@@ -50,13 +50,22 @@ hiddenimports += collect_submodules("tkinter")
 # Packages with runtime backends/plugins that PyInstaller does not always
 # discover completely from normal imports. tkinterdnd2 also carries Tcl/Tk
 # support files required at runtime.
-for package in ("PIL", "pyproj", "webview", "shapely", "ezdxf", "tkinterdnd2"):
+for package in (
+    "PIL",
+    "pyproj",
+    "webview",
+    "shapely",
+    "ezdxf",
+    "tkinterdnd2",
+    "mapbox_vector_tile",
+):
     extra_datas, extra_binaries, extra_hidden = _collect(package)
     datas += extra_datas
     binaries += extra_binaries
     hiddenimports += extra_hidden
 
-# Explicit fallbacks for the standard Tk dialogs used by the cached app module.
+# Explicit fallbacks for standard Tk dialogs and the BGT vector tile decoder
+# used by code that originates from the cached app bytecode.
 hiddenimports += [
     "tkinter.colorchooser",
     "tkinter.commondialog",
@@ -69,6 +78,7 @@ hiddenimports += [
     "tkinter.scrolledtext",
     "tkinter.simpledialog",
     "tkinter.ttk",
+    "mapbox_vector_tile",
 ]
 
 icon = assets_dir / "sleufbase_icon.ico"
