@@ -32,6 +32,12 @@ def main() -> int:
     _ensure_package_importable()
     args = list(sys.argv[1:])
 
+    # CI/runtime smoke test: import the complete app module without constructing
+    # the Tk GUI. This catches missing hidden imports from the cached bytecode.
+    if "--smoke-test" in args:
+        from SleufBase.app import KlicViewerApp  # noqa: F401
+        return 0
+
     if "--kickthemap-jobs-browser" in args:
         from SleufBase.kickthemap_jobs_browser import main as jobs_main
 
