@@ -1,10 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_all
+from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 ROOT = Path(SPECPATH).resolve()
 PACKAGE_PARENT = ROOT.parent
+
+# The source tree itself is the SleufBase package. Add its parent so hook
+# helpers can import/discover every package module while building.
+if str(PACKAGE_PARENT) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_PARENT))
 
 
 def _collect(package: str):
@@ -16,20 +22,22 @@ def _collect(package: str):
 
 
 datas = [
+    # app.py executes version-specific bytecode at runtime, so this directory
+    # must exist alongside the frozen SleufBase.app module.
     (str(ROOT / "_bytecode"), "SleufBase/_bytecode"),
+    # app.py and the jobs window resolve branding resources from _MEIPASS/assets.
     (str(ROOT / "assets"), "assets"),
 ]
 binaries = []
-hiddenimports = [
-    "SleufBase",
-    "SleufBase.app",
-    "SleufBase.kickthemap_browser",
-    "SleufBase.kickthemap_jobs_browser",
-]
+
+# app.py executes cached bytecode with exec(). Imports inside that bytecode are
+# invisible to PyInstaller's static analysis, therefore include every module in
+# the SleufBase package explicitly.
+hiddenimports = collect_submodules("SleufBase")
 
 # Packages with runtime backends/plugins that PyInstaller does not always
-# discover from normal imports.
-for package in ("PIL", "pyproj", "webview", "shapely"):
+# discover completely from normal imports.
+for package in ("PIL", "pyproj", "webview", "shapely", "ezdxf"):
     extra_datas, extra_binaries, extra_hidden = _collect(package)
     datas += extra_datas
     binaries += extra_binaries
