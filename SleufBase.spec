@@ -7,8 +7,6 @@ from PyInstaller.utils.hooks import collect_all, collect_submodules
 ROOT = Path(SPECPATH).resolve()
 PACKAGE_PARENT = ROOT.parent
 
-# The source tree itself is the SleufBase package. Add its parent so hook
-# helpers can import/discover every package module while building.
 if str(PACKAGE_PARENT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_PARENT))
 
@@ -22,34 +20,19 @@ def _collect(package: str):
 
 
 datas = []
-
-# app.py executes version-specific bytecode at runtime, so this directory must
-# exist alongside the frozen SleufBase.app module.
 bytecode_dir = ROOT / "_bytecode"
 if not bytecode_dir.exists():
     raise FileNotFoundError(f"Verplichte bytecode-map ontbreekt: {bytecode_dir}")
 datas.append((str(bytecode_dir), "SleufBase/_bytecode"))
 
-# Branding assets are optional. SleufBase already handles a missing icon.
 assets_dir = ROOT / "assets"
 if assets_dir.exists():
     datas.append((str(assets_dir), "assets"))
 
 binaries = []
-
-# app.py executes cached bytecode with exec(). Imports inside that bytecode are
-# invisible to PyInstaller's static analysis, therefore include every module in
-# the SleufBase package explicitly.
 hiddenimports = collect_submodules("SleufBase")
-
-# Tkinter imports such as colorchooser/filedialog/messagebox live inside the
-# dynamically executed app bytecode and therefore also need to be forced into
-# the frozen executable.
 hiddenimports += collect_submodules("tkinter")
 
-# Packages with runtime backends/plugins that PyInstaller does not always
-# discover completely from normal imports. tkinterdnd2 also carries Tcl/Tk
-# support files required at runtime.
 for package in (
     "PIL",
     "pyproj",
@@ -58,14 +41,15 @@ for package in (
     "ezdxf",
     "tkinterdnd2",
     "mapbox_vector_tile",
+    "boto3",
+    "botocore",
+    "Crypto",
 ):
     extra_datas, extra_binaries, extra_hidden = _collect(package)
     datas += extra_datas
     binaries += extra_binaries
     hiddenimports += extra_hidden
 
-# Explicit fallbacks for standard Tk dialogs and the BGT vector tile decoder
-# used by code that originates from the cached app bytecode.
 hiddenimports += [
     "tkinter.colorchooser",
     "tkinter.commondialog",
@@ -79,6 +63,11 @@ hiddenimports += [
     "tkinter.simpledialog",
     "tkinter.ttk",
     "mapbox_vector_tile",
+    "boto3",
+    "botocore",
+    "Crypto",
+    "Crypto.Cipher",
+    "Crypto.Cipher.AES",
 ]
 
 icon = assets_dir / "sleufbase_icon.ico"
