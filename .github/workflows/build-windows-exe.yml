@@ -57,6 +57,14 @@ jobs:
           }
           Get-Item 'dist/SleufBase.exe' | Format-List Name,Length,LastWriteTime
 
+      - name: Runtime import smoke test
+        shell: pwsh
+        run: |
+          & 'dist/SleufBase.exe' --smoke-test
+          if ($LASTEXITCODE -ne 0) {
+            throw "SleufBase runtime smoke test faalde met exitcode $LASTEXITCODE"
+          }
+
       - name: Upload SleufBase.exe artifact
         uses: actions/upload-artifact@v4
         with:
@@ -70,9 +78,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.1.1-windows'
-          $title = 'SleufBase Windows v0.1.1'
-          $notes = 'Windows build met expliciet gebundelde Tkinter-submodules (waaronder colorchooser) en tkinterdnd2 runtimebestanden.'
+          $tag = 'v0.1.2-windows'
+          $title = 'SleufBase Windows v0.1.2'
+          $notes = 'Windows build met mapbox-vector-tile runtime dependency, expliciete PyInstaller bundling en een frozen runtime smoke test tegen ontbrekende imports.'
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag 'dist/SleufBase.exe#SleufBase.exe' --clobber
