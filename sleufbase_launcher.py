@@ -16,6 +16,15 @@ def _ensure_package_importable() -> None:
         sys.path.insert(0, parent_text)
 
 
+def _install_runtime_patches() -> None:
+    # A StreetSmart account may be valid for the viewer while lacking the
+    # separately licensed Cyclomedia Aerial Map Service. In that specific 401
+    # case, use the public PDOK Actueel_orthoHR aerial layer instead.
+    from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
+
+    install_cyclomedia_pdok_fallback()
+
+
 def _take_option(args: list[str], name: str) -> str | None:
     try:
         index = args.index(name)
@@ -30,16 +39,20 @@ def _take_option(args: list[str], name: str) -> str | None:
 
 def main() -> int:
     _ensure_package_importable()
+    _install_runtime_patches()
     args = list(sys.argv[1:])
 
     # CI/runtime smoke test: import the complete app module without constructing
     # the Tk GUI, then verify the pywebview settings used by the KickTheMap browser.
     if "--smoke-test" in args:
         from SleufBase.app import KlicViewerApp  # noqa: F401
+        from SleufBase.cyclomedia import CyclomediaAerialClient
         import webview
 
         webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
         webview.settings["SHOW_DEFAULT_MENUS"] = False
+        if not getattr(CyclomediaAerialClient, "_sleufbase_pdok_fallback_installed", False):
+            raise RuntimeError("Cyclomedia/PDOK luchtfoto-fallback is niet geïnstalleerd")
         return 0
 
     if "--kickthemap-jobs-browser" in args:
