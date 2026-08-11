@@ -21,13 +21,21 @@ def _collect(package: str):
         return [], [], []
 
 
-datas = [
-    # app.py executes version-specific bytecode at runtime, so this directory
-    # must exist alongside the frozen SleufBase.app module.
-    (str(ROOT / "_bytecode"), "SleufBase/_bytecode"),
-    # app.py and the jobs window resolve branding resources from _MEIPASS/assets.
-    (str(ROOT / "assets"), "assets"),
-]
+datas = []
+
+# app.py executes version-specific bytecode at runtime, so this directory must
+# exist alongside the frozen SleufBase.app module.
+bytecode_dir = ROOT / "_bytecode"
+if not bytecode_dir.exists():
+    raise FileNotFoundError(f"Verplichte bytecode-map ontbreekt: {bytecode_dir}")
+datas.append((str(bytecode_dir), "SleufBase/_bytecode"))
+
+# Branding assets are optional. The current repository does not contain an
+# assets directory; SleufBase already handles a missing icon gracefully.
+assets_dir = ROOT / "assets"
+if assets_dir.exists():
+    datas.append((str(assets_dir), "assets"))
+
 binaries = []
 
 # app.py executes cached bytecode with exec(). Imports inside that bytecode are
@@ -43,7 +51,7 @@ for package in ("PIL", "pyproj", "webview", "shapely", "ezdxf"):
     binaries += extra_binaries
     hiddenimports += extra_hidden
 
-icon = ROOT / "assets" / "sleufbase_icon.ico"
+icon = assets_dir / "sleufbase_icon.ico"
 
 a = Analysis(
     [str(ROOT / "sleufbase_launcher.py")],
