@@ -33,9 +33,13 @@ def main() -> int:
     args = list(sys.argv[1:])
 
     # CI/runtime smoke test: import the complete app module without constructing
-    # the Tk GUI. This catches missing hidden imports from the cached bytecode.
+    # the Tk GUI, then verify the pywebview settings used by the KickTheMap browser.
     if "--smoke-test" in args:
         from SleufBase.app import KlicViewerApp  # noqa: F401
+        import webview
+
+        webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
+        webview.settings["SHOW_DEFAULT_MENUS"] = False
         return 0
 
     if "--kickthemap-jobs-browser" in args:
