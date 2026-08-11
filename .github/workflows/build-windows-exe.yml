@@ -21,6 +21,9 @@ on:
       - 'requirements-windows.txt'
       - '.github/workflows/build-windows-exe.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -54,9 +57,24 @@ jobs:
           }
           Get-Item 'dist/SleufBase.exe' | Format-List Name,Length,LastWriteTime
 
-      - name: Upload SleufBase.exe
+      - name: Upload SleufBase.exe artifact
         uses: actions/upload-artifact@v4
         with:
           name: SleufBase-Windows
           path: dist/SleufBase.exe
           if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/agent/windows-exe-build'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = 'v0.1.0-windows'
+          $title = 'SleufBase Windows v0.1.0'
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag 'dist/SleufBase.exe#SleufBase.exe' --clobber
+          } else {
+            gh release create $tag 'dist/SleufBase.exe#SleufBase.exe' --target '${{ github.sha }}' --title $title --notes 'Eerste Windows build van SleufBase. Bevat de standalone SleufBase.exe met ondersteuning voor de normale app en speciale KickTheMap-startmodi.'
+          }
