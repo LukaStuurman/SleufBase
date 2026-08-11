@@ -1,0 +1,62 @@
+name: Build SleufBase Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/windows-exe-build
+    paths:
+      - '**.py'
+      - '_bytecode/**'
+      - 'assets/**'
+      - 'SleufBase.spec'
+      - 'requirements-windows.txt'
+      - '.github/workflows/build-windows-exe.yml'
+  pull_request:
+    paths:
+      - '**.py'
+      - '_bytecode/**'
+      - 'assets/**'
+      - 'SleufBase.spec'
+      - 'requirements-windows.txt'
+      - '.github/workflows/build-windows-exe.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements-windows.txt
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install -r requirements-windows.txt
+
+      - name: Build SleufBase.exe
+        shell: pwsh
+        run: python -m PyInstaller --clean --noconfirm SleufBase.spec
+
+      - name: Verify executable
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist/SleufBase.exe')) {
+            throw 'dist/SleufBase.exe ontbreekt'
+          }
+          Get-Item 'dist/SleufBase.exe' | Format-List Name,Length,LastWriteTime
+
+      - name: Upload SleufBase.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Windows
+          path: dist/SleufBase.exe
+          if-no-files-found: error
