@@ -30,8 +30,7 @@ if not bytecode_dir.exists():
     raise FileNotFoundError(f"Verplichte bytecode-map ontbreekt: {bytecode_dir}")
 datas.append((str(bytecode_dir), "SleufBase/_bytecode"))
 
-# Branding assets are optional. The current repository does not contain an
-# assets directory; SleufBase already handles a missing icon gracefully.
+# Branding assets are optional. SleufBase already handles a missing icon.
 assets_dir = ROOT / "assets"
 if assets_dir.exists():
     datas.append((str(assets_dir), "assets"))
@@ -43,13 +42,34 @@ binaries = []
 # the SleufBase package explicitly.
 hiddenimports = collect_submodules("SleufBase")
 
+# Tkinter imports such as colorchooser/filedialog/messagebox live inside the
+# dynamically executed app bytecode and therefore also need to be forced into
+# the frozen executable.
+hiddenimports += collect_submodules("tkinter")
+
 # Packages with runtime backends/plugins that PyInstaller does not always
-# discover completely from normal imports.
-for package in ("PIL", "pyproj", "webview", "shapely", "ezdxf"):
+# discover completely from normal imports. tkinterdnd2 also carries Tcl/Tk
+# support files required at runtime.
+for package in ("PIL", "pyproj", "webview", "shapely", "ezdxf", "tkinterdnd2"):
     extra_datas, extra_binaries, extra_hidden = _collect(package)
     datas += extra_datas
     binaries += extra_binaries
     hiddenimports += extra_hidden
+
+# Explicit fallbacks for the standard Tk dialogs used by the cached app module.
+hiddenimports += [
+    "tkinter.colorchooser",
+    "tkinter.commondialog",
+    "tkinter.constants",
+    "tkinter.dialog",
+    "tkinter.dnd",
+    "tkinter.filedialog",
+    "tkinter.font",
+    "tkinter.messagebox",
+    "tkinter.scrolledtext",
+    "tkinter.simpledialog",
+    "tkinter.ttk",
+]
 
 icon = assets_dir / "sleufbase_icon.ico"
 
