@@ -17,9 +17,9 @@ def _ensure_package_importable() -> None:
 
 
 def _install_runtime_patches() -> None:
-    # A StreetSmart account may be valid for the viewer while lacking the
-    # separately licensed Cyclomedia Aerial Map Service. In that specific 401
-    # case, use the public PDOK Actueel_orthoHR aerial layer instead.
+    # A StreetSmart account may be valid for the viewer while lacking separate
+    # Cyclomedia Aerial WMS Basic-auth access. The aerial chain is therefore:
+    # normal Cyclomedia WMS -> documented StreetSmart bearer -> public PDOK HR.
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
 
     install_cyclomedia_pdok_fallback()
@@ -43,16 +43,28 @@ def main() -> int:
     args = list(sys.argv[1:])
 
     # CI/runtime smoke test: import the complete app module without constructing
-    # the Tk GUI, then verify the pywebview settings used by the KickTheMap browser.
+    # the Tk GUI and validate the frozen browser/auth patches used at runtime.
     if "--smoke-test" in args:
         from SleufBase.app import KlicViewerApp  # noqa: F401
         from SleufBase.cyclomedia import CyclomediaAerialClient
+        from SleufBase import streetsmart_browser as streetsmart_browser_module
+        from SleufBase.streetsmart_bearer import (
+            bearer_authorization_header,
+            load_streetsmart_bearer_token,  # noqa: F401
+        )
         import webview
 
         webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
         webview.settings["SHOW_DEFAULT_MENUS"] = False
+
         if not getattr(CyclomediaAerialClient, "_sleufbase_pdok_fallback_installed", False):
             raise RuntimeError("Cyclomedia/PDOK luchtfoto-fallback is niet geïnstalleerd")
+        if not getattr(CyclomediaAerialClient, "_sleufbase_streetsmart_bearer_retry_installed", False):
+            raise RuntimeError("Cyclomedia StreetSmart-bearer retry is niet geïnstalleerd")
+        if not getattr(streetsmart_browser_module, "_sleufbase_bearer_capture_installed", False):
+            raise RuntimeError("StreetSmart bearer capture hook is niet geïnstalleerd")
+        if bearer_authorization_header("smoke-test-token") != "Bearer smoke-test-token":
+            raise RuntimeError("StreetSmart bearer Authorization-header is ongeldig")
         return 0
 
     if "--kickthemap-jobs-browser" in args:
