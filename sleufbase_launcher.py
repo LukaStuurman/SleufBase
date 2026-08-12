@@ -17,9 +17,8 @@ def _ensure_package_importable() -> None:
 
 
 def _install_runtime_patches() -> None:
-    # A StreetSmart account may be valid for the viewer while lacking separate
-    # Cyclomedia Aerial WMS Basic-auth access. The aerial chain is therefore:
-    # normal Cyclomedia WMS -> documented StreetSmart bearer -> public PDOK HR.
+    # Imported lazily: Cyclomedia/StreetSmart support pulls in networking and
+    # geospatial modules that are unnecessary for browser-only launcher modes.
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
 
     install_cyclomedia_pdok_fallback()
@@ -39,12 +38,25 @@ def _take_option(args: list[str], name: str) -> str | None:
 
 def main() -> int:
     _ensure_package_importable()
-    _install_runtime_patches()
+
+    from SleufBase.professional_runtime import (
+        initialize_professional_runtime,
+        install_tk_exception_handler,
+        mark_startup_complete,
+        write_diagnostics,
+    )
+
+    initialize_professional_runtime()
     args = list(sys.argv[1:])
+
+    if "--diagnostics" in args:
+        write_diagnostics()
+        return 0
 
     # CI/runtime smoke test: import the complete app module without constructing
     # the Tk GUI and validate frozen browser/auth/native acceleration features.
     if "--smoke-test" in args:
+        _install_runtime_patches()
         from SleufBase.app import KlicViewerApp  # noqa: F401
         from SleufBase.cyclomedia import CyclomediaAerialClient
         from SleufBase import native_accel
@@ -92,9 +104,12 @@ def main() -> int:
         browser_main(start_url=browser_url, window_title=browser_title, prelogin=prelogin)
         return 0
 
+    # Only the normal desktop application needs Cyclomedia fallback patches.
+    _install_runtime_patches()
     from SleufBase.app import KlicViewerApp
 
     app = KlicViewerApp()
+    install_tk_exception_handler(app)
 
     # Positional arguments are file paths used by SleufBase itself when a frozen
     # process starts a second instance. Pass them to the app when the runtime
@@ -109,6 +124,10 @@ def main() -> int:
                 for path in positional_paths:
                     loader(path)
 
+    try:
+        app.after_idle(mark_startup_complete)
+    except Exception:
+        pass
     app.mainloop()
     return 0
 
