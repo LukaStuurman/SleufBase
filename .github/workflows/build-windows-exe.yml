@@ -79,9 +79,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.1.3-windows'
-          $title = 'SleufBase Windows v0.1.3'
-          $notes = 'Windows build met pywebview 6.2+ voor KickTheMap browserinstellingen. De frozen smoke test valideert nu ook SHOW_DEFAULT_MENUS en OPEN_EXTERNAL_LINKS_IN_BROWSER.'
+          $tag = 'v0.1.4-windows'
+          $title = 'SleufBase Windows v0.1.4'
+          $notes = 'Cyclomedia luchtfoto gebruikt eerst de normale Aerial WMS-authenticatie. Bij 401/403 probeert SleufBase daarna de gedocumenteerde bearer van de normaal ingelogde StreetSmart-sessie. PDOK Actueel HR blijft alleen de laatste fallback. De frozen smoke test valideert de StreetSmart bearer-capture en auth-retry.'
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag 'dist/SleufBase.exe#SleufBase.exe' --clobber
