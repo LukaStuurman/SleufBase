@@ -29,6 +29,13 @@ assets_dir = ROOT / "assets"
 if assets_dir.exists():
     datas.append((str(assets_dir), "assets"))
 
+# SleufBase already contains a native renderer for expensive DXF/GeoTIFF work.
+# It must live next to SleufBase.native_accel in the frozen package; otherwise
+# the executable silently falls back to the slower Python/Pillow implementation.
+native_dir = ROOT / "native"
+if native_dir.exists():
+    datas.append((str(native_dir), "SleufBase/native"))
+
 binaries = []
 hiddenimports = collect_submodules("SleufBase")
 hiddenimports += collect_submodules("tkinter")
@@ -83,7 +90,7 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
-    optimize=0,
+    optimize=1,
 )
 pyz = PYZ(a.pure)
 
