@@ -9,6 +9,7 @@ on:
       - '**.py'
       - '_bytecode/**'
       - 'assets/**'
+      - 'native/**'
       - 'SleufBase.spec'
       - 'requirements-windows.txt'
       - '.github/workflows/build-windows-exe.yml'
@@ -17,6 +18,7 @@ on:
       - '**.py'
       - '_bytecode/**'
       - 'assets/**'
+      - 'native/**'
       - 'SleufBase.spec'
       - 'requirements-windows.txt'
       - '.github/workflows/build-windows-exe.yml'
@@ -44,6 +46,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel
           python -m pip install -r requirements-windows.txt
+
+      - name: Prepare Techbase Windows branding
+        shell: pwsh
+        run: |
+          python prepare_windows_assets.py
+          if (-not (Test-Path 'assets/techbase-logo.png')) {
+            throw 'assets/techbase-logo.png ontbreekt na branding-preparatie'
+          }
+          if (-not (Test-Path 'assets/sleufbase_icon.ico')) {
+            throw 'assets/sleufbase_icon.ico ontbreekt na branding-preparatie'
+          }
+          Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico' | Format-Table Name,Length
 
       - name: Build SleufBase.exe
         shell: pwsh
@@ -79,9 +93,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.1.4-windows'
-          $title = 'SleufBase Windows v0.1.4'
-          $notes = 'Cyclomedia luchtfoto gebruikt eerst de normale Aerial WMS-authenticatie. Bij 401/403 probeert SleufBase daarna de gedocumenteerde bearer van de normaal ingelogde StreetSmart-sessie. PDOK Actueel HR blijft alleen de laatste fallback. De frozen smoke test valideert de StreetSmart bearer-capture en auth-retry.'
+          $tag = 'v0.1.5-windows'
+          $title = 'SleufBase Windows v0.1.5'
+          $notes = 'Windows build met het officiële Techbase-logo als exe-/venstericoon. De eerder aanwezige native ktk_accel.dll wordt nu daadwerkelijk meegebundeld en de frozen smoke test vereist dat de native DXF/GeoTIFF-renderer actief is. PyInstaller optimaliseert de Python-bytecode op niveau 1. Cyclomedia -> StreetSmart bearer -> PDOK fallback uit v0.1.4 blijft behouden.'
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag 'dist/SleufBase.exe#SleufBase.exe' --clobber
