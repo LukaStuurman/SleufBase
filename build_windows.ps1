@@ -18,6 +18,10 @@ $Python = Join-Path $Venv 'Scripts\python.exe'
 & $Python -m pip install --upgrade pip wheel
 & $Python -m pip install -r (Join-Path $Root 'requirements-windows.txt')
 
+# Reconstruct the exact Techbase PNG stored as text chunks and generate a
+# multi-resolution Windows ICO before PyInstaller reads SleufBase.spec.
+& $Python (Join-Path $Root 'prepare_windows_assets.py')
+
 Remove-Item -Recurse -Force (Join-Path $Root 'build') -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force (Join-Path $Root 'dist') -ErrorAction SilentlyContinue
 
