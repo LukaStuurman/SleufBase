@@ -43,10 +43,11 @@ def main() -> int:
     args = list(sys.argv[1:])
 
     # CI/runtime smoke test: import the complete app module without constructing
-    # the Tk GUI and validate the frozen browser/auth patches used at runtime.
+    # the Tk GUI and validate frozen browser/auth/native acceleration features.
     if "--smoke-test" in args:
         from SleufBase.app import KlicViewerApp  # noqa: F401
         from SleufBase.cyclomedia import CyclomediaAerialClient
+        from SleufBase import native_accel
         from SleufBase import streetsmart_browser as streetsmart_browser_module
         from SleufBase.streetsmart_bearer import (
             bearer_authorization_header,
@@ -65,6 +66,12 @@ def main() -> int:
             raise RuntimeError("StreetSmart bearer capture hook is niet geïnstalleerd")
         if bearer_authorization_header("smoke-test-token") != "Bearer smoke-test-token":
             raise RuntimeError("StreetSmart bearer Authorization-header is ongeldig")
+        if not native_accel.is_available():
+            raise RuntimeError("Native DXF/GeoTIFF renderer ktk_accel.dll is niet geladen")
+
+        icon_path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent)) / "assets" / "sleufbase_icon.ico"
+        if not icon_path.exists():
+            raise RuntimeError(f"Techbase Windows-icoon ontbreekt in frozen build: {icon_path}")
         return 0
 
     if "--kickthemap-jobs-browser" in args:
