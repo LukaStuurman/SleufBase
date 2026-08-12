@@ -29,9 +29,6 @@ assets_dir = ROOT / "assets"
 if assets_dir.exists():
     datas.append((str(assets_dir), "assets"))
 
-# SleufBase already contains a native renderer for expensive DXF/GeoTIFF work.
-# It must live next to SleufBase.native_accel in the frozen package; otherwise
-# the executable silently falls back to the slower Python/Pillow implementation.
 native_dir = ROOT / "native"
 if native_dir.exists():
     datas.append((str(native_dir), "SleufBase/native"))
@@ -78,6 +75,7 @@ hiddenimports += [
 ]
 
 icon = assets_dir / "sleufbase_icon.ico"
+version_info = ROOT / "windows_version_info.txt"
 
 a = Analysis(
     [str(ROOT / "sleufbase_launcher.py")],
@@ -94,19 +92,18 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
+# Professional/default build: onedir deliberately avoids the one-file bootloader
+# extraction penalty on every launch. The installer packages this folder.
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,
     name="SleufBase",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -114,4 +111,15 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=str(icon) if icon.exists() else None,
+    version=str(version_info) if version_info.exists() else None,
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name="SleufBase",
 )
