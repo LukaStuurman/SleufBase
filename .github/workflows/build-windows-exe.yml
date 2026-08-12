@@ -1,4 +1,4 @@
-name: Build SleufBase Windows EXE
+name: Build SleufBase Windows
 
 on:
   workflow_dispatch:
@@ -10,8 +10,12 @@ on:
       - '_bytecode/**'
       - 'assets/**'
       - 'native/**'
+      - 'installer/**'
       - 'SleufBase.spec'
+      - 'SleufBasePortable.spec'
+      - 'windows_version_info.txt'
       - 'requirements-windows.txt'
+      - 'WINDOWS_DEPLOYMENT.md'
       - '.github/workflows/build-windows-exe.yml'
   pull_request:
     paths:
@@ -19,8 +23,12 @@ on:
       - '_bytecode/**'
       - 'assets/**'
       - 'native/**'
+      - 'installer/**'
       - 'SleufBase.spec'
+      - 'SleufBasePortable.spec'
+      - 'windows_version_info.txt'
       - 'requirements-windows.txt'
+      - 'WINDOWS_DEPLOYMENT.md'
       - '.github/workflows/build-windows-exe.yml'
 
 permissions:
@@ -41,7 +49,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: requirements-windows.txt
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip wheel
@@ -59,32 +67,114 @@ jobs:
           }
           Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico' | Format-Table Name,Length
 
-      - name: Build SleufBase.exe
+      - name: Build fast professional edition
         shell: pwsh
         run: python -m PyInstaller --clean --noconfirm SleufBase.spec
 
-      - name: Verify executable
+      - name: Build portable edition
         shell: pwsh
-        run: |
-          if (-not (Test-Path 'dist/SleufBase.exe')) {
-            throw 'dist/SleufBase.exe ontbreekt'
-          }
-          Get-Item 'dist/SleufBase.exe' | Format-List Name,Length,LastWriteTime
+        run: python -m PyInstaller --clean --noconfirm SleufBasePortable.spec
 
-      - name: Runtime import smoke test
+      - name: Verify builds and benchmark startup
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath 'dist/SleufBase.exe' -ArgumentList '--smoke-test' -Wait -PassThru
-          Write-Host "SleufBase smoke-test exitcode: $($process.ExitCode)"
+          $fastExe = 'dist/SleufBase/SleufBase.exe'
+          $portableExe = 'dist/SleufBase-Portable.exe'
+          if (-not (Test-Path $fastExe)) { throw "$fastExe ontbreekt" }
+          if (-not (Test-Path $portableExe)) { throw "$portableExe ontbreekt" }
+
+          function Invoke-SmokeTest([string]$Path) {
+            $watch = [System.Diagnostics.Stopwatch]::StartNew()
+            $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -Wait -PassThru
+            $watch.Stop()
+            if ($process.ExitCode -ne 0) {
+              throw "$Path smoke-test faalde met exitcode $($process.ExitCode)"
+            }
+            return [math]::Round($watch.Elapsed.TotalMilliseconds)
+          }
+
+          # Warm the Windows filesystem/cache once, then measure a second launch.
+          [void](Invoke-SmokeTest $fastExe)
+          [void](Invoke-SmokeTest $portableExe)
+          $fastMs = Invoke-SmokeTest $fastExe
+          $portableMs = Invoke-SmokeTest $portableExe
+
+          "Fast onedir smoke-start: $fastMs ms" | Tee-Object -FilePath 'startup-benchmark.txt'
+          "Portable one-file smoke-start: $portableMs ms" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
+          if ($fastMs -lt $portableMs) {
+            $gain = [math]::Round((1 - ($fastMs / $portableMs)) * 100, 1)
+            "Fast build reduction vs portable: $gain%" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
+          }
+
+          Get-Item $fastExe, $portableExe | Format-Table FullName,Length,LastWriteTime
+          Get-Content 'startup-benchmark.txt'
+
+      - name: Package fast edition ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path 'dist/SleufBase/*' -DestinationPath 'dist/SleufBase-Windows-Fast.zip' -Force
+          if (-not (Test-Path 'dist/SleufBase-Windows-Fast.zip')) {
+            throw 'Fast ZIP ontbreekt'
+          }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler niet gevonden: $iscc"
+          }
+
+      - name: Build professional installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          & $iscc 'installer/SleufBase.iss'
+          if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) {
+            throw 'dist-installer/SleufBase-Setup.exe ontbreekt'
+          }
+          Get-Item 'dist-installer/SleufBase-Setup.exe' | Format-List Name,Length,LastWriteTime
+
+      - name: Validate silent installer end to end
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP 'SleufBase-Installed-Test'
+          Remove-Item -Recurse -Force $installDir -ErrorAction SilentlyContinue
+          $dirArg = "/DIR=`"$installDir`""
+          $setup = Start-Process -FilePath 'dist-installer/SleufBase-Setup.exe' -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',$dirArg) -Wait -PassThru
+          if ($setup.ExitCode -ne 0) {
+            throw "SleufBase installer faalde met exitcode $($setup.ExitCode)"
+          }
+
+          $installedExe = Join-Path $installDir 'SleufBase.exe'
+          if (-not (Test-Path $installedExe)) {
+            throw "Geïnstalleerde executable ontbreekt: $installedExe"
+          }
+          $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -Wait -PassThru
           if ($process.ExitCode -ne 0) {
-            throw "SleufBase runtime smoke test faalde met exitcode $($process.ExitCode)"
+            throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)"
           }
 
-      - name: Upload SleufBase.exe artifact
+          $uninstaller = Join-Path $installDir 'unins000.exe'
+          if (Test-Path $uninstaller) {
+            $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
+            if ($uninstall.ExitCode -ne 0) {
+              throw "SleufBase uninstall-test faalde met exitcode $($uninstall.ExitCode)"
+            }
+          }
+
+      - name: Upload professional Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows
-          path: dist/SleufBase.exe
+          name: SleufBase-Windows-v0.2.0
+          path: |
+            dist-installer/SleufBase-Setup.exe
+            dist/SleufBase-Windows-Fast.zip
+            dist/SleufBase-Portable.exe
+            startup-benchmark.txt
           if-no-files-found: error
 
       - name: Publish GitHub Release
@@ -93,12 +183,37 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.1.5-windows'
-          $title = 'SleufBase Windows v0.1.5'
-          $notes = 'Windows build met het officiële Techbase-logo als exe-/venstericoon. De eerder aanwezige native ktk_accel.dll wordt nu daadwerkelijk meegebundeld en de frozen smoke test vereist dat de native DXF/GeoTIFF-renderer actief is. PyInstaller optimaliseert de Python-bytecode op niveau 1. Cyclomedia -> StreetSmart bearer -> PDOK fallback uit v0.1.4 blijft behouden.'
+          $tag = 'v0.2.0-windows'
+          $title = 'SleufBase Windows v0.2.0'
+          $notes = @'
+          Professionele Windows-distributie van SleufBase.
+
+          Aanbevolen: SleufBase-Setup.exe. Deze installeert de snelle onedir-build zodat PyInstaller niet bij iedere start de volledige runtime hoeft uit te pakken.
+
+          Nieuw in v0.2.0:
+          - snelle onedir-build + Windows installer
+          - portable one-file build blijft beschikbaar
+          - Techbase/SleufBase versie- en bedrijfsmetadata in Windows
+          - vaste Windows AppUserModelID en DPI-awareness
+          - roterende logging in %LOCALAPPDATA%\Techbase\SleufBase\logs
+          - crashrapporten en systeemdiagnostiek in de diagnostics-map
+          - lazy loading van zware Cyclomedia-runtime voor launcher/browserpaden
+          - native ktk_accel.dll blijft verplicht gevalideerd
+          - CI test de installer met stille installatie, smoke-test en uninstall
+          '@
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag 'dist/SleufBase.exe#SleufBase.exe' --clobber
+            gh release upload $tag `
+              'dist-installer/SleufBase-Setup.exe#SleufBase-Setup.exe' `
+              'dist/SleufBase-Windows-Fast.zip#SleufBase-Windows-Fast.zip' `
+              'dist/SleufBase-Portable.exe#SleufBase-Portable.exe' `
+              --clobber
           } else {
-            gh release create $tag 'dist/SleufBase.exe#SleufBase.exe' --target '${{ github.sha }}' --title $title --notes $notes
+            gh release create $tag `
+              'dist-installer/SleufBase-Setup.exe#SleufBase-Setup.exe' `
+              'dist/SleufBase-Windows-Fast.zip#SleufBase-Windows-Fast.zip' `
+              'dist/SleufBase-Portable.exe#SleufBase-Portable.exe' `
+              --target '${{ github.sha }}' `
+              --title $title `
+              --notes $notes
           }
