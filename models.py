@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 from PIL import Image
@@ -145,6 +145,19 @@ class ViewportTransform:
         screen_x = ((x - self.bounds.min_x) / self.bounds.width) * self.width_px
         screen_y = self.height_px - ((y - self.bounds.min_y) / self.bounds.height) * self.height_px
         return screen_x, screen_y
+
+    def world_points_to_screen(self, points: Iterable[tuple[float, float]]) -> list[tuple[float, float]]:
+        """Convert many world points while validating and computing scale only once."""
+        self._validate()
+        scale_x = self.width_px / self.bounds.width
+        scale_y = self.height_px / self.bounds.height
+        min_x = self.bounds.min_x
+        min_y = self.bounds.min_y
+        height_px = self.height_px
+        return [
+            ((float(x) - min_x) * scale_x, height_px - ((float(y) - min_y) * scale_y))
+            for x, y in points
+        ]
 
     def screen_to_world(self, screen_x: float, screen_y: float) -> tuple[float, float]:
         self._validate()
