@@ -52,9 +52,11 @@ def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
     from SleufBase.start_point_patch import install_manual_start_point_patch
+    from SleufBase.template_reverse_patch import install_template_reverse_export_patch
 
     install_cyclomedia_pdok_fallback()
     install_manual_start_point_patch()
+    install_template_reverse_export_patch()
 
 
 def _take_option(args: list[str], name: str) -> str | None:
@@ -79,6 +81,7 @@ def _run_smoke_test() -> None:
     _smoke_trace("runtime-patches:ok")
 
     from SleufBase.app import KlicViewerApp
+    from SleufBase.cadastral_export import CadastralDxfExporter
 
     _smoke_trace("app-import:ok")
     from SleufBase.cyclomedia import CyclomediaAerialClient
@@ -115,6 +118,10 @@ def _run_smoke_test() -> None:
         raise RuntimeError("Verouderde beginpuntpatch in frozen build")
     if not callable(getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)):
         raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
+    if not getattr(CadastralDxfExporter, "_sleufbase_reverse_variant_export_patch", False):
+        raise RuntimeError("Normaal/reverse proefsleuf-exportpatch is niet geïnstalleerd")
+    if not bool(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_VARIANTS_DEFAULT", False)):
+        raise RuntimeError("Reverse proefsleufversie staat niet standaard aan")
     _smoke_trace("runtime-validations:ok")
 
     resource_root = _resource_root()
