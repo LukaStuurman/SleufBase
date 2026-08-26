@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from json import dumps
 from math import floor
+import threading
 import time
 from typing import Any
 
@@ -37,6 +39,7 @@ class BgtVectorTileClient:
     TILE_SPAN_METERS = TILE_PIXEL_SIZE * CELL_SIZE_METERS
     ORIGIN_X = -285401.92
     ORIGIN_Y = 903401.92
+    TILE_CACHE_LIMIT = 128
     EXCLUDED_LAYERS = {
         "buurt",
         "gemeente",
@@ -51,9 +54,37 @@ class BgtVectorTileClient:
         self.timeout = max(5, int(timeout))
         self.retries = max(1, int(retries))
         self.max_workers = max(1, min(12, int(max_workers)))
-        self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "SleufBase/1.0"})
-        self._tile_cache: dict[tuple[int, int], dict[str, Any]] = {}
+        self._thread_local = threading.local()
+        self._cache_lock = threading.RLock()
+        self._tile_cache: OrderedDict[tuple[int, int], dict[str, Any]] = OrderedDict()
+
+    @staticmethod
+    def _create_session() -> requests.Session:
+        session = requests.Session()
+        session.headers.update({"User-Agent": "SleufBase/1.0"})
+        return session
+
+    def _get_session(self) -> requests.Session:
+        session = getattr(self._thread_local, "session", None)
+        if session is None:
+            session = self._create_session()
+            self._thread_local.session = session
+        return session
+
+    def _cache_get(self, key: tuple[int, int]) -> dict[str, Any] | None:
+        with self._cache_lock:
+            cached = self._tile_cache.pop(key, None)
+            if cached is None:
+                return None
+            self._tile_cache[key] = cached
+            return cached
+
+    def _cache_put(self, key: tuple[int, int], decoded: dict[str, Any]) -> None:
+        with self._cache_lock:
+            self._tile_cache.pop(key, None)
+            self._tile_cache[key] = decoded
+            while len(self._tile_cache) > self.TILE_CACHE_LIMIT:
+                self._tile_cache.popitem(last=False)
 
     def fetch_paths(self, bounds: Bounds) -> list[list[tuple[float, float]]]:
         tiles = self._tiles_for_bounds(bounds)
@@ -256,24 +287,22 @@ class BgtVectorTileClient:
 
     def _decoded_tile(self, row: int, col: int) -> dict[str, Any]:
         cache_key = (row, col)
-        cached = self._tile_cache.get(cache_key)
+        cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
         url = f"{self.BASE_URL}/{self.TILE_MATRIX}/{row}/{col}?f=mvt"
         last_error: Exception | None = None
         for attempt in range(1, self.retries + 1):
             try:
-                response = self.session.get(url, timeout=self.timeout)
+                response = self._get_session().get(url, timeout=self.timeout)
                 response.raise_for_status()
                 decoded = mapbox_vector_tile.decode(response.content)
-                self._tile_cache[cache_key] = decoded
-                if len(self._tile_cache) > 128:
-                    self._tile_cache.pop(next(iter(self._tile_cache)), None)
+                self._cache_put(cache_key, decoded)
                 return decoded
-            except Exception as exc:
+            except (requests.RequestException, ValueError, TypeError) as exc:
                 last_error = exc
                 if attempt < self.retries:
-                    time.sleep(0.6 * attempt)
+                    time.sleep(min(2.0, 0.4 * (2 ** (attempt - 1))))
         raise BgtVectorTileError(str(last_error))
 
     def _world_coordinates(
