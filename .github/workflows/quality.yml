@@ -38,7 +38,9 @@ jobs:
             'Pillow>=10.0' \
             'numpy>=1.26,<2.3' \
             'pyproj>=3.6' \
-            'requests>=2.32'
+            'requests>=2.32' \
+            'shapely>=2.0,<3' \
+            'mapbox-vector-tile>=2,<3'
           python -m pip check
 
       - name: Compile source
