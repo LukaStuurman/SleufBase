@@ -3,7 +3,7 @@
 
 PyInstaller>=6.10,<7
 numpy>=1.26,<3
-Pillow>=10,<12
+Pillow>=12.3.0,<13
 requests>=2.31,<3
 pyproj>=3.6,<4
 shapely>=2.0,<3
