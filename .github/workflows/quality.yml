@@ -29,7 +29,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-          cache-dependency-path: requirements-windows.txt
+          cache-dependency-path: |
+            requirements-windows.txt
+            requirements-windows.lock
 
       - name: Install test dependencies
         run: |
@@ -42,6 +44,23 @@ jobs:
             'shapely>=2.0,<3' \
             'mapbox-vector-tile>=2,<3'
           python -m pip check
+
+      - name: Check repository hygiene
+        shell: bash
+        run: |
+          if git ls-files | grep -E '(^|/)__pycache__/|\.py[co]$' | grep -v '^_bytecode/'; then
+            echo 'Gegenereerde Python-cachebestanden zijn getrackt.' >&2
+            exit 1
+          fi
+          if grep -R --line-number --include='*.py' 'marshal\.loads' . \
+            | grep -v './legacy_bytecode.py:' \
+            | grep -v './app.py:'; then
+            echo 'Nieuwe losse marshal bytecode-loader gevonden.' >&2
+            exit 1
+          fi
+
+      - name: Check release integrity
+        run: python tools/check_release_integrity.py
 
       - name: Compile source
         run: |

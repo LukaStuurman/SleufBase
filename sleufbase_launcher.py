@@ -20,7 +20,17 @@ def _ensure_package_importable() -> None:
         sys.path.insert(0, parent_text)
 
 
+def _validate_core_legacy_bytecode() -> None:
+    # app.py still wraps legacy Python 3.11 bytecode because the original source
+    # is not present in the repository. Validate the pyc before any app import so
+    # a wrong Python version, truncated file or corrupt payload fails predictably.
+    from SleufBase.legacy_bytecode import validate_legacy_bytecode
+
+    validate_legacy_bytecode("app", __file__)
+
+
 def _install_runtime_patches() -> None:
+    _validate_core_legacy_bytecode()
     # Imported lazily: browser-only launcher modes do not need the full desktop app.
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
     from SleufBase.start_point_patch import install_manual_start_point_patch

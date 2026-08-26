@@ -1,0 +1,14 @@
+# SleufBase Windows dependency lock bootstrap.
+# CI replaces this with the exact package versions from the validated Windows build before v0.3.0 is merged.
+Pillow>=10.0
+numpy>=1.26,<2.3
+pyproj>=3.6
+requests>=2.32
+urllib3>=2.2
+ezdxf>=1.4,<2
+shapely>=2.0,<3
+mapbox-vector-tile>=2,<3
+boto3>=1.34
+pycryptodome>=3.20
+pywebview>=5,<7
+pyinstaller>=6.10,<7
