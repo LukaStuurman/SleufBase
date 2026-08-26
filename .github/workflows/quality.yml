@@ -42,7 +42,8 @@ jobs:
             'pyproj>=3.6' \
             'requests>=2.32' \
             'shapely>=2.0,<3' \
-            'mapbox-vector-tile>=2,<3'
+            'mapbox-vector-tile>=2,<3' \
+            'ezdxf>=1.3,<2'
           python -m pip check
 
       - name: Check repository hygiene
