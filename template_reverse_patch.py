@@ -43,6 +43,8 @@ def _ensure_layer(document, layer_name: str, *, visible: bool):
     try:
         layer = document.layers.get(layer_name)
     except Exception:
+        layer = None
+    if layer is None:
         layer = document.layers.add(layer_name)
     if visible:
         layer.on()
@@ -59,6 +61,8 @@ def _ensure_variant_container(document, modelspace, label: object, slot_index: i
     try:
         block = document.blocks.get(block_name)
     except Exception:
+        block = None
+    if block is None:
         block = document.blocks.new(name=block_name, base_point=(0.0, 0.0, 0.0))
 
     insert = None
