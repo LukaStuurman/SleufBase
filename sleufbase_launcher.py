@@ -31,6 +31,7 @@ def _smoke_trace(stage: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as handle:
             handle.write(f"{stage}\n")
+            handle.flush()
     except Exception:
         # Diagnostics may never be allowed to turn a successful smoke test into
         # a product failure.
@@ -49,7 +50,6 @@ def _validate_core_legacy_bytecode() -> None:
 
 def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
-    # Imported lazily: browser-only launcher modes do not need the full desktop app.
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
     from SleufBase.start_point_patch import install_manual_start_point_patch
 
@@ -69,9 +69,84 @@ def _take_option(args: list[str], name: str) -> str | None:
     return value
 
 
-def main() -> int:
+def _run_smoke_test() -> None:
+    """Validate the frozen runtime without initializing the desktop GUI runtime."""
+    _smoke_trace("smoke:start")
     _ensure_package_importable()
+    _smoke_trace("package-path:ok")
+
+    _install_runtime_patches()
+    _smoke_trace("runtime-patches:ok")
+
+    from SleufBase.app import KlicViewerApp
+
+    _smoke_trace("app-import:ok")
+    from SleufBase.cyclomedia import CyclomediaAerialClient
+
+    _smoke_trace("cyclomedia-import:ok")
+    from SleufBase import native_accel
+
+    _smoke_trace("native-accel-import:ok")
+    from SleufBase import streetsmart_browser as streetsmart_browser_module
+    from SleufBase.streetsmart_bearer import bearer_authorization_header
+
+    _smoke_trace("streetsmart-imports:ok")
+
+    # Import pywebview only; do not initialize its GUI backend in headless CI.
+    import webview
+
+    _smoke_trace("webview-import:ok")
+    webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
+    webview.settings["SHOW_DEFAULT_MENUS"] = False
+
+    if not getattr(CyclomediaAerialClient, "_sleufbase_pdok_fallback_installed", False):
+        raise RuntimeError("Cyclomedia/PDOK luchtfoto-fallback is niet geïnstalleerd")
+    if not getattr(CyclomediaAerialClient, "_sleufbase_streetsmart_bearer_retry_installed", False):
+        raise RuntimeError("Cyclomedia StreetSmart-bearer retry is niet geïnstalleerd")
+    if not getattr(streetsmart_browser_module, "_sleufbase_bearer_capture_installed", False):
+        raise RuntimeError("StreetSmart bearer capture hook is niet geïnstalleerd")
+    if bearer_authorization_header("smoke-test-token") != "Bearer smoke-test-token":
+        raise RuntimeError("StreetSmart bearer Authorization-header is ongeldig")
+    if not native_accel.is_available():
+        raise RuntimeError("Native DXF/GeoTIFF renderer ktk_accel.dll is niet geladen")
+    if not getattr(KlicViewerApp, "_manual_cross_section_start_patch", False):
+        raise RuntimeError("Handmatige-beginpuntpatch is niet geïnstalleerd")
+    if int(getattr(KlicViewerApp, "_sleufbase_start_point_patch_version", 0) or 0) < 2:
+        raise RuntimeError("Verouderde beginpuntpatch in frozen build")
+    if not callable(getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)):
+        raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
+    _smoke_trace("runtime-validations:ok")
+
+    resource_root = _resource_root()
+    icon_path = resource_root / "assets" / "sleufbase_icon.ico"
+    if not icon_path.exists():
+        raise RuntimeError(f"Techbase Windows-icoon ontbreekt in frozen build: {icon_path}")
+
+    template_path = resource_root / "assets" / "cadastral_template.dxf"
+    if not template_path.exists():
+        raise RuntimeError(f"Ingebouwd DXF-sjabloon ontbreekt in frozen build: {template_path}")
+    if template_path.stat().st_size < 1024:
+        raise RuntimeError(f"Ingebouwd DXF-sjabloon lijkt ongeldig: {template_path}")
+    _smoke_trace("assets:ok")
+    _smoke_trace("smoke:ok")
+
+    # Frozen GUI/runtime libraries may own non-daemon threads. Smoke mode is a
+    # process-scoped assertion mode, so exit without running unrelated GUI
+    # shutdown hooks after every assertion has succeeded.
+    os._exit(0)
+
+
+def main() -> int:
     args = list(sys.argv[1:])
+
+    # Keep smoke mode completely outside professional_runtime/Tk initialization.
+    # This is intentionally the first executable mode so CI can validate frozen
+    # imports even if the desktop runtime has a startup regression.
+    if "--smoke-test" in args:
+        _run_smoke_test()
+        return 0
+
+    _ensure_package_importable()
 
     from SleufBase.professional_runtime import (
         initialize_professional_runtime,
@@ -80,84 +155,11 @@ def main() -> int:
         write_diagnostics,
     )
 
-    # Smoke tests must stay headless. Installing the desktop exception handler
-    # here would turn an import/preflight failure into a modal Windows message
-    # box and make CI wait forever instead of reporting the failing exit code.
-    if "--smoke-test" not in args:
-        initialize_professional_runtime()
+    initialize_professional_runtime()
 
     if "--diagnostics" in args:
         write_diagnostics()
         return 0
-
-    # CI/runtime smoke test: import the complete app module without constructing
-    # the Tk GUI and validate frozen browser/auth/native acceleration features.
-    if "--smoke-test" in args:
-        _smoke_trace("smoke:start")
-        _install_runtime_patches()
-        _smoke_trace("runtime-patches:ok")
-
-        from SleufBase.app import KlicViewerApp
-
-        _smoke_trace("app-import:ok")
-        from SleufBase.cyclomedia import CyclomediaAerialClient
-
-        _smoke_trace("cyclomedia-import:ok")
-        from SleufBase import native_accel
-
-        _smoke_trace("native-accel-import:ok")
-        from SleufBase import streetsmart_browser as streetsmart_browser_module
-        from SleufBase.streetsmart_bearer import (
-            bearer_authorization_header,
-            load_streetsmart_bearer_token,  # noqa: F401
-        )
-
-        _smoke_trace("streetsmart-imports:ok")
-        import webview
-
-        _smoke_trace("webview-import:ok")
-        webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
-        webview.settings["SHOW_DEFAULT_MENUS"] = False
-
-        if not getattr(CyclomediaAerialClient, "_sleufbase_pdok_fallback_installed", False):
-            raise RuntimeError("Cyclomedia/PDOK luchtfoto-fallback is niet geïnstalleerd")
-        if not getattr(CyclomediaAerialClient, "_sleufbase_streetsmart_bearer_retry_installed", False):
-            raise RuntimeError("Cyclomedia StreetSmart-bearer retry is niet geïnstalleerd")
-        if not getattr(streetsmart_browser_module, "_sleufbase_bearer_capture_installed", False):
-            raise RuntimeError("StreetSmart bearer capture hook is niet geïnstalleerd")
-        if bearer_authorization_header("smoke-test-token") != "Bearer smoke-test-token":
-            raise RuntimeError("StreetSmart bearer Authorization-header is ongeldig")
-        if not native_accel.is_available():
-            raise RuntimeError("Native DXF/GeoTIFF renderer ktk_accel.dll is niet geladen")
-        if not getattr(KlicViewerApp, "_manual_cross_section_start_patch", False):
-            raise RuntimeError("Handmatige-beginpuntpatch is niet geïnstalleerd")
-        if int(getattr(KlicViewerApp, "_sleufbase_start_point_patch_version", 0) or 0) < 2:
-            raise RuntimeError("Verouderde beginpuntpatch in frozen build")
-        if not callable(
-            getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)
-        ):
-            raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
-        _smoke_trace("runtime-validations:ok")
-
-        resource_root = _resource_root()
-        icon_path = resource_root / "assets" / "sleufbase_icon.ico"
-        if not icon_path.exists():
-            raise RuntimeError(f"Techbase Windows-icoon ontbreekt in frozen build: {icon_path}")
-
-        template_path = resource_root / "assets" / "cadastral_template.dxf"
-        if not template_path.exists():
-            raise RuntimeError(f"Ingebouwd DXF-sjabloon ontbreekt in frozen build: {template_path}")
-        if template_path.stat().st_size < 1024:
-            raise RuntimeError(f"Ingebouwd DXF-sjabloon lijkt ongeldig: {template_path}")
-        _smoke_trace("assets:ok")
-        _smoke_trace("smoke:ok")
-
-        # Some bundled GUI/runtime libraries can keep non-daemon background
-        # threads alive even after all smoke assertions succeeded. Smoke mode is
-        # deliberately process-scoped, so terminate immediately after writing
-        # the final marker instead of letting unrelated shutdown hooks make CI
-        # appear hung.
-        os._exit(0)
 
     if "--kickthemap-jobs-browser" in args:
         from SleufBase.kickthemap_jobs_browser import main as jobs_main
@@ -177,16 +179,12 @@ def main() -> int:
         browser_main(start_url=browser_url, window_title=browser_title, prelogin=prelogin)
         return 0
 
-    # Only the normal desktop application needs the full runtime patches.
     _install_runtime_patches()
     from SleufBase.app import KlicViewerApp
 
     app = KlicViewerApp()
     install_tk_exception_handler(app)
 
-    # Positional arguments are file paths used by SleufBase itself when a frozen
-    # process starts a second instance. Pass them to the app when the runtime
-    # exposes the normal loader helper; otherwise start the UI normally.
     positional_paths = [arg for arg in args if not arg.startswith("--")]
     if positional_paths:
         loader = getattr(app, "load_paths", None) or getattr(app, "open_paths", None)
