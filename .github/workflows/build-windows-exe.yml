@@ -102,7 +102,11 @@ jobs:
 
           function Invoke-SmokeTest([string]$Path) {
             $watch = [System.Diagnostics.Stopwatch]::StartNew()
-            $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -Wait -PassThru
+            $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -PassThru
+            if (-not $process.WaitForExit(60000)) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+              throw "$Path smoke-test timeout na 60 seconden"
+            }
             $watch.Stop()
             if ($process.ExitCode -ne 0) { throw "$Path smoke-test faalde met exitcode $($process.ExitCode)" }
             return [math]::Round($watch.Elapsed.TotalMilliseconds)
@@ -151,7 +155,11 @@ jobs:
           if ($setup.ExitCode -ne 0) { throw "SleufBase installer faalde met exitcode $($setup.ExitCode)" }
           $installedExe = Join-Path $installDir 'SleufBase.exe'
           if (-not (Test-Path $installedExe)) { throw "Geïnstalleerde executable ontbreekt: $installedExe" }
-          $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -Wait -PassThru
+          $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Geïnstalleerde SleufBase smoke-test timeout na 60 seconden"
+          }
           if ($process.ExitCode -ne 0) { throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)" }
           $uninstaller = Join-Path $installDir 'unins000.exe'
           if (Test-Path $uninstaller) {
