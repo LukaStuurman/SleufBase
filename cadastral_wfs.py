@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass
+import hashlib
 import json
+import threading
 import time
 from typing import Any
 
@@ -35,6 +38,8 @@ class CadastralWfsClient:
     DIRECT_MAX_SPAN_METERS = 700.0
     SERVER_LIMIT_HINT = 1000
     MIN_SPLIT_SPAN_METERS = 90.0
+    CACHE_LIMIT = 96
+    MAX_PAGE_COUNT = 100
     FEATURE_TYPES = {
         "kadastralekaart:Perceel": "KAD_PERCEEL",
         "kadastralekaart:KadastraleGrens": "KAD_GRENS",
@@ -50,8 +55,14 @@ class CadastralWfsClient:
         self.page_size = max(50, page_size)
         self.retries = max(1, int(retries))
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "KLIC-TIFF-Kaarten/1.0"})
-        self._feature_cache: dict[tuple[str, float, float, float, float], list[dict[str, Any]]] = {}
+        self.session.headers.update({"User-Agent": "SleufBase/0.2"})
+        self._feature_cache: OrderedDict[
+            tuple[str, float, float, float, float], list[dict[str, Any]]
+        ] = OrderedDict()
+        self._feature_cache_lock = threading.RLock()
+
+    def close(self) -> None:
+        self.session.close()
 
     def fetch_linework(self, bounds: Bounds) -> list[CadastralLinework]:
         result: list[CadastralLinework] = []
@@ -85,9 +96,30 @@ class CadastralWfsClient:
                     labels.append(label)
         return labels
 
+    def _cache_get(
+        self, cache_key: tuple[str, float, float, float, float]
+    ) -> list[dict[str, Any]] | None:
+        with self._feature_cache_lock:
+            cached = self._feature_cache.get(cache_key)
+            if cached is None:
+                return None
+            self._feature_cache.move_to_end(cache_key)
+            return cached
+
+    def _cache_put(
+        self,
+        cache_key: tuple[str, float, float, float, float],
+        features: list[dict[str, Any]],
+    ) -> None:
+        with self._feature_cache_lock:
+            self._feature_cache[cache_key] = features
+            self._feature_cache.move_to_end(cache_key)
+            while len(self._feature_cache) > self.CACHE_LIMIT:
+                self._feature_cache.popitem(last=False)
+
     def _fetch_features(self, feature_type: str, bounds: Bounds) -> list[dict[str, Any]]:
         cache_key = self._feature_cache_key(feature_type, bounds)
-        cached = self._feature_cache.get(cache_key)
+        cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
 
@@ -97,16 +129,14 @@ class CadastralWfsClient:
             all_features = self._fetch_features_direct(feature_type, bounds)
             if len(all_features) >= self.SERVER_LIMIT_HINT and self._can_split_bounds(bounds):
                 all_features = self._fetch_features_tiled(feature_type, bounds)
-        self._feature_cache[cache_key] = all_features
-        if len(self._feature_cache) > 96:
-            first_key = next(iter(self._feature_cache))
-            self._feature_cache.pop(first_key, None)
+        self._cache_put(cache_key, all_features)
         return all_features
 
     def _fetch_features_direct(self, feature_type: str, bounds: Bounds) -> list[dict[str, Any]]:
         all_features: list[dict[str, Any]] = []
         start_index = 0
-        while True:
+        previous_page_signature: bytes | None = None
+        for page_number in range(1, self.MAX_PAGE_COUNT + 1):
             params = {
                 "service": "WFS",
                 "version": "2.0.0",
@@ -120,17 +150,46 @@ class CadastralWfsClient:
             }
             try:
                 payload = self._get_json(params)
+            except CadastralWfsError:
+                raise
             except Exception as exc:
-                raise CadastralWfsError(f"Kadastrale WFS ophalen mislukt voor {feature_type}: {exc}") from exc
+                raise CadastralWfsError(
+                    f"Kadastrale WFS ophalen mislukt voor {feature_type}: {exc}"
+                ) from exc
 
             features = payload.get("features", [])
             if not isinstance(features, list):
                 raise CadastralWfsError(f"Ongeldige WFS-respons voor {feature_type}.")
+            if not features:
+                break
+
+            page_signature = self._page_signature(features)
+            if previous_page_signature is not None and page_signature == previous_page_signature:
+                raise CadastralWfsError(
+                    "De kadastrale WFS-server herhaalt dezelfde pagina en lijkt "
+                    "startIndex te negeren. Ophalen is gestopt om een vastloper te voorkomen."
+                )
+            previous_page_signature = page_signature
+
             all_features.extend(features)
             if len(features) < self.page_size:
                 break
-            start_index += self.page_size
+            start_index += len(features)
+        else:
+            raise CadastralWfsError(
+                f"Kadastrale WFS voor {feature_type} overschreed de veiligheidslimiet "
+                f"van {self.MAX_PAGE_COUNT} pagina's."
+            )
         return all_features
+
+    @classmethod
+    def _page_signature(cls, features: list[dict[str, Any]]) -> bytes:
+        digest = hashlib.blake2b(digest_size=16)
+        digest.update(str(len(features)).encode("ascii"))
+        for feature in features:
+            digest.update(cls._feature_key(feature).encode("utf-8", errors="replace"))
+            digest.update(b"\0")
+        return digest.digest()
 
     def _fetch_features_tiled(self, feature_type: str, bounds: Bounds) -> list[dict[str, Any]]:
         deduped: list[dict[str, Any]] = []
@@ -146,13 +205,13 @@ class CadastralWfsClient:
 
     def _fetch_features_direct_or_split(self, feature_type: str, bounds: Bounds) -> list[dict[str, Any]]:
         cache_key = self._feature_cache_key(feature_type, bounds)
-        cached = self._feature_cache.get(cache_key)
+        cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
         features = self._fetch_features_direct(feature_type, bounds)
         if len(features) >= self.SERVER_LIMIT_HINT and self._can_split_bounds(bounds):
             features = self._fetch_features_from_subtiles(feature_type, bounds)
-        self._feature_cache[cache_key] = features
+        self._cache_put(cache_key, features)
         return features
 
     def _fetch_features_from_subtiles(self, feature_type: str, bounds: Bounds) -> list[dict[str, Any]]:
@@ -234,8 +293,11 @@ class CadastralWfsClient:
             try:
                 response = self.session.get(self.BASE_URL, params=params, timeout=self.timeout)
                 response.raise_for_status()
-                return response.json()
-            except Exception as exc:
+                payload = response.json()
+                if not isinstance(payload, dict):
+                    raise CadastralWfsError("De WFS-server gaf geen JSON-object terug.")
+                return payload
+            except (requests.RequestException, ValueError, CadastralWfsError) as exc:
                 last_error = exc
                 if attempt < self.retries:
                     time.sleep(0.7 * attempt)
@@ -274,16 +336,27 @@ class CadastralWfsClient:
         text = str(properties.get("tekst") or "").strip()
         if not text:
             return None
-        rotation = float(properties.get("hoek") or 0.0)
+        try:
+            rotation = float(properties.get("hoek") or 0.0)
+            position = (float(coordinates[0]), float(coordinates[1]))
+        except (TypeError, ValueError, IndexError):
+            return None
         return CadastralTextLabel(
             layer_name=layer_name,
             text=text,
-            position=(float(coordinates[0]), float(coordinates[1])),
+            position=position,
             rotation=rotation,
         )
 
     def _coords_to_path(self, coordinates: list[Any], close: bool = False) -> list[tuple[float, float]]:
-        path = [(float(item[0]), float(item[1])) for item in coordinates]
+        path: list[tuple[float, float]] = []
+        for item in coordinates:
+            try:
+                if len(item) < 2:
+                    continue
+                path.append((float(item[0]), float(item[1])))
+            except (TypeError, ValueError, IndexError):
+                continue
         if close and path and path[0] != path[-1]:
             path.append(path[0])
         return path
