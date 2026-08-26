@@ -1,23 +1,12 @@
 from __future__ import annotations
 
-import marshal
 import json
-import sys
 from pathlib import Path
 
-
-def _load_cached_module() -> None:
-    cache_tag = sys.implementation.cache_tag
-    if not cache_tag:
-        raise ImportError("Python cache tag is niet beschikbaar.")
-    pyc_path = Path(__file__).with_name("_bytecode") / f"settings.{cache_tag}.pyc"
-    if not pyc_path.exists():
-        raise ImportError(f"Bytecode voor app.settings niet gevonden: {pyc_path}")
-    code = marshal.loads(pyc_path.read_bytes()[16:])
-    exec(code, globals())
+from .legacy_bytecode import load_legacy_module
 
 
-_load_cached_module()
+load_legacy_module("settings", globals(), __file__)
 
 
 # Deze instelling is toegevoegd boven op de oudere, gebundelde settings-module.
