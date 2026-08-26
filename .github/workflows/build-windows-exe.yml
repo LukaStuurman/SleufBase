@@ -109,19 +109,22 @@ jobs:
               $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -PassThru
               if (-not $process.WaitForExit(60000)) {
                 Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-                if (Test-Path $tracePath) {
-                  Write-Host "--- smoke trace: $Path ---"
-                  Get-Content $tracePath
-                }
+                Write-Host "--- smoke trace: $Path ---"
+                if (Test-Path $tracePath) { Get-Content $tracePath } else { Write-Host '<geen tracebestand aangemaakt>' }
                 throw "$Path smoke-test timeout na 60 seconden"
               }
               $watch.Stop()
               if ($process.ExitCode -ne 0) {
-                if (Test-Path $tracePath) {
-                  Write-Host "--- smoke trace: $Path ---"
-                  Get-Content $tracePath
-                }
+                Write-Host "--- smoke trace: $Path ---"
+                if (Test-Path $tracePath) { Get-Content $tracePath } else { Write-Host '<geen tracebestand aangemaakt>' }
                 throw "$Path smoke-test faalde met exitcode $($process.ExitCode)"
+              }
+              if (-not (Test-Path $tracePath)) { throw "$Path smoke-test maakte geen tracebestand" }
+              $trace = Get-Content $tracePath
+              if ($trace -notcontains 'smoke:ok') {
+                Write-Host "--- incomplete smoke trace: $Path ---"
+                $trace | ForEach-Object { Write-Host $_ }
+                throw "$Path smoke-test eindigde zonder smoke:ok marker"
               }
               return [math]::Round($watch.Elapsed.TotalMilliseconds)
             } finally {
@@ -176,7 +179,6 @@ jobs:
           if ($setup.ExitCode -ne 0) { throw "SleufBase installer faalde met exitcode $($setup.ExitCode)" }
           $installedExe = Join-Path $installDir 'SleufBase.exe'
           if (-not (Test-Path $installedExe)) { throw "Geïnstalleerde executable ontbreekt: $installedExe" }
-
           $tracePath = Join-Path $env:RUNNER_TEMP 'sleufbase-installed-smoke.log'
           $env:SLEUFBASE_SMOKE_TRACE = $tracePath
           try {
@@ -190,10 +192,12 @@ jobs:
               if (Test-Path $tracePath) { Get-Content $tracePath }
               throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)"
             }
+            if (-not (Test-Path $tracePath) -or (Get-Content $tracePath) -notcontains 'smoke:ok') {
+              throw 'Geïnstalleerde SleufBase smoke-test mist smoke:ok marker'
+            }
           } finally {
             Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
           }
-
           $uninstaller = Join-Path $installDir 'unins000.exe'
           if (Test-Path $uninstaller) {
             $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
