@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 from math import ceil
@@ -67,13 +68,12 @@ class PdokKadastralekaartWmtsTileClient(WebMercatorTileClient):
 
     def build_tile_url(self, zoom: int, x: int, y: int) -> str:
         matrix_id = f"{zoom:02d}"
-        return (
-            f"{self.BASE_URL}/Kadastralekaart/EPSG:3857/{matrix_id}/{x}/{y}.png"
-        )
+        return f"{self.BASE_URL}/Kadastralekaart/EPSG:3857/{matrix_id}/{x}/{y}.png"
 
 
 class PdokWmsClient:
     BASE_URL = "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0"
+    CACHE_LIMIT = 24
 
     def __init__(
         self,
@@ -85,18 +85,19 @@ class PdokWmsClient:
         transparent: bool = False,
     ) -> None:
         self.layer_name = layer_name
-        self.timeout = timeout
-        self.retries = max(1, retries)
+        self.timeout = max(1, int(timeout))
+        self.retries = max(1, int(retries))
         self.max_workers = max(1, int(max_workers))
         self.base_url = base_url or self.BASE_URL
         self.transparent = transparent
         self._thread_local = threading.local()
-        self.session = self._create_session()
-        self._cache: dict[tuple[float, float, float, float, int, int], Image.Image] = {}
+        self._cache_lock = threading.RLock()
+        self._cache: OrderedDict[tuple[float, float, float, float, int, int], Image.Image] = OrderedDict()
 
-    def _create_session(self) -> requests.Session:
+    @staticmethod
+    def _create_session() -> requests.Session:
         session = requests.Session()
-        session.headers.update({"User-Agent": "KLIC-TIFF-Kaarten/1.0"})
+        session.headers.update({"User-Agent": "SleufBase/1.0"})
         return session
 
     def _get_session(self) -> requests.Session:
@@ -115,6 +116,25 @@ class PdokWmsClient:
             int(size[0]),
             int(size[1]),
         )
+
+    def _cache_get(self, key: tuple[float, float, float, float, int, int]) -> Image.Image | None:
+        with self._cache_lock:
+            cached = self._cache.pop(key, None)
+            if cached is None:
+                return None
+            self._cache[key] = cached
+            return cached.copy()
+
+    def _cache_put(self, key: tuple[float, float, float, float, int, int], image: Image.Image) -> None:
+        stored = image.copy()
+        with self._cache_lock:
+            previous = self._cache.pop(key, None)
+            if previous is not None:
+                previous.close()
+            self._cache[key] = stored
+            while len(self._cache) > self.CACHE_LIMIT:
+                _old_key, old_image = self._cache.popitem(last=False)
+                old_image.close()
 
     def _request_image(self, bounds: Bounds, size: tuple[int, int]) -> Image.Image:
         params = {
@@ -136,15 +156,16 @@ class PdokWmsClient:
                 response = self._get_session().get(self.base_url, params=params, timeout=self.timeout)
                 response.raise_for_status()
                 content_type = response.headers.get("content-type", "")
-                if "image" not in content_type:
+                if "image" not in content_type.lower():
                     snippet = response.text[:300].strip()
                     raise PdokError(f"PDOK gaf geen kaartbeeld terug: {snippet}")
-                return Image.open(BytesIO(response.content)).convert("RGBA")
-            except (requests.RequestException, OSError, PdokError) as exc:
+                with Image.open(BytesIO(response.content)) as source:
+                    return source.convert("RGBA")
+            except (requests.RequestException, OSError, ValueError, PdokError) as exc:
                 last_error = exc
                 if attempt >= self.retries:
                     break
-                time.sleep(0.6 * attempt)
+                time.sleep(min(2.0, 0.4 * (2 ** (attempt - 1))))
         raise PdokError(f"PDOK achtergrond ophalen mislukt: {last_error}")
 
     def fetch_map(
@@ -156,16 +177,19 @@ class PdokWmsClient:
     ) -> Image.Image:
         if size[0] <= 0 or size[1] <= 0:
             raise PdokError("Kaartgrootte moet groter dan nul zijn.")
+        if bounds.width <= 0 or bounds.height <= 0:
+            raise PdokError("Kaartuitsnede moet een positieve breedte en hoogte hebben.")
         key = self._cache_key(bounds, size)
-        cached = self._cache.get(key)
+        cached = self._cache_get(key)
         if cached is not None:
-            return cached.copy()
+            return cached
 
         width, height = size
-        effective_tile_size = min(max_tile_size, 512) if on_progress is not None else max_tile_size
+        effective_tile_size = max(64, int(max_tile_size))
+        effective_tile_size = min(effective_tile_size, 512) if on_progress is not None else effective_tile_size
         if width <= effective_tile_size and height <= effective_tile_size:
             image = self._request_image(bounds, size)
-            self._cache[key] = image.copy()
+            self._cache_put(key, image)
             if on_progress is not None:
                 on_progress(image.copy())
             return image
@@ -198,7 +222,10 @@ class PdokWmsClient:
             for future in as_completed(future_map):
                 left_px, top_px = future_map[future]
                 tile = future.result()
-                stitched.alpha_composite(tile, (left_px, top_px))
+                try:
+                    stitched.alpha_composite(tile, (left_px, top_px))
+                finally:
+                    tile.close()
                 completed += 1
                 if on_progress is not None and (
                     completed == 1
@@ -206,8 +233,5 @@ class PdokWmsClient:
                     or completed % progress_interval == 0
                 ):
                     on_progress(stitched.copy())
-        self._cache[key] = stitched.copy()
-        if len(self._cache) > 24:
-            first_key = next(iter(self._cache))
-            self._cache.pop(first_key, None)
+        self._cache_put(key, stitched)
         return stitched
