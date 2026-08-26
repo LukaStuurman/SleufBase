@@ -9,7 +9,11 @@ from PIL import Image
 
 from .models import Bounds, GeoTiffLayer, GeoTransform
 
-Image.MAX_IMAGE_PIXELS = None
+# Engineering rasters can legitimately be large, but disabling Pillow's global
+# decompression-bomb protection entirely allows a tiny malicious/corrupt file to
+# exhaust process memory. Keep a generous deterministic ceiling instead.
+MAX_GEOTIFF_PIXELS = 150_000_000
+Image.MAX_IMAGE_PIXELS = MAX_GEOTIFF_PIXELS
 
 MODEL_PIXEL_SCALE = 33550
 MODEL_TIEPOINT = 33922
@@ -188,20 +192,43 @@ def rotate_geotiff_layer(layer: GeoTiffLayer, angle_degrees: float) -> GeoTiffLa
 
 def load_geotiff(path: str | Path) -> GeoTiffLayer:
     file_path = Path(path)
-    image = Image.open(file_path)
-    tags = getattr(image, "tag_v2", None)
-    if tags is None:
-        raise GeoTiffError("Dit TIFF-bestand bevat geen leesbare GeoTIFF-tags.")
-    transform = _build_transform(tags)
-    bounds = _calculate_bounds(transform, image.width, image.height)
+    try:
+        image = Image.open(file_path)
+    except (OSError, Image.DecompressionBombError) as exc:
+        raise GeoTiffError(f"TIFF-bestand kon niet veilig worden geopend: {exc}") from exc
+
+    try:
+        width = int(image.width)
+        height = int(image.height)
+        if width <= 0 or height <= 0:
+            raise GeoTiffError("TIFF-bestand heeft ongeldige afbeeldingsafmetingen.")
+        pixel_count = width * height
+        if pixel_count > MAX_GEOTIFF_PIXELS:
+            raise GeoTiffError(
+                f"TIFF-bestand is te groot ({pixel_count:,} pixels). "
+                f"De veiligheidslimiet is {MAX_GEOTIFF_PIXELS:,} pixels."
+            )
+
+        tags = getattr(image, "tag_v2", None)
+        if tags is None:
+            raise GeoTiffError("Dit TIFF-bestand bevat geen leesbare GeoTIFF-tags.")
+        transform = _build_transform(tags)
+        bounds = _calculate_bounds(transform, width, height)
+        if bounds.width <= 0 or bounds.height <= 0:
+            raise GeoTiffError("GeoTIFF heeft ongeldige of lege geografische grenzen.")
+        epsg = _parse_epsg(tags)
+    except Exception:
+        image.close()
+        raise
+
     return GeoTiffLayer(
         path=file_path,
         image=image,
         transform=transform,
         bounds=bounds,
-        epsg=_parse_epsg(tags),
+        epsg=epsg,
         metadata={
-            "breedte_px": image.width,
-            "hoogte_px": image.height,
+            "breedte_px": width,
+            "hoogte_px": height,
         },
     )
