@@ -65,7 +65,10 @@ jobs:
           if (-not (Test-Path 'assets/sleufbase_icon.ico')) {
             throw 'assets/sleufbase_icon.ico ontbreekt na branding-preparatie'
           }
-          Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico' | Format-Table Name,Length
+          if (-not (Test-Path 'assets/cadastral_template.dxf')) {
+            throw 'assets/cadastral_template.dxf ontbreekt'
+          }
+          Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico', 'assets/cadastral_template.dxf' | Format-Table Name,Length
 
       - name: Build fast professional edition
         shell: pwsh
@@ -93,7 +96,6 @@ jobs:
             return [math]::Round($watch.Elapsed.TotalMilliseconds)
           }
 
-          # Warm the Windows filesystem/cache once, then measure a second launch.
           [void](Invoke-SmokeTest $fastExe)
           [void](Invoke-SmokeTest $portableExe)
           $fastMs = Invoke-SmokeTest $fastExe
@@ -169,7 +171,7 @@ jobs:
       - name: Upload professional Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.2.0
+          name: SleufBase-Windows-v0.2.1
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -183,23 +185,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v0.2.0-windows'
-          $title = 'SleufBase Windows v0.2.0'
+          $tag = 'v0.2.1-windows'
+          $title = 'SleufBase Windows v0.2.1'
           $notes = @'
-          Professionele Windows-distributie van SleufBase.
+          Bugfix-release voor DXF-sjabloonexport en handmatige beginpunten.
 
-          Aanbevolen: SleufBase-Setup.exe. Deze installeert de snelle onedir-build zodat PyInstaller niet bij iedere start de volledige runtime hoeft uit te pakken.
-
-          Nieuw in v0.2.0:
-          - snelle onedir-build + Windows installer
-          - portable one-file build blijft beschikbaar
-          - Techbase/SleufBase versie- en bedrijfsmetadata in Windows
-          - vaste Windows AppUserModelID en DPI-awareness
-          - roterende logging in %LOCALAPPDATA%\Techbase\SleufBase\logs
-          - crashrapporten en systeemdiagnostiek in de diagnostics-map
-          - lazy loading van zware Cyclomedia-runtime voor launcher/browserpaden
-          - native ktk_accel.dll blijft verplicht gevalideerd
-          - CI test de installer met stille installatie, smoke-test en uninstall
+          Nieuw in v0.2.1:
+          - handmatig gekozen beginpunten blijven leidend bij DXF-sjabloonexport en worden niet opnieuw overschreven door de automatische beginpuntbepaling
+          - dwarsprofielen gebruiken het actuele beginpunt uit de TIFF-laagmetadata, ook wanneer een dataset eerder in de cache stond
+          - assets/cadastral_template.dxf wordt verplicht meegebundeld in de installer, snelle ZIP en portable one-file build
+          - de frozen smoke-test controleert zowel de beginpuntpatch als het ingebouwde DXF-sjabloon
           '@
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {

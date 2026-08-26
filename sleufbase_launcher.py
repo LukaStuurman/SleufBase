@@ -9,6 +9,10 @@ def _package_parent() -> Path:
     return here.parent.parent
 
 
+def _resource_root() -> Path:
+    return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+
+
 def _ensure_package_importable() -> None:
     parent = _package_parent()
     parent_text = str(parent)
@@ -17,11 +21,12 @@ def _ensure_package_importable() -> None:
 
 
 def _install_runtime_patches() -> None:
-    # Imported lazily: Cyclomedia/StreetSmart support pulls in networking and
-    # geospatial modules that are unnecessary for browser-only launcher modes.
+    # Imported lazily: browser-only launcher modes do not need the full desktop app.
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
+    from SleufBase.start_point_patch import install_manual_start_point_patch
 
     install_cyclomedia_pdok_fallback()
+    install_manual_start_point_patch()
 
 
 def _take_option(args: list[str], name: str) -> str | None:
@@ -57,7 +62,7 @@ def main() -> int:
     # the Tk GUI and validate frozen browser/auth/native acceleration features.
     if "--smoke-test" in args:
         _install_runtime_patches()
-        from SleufBase.app import KlicViewerApp  # noqa: F401
+        from SleufBase.app import KlicViewerApp
         from SleufBase.cyclomedia import CyclomediaAerialClient
         from SleufBase import native_accel
         from SleufBase import streetsmart_browser as streetsmart_browser_module
@@ -80,10 +85,19 @@ def main() -> int:
             raise RuntimeError("StreetSmart bearer Authorization-header is ongeldig")
         if not native_accel.is_available():
             raise RuntimeError("Native DXF/GeoTIFF renderer ktk_accel.dll is niet geladen")
+        if not getattr(KlicViewerApp, "_manual_cross_section_start_patch", False):
+            raise RuntimeError("Handmatige-beginpuntpatch is niet geïnstalleerd")
 
-        icon_path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent)) / "assets" / "sleufbase_icon.ico"
+        resource_root = _resource_root()
+        icon_path = resource_root / "assets" / "sleufbase_icon.ico"
         if not icon_path.exists():
             raise RuntimeError(f"Techbase Windows-icoon ontbreekt in frozen build: {icon_path}")
+
+        template_path = resource_root / "assets" / "cadastral_template.dxf"
+        if not template_path.exists():
+            raise RuntimeError(f"Ingebouwd DXF-sjabloon ontbreekt in frozen build: {template_path}")
+        if template_path.stat().st_size < 1024:
+            raise RuntimeError(f"Ingebouwd DXF-sjabloon lijkt ongeldig: {template_path}")
         return 0
 
     if "--kickthemap-jobs-browser" in args:
@@ -104,7 +118,7 @@ def main() -> int:
         browser_main(start_url=browser_url, window_title=browser_title, prelogin=prelogin)
         return 0
 
-    # Only the normal desktop application needs Cyclomedia fallback patches.
+    # Only the normal desktop application needs the full runtime patches.
     _install_runtime_patches()
     from SleufBase.app import KlicViewerApp
 

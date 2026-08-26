@@ -26,8 +26,10 @@ if not bytecode_dir.exists():
 datas.append((str(bytecode_dir), "SleufBase/_bytecode"))
 
 assets_dir = ROOT / "assets"
-if assets_dir.exists():
-    datas.append((str(assets_dir), "assets"))
+template_path = assets_dir / "cadastral_template.dxf"
+if not template_path.exists():
+    raise FileNotFoundError(f"Verplicht ingebouwd DXF-sjabloon ontbreekt: {template_path}")
+datas.append((str(assets_dir), "assets"))
 
 native_dir = ROOT / "native"
 if native_dir.exists():
