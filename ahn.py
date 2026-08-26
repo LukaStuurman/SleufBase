@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from io import BytesIO
-import math
+import threading
 import time
 
 import numpy as np
@@ -16,6 +17,7 @@ class PdokAhnError(RuntimeError):
 class PdokAhnClient:
     BASE_URL = "https://service.pdok.nl/rws/ahn/wcs/v1_0"
     DEFAULT_NODATA = 3.4028234663852886e38
+    CACHE_LIMIT = 512
 
     def __init__(
         self,
@@ -29,30 +31,55 @@ class PdokAhnClient:
         self.timeout = max(1, int(timeout))
         self.retries = max(1, int(retries))
         self.sample_size_meters = max(0.2, float(sample_size_meters))
-        self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "KLIC-TIFF-Kaarten/1.0"})
-        self._cache: dict[tuple[float, float, str], float | None] = {}
+        self._thread_local = threading.local()
+        self._cache_lock = threading.RLock()
+        self._cache: OrderedDict[tuple[float, float, str], float | None] = OrderedDict()
+
+    @staticmethod
+    def _create_session() -> requests.Session:
+        session = requests.Session()
+        session.headers.update({"User-Agent": "SleufBase/1.0"})
+        return session
+
+    def _get_session(self) -> requests.Session:
+        session = getattr(self._thread_local, "session", None)
+        if session is None:
+            session = self._create_session()
+            self._thread_local.session = session
+        return session
+
+    def _cache_key(self, x: float, y: float) -> tuple[float, float, str]:
+        return (round(float(x), 2), round(float(y), 2), self.coverage_id)
+
+    def _cache_get(self, key: tuple[float, float, str]) -> tuple[bool, float | None]:
+        with self._cache_lock:
+            if key not in self._cache:
+                return False, None
+            value = self._cache.pop(key)
+            self._cache[key] = value
+            return True, value
+
+    def _cache_put(self, key: tuple[float, float, str], value: float | None) -> None:
+        with self._cache_lock:
+            self._cache.pop(key, None)
+            self._cache[key] = value
+            while len(self._cache) > self.CACHE_LIMIT:
+                self._cache.popitem(last=False)
 
     def fetch_ground_level(self, x: float, y: float) -> float | None:
-        key = (round(float(x), 2), round(float(y), 2), self.coverage_id)
-        if key in self._cache:
-            return self._cache[key]
+        key = self._cache_key(x, y)
+        found, cached = self._cache_get(key)
+        if found:
+            return cached
 
         value = self._request_ground_level(float(x), float(y))
-        self._cache[key] = value
-        if len(self._cache) > 512:
-            first_key = next(iter(self._cache))
-            self._cache.pop(first_key, None)
+        self._cache_put(key, value)
         return value
 
     def lookup_cached_ground_level(self, x: float, y: float) -> tuple[bool, float | None]:
-        key = (round(float(x), 2), round(float(y), 2), self.coverage_id)
-        if key not in self._cache:
-            return False, None
-        return True, self._cache[key]
+        return self._cache_get(self._cache_key(x, y))
 
     def _request_ground_level(self, x: float, y: float) -> float | None:
-        last_error: Exception | None = None
         search_windows = (
             (max(self.sample_size_meters, 2.0), 5),
             (max(self.sample_size_meters * 4.0, 8.0), 9),
@@ -73,24 +100,21 @@ class PdokAhnClient:
             ]
             for attempt in range(1, self.retries + 1):
                 try:
-                    response = self.session.get(self.BASE_URL, params=params, timeout=self.timeout)
+                    response = self._get_session().get(self.BASE_URL, params=params, timeout=self.timeout)
                     response.raise_for_status()
                     content_type = response.headers.get("content-type", "")
                     if "image" not in content_type.lower():
                         snippet = response.text[:300].strip()
                         raise PdokAhnError(f"PDOK AHN gaf geen raster terug: {snippet}")
-                    image = Image.open(BytesIO(response.content))
-                    nearest = self._nearest_valid_value(image)
+                    with Image.open(BytesIO(response.content)) as image:
+                        nearest = self._nearest_valid_value(image)
                     if nearest is not None:
                         return round(nearest, 3)
                     break
-                except (requests.RequestException, OSError, ValueError, PdokAhnError) as exc:
-                    last_error = exc
+                except (requests.RequestException, OSError, ValueError, PdokAhnError):
                     if attempt >= self.retries:
                         break
-                    time.sleep(0.25 * attempt)
-        if last_error is not None:
-            return None
+                    time.sleep(min(1.5, 0.2 * (2 ** (attempt - 1))))
         return None
 
     def _nodata_value(self, image: Image.Image) -> float:
