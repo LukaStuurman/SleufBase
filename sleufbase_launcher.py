@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -18,6 +19,22 @@ def _ensure_package_importable() -> None:
     parent_text = str(parent)
     if parent_text not in sys.path:
         sys.path.insert(0, parent_text)
+
+
+def _smoke_trace(stage: str) -> None:
+    """Write a best-effort phase marker for frozen CI smoke tests."""
+    trace_path = os.environ.get("SLEUFBASE_SMOKE_TRACE")
+    if not trace_path:
+        return
+    try:
+        path = Path(trace_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
+            handle.write(f"{stage}\n")
+    except Exception:
+        # Diagnostics may never be allowed to turn a successful smoke test into
+        # a product failure.
+        pass
 
 
 def _validate_core_legacy_bytecode() -> None:
@@ -76,17 +93,29 @@ def main() -> int:
     # CI/runtime smoke test: import the complete app module without constructing
     # the Tk GUI and validate frozen browser/auth/native acceleration features.
     if "--smoke-test" in args:
+        _smoke_trace("smoke:start")
         _install_runtime_patches()
+        _smoke_trace("runtime-patches:ok")
+
         from SleufBase.app import KlicViewerApp
+
+        _smoke_trace("app-import:ok")
         from SleufBase.cyclomedia import CyclomediaAerialClient
+
+        _smoke_trace("cyclomedia-import:ok")
         from SleufBase import native_accel
+
+        _smoke_trace("native-accel-import:ok")
         from SleufBase import streetsmart_browser as streetsmart_browser_module
         from SleufBase.streetsmart_bearer import (
             bearer_authorization_header,
             load_streetsmart_bearer_token,  # noqa: F401
         )
+
+        _smoke_trace("streetsmart-imports:ok")
         import webview
 
+        _smoke_trace("webview-import:ok")
         webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
         webview.settings["SHOW_DEFAULT_MENUS"] = False
 
@@ -108,6 +137,7 @@ def main() -> int:
             getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)
         ):
             raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
+        _smoke_trace("runtime-validations:ok")
 
         resource_root = _resource_root()
         icon_path = resource_root / "assets" / "sleufbase_icon.ico"
@@ -119,7 +149,15 @@ def main() -> int:
             raise RuntimeError(f"Ingebouwd DXF-sjabloon ontbreekt in frozen build: {template_path}")
         if template_path.stat().st_size < 1024:
             raise RuntimeError(f"Ingebouwd DXF-sjabloon lijkt ongeldig: {template_path}")
-        return 0
+        _smoke_trace("assets:ok")
+        _smoke_trace("smoke:ok")
+
+        # Some bundled GUI/runtime libraries can keep non-daemon background
+        # threads alive even after all smoke assertions succeeded. Smoke mode is
+        # deliberately process-scoped, so terminate immediately after writing
+        # the final marker instead of letting unrelated shutdown hooks make CI
+        # appear hung.
+        os._exit(0)
 
     if "--kickthemap-jobs-browser" in args:
         from SleufBase.kickthemap_jobs_browser import main as jobs_main
