@@ -83,9 +83,10 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertIn("0.3.0", result.stdout)
 
     def test_legacy_wrappers_do_not_duplicate_marshal_loader(self) -> None:
+        forbidden_loader_token = "marshal" + ".loads"
         for filename in ("settings.py", "streetsmart.py", "streetsmart_panel.py", "streetsmart_browser.py"):
             text = (REPO_ROOT / filename).read_text(encoding="utf-8")
-            self.assertNotIn("marshal.loads", text, filename)
+            self.assertNotIn(forbidden_loader_token, text, filename)
             self.assertIn("load_legacy_module", text, filename)
 
 
