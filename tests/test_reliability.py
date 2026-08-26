@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from PIL import Image
+import requests
 
 # GitHub checks out this repository as <workspace>/SleufBase. Add the parent so
 # imports use the same package layout as the packaged desktop application.
@@ -17,9 +18,13 @@ PACKAGE_PARENT = REPO_ROOT.parent
 if str(PACKAGE_PARENT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_PARENT))
 
+from SleufBase.ahn import PdokAhnClient
+from SleufBase.bgt_vector_tiles import BgtVectorTileClient
 from SleufBase.cadastral_wfs import CadastralWfsClient, CadastralWfsError
 from SleufBase.geotiff import GeoTiffError, MAX_GEOTIFF_PIXELS, load_geotiff
+from SleufBase.location_search import PdokLocationClient
 from SleufBase.models import Bounds, GeoTransform, ViewportTransform
+from SleufBase.pdok import PdokWmsClient
 from SleufBase.web_tiles import WebMercatorTileClient
 
 
@@ -119,6 +124,72 @@ class TileCacheReliabilityTests(unittest.TestCase):
                         future.result()
 
                 self.assertLessEqual(len(client._memory_cache), client.memory_cache_limit)
+
+
+class NetworkConcurrencyReliabilityTests(unittest.TestCase):
+    def test_bgt_cache_is_bounded_under_parallel_writes(self) -> None:
+        client = BgtVectorTileClient(max_workers=8)
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [
+                executor.submit(client._cache_put, (index, 0), {"tile": {"features": []}})
+                for index in range(client.TILE_CACHE_LIMIT + 100)
+            ]
+            for future in futures:
+                future.result()
+        self.assertLessEqual(len(client._tile_cache), client.TILE_CACHE_LIMIT)
+
+    def test_bgt_sessions_are_not_shared_between_threads(self) -> None:
+        client = BgtVectorTileClient()
+        main_session = client._get_session()
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            worker_session = executor.submit(client._get_session).result()
+        self.assertIsNot(main_session, worker_session)
+        main_session.close()
+        worker_session.close()
+
+    def test_ahn_cache_is_bounded_under_parallel_writes(self) -> None:
+        client = PdokAhnClient()
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [
+                executor.submit(client._cache_put, (float(index), 0.0, client.coverage_id), float(index))
+                for index in range(client.CACHE_LIMIT + 100)
+            ]
+            for future in futures:
+                future.result()
+        self.assertLessEqual(len(client._cache), client.CACHE_LIMIT)
+
+    def test_location_client_retries_transient_failure(self) -> None:
+        client = PdokLocationClient(retries=2)
+        session = Mock()
+        good_response = Mock()
+        good_response.raise_for_status.return_value = None
+        good_response.json.return_value = {"response": {"docs": []}}
+        session.get.side_effect = [requests.ConnectionError("temporary"), good_response]
+        client._get_session = Mock(return_value=session)  # type: ignore[method-assign]
+
+        with patch("SleufBase.location_search.time.sleep", return_value=None):
+            self.assertEqual(client.search("Utrecht"), [])
+        self.assertEqual(session.get.call_count, 2)
+
+    def test_pdok_wms_cache_is_bounded_under_parallel_writes(self) -> None:
+        client = PdokWmsClient()
+        images = [Image.new("RGBA", (16, 16), (index % 255, 0, 0, 255)) for index in range(80)]
+        try:
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                futures = []
+                for index, image in enumerate(images):
+                    key = (float(index), 0.0, float(index + 1), 1.0, 16, 16)
+                    futures.append(executor.submit(client._cache_put, key, image))
+                for future in futures:
+                    future.result()
+            self.assertLessEqual(len(client._cache), client.CACHE_LIMIT)
+        finally:
+            for image in images:
+                image.close()
+            with client._cache_lock:
+                for cached in client._cache.values():
+                    cached.close()
+                client._cache.clear()
 
 
 if __name__ == "__main__":
