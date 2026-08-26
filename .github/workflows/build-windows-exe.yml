@@ -101,15 +101,36 @@ jobs:
           if (-not (Test-Path $portableExe)) { throw "$portableExe ontbreekt" }
 
           function Invoke-SmokeTest([string]$Path) {
-            $watch = [System.Diagnostics.Stopwatch]::StartNew()
-            $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -PassThru
-            if (-not $process.WaitForExit(60000)) {
-              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-              throw "$Path smoke-test timeout na 60 seconden"
+            $tracePath = Join-Path $env:RUNNER_TEMP ("sleufbase-smoke-" + [guid]::NewGuid().ToString('N') + '.log')
+            $previousTrace = $env:SLEUFBASE_SMOKE_TRACE
+            $env:SLEUFBASE_SMOKE_TRACE = $tracePath
+            try {
+              $watch = [System.Diagnostics.Stopwatch]::StartNew()
+              $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -PassThru
+              if (-not $process.WaitForExit(60000)) {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                if (Test-Path $tracePath) {
+                  Write-Host "--- smoke trace: $Path ---"
+                  Get-Content $tracePath
+                }
+                throw "$Path smoke-test timeout na 60 seconden"
+              }
+              $watch.Stop()
+              if ($process.ExitCode -ne 0) {
+                if (Test-Path $tracePath) {
+                  Write-Host "--- smoke trace: $Path ---"
+                  Get-Content $tracePath
+                }
+                throw "$Path smoke-test faalde met exitcode $($process.ExitCode)"
+              }
+              return [math]::Round($watch.Elapsed.TotalMilliseconds)
+            } finally {
+              if ($null -eq $previousTrace) {
+                Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
+              } else {
+                $env:SLEUFBASE_SMOKE_TRACE = $previousTrace
+              }
             }
-            $watch.Stop()
-            if ($process.ExitCode -ne 0) { throw "$Path smoke-test faalde met exitcode $($process.ExitCode)" }
-            return [math]::Round($watch.Elapsed.TotalMilliseconds)
           }
 
           [void](Invoke-SmokeTest $fastExe)
@@ -155,12 +176,24 @@ jobs:
           if ($setup.ExitCode -ne 0) { throw "SleufBase installer faalde met exitcode $($setup.ExitCode)" }
           $installedExe = Join-Path $installDir 'SleufBase.exe'
           if (-not (Test-Path $installedExe)) { throw "Geïnstalleerde executable ontbreekt: $installedExe" }
-          $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -PassThru
-          if (-not $process.WaitForExit(60000)) {
-            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-            throw "Geïnstalleerde SleufBase smoke-test timeout na 60 seconden"
+
+          $tracePath = Join-Path $env:RUNNER_TEMP 'sleufbase-installed-smoke.log'
+          $env:SLEUFBASE_SMOKE_TRACE = $tracePath
+          try {
+            $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -PassThru
+            if (-not $process.WaitForExit(60000)) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+              if (Test-Path $tracePath) { Get-Content $tracePath }
+              throw "Geïnstalleerde SleufBase smoke-test timeout na 60 seconden"
+            }
+            if ($process.ExitCode -ne 0) {
+              if (Test-Path $tracePath) { Get-Content $tracePath }
+              throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)"
+            }
+          } finally {
+            Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
           }
-          if ($process.ExitCode -ne 0) { throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)" }
+
           $uninstaller = Join-Path $installDir 'unins000.exe'
           if (Test-Path $uninstaller) {
             $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
