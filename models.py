@@ -98,15 +98,15 @@ class GeoTransform:
         return x, y
 
     def world_to_pixel(self, x: float, y: float) -> tuple[float, float]:
+        """Invert the affine 2x2 part directly; this is a hot render path."""
         determinant = (self.a * self.e) - (self.b * self.d)
         if abs(determinant) <= 1e-15:
             raise ValueError("GeoTIFF-transformatie is singulier en kan niet worden geïnverteerd.")
-        matrix = np.array([[self.a, self.b], [self.d, self.e]], dtype=float)
-        offset = np.array([x - self.c, y - self.f], dtype=float)
-        try:
-            col, row = np.linalg.solve(matrix, offset)
-        except np.linalg.LinAlgError as exc:
-            raise ValueError("GeoTIFF-transformatie kon niet worden geïnverteerd.") from exc
+        dx = float(x) - self.c
+        dy = float(y) - self.f
+        inverse = 1.0 / determinant
+        col = ((self.e * dx) - (self.b * dy)) * inverse
+        row = ((-self.d * dx) + (self.a * dy)) * inverse
         return float(col), float(row)
 
     def to_matrix(self) -> np.ndarray:
@@ -205,6 +205,27 @@ class CableFeature:
             return layer_name
         return self.metadata.get("Type", self.feature_id)
 
+    def native_render_signature(self) -> tuple[object, ...]:
+        """Cheap identity/state signature for native render-cache validation."""
+        points = self.points
+        first_point = points[0] if points else None
+        middle_point = points[len(points) // 2] if len(points) > 2 else None
+        last_point = points[-1] if points else None
+        return (
+            self.feature_id,
+            id(self),
+            id(points),
+            len(points),
+            first_point,
+            middle_point,
+            last_point,
+            self.bounds.min_x,
+            self.bounds.min_y,
+            self.bounds.max_x,
+            self.bounds.max_y,
+            self.color,
+        )
+
 
 @dataclass
 class DxfOverlay:
@@ -221,6 +242,10 @@ class DxfOverlay:
         for feature in self.features[1:]:
             combined = combined.union(feature.bounds)
         return combined
+
+    def native_render_signature(self) -> tuple[tuple[object, ...], ...]:
+        """O(feature-count) signature; avoids re-hashing every DXF point per frame."""
+        return tuple(feature.native_render_signature() for feature in self.features)
 
     def invalidate_native_render_cache(self) -> None:
         """Invalidate native render data after replacing or editing overlay geometry."""
@@ -264,3 +289,7 @@ class GeoTiffLayer:
     @property
     def name(self) -> str:
         return self.path.name
+
+    def invalidate_native_rgba_cache(self) -> None:
+        """Invalidate native RGBA data after mutating or replacing the image."""
+        self.native_rgba_cache = None
