@@ -22,11 +22,12 @@ def _ensure_package_importable() -> None:
 
 def _validate_core_legacy_bytecode() -> None:
     # app.py still wraps legacy Python 3.11 bytecode because the original source
-    # is not present in the repository. Validate the pyc before any app import so
-    # a wrong Python version, truncated file or corrupt payload fails predictably.
-    from SleufBase.legacy_bytecode import validate_legacy_bytecode
+    # is not present in the repository. Resolve the bytecode relative to an
+    # imported SleufBase package module: in a frozen executable the launcher is
+    # extracted at the bundle root while _bytecode lives under SleufBase/.
+    from SleufBase import legacy_bytecode
 
-    validate_legacy_bytecode("app", __file__)
+    legacy_bytecode.validate_legacy_bytecode("app", legacy_bytecode.__file__)
 
 
 def _install_runtime_patches() -> None:
@@ -53,6 +54,7 @@ def _take_option(args: list[str], name: str) -> str | None:
 
 def main() -> int:
     _ensure_package_importable()
+    args = list(sys.argv[1:])
 
     from SleufBase.professional_runtime import (
         initialize_professional_runtime,
@@ -61,8 +63,11 @@ def main() -> int:
         write_diagnostics,
     )
 
-    initialize_professional_runtime()
-    args = list(sys.argv[1:])
+    # Smoke tests must stay headless. Installing the desktop exception handler
+    # here would turn an import/preflight failure into a modal Windows message
+    # box and make CI wait forever instead of reporting the failing exit code.
+    if "--smoke-test" not in args:
+        initialize_professional_runtime()
 
     if "--diagnostics" in args:
         write_diagnostics()
