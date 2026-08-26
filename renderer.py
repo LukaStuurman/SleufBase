@@ -18,7 +18,7 @@ _NATIVE_TIFF_MIN_DEST_PIXELS = 900_000
 
 @dataclass(frozen=True)
 class _NativeDxfRenderCache:
-    key: tuple[int, int, str, str]
+    key: tuple[tuple[object, ...], ...]
     points_xy: np.ndarray
     feature_offsets: np.ndarray
     feature_bounds: np.ndarray
@@ -28,7 +28,7 @@ class _NativeDxfRenderCache:
 
 @dataclass(frozen=True)
 class _NativeTiffImageCache:
-    key: tuple[int, int, int]
+    key: tuple[int, int, int, str]
     rgba: np.ndarray
 
 
@@ -143,14 +143,13 @@ class MapRenderer:
         return Image.fromarray(rgba, mode="RGBA")
 
     def _native_dxf_render_cache(self, overlay: DxfOverlay) -> _NativeDxfRenderCache | None:
-        feature_count = len(overlay.features)
-        point_count = sum(len(feature.points) for feature in overlay.features)
-        first_id = overlay.features[0].feature_id if overlay.features else ""
-        last_id = overlay.features[-1].feature_id if overlay.features else ""
-        key = (feature_count, point_count, first_id, last_id)
+        key = overlay.native_render_signature()
         cache = overlay.native_render_cache
         if isinstance(cache, _NativeDxfRenderCache) and cache.key == key:
             return cache
+
+        feature_count = len(overlay.features)
+        point_count = sum(len(feature.points) for feature in overlay.features)
         if feature_count <= 0 or point_count <= 0 or point_count > np.iinfo(np.int32).max:
             return None
 
@@ -246,14 +245,22 @@ class MapRenderer:
 
     def _native_tiff_rgba_cache(self, layer: GeoTiffLayer) -> np.ndarray | None:
         image = layer.image
-        key = (id(image), int(image.width), int(image.height))
+        key = (id(image), int(image.width), int(image.height), str(image.mode))
         cache = layer.native_rgba_cache
         if isinstance(cache, _NativeTiffImageCache) and cache.key == key:
             return cache.rgba
+        converted: Image.Image | None = None
         try:
-            rgba = np.ascontiguousarray(np.array(image.convert("RGBA"), dtype=np.uint8, copy=True))
+            source = image
+            if image.mode != "RGBA":
+                converted = image.convert("RGBA")
+                source = converted
+            rgba = np.ascontiguousarray(np.array(source, dtype=np.uint8, copy=True))
         except Exception:
             return None
+        finally:
+            if converted is not None:
+                converted.close()
         cache = _NativeTiffImageCache(key=key, rgba=rgba)
         layer.native_rgba_cache = cache
         return cache.rgba
@@ -306,19 +313,28 @@ class MapRenderer:
         if right <= left or lower <= upper:
             return
         crop = layer.image.crop((left, upper, right, lower)).convert("RGBA")
-        if layer.opacity < 1.0:
-            alpha = crop.getchannel("A").point(lambda value: int(value * layer.opacity))
-            crop.putalpha(alpha)
-        screen_top_left = transform.world_to_screen(visible_bounds.min_x, visible_bounds.max_y)
-        screen_bottom_right = transform.world_to_screen(visible_bounds.max_x, visible_bounds.min_y)
-        dest_left = int(np.floor(min(screen_top_left[0], screen_bottom_right[0])))
-        dest_top = int(np.floor(min(screen_top_left[1], screen_bottom_right[1])))
-        dest_right = int(np.ceil(max(screen_top_left[0], screen_bottom_right[0])))
-        dest_bottom = int(np.ceil(max(screen_top_left[1], screen_bottom_right[1])))
-        if dest_right <= dest_left or dest_bottom <= dest_top:
-            return
-        resized = crop.resize((dest_right - dest_left, dest_bottom - dest_top), Image.Resampling.BILINEAR)
-        canvas.alpha_composite(resized, (dest_left, dest_top))
+        resized: Image.Image | None = None
+        try:
+            if layer.opacity < 1.0:
+                alpha = crop.getchannel("A").point(lambda value: int(value * layer.opacity))
+                try:
+                    crop.putalpha(alpha)
+                finally:
+                    alpha.close()
+            screen_top_left = transform.world_to_screen(visible_bounds.min_x, visible_bounds.max_y)
+            screen_bottom_right = transform.world_to_screen(visible_bounds.max_x, visible_bounds.min_y)
+            dest_left = int(np.floor(min(screen_top_left[0], screen_bottom_right[0])))
+            dest_top = int(np.floor(min(screen_top_left[1], screen_bottom_right[1])))
+            dest_right = int(np.ceil(max(screen_top_left[0], screen_bottom_right[0])))
+            dest_bottom = int(np.ceil(max(screen_top_left[1], screen_bottom_right[1])))
+            if dest_right <= dest_left or dest_bottom <= dest_top:
+                return
+            resized = crop.resize((dest_right - dest_left, dest_bottom - dest_top), Image.Resampling.BILINEAR)
+            canvas.alpha_composite(resized, (dest_left, dest_top))
+        finally:
+            if resized is not None:
+                resized.close()
+            crop.close()
 
     def _paint_affine_tiff(self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer) -> None:
         pixel_to_world = layer.transform.to_matrix()
@@ -334,17 +350,26 @@ class MapRenderer:
             float(screen_to_pixel[1, 2]),
         )
         source = layer.image.convert("RGBA")
-        if layer.opacity < 1.0:
-            alpha = source.getchannel("A").point(lambda value: int(value * layer.opacity))
-            source.putalpha(alpha)
-        warped = source.transform(
-            canvas.size,
-            Image.Transform.AFFINE,
-            coefficients,
-            resample=Image.Resampling.BILINEAR,
-            fillcolor=(0, 0, 0, 0),
-        )
-        canvas.alpha_composite(warped)
+        warped: Image.Image | None = None
+        try:
+            if layer.opacity < 1.0:
+                alpha = source.getchannel("A").point(lambda value: int(value * layer.opacity))
+                try:
+                    source.putalpha(alpha)
+                finally:
+                    alpha.close()
+            warped = source.transform(
+                canvas.size,
+                Image.Transform.AFFINE,
+                coefficients,
+                resample=Image.Resampling.BILINEAR,
+                fillcolor=(0, 0, 0, 0),
+            )
+            canvas.alpha_composite(warped)
+        finally:
+            if warped is not None:
+                warped.close()
+            source.close()
 
     def _draw_feature(
         self,
@@ -354,7 +379,7 @@ class MapRenderer:
         is_selected: bool,
         is_highlighted: bool,
     ) -> None:
-        screen_points = [transform.world_to_screen(x, y) for x, y in feature.points]
+        screen_points = transform.world_points_to_screen(feature.points)
         if len(screen_points) < 2:
             return
         if is_highlighted:
