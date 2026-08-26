@@ -1,6 +1,5 @@
 # SleufBase Windows dependency lock bootstrap.
 # CI replaces this with the exact package versions from the validated Windows build before v0.3.0 is merged.
---only-binary=:all:
 Pillow>=10.0
 numpy>=1.26,<2.3
 pyproj>=3.6
