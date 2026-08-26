@@ -87,6 +87,12 @@ def main() -> int:
             raise RuntimeError("Native DXF/GeoTIFF renderer ktk_accel.dll is niet geladen")
         if not getattr(KlicViewerApp, "_manual_cross_section_start_patch", False):
             raise RuntimeError("Handmatige-beginpuntpatch is niet geïnstalleerd")
+        if int(getattr(KlicViewerApp, "_sleufbase_start_point_patch_version", 0) or 0) < 2:
+            raise RuntimeError("Verouderde beginpuntpatch in frozen build")
+        if not callable(
+            getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)
+        ):
+            raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
 
         resource_root = _resource_root()
         icon_path = resource_root / "assets" / "sleufbase_icon.ico"
