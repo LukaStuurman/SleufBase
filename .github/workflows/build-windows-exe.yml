@@ -1,0 +1,214 @@
+name: Build SleufBase Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/windows-exe-build
+    paths:
+      - '**.py'
+      - '_bytecode/**'
+      - 'assets/**'
+      - 'native/**'
+      - 'installer/**'
+      - 'SleufBase.spec'
+      - 'SleufBasePortable.spec'
+      - 'windows_version_info.txt'
+      - 'requirements-windows.txt'
+      - 'WINDOWS_DEPLOYMENT.md'
+      - '.github/workflows/build-windows-exe.yml'
+  pull_request:
+    paths:
+      - '**.py'
+      - '_bytecode/**'
+      - 'assets/**'
+      - 'native/**'
+      - 'installer/**'
+      - 'SleufBase.spec'
+      - 'SleufBasePortable.spec'
+      - 'windows_version_info.txt'
+      - 'requirements-windows.txt'
+      - 'WINDOWS_DEPLOYMENT.md'
+      - '.github/workflows/build-windows-exe.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements-windows.txt
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install -r requirements-windows.txt
+
+      - name: Prepare Techbase Windows branding
+        shell: pwsh
+        run: |
+          python prepare_windows_assets.py
+          if (-not (Test-Path 'assets/techbase-logo.png')) {
+            throw 'assets/techbase-logo.png ontbreekt na branding-preparatie'
+          }
+          if (-not (Test-Path 'assets/sleufbase_icon.ico')) {
+            throw 'assets/sleufbase_icon.ico ontbreekt na branding-preparatie'
+          }
+          if (-not (Test-Path 'assets/cadastral_template.dxf')) {
+            throw 'assets/cadastral_template.dxf ontbreekt'
+          }
+          Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico', 'assets/cadastral_template.dxf' | Format-Table Name,Length
+
+      - name: Build fast professional edition
+        shell: pwsh
+        run: python -m PyInstaller --clean --noconfirm SleufBase.spec
+
+      - name: Build portable edition
+        shell: pwsh
+        run: python -m PyInstaller --clean --noconfirm SleufBasePortable.spec
+
+      - name: Verify builds and benchmark startup
+        shell: pwsh
+        run: |
+          $fastExe = 'dist/SleufBase/SleufBase.exe'
+          $portableExe = 'dist/SleufBase-Portable.exe'
+          if (-not (Test-Path $fastExe)) { throw "$fastExe ontbreekt" }
+          if (-not (Test-Path $portableExe)) { throw "$portableExe ontbreekt" }
+
+          function Invoke-SmokeTest([string]$Path) {
+            $watch = [System.Diagnostics.Stopwatch]::StartNew()
+            $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -Wait -PassThru
+            $watch.Stop()
+            if ($process.ExitCode -ne 0) {
+              throw "$Path smoke-test faalde met exitcode $($process.ExitCode)"
+            }
+            return [math]::Round($watch.Elapsed.TotalMilliseconds)
+          }
+
+          [void](Invoke-SmokeTest $fastExe)
+          [void](Invoke-SmokeTest $portableExe)
+          $fastMs = Invoke-SmokeTest $fastExe
+          $portableMs = Invoke-SmokeTest $portableExe
+
+          "Fast onedir smoke-start: $fastMs ms" | Tee-Object -FilePath 'startup-benchmark.txt'
+          "Portable one-file smoke-start: $portableMs ms" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
+          if ($fastMs -lt $portableMs) {
+            $gain = [math]::Round((1 - ($fastMs / $portableMs)) * 100, 1)
+            "Fast build reduction vs portable: $gain%" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
+          }
+
+          Get-Item $fastExe, $portableExe | Format-Table FullName,Length,LastWriteTime
+          Get-Content 'startup-benchmark.txt'
+
+      - name: Package fast edition ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path 'dist/SleufBase/*' -DestinationPath 'dist/SleufBase-Windows-Fast.zip' -Force
+          if (-not (Test-Path 'dist/SleufBase-Windows-Fast.zip')) {
+            throw 'Fast ZIP ontbreekt'
+          }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler niet gevonden: $iscc"
+          }
+
+      - name: Build professional installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          & $iscc 'installer/SleufBase.iss'
+          if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) {
+            throw 'dist-installer/SleufBase-Setup.exe ontbreekt'
+          }
+          Get-Item 'dist-installer/SleufBase-Setup.exe' | Format-List Name,Length,LastWriteTime
+
+      - name: Validate silent installer end to end
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP 'SleufBase-Installed-Test'
+          Remove-Item -Recurse -Force $installDir -ErrorAction SilentlyContinue
+          $dirArg = "/DIR=`"$installDir`""
+          $setup = Start-Process -FilePath 'dist-installer/SleufBase-Setup.exe' -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',$dirArg) -Wait -PassThru
+          if ($setup.ExitCode -ne 0) {
+            throw "SleufBase installer faalde met exitcode $($setup.ExitCode)"
+          }
+
+          $installedExe = Join-Path $installDir 'SleufBase.exe'
+          if (-not (Test-Path $installedExe)) {
+            throw "Geïnstalleerde executable ontbreekt: $installedExe"
+          }
+          $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)"
+          }
+
+          $uninstaller = Join-Path $installDir 'unins000.exe'
+          if (Test-Path $uninstaller) {
+            $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
+            if ($uninstall.ExitCode -ne 0) {
+              throw "SleufBase uninstall-test faalde met exitcode $($uninstall.ExitCode)"
+            }
+          }
+
+      - name: Upload professional Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Windows-v0.2.1
+          path: |
+            dist-installer/SleufBase-Setup.exe
+            dist/SleufBase-Windows-Fast.zip
+            dist/SleufBase-Portable.exe
+            startup-benchmark.txt
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/agent/windows-exe-build'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = 'v0.2.1-windows'
+          $title = 'SleufBase Windows v0.2.1'
+          $notes = @'
+          Bugfix-release voor DXF-sjabloonexport en handmatige beginpunten.
+
+          Nieuw in v0.2.1:
+          - handmatig gekozen beginpunten blijven leidend bij DXF-sjabloonexport en worden niet opnieuw overschreven door de automatische beginpuntbepaling
+          - dwarsprofielen gebruiken het actuele beginpunt uit de TIFF-laagmetadata, ook wanneer een dataset eerder in de cache stond
+          - assets/cadastral_template.dxf wordt verplicht meegebundeld in de installer, snelle ZIP en portable one-file build
+          - de frozen smoke-test controleert zowel de beginpuntpatch als het ingebouwde DXF-sjabloon
+          '@
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag `
+              'dist-installer/SleufBase-Setup.exe#SleufBase-Setup.exe' `
+              'dist/SleufBase-Windows-Fast.zip#SleufBase-Windows-Fast.zip' `
+              'dist/SleufBase-Portable.exe#SleufBase-Portable.exe' `
+              --clobber
+          } else {
+            gh release create $tag `
+              'dist-installer/SleufBase-Setup.exe#SleufBase-Setup.exe' `
+              'dist/SleufBase-Windows-Fast.zip#SleufBase-Windows-Fast.zip' `
+              'dist/SleufBase-Portable.exe#SleufBase-Portable.exe' `
+              --target '${{ github.sha }}' `
+              --title $title `
+              --notes $notes
+          }
