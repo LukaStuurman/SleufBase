@@ -13,9 +13,23 @@ class DxfError(RuntimeError):
 
 
 def _points_bounds(points: list[tuple[float, float]]) -> Bounds:
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
-    return Bounds(min(xs), min(ys), max(xs), max(ys))
+    if not points:
+        raise ValueError("Puntenlijst mag niet leeg zijn.")
+    first_x, first_y = points[0]
+    min_x = max_x = float(first_x)
+    min_y = max_y = float(first_y)
+    for x, y in points[1:]:
+        x = float(x)
+        y = float(y)
+        if x < min_x:
+            min_x = x
+        elif x > max_x:
+            max_x = x
+        if y < min_y:
+            min_y = y
+        elif y > max_y:
+            max_y = y
+    return Bounds(min_x, min_y, max_x, max_y)
 
 
 def _resolve_entity_color(entity, document) -> tuple[int, int, int]:
@@ -131,4 +145,3 @@ def load_dxf(path: str | Path) -> DxfOverlay:
                 )
             )
     return DxfOverlay(path=file_path, features=features)
-

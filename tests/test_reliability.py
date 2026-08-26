@@ -25,8 +25,9 @@ from SleufBase.bgt_vector_tiles import BgtVectorTileClient
 from SleufBase.cadastral_wfs import CadastralWfsClient, CadastralWfsError
 from SleufBase.geotiff import GeoTiffError, MAX_GEOTIFF_PIXELS, load_geotiff
 from SleufBase.location_search import PdokLocationClient
-from SleufBase.models import Bounds, GeoTransform, ViewportTransform
+from SleufBase.models import Bounds, CableFeature, DxfOverlay, GeoTransform, ViewportTransform
 from SleufBase.pdok import PdokWmsClient
+from SleufBase.renderer import MapRenderer
 from SleufBase.road_centerline import RoadCenterlineClient, RoadCenterlineError
 from SleufBase.web_tiles import WebMercatorTileClient
 
@@ -69,6 +70,89 @@ class TransformReliabilityTests(unittest.TestCase):
         transform = GeoTransform(a=1.0, b=2.0, c=0.0, d=2.0, e=4.0, f=0.0)
         with self.assertRaisesRegex(ValueError, "singulier"):
             transform.world_to_pixel(10.0, 20.0)
+
+    def test_direct_geotransform_inverse_round_trips_without_numpy_solve(self) -> None:
+        transform = GeoTransform(a=0.5, b=0.12, c=155000.0, d=-0.08, e=-0.5, f=463000.0)
+        col, row = 347.25, 918.5
+        x, y = transform.pixel_to_world(col, row)
+        with patch("numpy.linalg.solve", side_effect=AssertionError("hot path must not call solve")):
+            actual_col, actual_row = transform.world_to_pixel(x, y)
+        self.assertAlmostEqual(actual_col, col, places=9)
+        self.assertAlmostEqual(actual_row, row, places=9)
+
+    def test_batch_world_to_screen_matches_scalar_conversion(self) -> None:
+        transform = ViewportTransform(Bounds(100.0, 200.0, 300.0, 500.0), 1200, 900)
+        points = [(100.0, 200.0), (140.5, 260.25), (225.0, 410.0), (300.0, 500.0)]
+        expected = [transform.world_to_screen(x, y) for x, y in points]
+        actual = transform.world_points_to_screen(points)
+        for actual_point, expected_point in zip(actual, expected, strict=True):
+            self.assertAlmostEqual(actual_point[0], expected_point[0], places=12)
+            self.assertAlmostEqual(actual_point[1], expected_point[1], places=12)
+
+
+class RenderCacheReliabilityTests(unittest.TestCase):
+    @staticmethod
+    def _feature(feature_id: str, offset: float, color: tuple[int, int, int]) -> CableFeature:
+        points = [(offset, 0.0), (offset + 1.0, 1.0), (offset + 2.0, 0.0)]
+        return CableFeature(
+            feature_id=feature_id,
+            source_path=Path("test.dxf"),
+            points=points,
+            bounds=Bounds(offset, 0.0, offset + 2.0, 1.0),
+            color=color,
+        )
+
+    def test_native_dxf_cache_reuses_unchanged_overlay(self) -> None:
+        overlay = DxfOverlay(
+            path=Path("test.dxf"),
+            features=[
+                self._feature("first", 0.0, (255, 0, 0)),
+                self._feature("middle", 10.0, (0, 255, 0)),
+                self._feature("last", 20.0, (0, 0, 255)),
+            ],
+        )
+        renderer = MapRenderer()
+        first_cache = renderer._native_dxf_render_cache(overlay)
+        second_cache = renderer._native_dxf_render_cache(overlay)
+        self.assertIsNotNone(first_cache)
+        self.assertIs(first_cache, second_cache)
+
+    def test_native_dxf_cache_invalidates_middle_feature_color_change(self) -> None:
+        overlay = DxfOverlay(
+            path=Path("test.dxf"),
+            features=[
+                self._feature("first", 0.0, (255, 0, 0)),
+                self._feature("middle", 10.0, (0, 255, 0)),
+                self._feature("last", 20.0, (0, 0, 255)),
+            ],
+        )
+        renderer = MapRenderer()
+        first_cache = renderer._native_dxf_render_cache(overlay)
+        overlay.features[1].color = (12, 34, 56)
+        second_cache = renderer._native_dxf_render_cache(overlay)
+        self.assertIsNotNone(first_cache)
+        self.assertIsNotNone(second_cache)
+        self.assertIsNot(first_cache, second_cache)
+        self.assertEqual(tuple(second_cache.feature_colors[1]), (12, 34, 56))  # type: ignore[union-attr]
+
+    def test_native_dxf_cache_invalidates_middle_point_in_place(self) -> None:
+        overlay = DxfOverlay(
+            path=Path("test.dxf"),
+            features=[
+                self._feature("first", 0.0, (255, 0, 0)),
+                self._feature("middle", 10.0, (0, 255, 0)),
+                self._feature("last", 20.0, (0, 0, 255)),
+            ],
+        )
+        renderer = MapRenderer()
+        first_cache = renderer._native_dxf_render_cache(overlay)
+        overlay.features[1].points[1] = (11.0, 2.0)
+        overlay.features[1].bounds = Bounds(10.0, 0.0, 12.0, 2.0)
+        second_cache = renderer._native_dxf_render_cache(overlay)
+        self.assertIsNotNone(first_cache)
+        self.assertIsNotNone(second_cache)
+        self.assertIsNot(first_cache, second_cache)
+        self.assertEqual(tuple(second_cache.points_xy[4]), (11.0, 2.0))  # type: ignore[union-attr]
 
 
 class GeoTiffReliabilityTests(unittest.TestCase):
