@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 import ezdxf
+from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_PARENT = REPO_ROOT.parent
@@ -142,6 +143,71 @@ class TemplateReversePatchTests(unittest.TestCase):
             imported_lines = list(reverse_block.query('LINE'))
             self.assertEqual(len(imported_lines), 1)
             self.assertEqual(imported_lines[0].dxf.layer, 'KABELS')
+
+    def test_reverse_image_dependency_is_preserved_and_relinked(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            normal_path = directory / 'proefsleuven.dxf'
+            reverse_path = directory / '.proefsleuven.sleufbase-reverse-source.dxf'
+            source_png = directory / 'reverse-kaart.png'
+            Image.new('RGB', (8, 6), 'white').save(source_png)
+
+            normal_document = ezdxf.new('R2010')
+            normal_modelspace = normal_document.modelspace()
+            normal_line = normal_modelspace.add_line((0, 0), (1, 0))
+            reverse_patch._move_entities_to_variant_container(
+                normal_document,
+                normal_modelspace,
+                [normal_line],
+                label='PS2',
+                slot_index=2,
+                mode=reverse_patch.NORMAL_MODE,
+            )
+            normal_document.saveas(normal_path)
+
+            reverse_document = ezdxf.new('R2010')
+            reverse_modelspace = reverse_document.modelspace()
+            image_def = reverse_document.add_image_def(
+                filename=str(source_png.resolve()),
+                size_in_pixel=(8, 6),
+            )
+            reverse_image = reverse_modelspace.add_image(
+                insert=(10, 20),
+                size_in_units=(8, 6),
+                image_def=image_def,
+            )
+            reverse_patch._move_entities_to_variant_container(
+                reverse_document,
+                reverse_modelspace,
+                [reverse_image],
+                label='PS2',
+                slot_index=2,
+                mode=reverse_patch.REVERSE_MODE,
+            )
+            reverse_document.saveas(reverse_path)
+
+            self.assertEqual(
+                reverse_patch._merge_reverse_variant_document(normal_path, reverse_path),
+                1,
+            )
+
+            merged = ezdxf.readfile(normal_path)
+            reverse_layer = reverse_patch.variant_layer_name(
+                'PS2', 2, reverse_patch.REVERSE_MODE
+            )
+            reverse_insert = next(
+                entity
+                for entity in merged.modelspace()
+                if entity.dxftype() == 'INSERT' and entity.dxf.layer == reverse_layer
+            )
+            reverse_block = merged.blocks.get(reverse_insert.dxf.name)
+            images = list(reverse_block.query('IMAGE'))
+            self.assertEqual(len(images), 1)
+            linked_file = Path(images[0].image_def.dxf.filename)
+            self.assertTrue(linked_file.exists())
+            self.assertEqual(linked_file.parent, directory / 'proefsleuven_reverse_assets')
+            self.assertEqual(linked_file.name, source_png.name)
+            self.assertTrue(merged.layers.get(reverse_layer).is_off())
 
 
 if __name__ == '__main__':
