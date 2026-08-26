@@ -19,12 +19,15 @@ if str(PACKAGE_PARENT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_PARENT))
 
 from SleufBase.ahn import PdokAhnClient
+from SleufBase.bgt_roadpart import BgtRoadPartClient, BgtRoadPartError
+from SleufBase.bgt_terrain_boundary import BgtTerrainBoundaryClient, BgtTerrainBoundaryError
 from SleufBase.bgt_vector_tiles import BgtVectorTileClient
 from SleufBase.cadastral_wfs import CadastralWfsClient, CadastralWfsError
 from SleufBase.geotiff import GeoTiffError, MAX_GEOTIFF_PIXELS, load_geotiff
 from SleufBase.location_search import PdokLocationClient
 from SleufBase.models import Bounds, GeoTransform, ViewportTransform
 from SleufBase.pdok import PdokWmsClient
+from SleufBase.road_centerline import RoadCenterlineClient, RoadCenterlineError
 from SleufBase.web_tiles import WebMercatorTileClient
 
 
@@ -190,6 +193,28 @@ class NetworkConcurrencyReliabilityTests(unittest.TestCase):
                 for cached in client._cache.values():
                     cached.close()
                 client._cache.clear()
+
+
+class OgcPaginationReliabilityTests(unittest.TestCase):
+    def test_repeated_next_link_is_detected_for_all_ogc_clients(self) -> None:
+        cases = [
+            (BgtRoadPartClient(retries=1), BgtRoadPartError, "BGT wegdelen"),
+            (BgtTerrainBoundaryClient(retries=1), BgtTerrainBoundaryError, "BGT terreinserver"),
+            (RoadCenterlineClient(retries=1), RoadCenterlineError, "Wegdeel-hartlijnen"),
+        ]
+        bounds = Bounds(100000.0, 400000.0, 100010.0, 400010.0)
+        for client, error_type, expected_text in cases:
+            with self.subTest(client=type(client).__name__):
+                first_url = f"{client.BASE_URL}/collections/{client.COLLECTION_ID}/items"
+                client._get_json = Mock(  # type: ignore[method-assign]
+                    return_value={
+                        "features": [],
+                        "links": [{"rel": "next", "href": first_url}],
+                    }
+                )
+                with self.assertRaisesRegex(error_type, expected_text):
+                    client.fetch_paths(bounds)
+                self.assertEqual(client._get_json.call_count, 1)  # type: ignore[attr-defined]
 
 
 if __name__ == "__main__":
