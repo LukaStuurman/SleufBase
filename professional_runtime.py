@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+from datetime import datetime, timezone
 import json
 import logging
 import os
@@ -9,6 +10,7 @@ import sys
 import threading
 import time
 import traceback
+import uuid
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
@@ -110,13 +112,30 @@ def install_windows_integration() -> None:
             _LOGGER.debug("DPI awareness kon niet worden ingesteld", exc_info=True)
 
 
+def _atomic_write_text(path: Path, content: str) -> None:
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    try:
+        temp_path.write_text(content, encoding="utf-8")
+        os.replace(temp_path, path)
+    finally:
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
 def _write_crash_report(exc_type: type[BaseException], exc: BaseException, tb: Any) -> Path:
     configure_environment()
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    path = diagnostics_dir() / f"crash-{stamp}.txt"
+    now = datetime.now(timezone.utc)
+    stamp = now.strftime("%Y%m%d-%H%M%S-%f")
+    unique = uuid.uuid4().hex[:8]
+    path = diagnostics_dir() / f"crash-{stamp}-p{os.getpid()}-{unique}.txt"
     lines = [
         f"Product: {PRODUCT_NAME}",
         f"Versie: {__version__}",
+        f"Tijd UTC: {now.isoformat()}",
+        f"Proces-ID: {os.getpid()}",
+        f"Thread: {threading.current_thread().name}",
         f"Platform: {platform.platform()}",
         f"Python: {platform.python_version()}",
         f"Frozen: {bool(getattr(sys, 'frozen', False))}",
@@ -124,7 +143,7 @@ def _write_crash_report(exc_type: type[BaseException], exc: BaseException, tb: A
         "Traceback:",
         "".join(traceback.format_exception(exc_type, exc, tb)),
     ]
-    path.write_text("\n".join(lines), encoding="utf-8")
+    _atomic_write_text(path, "\n".join(lines))
     return path
 
 
@@ -188,7 +207,7 @@ def write_diagnostics() -> Path:
         "log_path": str(_LOG_PATH or logs_dir() / "sleufbase.log"),
     }
     path = diagnostics_dir() / "system-info.json"
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    _atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False))
     return path
 
 

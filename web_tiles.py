@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import math
 import os
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Callable
 
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pyproj import Transformer
 
 from .models import Bounds
@@ -46,12 +47,12 @@ class WebMercatorTileClient:
         self.retries = max(1, int(retries))
         self.transformer = Transformer.from_crs("EPSG:28992", "EPSG:3857", always_xy=True)
         self._thread_local = threading.local()
-        self.session = self._create_session()
         local_appdata = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
         self.cache_dir = local_appdata / "SleufBase" / "cache" / cache_namespace
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.min_cache_ttl = timedelta(days=min_cache_ttl_days)
-        self._memory_cache: dict[tuple[int, int, int], Image.Image] = {}
+        self._memory_cache: OrderedDict[tuple[int, int, int], Image.Image] = OrderedDict()
+        self._memory_cache_lock = threading.RLock()
 
     def build_tile_url(self, zoom: int, x: int, y: int) -> str:
         raise NotImplementedError
@@ -230,19 +231,39 @@ class WebMercatorTileClient:
 
     def _load_cached_tile(self, zoom: int, x: int, y: int, *, allow_stale: bool) -> Image.Image | None:
         cache_key = (zoom, x, y)
-        cached_image = self._memory_cache.get(cache_key)
-        if cached_image is not None:
-            self._memory_cache.pop(cache_key, None)
-            self._memory_cache[cache_key] = cached_image
-            return cached_image.copy()
+        with self._memory_cache_lock:
+            cached_image = self._memory_cache.get(cache_key)
+            if cached_image is not None:
+                self._memory_cache.move_to_end(cache_key)
+                return cached_image.copy()
+
         tile_path = self._tile_path(zoom, x, y)
-        if not tile_path.exists():
+        try:
+            stat = tile_path.stat()
+        except FileNotFoundError:
             return None
-        age = datetime.now(timezone.utc) - datetime.fromtimestamp(tile_path.stat().st_mtime, tz=timezone.utc)
+        except OSError:
+            return None
+
+        age = datetime.now(timezone.utc) - datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
         if not allow_stale and age > self.min_cache_ttl:
             return None
-        with Image.open(tile_path) as image:
-            tile = image.convert("RGBA")
+        try:
+            with Image.open(tile_path) as image:
+                tile = image.convert("RGBA")
+                tile.load()
+        except (OSError, UnidentifiedImageError, ValueError):
+            try:
+                tile_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            return None
+        if tile.size != (256, 256):
+            try:
+                tile_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            return None
         self._remember_tile(cache_key, tile)
         return tile.copy()
 
@@ -271,6 +292,19 @@ class WebMercatorTileClient:
             return cropped.resize((256, 256), Image.Resampling.BILINEAR)
         return None
 
+    def _write_tile_atomically(self, tile_path: Path, tile: Image.Image) -> None:
+        temp_path = tile_path.with_name(
+            f".{tile_path.name}.{os.getpid()}.{threading.get_ident()}.{time.time_ns()}.tmp"
+        )
+        try:
+            tile.save(temp_path, format="PNG")
+            os.replace(temp_path, tile_path)
+        finally:
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+
     def _fetch_tile(self, zoom: int, x: int, y: int) -> Image.Image:
         cache_key = (zoom, x, y)
         cached_tile = self._load_cached_tile(zoom, x, y, allow_stale=False)
@@ -285,13 +319,19 @@ class WebMercatorTileClient:
                 response = self._get_session().get(url, timeout=self.timeout)
                 response.raise_for_status()
                 content_type = response.headers.get("content-type", "")
-                if "image" not in content_type:
+                if "image" not in content_type.casefold():
                     raise TileClientError(f"Geen afbeelding ontvangen voor tegel {zoom}/{x}/{y}.")
-                tile = Image.open(BytesIO(response.content)).convert("RGBA")
-                tile.save(tile_path)
+                with Image.open(BytesIO(response.content)) as source:
+                    tile = source.convert("RGBA")
+                    tile.load()
+                if tile.size != (256, 256):
+                    raise TileClientError(
+                        f"Ongeldige tegelgrootte {tile.size} voor {zoom}/{x}/{y}; 256x256 verwacht."
+                    )
+                self._write_tile_atomically(tile_path, tile)
                 self._remember_tile(cache_key, tile)
                 return tile.copy()
-            except Exception as exc:
+            except (requests.RequestException, OSError, UnidentifiedImageError, ValueError, TileClientError) as exc:
                 last_error = exc
                 if attempt < self.retries:
                     time.sleep(0.4 * attempt)
@@ -301,8 +341,8 @@ class WebMercatorTileClient:
         raise TileClientError(f"Tegel {zoom}/{x}/{y} kon niet worden geladen: {last_error}") from last_error
 
     def _remember_tile(self, cache_key: tuple[int, int, int], tile: Image.Image) -> None:
-        self._memory_cache.pop(cache_key, None)
-        self._memory_cache[cache_key] = tile.copy()
-        while len(self._memory_cache) > self.memory_cache_limit:
-            first_key = next(iter(self._memory_cache))
-            self._memory_cache.pop(first_key, None)
+        with self._memory_cache_lock:
+            self._memory_cache[cache_key] = tile.copy()
+            self._memory_cache.move_to_end(cache_key)
+            while len(self._memory_cache) > self.memory_cache_limit:
+                self._memory_cache.popitem(last=False)

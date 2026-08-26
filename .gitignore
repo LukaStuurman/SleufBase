@@ -1,0 +1,36 @@
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging/build output
+build/
+dist/
+dist-installer/
+*.spec.bak
+
+# Runtime output
+*.log
+logs/
+diagnostics/
+startup-benchmark.txt
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# SleufBase intentionally keeps _bytecode/ for compatibility until the
+# bytecode-to-source migration is complete.

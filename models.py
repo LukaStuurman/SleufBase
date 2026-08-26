@@ -98,9 +98,15 @@ class GeoTransform:
         return x, y
 
     def world_to_pixel(self, x: float, y: float) -> tuple[float, float]:
+        determinant = (self.a * self.e) - (self.b * self.d)
+        if abs(determinant) <= 1e-15:
+            raise ValueError("GeoTIFF-transformatie is singulier en kan niet worden geïnverteerd.")
         matrix = np.array([[self.a, self.b], [self.d, self.e]], dtype=float)
         offset = np.array([x - self.c, y - self.f], dtype=float)
-        col, row = np.linalg.solve(matrix, offset)
+        try:
+            col, row = np.linalg.solve(matrix, offset)
+        except np.linalg.LinAlgError as exc:
+            raise ValueError("GeoTIFF-transformatie kon niet worden geïnverteerd.") from exc
         return float(col), float(row)
 
     def to_matrix(self) -> np.ndarray:
@@ -123,23 +129,31 @@ class ViewportTransform:
     width_px: int
     height_px: int
 
+    def _validate(self) -> None:
+        if self.width_px <= 0 or self.height_px <= 0:
+            raise ValueError("Viewport-afmetingen moeten groter dan nul zijn.")
+        if self.bounds.width <= 0 or self.bounds.height <= 0:
+            raise ValueError("Viewport-grenzen moeten een positieve breedte en hoogte hebben.")
+
     @property
     def meters_per_pixel(self) -> float:
-        if self.width_px <= 0:
-            return 1.0
+        self._validate()
         return self.bounds.width / self.width_px
 
     def world_to_screen(self, x: float, y: float) -> tuple[float, float]:
+        self._validate()
         screen_x = ((x - self.bounds.min_x) / self.bounds.width) * self.width_px
         screen_y = self.height_px - ((y - self.bounds.min_y) / self.bounds.height) * self.height_px
         return screen_x, screen_y
 
     def screen_to_world(self, screen_x: float, screen_y: float) -> tuple[float, float]:
+        self._validate()
         x = self.bounds.min_x + (screen_x / self.width_px) * self.bounds.width
         y = self.bounds.min_y + ((self.height_px - screen_y) / self.height_px) * self.bounds.height
         return x, y
 
     def world_to_screen_matrix(self) -> np.ndarray:
+        self._validate()
         scale_x = self.width_px / self.bounds.width
         scale_y = self.height_px / self.bounds.height
         return np.array(
@@ -207,6 +221,10 @@ class DxfOverlay:
         for feature in self.features[1:]:
             combined = combined.union(feature.bounds)
         return combined
+
+    def invalidate_native_render_cache(self) -> None:
+        """Invalidate native render data after replacing or editing overlay geometry."""
+        self.native_render_cache = None
 
 
 @dataclass
