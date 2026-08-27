@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.1'
+  SLEUFBASE_RELEASE_VERSION: '0.3.2'
 
 permissions:
   contents: write
@@ -140,7 +140,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.1
+          name: SleufBase-Windows-v0.3.2
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -159,17 +159,15 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.1
+          SleufBase Windows v0.3.2
 
           Belangrijk:
-          - automatische projectback-ups standaard elke 10 minuten
-          - maximaal 20 automatische back-ups; de oudste wordt automatisch verwijderd
-          - willekeurige back-upbestandsnamen en atomisch opslaan
-          - instellingen voor aan/uit, interval en maximumaantal, inclusief knop naar de back-upmap
-          - handmatige beginpunten blijven altijd leidend boven automatische beginpunten
-          - proefsleuven exporteren Normaal + Reverse in hetzelfde vak met AutoCAD Dynamic Visibility-property `Versie`
-          - `Normaal` is standaard zichtbaar en `Reverse` start verborgen
-          - Windows runtime bundelt tkinterdnd2/TkDnD expliciet; crash door ontbrekende tkinterdnd2 is opgelost
+          - instellingenvenster duidelijker en compacter georganiseerd
+          - kortere checkboxlabels met kleinere, rustigere uitlegteksten
+          - uniforme sectiestyling, spacing en primaire/secundaire knoppen
+          - runtime-toegevoegde BGT- en KickTheMap-opties volgen dezelfde instellingenstijl
+          - release-integriteitstest is versie-onafhankelijk gemaakt zodat versiebumpen de quality gate niet onterecht breekt
+          - bestaande instellingenlogica en opslaggedrag blijven ongewijzigd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
