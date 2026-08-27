@@ -80,7 +80,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout)
-        self.assertIn("0.3.0", result.stdout)
+        self.assertIn("Release-integriteit OK: SleufBase ", result.stdout)
 
     def test_legacy_wrappers_do_not_duplicate_marshal_loader(self) -> None:
         forbidden_loader_token = "marshal" + ".loads"
