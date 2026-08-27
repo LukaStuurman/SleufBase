@@ -11,12 +11,33 @@ if str(PACKAGE_PARENT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_PARENT))
 
 
+_EXCLUDED_HIDDEN_PREFIXES = (
+    "Crypto.SelfTest",
+    "shapely.conftest",
+    "shapely.tests",
+    "tkinter.test",
+    "ezdxf.addons.browser",
+    "ezdxf.tools.test",
+)
+
+
 def _collect(package: str):
     try:
         datas, binaries, hiddenimports = collect_all(package)
         return datas, binaries, hiddenimports
     except Exception:
         return [], [], []
+
+
+def _production_hiddenimports(imports):
+    return [
+        name
+        for name in imports
+        if not any(
+            name == prefix or name.startswith(prefix + ".")
+            for prefix in _EXCLUDED_HIDDEN_PREFIXES
+        )
+    ]
 
 
 datas = []
@@ -75,9 +96,13 @@ hiddenimports += [
     "Crypto.Cipher",
     "Crypto.Cipher.AES",
 ]
+hiddenimports = _production_hiddenimports(hiddenimports)
 
 icon = assets_dir / "sleufbase_icon.ico"
 version_info = ROOT / "windows_version_info.txt"
+runtime_probe = ROOT / "pyi_runtime_probe.py"
+if not runtime_probe.exists():
+    raise FileNotFoundError(f"PyInstaller runtime-probe ontbreekt: {runtime_probe}")
 
 a = Analysis(
     [str(ROOT / "sleufbase_launcher.py")],
@@ -87,8 +112,8 @@ a = Analysis(
     hiddenimports=sorted(set(hiddenimports)),
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
+    runtime_hooks=[str(runtime_probe)],
+    excludes=list(_EXCLUDED_HIDDEN_PREFIXES),
     noarchive=False,
     optimize=1,
 )
