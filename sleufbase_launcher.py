@@ -33,16 +33,10 @@ def _smoke_trace(stage: str) -> None:
             handle.write(f"{stage}\n")
             handle.flush()
     except Exception:
-        # Diagnostics may never be allowed to turn a successful smoke test into
-        # a product failure.
         pass
 
 
 def _validate_core_legacy_bytecode() -> None:
-    # app.py still wraps legacy Python 3.11 bytecode because the original source
-    # is not present in the repository. Resolve the bytecode relative to an
-    # imported SleufBase package module: in a frozen executable the launcher is
-    # extracted at the bundle root while _bytecode lives under SleufBase/.
     from SleufBase import legacy_bytecode
 
     legacy_bytecode.validate_legacy_bytecode("app", legacy_bytecode.__file__)
@@ -50,6 +44,7 @@ def _validate_core_legacy_bytecode() -> None:
 
 def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
+    from SleufBase.autosave_backup_patch import install_autosave_backup_patch
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
     from SleufBase.start_point_patch import install_manual_start_point_patch
     from SleufBase.template_dynamic_visibility_patch import (
@@ -61,6 +56,7 @@ def _install_runtime_patches() -> None:
     install_manual_start_point_patch()
     install_template_reverse_export_patch()
     install_template_dynamic_visibility_patch()
+    install_autosave_backup_patch()
 
 
 def _take_option(args: list[str], name: str) -> str | None:
@@ -85,6 +81,7 @@ def _run_smoke_test() -> None:
     _smoke_trace("runtime-patches:ok")
 
     from SleufBase.app import KlicViewerApp
+    from SleufBase.autosave_backup_patch import AutosaveSettings
     from SleufBase.cadastral_export import CadastralDxfExporter
 
     _smoke_trace("app-import:ok")
@@ -99,7 +96,6 @@ def _run_smoke_test() -> None:
 
     _smoke_trace("streetsmart-imports:ok")
 
-    # Import pywebview only; do not initialize its GUI backend in headless CI.
     import webview
 
     _smoke_trace("webview-import:ok")
@@ -122,6 +118,15 @@ def _run_smoke_test() -> None:
         raise RuntimeError("Verouderde beginpuntpatch in frozen build")
     if not callable(getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)):
         raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
+    if int(getattr(KlicViewerApp, "_sleufbase_autosave_patch_version", 0) or 0) < 1:
+        raise RuntimeError("Automatische back-uppatch ontbreekt in frozen build")
+    autosave_defaults = AutosaveSettings()
+    if (
+        not autosave_defaults.enabled
+        or autosave_defaults.interval_minutes != 10
+        or autosave_defaults.max_backups != 20
+    ):
+        raise RuntimeError("Automatische back-upstandaarden zijn ongeldig")
     if not getattr(CadastralDxfExporter, "_sleufbase_reverse_variant_export_patch", False):
         raise RuntimeError("Normaal/reverse proefsleuf-exportpatch is niet geïnstalleerd")
     if not bool(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_VARIANTS_DEFAULT", False)):
@@ -150,18 +155,12 @@ def _run_smoke_test() -> None:
     _smoke_trace("assets:ok")
     _smoke_trace("smoke:ok")
 
-    # Frozen GUI/runtime libraries may own non-daemon threads. Smoke mode is a
-    # process-scoped assertion mode, so exit without running unrelated GUI
-    # shutdown hooks after every assertion has succeeded.
     os._exit(0)
 
 
 def main() -> int:
     args = list(sys.argv[1:])
 
-    # Keep smoke mode completely outside professional_runtime/Tk initialization.
-    # This is intentionally the first executable mode so CI can validate frozen
-    # imports even if the desktop runtime has a startup regression.
     if "--smoke-test" in args:
         _run_smoke_test()
         return 0
