@@ -52,11 +52,15 @@ def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
     from SleufBase.start_point_patch import install_manual_start_point_patch
+    from SleufBase.template_dynamic_visibility_patch import (
+        install_template_dynamic_visibility_patch,
+    )
     from SleufBase.template_reverse_patch import install_template_reverse_export_patch
 
     install_cyclomedia_pdok_fallback()
     install_manual_start_point_patch()
     install_template_reverse_export_patch()
+    install_template_dynamic_visibility_patch()
 
 
 def _take_option(args: list[str], name: str) -> str | None:
@@ -122,6 +126,15 @@ def _run_smoke_test() -> None:
         raise RuntimeError("Normaal/reverse proefsleuf-exportpatch is niet geïnstalleerd")
     if not bool(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_VARIANTS_DEFAULT", False)):
         raise RuntimeError("Reverse proefsleufversie staat niet standaard aan")
+    if not getattr(CadastralDxfExporter, "_sleufbase_dynamic_visibility_patch", False):
+        raise RuntimeError("AutoCAD Dynamic Visibility proefsleufpatch is niet geïnstalleerd")
+    if getattr(CadastralDxfExporter, "SLEUFBASE_DYNAMIC_VISIBILITY_PROPERTY", None) != "Versie":
+        raise RuntimeError("Dynamic Visibility property heet niet 'Versie'")
+    if tuple(getattr(CadastralDxfExporter, "SLEUFBASE_DYNAMIC_VISIBILITY_STATES", ())) != (
+        "Normaal",
+        "Reverse",
+    ):
+        raise RuntimeError("Dynamic Visibility states zijn niet Normaal/Reverse")
     _smoke_trace("runtime-validations:ok")
 
     resource_root = _resource_root()
