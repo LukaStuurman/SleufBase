@@ -21,11 +21,13 @@ _EXCLUDED_HIDDEN_PREFIXES = (
 )
 
 
-def _collect(package: str):
+def _collect(package: str, *, required: bool = False):
     try:
         datas, binaries, hiddenimports = collect_all(package)
         return datas, binaries, hiddenimports
     except Exception:
+        if required:
+            raise
         return [], [], []
 
 
@@ -72,7 +74,10 @@ for package in (
     "botocore",
     "Crypto",
 ):
-    extra_datas, extra_binaries, extra_hidden = _collect(package)
+    extra_datas, extra_binaries, extra_hidden = _collect(
+        package,
+        required=(package == "tkinterdnd2"),
+    )
     datas += extra_datas
     binaries += extra_binaries
     hiddenimports += extra_hidden
@@ -89,6 +94,8 @@ hiddenimports += [
     "tkinter.scrolledtext",
     "tkinter.simpledialog",
     "tkinter.ttk",
+    "tkinterdnd2",
+    "tkinterdnd2.TkinterDnD",
     "mapbox_vector_tile",
     "boto3",
     "botocore",
@@ -110,7 +117,7 @@ a = Analysis(
     binaries=binaries,
     datas=datas,
     hiddenimports=sorted(set(hiddenimports)),
-    hookspath=[],
+    hookspath=[str(ROOT)],
     hooksconfig={},
     runtime_hooks=[str(runtime_probe)],
     excludes=list(_EXCLUDED_HIDDEN_PREFIXES),
