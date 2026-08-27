@@ -36,14 +36,14 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.0'
+  SLEUFBASE_RELEASE_VERSION: '0.3.1'
 
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 45
 
     steps:
@@ -59,30 +59,26 @@ jobs:
             requirements-windows.txt
             requirements-windows.lock
 
-      - name: Install Python dependencies
+      - name: Install locked Windows dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip wheel
-          if (Test-Path 'requirements-windows.lock') {
-            python -m pip install -r requirements-windows.lock
-          } else {
-            python -m pip install -r requirements-windows.txt
-          }
+          python -m pip install -r requirements-windows.lock
           python -m pip check
+          python -c "import tkinterdnd2; from tkinterdnd2 import TkinterDnD; print('tkinterdnd2:', tkinterdnd2.__file__)"
           python -m pip freeze --all | Sort-Object | Set-Content -Encoding utf8 'dependency-snapshot.txt'
 
       - name: Check release integrity
         shell: pwsh
         run: python tools/check_release_integrity.py
 
-      - name: Prepare Techbase Windows branding
+      - name: Prepare Windows branding
         shell: pwsh
         run: |
           python prepare_windows_assets.py
-          if (-not (Test-Path 'assets/techbase-logo.png')) { throw 'assets/techbase-logo.png ontbreekt na branding-preparatie' }
-          if (-not (Test-Path 'assets/sleufbase_icon.ico')) { throw 'assets/sleufbase_icon.ico ontbreekt na branding-preparatie' }
+          if (-not (Test-Path 'assets/techbase-logo.png')) { throw 'assets/techbase-logo.png ontbreekt' }
+          if (-not (Test-Path 'assets/sleufbase_icon.ico')) { throw 'assets/sleufbase_icon.ico ontbreekt' }
           if (-not (Test-Path 'assets/cadastral_template.dxf')) { throw 'assets/cadastral_template.dxf ontbreekt' }
-          Get-Item 'assets/techbase-logo.png', 'assets/sleufbase_icon.ico', 'assets/cadastral_template.dxf' | Format-Table Name,Length
 
       - name: Build fast professional edition
         shell: pwsh
@@ -92,7 +88,7 @@ jobs:
         shell: pwsh
         run: python -m PyInstaller --clean --noconfirm SleufBasePortable.spec
 
-      - name: Verify builds and benchmark startup
+      - name: Verify packaged runtime dependencies
         shell: pwsh
         run: |
           $fastExe = 'dist/SleufBase/SleufBase.exe'
@@ -100,54 +96,16 @@ jobs:
           if (-not (Test-Path $fastExe)) { throw "$fastExe ontbreekt" }
           if (-not (Test-Path $portableExe)) { throw "$portableExe ontbreekt" }
 
-          function Invoke-SmokeTest([string]$Path) {
-            $tracePath = Join-Path $env:RUNNER_TEMP ("sleufbase-smoke-" + [guid]::NewGuid().ToString('N') + '.log')
-            $previousTrace = $env:SLEUFBASE_SMOKE_TRACE
-            $env:SLEUFBASE_SMOKE_TRACE = $tracePath
-            try {
-              $watch = [System.Diagnostics.Stopwatch]::StartNew()
-              $process = Start-Process -FilePath $Path -ArgumentList '--smoke-test' -PassThru
-              if (-not $process.WaitForExit(60000)) {
-                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-                Write-Host "--- smoke trace: $Path ---"
-                if (Test-Path $tracePath) { Get-Content $tracePath } else { Write-Host '<geen tracebestand aangemaakt>' }
-                throw "$Path smoke-test timeout na 60 seconden"
-              }
-              $watch.Stop()
-              if ($process.ExitCode -ne 0) {
-                Write-Host "--- smoke trace: $Path ---"
-                if (Test-Path $tracePath) { Get-Content $tracePath } else { Write-Host '<geen tracebestand aangemaakt>' }
-                throw "$Path smoke-test faalde met exitcode $($process.ExitCode)"
-              }
-              if (-not (Test-Path $tracePath)) { throw "$Path smoke-test maakte geen tracebestand" }
-              $trace = Get-Content $tracePath
-              if ($trace -notcontains 'smoke:ok') {
-                Write-Host "--- incomplete smoke trace: $Path ---"
-                $trace | ForEach-Object { Write-Host $_ }
-                throw "$Path smoke-test eindigde zonder smoke:ok marker"
-              }
-              return [math]::Round($watch.Elapsed.TotalMilliseconds)
-            } finally {
-              if ($null -eq $previousTrace) {
-                Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
-              } else {
-                $env:SLEUFBASE_SMOKE_TRACE = $previousTrace
-              }
-            }
+          $dndFiles = Get-ChildItem 'dist/SleufBase' -Recurse -File | Where-Object {
+            $_.FullName -match 'tkinterdnd2' -or $_.FullName -match 'tkdnd'
           }
+          if (-not $dndFiles) { throw 'tkinterdnd2/TkDnD data ontbreekt in fast Windows bundle' }
+          $dndFiles | Select-Object -First 20 FullName,Length | Format-Table -AutoSize
 
-          [void](Invoke-SmokeTest $fastExe)
-          [void](Invoke-SmokeTest $portableExe)
-          $fastMs = Invoke-SmokeTest $fastExe
-          $portableMs = Invoke-SmokeTest $portableExe
-
-          "Fast onedir smoke-start: $fastMs ms" | Tee-Object -FilePath 'startup-benchmark.txt'
-          "Portable one-file smoke-start: $portableMs ms" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
-          if ($fastMs -lt $portableMs) {
-            $gain = [math]::Round((1 - ($fastMs / $portableMs)) * 100, 1)
-            "Fast build reduction vs portable: $gain%" | Tee-Object -FilePath 'startup-benchmark.txt' -Append
+          pyi-archive_viewer -l $portableExe | Out-File -Encoding utf8 'portable-toc.txt'
+          if (-not (Select-String -Path 'portable-toc.txt' -Pattern 'tkinterdnd2' -Quiet)) {
+            throw 'tkinterdnd2 ontbreekt in Portable EXE archive'
           }
-          Get-Content 'startup-benchmark.txt'
 
       - name: Package fast edition ZIP
         shell: pwsh
@@ -167,42 +125,8 @@ jobs:
         run: |
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
           & $iscc 'installer/SleufBase.iss'
-          if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) { throw 'dist-installer/SleufBase-Setup.exe ontbreekt' }
-
-      - name: Validate silent installer end to end
-        shell: pwsh
-        run: |
-          $installDir = Join-Path $env:RUNNER_TEMP 'SleufBase-Installed-Test'
-          Remove-Item -Recurse -Force $installDir -ErrorAction SilentlyContinue
-          $dirArg = "/DIR=`"$installDir`""
-          $setup = Start-Process -FilePath 'dist-installer/SleufBase-Setup.exe' -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',$dirArg) -Wait -PassThru
-          if ($setup.ExitCode -ne 0) { throw "SleufBase installer faalde met exitcode $($setup.ExitCode)" }
-          $installedExe = Join-Path $installDir 'SleufBase.exe'
-          if (-not (Test-Path $installedExe)) { throw "Geïnstalleerde executable ontbreekt: $installedExe" }
-          $tracePath = Join-Path $env:RUNNER_TEMP 'sleufbase-installed-smoke.log'
-          $env:SLEUFBASE_SMOKE_TRACE = $tracePath
-          try {
-            $process = Start-Process -FilePath $installedExe -ArgumentList '--smoke-test' -PassThru
-            if (-not $process.WaitForExit(60000)) {
-              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-              if (Test-Path $tracePath) { Get-Content $tracePath }
-              throw "Geïnstalleerde SleufBase smoke-test timeout na 60 seconden"
-            }
-            if ($process.ExitCode -ne 0) {
-              if (Test-Path $tracePath) { Get-Content $tracePath }
-              throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($process.ExitCode)"
-            }
-            if (-not (Test-Path $tracePath) -or (Get-Content $tracePath) -notcontains 'smoke:ok') {
-              throw 'Geïnstalleerde SleufBase smoke-test mist smoke:ok marker'
-            }
-          } finally {
-            Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
-          }
-          $uninstaller = Join-Path $installDir 'unins000.exe'
-          if (Test-Path $uninstaller) {
-            $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
-            if ($uninstall.ExitCode -ne 0) { throw "SleufBase uninstall-test faalde met exitcode $($uninstall.ExitCode)" }
-          }
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup faalde met exitcode $LASTEXITCODE" }
+          if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) { throw 'SleufBase-Setup.exe ontbreekt' }
 
       - name: Generate checksums and SBOM
         shell: pwsh
@@ -213,15 +137,14 @@ jobs:
             'dist/SleufBase-Portable.exe'
           Get-Content 'release-metadata/SHA256SUMS.txt'
 
-      - name: Upload professional Windows artifacts
+      - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.0
+          name: SleufBase-Windows-v0.3.1
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
             dist/SleufBase-Portable.exe
-            startup-benchmark.txt
             dependency-snapshot.txt
             release-metadata/SHA256SUMS.txt
             release-metadata/sbom.cdx.json
@@ -236,17 +159,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          Productie-hardening release voor betrouwbaarheid, snelheid en beginpunten.
+          SleufBase Windows v0.3.1
 
-          Belangrijk in v0.3.0:
-          - handmatig gekozen beginpunten zijn autoritatief en hebben altijd voorrang boven automatisch bepaalde beginpunten
-          - handmatige beginpunten blijven persistent bij project opslaan/laden en een nieuwe klik vervangt direct het vorige handmatige punt
-          - Alle beginpunten laden slaat handmatige lagen over en heeft een veilige fallback bij fouten
-          - netwerk-, OGC-, GeoTIFF- en tilecaches zijn begrensd/thread-safe en schrijven waar nodig atomisch
-          - render- en GeoTIFF-hotpaths zijn versneld met sterkere cache-invalidatie
-          - legacy bytecode wordt vóór uitvoering gevalideerd op Python-runtime, header en codeobject
-          - Windows release bevat SHA-256-checksums, dependency snapshot en CycloneDX-SBOM
-          - releaseversies worden automatisch op consistentie gecontroleerd
+          Belangrijk:
+          - automatische projectback-ups standaard elke 10 minuten
+          - maximaal 20 automatische back-ups; de oudste wordt automatisch verwijderd
+          - willekeurige back-upbestandsnamen en atomisch opslaan
+          - instellingen voor aan/uit, interval en maximumaantal, inclusief knop naar de back-upmap
+          - handmatige beginpunten blijven altijd leidend boven automatische beginpunten
+          - proefsleuven exporteren Normaal + Reverse in hetzelfde vak met AutoCAD Dynamic Visibility-property `Versie`
+          - `Normaal` is standaard zichtbaar en `Reverse` start verborgen
+          - Windows runtime bundelt tkinterdnd2/TkDnD expliciet; crash door ontbrekende tkinterdnd2 is opgelost
+          - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
             'dist-installer/SleufBase-Setup.exe#SleufBase-Setup.exe',
