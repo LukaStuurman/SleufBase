@@ -1,7 +1,6 @@
-# Exact Windows dependency baseline for SleufBase v0.3.0.
-# Versions are pinned to the package set used by the fully successful Windows
-# build for PR #5 (workflow run 32944501213), including frozen smoke tests,
-# installer creation, silent install validation and uninstall validation.
+# Exact Windows dependency baseline for SleufBase v0.3.1.
+# Based on the proven v0.3.0 dependency set plus tkinterdnd2, which is required
+# by the legacy app runtime and must be present in frozen Windows builds.
 altgraph==0.17.4
 boto3==1.40.21
 botocore==1.40.21
@@ -36,5 +35,6 @@ requests==2.32.5
 s3transfer==0.13.1
 shapely==2.1.2
 six==1.17.0
+tkinterdnd2==0.6.2
 typing_extensions==4.15.0
 urllib3==2.5.0
