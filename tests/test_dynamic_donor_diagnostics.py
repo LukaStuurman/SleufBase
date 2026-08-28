@@ -15,6 +15,19 @@ class DynamicDonorDiagnostics(unittest.TestCase):
         root_record = dv._find_record_by_handle(records, donor.block_record_handle)
         root_name = dv._record_name(root_record or [])
         print("DONOR_ROOT", donor.block_record_handle, root_name)
+        print("DONOR_ROOT_RECORD", root_record)
+
+        root_block_entity = next(
+            (
+                record
+                for record, section in zip(records, sections)
+                if section == "BLOCKS"
+                and dv._record_type(record) == "BLOCK"
+                and str(dv._record_name(record) or "").upper() == str(root_name or "").upper()
+            ),
+            None,
+        )
+        print("DONOR_BLOCK_ENTITY", root_block_entity)
 
         visibility = next(
             record for record, section in zip(records, sections)
