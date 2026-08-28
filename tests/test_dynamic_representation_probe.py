@@ -19,6 +19,25 @@ class DynamicRepresentationProbe(unittest.TestCase):
         print("DONOR", donor_name, donor.block_record_handle)
         print("DONOR_REP_E", donor.block_rep_e_tag)
 
+        print("STATE_ENTITIES")
+        for state_handle in donor.state_entity_handles:
+            record = dv._find_record_by_handle(records, state_handle)
+            print("STATE", state_handle, record)
+
+        print("DONOR_BLOCK_CONTENT")
+        for record, section in zip(records, sections):
+            if section != "BLOCKS":
+                continue
+            if (dv._record_owner(record) or "").upper() != donor.block_record_handle.upper():
+                continue
+            print("BLOCKREC", dv._record_type(record), record)
+
+        print("DONOR_METADATA_FULL")
+        for record, section in zip(records, sections):
+            handle = (dv._record_handle(record) or "").upper()
+            if section == "OBJECTS" and handle in set(donor.metadata_handles):
+                print("META_FULL", dv._record_type(record), record)
+
         print("BLOCK_RECORD_XDATA")
         for record, section in zip(records, sections):
             if section != "TABLES" or dv._record_type(record) != "BLOCK_RECORD":
@@ -30,20 +49,6 @@ class DynamicRepresentationProbe(unittest.TestCase):
                     apps.append((app, payload))
             if apps:
                 print("BR", dv._record_handle(record), dv._record_name(record), apps)
-
-        print("DONOR_VISIBILITY")
-        for record, section in zip(records, sections):
-            if section == "OBJECTS" and dv._record_type(record) == "BLOCKVISIBILITYPARAMETER":
-                if dv._record_owner(record) in donor.metadata_handles:
-                    interesting = [(c, v) for c, v in record if c in {5, 10, 20, 30, 11, 21, 31, 40, 70, 90, 280, 281, 301, 302, 303, 304, 305, 331, 332}]
-                    print("VIS", interesting)
-
-        print("DONOR_METADATA")
-        for record, section in zip(records, sections):
-            handle = (dv._record_handle(record) or "").upper()
-            if section == "OBJECTS" and handle in set(donor.metadata_handles):
-                interesting = [(c, v) for c, v in record if c in {0, 5, 330, 331, 332, 340, 360, 90, 91, 92, 93, 94, 95, 280, 281, 301, 302, 303}]
-                print("META", dv._record_type(record), interesting)
 
         print("INSERTS")
         anonymous_names = set()
@@ -58,8 +63,7 @@ class DynamicRepresentationProbe(unittest.TestCase):
                 continue
             name = (dv._record_name(record) or "").upper()
             if name == str(donor_name or "").upper() or name in anonymous_names or name.startswith("*U"):
-                interesting = [(c, v) for c, v in record if c in {5, 330, 2, 10, 20, 30, 41, 42, 43, 50, 1001, 1000, 1005}]
-                print("INSERT", section, interesting)
+                print("INSERT", section, record)
 
         self.fail("dynamic representation probe; remove after inspection")
 
