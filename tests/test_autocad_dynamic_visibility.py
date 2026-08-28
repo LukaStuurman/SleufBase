@@ -22,6 +22,13 @@ class AutoCadDynamicVisibilityTests(unittest.TestCase):
     def template_path(self) -> Path:
         return REPO_ROOT / "assets" / "cadastral_template.dxf"
 
+    def _donor_rep_e_tag(self) -> tuple[tuple[int, str], ...]:
+        pairs, _newline, _had_bom = dynamic_visibility._read_pairs(self.template_path)
+        records = dynamic_visibility._split_records(pairs)
+        sections = dynamic_visibility._record_sections(records)
+        donor = dynamic_visibility._discover_donor(records, sections)
+        return tuple((code, value.strip()) for code, value in donor.block_rep_e_tag)
+
     def test_real_template_contains_native_two_state_visibility_donor(self) -> None:
         pairs, _newline, _had_bom = dynamic_visibility._read_pairs(self.template_path)
         records = dynamic_visibility._split_records(pairs)
@@ -36,6 +43,8 @@ class AutoCadDynamicVisibilityTests(unittest.TestCase):
             donor.state_entity_handles[0],
             donor.state_entity_handles[1],
         )
+        self.assertTrue(donor.block_rep_e_tag)
+        self.assertEqual(self._donor_rep_e_tag(), ((1070, "1"), (1071, "2")))
 
     def test_variant_pair_is_wrapped_without_changing_child_layers(self) -> None:
         document = ezdxf.new("R2018")
@@ -143,6 +152,7 @@ class AutoCadDynamicVisibilityTests(unittest.TestCase):
             self.assertEqual(details["property_name"], "Versie")
             self.assertEqual(details["states"], ("Normaal", "Reverse"))
             self.assertEqual(details["default_state"], "Normaal")
+            self.assertEqual(details["block_rep_e_tag"], self._donor_rep_e_tag())
 
             # ezdxf must still be able to parse the finished file, while the
             # unsupported AutoCAD dynamic objects are preserved as DXF data.

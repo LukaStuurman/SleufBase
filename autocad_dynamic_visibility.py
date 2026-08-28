@@ -15,6 +15,13 @@ _HANDLE_REFERENCE_CODES = frozenset(
     + list(range(390, 400))
     + [480, 481, 1005]
 )
+_DYNAMIC_BLOCK_XDATA_APPS = frozenset(
+    {
+        "AcDbBlockRepETag",
+        "AcDbDynamicBlockTrueName",
+        "AcDbDynamicBlockGUID",
+    }
+)
 
 
 class DynamicVisibilityError(RuntimeError):
@@ -27,6 +34,7 @@ class _Donor:
     xdictionary_handle: str
     metadata_handles: tuple[str, ...]
     state_entity_handles: tuple[str, str]
+    block_rep_e_tag: tuple[tuple[int, str], ...]
 
 
 def _read_pairs(path: Path) -> tuple[list[tuple[int, str]], str, bool]:
@@ -107,6 +115,24 @@ def _record_owner(record: list[tuple[int, str]]) -> str | None:
 
 def _record_name(record: list[tuple[int, str]]) -> str | None:
     return _first_value(record, 2)
+
+
+def _xdata_payload(
+    record: list[tuple[int, str]],
+    app_name: str,
+) -> tuple[tuple[int, str], ...]:
+    """Return one XData application's payload, excluding the 1001 app marker."""
+
+    for index, (code, value) in enumerate(record):
+        if code != 1001 or value.strip() != app_name:
+            continue
+        payload: list[tuple[int, str]] = []
+        for pair_code, pair_value in record[index + 1 :]:
+            if pair_code == 1001 or pair_code < 1000:
+                break
+            payload.append((pair_code, pair_value))
+        return tuple(payload)
+    return ()
 
 
 def _record_sections(records: list[list[tuple[int, str]]]) -> list[str | None]:
@@ -191,6 +217,14 @@ def _discover_donor(
     block_record_handle = _record_owner(xdictionary)
     if not block_record_handle:
         raise DynamicVisibilityError("Visibility-donor is niet gekoppeld aan een BLOCK_RECORD.")
+    block_record = _find_record_by_handle(records, block_record_handle)
+    if block_record is None or _record_type(block_record) != "BLOCK_RECORD":
+        raise DynamicVisibilityError("BLOCK_RECORD van Visibility-donor ontbreekt.")
+    block_rep_e_tag = _xdata_payload(block_record, "AcDbBlockRepETag")
+    if not block_rep_e_tag:
+        raise DynamicVisibilityError(
+            "Visibility-donor mist AcDbBlockRepETag voor de initiële AutoCAD-evaluatie."
+        )
 
     metadata_handles: set[str] = {xdictionary_handle.upper()}
     changed = True
@@ -225,6 +259,7 @@ def _discover_donor(
         xdictionary_handle=xdictionary_handle.upper(),
         metadata_handles=ordered_metadata_handles,
         state_entity_handles=(state_handles[0], state_handles[1]),
+        block_rep_e_tag=block_rep_e_tag,
     )
 
 
@@ -309,6 +344,7 @@ def _inject_dynamic_block_record_data(
     *,
     xdictionary_handle: str,
     block_name: str,
+    block_rep_e_tag: tuple[tuple[int, str], ...],
 ) -> list[tuple[int, str]]:
     result: list[tuple[int, str]] = []
     inserted_xdict = False
@@ -323,12 +359,12 @@ def _inject_dynamic_block_record_data(
                 if close_code == 102 and close_value.strip() == "}":
                     break
             continue
-        if code == 1001 and value.strip() in {
-            "AcDbDynamicBlockTrueName",
-            "AcDbDynamicBlockGUID",
-        }:
+        if code == 1001 and value.strip() in _DYNAMIC_BLOCK_XDATA_APPS:
             index += 1
-            if index < len(record) and record[index][0] == 1000:
+            while index < len(record):
+                payload_code, _payload_value = record[index]
+                if payload_code == 1001 or payload_code < 1000:
+                    break
                 index += 1
             continue
 
@@ -348,6 +384,8 @@ def _inject_dynamic_block_record_data(
         raise DynamicVisibilityError(f"BLOCK_RECORD {block_name!r} heeft geen handle.")
     result.extend(
         [
+            (1001, "AcDbBlockRepETag"),
+            *block_rep_e_tag,
             (1001, "AcDbDynamicBlockTrueName"),
             (1000, block_name),
             (1001, "AcDbDynamicBlockGUID"),
@@ -461,6 +499,7 @@ def promote_dynamic_visibility_blocks(
             block_record,
             xdictionary_handle=handle_map[donor.xdictionary_handle],
             block_name=block_name,
+            block_rep_e_tag=donor.block_rep_e_tag,
         )
 
         cloned_records = [
@@ -496,6 +535,10 @@ def inspect_dynamic_visibility_block(
     sections = _record_sections(records)
     _index, block_record = _target_block_record(records, sections, block_name)
     block_handle = (_record_handle(block_record) or "").upper()
+    block_rep_e_tag = tuple(
+        (code, value.strip())
+        for code, value in _xdata_payload(block_record, "AcDbBlockRepETag")
+    )
     xdict_handle: str | None = None
     for index, (code, value) in enumerate(block_record[:-1]):
         if code == 102 and value.strip().upper() == "{ACAD_XDICTIONARY":
@@ -509,6 +552,7 @@ def inspect_dynamic_visibility_block(
             "is_dynamic": False,
             "property_name": None,
             "states": (),
+            "block_rep_e_tag": block_rep_e_tag,
         }
 
     metadata_handles = {xdict_handle}
@@ -541,6 +585,7 @@ def inspect_dynamic_visibility_block(
             "is_dynamic": False,
             "property_name": None,
             "states": (),
+            "block_rep_e_tag": block_rep_e_tag,
         }
 
     states = tuple(name for name, _refs in _visibility_states(visibility))
@@ -551,4 +596,5 @@ def inspect_dynamic_visibility_block(
         "property_name": _first_value(visibility, 301),
         "states": states,
         "default_state": states[0] if states else None,
+        "block_rep_e_tag": block_rep_e_tag,
     }
