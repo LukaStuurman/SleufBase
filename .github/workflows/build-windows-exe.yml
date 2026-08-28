@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.4'
+  SLEUFBASE_RELEASE_VERSION: '0.3.5'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.4
+          name: SleufBase-Windows-v0.3.5
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,14 +160,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.4
+          SleufBase Windows v0.3.5
 
           Belangrijk:
-          - elk DXF-sjabloonvak heeft één Dynamic Block met `Versie: Normaal/Reverse`
-          - `Normaal` toont alleen de normale TIFF/kaart en het normale dwarsprofiel
-          - `Reverse` toont alleen de omgekeerde TIFF/kaart en het reverse dwarsprofiel
-          - reverse IMAGEDEF-bronnen krijgen unieke namen zodat de normale rasterbron niet meer wordt hergebruikt
-          - regressietest gebruikt het echte kadastrale sjabloon en controleert beide rasterbronnen plus de `Versie`-keuze
+          - Dynamic Block `Versie` wordt bij openen direct als `Normaal` geïnitialiseerd
+          - gegenereerde blocks nemen de AutoCAD `AcDbBlockRepETag` over van het echte donorblock
+          - `Normaal` en `Reverse` blijven afzonderlijk selecteerbaar met hun eigen TIFF/kaart en dwarsprofiel
+          - instellingenvenster is groter en resizable met minder lange uitlegtekst
+          - sectiekoppen zijn vlak en borderless zonder grijze titelvlakken
+          - KickTheMap kabel- en woordeninstellingen hebben duidelijkere compacte titels
+          - KickTheMap-woordenlijsten krijgen extra hoogte en rekruimte zodat de onderste lijst zichtbaar blijft
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
