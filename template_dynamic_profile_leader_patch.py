@@ -155,6 +155,14 @@ def _install_final_dxf_promotion() -> None:
 
     def _promote_visibility_and_synthetic_polar(output_path):
         result = original_promote(output_path)
+
+        # Generic Dynamic-Visibility tests and helper DXFs do not necessarily
+        # contain a profile leader. Only promote our Polar block when the
+        # complete export actually contains that SleufBase-owned block.
+        document = ezdxf.readfile(output_path)
+        if not _synthetic_dynamic_leader_available(document):
+            return result
+
         promote_synthetic_polar_leader(output_path, DYNAMIC_LEADER_BLOCK_NAME)
 
         # Structural release guard: the final merged file itself must contain
