@@ -9,18 +9,20 @@ from .legacy_bytecode import load_legacy_module
 load_legacy_module("settings", globals(), __file__)
 
 
-# Deze instelling is toegevoegd boven op de oudere, gebundelde settings-module.
-# De class-attribuutfallback houdt ook rechtstreeks gemaakte AppSettings-objecten
-# achterwaarts compatibel met de nieuwe exportoptie.
+# Deze instellingen zijn toegevoegd boven op de oudere, gebundelde settings-module.
+# Class-attribuutfallbacks houden ook rechtstreeks gemaakte AppSettings-objecten
+# achterwaarts compatibel met de nieuwere UI- en exportopties.
 DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN = True
 TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY = "template_auto_fill_bgt_fysiek_voorkomen"
 KICKTHEMAP_MATERIAL_CHOICES_KEY = "kickthemap_material_choices"
+KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY = "kickthemap_profile_extra_choices"
 setattr(
     AppSettings,
     TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
     DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN,
 )
 setattr(AppSettings, KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
+setattr(AppSettings, KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
 
 _load_settings_without_bgt_surface_option = load_settings
 _save_settings_without_bgt_surface_option = save_settings
@@ -40,7 +42,7 @@ def _bgt_surface_option_value(value: object) -> bool:
     return DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN
 
 
-def normalize_kickthemap_material_choices(value: object) -> list[str]:
+def _normalize_choice_list(value: object) -> list[str]:
     if not isinstance(value, (list, tuple)):
         return []
     choices: list[str] = []
@@ -55,10 +57,21 @@ def normalize_kickthemap_material_choices(value: object) -> list[str]:
     return choices
 
 
+def normalize_kickthemap_material_choices(value: object) -> list[str]:
+    return _normalize_choice_list(value)
+
+
+def normalize_kickthemap_profile_extra_choices(value: object) -> list[str]:
+    """Normalize user-managed extra values for the Kabel/Leiding dropdown."""
+
+    return _normalize_choice_list(value)
+
+
 def load_settings() -> AppSettings:
     settings = _load_settings_without_bgt_surface_option()
     option_value: object = DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN
     material_choices: object = []
+    profile_extra_choices: object = []
     try:
         payload = json.loads(_settings_path().read_text(encoding="utf-8"))
         if isinstance(payload, dict):
@@ -67,6 +80,7 @@ def load_settings() -> AppSettings:
                 DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN,
             )
             material_choices = payload.get(KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
+            profile_extra_choices = payload.get(KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
     except (FileNotFoundError, OSError, json.JSONDecodeError, TypeError, ValueError):
         pass
     setattr(
@@ -78,6 +92,11 @@ def load_settings() -> AppSettings:
         settings,
         KICKTHEMAP_MATERIAL_CHOICES_KEY,
         normalize_kickthemap_material_choices(material_choices),
+    )
+    setattr(
+        settings,
+        KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY,
+        normalize_kickthemap_profile_extra_choices(profile_extra_choices),
     )
     return settings
 
@@ -99,6 +118,9 @@ def save_settings(settings: AppSettings) -> Path:
     )
     payload[KICKTHEMAP_MATERIAL_CHOICES_KEY] = normalize_kickthemap_material_choices(
         getattr(settings, KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
+    )
+    payload[KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY] = normalize_kickthemap_profile_extra_choices(
+        getattr(settings, KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
     )
     settings_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",

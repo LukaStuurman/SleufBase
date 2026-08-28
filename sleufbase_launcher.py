@@ -196,9 +196,17 @@ def main() -> int:
     browser_url = _take_option(args, "--kickthemap-browser-url")
     browser_title = _take_option(args, "--kickthemap-browser-title")
     if prelogin or browser_url is not None or browser_title is not None:
-        from SleufBase.kickthemap_browser import main as browser_main
+        from SleufBase import kickthemap_browser as browser_module
+        from SleufBase.kickthemap_profile_choices_patch import (
+            install_kickthemap_profile_choices_patch,
+        )
 
-        browser_main(start_url=browser_url, window_title=browser_title, prelogin=prelogin)
+        install_kickthemap_profile_choices_patch(browser_module)
+        browser_module.main(
+            start_url=browser_url,
+            window_title=browser_title,
+            prelogin=prelogin,
+        )
         return 0
 
     _install_runtime_patches()
