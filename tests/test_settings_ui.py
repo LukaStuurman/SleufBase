@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import unittest
 
 from SleufBase import settings_general_layout_patch, settings_ui
@@ -49,6 +50,21 @@ class SettingsUiTests(unittest.TestCase):
         )
         self.assertTrue(callable(settings_general_layout_patch._make_general_full_width))
         self.assertTrue(callable(settings_general_layout_patch._place_launcher_in_general))
+
+    def test_material_choices_remain_visible_beside_compact_words_launcher(self) -> None:
+        self.assertGreaterEqual(settings_general_layout_patch.PATCH_VERSION, 2)
+        self.assertEqual(
+            settings_general_layout_patch._MATERIAL_EDITOR_TITLE,
+            "KickTheMap materiaalkeuzes",
+        )
+        self.assertEqual(
+            settings_general_layout_patch._MATERIAL_EDITOR_HELP,
+            "Waarden in de materiaal-dropdown van KickTheMap.",
+        )
+        self.assertTrue(callable(settings_general_layout_patch._install_material_editor_in_general))
+        source = inspect.getsource(settings_general_layout_patch._install_words_launcher_in_general)
+        self.assertIn("_install_material_editor_in_general", source)
+        self.assertIn("panel.grid_remove()", source)
 
 
 if __name__ == "__main__":
