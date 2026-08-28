@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.11'
+  SLEUFBASE_RELEASE_VERSION: '0.3.12'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.11
+          name: SleufBase-Windows-v0.3.12
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.11
+          SleufBase Windows v0.3.12
 
           Belangrijk:
-          - dwarsprofiel-verwijzingen gebruiken nu het echte AutoCAD Dynamic Block uit het kadastrale sjabloon
-          - elke verwijzing op `X-XX-AL-VERWIJZING-SD` krijgt een Polar-grip: de onderkant blijft vast en de bovenkant kan vrij in lengte en hoek worden verplaatst
-          - de verwijzingslijn stretcht mee met de Polar-grip
-          - `OMSCHRIJVING` en `HOOGTE` bewegen mee met de bovenzijde, maar blijven ongeroteerd
-          - de native AutoCAD Stretch- en Move-actions worden behouden in plaats van nagebouwd als statische LEADER
-          - de bestaande `Versie: Normaal/Reverse` Dynamic Visibility blijft naast deze nested Dynamic Leaders werken
-          - de KickTheMap materiaalkeuzes en instellingenverbeteringen uit v0.3.10 blijven aanwezig
-          - regressietests gebruiken de echte AutoCAD-donor en controleren Polar/Stretch/Move plus save/reopen van de DXF
+          - Instellingen bevat nu een aparte `KickTheMap Kabel/Leiding-keuzes` lijst voor extra woorden in de Kabel/Leiding-dropdown
+          - deze extra dropdownwoorden staan los van `Woordenlijst beheren…`; de bestaande DXF-laag-, kleur- en dwarsprofiellogica blijft daardoor ongewijzigd
+          - `Materiaalkeuzes` blijft een afzonderlijke lijst voor de Materiaal-dropdown
+          - onder Algemeen staat nu een Autosave-sectie met aan/uit, interval in minuten en maximum aantal autosaves
+          - `Autosave laden…` toont beschikbare back-ups met datum/tijd, bestandsnaam en grootte, nieuwste bovenaan
+          - een gekozen autosave wordt via de normale SleufBase-projectlader geopend, zodat bestaande projectherstelpatches blijven werken
+          - de bestaande autosave-planner en rotatie worden hergebruikt; er is geen tweede back-upsysteem toegevoegd
+          - de AutoCAD Dynamic Leader en `Versie: Normaal/Reverse` verbeteringen uit v0.3.11 blijven aanwezig
+          - regressietests en de volledige Windows-build zijn uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
