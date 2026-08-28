@@ -2,7 +2,7 @@
 # Python 3.11 is intentional: SleufBase includes matching app.cpython-311 bytecode.
 
 PyInstaller>=6.10,<7
-numpy>=1.26,<3
+numpy>=2.5.2,<3
 Pillow>=10,<12
 requests>=2.31,<3
 pyproj>=3.6,<4
