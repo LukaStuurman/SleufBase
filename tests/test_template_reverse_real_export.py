@@ -14,11 +14,12 @@ PACKAGE_PARENT = REPO_ROOT.parent
 if str(PACKAGE_PARENT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_PARENT))
 
+from SleufBase import template_dynamic_visibility_patch as dynamic_patch
 from SleufBase import template_reverse_patch as reverse_patch
 
 
 class RealTemplateReverseMergeTests(unittest.TestCase):
-    def test_real_template_merges_same_named_image_defs(self) -> None:
+    def test_real_template_merges_same_named_image_defs_and_promotes_dynamic_pair(self) -> None:
         template_path = REPO_ROOT / "assets" / "cadastral_template.dxf"
         with tempfile.TemporaryDirectory() as temporary_directory:
             directory = Path(temporary_directory)
@@ -79,17 +80,14 @@ class RealTemplateReverseMergeTests(unittest.TestCase):
                 reverse_patch._merge_reverse_variant_document(normal_path, reverse_path),
                 1,
             )
+            wrapper_names = dynamic_patch._promote_exported_variants_to_dynamic_blocks(normal_path)
+            self.assertEqual(wrapper_names, [dynamic_patch.dynamic_block_name("PS1", 1)])
 
             merged = ezdxf.readfile(normal_path)
-            reverse_layer = reverse_patch.variant_layer_name(
-                "PS1", 1, reverse_patch.REVERSE_MODE
-            )
-            reverse_insert = next(
-                entity
-                for entity in merged.modelspace()
-                if entity.dxftype() == "INSERT" and entity.dxf.layer == reverse_layer
-            )
-            reverse_block = merged.blocks.get(reverse_insert.dxf.name)
+            wrapper = merged.blocks.get(wrapper_names[0])
+            child_refs = list(wrapper.query("INSERT"))
+            self.assertEqual(len(child_refs), 2)
+            reverse_block = merged.blocks.get(child_refs[1].dxf.name)
             images = list(reverse_block.query("IMAGE"))
             self.assertEqual(len(images), 1)
             self.assertTrue(Path(images[0].image_def.dxf.filename).exists())
