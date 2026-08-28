@@ -23,11 +23,19 @@ class SettingsUiTests(unittest.TestCase):
             "Een tweede zin hoort niet nodig te zijn."
         )
         compact = settings_ui._compact_help_text(source)
-        self.assertLessEqual(len(compact), 119)
+        self.assertLessEqual(len(compact), 113)
         self.assertNotIn("Een tweede zin", compact)
 
-    def test_settings_sections_use_flat_borderless_style_constant(self) -> None:
-        self.assertEqual(settings_ui._SETTINGS_BG, "#f5f7fb")
+    def test_settings_content_is_white_instead_of_gray_text_tiles(self) -> None:
+        self.assertEqual(settings_ui._WINDOW_BG, "#f5f7fb")
+        self.assertEqual(settings_ui._SETTINGS_BG, "#ffffff")
+
+    def test_words_list_has_dedicated_view_and_launcher_labels(self) -> None:
+        self.assertEqual(settings_ui._WORDS_DISPLAY_TITLE, "KickTheMap – woorden")
+        self.assertEqual(settings_ui._WORDS_VIEW_TITLE, "KickTheMap – woordenlijst")
+        self.assertTrue(callable(settings_ui._install_words_launcher))
+        self.assertTrue(callable(settings_ui._open_words_view))
+        self.assertTrue(callable(settings_ui._close_words_view))
 
 
 if __name__ == "__main__":
