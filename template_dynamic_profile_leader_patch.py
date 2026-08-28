@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import ezdxf
 
+from . import template_dynamic_visibility_patch as dynamic_visibility_patch
+from .autocad_synthetic_polar_leader import (
+    BASE_POINT,
+    BLOCK_NAME as DYNAMIC_LEADER_BLOCK_NAME,
+    LAYER_NAME as DYNAMIC_LEADER_LAYER,
+    TOP_POINT,
+    ensure_synthetic_polar_leader_block,
+    inspect_synthetic_polar_leader,
+    promote_synthetic_polar_leader,
+)
 from .cadastral_export import CadastralDxfExporter
 
 
-PATCH_VERSION = 1
-DYNAMIC_LEADER_BLOCK_NAME = CadastralDxfExporter.TEMPLATE_PROFILE_LEGACY_DYNAMIC_LEADER_BLOCK_NAME
-DYNAMIC_LEADER_LAYER = "X-XX-AL-VERWIJZING-SD"
-POLAR_BASE_TO_LINE_START = 1.0
-POLAR_BASE_TO_TOP = 10.0
+PATCH_VERSION = 2
 
 
 _ORIGINAL_REMOVE_LEGACY = CadastralDxfExporter._remove_template_legacy_profile_leader_blocks
@@ -18,7 +24,7 @@ _ORIGINAL_DISTRIBUTE_LEADERS = CadastralDxfExporter._distribute_template_leader_
 _ORIGINAL_ADD_MARKER = CadastralDxfExporter._add_template_profile_leader_marker
 
 
-def _dynamic_leader_available(document: ezdxf.EzDxfDocument | None) -> bool:
+def _synthetic_dynamic_leader_available(document: ezdxf.EzDxfDocument | None) -> bool:
     if document is None:
         return False
     try:
@@ -27,40 +33,23 @@ def _dynamic_leader_available(document: ezdxf.EzDxfDocument | None) -> bool:
         return False
 
 
-def _preserve_dynamic_profile_leader_donor(
+def _prepare_synthetic_profile_leader(
     self: CadastralDxfExporter,
     document: ezdxf.EzDxfDocument,
 ) -> None:
-    """Remove stale example/profile blocks but keep the genuine AutoCAD donor.
+    """Delete the old example donor and create SleufBase's own static block.
 
-    The cadastral template already contains ``SAL-VERWIJZING_LEIDING_BOVENKANT-SOD``
-    as a native AutoCAD Dynamic Block.  Its Polar parameter drives a Stretch
-    action on the leader polyline and a Move action on the two attribute
-    definitions.  Older SleufBase code deleted this donor before every export,
-    which forced generated profile leaders back to a static INSERT + LEADER.
+    No entity, grip coordinate, evaluation node or action from the cadastral
+    example block is reused. The new block starts as ordinary geometry; its own
+    AutoCAD Polar parameter/action graph is attached after the complete
+    Normaal/Reverse export has been assembled.
     """
 
-    legacy_name = self.TEMPLATE_PROFILE_LEGACY_DYNAMIC_LEADER_BLOCK_NAME
-    if legacy_name not in document.blocks:
-        return
-
-    dependent_names = [
-        block.name
-        for block in list(document.blocks)
-        if block.name != legacy_name
-        and any(
-            entity.dxftype() == "INSERT" and str(entity.dxf.name) == legacy_name
-            for entity in block
-        )
-    ]
-    for block_name in dependent_names:
-        try:
-            document.blocks.delete_block(block_name, safe=True)
-        except Exception:
-            pass
+    _ORIGINAL_REMOVE_LEGACY(self, document)
+    ensure_synthetic_polar_leader_block(document, DYNAMIC_LEADER_BLOCK_NAME)
 
 
-def _add_dynamic_template_profile_leader(
+def _add_synthetic_dynamic_template_profile_leader(
     self: CadastralDxfExporter,
     modelspace,
     description: str,
@@ -70,21 +59,10 @@ def _add_dynamic_template_profile_leader(
     marker_scale: float,
     color: int | None = None,
 ) -> None:
-    """Insert the template's native Polar/Stretch/Move Dynamic Block.
-
-    ``leader_start`` is the old static LEADER start.  In the native donor the
-    actual stretchable line starts one local unit above the block base and the
-    Polar end grip is ten local units above that base.  Moving the insertion
-    point down by one scaled unit therefore preserves the existing profile
-    geometry exactly while restoring the AutoCAD action grip.
-
-    The generated initial state intentionally stays vertical.  The user can then
-    drag the Polar grip freely: the lower end stays fixed, the line stretches and
-    changes angle, and OMSCHRIJVING/HOOGTE move with the top without rotating.
-    """
+    """Insert our own leader geometry with its fixed base at the profile point."""
 
     document = modelspace.doc
-    if not _dynamic_leader_available(document):
+    if not _synthetic_dynamic_leader_available(document):
         return _ORIGINAL_ADD_MULTILEADER(
             self,
             modelspace,
@@ -97,13 +75,10 @@ def _add_dynamic_template_profile_leader(
         )
 
     normalized_scale = max(0.005, float(marker_scale))
-    insert_x = float(leader_start[0])
-    insert_y = float(leader_start[1]) - (POLAR_BASE_TO_LINE_START * normalized_scale)
-
     self._insert_template_block(
         modelspace,
         DYNAMIC_LEADER_BLOCK_NAME,
-        insert=(insert_x, insert_y),
+        insert=(float(leader_start[0]), float(leader_start[1])),
         layer_name=DYNAMIC_LEADER_LAYER,
         attributes={
             "OMSCHRIJVING": str(description),
@@ -114,7 +89,7 @@ def _add_dynamic_template_profile_leader(
     )
 
 
-def _distribute_dynamic_profile_leaders(
+def _distribute_synthetic_profile_leaders(
     self: CadastralDxfExporter,
     document: ezdxf.EzDxfDocument,
     modelspace,
@@ -127,14 +102,7 @@ def _distribute_dynamic_profile_leaders(
     max_text_x: float | None = None,
     avoid_collisions: bool = True,
 ) -> None:
-    """Keep native dynamic leaders in their donor default state on export.
-
-    SleufBase's former static leader could pre-shift label tops to avoid
-    collisions.  A native Dynamic Block should instead open in a valid default
-    Polar state, otherwise the line and the dynamic attributes would disagree
-    before AutoCAD evaluates the action.  The initial leader is therefore kept
-    vertical; collision correction is now an explicit grip edit in AutoCAD.
-    """
+    """Leave generated leaders in their own well-defined default Polar state."""
 
     return _ORIGINAL_DISTRIBUTE_LEADERS(
         self,
@@ -147,7 +115,7 @@ def _distribute_dynamic_profile_leaders(
         static_text_boxes=static_text_boxes,
         min_text_x=min_text_x,
         max_text_x=max_text_x,
-        avoid_collisions=False if _dynamic_leader_available(document) else avoid_collisions,
+        avoid_collisions=False if _synthetic_dynamic_leader_available(document) else avoid_collisions,
     )
 
 
@@ -163,14 +131,7 @@ def _skip_duplicate_profile_marker(
     clip_right: float | None = None,
     clip_bottom: float | None = None,
 ) -> None:
-    """Let the native leader block provide the fixed lower marker.
-
-    The donor contains the same circle marker at its fixed base.  Drawing the old
-    standalone marker as well would create two coincident entities on different
-    layers and make AutoCAD selection unnecessarily confusing.
-    """
-
-    if _dynamic_leader_available(getattr(modelspace, "doc", None)):
+    if _synthetic_dynamic_leader_available(getattr(modelspace, "doc", None)):
         return None
     return _ORIGINAL_ADD_MARKER(
         self,
@@ -186,14 +147,56 @@ def _skip_duplicate_profile_marker(
     )
 
 
+def _install_final_dxf_promotion() -> None:
+    if getattr(dynamic_visibility_patch, "_sleufbase_synthetic_polar_profile_wrapped", False):
+        return
+
+    original_promote = dynamic_visibility_patch._promote_exported_variants_to_dynamic_blocks
+
+    def _promote_visibility_and_synthetic_polar(output_path):
+        result = original_promote(output_path)
+        promote_synthetic_polar_leader(output_path, DYNAMIC_LEADER_BLOCK_NAME)
+
+        # Structural release guard: the final merged file itself must contain
+        # our top grip and both actions before it is handed to the user.
+        details = inspect_synthetic_polar_leader(output_path, DYNAMIC_LEADER_BLOCK_NAME)
+        expected_top = tuple(float(value) for value in TOP_POINT)
+        expected_base = tuple(float(value) for value in BASE_POINT)
+        if not details.get("is_dynamic"):
+            raise RuntimeError("SleufBase Polar-grip ontbreekt in de definitieve DXF.")
+        if details.get("parameter_base") != expected_base:
+            raise RuntimeError(f"Polar-basis is ongeldig: {details.get('parameter_base')!r}")
+        if details.get("parameter_top") != expected_top or details.get("grip_top") != expected_top:
+            raise RuntimeError(f"Polar-bovengrip staat niet op de eigen SleufBase-top: {details!r}")
+        if details.get("parameter_labels") != ("Lengte", "Hoek"):
+            raise RuntimeError(f"Polar-eigenschappen zijn ongeldig: {details.get('parameter_labels')!r}")
+        if details.get("parameter_count") != 1 or details.get("grip_count") != 1:
+            raise RuntimeError("De verwijzing heeft niet exact één eigen Polar-parameter en -grip.")
+        if details.get("stretch_count") != 1 or details.get("move_count") != 1:
+            raise RuntimeError("De verwijzing mist zijn eigen Stretch- of Move-action.")
+
+        # Re-open after raw Dynamic Block creation. This catches malformed DXF
+        # records immediately during export/CI rather than in AutoCAD.
+        ezdxf.readfile(output_path)
+        return result
+
+    dynamic_visibility_patch._promote_exported_variants_to_dynamic_blocks = (
+        _promote_visibility_and_synthetic_polar
+    )
+    dynamic_visibility_patch._sleufbase_synthetic_polar_profile_wrapped = True
+
+
 def install_dynamic_profile_leader_patch() -> None:
     if getattr(CadastralDxfExporter, "_sleufbase_dynamic_profile_leader_patch_version", 0) >= PATCH_VERSION:
         return
 
-    CadastralDxfExporter._remove_template_legacy_profile_leader_blocks = _preserve_dynamic_profile_leader_donor
-    CadastralDxfExporter._add_template_profile_multileader = _add_dynamic_template_profile_leader
-    CadastralDxfExporter._distribute_template_leader_labels = _distribute_dynamic_profile_leaders
+    CadastralDxfExporter._remove_template_legacy_profile_leader_blocks = _prepare_synthetic_profile_leader
+    CadastralDxfExporter._add_template_profile_multileader = _add_synthetic_dynamic_template_profile_leader
+    CadastralDxfExporter._distribute_template_leader_labels = _distribute_synthetic_profile_leaders
     CadastralDxfExporter._add_template_profile_leader_marker = _skip_duplicate_profile_marker
     CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_BLOCK = DYNAMIC_LEADER_BLOCK_NAME
     CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_POLAR = True
+    CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_SOURCE = "synthetic"
     CadastralDxfExporter._sleufbase_dynamic_profile_leader_patch_version = PATCH_VERSION
+
+    _install_final_dxf_promotion()
