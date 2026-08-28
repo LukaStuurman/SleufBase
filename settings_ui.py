@@ -8,11 +8,15 @@ from tkinter import ttk
 
 _ORIGINAL_TK_TOPLEVEL = tk.Toplevel
 _INSTALLED = False
-_SETTINGS_BG = "#f5f7fb"
+_WINDOW_BG = "#f5f7fb"
+_SETTINGS_BG = "#ffffff"
+_WORDS_SOURCE_TITLE = "KickTheMap woord-naar-laag"
+_WORDS_DISPLAY_TITLE = "KickTheMap – woorden"
+_WORDS_VIEW_TITLE = "KickTheMap – woordenlijst"
 
 _SECTION_TITLES = {
     "KickTheMap kabeltype, materiaal en DXF-laag": "KickTheMap – kabels",
-    "KickTheMap woord-naar-laag": "KickTheMap – woorden",
+    _WORDS_SOURCE_TITLE: _WORDS_DISPLAY_TITLE,
     "Proefsleuven-sjabloon": "Proefsleuven & sjabloon",
 }
 
@@ -88,7 +92,11 @@ def _is_expandable_list(widget: tk.Misc) -> bool:
     return isinstance(widget, tk.Listbox) or _widget_class(widget) == "Treeview"
 
 
-def _compact_help_text(text: str, limit: int = 118) -> str:
+def _is_plain_frame(widget: tk.Misc) -> bool:
+    return _widget_class(widget) in {"TFrame", "Frame"} and not _is_label_frame(widget)
+
+
+def _compact_help_text(text: str, limit: int = 112) -> str:
     """Keep settings help useful without turning sections into paragraphs."""
 
     compact = " ".join(str(text or "").split())
@@ -110,6 +118,12 @@ def _configure_styles(dialog: tk.Misc) -> None:
     try:
         style = ttk.Style(dialog)
         style.configure(
+            "Settings.Content.TFrame",
+            borderwidth=0,
+            relief="flat",
+            background=_SETTINGS_BG,
+        )
+        style.configure(
             "Settings.Section.TLabelframe",
             borderwidth=0,
             relief="flat",
@@ -119,7 +133,7 @@ def _configure_styles(dialog: tk.Misc) -> None:
         style.configure(
             "Settings.Section.TLabelframe.Label",
             font=("Segoe UI", 10, "bold"),
-            foreground="#1f2937",
+            foreground="#111827",
             background=_SETTINGS_BG,
         )
         style.configure(
@@ -138,6 +152,24 @@ def _configure_styles(dialog: tk.Misc) -> None:
             "Settings.Option.TCheckbutton",
             font=("Segoe UI", 9),
             foreground="#111827",
+            background=_SETTINGS_BG,
+        )
+        style.configure(
+            "Settings.Launcher.TFrame",
+            borderwidth=0,
+            relief="flat",
+            background=_SETTINGS_BG,
+        )
+        style.configure(
+            "Settings.LauncherTitle.TLabel",
+            font=("Segoe UI", 10, "bold"),
+            foreground="#111827",
+            background=_SETTINGS_BG,
+        )
+        style.configure(
+            "Settings.LauncherHelp.TLabel",
+            font=("Segoe UI", 8),
+            foreground="#6b7280",
             background=_SETTINGS_BG,
         )
         style.configure(
@@ -212,6 +244,16 @@ def _indent_help_below_checkbox(widget: tk.Misc) -> None:
         pass
 
 
+def _style_plain_frame(widget: tk.Misc) -> None:
+    try:
+        if _widget_class(widget) == "TFrame":
+            widget.configure(style="Settings.Content.TFrame")
+        elif _widget_class(widget) == "Frame":
+            widget.configure(background=_SETTINGS_BG, borderwidth=0, highlightthickness=0)
+    except (AttributeError, tk.TclError):
+        pass
+
+
 def _style_label_frame(widget: tk.Misc) -> None:
     text = _widget_text(widget)
     if not hasattr(widget, "_settings_original_section_title"):
@@ -251,9 +293,6 @@ def _style_checkbutton(widget: tk.Misc) -> None:
     except (AttributeError, tk.TclError):
         pass
 
-    # RoundedCheckbutton is a Canvas wrapper and keeps its own font object.
-    # Updating that private font keeps the settings-specific style compact
-    # without changing checkboxes elsewhere in the application.
     try:
         if hasattr(widget, "_font"):
             compact_font = tkfont.Font(widget, family="Segoe UI", size=9)
@@ -291,7 +330,7 @@ def _style_label(widget: tk.Misc) -> None:
     try:
         widget.configure(
             style="Settings.Help.TLabel",
-            wraplength=640,
+            wraplength=620,
             justify="left",
         )
     except (AttributeError, tk.TclError):
@@ -311,11 +350,11 @@ def _style_button(widget: tk.Misc) -> None:
         pass
 
 
-def _expand_list_widget(widget: tk.Misc) -> None:
+def _expand_list_widget(widget: tk.Misc, *, minimum_height: int = 10) -> None:
     try:
         current_height = int(widget.cget("height"))
-        if current_height < 6:
-            widget.configure(height=6)
+        if current_height < minimum_height:
+            widget.configure(height=minimum_height)
     except (AttributeError, TypeError, ValueError, tk.TclError):
         pass
 
@@ -326,7 +365,7 @@ def _expand_list_widget(widget: tk.Misc) -> None:
             row = int(info.get("row", 0))
             column = int(info.get("column", 0))
             widget.grid_configure(sticky="nsew")
-            widget.master.rowconfigure(row, weight=1, minsize=105)
+            widget.master.rowconfigure(row, weight=1, minsize=150)
             widget.master.columnconfigure(column, weight=1)
         elif manager == "pack":
             widget.pack_configure(fill="both", expand=True)
@@ -334,21 +373,285 @@ def _expand_list_widget(widget: tk.Misc) -> None:
         pass
 
 
-def _expand_word_rules_panel(panel: tk.Misc) -> None:
+def _is_words_panel(panel: tk.Misc) -> bool:
     original_title = str(getattr(panel, "_settings_original_section_title", "") or "")
-    if original_title != "KickTheMap woord-naar-laag":
+    current_title = _widget_text(panel)
+    return original_title == _WORDS_SOURCE_TITLE or current_title in {
+        _WORDS_SOURCE_TITLE,
+        _WORDS_DISPLAY_TITLE,
+    }
+
+
+def _expand_word_rules_panel(panel: tk.Misc) -> None:
+    if not _is_words_panel(panel):
         return
     try:
-        if panel.winfo_manager() == "grid":
-            info = panel.grid_info()
-            row = int(info.get("row", 0))
-            panel.grid_configure(sticky="nsew")
-            panel.master.rowconfigure(row, weight=1, minsize=180)
-    except (TypeError, ValueError, tk.TclError):
+        panel.columnconfigure(0, weight=1)
+    except tk.TclError:
         pass
     for child in _descendants(panel):
         if _is_expandable_list(child):
-            _expand_list_widget(child)
+            _expand_list_widget(child, minimum_height=12)
+
+
+def _grid_info_copy(widget: tk.Misc) -> dict[str, object]:
+    try:
+        info = dict(widget.grid_info())
+    except tk.TclError:
+        return {}
+    info.pop("in", None)
+    return info
+
+
+def _occupied_grid_columns(parent: tk.Misc) -> int:
+    maximum = 1
+    try:
+        children = parent.grid_slaves()
+    except tk.TclError:
+        return maximum
+    for child in children:
+        try:
+            info = child.grid_info()
+            column = int(info.get("column", 0))
+            span = max(1, int(info.get("columnspan", 1)))
+            maximum = max(maximum, column + span)
+        except (TypeError, ValueError, tk.TclError):
+            continue
+    return maximum
+
+
+def _snapshot_grid_configuration(parent: tk.Misc) -> tuple[dict[int, dict[str, object]], dict[int, dict[str, object]]]:
+    rows: dict[int, dict[str, object]] = {}
+    columns: dict[int, dict[str, object]] = {}
+    try:
+        children = parent.grid_slaves()
+    except tk.TclError:
+        return rows, columns
+
+    row_indexes: set[int] = set()
+    column_indexes: set[int] = set()
+    for child in children:
+        try:
+            info = child.grid_info()
+            row_indexes.add(int(info.get("row", 0)))
+            column = int(info.get("column", 0))
+            span = max(1, int(info.get("columnspan", 1)))
+            column_indexes.update(range(column, column + span))
+        except (TypeError, ValueError, tk.TclError):
+            continue
+
+    for row in row_indexes:
+        try:
+            rows[row] = dict(parent.grid_rowconfigure(row))
+        except tk.TclError:
+            pass
+    for column in column_indexes:
+        try:
+            columns[column] = dict(parent.grid_columnconfigure(column))
+        except tk.TclError:
+            pass
+    return rows, columns
+
+
+def _restore_grid_configuration(
+    parent: tk.Misc,
+    rows: dict[int, dict[str, object]],
+    columns: dict[int, dict[str, object]],
+) -> None:
+    for row, config in rows.items():
+        try:
+            parent.grid_rowconfigure(row, **config)
+        except tk.TclError:
+            pass
+    for column, config in columns.items():
+        try:
+            parent.grid_columnconfigure(column, **config)
+        except tk.TclError:
+            pass
+
+
+def _close_words_view(dialog: tk.Misc, panel: tk.Misc) -> None:
+    state = getattr(dialog, "_settings_words_view_state", None)
+    if not state:
+        return
+    parent = state["parent"]
+
+    try:
+        panel.grid_remove()
+    except tk.TclError:
+        pass
+    toolbar = state.get("toolbar")
+    if toolbar is not None:
+        try:
+            toolbar.grid_remove()
+        except tk.TclError:
+            pass
+
+    for child, info in state.get("siblings", []):
+        try:
+            child.grid(**info)
+        except tk.TclError:
+            pass
+
+    _restore_grid_configuration(
+        parent,
+        state.get("rows", {}),
+        state.get("columns", {}),
+    )
+
+    original_info = state.get("panel_info", {})
+    if original_info:
+        try:
+            panel.grid(**original_info)
+            panel.grid_remove()
+        except tk.TclError:
+            pass
+
+    try:
+        dialog._settings_words_view_state = None
+        dialog.title("Instellingen")
+    except (AttributeError, tk.TclError):
+        pass
+
+
+def _open_words_view(dialog: tk.Misc, panel: tk.Misc) -> None:
+    if getattr(dialog, "_settings_words_view_state", None):
+        return
+    parent = panel.master
+    panel_info = dict(getattr(panel, "_settings_words_original_grid", {}) or {})
+    if not panel_info:
+        panel_info = _grid_info_copy(panel)
+    if not panel_info:
+        return
+
+    rows, columns = _snapshot_grid_configuration(parent)
+    siblings: list[tuple[tk.Misc, dict[str, object]]] = []
+    try:
+        for child in parent.grid_slaves():
+            if child is panel:
+                continue
+            info = _grid_info_copy(child)
+            if not info:
+                continue
+            siblings.append((child, info))
+            child.grid_remove()
+    except tk.TclError:
+        return
+
+    toolbar = getattr(dialog, "_settings_words_toolbar", None)
+    if toolbar is None or not bool(toolbar.winfo_exists()):
+        toolbar = ttk.Frame(parent, style="Settings.Content.TFrame", padding=(0, 0, 0, 8))
+        toolbar.columnconfigure(1, weight=1)
+        back_button = ttk.Button(
+            toolbar,
+            text="← Terug naar instellingen",
+            style="Settings.Secondary.TButton",
+            command=lambda target=dialog, rules=panel: _close_words_view(target, rules),
+        )
+        back_button.grid(row=0, column=0, sticky="w")
+        ttk.Label(
+            toolbar,
+            text="Woorden, DXF-lagen, kleuren en dwarsprofielnamen",
+            style="Settings.LauncherHelp.TLabel",
+        ).grid(row=0, column=1, sticky="e")
+        try:
+            dialog._settings_words_toolbar = toolbar
+        except Exception:
+            pass
+
+    total_columns = max(1, _occupied_grid_columns(parent))
+    toolbar.grid(row=0, column=0, columnspan=total_columns, sticky="ew", padx=0, pady=(0, 6))
+    panel.grid(row=1, column=0, columnspan=total_columns, sticky="nsew", padx=0, pady=0)
+
+    try:
+        parent.grid_rowconfigure(0, weight=0)
+        parent.grid_rowconfigure(1, weight=1)
+        for column in range(total_columns):
+            parent.grid_columnconfigure(column, weight=1, minsize=0)
+        panel.columnconfigure(0, weight=1)
+    except tk.TclError:
+        pass
+
+    _expand_word_rules_panel(panel)
+    try:
+        dialog._settings_words_view_state = {
+            "parent": parent,
+            "panel_info": panel_info,
+            "siblings": siblings,
+            "rows": rows,
+            "columns": columns,
+            "toolbar": toolbar,
+        }
+        dialog.title(_WORDS_VIEW_TITLE)
+        dialog.update_idletasks()
+        screen_width = max(int(dialog.winfo_screenwidth()), 900)
+        screen_height = max(int(dialog.winfo_screenheight()), 700)
+        width = min(max(1040, int(dialog.winfo_reqwidth())), screen_width - 80)
+        height = min(max(760, int(dialog.winfo_reqheight())), screen_height - 100)
+        x = max(20, (screen_width - width) // 2)
+        y = max(20, (screen_height - height) // 2)
+        dialog.geometry(f"{width}x{height}+{x}+{y}")
+    except (AttributeError, TypeError, ValueError, tk.TclError):
+        pass
+
+
+def _install_words_launcher(dialog: tk.Misc, panel: tk.Misc) -> None:
+    if getattr(dialog, "_settings_words_launcher", None) is not None:
+        return
+    try:
+        if panel.winfo_manager() != "grid":
+            return
+        panel_info = _grid_info_copy(panel)
+        if not panel_info:
+            return
+        panel._settings_words_original_grid = dict(panel_info)
+        panel.grid_remove()
+    except (AttributeError, tk.TclError):
+        return
+
+    parent = panel.master
+    launcher = ttk.Frame(parent, style="Settings.Launcher.TFrame", padding=(16, 12))
+    launcher.columnconfigure(0, weight=1)
+    ttk.Label(
+        launcher,
+        text="KickTheMap woordenlijst",
+        style="Settings.LauncherTitle.TLabel",
+    ).grid(row=0, column=0, sticky="w")
+    ttk.Label(
+        launcher,
+        text="Beheer woorden/codes, DXF-lagen, kleuren en dwarsprofielen in een ruime aparte weergave.",
+        style="Settings.LauncherHelp.TLabel",
+        wraplength=260,
+        justify="left",
+    ).grid(row=1, column=0, sticky="w", pady=(3, 10))
+    ttk.Button(
+        launcher,
+        text="Woordenlijst beheren…",
+        command=lambda target=dialog, rules=panel: _open_words_view(target, rules),
+        padding=(12, 7),
+    ).grid(row=2, column=0, sticky="ew")
+
+    try:
+        launcher.grid(
+            row=int(panel_info.get("row", 0)),
+            column=int(panel_info.get("column", 0)),
+            columnspan=max(1, int(panel_info.get("columnspan", 1))),
+            sticky="new",
+            padx=panel_info.get("padx", 0),
+            pady=panel_info.get("pady", 0),
+        )
+        word_column = int(panel_info.get("column", 0))
+        word_span = max(1, int(panel_info.get("columnspan", 1)))
+        for column in range(word_column, word_column + word_span):
+            parent.grid_columnconfigure(column, weight=0, minsize=250)
+        for column in range(word_column):
+            parent.grid_columnconfigure(column, weight=1, minsize=0)
+        dialog._settings_words_launcher = launcher
+    except (AttributeError, TypeError, ValueError, tk.TclError):
+        try:
+            launcher.destroy()
+        except tk.TclError:
+            pass
 
 
 def _configure_dialog_geometry(dialog: tk.Misc) -> None:
@@ -363,13 +666,13 @@ def _configure_dialog_geometry(dialog: tk.Misc) -> None:
         requested_width = max(int(dialog.winfo_reqwidth()), int(dialog.winfo_width()))
         requested_height = max(int(dialog.winfo_reqheight()), int(dialog.winfo_height()))
 
-        width = min(max(requested_width, 940), available_width)
-        height = min(max(requested_height, 840), available_height)
+        width = min(max(requested_width, 980), available_width)
+        height = min(max(requested_height, 720), available_height)
         x = max(20, (screen_width - width) // 2)
         y = max(20, (screen_height - height) // 2)
 
         dialog.resizable(True, True)
-        dialog.minsize(min(820, width), min(680, height))
+        dialog.minsize(min(860, width), min(620, height))
         dialog.geometry(f"{width}x{height}+{x}+{y}")
         dialog._settings_geometry_done = True
     except (AttributeError, TypeError, ValueError, tk.TclError):
@@ -386,7 +689,7 @@ def _apply_settings_ui(dialog: tk.Misc) -> None:
     _configure_styles(dialog)
 
     try:
-        dialog.configure(background=_SETTINGS_BG)
+        dialog.configure(background=_WINDOW_BG)
     except tk.TclError:
         pass
 
@@ -400,6 +703,8 @@ def _apply_settings_ui(dialog: tk.Misc) -> None:
         if _is_label_frame(widget):
             _style_label_frame(widget)
             section_panels.append(widget)
+        elif _is_plain_frame(widget):
+            _style_plain_frame(widget)
         elif _is_checkbutton(widget):
             _style_checkbutton(widget)
         elif _is_label(widget):
@@ -407,12 +712,11 @@ def _apply_settings_ui(dialog: tk.Misc) -> None:
         elif _is_button(widget):
             _style_button(widget)
 
-    for panel in section_panels:
-        _expand_word_rules_panel(panel)
+    words_panel = next((panel for panel in section_panels if _is_words_panel(panel)), None)
+    if words_panel is not None:
+        _expand_word_rules_panel(words_panel)
+        _install_words_launcher(dialog, words_panel)
 
-    # The settings dialog receives a few controls from runtime patches after
-    # the original dialog has been built. Re-running is therefore deliberate
-    # and keeps all sections visually consistent.
     try:
         dialog.update_idletasks()
     except tk.TclError:
