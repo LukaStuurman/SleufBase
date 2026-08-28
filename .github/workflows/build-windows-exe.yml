@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.10'
+  SLEUFBASE_RELEASE_VERSION: '0.3.11'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.10
+          name: SleufBase-Windows-v0.3.11
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,15 +160,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.10
+          SleufBase Windows v0.3.11
 
           Belangrijk:
-          - de KickTheMap materiaalkeuzes zijn weer zichtbaar in Instellingen
-          - onder Algemeen staat een compacte editor om materiaalwaarden toe te voegen en te verwijderen
-          - de editor gebruikt dezelfde bestaande materiaallijst en Opslaan-logica als voorheen
-          - `Woordenlijst beheren…` blijft apart beschikbaar en Algemeen blijft over de volledige breedte
-          - de Dynamic Block fixes voor Normaal/Reverse en de selectorpositie uit v0.3.9 blijven aanwezig
-          - regressietests en de volledige Windows-build zijn uitgevoerd
+          - dwarsprofiel-verwijzingen gebruiken nu het echte AutoCAD Dynamic Block uit het kadastrale sjabloon
+          - elke verwijzing op `X-XX-AL-VERWIJZING-SD` krijgt een Polar-grip: de onderkant blijft vast en de bovenkant kan vrij in lengte en hoek worden verplaatst
+          - de verwijzingslijn stretcht mee met de Polar-grip
+          - `OMSCHRIJVING` en `HOOGTE` bewegen mee met de bovenzijde, maar blijven ongeroteerd
+          - de native AutoCAD Stretch- en Move-actions worden behouden in plaats van nagebouwd als statische LEADER
+          - de bestaande `Versie: Normaal/Reverse` Dynamic Visibility blijft naast deze nested Dynamic Leaders werken
+          - de KickTheMap materiaalkeuzes en instellingenverbeteringen uit v0.3.10 blijven aanwezig
+          - regressietests gebruiken de echte AutoCAD-donor en controleren Polar/Stretch/Move plus save/reopen van de DXF
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
