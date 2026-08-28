@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.2'
+  SLEUFBASE_RELEASE_VERSION: '0.3.3'
 
 permissions:
   contents: write
@@ -66,6 +66,7 @@ jobs:
           python -m pip install -r requirements-windows.lock
           python -m pip check
           python -c "import tkinterdnd2; from tkinterdnd2 import TkinterDnD; print('tkinterdnd2:', tkinterdnd2.__file__)"
+          python -c "import ezdxf; from packaging.version import Version; assert Version(ezdxf.__version__) >= Version('1.4.4'), ezdxf.__version__; print('ezdxf:', ezdxf.__version__)"
           python -m pip freeze --all | Sort-Object | Set-Content -Encoding utf8 'dependency-snapshot.txt'
 
       - name: Check release integrity
@@ -140,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.2
+          name: SleufBase-Windows-v0.3.3
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -159,15 +160,14 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.2
+          SleufBase Windows v0.3.3
 
           Belangrijk:
-          - instellingenvenster duidelijker en compacter georganiseerd
-          - kortere checkboxlabels met kleinere, rustigere uitlegteksten
-          - uniforme sectiestyling, spacing en primaire/secundaire knoppen
-          - runtime-toegevoegde BGT- en KickTheMap-opties volgen dezelfde instellingenstijl
-          - release-integriteitstest is versie-onafhankelijk gemaakt zodat versiebumpen de quality gate niet onterecht breekt
-          - bestaande instellingenlogica en opslaggedrag blijven ongewijzigd
+          - fixeert de fout `NoEntityType object has no attribute destroy` bij DXF-sjabloonexport met Normaal/Reverse
+          - Windows-runtime gebruikt ezdxf 1.4.4 voor de gerepareerde xref/ConflictPolicy.KEEP-samenvoeging
+          - extra regressietests gebruiken het echte kadastrale AutoCAD-sjabloon
+          - reverse variantblokken, rasterafbeeldingen en Dynamic Visibility `Versie` worden samen getest
+          - Windows-build controleert expliciet dat ezdxf 1.4.4 of nieuwer wordt gebundeld
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
