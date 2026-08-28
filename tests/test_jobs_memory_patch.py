@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import sys
 import threading
+import types
 import unittest
 
+import SleufBase
 from SleufBase import jobs_memory_patch
 
 
@@ -70,51 +73,61 @@ class JobsMemoryPatchTests(unittest.TestCase):
         self.assertFalse(hasattr(view.tile_client._thread_local, "session"))
 
     def test_jobs_patch_disables_automatic_hidden_browser_prelogin(self) -> None:
-        from SleufBase import kickthemap_jobs_browser as jobs_module
+        module_name = "SleufBase.kickthemap_jobs_browser"
+        fake_module = types.ModuleType(module_name)
 
-        window_class = jobs_module.KickTheMapJobsWindow
-        map_class = jobs_module.KickTheMapJobsMapView
-        original_prelogin = window_class._prelogin_kickthemap_browser
-        original_window_destroy = window_class.destroy
-        original_map_init = map_class.__init__
-        original_map_worker = map_class._load_map_worker
-        original_map_destroy = map_class.destroy
-        old_window_version = getattr(window_class, "_sleufbase_jobs_memory_patch_version", None)
-        old_map_version = getattr(map_class, "_sleufbase_jobs_memory_patch_version", None)
+        class FakeMapView:
+            def __init__(self, *args, **kwargs) -> None:
+                self.tile_client = _FakeTileClient()
+                self._map_request_id = 0
+                self._pending_map_result = None
 
+            def _load_map_worker(self, *args, **kwargs) -> None:
+                return
+
+            def destroy(self) -> None:
+                return
+
+        class FakeWindow:
+            def __init__(self) -> None:
+                self._browser_prelogin_started = False
+                self.map_view = None
+
+            def _prelogin_kickthemap_browser(self) -> None:
+                raise AssertionError("legacy hidden prelogin should have been replaced")
+
+            def destroy(self) -> None:
+                return
+
+        fake_module.KickTheMapJobsMapView = FakeMapView
+        fake_module.KickTheMapJobsWindow = FakeWindow
+
+        previous_module = sys.modules.get(module_name)
+        had_package_attr = hasattr(SleufBase, "kickthemap_jobs_browser")
+        previous_package_attr = getattr(SleufBase, "kickthemap_jobs_browser", None)
+        sys.modules[module_name] = fake_module
+        SleufBase.kickthemap_jobs_browser = fake_module
         try:
             jobs_memory_patch.install_jobs_memory_patch()
-
-            class DummyWindow:
-                _browser_prelogin_started = False
-
-            dummy = DummyWindow()
-            window_class._prelogin_kickthemap_browser(dummy)
+            dummy = FakeWindow()
+            dummy._prelogin_kickthemap_browser()
             self.assertTrue(dummy._browser_prelogin_started)
             self.assertEqual(
-                window_class._sleufbase_jobs_memory_patch_version,
+                FakeWindow._sleufbase_jobs_memory_patch_version,
                 jobs_memory_patch.PATCH_VERSION,
             )
         finally:
-            window_class._prelogin_kickthemap_browser = original_prelogin
-            window_class.destroy = original_window_destroy
-            map_class.__init__ = original_map_init
-            map_class._load_map_worker = original_map_worker
-            map_class.destroy = original_map_destroy
-            if old_window_version is None:
+            if previous_module is None:
+                sys.modules.pop(module_name, None)
+            else:
+                sys.modules[module_name] = previous_module
+            if had_package_attr:
+                SleufBase.kickthemap_jobs_browser = previous_package_attr
+            else:
                 try:
-                    delattr(window_class, "_sleufbase_jobs_memory_patch_version")
+                    delattr(SleufBase, "kickthemap_jobs_browser")
                 except AttributeError:
                     pass
-            else:
-                window_class._sleufbase_jobs_memory_patch_version = old_window_version
-            if old_map_version is None:
-                try:
-                    delattr(map_class, "_sleufbase_jobs_memory_patch_version")
-                except AttributeError:
-                    pass
-            else:
-                map_class._sleufbase_jobs_memory_patch_version = old_map_version
 
     def test_launcher_guard_reuses_existing_jobs_process_instead_of_spawning_another(self) -> None:
         class RunningProcess:
