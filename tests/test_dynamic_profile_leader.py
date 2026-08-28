@@ -7,17 +7,35 @@ import unittest
 import ezdxf
 
 from SleufBase import autocad_dynamic_visibility as dv
+from SleufBase.autocad_synthetic_polar_leader import (
+    BASE_POINT,
+    BLOCK_NAME,
+    GRIP_NODE,
+    LAYER_NAME,
+    MOVE_NODE,
+    PARAMETER_NODE,
+    STRETCH_NODE,
+    TOP_POINT,
+    inspect_synthetic_polar_leader,
+    promote_synthetic_polar_leader,
+)
 from SleufBase.cadastral_export import CadastralDxfExporter
 from SleufBase import template_dynamic_profile_leader_patch as leader_patch
 
 
 ASSET = Path(__file__).resolve().parents[1] / "assets" / "cadastral_template.dxf"
+OLD_DONOR = CadastralDxfExporter.TEMPLATE_PROFILE_LEGACY_DYNAMIC_LEADER_BLOCK_NAME
 
 
-def _metadata_records_for_block(path: Path, block_name: str):
+def _raw_records(path: Path):
     pairs, _newline, _bom = dv._read_pairs(path)
     records = dv._split_records(pairs)
     sections = dv._record_sections(records)
+    return pairs, records, sections
+
+
+def _metadata_records_for_block(path: Path, block_name: str):
+    _pairs, records, sections = _raw_records(path)
     _index, block_record = dv._target_block_record(records, sections, block_name)
     block_handle = (dv._record_handle(block_record) or "").upper()
 
@@ -58,52 +76,84 @@ def _metadata_records_for_block(path: Path, block_name: str):
     return metadata, block_entities
 
 
+def _action_dependency_refs(record: list[tuple[int, str]]) -> tuple[str, ...]:
+    in_action = False
+    refs: list[str] = []
+    for code, value in record:
+        if code == 100 and value.strip() == "AcDbBlockAction":
+            in_action = True
+            continue
+        if in_action and code == 100:
+            break
+        if in_action and code == 330:
+            refs.append(value.strip().upper())
+    return tuple(refs)
+
+
 class DynamicProfileLeaderTests(unittest.TestCase):
-    def test_template_contains_native_polar_stretch_move_donor(self) -> None:
-        metadata, block_entities = _metadata_records_for_block(
-            ASSET,
-            leader_patch.DYNAMIC_LEADER_BLOCK_NAME,
-        )
-        metadata_by_type = {dv._record_type(record): record for record in metadata}
-        self.assertIn("BLOCKPOLARPARAMETER", metadata_by_type)
-        self.assertIn("BLOCKPOLARGRIP", metadata_by_type)
-        self.assertIn("BLOCKSTRETCHACTION", metadata_by_type)
-        self.assertIn("BLOCKMOVEACTION", metadata_by_type)
-
-        polyline = next(record for record in block_entities if dv._record_type(record) == "LWPOLYLINE")
-        attdefs = [record for record in block_entities if dv._record_type(record) == "ATTDEF"]
-        self.assertEqual(len(attdefs), 2)
-        polyline_handle = (dv._record_handle(polyline) or "").upper()
-        attdef_handles = {(dv._record_handle(record) or "").upper() for record in attdefs}
-
-        stretch_refs = {
-            value.strip().upper()
-            for code, value in metadata_by_type["BLOCKSTRETCHACTION"]
-            if code in {330, 331}
-        }
-        move_refs = {
-            value.strip().upper()
-            for code, value in metadata_by_type["BLOCKMOVEACTION"]
-            if code == 330
-        }
-        self.assertIn(polyline_handle, stretch_refs)
-        self.assertTrue(attdef_handles.issubset(move_refs))
-
-        polar = metadata_by_type["BLOCKPOLARPARAMETER"]
-        base_x = next(float(value) for code, value in polar if code == 1010)
-        base_y = next(float(value) for code, value in polar if code == 1020)
-        end_x = next(float(value) for code, value in polar if code == 1011)
-        end_y = next(float(value) for code, value in polar if code == 1021)
-        self.assertAlmostEqual(base_x, 0.0)
-        self.assertAlmostEqual(base_y, 0.0)
-        self.assertAlmostEqual(end_x, 0.0)
-        self.assertAlmostEqual(end_y, 10.0)
-
-    def test_exporter_preserves_and_inserts_dynamic_leader(self) -> None:
+    def test_synthetic_polar_metadata_is_built_from_our_own_values(self) -> None:
         document = ezdxf.readfile(ASSET)
         exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
         exporter._remove_template_legacy_profile_leader_blocks(document)
-        self.assertIn(leader_patch.DYNAMIC_LEADER_BLOCK_NAME, document.blocks)
+
+        self.assertIn(BLOCK_NAME, document.blocks)
+        self.assertNotEqual(BLOCK_NAME, OLD_DONOR)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sleufbase-owned-polar.dxf"
+            document.saveas(output)
+            promote_synthetic_polar_leader(output, BLOCK_NAME)
+            reopened = ezdxf.readfile(output)
+            self.assertIn(BLOCK_NAME, reopened.blocks)
+
+            details = inspect_synthetic_polar_leader(output, BLOCK_NAME)
+            self.assertTrue(details["is_dynamic"])
+            self.assertEqual(details["parameter_count"], 1)
+            self.assertEqual(details["grip_count"], 1)
+            self.assertEqual(details["grip_component_count"], 2)
+            self.assertEqual(details["stretch_count"], 1)
+            self.assertEqual(details["move_count"], 1)
+            self.assertEqual(details["parameter_base"], BASE_POINT)
+            self.assertEqual(details["parameter_top"], TOP_POINT)
+            self.assertEqual(details["grip_top"], TOP_POINT)
+            self.assertEqual(details["parameter_labels"], ("Lengte", "Hoek"))
+
+            metadata, block_entities = _metadata_records_for_block(output, BLOCK_NAME)
+            metadata_by_type = {dv._record_type(record): record for record in metadata}
+            polar = metadata_by_type["BLOCKPOLARPARAMETER"]
+            grip = metadata_by_type["BLOCKPOLARGRIP"]
+            stretch = metadata_by_type["BLOCKSTRETCHACTION"]
+            move = metadata_by_type["BLOCKMOVEACTION"]
+
+            self.assertEqual(next(int(value) for code, value in polar if code == 90), PARAMETER_NODE)
+            self.assertEqual(next(int(value) for code, value in grip if code == 90), GRIP_NODE)
+            self.assertEqual(next(int(value) for code, value in stretch if code == 90), STRETCH_NODE)
+            self.assertEqual(next(int(value) for code, value in move if code == 90), MOVE_NODE)
+
+            polyline = next(record for record in block_entities if dv._record_type(record) == "LWPOLYLINE")
+            attdefs = [record for record in block_entities if dv._record_type(record) == "ATTDEF"]
+            self.assertEqual(len(attdefs), 2)
+            polyline_handle = (dv._record_handle(polyline) or "").upper()
+            attdef_handles = {(dv._record_handle(record) or "").upper() for record in attdefs}
+            stretch_refs = _action_dependency_refs(stretch)
+            move_refs = set(_action_dependency_refs(move))
+            self.assertEqual(stretch_refs, (polyline_handle,))
+            self.assertEqual(move_refs, attdef_handles)
+
+            # The synthetic parameter/action records must not reference the old
+            # example block name. The only accepted source is our new block.
+            metadata_text = "\n".join(value for record in metadata for _code, value in record)
+            self.assertNotIn(OLD_DONOR, metadata_text)
+            self.assertIn("SleufBase bovenkant", metadata_text)
+            self.assertIn("Bovenkant grip", metadata_text)
+
+    def test_exporter_removes_example_and_inserts_our_own_leader(self) -> None:
+        document = ezdxf.readfile(ASSET)
+        exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
+        exporter._remove_template_legacy_profile_leader_blocks(document)
+        self.assertIn(BLOCK_NAME, document.blocks)
+        self.assertEqual(leader_patch.DYNAMIC_LEADER_BLOCK_NAME, BLOCK_NAME)
+        self.assertEqual(leader_patch.DYNAMIC_LEADER_LAYER, LAYER_NAME)
 
         modelspace = document.modelspace()
         before_leaders = len(list(modelspace.query("LEADER")))
@@ -122,36 +172,22 @@ class DynamicProfileLeaderTests(unittest.TestCase):
         refs = [
             entity
             for entity in modelspace.query("INSERT")
-            if str(entity.dxf.name) == leader_patch.DYNAMIC_LEADER_BLOCK_NAME
+            if str(entity.dxf.name) == BLOCK_NAME
         ]
         self.assertTrue(refs)
         block_ref = refs[-1]
         self.assertAlmostEqual(float(block_ref.dxf.insert.x), 10.0)
-        self.assertAlmostEqual(float(block_ref.dxf.insert.y), 20.0)
+        self.assertAlmostEqual(float(block_ref.dxf.insert.y), 20.02)
         self.assertAlmostEqual(float(block_ref.dxf.xscale), 0.02)
         self.assertAlmostEqual(float(block_ref.dxf.yscale), 0.02)
         self.assertAlmostEqual(float(block_ref.dxf.rotation), 0.0)
-        self.assertEqual(str(block_ref.dxf.layer), leader_patch.DYNAMIC_LEADER_LAYER)
+        self.assertEqual(str(block_ref.dxf.layer), LAYER_NAME)
 
         values = {str(attribute.dxf.tag): str(attribute.dxf.text) for attribute in block_ref.attribs}
         self.assertEqual(values["OMSCHRIJVING"], "Datakabel")
         self.assertEqual(values["HOOGTE"], "Diepte: 0.85")
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            output = Path(temp_dir) / "dynamic-leader.dxf"
-            document.saveas(output)
-            reopened = ezdxf.readfile(output)
-            self.assertIn(leader_patch.DYNAMIC_LEADER_BLOCK_NAME, reopened.blocks)
-            metadata, _entities = _metadata_records_for_block(
-                output,
-                leader_patch.DYNAMIC_LEADER_BLOCK_NAME,
-            )
-            types = {dv._record_type(record) for record in metadata}
-            self.assertIn("BLOCKPOLARPARAMETER", types)
-            self.assertIn("BLOCKSTRETCHACTION", types)
-            self.assertIn("BLOCKMOVEACTION", types)
-
-    def test_old_standalone_marker_is_skipped_when_dynamic_donor_is_available(self) -> None:
+    def test_old_standalone_marker_is_skipped_for_synthetic_dynamic_leader(self) -> None:
         document = ezdxf.readfile(ASSET)
         exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
         exporter._remove_template_legacy_profile_leader_blocks(document)
