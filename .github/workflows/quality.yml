@@ -43,8 +43,9 @@ jobs:
             'requests>=2.32' \
             'shapely>=2.0,<3' \
             'mapbox-vector-tile>=2,<3' \
-            'ezdxf>=1.3,<2'
+            'ezdxf>=1.4.4,<2'
           python -m pip check
+          python -c "import ezdxf; print('ezdxf:', ezdxf.__version__)"
 
       - name: Check repository hygiene
         shell: bash
