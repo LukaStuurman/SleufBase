@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
@@ -143,6 +144,58 @@ class TemplateReversePatchTests(unittest.TestCase):
             imported_lines = list(reverse_block.query('LINE'))
             self.assertEqual(len(imported_lines), 1)
             self.assertEqual(imported_lines[0].dxf.layer, 'KABELS')
+
+    def test_merge_real_template_handles_autocad_proxy_resources(self) -> None:
+        template_path = REPO_ROOT / 'assets' / 'cadastral_template.dxf'
+        self.assertTrue(template_path.exists())
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            normal_path = directory / 'proefsleuven.dxf'
+            reverse_path = directory / '.proefsleuven.sleufbase-reverse-source.dxf'
+            shutil.copy2(template_path, normal_path)
+            shutil.copy2(template_path, reverse_path)
+
+            normal_document = ezdxf.readfile(normal_path)
+            normal_modelspace = normal_document.modelspace()
+            normal_line = normal_modelspace.add_line((0, 0), (5, 0))
+            reverse_patch._move_entities_to_variant_container(
+                normal_document,
+                normal_modelspace,
+                [normal_line],
+                label='PS_REAL',
+                slot_index=1,
+                mode=reverse_patch.NORMAL_MODE,
+            )
+            normal_document.saveas(normal_path)
+
+            reverse_document = ezdxf.readfile(reverse_path)
+            reverse_modelspace = reverse_document.modelspace()
+            reverse_line = reverse_modelspace.add_line((0, 1), (5, 1))
+            reverse_patch._move_entities_to_variant_container(
+                reverse_document,
+                reverse_modelspace,
+                [reverse_line],
+                label='PS_REAL',
+                slot_index=1,
+                mode=reverse_patch.REVERSE_MODE,
+            )
+            reverse_document.saveas(reverse_path)
+
+            self.assertEqual(
+                reverse_patch._merge_reverse_variant_document(normal_path, reverse_path),
+                1,
+            )
+            merged = ezdxf.readfile(normal_path)
+            reverse_layer = reverse_patch.variant_layer_name(
+                'PS_REAL', 1, reverse_patch.REVERSE_MODE
+            )
+            self.assertTrue(merged.layers.get(reverse_layer).is_off())
+            self.assertTrue(
+                any(
+                    entity.dxftype() == 'INSERT' and entity.dxf.layer == reverse_layer
+                    for entity in merged.modelspace()
+                )
+            )
 
     def test_reverse_image_dependency_is_preserved_and_relinked(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
