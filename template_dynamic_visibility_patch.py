@@ -55,6 +55,72 @@ def _blockref_dxfattribs(entity) -> dict[str, object]:
     return attributes
 
 
+def _make_reverse_image_definitions_unique(reverse_source_path: Path) -> dict[str, str]:
+    """Give reverse IMAGEDEF dictionary entries names that cannot alias normal images.
+
+    Normal and reverse exports deliberately use the same logical image names
+    (for example ``PS1_tiff``).  During the later xref merge the KEEP conflict
+    policy would otherwise reuse the normal IMAGEDEF and silently make the
+    reverse block point at the normal raster.  Renaming only the reverse
+    dictionary entries keeps the actual reverse TIFF/map resources distinct.
+    """
+
+    import ezdxf
+
+    source_path = Path(reverse_source_path)
+    document = ezdxf.readfile(source_path)
+    try:
+        image_dict = document.rootdict.get_required_dict("ACAD_IMAGE_DICT")
+    except Exception:
+        return {}
+
+    renamed: dict[str, str] = {}
+    processed_handles: set[str] = set()
+    for block in document.blocks:
+        block_name = str(getattr(block, "name", "") or "").upper()
+        if not block_name.startswith(reverse_patch.VARIANT_LAYER_PREFIX) or not block_name.endswith(
+            f"_{reverse_patch.REVERSE_MODE}{reverse_patch.VARIANT_BLOCK_SUFFIX}"
+        ):
+            continue
+
+        for image in block.query("IMAGE"):
+            try:
+                image_def = image.image_def
+            except Exception:
+                image_def = None
+            if image_def is None:
+                continue
+
+            handle = str(getattr(image_def.dxf, "handle", "") or id(image_def)).upper()
+            if handle in processed_handles:
+                continue
+            processed_handles.add(handle)
+
+            original_name = str(image_dict.find_key(image_def) or "").strip()
+            if not original_name:
+                continue
+
+            base_name = f"{original_name}_{reverse_patch.REVERSE_MODE}"
+            candidate = base_name
+            sequence = 2
+            while True:
+                existing = image_dict.get(candidate)
+                if existing is None or existing is image_def:
+                    break
+                candidate = f"{base_name}_{sequence}"
+                sequence += 1
+
+            if candidate == original_name:
+                continue
+            image_dict.add(candidate, image_def)
+            image_dict.discard(original_name)
+            renamed[original_name] = candidate
+
+    if renamed:
+        document.saveas(source_path)
+    return renamed
+
+
 def _wrap_variant_pairs_as_static_blocks(document) -> list[str]:
     """Replace each normal/reverse top-level pair with one two-child wrapper.
 
@@ -196,6 +262,7 @@ def install_template_dynamic_visibility_patch() -> None:
     original_merge = reverse_patch._merge_reverse_variant_document
 
     def _merge_with_native_dynamic_visibility(final_output_path, reverse_source_path):
+        _make_reverse_image_definitions_unique(Path(reverse_source_path))
         merged_count = original_merge(final_output_path, reverse_source_path)
         _promote_exported_variants_to_dynamic_blocks(Path(final_output_path))
         return merged_count
