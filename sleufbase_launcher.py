@@ -181,6 +181,9 @@ def main() -> int:
         return 0
 
     if "--kickthemap-jobs-browser" in args:
+        from SleufBase.jobs_memory_patch import install_jobs_memory_patch
+
+        install_jobs_memory_patch()
         from SleufBase.kickthemap_jobs_browser import main as jobs_main
 
         jobs_main()
@@ -200,6 +203,9 @@ def main() -> int:
 
     _install_runtime_patches()
     from SleufBase.app import KlicViewerApp
+    from SleufBase.jobs_memory_patch import install_jobs_launcher_guard
+
+    install_jobs_launcher_guard(KlicViewerApp)
 
     app = KlicViewerApp()
     install_tk_exception_handler(app)
