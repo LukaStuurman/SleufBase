@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.5'
+  SLEUFBASE_RELEASE_VERSION: '0.3.6'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.5
+          name: SleufBase-Windows-v0.3.6
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,16 +160,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.5
+          SleufBase Windows v0.3.6
 
           Belangrijk:
-          - Dynamic Block `Versie` wordt bij openen direct als `Normaal` geïnitialiseerd
-          - gegenereerde blocks nemen de AutoCAD `AcDbBlockRepETag` over van het echte donorblock
-          - `Normaal` en `Reverse` blijven afzonderlijk selecteerbaar met hun eigen TIFF/kaart en dwarsprofiel
-          - instellingenvenster is groter en resizable met minder lange uitlegtekst
-          - sectiekoppen zijn vlak en borderless zonder grijze titelvlakken
-          - KickTheMap kabel- en woordeninstellingen hebben duidelijkere compacte titels
-          - KickTheMap-woordenlijsten krijgen extra hoogte en rekruimte zodat de onderste lijst zichtbaar blijft
+          - instellingenoverzicht is rustiger en gebruikt witte inhoudsvlakken zonder grijze blokken achter koppen of uitleg
+          - de grote KickTheMap-woordenlijst staat niet meer permanent in het hoofdvenster
+          - `Woordenlijst beheren…` opent de bestaande woordeneditor in een ruime aparte instellingenweergave
+          - met `Terug naar instellingen` keer je terug naar het normale overzicht; Opslaan blijft de bestaande instellingenlogica gebruiken
+          - de hoofdinstellingen krijgen meer ruimte doordat de woordenkolom compact blijft zolang de editor gesloten is
+          - woordenregels, DXF-lagen, kleuren, dwarsprofielnamen, toevoegen en verwijderen blijven functioneel via dezelfde bestaande editor
+          - Dynamic Block `Versie: Normaal/Reverse` en de 0.3.5 AutoCAD-initialisatie blijven ongewijzigd aanwezig
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
