@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.3'
+  SLEUFBASE_RELEASE_VERSION: '0.3.4'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.3
+          name: SleufBase-Windows-v0.3.4
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,14 +160,14 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.3
+          SleufBase Windows v0.3.4
 
           Belangrijk:
-          - fixeert de fout `NoEntityType object has no attribute destroy` bij DXF-sjabloonexport met Normaal/Reverse
-          - Windows-runtime gebruikt ezdxf 1.4.4 voor de gerepareerde xref/ConflictPolicy.KEEP-samenvoeging
-          - extra regressietests gebruiken het echte kadastrale AutoCAD-sjabloon
-          - reverse variantblokken, rasterafbeeldingen en Dynamic Visibility `Versie` worden samen getest
-          - Windows-build controleert expliciet dat ezdxf 1.4.4 of nieuwer wordt gebundeld
+          - elk DXF-sjabloonvak heeft één Dynamic Block met `Versie: Normaal/Reverse`
+          - `Normaal` toont alleen de normale TIFF/kaart en het normale dwarsprofiel
+          - `Reverse` toont alleen de omgekeerde TIFF/kaart en het reverse dwarsprofiel
+          - reverse IMAGEDEF-bronnen krijgen unieke namen zodat de normale rasterbron niet meer wordt hergebruikt
+          - regressietest gebruikt het echte kadastrale sjabloon en controleert beide rasterbronnen plus de `Versie`-keuze
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
