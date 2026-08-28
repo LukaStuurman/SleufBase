@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from SleufBase import settings_ui
+from SleufBase import settings_general_layout_patch, settings_ui
 
 
 class SettingsUiTests(unittest.TestCase):
@@ -36,6 +36,19 @@ class SettingsUiTests(unittest.TestCase):
         self.assertTrue(callable(settings_ui._install_words_launcher))
         self.assertTrue(callable(settings_ui._open_words_view))
         self.assertTrue(callable(settings_ui._close_words_view))
+
+    def test_words_launcher_is_installed_in_full_width_general_settings(self) -> None:
+        self.assertEqual(settings_general_layout_patch._GENERAL_TITLE, "Algemeen")
+        self.assertEqual(
+            settings_general_layout_patch._WORDS_BUTTON_TEXT,
+            "Woordenlijst beheren…",
+        )
+        self.assertIs(
+            settings_ui._install_words_launcher,
+            settings_general_layout_patch._install_words_launcher_in_general,
+        )
+        self.assertTrue(callable(settings_general_layout_patch._make_general_full_width))
+        self.assertTrue(callable(settings_general_layout_patch._place_launcher_in_general))
 
 
 if __name__ == "__main__":
