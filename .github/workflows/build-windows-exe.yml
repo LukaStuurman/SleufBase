@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.9'
+  SLEUFBASE_RELEASE_VERSION: '0.3.10'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.9
+          name: SleufBase-Windows-v0.3.10
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,16 +160,15 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.9
+          SleufBase Windows v0.3.10
 
           Belangrijk:
-          - Normaal is nu al in de basis-DXF de zichtbare Dynamic Block-state bij het eerste openen in AutoCAD
-          - Reverse start expliciet onzichtbaar (`DXF 60=1`) in plaats van eerst over Normaal heen te worden getekend
-          - Normaal en Reverse krijgen dezelfde `AcDbBlockRepETag` state-indexering als het echte AutoCAD-donorblok uit het sjabloon
-          - de `Versie` visibility-selector wordt verplaatst naar direct rechts/boven het betreffende dwarsprofiel in plaats van de oude donorpositie rond `(0, 5)`
-          - de oorspronkelijke AutoCAD-relatie tussen visibility parameter en grip blijft behouden
-          - de instellingenindeling uit v0.3.8 en de Jobs-geheugenfix uit v0.3.7 blijven aanwezig
-          - regressietests controleren eerste zichtbaarheid, state-tags, selectorpositie en heropenen van de DXF
+          - de KickTheMap materiaalkeuzes zijn weer zichtbaar in Instellingen
+          - onder Algemeen staat een compacte editor om materiaalwaarden toe te voegen en te verwijderen
+          - de editor gebruikt dezelfde bestaande materiaallijst en Opslaan-logica als voorheen
+          - `Woordenlijst beheren…` blijft apart beschikbaar en Algemeen blijft over de volledige breedte
+          - de Dynamic Block fixes voor Normaal/Reverse en de selectorpositie uit v0.3.9 blijven aanwezig
+          - regressietests en de volledige Windows-build zijn uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
