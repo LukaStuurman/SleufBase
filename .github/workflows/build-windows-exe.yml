@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.7'
+  SLEUFBASE_RELEASE_VERSION: '0.3.8'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.7
+          name: SleufBase-Windows-v0.3.8
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,16 +160,15 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.7
+          SleufBase Windows v0.3.8
 
           Belangrijk:
-          - KickTheMap Jobs start niet langer automatisch een verborgen WebView2-browser voor prelogin
-          - de normale KickTheMap-browser logt pas in wanneer daadwerkelijk een job wordt geopend
-          - vanuit het hoofdvenster kan maar één Jobs-proces tegelijk actief zijn, zodat dubbele vensters geen extra geheugen stapelen
-          - de Jobs-kaartcache is begrensd van 768 naar 96 tegels, ongeveer 24 MiB ruwe RGBA-cache in plaats van ongeveer 192 MiB
-          - kaartafbeeldingen, marker-/labelcaches en tile-cache worden expliciet vrijgegeven wanneer de kaartweergave sluit
-          - late kaartresultaten worden genegeerd als de map view al is gesloten
-          - instellingenweergave uit v0.3.6 en Dynamic Block `Versie: Normaal/Reverse` blijven ongewijzigd aanwezig
+          - de sectie Algemeen gebruikt nu de volledige beschikbare breedte van het instellingenvenster
+          - de losse KickTheMap-woordenlijstkaart rechtsboven is verwijderd
+          - `Woordenlijst beheren…` staat compact binnen de sectie Algemeen
+          - de aparte ruime KickTheMap-woordenlijstweergave blijft behouden
+          - bestaande Opslaan-logica, woordenregels, DXF-lagen, kleuren en dwarsprofielnamen blijven ongewijzigd
+          - de Jobs-geheugenfix uit v0.3.7 en Dynamic Block `Versie: Normaal/Reverse` blijven aanwezig
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
