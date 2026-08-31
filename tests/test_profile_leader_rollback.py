@@ -2,37 +2,43 @@ from __future__ import annotations
 
 import unittest
 
+from SleufBase.autocad_profile_leader_donor import BLOCK_NAME, DONOR_SHA256
 from SleufBase.cadastral_export import CadastralDxfExporter
 
 
-class ProfileLeaderRollbackTests(unittest.TestCase):
-    def test_profile_leader_methods_are_the_original_v0310_exporter_methods(self) -> None:
+class ProfileLeaderDonorActivationTests(unittest.TestCase):
+    def test_profile_leader_methods_use_approved_donor_patch(self) -> None:
+        expected_module = "SleufBase.template_dynamic_profile_leader_patch"
         self.assertEqual(
             CadastralDxfExporter._remove_template_legacy_profile_leader_blocks.__module__,
-            "SleufBase.cadastral_export",
+            expected_module,
         )
         self.assertEqual(
             CadastralDxfExporter._add_template_profile_multileader.__module__,
-            "SleufBase.cadastral_export",
+            expected_module,
         )
         self.assertEqual(
             CadastralDxfExporter._distribute_template_leader_labels.__module__,
-            "SleufBase.cadastral_export",
+            expected_module,
         )
         self.assertEqual(
             CadastralDxfExporter._add_template_profile_leader_marker.__module__,
-            "SleufBase.cadastral_export",
+            expected_module,
         )
 
-    def test_no_later_polar_profile_patch_is_active(self) -> None:
-        self.assertFalse(
-            hasattr(CadastralDxfExporter, "SLEUFBASE_DYNAMIC_PROFILE_LEADER_POLAR")
+    def test_approved_polar_profile_patch_is_active(self) -> None:
+        self.assertTrue(CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_POLAR)
+        self.assertEqual(
+            CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_BLOCK,
+            BLOCK_NAME,
         )
-        self.assertFalse(
-            hasattr(CadastralDxfExporter, "SLEUFBASE_DYNAMIC_PROFILE_LEADER_BLOCK")
+        self.assertEqual(
+            CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_DONOR_SHA256,
+            DONOR_SHA256,
         )
-        self.assertFalse(
-            hasattr(CadastralDxfExporter, "_sleufbase_dynamic_profile_leader_patch_version")
+        self.assertGreaterEqual(
+            CadastralDxfExporter._sleufbase_dynamic_profile_leader_patch_version,
+            3,
         )
 
 
