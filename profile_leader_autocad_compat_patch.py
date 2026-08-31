@@ -11,9 +11,10 @@ from . import template_dynamic_profile_leader_patch as profile_patch
 PATCH_VERSION = 1
 DONOR_DYNAMIC_BLOCK_GUID = "{E2960563-75C0-7641-A1E0-122EAD996DAC}"
 
-# Exact CLASS records from the user-supplied working donor DXF.  These records
-# are required for AutoCAD/ObjectDBX to instantiate the native Dynamic Block
-# evaluation objects instead of treating them as unknown/proxy data.
+# CLASS registrations from the user-supplied working donor DXF.  The semantic
+# registration fields are preserved from the donor. DXF group 91 is deliberately
+# recalculated for the final SleufBase drawing because it is the number of
+# instances of that class in the complete drawing, not a fixed class property.
 _DONOR_CLASS_RECORDS: tuple[tuple[tuple[int, str], ...], ...] = (
     ((0, "CLASS"), (1, "ACAD_EVALUATION_GRAPH"), (2, "AcDbEvalGraph"), (3, "ObjectDBX Classes"), (90, "     1153"), (91, "        1"), (280, "     0"), (281, "     0")),
     ((0, "CLASS"), (1, "BLOCKLINEARPARAMETER"), (2, "AcDbBlockLinearParameter"), (3, "ObjectDBX Classes"), (90, "     1153"), (91, "        1"), (280, "     0"), (281, "     0")),
@@ -84,8 +85,6 @@ def _insert_blkrefs(record: list[tuple[int, str]], reference_handles: list[str])
     payload.extend((331, handle) for handle in reference_handles)
     payload.append((102, "}"))
 
-    # The donor stores BLKREFS directly after the block-layout handle (340).  If
-    # that handle is absent, place it after the block name record instead.
     insert_after = None
     for index, (code, _value) in enumerate(cleaned):
         if code == 340:
@@ -130,23 +129,62 @@ def _reference_handles(
     return handles
 
 
-def _inject_required_classes(
+def _class_instance_counts(
     records: list[list[tuple[int, str]]],
-    sections: list[str | None],
-) -> int:
-    """Replace the relevant CLASS records with the donor records verbatim.
+    class_names: set[str],
+) -> dict[str, int]:
+    counts = {name: 0 for name in class_names}
+    for record in records:
+        record_type = dv._record_type(record).upper()
+        if record_type in counts:
+            counts[record_type] += 1
+    return counts
 
-    Merely having a class with the same DXF name is not enough. The cadastral
-    template contains older/different registration records for these ObjectDBX
-    classes. AutoCAD must see the same proxy/version flags as the working donor,
-    so existing records are deliberately replaced rather than only filling in
-    missing names.
-    """
 
+def _class_record_for_drawing(
+    donor_record: list[tuple[int, str]],
+    instance_count: int,
+) -> list[tuple[int, str]]:
+    result: list[tuple[int, str]] = []
+    replaced = False
+    for code, value in donor_record:
+        if code == 91:
+            result.append((91, f"{int(instance_count):9d}"))
+            replaced = True
+        else:
+            result.append((code, value))
+    if not replaced:
+        result.append((91, f"{int(instance_count):9d}"))
+    return result
+
+
+def _expected_class_records(
+    records: list[list[tuple[int, str]]],
+) -> dict[str, list[tuple[int, str]]]:
     donor_by_name = {
         (_first_value(list(donor_record), 1) or "").upper(): list(donor_record)
         for donor_record in _DONOR_CLASS_RECORDS
     }
+    counts = _class_instance_counts(records, set(donor_by_name))
+    return {
+        name: _class_record_for_drawing(record, counts[name])
+        for name, record in donor_by_name.items()
+    }
+
+
+def _inject_required_classes(
+    records: list[list[tuple[int, str]]],
+    sections: list[str | None],
+) -> int:
+    """Use donor CLASS semantics with a drawing-correct instance count.
+
+    The cadastral template contains registrations with different proxy/version
+    fields. Those semantic fields are replaced with the values from the working
+    user donor. Group 91 is not copied from the donor: it is recomputed from the
+    complete final DXF so the class table stays internally consistent.
+    """
+
+    expected_by_name = _expected_class_records(records)
     seen: set[str] = set()
     changes = 0
 
@@ -154,7 +192,7 @@ def _inject_required_classes(
         if section != "CLASSES" or dv._record_type(record) != "CLASS":
             continue
         name = (_first_value(record, 1) or "").upper()
-        expected = donor_by_name.get(name)
+        expected = expected_by_name.get(name)
         if expected is None:
             continue
         seen.add(name)
@@ -163,8 +201,8 @@ def _inject_required_classes(
             changes += 1
 
     missing = [
-        list(donor_by_name[name])
-        for name in donor_by_name
+        list(expected_by_name[name])
+        for name in expected_by_name
         if name not in seen
     ]
     if missing:
@@ -227,6 +265,10 @@ def inspect_profile_leader_autocad_compat(
         for record, section in zip(records, sections)
         if section == "CLASSES" and dv._record_type(record) == "CLASS"
     }
+    expected_classes = {
+        name: tuple(record)
+        for name, record in _expected_class_records(records).items()
+    }
     _block_record_index, block_record = dv._target_block_record(records, sections, block_name)
 
     guid = None
@@ -248,15 +290,15 @@ def inspect_profile_leader_autocad_compat(
         if in_blkrefs and code == 331:
             blkrefs.append(value.strip().upper())
 
-    expected_classes = {
-        (_first_value(list(record), 1) or "").upper(): tuple(record)
-        for record in _DONOR_CLASS_RECORDS
-    }
     return {
         "guid": guid,
         "blkrefs": tuple(blkrefs),
         "actual_refs": tuple(_reference_handles(records, block_name)),
         "required_classes": tuple(expected_classes),
+        "class_instance_counts": {
+            name: int(_first_value(list(record), 91) or "0")
+            for name, record in expected_classes.items()
+        },
         "missing_classes": tuple(
             name for name in expected_classes if name not in class_records
         ),
@@ -272,9 +314,6 @@ def install_profile_leader_autocad_compat_patch() -> None:
     if getattr(donor, "_sleufbase_profile_leader_autocad_compat_patch_version", 0) >= PATCH_VERSION:
         return
 
-    # Installed after the literal donor patch.  The final export wrapper resolves
-    # profile_patch.promote_profile_leader_block at runtime, so replacing both
-    # module globals makes this the last raw-DXF mutation before validation.
     donor.promote_profile_leader_block = promote_profile_leader_autocad_compat
     profile_patch.promote_profile_leader_block = promote_profile_leader_autocad_compat
     donor.SLEUFBASE_PROFILE_LEADER_DONOR_GUID = DONOR_DYNAMIC_BLOCK_GUID
