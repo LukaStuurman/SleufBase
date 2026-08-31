@@ -134,31 +134,54 @@ def _inject_required_classes(
     records: list[list[tuple[int, str]]],
     sections: list[str | None],
 ) -> int:
-    existing = {
-        (_first_value(record, 1) or "").upper()
-        for record, section in zip(records, sections)
-        if section == "CLASSES" and dv._record_type(record) == "CLASS"
-    }
-    missing = [
-        [tuple(item) for item in donor_record]
-        for donor_record in _DONOR_CLASS_RECORDS
-        if (_first_value(list(donor_record), 1) or "").upper() not in existing
-    ]
-    if not missing:
-        return 0
+    """Replace the relevant CLASS records with the donor records verbatim.
 
-    classes_end = next(
-        (
-            index
-            for index, (record, section) in enumerate(zip(records, sections))
-            if section == "CLASSES" and dv._record_type(record) == "ENDSEC"
-        ),
-        None,
-    )
-    if classes_end is None:
-        raise RuntimeError("DXF bevat geen afsluiting van de CLASSES-sectie.")
-    records[classes_end:classes_end] = missing
-    return len(missing)
+    Merely having a class with the same DXF name is not enough. The cadastral
+    template contains older/different registration records for these ObjectDBX
+    classes. AutoCAD must see the same proxy/version flags as the working donor,
+    so existing records are deliberately replaced rather than only filling in
+    missing names.
+    """
+
+    donor_by_name = {
+        (_first_value(list(donor_record), 1) or "").upper(): list(donor_record)
+        for donor_record in _DONOR_CLASS_RECORDS
+    }
+    seen: set[str] = set()
+    changes = 0
+
+    for index, (record, section) in enumerate(zip(records, sections)):
+        if section != "CLASSES" or dv._record_type(record) != "CLASS":
+            continue
+        name = (_first_value(record, 1) or "").upper()
+        expected = donor_by_name.get(name)
+        if expected is None:
+            continue
+        seen.add(name)
+        if record != expected:
+            records[index] = list(expected)
+            changes += 1
+
+    missing = [
+        list(donor_by_name[name])
+        for name in donor_by_name
+        if name not in seen
+    ]
+    if missing:
+        classes_end = next(
+            (
+                index
+                for index, (record, section) in enumerate(zip(records, sections))
+                if section == "CLASSES" and dv._record_type(record) == "ENDSEC"
+            ),
+            None,
+        )
+        if classes_end is None:
+            raise RuntimeError("DXF bevat geen afsluiting van de CLASSES-sectie.")
+        records[classes_end:classes_end] = missing
+        changes += len(missing)
+
+    return changes
 
 
 def promote_profile_leader_autocad_compat(
