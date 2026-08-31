@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.15'
+  SLEUFBASE_RELEASE_VERSION: '0.3.16'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.15
+          name: SleufBase-Windows-v0.3.16
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,22 +160,19 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.15
+          SleufBase Windows v0.3.16
 
           Belangrijk:
-          - kabel/leiding-profielverwijzingen gebruiken nu de exact aangeleverde werkende AutoCAD Dynamic Block-donor
-          - donor SHA-256: `f975ccf4cbe8d98aba66dc52300c7c255e9c2d0a86aff4f78f31b7c4c0dc4c3b`
-          - blocknaam blijft `SAL-VERWIJZING_LEIDING_BOVENKANT-SOD`
-          - de donor-geometrie bestaat uit de originele cirkel, OMSCHRIJVING, verwijzingslijn en HOOGTE
-          - de native Diameter Linear/Scale-grip uit de donor blijft behouden
-          - de native Polar Parameter/Grip van `(0,0)` naar `(0,10)` blijft behouden
-          - de native Stretch Action blijft exact gekoppeld aan de verwijzingslijn
-          - de native Move Action blijft exact gekoppeld aan `OMSCHRIJVING` en `HOOGTE`
-          - SleufBase verzint geen eigen Dynamic Block action graph; alleen DXF-handles worden opnieuw gekoppeld aan de nieuw geëxporteerde entities
-          - de v0.3.10 profielplaatsing blijft de basis voor de insertpositie
-          - donor-metadata wordt pas na de Normaal/Reverse Dynamic Visibility-finalisatie toegevoegd zodat een latere ezdxf-save de AutoCAD actions niet verwijdert
-          - de `Versie: Normaal/Reverse` Dynamic Visibility en alle v0.3.14 instellingen/autosave/Jobs-fixes blijven behouden
-          - regressietests controleren Polar-coördinaten, Stretch/Move/Scale-targets, RepETags, save/reopen en idempotentie
+          - oorzaak van de ontbrekende Polar-grips is opgelost: de kabel/leiding Dynamic Blocks worden niet meer genest in het grotere `Versie: Normaal/Reverse` block
+          - `SAL-VERWIJZING_LEIDING_BOVENKANT-SOD` blijft nu als top-level blockreference direct in modelspace/current layout staan, zoals in de aangeleverde werkende voorbeeld-DXF
+          - daardoor kan AutoCAD de native Polar- en Diameter-grips van de leidingverwijzing daadwerkelijk tonen en bedienen
+          - de goedgekeurde donor blijft exact dezelfde: SHA-256 `f975ccf4cbe8d98aba66dc52300c7c255e9c2d0a86aff4f78f31b7c4c0dc4c3b`
+          - de native Polar Parameter/Grip, Stretch Action, Move Action en Diameter Scale Action uit die donor blijven behouden
+          - alle overige profiel-, kaart- en slotgeometrie blijft wel in de Normaal/Reverse content blocks zitten
+          - de reverse merge importeert de top-level leidingverwijzingen niet opnieuw, zodat er geen dubbele set ontstaat; de normale verwijzingsset blijft top-level en handmatig verstelbaar
+          - dit is een AutoCAD-beperking: Dynamic Block-grips van een genest block zijn buiten de Block Editor niet bedienbaar; daarom staan de verwijzingen bewust buiten het `Versie`-wrapperblock
+          - de overige v0.3.15 donorvalidatie, instellingen, autosave, Jobs- en Dynamic Visibility-fixes blijven behouden
+          - regressietests controleren dat leidingverwijzingen top-level blijven terwijl gewone profielentities nog steeds correct worden genest
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
