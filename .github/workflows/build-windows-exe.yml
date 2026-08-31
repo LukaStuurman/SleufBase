@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.12'
+  SLEUFBASE_RELEASE_VERSION: '0.3.13'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.12
+          name: SleufBase-Windows-v0.3.13
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,18 +160,20 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.12
+          SleufBase Windows v0.3.13
 
           Belangrijk:
-          - Instellingen bevat nu een aparte `KickTheMap Kabel/Leiding-keuzes` lijst voor extra woorden in de Kabel/Leiding-dropdown
-          - deze extra dropdownwoorden staan los van `Woordenlijst beheren…`; de bestaande DXF-laag-, kleur- en dwarsprofiellogica blijft daardoor ongewijzigd
-          - `Materiaalkeuzes` blijft een afzonderlijke lijst voor de Materiaal-dropdown
-          - onder Algemeen staat nu een Autosave-sectie met aan/uit, interval in minuten en maximum aantal autosaves
-          - `Autosave laden…` toont beschikbare back-ups met datum/tijd, bestandsnaam en grootte, nieuwste bovenaan
-          - een gekozen autosave wordt via de normale SleufBase-projectlader geopend, zodat bestaande projectherstelpatches blijven werken
-          - de bestaande autosave-planner en rotatie worden hergebruikt; er is geen tweede back-upsysteem toegevoegd
-          - de AutoCAD Dynamic Leader en `Versie: Normaal/Reverse` verbeteringen uit v0.3.11 blijven aanwezig
-          - regressietests en de volledige Windows-build zijn uitgevoerd
+          - profielverwijzingen gebruiken niet langer de Dynamic Block/grip-data uit het bestaande AutoCAD-voorbeeldblok
+          - nieuw SleufBase-blok `SLEUFBASE_VERWIJZING_POLAR_BOVENKANT` met eigen geometrie en eigen Dynamic Block-metadata
+          - elke verwijzing krijgt een eigen Polar-parameter met `Lengte` en `Hoek` en een zichtbare `Bovenkant grip`
+          - de onderkant blijft het vaste ankerpunt; de bovenkant kan vrij worden verplaatst zodat de verwijzingslijn langer, korter en schuin kan worden
+          - een eigen Stretch-action past alleen de verwijzingslijn aan
+          - een eigen Move-action verplaatst `OMSCHRIJVING` en `HOOGTE` mee zonder de tekst te roteren
+          - de evaluation graph gebruikt SleufBase-eigen node-ID's 101-106 en iedere Dynamic Block-definitie krijgt een nieuwe GUID
+          - het oude donor/voorbeeldblok wordt tijdens export verwijderd en is niet meer nodig voor de Polar-grip
+          - de bestaande `Versie: Normaal/Reverse` Dynamic Visibility blijft behouden
+          - regressietests controleren de eigen grippositie en dat Stretch/Move naar de eigen lijn en attributen verwijzen
+          - de KickTheMap dropdown- en autosave-instellingen uit v0.3.12 blijven aanwezig
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
