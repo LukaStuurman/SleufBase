@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from math import hypot
 import unittest
 
 from SleufBase.cadastral_export import CadastralDxfExporter
@@ -83,10 +84,23 @@ class VirtualTrenchTemplatePatchTests(unittest.TestCase):
         end = next(point for point in payload["points"] if point.get("role") == "end")
         self.assertAlmostEqual(profile.start_point.x, float(start["x"]), places=6)
         self.assertAlmostEqual(profile.start_point.y, float(start["y"]), places=6)
-        self.assertAlmostEqual(profile.end_point.x, float(end["x"]), places=6)
-        self.assertAlmostEqual(profile.end_point.y, float(end["y"]), places=6)
         self.assertAlmostEqual(float(profile.start_point.z or 0.0), float(start["z"]), places=6)
         self.assertAlmostEqual(float(profile.end_point.z or 0.0), float(end["z"]), places=6)
+
+        # The existing virtual-trench profile builder reserves half the marker
+        # diameter past the far endpoint. That can extend the displayed profile
+        # by 1 cm for a 0.02 m marker, but it must stay exactly on the measured
+        # MarXact start->end axis and may never meaningfully lengthen it.
+        measured_dx = float(end["x"]) - float(start["x"])
+        measured_dy = float(end["y"]) - float(start["y"])
+        measured_length = hypot(measured_dx, measured_dy)
+        profile_dx = float(profile.end_point.x) - float(profile.start_point.x)
+        profile_dy = float(profile.end_point.y) - float(profile.start_point.y)
+        profile_length = hypot(profile_dx, profile_dy)
+        cross_track = abs((profile_dx * measured_dy) - (profile_dy * measured_dx)) / measured_length
+        self.assertAlmostEqual(cross_track, 0.0, places=6)
+        self.assertGreaterEqual(profile_length + 1e-9, measured_length)
+        self.assertLessEqual(profile_length - measured_length, 0.010001)
         self.assertEqual(len([point for point in profile.points if not point.is_endpoint]), 3)
 
     def test_virtual_dataset_is_injected_with_private_id_and_restored(self) -> None:
