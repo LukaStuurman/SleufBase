@@ -166,7 +166,9 @@ jobs:
           - bij `marXact import` komt het maaiveld van het beginpunt nu rechtstreeks uit de Z-waarden van de gemeten 3D-polyline
           - hetzelfde geldt voor het maaiveld van het eindpunt
           - de Z wordt op het dichtstbijzijnde segment van de 3D-polyline geïnterpoleerd op de XY-positie van het begin/eindpunt; MULTILEADER-hoogtes of kabel-/leidinghoogtes worden hiervoor niet gebruikt
-          - regressietest toegevoegd die begin- en eindmaaiveld controleert op een 3D-polyline met verschillende Z-waarden
+          - DXF sjabloon export haalt BGT-vector tiles nu per lokaal proefsleufgebied op in plaats van over één grote gecombineerde bounding box
+          - verspreid liggende proefsleuven veroorzaken daardoor niet langer een enorme BGT-download van het lege gebied ertussen; lokale resultaten worden gededupliceerd en de status toont voortgang per gebied
+          - regressietests toegevoegd voor zowel MarXact-maaiveld-Z als lokale BGT-templatefetches
           - gevalideerd op de aangeleverde MarXact-DXF: 26 proefsleuven, alle begin/eindpunten met geldige polyline-Z en 211/211 kabel-/leidingpunten toegewezen
           - de volledige Quality Gate en Windows-packaging worden voor deze release uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
