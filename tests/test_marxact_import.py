@@ -12,7 +12,7 @@ from SleufBase.marxact_import import (
     trench_centerline,
 )
 from SleufBase.settings import normalize_marxact_name_mappings
-from SleufBase.virtual_trench import VIRTUAL_TRENCH_METADATA_KEY
+from SleufBase.virtual_trench import VIRTUAL_TRENCH_METADATA_KEY, point_chainage
 
 
 class MarXactImportTests(unittest.TestCase):
@@ -35,7 +35,7 @@ class MarXactImportTests(unittest.TestCase):
         )
         self.assertEqual(normalized, {"Water": "water", "Laagspanning": "ls"})
 
-    def test_centerline_uses_long_axis_and_measured_width(self) -> None:
+    def test_centerline_uses_long_axis_and_measured_width_without_block_direction(self) -> None:
         trench = MarXactTrench(
             name="ps3",
             polygon=(
@@ -67,6 +67,48 @@ class MarXactImportTests(unittest.TestCase):
         self.assertAlmostEqual(end[0], 4.0, places=6)
         self.assertAlmostEqual(end[1], 1.0, places=6)
         self.assertAlmostEqual(end[2] or 0.0, 16.0, places=6)
+
+    def test_centerline_follows_blocks_and_hits_3d_polygon_boundary(self) -> None:
+        # The polygon itself is much longer east-west. The cable/pipe blocks run
+        # north-south, so the MarXact virtual trench must follow the blocks rather
+        # than the polygon PCA. This reproduces the case where the old direction
+        # made several cables project onto exactly the same chainage.
+        trench = MarXactTrench(
+            name="ps-block-direction",
+            polygon=(
+                (0.0, 0.0, 10.0),
+                (8.0, 0.0, 18.0),
+                (8.0, 3.0, 22.0),
+                (0.0, 3.0, 14.0),
+            ),
+            objects=[
+                MarXactObject(4.0, 0.5, 3.0, "Water", "water", 3.0, "marxact_point"),
+                MarXactObject(4.0, 1.5, 3.1, "Laagspanning", "ls", 3.1, "marxact_point"),
+                MarXactObject(4.0, 2.5, 3.2, "Datatransport", "data", 3.2, "marxact_point"),
+            ],
+        )
+
+        start, end, _width = trench_centerline(trench)
+        self.assertAlmostEqual(start[0], 4.0, places=6)
+        self.assertAlmostEqual(end[0], 4.0, places=6)
+        self.assertAlmostEqual(start[1], 0.0, places=6)
+        self.assertAlmostEqual(end[1], 3.0, places=6)
+        self.assertAlmostEqual(start[2] or 0.0, 14.0, places=6)
+        self.assertAlmostEqual(end[2] or 0.0, 18.0, places=6)
+
+        layer = build_marxact_virtual_layer(
+            trench,
+            source_path="block-direction.dxf",
+            source_name_resolver=lambda item: item.mapping_name,
+            fallback_index=1,
+        )
+        payload = layer.metadata[VIRTUAL_TRENCH_METADATA_KEY]
+        start_point = next(point for point in payload["points"] if point.get("role") == "start")
+        end_point = next(point for point in payload["points"] if point.get("role") == "end")
+        objects = [point for point in payload["points"] if point.get("role") == "object"]
+        chainages = [point_chainage(point, start_point, end_point) for point in objects]
+        self.assertEqual(len({round(value, 6) for value in chainages}), 3)
+        self.assertEqual([round(value, 6) for value in chainages], [0.5, 1.5, 2.5])
 
     def test_virtual_layer_preserves_marxact_info_and_selected_source(self) -> None:
         trench = MarXactTrench(
