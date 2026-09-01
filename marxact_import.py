@@ -224,6 +224,52 @@ def _distance_point_segment(
     return math.hypot(point_x - nearest_x, point_y - nearest_y)
 
 
+def _polyline_z_at_xy(
+    x: float,
+    y: float,
+    polygon: tuple[tuple[float, float, float | None], ...],
+) -> float | None:
+    """Interpolate Z on the nearest segment of the measured 3D boundary."""
+
+    best_distance_sq = math.inf
+    best_z: float | None = None
+    for index, (start_x, start_y, start_z) in enumerate(polygon):
+        end_x, end_y, end_z = polygon[(index + 1) % len(polygon)]
+        dx = end_x - start_x
+        dy = end_y - start_y
+        length_sq = (dx * dx) + (dy * dy)
+        if length_sq <= 1e-16:
+            fraction = 0.0
+            nearest_x = start_x
+            nearest_y = start_y
+        else:
+            fraction = max(
+                0.0,
+                min(
+                    1.0,
+                    ((x - start_x) * dx + (y - start_y) * dy) / length_sq,
+                ),
+            )
+            nearest_x = start_x + (fraction * dx)
+            nearest_y = start_y + (fraction * dy)
+        distance_sq = ((x - nearest_x) ** 2) + ((y - nearest_y) ** 2)
+        if distance_sq >= best_distance_sq:
+            continue
+
+        if start_z is not None and end_z is not None:
+            segment_z = start_z + ((end_z - start_z) * fraction)
+        elif start_z is not None:
+            segment_z = start_z
+        else:
+            segment_z = end_z
+        if segment_z is None:
+            continue
+        best_distance_sq = distance_sq
+        best_z = float(segment_z)
+
+    return best_z
+
+
 def _point_in_polygon(
     x: float,
     y: float,
@@ -299,13 +345,20 @@ def parse_marxact_dxf(path: str | Path) -> MarXactParseResult:
             vertex_names.append(leader.name.strip() if leader is not None else "")
 
         if abs(_signed_area([(x, y) for x, y, _z in vertices])) < BOUNDARY_MIN_AREA:
+            # MarXact can also export line objects as closed 3D polylines with two
+            # coincident vertices. Those are not proefsleuf boundaries.
             continue
         normalized_names = [
             normalize_marxact_name(name) for name in vertex_names if name.strip()
         ]
-        if len(normalized_names) != len(vertices) or len(set(normalized_names)) != 1:
+        if (
+            len(normalized_names) != len(vertices)
+            or len(set(normalized_names)) != 1
+        ):
             continue
-        trenches.append(MarXactTrench(name=vertex_names[0].strip(), polygon=tuple(vertices)))
+        trenches.append(
+            MarXactTrench(name=vertex_names[0].strip(), polygon=tuple(vertices))
+        )
 
     if not trenches:
         raise MarXactImportError(
@@ -327,6 +380,8 @@ def parse_marxact_dxf(path: str | Path) -> MarXactParseResult:
         ]
         if not containing:
             continue
+        # When boundaries happen to overlap, the smallest containing proefsleuf is
+        # the least surprising owner of a measured point.
         trench = min(containing, key=lambda candidate: candidate.area)
         leader = nearest_leader(x, y)
         layer_name = str(entity.dxf.layer or "0").strip() or "0"
@@ -378,7 +433,10 @@ def trench_centerline(
         (point[0] - center_x) * (point[1] - center_y) for point in points
     ) / len(points)
 
-    angle = 0.5 * math.atan2(2.0 * covariance_xy, covariance_xx - covariance_yy)
+    angle = 0.5 * math.atan2(
+        2.0 * covariance_xy,
+        covariance_xx - covariance_yy,
+    )
     axis_x = math.cos(angle)
     axis_y = math.sin(angle)
     normal_x = -axis_y
@@ -402,27 +460,17 @@ def trench_centerline(
     normal_max = max(item[1] for item in projections)
     normal_middle = (normal_min + normal_max) * 0.5
     width = max(0.1, normal_max - normal_min)
-    end_tolerance = max(0.01, (axis_max - axis_min) * 0.08)
 
-    def endpoint(axis_value: float, at_start: bool):
-        z_values = [
-            z
-            for projected_axis, _projected_normal, z in projections
-            if z is not None
-            and (
-                projected_axis <= axis_min + end_tolerance
-                if at_start
-                else projected_axis >= axis_max - end_tolerance
-            )
-        ]
-        z = (sum(z_values) / len(z_values)) if z_values else None
-        return (
-            center_x + (axis_x * axis_value) + (normal_x * normal_middle),
-            center_y + (axis_y * axis_value) + (normal_y * normal_middle),
-            z,
-        )
+    def endpoint(axis_value: float):
+        x = center_x + (axis_x * axis_value) + (normal_x * normal_middle)
+        y = center_y + (axis_y * axis_value) + (normal_y * normal_middle)
+        # Maaiveld at begin/end comes from the measured 3D POLYLINE itself.
+        # Interpolate on the nearest boundary segment instead of averaging
+        # nearby vertices or using MULTILEADER/object heights.
+        z = _polyline_z_at_xy(x, y, trench.polygon)
+        return x, y, z
 
-    return endpoint(axis_min, True), endpoint(axis_max, False), width
+    return endpoint(axis_min), endpoint(axis_max), width
 
 
 def _safe_virtual_name(name: str, fallback_index: int, occurrence: int) -> str:
@@ -472,6 +520,9 @@ def build_marxact_virtual_layer(
                 "x": item.x,
                 "y": item.y,
                 "z": item.z,
+                # Keep the original MarXact MULTILEADER Name and block layer in
+                # the generic feature attributes too, so the information survives
+                # when the virtual trench is converted to a KickTheMapObjectDataset.
                 "attribute_1": item.name,
                 "attribute_2": item.layer_name,
                 "attribute_3": item.block_name,
