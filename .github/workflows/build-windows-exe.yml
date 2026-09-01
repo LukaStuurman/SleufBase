@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.18'
+  SLEUFBASE_RELEASE_VERSION: '0.3.19'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.18
+          name: SleufBase-Windows-v0.3.19
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,18 +160,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.18
+          SleufBase Windows v0.3.19
 
           Belangrijk:
-          - fixeert de Polar grips van kabel-/leidingverwijzingen in AutoCAD
-          - behoudt de originele AutoCAD Dynamic Block-definitie `SAL-VERWIJZING_LEIDING_BOVENKANT-SOD` uit het productiesjabloon in plaats van deze via ezdxf opnieuw op te bouwen
-          - BLOCK_RECORD- en geometry-handles van de originele definitie blijven behouden tijdens de templatevoorbereiding
-          - nieuwe profielverwijzingen wijzen rechtstreeks naar de behouden originele blockdefinitie; alleen positie, schaal en attribuutdata (`OMSCHRIJVING` en `HOOGTE`) worden per reference ingesteld
-          - profielverwijzingen blijven top-level in modelspace, zodat AutoCAD de native Polar grip rechtstreeks kan exposen
-          - Normaal en Reverse behouden ieder hun eigen positie via hun bestaande SleufBase-variantlaag
-          - alleen het bolletje wordt op laag `X-XX-AL-VERWIJZING-SD` gezet met kleur `ByBlock`, zodat de bedoelde kabelkleur wordt gevolgd
-          - de fallback voor externe/minimale templates zonder het originele donorblock blijft behouden
-          - regressietests controleren het echte `assets/cadastral_template.dxf`, behoud van handles, donor-metadata, Normaal/Reverse-posities en bolletje-laag/kleur
+          - zet het profiel-/leidingverwijzingsblock terug naar dezelfde oorspronkelijke implementatie als SleufBase v0.3.10
+          - de latere Polar-grip-, donor-, circle-style- en top-level profielverwijzingspatches worden niet meer geactiveerd
+          - `cadastral_export.py` levert daardoor weer rechtstreeks de verwijzingsblock-functionaliteit zonder de post-v0.3.10 runtime-overrides
+          - dit verwijdert ook de top-level ingreep in de Normal/Reverse-variantopbouw die kon botsen met het samenstellen van variantblokken en meldingen zoals `Dubbele NORMAAL-variant gevonden` kon veroorzaken
+          - de overige nieuwere SleufBase-fixes blijven behouden, waaronder instellingen/autosave en Dynamic Visibility
+          - regressietests bewaken expliciet dat de relevante verwijzingsmethoden weer uit `SleufBase.cadastral_export` komen
+          - de volledige Quality Gate en Windows-packaging worden voor deze release uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
