@@ -1,0 +1,205 @@
+from __future__ import annotations
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+
+from .virtual_trench import is_virtual_trench_layer
+
+
+PATCH_VERSION = 1
+SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 2.0
+MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS = 1
+
+
+def _contains_virtual_template_task(tasks: list[tuple[int, dict[str, object]]]) -> bool:
+    for _layer_index, task_kwargs in tasks:
+        layer = task_kwargs.get("layer")
+        if layer is not None and is_virtual_trench_layer(layer):
+            return True
+    return False
+
+
+def _memory_safe_normalize_template_tiff_raster_alpha(exporter, image: Image.Image) -> Image.Image:
+    """Normalize TIFF alpha without the former full-size int16 RGB copy.
+
+    The previous implementation converted every RGB channel to int16 before
+    determining whether a pixel was almost white. For a large rotated raster
+    that temporary copy can easily exceed a gigabyte. uint8 min/max subtraction
+    is safe here because max is always greater than or equal to min.
+    """
+
+    rgba = image.convert("RGBA")
+    pixels = np.array(rgba, dtype=np.uint8, copy=True)
+    alpha = pixels[:, :, 3]
+    rgb = pixels[:, :, :3]
+    visible = alpha > exporter.MASK_ALPHA_THRESHOLD
+    rgb_min = rgb.min(axis=2)
+    rgb_max = rgb.max(axis=2)
+    near_white = visible & (rgb_min >= 240) & ((rgb_max - rgb_min) <= 30)
+    edge_background = exporter._edge_connected_mask((~visible) | near_white)
+
+    alpha[:] = 0
+    alpha[visible & ~edge_background] = 255
+    return Image.fromarray(pixels, mode="RGBA")
+
+
+def install_template_asset_memory_patch() -> None:
+    from .cadastral_export import (
+        CadastralDxfExporter,
+        CadastralExportError,
+        PreparedTemplateSlotAssets,
+    )
+
+    if int(getattr(CadastralDxfExporter, "_sleufbase_template_asset_memory_patch_version", 0) or 0) >= PATCH_VERSION:
+        return
+
+    original_batch = CadastralDxfExporter._prepare_template_slot_assets_batch
+
+    # 6x allowed a single virtual-trench image to reach 9600x9600 pixels before
+    # rotate(expand=True). 2x still provides a high-resolution raster (up to
+    # 3200x3200 before rotation) while cutting the base RGBA allocation by ~89%.
+    CadastralDxfExporter.VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = (
+        SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER
+    )
+
+    def _normalize_template_tiff_raster_alpha_memory_safe(self, image: Image.Image) -> Image.Image:
+        return _memory_safe_normalize_template_tiff_raster_alpha(self, image)
+
+    def _build_template_tiff_raster_memory_safe(
+        self,
+        asset_dir: Path,
+        layer,
+        label: str,
+        index: int,
+        road_orientation_paths,
+        terrain_boundary_paths,
+        profile=None,
+        reverse_orientation: bool = False,
+    ) -> Path:
+        image_path = self._unique_raster_copy_path(asset_dir, f"{label}_geotiff.png")
+        virtual_layer = is_virtual_trench_layer(layer)
+        export_layer = self._prepared_virtual_trench_export_layer(layer)
+
+        orientation_vector = self._template_tiff_orientation_pixel_vector(
+            export_layer,
+            road_orientation_paths,
+            terrain_boundary_paths,
+            profile=profile,
+        )
+
+        image = export_layer.image.convert("RGBA")
+        if virtual_layer and export_layer.image is not layer.image:
+            try:
+                export_layer.image.close()
+            except Exception:
+                pass
+
+        try:
+            # Virtual trenches are born with a transparent background. Cropping
+            # before rotation avoids rotating a large empty canvas, and unlike
+            # normal GeoTIFFs they do not need the expensive white-background
+            # alpha normalizer at all.
+            if virtual_layer:
+                cropped = self._crop_template_tiff_to_visible_bounds(image)
+                if cropped is not image:
+                    image.close()
+                    image = cropped
+
+            if orientation_vector is not None:
+                dx, dy = orientation_vector
+                if (dx * dx + dy * dy) > 1e-6:
+                    current_bearing = self._template_bearing_from_pixel_vector(dx, dy)
+                    target_bearing = (
+                        270.0
+                        if profile is not None
+                        else (90.0 if reverse_orientation else 270.0)
+                    )
+                    rotation_degrees = self._normalize_rotation_degrees(
+                        target_bearing - current_bearing
+                    )
+                    rotated = image.rotate(
+                        rotation_degrees,
+                        resample=Image.Resampling.BICUBIC,
+                        expand=True,
+                        fillcolor=(255, 255, 255, 0),
+                    )
+                    image.close()
+                    image = rotated
+
+            cropped = self._crop_template_tiff_to_visible_bounds(image)
+            if cropped is not image:
+                image.close()
+                image = cropped
+
+            if not virtual_layer:
+                normalized = self._normalize_template_tiff_raster_alpha(image)
+                if normalized is not image:
+                    image.close()
+                    image = normalized
+
+            try:
+                image.save(image_path, format="PNG")
+            except OSError as exc:
+                raise CadastralExportError(
+                    f"GeoTIFF-afbeelding kon niet worden opgeslagen voor {label}: {exc}"
+                ) from exc
+            return image_path.resolve()
+        finally:
+            try:
+                image.close()
+            except Exception:
+                pass
+
+    def _prepare_template_slot_assets_batch_memory_safe(
+        self,
+        tasks: list[tuple[int, dict[str, object]]],
+        *,
+        status_callback=None,
+    ) -> dict[int, PreparedTemplateSlotAssets]:
+        if not tasks:
+            return {}
+        if not _contains_virtual_template_task(tasks):
+            return original_batch(self, tasks, status_callback=status_callback)
+
+        # MarXact imports can contain dozens of virtual trenches. Keep their
+        # large raster/rotation work sequential so peak RAM is bounded instead
+        # of multiplying the allocation by the normal four template workers.
+        prepared_assets: dict[int, PreparedTemplateSlotAssets] = {}
+        max_workers = min(MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS, len(tasks))
+        with ThreadPoolExecutor(
+            max_workers=max_workers,
+            thread_name_prefix="template-assets-virtual",
+        ) as executor:
+            future_map = {
+                executor.submit(self._prepare_template_slot_assets, **task_kwargs): layer_index
+                for layer_index, task_kwargs in tasks
+            }
+            completed_assets = 0
+            for future in as_completed(future_map):
+                layer_index = future_map[future]
+                try:
+                    prepared_assets[layer_index] = future.result()
+                except CadastralExportError:
+                    raise
+                except Exception as exc:
+                    raise CadastralExportError(
+                        f"Sjabloonvak {layer_index + 1} kon niet worden voorbereid: {exc}"
+                    ) from exc
+                completed_assets += 1
+                if status_callback is not None:
+                    status_callback(
+                        f"Bereid sjabloonafbeeldingen voor... {completed_assets}/{len(tasks)}"
+                    )
+        return prepared_assets
+
+    CadastralDxfExporter._normalize_template_tiff_raster_alpha = (
+        _normalize_template_tiff_raster_alpha_memory_safe
+    )
+    CadastralDxfExporter._build_template_tiff_raster = _build_template_tiff_raster_memory_safe
+    CadastralDxfExporter._prepare_template_slot_assets_batch = (
+        _prepare_template_slot_assets_batch_memory_safe
+    )
+    CadastralDxfExporter._sleufbase_template_asset_memory_patch_version = PATCH_VERSION
