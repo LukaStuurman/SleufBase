@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import ezdxf
 
@@ -22,6 +23,11 @@ from SleufBase.autocad_profile_leader_donor import (
     promote_profile_leader_block,
 )
 from SleufBase.cadastral_export import CadastralDxfExporter
+from SleufBase.template_dynamic_profile_leader_patch import (
+    _PROFILE_LEADER_PROTOTYPE_ATTR,
+    _PROFILE_LEADER_PROTOTYPE_NAME_ATTR,
+    _find_template_profile_leader_reference,
+)
 
 
 ASSET = Path(__file__).resolve().parents[1] / "assets" / "cadastral_template.dxf"
@@ -34,6 +40,52 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
         exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
         exporter._remove_template_legacy_profile_leader_blocks(document)
         return exporter, document
+
+    @staticmethod
+    def _generated_profile_refs(modelspace):
+        refs = []
+        for entity in modelspace.query("INSERT"):
+            values = {
+                str(attribute.dxf.tag).upper(): str(attribute.dxf.text)
+                for attribute in entity.attribs
+            }
+            if {"OMSCHRIJVING", "HOOGTE"}.issubset(values):
+                refs.append(entity)
+        return refs
+
+    @staticmethod
+    def _definition_signature(document):
+        block = document.blocks.get(BLOCK_NAME)
+        return (
+            str(block.block_record_handle).upper(),
+            tuple(str(entity.dxf.handle or "").upper() for entity in block),
+        )
+
+    def test_real_template_original_definition_is_preserved_instead_of_reconstructed(self) -> None:
+        document = ezdxf.readfile(ASSET)
+        source_layout, source = _find_template_profile_leader_reference(document)
+        self.assertIsNone(source_layout)
+        self.assertIsNone(source, "Het productiesjabloon bevat een BLOCK-definition, geen geplaatst donor-INSERT.")
+        before_signature = self._definition_signature(document)
+
+        exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
+        with patch(
+            "SleufBase.template_dynamic_profile_leader_patch.ensure_profile_leader_geometry"
+        ) as rebuild:
+            exporter._remove_template_legacy_profile_leader_blocks(document)
+            rebuild.assert_not_called()
+
+        self.assertEqual(self._definition_signature(document), before_signature)
+        self.assertIsNone(getattr(exporter, _PROFILE_LEADER_PROTOTYPE_ATTR, None))
+        self.assertEqual(
+            getattr(exporter, _PROFILE_LEADER_PROTOTYPE_NAME_ATTR, ""),
+            BLOCK_NAME,
+        )
+        self.assertEqual(
+            getattr(exporter, "_sleufbase_profile_leader_original_definition_signature", None),
+            before_signature,
+        )
+        self.assertTrue(CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_PRESERVES_TEMPLATE_DEFINITION)
 
     def test_donor_identity_and_geometry_are_exact(self) -> None:
         self.assertEqual(DONOR_SHA256, APPROVED_DONOR_SHA256)
@@ -66,10 +118,11 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
         self.assertAlmostEqual(float(description.dxf.rotation), 90.0)
         self.assertAlmostEqual(float(depth.dxf.rotation), 90.0)
 
-    def test_export_inserts_approved_block_without_static_leader_or_duplicate_marker(self) -> None:
+    def test_export_references_the_preserved_original_block_without_static_leader_or_duplicate_marker(self) -> None:
         exporter, document = self._prepared_document()
         modelspace = document.modelspace()
         before_leaders = len(list(modelspace.query("LEADER")))
+        before_refs = set(id(entity) for entity in self._generated_profile_refs(modelspace))
 
         exporter._add_template_profile_multileader(
             modelspace,
@@ -84,17 +137,19 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
 
         refs = [
             entity
-            for entity in modelspace.query("INSERT")
-            if str(entity.dxf.name) == BLOCK_NAME
+            for entity in self._generated_profile_refs(modelspace)
+            if id(entity) not in before_refs
         ]
-        self.assertTrue(refs)
-        block_ref = refs[-1]
+        self.assertEqual(len(refs), 1)
+        block_ref = refs[0]
+        self.assertEqual(str(block_ref.dxf.name), BLOCK_NAME)
         self.assertAlmostEqual(float(block_ref.dxf.insert.x), 10.0)
         self.assertAlmostEqual(float(block_ref.dxf.insert.y), 20.0)
         self.assertAlmostEqual(float(block_ref.dxf.xscale), 0.02)
         self.assertAlmostEqual(float(block_ref.dxf.yscale), 0.02)
         self.assertAlmostEqual(float(block_ref.dxf.rotation), 0.0)
         self.assertEqual(str(block_ref.dxf.layer), "X-XX-AL-VERWIJZING-SD")
+        self.assertEqual(int(block_ref.dxf.color), 3)
 
         values = {
             str(attribute.dxf.tag): str(attribute.dxf.text)
@@ -180,17 +235,15 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
                 self.assertEqual(tag[0], (1070, "1"))
                 self.assertEqual(tag[1], (1071, expected_index))
 
-            # Promotion is deliberately idempotent so a second finalization pass
-            # can never stack a duplicate Dynamic Block graph onto the donor.
             self.assertEqual(promote_profile_leader_block(output, BLOCK_NAME), 0)
             ezdxf.readfile(output)
 
-    def test_geometry_helper_recreates_donor_after_v0310_cleanup(self) -> None:
-        document = ezdxf.readfile(ASSET)
+    def test_geometry_helper_remains_the_fallback_for_minimal_templates(self) -> None:
+        document = ezdxf.new("R2018")
         exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
-        # The public patched cleanup is expected to end with the approved block.
         exporter._remove_template_legacy_profile_leader_blocks(document)
         self.assertIn(BLOCK_NAME, document.blocks)
+        self.assertIsNone(getattr(exporter, _PROFILE_LEADER_PROTOTYPE_ATTR, None))
         self.assertEqual(ensure_profile_leader_geometry.__module__, "SleufBase.autocad_profile_leader_donor")
 
 
