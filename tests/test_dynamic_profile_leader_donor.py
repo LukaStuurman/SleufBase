@@ -53,13 +53,20 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
                 refs.append(entity)
         return refs
 
-    def test_real_template_example_is_captured_instead_of_reconstructed(self) -> None:
+    @staticmethod
+    def _definition_signature(document):
+        block = document.blocks.get(BLOCK_NAME)
+        return (
+            str(block.block_record_handle).upper(),
+            tuple(str(entity.dxf.handle or "").upper() for entity in block),
+        )
+
+    def test_real_template_original_definition_is_preserved_instead_of_reconstructed(self) -> None:
         document = ezdxf.readfile(ASSET)
         source_layout, source = _find_template_profile_leader_reference(document)
-        self.assertIsNotNone(source_layout)
-        self.assertIsNotNone(source, "Het productiesjabloon moet een echt AutoCAD-voorbeeld-INSERT bevatten.")
-        source_name = str(source.dxf.name)
-        source_attribute_tags = tuple(str(attribute.dxf.tag) for attribute in source.attribs)
+        self.assertIsNone(source_layout)
+        self.assertIsNone(source, "Het productiesjabloon bevat een BLOCK-definition, geen geplaatst donor-INSERT.")
+        before_signature = self._definition_signature(document)
 
         exporter = CadastralDxfExporter.__new__(CadastralDxfExporter)
         with patch(
@@ -68,20 +75,17 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
             exporter._remove_template_legacy_profile_leader_blocks(document)
             rebuild.assert_not_called()
 
-        prototype = getattr(exporter, _PROFILE_LEADER_PROTOTYPE_ATTR, None)
-        self.assertIsNotNone(prototype)
-        self.assertIsNot(prototype, source)
-        self.assertEqual(str(prototype.dxf.name), source_name)
-        self.assertEqual(
-            tuple(str(attribute.dxf.tag) for attribute in prototype.attribs),
-            source_attribute_tags,
-        )
+        self.assertEqual(self._definition_signature(document), before_signature)
+        self.assertIsNone(getattr(exporter, _PROFILE_LEADER_PROTOTYPE_ATTR, None))
         self.assertEqual(
             getattr(exporter, _PROFILE_LEADER_PROTOTYPE_NAME_ATTR, ""),
-            source_name,
+            BLOCK_NAME,
         )
-        self.assertIn(BLOCK_NAME, document.blocks)
-        self.assertFalse(source.is_alive, "Alleen het zichtbare donorvoorbeeld zelf hoort verwijderd te worden.")
+        self.assertEqual(
+            getattr(exporter, "_sleufbase_profile_leader_original_definition_signature", None),
+            before_signature,
+        )
+        self.assertTrue(CadastralDxfExporter.SLEUFBASE_DYNAMIC_PROFILE_LEADER_PRESERVES_TEMPLATE_DEFINITION)
 
     def test_donor_identity_and_geometry_are_exact(self) -> None:
         self.assertEqual(DONOR_SHA256, APPROVED_DONOR_SHA256)
@@ -114,14 +118,11 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
         self.assertAlmostEqual(float(description.dxf.rotation), 90.0)
         self.assertAlmostEqual(float(depth.dxf.rotation), 90.0)
 
-    def test_export_clones_real_template_insert_without_static_leader_or_duplicate_marker(self) -> None:
+    def test_export_references_the_preserved_original_block_without_static_leader_or_duplicate_marker(self) -> None:
         exporter, document = self._prepared_document()
         modelspace = document.modelspace()
         before_leaders = len(list(modelspace.query("LEADER")))
         before_refs = set(id(entity) for entity in self._generated_profile_refs(modelspace))
-        prototype = getattr(exporter, _PROFILE_LEADER_PROTOTYPE_ATTR, None)
-        self.assertIsNotNone(prototype)
-        prototype_name = str(prototype.dxf.name)
 
         exporter._add_template_profile_multileader(
             modelspace,
@@ -141,7 +142,7 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
         ]
         self.assertEqual(len(refs), 1)
         block_ref = refs[0]
-        self.assertEqual(str(block_ref.dxf.name), prototype_name)
+        self.assertEqual(str(block_ref.dxf.name), BLOCK_NAME)
         self.assertAlmostEqual(float(block_ref.dxf.insert.x), 10.0)
         self.assertAlmostEqual(float(block_ref.dxf.insert.y), 20.0)
         self.assertAlmostEqual(float(block_ref.dxf.xscale), 0.02)
@@ -234,8 +235,6 @@ class ApprovedDynamicProfileLeaderTests(unittest.TestCase):
                 self.assertEqual(tag[0], (1070, "1"))
                 self.assertEqual(tag[1], (1071, expected_index))
 
-            # Promotion is deliberately idempotent so a second finalization pass
-            # can never stack a duplicate Dynamic Block graph onto the donor.
             self.assertEqual(promote_profile_leader_block(output, BLOCK_NAME), 0)
             ezdxf.readfile(output)
 
