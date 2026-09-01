@@ -402,12 +402,17 @@ def _settings_row(app: Any, dialog: tk.Misc) -> None:
     if getattr(dialog, "_marxact_settings_row", False):
         return
     widgets = list(_descendants(dialog))
-    panel = next((w for w in widgets if isinstance(w, ttk.LabelFrame) and (
+    general = next((w for w in widgets if isinstance(w, ttk.LabelFrame) and (
+        str(getattr(w, "_settings_original_section_title", "") or "") == "Algemeen"
+        or _widget_text(w) == "Algemeen"
+    )), None)
+    rules = next((w for w in widgets if isinstance(w, ttk.LabelFrame) and (
         str(getattr(w, "_settings_original_section_title", "") or "") in {"KickTheMap woord-naar-laag", "KickTheMap kabeltype, materiaal en DXF-laag"}
         or _widget_text(w) in {"KickTheMap woord-naar-laag", "KickTheMap kabeltype, materiaal en DXF-laag", "KickTheMap – kabels"}
     )), None)
     save = next((w for w in widgets if _widget_text(w) == "Opslaan"), None)
-    if panel is None or save is None:
+    parent = general or rules
+    if parent is None or save is None:
         return
     working = normalize_marxact_name_mappings(getattr(app.settings, MARXACT_NAME_MAPPINGS_KEY, {}))
     count = tk.StringVar(value=f"{len(working)} opgeslagen koppeling(en)")
@@ -419,13 +424,14 @@ def _settings_row(app: Any, dialog: tk.Misc) -> None:
             working = value
             count.set(f"{len(working)} opgeslagen koppeling(en)")
 
-    box = ttk.Frame(panel)
-    box.grid(row=_next_row(panel), column=0, sticky="ew", pady=(10, 2))
+    box = ttk.Frame(parent)
+    box.grid(row=_next_row(parent), column=0, sticky="ew", pady=(10, 2))
     box.columnconfigure(0, weight=1)
-    ttk.Label(box, text="MarXact namen", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, sticky="w")
-    ttk.Button(box, text="Namen koppelen…", command=edit).grid(row=0, column=1, sticky="e", padx=(12, 0))
-    ttk.Label(box, textvariable=count).grid(row=1, column=0, columnspan=2, sticky="w", pady=(2, 0))
-    ttk.Label(box, text="Blocklaag bepaalt het type; bij laag 0 wordt MULTILEADER Name gebruikt.", wraplength=620).grid(row=2, column=0, columnspan=2, sticky="w", pady=(2, 0))
+    ttk.Separator(box, orient="horizontal").grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 8))
+    ttk.Label(box, text="MarXact namen", font=("Segoe UI", 10, "bold")).grid(row=1, column=0, sticky="w")
+    ttk.Button(box, text="Namen koppelen…", command=edit).grid(row=1, column=1, sticky="e", padx=(12, 0))
+    ttk.Label(box, textvariable=count).grid(row=2, column=0, columnspan=2, sticky="w", pady=(2, 0))
+    ttk.Label(box, text="Blocklaag bepaalt het type; bij laag 0 wordt MULTILEADER Name gebruikt.", wraplength=620).grid(row=3, column=0, columnspan=2, sticky="w", pady=(2, 0))
     original = save.cget("command")
 
     def save_all():
@@ -518,8 +524,10 @@ def _patch_viewer_class(viewer_class: type) -> None:
         dialog = next((child for child in self.winfo_children() if isinstance(child, tk.Toplevel) and str(child) not in existing and child.title() == "Instellingen"), None)
         if dialog is None:
             return
-        _settings_row(self, dialog)
-        for delay in (60, 220):
+        # settings_ui/general_layout runs delayed passes up to 400 ms and hides
+        # the legacy KickTheMap rule panel. Add MarXact afterwards so the row is
+        # placed in the visible General panel next to the KickTheMap controls.
+        for delay in (450, 700):
             try:
                 dialog.after(delay, lambda target=dialog: _settings_row(self, target))
             except tk.TclError:
