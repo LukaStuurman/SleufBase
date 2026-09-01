@@ -52,10 +52,12 @@ def _install_runtime_patches() -> None:
         install_template_dynamic_visibility_patch,
     )
     from SleufBase.template_reverse_patch import install_template_reverse_export_patch
+    from SleufBase.virtual_trench_template_patch import install_virtual_trench_template_patch
 
     install_cyclomedia_pdok_fallback()
     install_manual_start_point_patch()
     install_marxact_import_patch()
+    install_virtual_trench_template_patch()
     install_template_reverse_export_patch()
     install_template_dynamic_visibility_patch()
     install_autosave_backup_patch()
@@ -133,6 +135,11 @@ def _run_smoke_test() -> None:
         or autosave_defaults.max_backups != 20
     ):
         raise RuntimeError("Automatische back-upstandaarden zijn ongeldig")
+    if int(
+        getattr(CadastralDxfExporter, "_sleufbase_virtual_trench_template_patch_version", 0)
+        or 0
+    ) < 1:
+        raise RuntimeError("Virtuele proefsleuf-sjabloondwarsprofielpatch ontbreekt")
     if not getattr(CadastralDxfExporter, "_sleufbase_reverse_variant_export_patch", False):
         raise RuntimeError("Normaal/reverse proefsleuf-exportpatch is niet geïnstalleerd")
     if not bool(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_VARIANTS_DEFAULT", False)):
