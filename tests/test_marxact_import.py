@@ -50,6 +50,24 @@ class MarXactImportTests(unittest.TestCase):
         self.assertGreater(width, 0.5)
         self.assertLess(width, 2.0)
 
+    def test_centerline_ground_levels_are_interpolated_from_3d_polyline(self) -> None:
+        trench = MarXactTrench(
+            name="ps-ground",
+            polygon=(
+                (0.0, 0.0, 10.0),
+                (4.0, 0.0, 14.0),
+                (4.0, 2.0, 18.0),
+                (0.0, 2.0, 12.0),
+            ),
+        )
+        start, end, _width = trench_centerline(trench)
+        self.assertAlmostEqual(start[0], 0.0, places=6)
+        self.assertAlmostEqual(start[1], 1.0, places=6)
+        self.assertAlmostEqual(start[2] or 0.0, 11.0, places=6)
+        self.assertAlmostEqual(end[0], 4.0, places=6)
+        self.assertAlmostEqual(end[1], 1.0, places=6)
+        self.assertAlmostEqual(end[2] or 0.0, 16.0, places=6)
+
     def test_virtual_layer_preserves_marxact_info_and_selected_source(self) -> None:
         trench = MarXactTrench(
             name="ps3",
