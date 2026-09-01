@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.19'
+  SLEUFBASE_RELEASE_VERSION: '0.3.20'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.19
+          name: SleufBase-Windows-v0.3.20
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,15 +160,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.19
+          SleufBase Windows v0.3.20
 
-          Belangrijk:
-          - zet het profiel-/leidingverwijzingsblock terug naar dezelfde oorspronkelijke implementatie als SleufBase v0.3.10
-          - de latere Polar-grip-, donor-, circle-style- en top-level profielverwijzingspatches worden niet meer geactiveerd
-          - `cadastral_export.py` levert daardoor weer rechtstreeks de verwijzingsblock-functionaliteit zonder de post-v0.3.10 runtime-overrides
-          - dit verwijdert ook de top-level ingreep in de Normal/Reverse-variantopbouw die kon botsen met het samenstellen van variantblokken en meldingen zoals `Dubbele NORMAAL-variant gevonden` kon veroorzaken
-          - de overige nieuwere SleufBase-fixes blijven behouden, waaronder instellingen/autosave en Dynamic Visibility
-          - regressietests bewaken expliciet dat de relevante verwijzingsmethoden weer uit `SleufBase.cadastral_export` komen
+          Nieuw:
+          - nieuwe actie `marXact import` voor het omzetten van MarXact-DXF-bestanden naar virtuele proefsleuven
+          - proefsleuven worden herkend via 3D-polylines en de gekoppelde MULTILEADER `Name`, bijvoorbeeld `ps3`
+          - kabels en leidingen binnen de proefsleuf worden uit de MarXact-blocks ingelezen met behoud van hoogte en broninformatie
+          - voor gewone blocks is de MarXact-laagnaam leidend; bij laag `0` wordt de `Name` uit de MULTILEADER gebruikt
+          - na import kunnen MarXact-namen worden gekoppeld aan dezelfde Kabel/Leiding-keuzes als in KickTheMap
+          - MarXact-koppelingen worden opgeslagen en zijn later via Instellingen > MarXact namen opnieuw te beheren
+          - de geïmporteerde proefsleuven gebruiken de bestaande virtuele-proefsleuf- en DXF-sjabloonexport, inclusief automatische beginpuntrichting
+          - regressietests voor parser, laag-0 fallback en virtuele-proefsleufopbouw toegevoegd
           - de volledige Quality Gate en Windows-packaging worden voor deze release uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
