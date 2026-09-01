@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.23'
+  SLEUFBASE_RELEASE_VERSION: '0.3.24'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.23
+          name: SleufBase-Windows-v0.3.24
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,16 +160,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.23
+          SleufBase Windows v0.3.24
 
           Verbeteringen:
-          - de DXF-sjabloonexport haalt kadastrale perceelgrenzen nu alleen op rond de daadwerkelijke proefsleufgebieden in plaats van over één grote gecombineerde bounding box
-          - kadastrale straatnamen en huisnummers gebruiken dezelfde lokale fetchstrategie
-          - overlappende perceelgrenzen en dubbele kadastrale labels worden gededupliceerd
-          - voortgang wordt per lokaal gebied weergegeven, bijvoorbeeld `Haal kadastrale perceelgrenzen op... 2/6`
-          - hierdoor hoeft PDOK geen grote aantallen 350x350 m WFS-tegels uit lege tussenruimte tussen ver uit elkaar liggende proefsleuven meer te verwerken
-          - bevat daarnaast de MarXact-richtingfix uit v0.3.22: richting op basis van kabel- en leidingblocks, snijpunten op de 3D-polyline en correcte maaiveld-Z op begin/eind
-          - regressietests voor lokale kadastrale WFS-bounds, deduplicatie en voortgang toegevoegd
+          - verhelpt de extreme geheugenpiek bij `Bereid sjabloonafbeeldingen voor...` tijdens MarXact DXF-sjabloonexport
+          - virtuele proefsleuven renderen voor sjabloonexport met een veilige 2x kwaliteitsfactor in plaats van 6x
+          - transparante lege ruimte wordt vóór rotatie al weggecropt, zodat grote lege canvassen niet onnodig worden geroteerd
+          - virtuele MarXact-rasters slaan de zware witte-achtergrond alpha-normalisatie over
+          - normale TIFF-alpha-normalisatie gebruikt geen volledige int16 RGB-kopie meer
+          - zware MarXact-sjabloonrenders worden sequentieel verwerkt zodat RAM-gebruik niet meer vier keer tegelijk piekt
+          - PIL-afbeeldingen worden expliciet gesloten zodra ze niet meer nodig zijn
+          - regressietests toegevoegd voor renderlimiet, virtuele taakdetectie, alpha-normalisatie en geheugengebonden sjabloonexport
+          - bevat daarnaast alle MarXact-richting-, maaiveld-, BGT- en kadastrale fetchverbeteringen uit v0.3.20 t/m v0.3.23
           - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
