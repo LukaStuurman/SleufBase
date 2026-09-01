@@ -13,6 +13,8 @@ def _definition_signature(document) -> tuple[str, tuple[str, ...]] | None:
         block = document.blocks.get(donor.BLOCK_NAME)
     except Exception:
         return None
+    if block is None:
+        return None
     block_record_handle = str(getattr(block, "block_record_handle", "") or "").upper()
     entity_handles = tuple(
         str(getattr(entity.dxf, "handle", "") or "").upper()
