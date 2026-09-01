@@ -46,6 +46,7 @@ def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
     from SleufBase.autosave_backup_patch import install_autosave_backup_patch
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
+    from SleufBase.marxact_import_patch import install_marxact_import_patch
     from SleufBase.start_point_patch import install_manual_start_point_patch
     from SleufBase.template_dynamic_visibility_patch import (
         install_template_dynamic_visibility_patch,
@@ -54,6 +55,7 @@ def _install_runtime_patches() -> None:
 
     install_cyclomedia_pdok_fallback()
     install_manual_start_point_patch()
+    install_marxact_import_patch()
     install_template_reverse_export_patch()
     install_template_dynamic_visibility_patch()
     install_autosave_backup_patch()
@@ -118,6 +120,10 @@ def _run_smoke_test() -> None:
         raise RuntimeError("Verouderde beginpuntpatch in frozen build")
     if not callable(getattr(KlicViewerApp, "_set_automatic_template_cross_section_start_metadata", None)):
         raise RuntimeError("Automatische beginpuntsetter met handmatige voorrang ontbreekt")
+    if int(getattr(KlicViewerApp, "_marxact_import_patch_version", 0) or 0) < 1:
+        raise RuntimeError("MarXact importpatch ontbreekt in frozen build")
+    if not callable(getattr(KlicViewerApp, "import_marxact_dxf", None)):
+        raise RuntimeError("MarXact importactie ontbreekt in frozen build")
     if int(getattr(KlicViewerApp, "_sleufbase_autosave_patch_version", 0) or 0) < 1:
         raise RuntimeError("Automatische back-uppatch ontbreekt in frozen build")
     autosave_defaults = AutosaveSettings()

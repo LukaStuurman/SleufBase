@@ -16,6 +16,7 @@ DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN = True
 TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY = "template_auto_fill_bgt_fysiek_voorkomen"
 KICKTHEMAP_MATERIAL_CHOICES_KEY = "kickthemap_material_choices"
 KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY = "kickthemap_profile_extra_choices"
+MARXACT_NAME_MAPPINGS_KEY = "marxact_name_mappings"
 setattr(
     AppSettings,
     TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
@@ -23,6 +24,7 @@ setattr(
 )
 setattr(AppSettings, KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
 setattr(AppSettings, KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
+setattr(AppSettings, MARXACT_NAME_MAPPINGS_KEY, {})
 
 _load_settings_without_bgt_surface_option = load_settings
 _save_settings_without_bgt_surface_option = save_settings
@@ -67,11 +69,30 @@ def normalize_kickthemap_profile_extra_choices(value: object) -> list[str]:
     return _normalize_choice_list(value)
 
 
+def normalize_marxact_name_mappings(value: object) -> dict[str, str]:
+    """Normalize persisted MarXact source-name to KickTheMap profile mappings."""
+
+    if not isinstance(value, dict):
+        return {}
+    mappings: dict[str, str] = {}
+    seen: set[str] = set()
+    for raw_source, raw_target in value.items():
+        source = " ".join(str(raw_source or "").split()).strip()
+        target = str(raw_target or "").strip()
+        normalized_source = source.casefold()
+        if not source or not target or normalized_source in seen:
+            continue
+        seen.add(normalized_source)
+        mappings[source] = target
+    return mappings
+
+
 def load_settings() -> AppSettings:
     settings = _load_settings_without_bgt_surface_option()
     option_value: object = DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN
     material_choices: object = []
     profile_extra_choices: object = []
+    marxact_name_mappings: object = {}
     try:
         payload = json.loads(_settings_path().read_text(encoding="utf-8"))
         if isinstance(payload, dict):
@@ -81,6 +102,7 @@ def load_settings() -> AppSettings:
             )
             material_choices = payload.get(KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
             profile_extra_choices = payload.get(KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
+            marxact_name_mappings = payload.get(MARXACT_NAME_MAPPINGS_KEY, {})
     except (FileNotFoundError, OSError, json.JSONDecodeError, TypeError, ValueError):
         pass
     setattr(
@@ -97,6 +119,11 @@ def load_settings() -> AppSettings:
         settings,
         KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY,
         normalize_kickthemap_profile_extra_choices(profile_extra_choices),
+    )
+    setattr(
+        settings,
+        MARXACT_NAME_MAPPINGS_KEY,
+        normalize_marxact_name_mappings(marxact_name_mappings),
     )
     return settings
 
@@ -121,6 +148,9 @@ def save_settings(settings: AppSettings) -> Path:
     )
     payload[KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY] = normalize_kickthemap_profile_extra_choices(
         getattr(settings, KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
+    )
+    payload[MARXACT_NAME_MAPPINGS_KEY] = normalize_marxact_name_mappings(
+        getattr(settings, MARXACT_NAME_MAPPINGS_KEY, {})
     )
     settings_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
