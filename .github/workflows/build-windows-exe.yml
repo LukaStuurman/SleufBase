@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.20'
+  SLEUFBASE_RELEASE_VERSION: '0.3.21'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.20
+          name: SleufBase-Windows-v0.3.21
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,14 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.20
+          SleufBase Windows v0.3.21
 
-          Nieuw:
-          - nieuwe actie `marXact import` voor het omzetten van MarXact-DXF-bestanden naar virtuele proefsleuven
-          - proefsleuven worden herkend via 3D-polylines en de gekoppelde MULTILEADER `Name`, bijvoorbeeld `ps3`
-          - kabels en leidingen binnen de proefsleuf worden uit de MarXact-blocks ingelezen met behoud van hoogte en broninformatie
-          - voor gewone blocks is de MarXact-laagnaam leidend; bij laag `0` wordt de `Name` uit de MULTILEADER gebruikt
-          - na import kunnen MarXact-namen worden gekoppeld aan dezelfde Kabel/Leiding-keuzes als in KickTheMap
-          - MarXact-koppelingen worden opgeslagen en zijn later via Instellingen > MarXact namen opnieuw te beheren
-          - de geïmporteerde proefsleuven gebruiken de bestaande virtuele-proefsleuf- en DXF-sjabloonexport, inclusief automatische beginpuntrichting
-          - regressietests voor parser, laag-0 fallback en virtuele-proefsleufopbouw toegevoegd
+          Fix:
+          - bij `marXact import` komt het maaiveld van het beginpunt nu rechtstreeks uit de Z-waarden van de gemeten 3D-polyline
+          - hetzelfde geldt voor het maaiveld van het eindpunt
+          - de Z wordt op het dichtstbijzijnde segment van de 3D-polyline geïnterpoleerd op de XY-positie van het begin/eindpunt; MULTILEADER-hoogtes of kabel-/leidinghoogtes worden hiervoor niet gebruikt
+          - regressietest toegevoegd die begin- en eindmaaiveld controleert op een 3D-polyline met verschillende Z-waarden
+          - gevalideerd op de aangeleverde MarXact-DXF: 26 proefsleuven, alle begin/eindpunten met geldige polyline-Z en 211/211 kabel-/leidingpunten toegewezen
           - de volledige Quality Gate en Windows-packaging worden voor deze release uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
