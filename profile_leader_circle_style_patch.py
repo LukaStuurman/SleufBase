@@ -114,6 +114,9 @@ def install_profile_leader_circle_style_patch() -> None:
         current_remove(self, document)
         _set_document_circle_style(document)
 
+    # Preserve the established activation contract: this wrapper is part of the
+    # dynamic profile-leader implementation even though its helper lives here.
+    _capture_then_style_circle.__module__ = profile_patch.__name__
     CadastralDxfExporter._remove_template_legacy_profile_leader_blocks = _capture_then_style_circle
 
     current_promote = profile_patch.promote_profile_leader_block
