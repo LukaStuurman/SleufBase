@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.17'
+  SLEUFBASE_RELEASE_VERSION: '0.3.18'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.17
+          name: SleufBase-Windows-v0.3.18
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,18 +160,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.17
+          SleufBase Windows v0.3.18
 
           Belangrijk:
-          - corrigeert de v0.3.16 top-level workaround: kabel-/leidingverwijzingen zitten weer in hun eigen `Normaal` en `Reverse` content block
-          - daardoor behoudt Reverse opnieuw zijn eigen berekende verwijzingsposities; na BURST wordt de geneste Dynamic Block-reference weer direct bewerkbaar
-          - de aangeleverde werkende donor-DXF is nu letterlijker de bron: SHA-256 `f975ccf4cbe8d98aba66dc52300c7c255e9c2d0a86aff4f78f31b7c4c0dc4c3b`
-          - de originele donor-records voor `BLOCK`, `CIRCLE`, beide `ATTDEF`-records, `LWPOLYLINE`, `ENDBLK` en de ATTDEF annotation extension dictionaries worden tag-voor-tag in de uiteindelijke DXF gezet
-          - alleen DXF-handles en owners worden opnieuw gekoppeld omdat die uniek moeten zijn in de doeltekening
-          - `OMSCHRIJVING` en `HOOGTE` worden per geplakte kabel-/leidingverwijzing door SleufBase ingevuld; de Dynamic Block-definitie zelf blijft de donor
-          - de native Polar Parameter/Grip, Stretch Action, Move Action en Diameter Scale Action uit de donor blijven behouden
-          - regressietests controleren letterlijke donor-details, save/reopen/idempotentie, meerdere verschillende attribuutwaarden en aparte Normaal/Reverse-posities
-          - overige Dynamic Visibility-, instellingen-, autosave- en Jobs-fixes blijven behouden
+          - fixeert de Polar grips van kabel-/leidingverwijzingen in AutoCAD
+          - behoudt de originele AutoCAD Dynamic Block-definitie `SAL-VERWIJZING_LEIDING_BOVENKANT-SOD` uit het productiesjabloon in plaats van deze via ezdxf opnieuw op te bouwen
+          - BLOCK_RECORD- en geometry-handles van de originele definitie blijven behouden tijdens de templatevoorbereiding
+          - nieuwe profielverwijzingen wijzen rechtstreeks naar de behouden originele blockdefinitie; alleen positie, schaal en attribuutdata (`OMSCHRIJVING` en `HOOGTE`) worden per reference ingesteld
+          - profielverwijzingen blijven top-level in modelspace, zodat AutoCAD de native Polar grip rechtstreeks kan exposen
+          - Normaal en Reverse behouden ieder hun eigen positie via hun bestaande SleufBase-variantlaag
+          - alleen het bolletje wordt op laag `X-XX-AL-VERWIJZING-SD` gezet met kleur `ByBlock`, zodat de bedoelde kabelkleur wordt gevolgd
+          - de fallback voor externe/minimale templates zonder het originele donorblock blijft behouden
+          - regressietests controleren het echte `assets/cadastral_template.dxf`, behoud van handles, donor-metadata, Normaal/Reverse-posities en bolletje-laag/kleur
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
