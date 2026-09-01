@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.21'
+  SLEUFBASE_RELEASE_VERSION: '0.3.22'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.21
+          name: SleufBase-Windows-v0.3.22
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.21
+          SleufBase Windows v0.3.22
 
           Fix:
-          - bij `marXact import` komt het maaiveld van het beginpunt nu rechtstreeks uit de Z-waarden van de gemeten 3D-polyline
-          - hetzelfde geldt voor het maaiveld van het eindpunt
-          - de Z wordt op het dichtstbijzijnde segment van de 3D-polyline geïnterpoleerd op de XY-positie van het begin/eindpunt; MULTILEADER-hoogtes of kabel-/leidinghoogtes worden hiervoor niet gebruikt
-          - DXF sjabloon export haalt BGT-vector tiles nu per lokaal proefsleufgebied op in plaats van over één grote gecombineerde bounding box
-          - verspreid liggende proefsleuven veroorzaken daardoor niet langer een enorme BGT-download van het lege gebied ertussen; lokale resultaten worden gededupliceerd en de status toont voortgang per gebied
-          - regressietests toegevoegd voor zowel MarXact-maaiveld-Z als lokale BGT-templatefetches
-          - gevalideerd op de aangeleverde MarXact-DXF: 26 proefsleuven, alle begin/eindpunten met geldige polyline-Z en 211/211 kabel-/leidingpunten toegewezen
-          - de volledige Quality Gate en Windows-packaging worden voor deze release uitgevoerd
+          - de richting van een `marXact import` proefsleuf wordt nu bepaald door de kabel- en leidingblocks binnen de gemeten 3D-polyline
+          - door de blockposities wordt een best passende lijn gelegd; die lijn wordt aan beide kanten doorgetrokken tot de grens van de 3D-polyline
+          - de twee lijn/polyline-snijpunten worden het begin- en eindpunt van de virtuele proefsleuf
+          - hierdoor behouden kabels en leidingen hun juiste onderlinge positie/chainage en komen ze niet meer op elkaar te liggen wanneer de polygonvorm een verkeerde richting suggereert
+          - de maaiveld-Z van begin en eind blijft afkomstig uit de gemeten 3D-polyline en wordt op het grenssegment geïnterpoleerd
+          - bij minder dan twee verschillende blockposities blijft de polygon-richting als veilige fallback beschikbaar
+          - regressietest toegevoegd met een oost-west polygon en noord-zuid blocks; de virtuele proefsleuf volgt aantoonbaar de blocks en bewaart drie unieke chainages
+          - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
