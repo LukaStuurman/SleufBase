@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.22'
+  SLEUFBASE_RELEASE_VERSION: '0.3.23'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.22
+          name: SleufBase-Windows-v0.3.23
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,16 +160,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.22
+          SleufBase Windows v0.3.23
 
-          Fix:
-          - de richting van een `marXact import` proefsleuf wordt nu bepaald door de kabel- en leidingblocks binnen de gemeten 3D-polyline
-          - door de blockposities wordt een best passende lijn gelegd; die lijn wordt aan beide kanten doorgetrokken tot de grens van de 3D-polyline
-          - de twee lijn/polyline-snijpunten worden het begin- en eindpunt van de virtuele proefsleuf
-          - hierdoor behouden kabels en leidingen hun juiste onderlinge positie/chainage en komen ze niet meer op elkaar te liggen wanneer de polygonvorm een verkeerde richting suggereert
-          - de maaiveld-Z van begin en eind blijft afkomstig uit de gemeten 3D-polyline en wordt op het grenssegment geïnterpoleerd
-          - bij minder dan twee verschillende blockposities blijft de polygon-richting als veilige fallback beschikbaar
-          - regressietest toegevoegd met een oost-west polygon en noord-zuid blocks; de virtuele proefsleuf volgt aantoonbaar de blocks en bewaart drie unieke chainages
+          Verbeteringen:
+          - de DXF-sjabloonexport haalt kadastrale perceelgrenzen nu alleen op rond de daadwerkelijke proefsleufgebieden in plaats van over één grote gecombineerde bounding box
+          - kadastrale straatnamen en huisnummers gebruiken dezelfde lokale fetchstrategie
+          - overlappende perceelgrenzen en dubbele kadastrale labels worden gededupliceerd
+          - voortgang wordt per lokaal gebied weergegeven, bijvoorbeeld `Haal kadastrale perceelgrenzen op... 2/6`
+          - hierdoor hoeft PDOK geen grote aantallen 350x350 m WFS-tegels uit lege tussenruimte tussen ver uit elkaar liggende proefsleuven meer te verwerken
+          - bevat daarnaast de MarXact-richtingfix uit v0.3.22: richting op basis van kabel- en leidingblocks, snijpunten op de 3D-polyline en correcte maaiveld-Z op begin/eind
+          - regressietests voor lokale kadastrale WFS-bounds, deduplicatie en voortgang toegevoegd
           - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
