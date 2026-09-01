@@ -8,6 +8,7 @@ from .settings_kickthemap_autosave_patch import (
 from .dynamic_visibility_finalize_patch import install_dynamic_visibility_finalize_patch
 from .marxact_direction_patch import install_marxact_direction_patch
 from .template_bgt_fetch_patch import install_template_bgt_fetch_patch
+from .template_asset_memory_patch import install_template_asset_memory_patch
 
 
 install_settings_ui_patch()
@@ -16,3 +17,4 @@ install_settings_kickthemap_autosave_patch()
 install_dynamic_visibility_finalize_patch()
 install_marxact_direction_patch()
 install_template_bgt_fetch_patch()
+install_template_asset_memory_patch()
