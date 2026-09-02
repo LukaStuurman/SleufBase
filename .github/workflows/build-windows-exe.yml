@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.27'
+  SLEUFBASE_RELEASE_VERSION: '0.3.28'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.27
+          name: SleufBase-Windows-v0.3.28
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.27
+          SleufBase Windows v0.3.28
 
           Verbeteringen:
-          - handmatig geselecteerde `Luchtfoto NL Actueel` gebruikt voor de definitieve afbeelding nu dezelfde hoge-resolutie PDOK WMS-route als de Cyclomedia-fallback
-          - `Actueel_orthoHR` wordt niet meer begrensd door de oude WMTS zoom-19 limiet bij ver inzoomen
-          - de WMS-route krijgt exact de gevraagde canvas- en exportafmetingen, zodat de beschikbare 8 cm en deels 5 cm bronkwaliteit zo goed mogelijk wordt benut
-          - bestaande WMTS-tegels blijven beschikbaar als snelle gecachte preview zolang nog geen exacte WMS-afbeelding beschikbaar is
-          - zodra een WMS-resultaat gecachet is, krijgt die scherpere afbeelding ook voorrang bij de preview
-          - alleen HR-orthofotolagen worden naar WMS geleid; overige PDOK WMTS-lagen behouden hun bestaande gedrag
-          - regressietests controleren de WMS-routering, outputgrootte, previewvoorrang en beperking tot HR-lagen
-          - bevat daarnaast alle MarXact sjabloonperformance-, Reverse-, dwarsprofiel-, BGT- en kadastrale verbeteringen uit eerdere releases
+          - de linker proefsleufafbeelding in de DXF-sjabloonexport wordt voor zowel MarXact als normale virtuele proefsleuven nu op 2,5x renderkwaliteit opgebouwd
+          - de maximale bronresolutie van een virtuele proefsleufafbeelding stijgt van 2000 naar 4000 pixels per zijde
+          - rotatie van virtuele proefsleuflijnwerk gebruikt nu bicubische interpolatie in plaats van bilineair, waardoor diagonale randen en kabel-/leidinglijnen veel minder blokkerig zijn
+          - de hogere kwaliteit geldt ook voor Normaal- en Reverse-varianten omdat beide dezelfde virtuele sjabloonrenderroute gebruiken
+          - de eerdere geheugenbeveiliging blijft behouden: maximaal één zware virtuele render tegelijk, transparante marges worden vóór rotatie weggecropt, de dure alpha-normalisatie blijft uitgeschakeld en tijdelijke beelden worden direct gesloten
+          - PNG-compressie blijft op de snelle lossless instelling zodat de hogere resolutie niet onnodig extra CPU-tijd kost
+          - regressietests controleren de 2,5x kwaliteit, bicubische rotatie, geheugenlimiet en sequentiële rendering
+          - bevat daarnaast de hoge-resolutie PDOK NL Actueel WMS-route uit v0.3.27 en alle eerdere MarXact sjabloonverbeteringen
           - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@

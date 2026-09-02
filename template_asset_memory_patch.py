@@ -10,11 +10,17 @@ from PIL import Image
 from .virtual_trench import is_virtual_trench_layer
 
 
-PATCH_VERSION = 2
-SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 1.25
+PATCH_VERSION = 3
+# The left-hand trench image in the DXF template is vector-like line art. 1.25x
+# was intentionally conservative after the old memory spike, but that left
+# visibly stepped/pixelated edges. 2.5x keeps the source raster at at most
+# 4000x4000 pixels while the existing single-worker/crop/close safeguards keep
+# peak memory bounded.
+SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 2.5
 MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS = 1
 VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL = 1
 TEMPLATE_UI_PUMP_INTERVAL_SECONDS = 0.08
+VIRTUAL_TEMPLATE_ROTATION_RESAMPLE = Image.Resampling.BICUBIC
 
 
 def _contains_virtual_template_task(tasks: list[tuple[int, dict[str, object]]]) -> bool:
@@ -96,9 +102,11 @@ def install_template_asset_memory_patch() -> None:
 
     original_batch = CadastralDxfExporter._prepare_template_slot_assets_batch
 
-    # v0.3.24 already reduced virtual-trench rendering from 6x to 2x. MarXact
-    # linework is still sharp at 1.25x (max 2000 px before rotation), while the
-    # number of pixels to rotate/compress drops to ~39% of the previous 2x path.
+    # High-resolution output for both normal virtual trenches and MarXact.
+    # The renderer itself caps every side at 1600 * multiplier = 4000 px. Heavy
+    # template assets are still rendered sequentially and transparent margins
+    # are cropped before rotation, so this does not reintroduce the former 6x /
+    # four-workers memory explosion.
     CadastralDxfExporter.VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = (
         SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER
     )
@@ -160,11 +168,12 @@ def install_template_asset_memory_patch() -> None:
                     )
                     rotated = image.rotate(
                         rotation_degrees,
-                        # MarXact/virtual rasters are crisp vector-like line art.
-                        # Bilinear rotation is visibly sufficient here and much
-                        # cheaper than bicubic; normal GeoTIFFs keep bicubic.
+                        # Virtual-trench linework now prioritizes edge quality.
+                        # At 2.5x source resolution bicubic interpolation removes
+                        # the visible staircase/block artefacts along diagonals.
+                        # Normal GeoTIFFs already used bicubic and stay unchanged.
                         resample=(
-                            Image.Resampling.BILINEAR
+                            VIRTUAL_TEMPLATE_ROTATION_RESAMPLE
                             if virtual_layer
                             else Image.Resampling.BICUBIC
                         ),
