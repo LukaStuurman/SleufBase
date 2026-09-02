@@ -81,6 +81,15 @@ def _distance_point_to_segment(
     return math.hypot(px - (sx + t * dx), py - (sy + t * dy))
 
 
+def _edge_midpoint(
+    polygon: tuple[tuple[float, float, float], ...],
+    index: int,
+) -> tuple[float, float]:
+    start = polygon[index]
+    end = polygon[(index + 1) % len(polygon)]
+    return ((start[0] + end[0]) * 0.5, (start[1] + end[1]) * 0.5)
+
+
 class MarXactAlignmentTests(unittest.TestCase):
     def _layer(self):
         polygon = _rotated_rectangle(10.0)
@@ -110,6 +119,81 @@ class MarXactAlignmentTests(unittest.TestCase):
         start, end, _width = trench_centerline(trench)
         angle = _line_angle_degrees((start[0], start[1]), (end[0], end[1]))
         self.assertLess(_angle_difference_degrees(angle, 10.0), 0.25)
+
+    def test_automatic_alignment_uses_midpoints_of_intersected_edges(self) -> None:
+        polygon = _rotated_rectangle(10.0)
+        angle = math.radians(10.0)
+        axis_x, axis_y = math.cos(angle), math.sin(angle)
+        normal_x, normal_y = -axis_y, axis_x
+        # The measured objects are deliberately shifted sideways. The old logic
+        # would keep that lateral offset and hit each end edge away from its
+        # center. The new rule uses those intersections only to identify the two
+        # hit edges and then snaps to the exact edge midpoints.
+        objects = [
+            MarXactObject(
+                x=(axis_x * along) + (normal_x * 0.28),
+                y=(axis_y * along) + (normal_y * 0.28),
+                z=9.0,
+                layer_name="Laagspanning",
+                name=f"LS {index}",
+                height=9.0,
+                block_name="marxact_point",
+            )
+            for index, along in enumerate((-1.3, -0.4, 0.45, 1.25), start=1)
+        ]
+        trench = MarXactTrench(name="PS midpoint", polygon=polygon, objects=objects)
+        start, end, _width = trench_centerline(trench)
+
+        expected = [_edge_midpoint(polygon, 1), _edge_midpoint(polygon, 3)]
+        actual = [(start[0], start[1]), (end[0], end[1])]
+        for wanted in expected:
+            self.assertLess(
+                min(math.hypot(got[0] - wanted[0], got[1] - wanted[1]) for got in actual),
+                1e-7,
+            )
+        self.assertIsNotNone(start[2])
+        self.assertIsNotNone(end[2])
+
+    def test_recalculate_automatic_alignment_also_uses_edge_midpoints(self) -> None:
+        polygon = _rotated_rectangle(10.0)
+        angle = math.radians(10.0)
+        axis_x, axis_y = math.cos(angle), math.sin(angle)
+        normal_x, normal_y = -axis_y, axis_x
+        objects = [
+            MarXactObject(
+                x=(axis_x * along) + (normal_x * 0.25),
+                y=(axis_y * along) + (normal_y * 0.25),
+                z=9.0,
+                layer_name="Laagspanning",
+                name=f"LS {index}",
+                height=9.0,
+                block_name="marxact_point",
+            )
+            for index, along in enumerate((-1.1, -0.25, 0.55, 1.1), start=1)
+        ]
+        trench = MarXactTrench(name="PS recalc", polygon=polygon, objects=objects)
+        layer = build_marxact_virtual_layer(
+            trench,
+            source_path="midpoint-recalc.dxf",
+            source_name_resolver=lambda item: item.mapping_name,
+            fallback_index=1,
+        )
+        payload = layer.metadata[VIRTUAL_TRENCH_METADATA_KEY]
+        start = next(point for point in payload["points"] if point.get("role") == "start")
+        end = next(point for point in payload["points"] if point.get("role") == "end")
+        # Disturb the endpoints to prove the explicit recalculate action restores
+        # the midpoint rule rather than merely preserving the imported values.
+        start["x"] = float(start["x"]) + 0.12
+        end["y"] = float(end["y"]) - 0.12
+        self.assertTrue(recalculate_virtual_layer_automatic_alignment(layer))
+
+        expected = [_edge_midpoint(polygon, 1), _edge_midpoint(polygon, 3)]
+        actual = [(float(start["x"]), float(start["y"])), (float(end["x"]), float(end["y"]))]
+        for wanted in expected:
+            self.assertLess(
+                min(math.hypot(got[0] - wanted[0], got[1] - wanted[1]) for got in actual),
+                1e-7,
+            )
 
     def test_manual_rotation_reclips_endpoints_to_3d_boundary(self) -> None:
         trench, layer = self._layer()
