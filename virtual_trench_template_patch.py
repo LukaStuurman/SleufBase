@@ -10,10 +10,11 @@ from .virtual_trench import (
     build_virtual_trench_dataset,
     is_virtual_trench_layer,
     virtual_trench_centerline,
+    virtual_trench_endpoints,
 )
 
 
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 VIRTUAL_TEMPLATE_DATASET_ID_KEY = "_sleufbase_virtual_template_dataset_id"
 SYNTHETIC_DATASET_ID_START = -1_500_000_000
 MISSING_PROFILE_WARNING_TITLE = "Dwarsprofielen deels overgeslagen"
@@ -62,11 +63,22 @@ def _virtual_axis_pixel_vector(layer: Any) -> tuple[float, float] | None:
     return dx, dy
 
 
+def _point_xy(point: dict[str, Any] | None) -> tuple[float, float] | None:
+    if point is None:
+        return None
+    try:
+        return float(point.get("x")), float(point.get("y"))
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
 def _augment_virtual_template_datasets(
     exporter: Any,
     tiff_layers: list[Any],
     cross_section_datasets: dict[int, Any] | None,
     original_job_id: Callable[[Any, Any], int | None],
+    *,
+    reverse_cross_sections: bool = False,
 ) -> tuple[dict[int, Any], list[tuple[Any, bool, object]]]:
     """Add datasets for virtual trenches that do not have a usable KTK dataset.
 
@@ -74,6 +86,12 @@ def _augment_virtual_template_datasets(
     virtual trench does not need or have such a job. During this export only we
     give it a private negative id and let the existing, well-tested profile
     builder consume `build_virtual_trench_dataset()` unchanged.
+
+    Virtual datasets always carry a forced start point. The core profile builder
+    deliberately refuses its generic reverse operation when a forced start is
+    present. For a reverse export we therefore force the *measured end point*
+    instead. That makes the same profile builder walk the exact MarXact axis in
+    the opposite direction, including the correct endpoint Z values.
     """
 
     datasets = dict(cross_section_datasets or {})
@@ -101,6 +119,12 @@ def _augment_virtual_template_datasets(
         dataset = build_virtual_trench_dataset(layer, include_endpoints=True)
         if dataset is None:
             continue
+
+        if reverse_cross_sections:
+            _start_point, end_point = virtual_trench_endpoints(layer)
+            reverse_start_xy = _point_xy(end_point)
+            if reverse_start_xy is not None:
+                dataset = replace(dataset, cross_section_start_xy=reverse_start_xy)
 
         while next_dataset_id in datasets:
             next_dataset_id -= 1
@@ -189,6 +213,7 @@ def install_virtual_trench_template_patch() -> None:
             tiff_layers,
             bound.arguments.get("cross_section_datasets"),
             original_job_id,
+            reverse_cross_sections=bool(bound.arguments.get("reverse_cross_sections", False)),
         )
         bound.arguments["cross_section_datasets"] = datasets
         try:

@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.25'
+  SLEUFBASE_RELEASE_VERSION: '0.3.26'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.25
+          name: SleufBase-Windows-v0.3.26
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.25
+          SleufBase Windows v0.3.26
 
           Verbeteringen:
-          - MarXact virtuele proefsleuven bouwen hun DXF-dwarsprofiel nu rechtstreeks uit de virtuele-sleufdata; een KickTheMap-job is niet meer nodig
-          - begin- en eindpunt, maaiveld-Z en kabel-/leidingpunten uit de MarXact-import worden door dezelfde bestaande virtuele-proefsleufprofielbouwer gebruikt
-          - de melding `geen KickTheMap job gekoppeld voor dwarsprofiel` wordt voor MarXact niet meer getoond, omdat deze lagen niet meer worden overgeslagen
-          - de eerste proefsleufafbeelding gebruikt zonder profiel altijd exact de begin-eind-as van de virtuele proefsleuf in plaats van de weg-/terrein-fallback
-          - daardoor heeft de MarXact sjabloonafbeelding dezelfde stabiele oriëntatielogica als andere virtuele proefsleuven
-          - de bestaande block-gebaseerde MarXact-richting en 3D-polyline maaiveld-Z blijven leidend voor het profiel
-          - regressietests toegevoegd voor profielopbouw zonder KickTheMap, tijdelijke virtuele dataset-id, exacte afbeeldingoriëntatie en waarschuwingfilter
-          - bevat daarnaast de geheugen-, BGT- en kadastrale sjabloonexportverbeteringen uit v0.3.20 t/m v0.3.24
+          - de stap `Bereid sjabloonafbeeldingen voor...` houdt de SleufBase-interface nu actief tijdens zware MarXact-renders in plaats van de Tk-hoofdthread langdurig te blokkeren
+          - MarXact/virtuele proefsleuven blijven bewust op één rasterworker zodat RAM- en CPU-pieken niet vermenigvuldigen
+          - virtuele sjabloonrasters gaan van 2x naar 1,25x renderkwaliteit; de maximale bronafbeelding daalt daarmee van 3200 naar 2000 pixels
+          - virtuele lijnrasters gebruiken de veel lichtere bilineaire rotatie en snelle lossless PNG-compressie, waardoor de export minder lang hoge CPU-belasting veroorzaakt
+          - normale GeoTIFFs behouden hun bestaande bicubische rotatie en kwaliteitsroute
+          - MarXact krijgt nu een echte Reverse-versie: bij reverse wordt het gemeten eindpunt als profielbegin gebruikt, zodat profielas, maaiveld-Z en kabel-/leidingvolgorde werkelijk omkeren
+          - hierdoor verschillen de Normaal- en Reverse-varianten ook zichtbaar in de eerste proefsleufafbeelding en het dwarsprofiel
+          - regressietests controleren UI-pumping, renderlimieten, private virtuele datasets en tegengestelde normale/reverse profielassen
+          - Windows smoke test vereist expliciet de nieuwe performance- en reverse-patchversies
           - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
