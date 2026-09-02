@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import sys
 from math import isfinite
 from typing import Any
 
+from PIL import Image, ImageChops, ImageDraw
 
-PATCH_VERSION = 1
+
+PATCH_VERSION = 2
 VIRTUAL_TRENCH_BOUNDARY_3D_KEY = "boundary_3d"
 LEGACY_MARXACT_BOUNDARY_3D_KEY = "marxact_boundary_3d"
 
@@ -35,8 +38,6 @@ def _normalized_boundary_3d(raw_boundary: object) -> list[tuple[float, float, fl
                 z = candidate_z
         points.append((x, y, z))
 
-    # A repeated closing vertex is harmless in DXF, but keeping only one copy
-    # avoids drawing a zero-length final segment before the renderer closes it.
     if len(points) >= 2 and points[0][:2] == points[-1][:2]:
         points.pop()
     if len(points) < 3:
@@ -56,8 +57,50 @@ def _normalized_boundary_3d(raw_boundary: object) -> list[tuple[float, float, fl
     return points
 
 
+def _clip_render_to_measured_boundary(
+    image: Image.Image,
+    bounds,
+    boundary: list[tuple[float, float, float | None]],
+    *,
+    border_rgba: tuple[int, int, int, int],
+    border_width: int,
+) -> Image.Image:
+    if image.mode != "RGBA" or image.width < 2 or image.height < 2 or len(boundary) < 3:
+        return image
+
+    def to_pixel(x: float, y: float) -> tuple[float, float]:
+        px = ((float(x) - bounds.min_x) / max(bounds.width, 1e-9)) * (image.width - 1)
+        py = ((bounds.max_y - float(y)) / max(bounds.height, 1e-9)) * (image.height - 1)
+        return px, py
+
+    polygon_pixels = [to_pixel(x, y) for x, y, _z in boundary]
+    mask = Image.new("L", image.size, 0)
+    try:
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.polygon(polygon_pixels, fill=255)
+        alpha = image.getchannel("A")
+        clipped_alpha = ImageChops.multiply(alpha, mask)
+        image.putalpha(clipped_alpha)
+        alpha.close()
+        clipped_alpha.close()
+
+        # Redraw only the measured black boundary after clipping. Cable/pipe
+        # colours can therefore never protrude past the real 3D-POLYLINE while
+        # the contour itself stays crisp and fully visible.
+        draw = ImageDraw.Draw(image, "RGBA")
+        draw.line(
+            [*polygon_pixels, polygon_pixels[0]],
+            fill=border_rgba,
+            width=max(1, int(border_width)),
+        )
+    finally:
+        mask.close()
+    return image
+
+
 def install_marxact_boundary_patch() -> None:
     from . import cadastral_export as cadastral_export_module
+    from . import marxact_import as marxact_import_module
     from . import virtual_trench as virtual_trench_module
 
     exporter_cls = cadastral_export_module.CadastralDxfExporter
@@ -65,6 +108,7 @@ def install_marxact_boundary_patch() -> None:
         return
 
     original_virtual_trench_polygon = virtual_trench_module.virtual_trench_polygon
+    original_build_virtual_trench_render = virtual_trench_module.build_virtual_trench_render
 
     def virtual_trench_boundary_3d(layer) -> list[tuple[float, float, float | None]]:
         payload = virtual_trench_module.virtual_trench_payload(layer)
@@ -75,9 +119,6 @@ def install_marxact_boundary_patch() -> None:
         if normalized:
             return normalized
 
-        # MarXact already preserved the original measured 3D POLYLINE at layer
-        # level. Promote that legacy field into the generic virtual-trench payload
-        # so every renderer/exporter can use the exact same measured contour.
         legacy_boundary = layer.metadata.get(LEGACY_MARXACT_BOUNDARY_3D_KEY)
         normalized = _normalized_boundary_3d(legacy_boundary)
         if normalized and isinstance(payload, dict):
@@ -92,15 +133,37 @@ def install_marxact_boundary_patch() -> None:
             return [(x, y) for x, y, _z in boundary]
         return original_virtual_trench_polygon(layer)
 
-    # build_virtual_trench_render resolves this global at runtime, so replacing it
-    # here updates the normal application view immediately after MarXact import.
+    def clipped_virtual_trench_render(layer, *, quality_multiplier: float = 1.0):
+        image, bounds, transform = original_build_virtual_trench_render(
+            layer,
+            quality_multiplier=quality_multiplier,
+        )
+        boundary = virtual_trench_boundary_3d(layer)
+        if not boundary:
+            return image, bounds, transform
+        border_width = max(2, int(round(2.0 * max(0.1, float(quality_multiplier)))))
+        _clip_render_to_measured_boundary(
+            image,
+            bounds,
+            boundary,
+            border_rgba=virtual_trench_module.VIRTUAL_TRENCH_BORDER_RGBA,
+            border_width=border_width,
+        )
+        return image, bounds, transform
+
     virtual_trench_module.VIRTUAL_TRENCH_BOUNDARY_3D_KEY = VIRTUAL_TRENCH_BOUNDARY_3D_KEY
     virtual_trench_module.virtual_trench_boundary_3d = virtual_trench_boundary_3d
     virtual_trench_module.virtual_trench_polygon = measured_virtual_trench_polygon
+    virtual_trench_module.build_virtual_trench_render = clipped_virtual_trench_render
 
-    # cadastral_export imports virtual_trench_polygon by value, so update that
-    # module alias too. The DXF template overview/slot then uses the identical
-    # measured MarXact outline rather than a generated rectangle.
     cadastral_export_module.virtual_trench_polygon = measured_virtual_trench_polygon
+    cadastral_export_module.build_virtual_trench_render = clipped_virtual_trench_render
+    marxact_import_module.build_virtual_trench_render = clipped_virtual_trench_render
+
+    # If the runtime import patch has already been imported, it may hold the old
+    # renderer by value. Update that alias without forcing app.py to load early.
+    import_patch = sys.modules.get("SleufBase.marxact_import_patch")
+    if import_patch is not None:
+        setattr(import_patch, "build_virtual_trench_render", clipped_virtual_trench_render)
 
     exporter_cls._sleufbase_marxact_boundary_patch_version = PATCH_VERSION
