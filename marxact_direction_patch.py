@@ -128,9 +128,6 @@ def _boundary_axis_near(
         if _axis_angle_difference(angle, target_angle) <= tolerance:
             candidates.append((angle, length))
 
-    # A single irregular polygon segment is too weak a signal to overrule the
-    # measured blocks. Two matching sides/segments are enough to stabilize a
-    # slightly skewed MarXact block fit.
     if len(candidates) < 2:
         return None
 
@@ -142,8 +139,6 @@ def _boundary_axis_near(
     snapped_x = math.cos(snapped_angle)
     snapped_y = math.sin(snapped_angle)
 
-    # Keep the same directed orientation as the block PCA so Normaal/Reverse
-    # keeps its existing start/end ordering.
     if (snapped_x * target_axis_x) + (snapped_y * target_axis_y) < 0.0:
         snapped_x *= -1.0
         snapped_y *= -1.0
@@ -554,6 +549,66 @@ def apply_virtual_layer_alignment_rotation(
     if isinstance(payload, dict):
         payload["width_meters"] = width
     metadata[MARXACT_ALIGNMENT_ROTATION_KEY] = normalized_rotation
+    return True
+
+
+def recalculate_virtual_layer_automatic_alignment(layer: Any) -> bool:
+    """Re-run the robust automatic MarXact alignment for an already loaded layer."""
+
+    polygon = _layer_boundary(layer)
+    if polygon is None:
+        return False
+    metadata = getattr(layer, "metadata", None)
+    if not isinstance(metadata, dict):
+        return False
+
+    start, end, object_rows = _layer_points(layer)
+    if start is None or end is None:
+        return False
+    object_points: list[tuple[float, float]] = []
+    for row in object_rows:
+        try:
+            object_points.append((float(row["x"]), float(row["y"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    object_axis = _automatic_object_axis(object_points, polygon)
+    using_object_axis = object_axis is not None
+    center_x, center_y, axis_x, axis_y = object_axis or _axis_from_polygon(polygon)
+    try:
+        new_start, new_end, width = _centerline_from_axis(
+            polygon,
+            object_points,
+            center_x,
+            center_y,
+            axis_x,
+            axis_y,
+            use_object_extent=using_object_axis,
+        )
+    except (ValueError, ZeroDivisionError):
+        return False
+
+    for row, point in ((start, new_start), (end, new_end)):
+        row["x"] = point[0]
+        row["y"] = point[1]
+        row["z"] = point[2]
+
+    payload = metadata.get(VIRTUAL_TRENCH_METADATA_KEY)
+    if isinstance(payload, dict):
+        payload["width_meters"] = width
+
+    metadata[MARXACT_ALIGNMENT_AUTO_START_KEY] = [
+        new_start[0],
+        new_start[1],
+        new_start[2],
+    ]
+    metadata[MARXACT_ALIGNMENT_AUTO_END_KEY] = [
+        new_end[0],
+        new_end[1],
+        new_end[2],
+    ]
+    metadata[MARXACT_ALIGNMENT_AUTO_WIDTH_KEY] = width
+    metadata[MARXACT_ALIGNMENT_ROTATION_KEY] = 0.0
     return True
 
 
