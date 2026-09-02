@@ -9,6 +9,7 @@ from SleufBase.virtual_trench import (
     VIRTUAL_TRENCH_METADATA_KEY,
     build_virtual_trench_dataset,
     virtual_trench_centerline,
+    virtual_trench_endpoints,
 )
 from SleufBase.virtual_trench_template_patch import (
     MISSING_KICKTHEMAP_JOB_TEXT,
@@ -56,7 +57,7 @@ class VirtualTrenchTemplatePatchTests(unittest.TestCase):
                 )
                 or 0
             ),
-            1,
+            2,
         )
 
     def test_marxact_virtual_dataset_builds_profile_without_kickthemap_job(self) -> None:
@@ -122,6 +123,86 @@ class VirtualTrenchTemplatePatchTests(unittest.TestCase):
         _restore_virtual_template_dataset_ids(restore_entries)
         self.assertNotIn(VIRTUAL_TEMPLATE_DATASET_ID_KEY, layer.metadata)
         self.assertIsNone(exporter._kickthemap_job_id(layer))
+
+    def test_reverse_virtual_dataset_forces_measured_end_as_profile_start(self) -> None:
+        layer = self._marxact_layer()
+        exporter = CadastralDxfExporter(wfs_client=object())
+        datasets, restore_entries = _augment_virtual_template_datasets(
+            exporter,
+            [layer],
+            {},
+            lambda _exporter, _layer: None,
+            reverse_cross_sections=True,
+        )
+        try:
+            self.assertEqual(len(datasets), 1)
+            dataset = next(iter(datasets.values()))
+            start_point, end_point = virtual_trench_endpoints(layer)
+            assert start_point is not None and end_point is not None
+            self.assertEqual(
+                dataset.cross_section_start_xy,
+                (float(end_point["x"]), float(end_point["y"])),
+            )
+
+            profile = exporter._build_template_cross_section_profile(
+                dataset,
+                (),
+                [],
+                [],
+                0.02,
+            )
+            self.assertIsNotNone(profile)
+            assert profile is not None
+            self.assertAlmostEqual(profile.start_point.x, float(end_point["x"]), places=6)
+            self.assertAlmostEqual(profile.start_point.y, float(end_point["y"]), places=6)
+            self.assertAlmostEqual(float(profile.start_point.z or 0.0), float(end_point["z"]), places=6)
+            self.assertAlmostEqual(float(profile.end_point.z or 0.0), float(start_point["z"]), places=6)
+            self.assertEqual(len([point for point in profile.points if not point.is_endpoint]), 3)
+        finally:
+            _restore_virtual_template_dataset_ids(restore_entries)
+
+    def test_normal_and_reverse_profile_axes_point_in_opposite_directions(self) -> None:
+        layer = self._marxact_layer()
+        exporter = CadastralDxfExporter(wfs_client=object())
+
+        normal_sets, normal_restore = _augment_virtual_template_datasets(
+            exporter,
+            [layer],
+            {},
+            lambda _exporter, _layer: None,
+            reverse_cross_sections=False,
+        )
+        try:
+            normal_dataset = next(iter(normal_sets.values()))
+            normal_profile = exporter._build_template_cross_section_profile(
+                normal_dataset, (), [], [], 0.02
+            )
+        finally:
+            _restore_virtual_template_dataset_ids(normal_restore)
+
+        reverse_sets, reverse_restore = _augment_virtual_template_datasets(
+            exporter,
+            [layer],
+            {},
+            lambda _exporter, _layer: None,
+            reverse_cross_sections=True,
+        )
+        try:
+            reverse_dataset = next(iter(reverse_sets.values()))
+            reverse_profile = exporter._build_template_cross_section_profile(
+                reverse_dataset, (), [], [], 0.02
+            )
+        finally:
+            _restore_virtual_template_dataset_ids(reverse_restore)
+
+        self.assertIsNotNone(normal_profile)
+        self.assertIsNotNone(reverse_profile)
+        assert normal_profile is not None and reverse_profile is not None
+        dot = (
+            float(normal_profile.axis_dx) * float(reverse_profile.axis_dx)
+            + float(normal_profile.axis_dy) * float(reverse_profile.axis_dy)
+        )
+        self.assertLess(dot, 0.0)
 
     def test_first_template_image_uses_exact_virtual_axis_without_profile(self) -> None:
         layer = self._marxact_layer()
