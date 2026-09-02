@@ -136,10 +136,15 @@ def _run_smoke_test() -> None:
     ):
         raise RuntimeError("Automatische back-upstandaarden zijn ongeldig")
     if int(
+        getattr(CadastralDxfExporter, "_sleufbase_template_asset_memory_patch_version", 0)
+        or 0
+    ) < 2:
+        raise RuntimeError("Responsieve MarXact sjabloonafbeeldingspatch ontbreekt")
+    if int(
         getattr(CadastralDxfExporter, "_sleufbase_virtual_trench_template_patch_version", 0)
         or 0
-    ) < 1:
-        raise RuntimeError("Virtuele proefsleuf-sjabloondwarsprofielpatch ontbreekt")
+    ) < 2:
+        raise RuntimeError("Virtuele proefsleuf reverse-sjabloonpatch ontbreekt")
     if not getattr(CadastralDxfExporter, "_sleufbase_reverse_variant_export_patch", False):
         raise RuntimeError("Normaal/reverse proefsleuf-exportpatch is niet geïnstalleerd")
     if not bool(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_VARIANTS_DEFAULT", False)):
