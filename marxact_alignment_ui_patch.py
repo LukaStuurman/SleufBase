@@ -344,3 +344,20 @@ def install_marxact_alignment_ui_patch() -> None:
     from .app import KlicViewerApp
 
     _patch_viewer_class(KlicViewerApp)
+
+
+def install_marxact_alignment_ui_hook() -> None:
+    """Chain the UI patch onto the existing MarXact runtime installer."""
+
+    from . import marxact_import_patch as import_patch
+
+    if bool(getattr(import_patch, "_marxact_alignment_ui_hook_installed", False)):
+        return
+    original_install = import_patch.install_marxact_import_patch
+
+    def install_marxact_import_and_alignment_patch() -> None:
+        original_install()
+        install_marxact_alignment_ui_patch()
+
+    import_patch.install_marxact_import_patch = install_marxact_import_and_alignment_patch
+    import_patch._marxact_alignment_ui_hook_installed = True
