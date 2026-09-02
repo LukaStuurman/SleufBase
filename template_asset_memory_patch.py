@@ -53,15 +53,21 @@ def _pump_template_ui(status_callback) -> bool:
     """Keep Tk responsive while the single heavy raster worker is running.
 
     The legacy template export is invoked from the Tk main thread. Waiting for
-    a Future with ``as_completed`` therefore froze painting and window events
-    until a complete slot had finished. Pumping the bound status callback's Tk
-    owner at a low frequency keeps the application interactive without adding
-    more raster workers or increasing CPU pressure.
+    a Future until a complete slot has finished therefore freezes window events.
+    Pump the callback owner when it is a bound Tk method, or fall back to Tk's
+    default root when the callback is a lambda/wrapper around ``set_status``.
     """
 
-    if status_callback is None or threading.current_thread() is not threading.main_thread():
+    if threading.current_thread() is not threading.main_thread():
         return False
-    owner = getattr(status_callback, "__self__", None)
+    owner = getattr(status_callback, "__self__", None) if status_callback is not None else None
+    if owner is None:
+        try:
+            import tkinter as tk
+
+            owner = getattr(tk, "_default_root", None)
+        except Exception:
+            owner = None
     if owner is None:
         return False
     update_idletasks = getattr(owner, "update_idletasks", None)
