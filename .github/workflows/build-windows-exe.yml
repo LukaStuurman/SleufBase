@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.28'
+  SLEUFBASE_RELEASE_VERSION: '0.3.29'
 
 permissions:
   contents: write
@@ -141,7 +141,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.28
+          name: SleufBase-Windows-v0.3.29
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,17 +160,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.28
+          SleufBase Windows v0.3.29
 
           Verbeteringen:
-          - de linker proefsleufafbeelding in de DXF-sjabloonexport wordt voor zowel MarXact als normale virtuele proefsleuven nu op 2,5x renderkwaliteit opgebouwd
-          - de maximale bronresolutie van een virtuele proefsleufafbeelding stijgt van 2000 naar 4000 pixels per zijde
-          - rotatie van virtuele proefsleuflijnwerk gebruikt nu bicubische interpolatie in plaats van bilineair, waardoor diagonale randen en kabel-/leidinglijnen veel minder blokkerig zijn
-          - de hogere kwaliteit geldt ook voor Normaal- en Reverse-varianten omdat beide dezelfde virtuele sjabloonrenderroute gebruiken
-          - de eerdere geheugenbeveiliging blijft behouden: maximaal één zware virtuele render tegelijk, transparante marges worden vóór rotatie weggecropt, de dure alpha-normalisatie blijft uitgeschakeld en tijdelijke beelden worden direct gesloten
-          - PNG-compressie blijft op de snelle lossless instelling zodat de hogere resolutie niet onnodig extra CPU-tijd kost
-          - regressietests controleren de 2,5x kwaliteit, bicubische rotatie, geheugenlimiet en sequentiële rendering
-          - bevat daarnaast de hoge-resolutie PDOK NL Actueel WMS-route uit v0.3.27 en alle eerdere MarXact sjabloonverbeteringen
+          - MarXact proefsleuven gebruiken na import nu de originele gemeten gesloten 3D-POLYLINE als contour in plaats van een generiek rechthoekig virtueel sleufvlak
+          - de volledige X/Y/Z-vertexreeks blijft behouden; de kaart- en sjabloonweergave gebruikt exact de gemeten XY-vorm met alle knikken en lokale breedteverschillen
+          - de bestaande block-gebaseerde begin/eind-richting blijft leidend voor oriëntatie, dwarsprofielen en Normaal/Reverse; alleen de sleufvorm komt uit de gemeten contour
+          - de MarXact `marxact_boundary_3d` wordt automatisch gepromoveerd naar een generieke `boundary_3d` in de virtuele-proefsleufpayload zodat dezelfde geometrie door render- en DXF-sjabloonroutes wordt hergebruikt
+          - normale virtuele proefsleuven zonder gemeten boundary behouden exact de bestaande rechthoek-fallback
+          - ongeldige, gedegenereerde of te korte boundary-data valt veilig terug op de bestaande virtuele geometrie
+          - regressietests controleren exacte MarXact polygonvorm, Z-behoud, generieke boundary-voorrang, DXF-sjabloonalias en normale rechthoek-fallback
+          - bevat daarnaast de 2,5x high-res virtuele sjabloonafbeeldingen uit v0.3.28 en de hoge-resolutie PDOK NL Actueel route uit v0.3.27
           - volledige Quality Gate en Windows-packaging uitgevoerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
