@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
+import threading
 
 import numpy as np
 from PIL import Image
@@ -9,9 +10,11 @@ from PIL import Image
 from .virtual_trench import is_virtual_trench_layer
 
 
-PATCH_VERSION = 1
-SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 2.0
+PATCH_VERSION = 2
+SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 1.25
 MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS = 1
+VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL = 1
+TEMPLATE_UI_PUMP_INTERVAL_SECONDS = 0.08
 
 
 def _contains_virtual_template_task(tasks: list[tuple[int, dict[str, object]]]) -> bool:
@@ -46,6 +49,35 @@ def _memory_safe_normalize_template_tiff_raster_alpha(exporter, image: Image.Ima
     return Image.fromarray(pixels, mode="RGBA")
 
 
+def _pump_template_ui(status_callback) -> bool:
+    """Keep Tk responsive while the single heavy raster worker is running.
+
+    The legacy template export is invoked from the Tk main thread. Waiting for
+    a Future with ``as_completed`` therefore froze painting and window events
+    until a complete slot had finished. Pumping the bound status callback's Tk
+    owner at a low frequency keeps the application interactive without adding
+    more raster workers or increasing CPU pressure.
+    """
+
+    if status_callback is None or threading.current_thread() is not threading.main_thread():
+        return False
+    owner = getattr(status_callback, "__self__", None)
+    if owner is None:
+        return False
+    update_idletasks = getattr(owner, "update_idletasks", None)
+    update = getattr(owner, "update", None)
+    if not callable(update_idletasks) and not callable(update):
+        return False
+    try:
+        if callable(update_idletasks):
+            update_idletasks()
+        if callable(update):
+            update()
+        return True
+    except Exception:
+        return False
+
+
 def install_template_asset_memory_patch() -> None:
     from .cadastral_export import (
         CadastralDxfExporter,
@@ -58,9 +90,9 @@ def install_template_asset_memory_patch() -> None:
 
     original_batch = CadastralDxfExporter._prepare_template_slot_assets_batch
 
-    # 6x allowed a single virtual-trench image to reach 9600x9600 pixels before
-    # rotate(expand=True). 2x still provides a high-resolution raster (up to
-    # 3200x3200 before rotation) while cutting the base RGBA allocation by ~89%.
+    # v0.3.24 already reduced virtual-trench rendering from 6x to 2x. MarXact
+    # linework is still sharp at 1.25x (max 2000 px before rotation), while the
+    # number of pixels to rotate/compress drops to ~39% of the previous 2x path.
     CadastralDxfExporter.VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = (
         SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER
     )
@@ -122,7 +154,14 @@ def install_template_asset_memory_patch() -> None:
                     )
                     rotated = image.rotate(
                         rotation_degrees,
-                        resample=Image.Resampling.BICUBIC,
+                        # MarXact/virtual rasters are crisp vector-like line art.
+                        # Bilinear rotation is visibly sufficient here and much
+                        # cheaper than bicubic; normal GeoTIFFs keep bicubic.
+                        resample=(
+                            Image.Resampling.BILINEAR
+                            if virtual_layer
+                            else Image.Resampling.BICUBIC
+                        ),
                         expand=True,
                         fillcolor=(255, 255, 255, 0),
                     )
@@ -141,7 +180,17 @@ def install_template_asset_memory_patch() -> None:
                     image = normalized
 
             try:
-                image.save(image_path, format="PNG")
+                if virtual_layer:
+                    # DXF image assets do not benefit from maximum PNG compression;
+                    # a low level cuts CPU time substantially and remains lossless.
+                    image.save(
+                        image_path,
+                        format="PNG",
+                        compress_level=VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL,
+                        optimize=False,
+                    )
+                else:
+                    image.save(image_path, format="PNG")
             except OSError as exc:
                 raise CadastralExportError(
                     f"GeoTIFF-afbeelding kon niet worden opgeslagen voor {label}: {exc}"
@@ -165,8 +214,9 @@ def install_template_asset_memory_patch() -> None:
             return original_batch(self, tasks, status_callback=status_callback)
 
         # MarXact imports can contain dozens of virtual trenches. Keep their
-        # large raster/rotation work sequential so peak RAM is bounded instead
-        # of multiplying the allocation by the normal four template workers.
+        # raster/rotation work sequential so peak RAM and CPU load stay bounded.
+        # The main Tk thread only waits for short intervals and pumps UI events,
+        # so the window keeps repainting/responding while the worker runs.
         prepared_assets: dict[int, PreparedTemplateSlotAssets] = {}
         max_workers = min(MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS, len(tasks))
         with ThreadPoolExecutor(
@@ -177,22 +227,33 @@ def install_template_asset_memory_patch() -> None:
                 executor.submit(self._prepare_template_slot_assets, **task_kwargs): layer_index
                 for layer_index, task_kwargs in tasks
             }
+            pending = set(future_map)
             completed_assets = 0
-            for future in as_completed(future_map):
-                layer_index = future_map[future]
-                try:
-                    prepared_assets[layer_index] = future.result()
-                except CadastralExportError:
-                    raise
-                except Exception as exc:
-                    raise CadastralExportError(
-                        f"Sjabloonvak {layer_index + 1} kon niet worden voorbereid: {exc}"
-                    ) from exc
-                completed_assets += 1
-                if status_callback is not None:
-                    status_callback(
-                        f"Bereid sjabloonafbeeldingen voor... {completed_assets}/{len(tasks)}"
-                    )
+            while pending:
+                done, pending = wait(
+                    pending,
+                    timeout=TEMPLATE_UI_PUMP_INTERVAL_SECONDS,
+                    return_when=FIRST_COMPLETED,
+                )
+                if not done:
+                    _pump_template_ui(status_callback)
+                    continue
+                for future in done:
+                    layer_index = future_map[future]
+                    try:
+                        prepared_assets[layer_index] = future.result()
+                    except CadastralExportError:
+                        raise
+                    except Exception as exc:
+                        raise CadastralExportError(
+                            f"Sjabloonvak {layer_index + 1} kon niet worden voorbereid: {exc}"
+                        ) from exc
+                    completed_assets += 1
+                    if status_callback is not None:
+                        status_callback(
+                            f"Bereid sjabloonafbeeldingen voor... {completed_assets}/{len(tasks)}"
+                        )
+                _pump_template_ui(status_callback)
         return prepared_assets
 
     CadastralDxfExporter._normalize_template_tiff_raster_alpha = (
