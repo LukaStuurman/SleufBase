@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 import unittest
+from unittest.mock import patch
+
+from PIL import Image
 
 from SleufBase import cadastral_export, marxact_import, virtual_trench
 from SleufBase.marxact_local_cross_section_patch import local_cross_section_segment
+from SleufBase.models import Bounds, GeoTiffLayer, GeoTransform
+from SleufBase.virtual_trench import VIRTUAL_TRENCH_METADATA_KEY
 
 
 class MarXactLocalCrossSectionTests(unittest.TestCase):
@@ -73,6 +79,57 @@ class MarXactLocalCrossSectionTests(unittest.TestCase):
         self.assertAlmostEqual(ys[0], 0.5, places=7)
         self.assertAlmostEqual(ys[1], 2.0, places=7)
 
+    def test_final_render_is_hard_clipped_to_active_polygon_even_on_fallback(self) -> None:
+        # Reproduce the visual failure from SleufBase: the marker fallback is
+        # intentionally much wider than the visible polygon. The final render
+        # must still contain no coloured pixel at y=0.7 outside the contour.
+        layer = GeoTiffLayer(
+            path=Path("clip-regression.tif"),
+            image=Image.new("RGBA", (4, 4), (0, 0, 0, 0)),
+            transform=GeoTransform(1.0, 0.0, -1.0, 0.0, -1.0, 1.0),
+            bounds=Bounds(-1.0, -1.0, 5.0, 1.0),
+            epsg=28992,
+            opacity=1.0,
+            metadata={
+                VIRTUAL_TRENCH_METADATA_KEY: {
+                    "width_meters": 2.0,
+                    "points": [
+                        {"role": "start", "x": 0.0, "y": 0.0, "z": 1.0},
+                        {
+                            "role": "object",
+                            "x": 2.0,
+                            "y": 0.0,
+                            "z": 0.5,
+                            "display_rgb": [255, 0, 255],
+                        },
+                        {"role": "end", "x": 4.0, "y": 0.0, "z": 1.0},
+                    ],
+                }
+            },
+        )
+        visible_polygon = [
+            (0.0, 0.2),
+            (0.0, -0.2),
+            (4.0, -0.2),
+            (4.0, 0.2),
+        ]
+
+        with patch.object(virtual_trench, "virtual_trench_polygon", return_value=visible_polygon), patch(
+            "SleufBase.marxact_local_cross_section_patch.local_cross_section_segment",
+            return_value=None,
+        ):
+            image, bounds, _transform = virtual_trench.build_virtual_trench_render(layer)
+
+        def sample_alpha(world_x: float, world_y: float) -> int:
+            px = int(round(((world_x - bounds.min_x) / bounds.width) * (image.width - 1)))
+            py = int(round(((bounds.max_y - world_y) / bounds.height) * (image.height - 1)))
+            return int(image.getpixel((px, py))[3])
+
+        self.assertGreater(sample_alpha(2.0, 0.0), 0)
+        self.assertEqual(sample_alpha(2.0, 0.7), 0)
+        self.assertEqual(sample_alpha(2.0, -0.7), 0)
+        image.close()
+
     def test_all_render_paths_use_local_cross_section_renderer(self) -> None:
         self.assertIs(
             virtual_trench.build_virtual_trench_render,
@@ -84,7 +141,7 @@ class MarXactLocalCrossSectionTests(unittest.TestCase):
         )
         self.assertGreaterEqual(
             int(getattr(virtual_trench, "_marxact_local_cross_section_patch_version", 0)),
-            1,
+            2,
         )
 
 
