@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.32'
+  SLEUFBASE_RELEASE_VERSION: '0.3.33'
 
 permissions:
   contents: write
@@ -218,7 +218,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.32
+          name: SleufBase-Windows-v0.3.33
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -237,16 +237,15 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.32
+          SleufBase Windows v0.3.33
 
           Verbeteringen:
-          - MarXact-weergave wordt nu als laatste stap altijd hard geclipt tegen exact dezelfde polygon die als zwarte sleufcontour wordt getekend
-          - kabels, leidingen en dekbandlijnen kunnen daardoor niet meer buiten de gemeten 3D-POLYLINE zichtbaar blijven, ook niet bij fallback-lijnlengtes of oudere/geïmporteerde lagen
-          - lokale doorsnedes blijven per object op de eigen chainage berekend; de polygonmasker-clipping is nu een onvoorwaardelijke tweede beveiliging
-          - regressietest reproduceert bewust een te lange fallback-lijn en controleert dat pixels buiten de actieve sleufpolygon transparant zijn
-          - Windows fast- en portable-builds worden na PyInstaller nu daadwerkelijk met --smoke-test gestart en afgewacht
-          - SleufBase-Setup.exe wordt in de Windows CI stil geïnstalleerd in een schone tijdelijke map en de geïnstalleerde SleufBase.exe moet daarna dezelfde runtime smoke-test doorstaan
-          - een installer die wel compileert maar niet installeert of niet start kan daardoor niet meer als geslaagde release worden gepubliceerd
+          - herstelt de installerpagina `Selecteer extra taken`, die in v0.3.32 leeg kon worden weergegeven en waardoor de interactieve installatie niet normaal verderging
+          - de fragiele standaard Inno Setup `[Tasks]`-pagina is vervangen door een expliciete SleufBase-wizardpagina
+          - de optie `Bureaubladsnelkoppeling maken` is opnieuw zichtbaar en bestuurt rechtstreeks of het desktopicoon wordt aangemaakt
+          - een regressietest bewaakt dat de installer niet terugvalt op de lege standaard takenpagina en dat de checkbox aan het desktopicoon gekoppeld blijft
+          - de bestaande stille installer-smoketest blijft controleren dat Setup daadwerkelijk installeert en dat de geïnstalleerde SleufBase.exe start
+          - bevat daarnaast alle verbeteringen uit v0.3.32 en v0.3.31 voor lokale MarXact polygon-clipping
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
