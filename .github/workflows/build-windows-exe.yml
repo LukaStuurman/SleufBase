@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.31'
+  SLEUFBASE_RELEASE_VERSION: '0.3.32'
 
 permissions:
   contents: write
@@ -108,6 +108,26 @@ jobs:
             throw 'tkinterdnd2 ontbreekt in Portable EXE archive'
           }
 
+      - name: Smoke test packaged executables
+        shell: pwsh
+        run: |
+          $fastTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-fast-smoke.txt'
+          $env:SLEUFBASE_SMOKE_TRACE = $fastTrace
+          & 'dist/SleufBase/SleufBase.exe' --smoke-test
+          if ($LASTEXITCODE -ne 0) { throw "Fast SleufBase smoke-test faalde met exitcode $LASTEXITCODE" }
+          if (-not (Test-Path $fastTrace) -or -not (Select-String -Path $fastTrace -Pattern '^smoke:ok$' -Quiet)) {
+            throw 'Fast SleufBase smoke-test bereikte smoke:ok niet'
+          }
+
+          $portableTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-portable-smoke.txt'
+          $env:SLEUFBASE_SMOKE_TRACE = $portableTrace
+          & 'dist/SleufBase-Portable.exe' --smoke-test
+          if ($LASTEXITCODE -ne 0) { throw "Portable SleufBase smoke-test faalde met exitcode $LASTEXITCODE" }
+          if (-not (Test-Path $portableTrace) -or -not (Select-String -Path $portableTrace -Pattern '^smoke:ok$' -Quiet)) {
+            throw 'Portable SleufBase smoke-test bereikte smoke:ok niet'
+          }
+          Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
+
       - name: Package fast edition ZIP
         shell: pwsh
         run: |
@@ -129,6 +149,39 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup faalde met exitcode $LASTEXITCODE" }
           if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) { throw 'SleufBase-Setup.exe ontbreekt' }
 
+      - name: Install and smoke test professional installer
+        shell: pwsh
+        run: |
+          $setupExe = (Resolve-Path 'dist-installer/SleufBase-Setup.exe').Path
+          $installDir = Join-Path $env:RUNNER_TEMP 'SleufBase-Installed'
+          if (Test-Path $installDir) { Remove-Item $installDir -Recurse -Force }
+
+          $installer = Start-Process -FilePath $setupExe -ArgumentList @(
+            '/VERYSILENT',
+            '/SUPPRESSMSGBOXES',
+            '/NORESTART',
+            "/DIR=$installDir"
+          ) -Wait -PassThru
+          if ($installer.ExitCode -ne 0) {
+            throw "SleufBase installer faalde met exitcode $($installer.ExitCode)"
+          }
+
+          $installedExe = Join-Path $installDir 'SleufBase.exe'
+          if (-not (Test-Path $installedExe)) {
+            throw "Geïnstalleerde SleufBase.exe ontbreekt: $installedExe"
+          }
+
+          $installedTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-installed-smoke.txt'
+          $env:SLEUFBASE_SMOKE_TRACE = $installedTrace
+          & $installedExe --smoke-test
+          if ($LASTEXITCODE -ne 0) {
+            throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $LASTEXITCODE"
+          }
+          if (-not (Test-Path $installedTrace) -or -not (Select-String -Path $installedTrace -Pattern '^smoke:ok$' -Quiet)) {
+            throw 'Geïnstalleerde SleufBase smoke-test bereikte smoke:ok niet'
+          }
+          Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
+
       - name: Generate checksums and SBOM
         shell: pwsh
         run: |
@@ -141,7 +194,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.31
+          name: SleufBase-Windows-v0.3.32
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -160,18 +213,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.31
+          SleufBase Windows v0.3.32
 
           Verbeteringen:
-          - MarXact kabel-/leidinglijnen gebruiken nu per gemeten object de lokale doorsnede van de echte 3D-POLYLINE in plaats van één globale maximale sleufbreedte
-          - op de eigen chainage van iedere kabel/leiding wordt een lijn loodrecht op de alignment gesneden met de gemeten polygon; alleen het lokale segment tussen de relevante snijpunten wordt getekend
-          - bij concave of sterk onregelmatige proefsleuven kiest SleufBase de lokale binnenruimte waarin het originele gemeten block ligt, zodat lijnen niet door een verkeerde polygonopening lopen
-          - de globale width_meters blijft alleen als noodfallback beschikbaar wanneer geen geldige lokale polygondoorsnede kan worden bepaald
-          - de bestaande harde polygonmasker-clipping blijft als extra pixelbeveiliging actief voor lijncaps en anti-aliasing
-          - dezelfde lokale clippingroute wordt gebruikt in SleufBase en in de DXF-sjabloonexport
-          - bevat daarnaast alle verbeteringen uit v0.3.30, waaronder midpoint-snapping van de automatische MarXact-as, handmatige rotatiecorrectie en de echte gemeten 3D-POLYLINE-contour
-          - regressietests controleren verschillende lokale lijnlengtes bij taps/onregelmatig sleufverloop en correcte segmentkeuze bij concave contouren
-          - volledige Quality Gate en Windows-packaging uitgevoerd
+          - MarXact-weergave wordt nu als laatste stap altijd hard geclipt tegen exact dezelfde polygon die als zwarte sleufcontour wordt getekend
+          - kabels, leidingen en dekbandlijnen kunnen daardoor niet meer buiten de gemeten 3D-POLYLINE zichtbaar blijven, ook niet bij fallback-lijnlengtes of oudere/geïmporteerde lagen
+          - lokale doorsnedes blijven per object op de eigen chainage berekend; de polygonmasker-clipping is nu een onvoorwaardelijke tweede beveiliging
+          - regressietest reproduceert bewust een te lange fallback-lijn en controleert dat pixels buiten de actieve sleufpolygon transparant zijn
+          - Windows fast- en portable-builds worden na PyInstaller nu daadwerkelijk met --smoke-test gestart
+          - SleufBase-Setup.exe wordt in de Windows CI stil geïnstalleerd in een schone tijdelijke map en de geïnstalleerde SleufBase.exe moet daarna dezelfde runtime smoke-test doorstaan
+          - een installer die wel compileert maar niet installeert of niet start kan daardoor niet meer als geslaagde release worden gepubliceerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
