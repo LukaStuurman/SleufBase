@@ -55,9 +55,10 @@ begin
     wpSelectDir,
     'Selecteer extra taken',
     'Welke extra taken moeten uitgevoerd worden?',
-    'Selecteer de extra taken die u door Setup wilt laten uitvoeren en klik vervolgens op Volgende.'
+    'Selecteer de extra taken die u door Setup wilt laten uitvoeren en klik vervolgens op Volgende.',
+    False,
+    False
   );
-  ExtraTasksPage.Exclusive := False;
   ExtraTasksPage.Add('Bureaubladsnelkoppeling maken');
   ExtraTasksPage.Values[0] := False;
 end;
