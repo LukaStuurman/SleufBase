@@ -1,5 +1,5 @@
 #define MyAppName "SleufBase"
-#define MyAppVersion "0.3.32"
+#define MyAppVersion "0.3.33"
 #define MyAppPublisher "Techbase"
 #define MyAppExeName "SleufBase.exe"
 
@@ -24,7 +24,7 @@ WizardStyle=modern
 CloseApplications=yes
 RestartApplications=yes
 UsePreviousAppDir=yes
-VersionInfoVersion=0.3.32.0
+VersionInfoVersion=0.3.33.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription=SleufBase Windows installer
 VersionInfoProductName={#MyAppName}
@@ -33,15 +33,41 @@ VersionInfoProductVersion={#MyAppVersion}
 [Languages]
 Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "Bureaubladsnelkoppeling maken"; GroupDescription: "Extra snelkoppelingen:"; Flags: unchecked
-
 [Files]
 Source: "..\dist\SleufBase\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\SleufBase"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"
-Name: "{autodesktop}\SleufBase"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autodesktop}\SleufBase"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Check: ShouldCreateDesktopShortcut
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "SleufBase starten"; Flags: nowait postinstall skipifsilent
+
+[Code]
+var
+  ExtraTasksPage: TInputOptionWizardPage;
+
+procedure InitializeWizard;
+begin
+  { Gebruik bewust een eigen pagina in plaats van de standaard [Tasks]-pagina.
+    In v0.3.32 kon de standaard Inno Setup-pagina leeg worden weergegeven. }
+  ExtraTasksPage := CreateInputOptionPage(
+    wpSelectDir,
+    'Selecteer extra taken',
+    'Welke extra taken moeten uitgevoerd worden?',
+    'Selecteer de extra taken die u door Setup wilt laten uitvoeren en klik vervolgens op Volgende.'
+  );
+  ExtraTasksPage.Exclusive := False;
+  ExtraTasksPage.Add('Bureaubladsnelkoppeling maken');
+  ExtraTasksPage.Values[0] := False;
+end;
+
+function ShouldCreateDesktopShortcut(): Boolean;
+begin
+  if ExtraTasksPage = nil then
+  begin
+    Result := False;
+    Exit;
+  end;
+  Result := ExtraTasksPage.Values[0];
+end;
