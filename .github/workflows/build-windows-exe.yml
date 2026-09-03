@@ -111,21 +111,39 @@ jobs:
       - name: Smoke test packaged executables
         shell: pwsh
         run: |
-          $fastTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-fast-smoke.txt'
-          $env:SLEUFBASE_SMOKE_TRACE = $fastTrace
-          & 'dist/SleufBase/SleufBase.exe' --smoke-test
-          if ($LASTEXITCODE -ne 0) { throw "Fast SleufBase smoke-test faalde met exitcode $LASTEXITCODE" }
-          if (-not (Test-Path $fastTrace) -or -not (Select-String -Path $fastTrace -Pattern '^smoke:ok$' -Quiet)) {
-            throw 'Fast SleufBase smoke-test bereikte smoke:ok niet'
+          function Invoke-SleufBaseSmokeTest {
+            param(
+              [Parameter(Mandatory = $true)][string]$ExePath,
+              [Parameter(Mandatory = $true)][string]$TracePath,
+              [Parameter(Mandatory = $true)][string]$Label
+            )
+            if (Test-Path $TracePath) { Remove-Item $TracePath -Force }
+            $env:SLEUFBASE_SMOKE_TRACE = $TracePath
+            $resolvedExe = (Resolve-Path $ExePath).Path
+            $process = Start-Process -FilePath $resolvedExe -ArgumentList @('--smoke-test') -Wait -PassThru
+            if (Test-Path $TracePath) {
+              Write-Host "--- $Label smoke trace ---"
+              Get-Content $TracePath
+              Write-Host "--- einde smoke trace ---"
+            }
+            if ($process.ExitCode -ne 0) {
+              throw "$Label smoke-test faalde met exitcode $($process.ExitCode)"
+            }
+            if (-not (Test-Path $TracePath) -or -not (Select-String -Path $TracePath -Pattern '^smoke:ok$' -Quiet)) {
+              throw "$Label smoke-test bereikte smoke:ok niet"
+            }
           }
 
-          $portableTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-portable-smoke.txt'
-          $env:SLEUFBASE_SMOKE_TRACE = $portableTrace
-          & 'dist/SleufBase-Portable.exe' --smoke-test
-          if ($LASTEXITCODE -ne 0) { throw "Portable SleufBase smoke-test faalde met exitcode $LASTEXITCODE" }
-          if (-not (Test-Path $portableTrace) -or -not (Select-String -Path $portableTrace -Pattern '^smoke:ok$' -Quiet)) {
-            throw 'Portable SleufBase smoke-test bereikte smoke:ok niet'
-          }
+          Invoke-SleufBaseSmokeTest `
+            -ExePath 'dist/SleufBase/SleufBase.exe' `
+            -TracePath (Join-Path $env:RUNNER_TEMP 'sleufbase-fast-smoke.txt') `
+            -Label 'Fast SleufBase'
+
+          Invoke-SleufBaseSmokeTest `
+            -ExePath 'dist/SleufBase-Portable.exe' `
+            -TracePath (Join-Path $env:RUNNER_TEMP 'sleufbase-portable-smoke.txt') `
+            -Label 'Portable SleufBase'
+
           Remove-Item Env:SLEUFBASE_SMOKE_TRACE -ErrorAction SilentlyContinue
 
       - name: Package fast edition ZIP
@@ -172,10 +190,16 @@ jobs:
           }
 
           $installedTrace = Join-Path $env:RUNNER_TEMP 'sleufbase-installed-smoke.txt'
+          if (Test-Path $installedTrace) { Remove-Item $installedTrace -Force }
           $env:SLEUFBASE_SMOKE_TRACE = $installedTrace
-          & $installedExe --smoke-test
-          if ($LASTEXITCODE -ne 0) {
-            throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $LASTEXITCODE"
+          $installedProcess = Start-Process -FilePath $installedExe -ArgumentList @('--smoke-test') -Wait -PassThru
+          if (Test-Path $installedTrace) {
+            Write-Host '--- Geïnstalleerde SleufBase smoke trace ---'
+            Get-Content $installedTrace
+            Write-Host '--- einde smoke trace ---'
+          }
+          if ($installedProcess.ExitCode -ne 0) {
+            throw "Geïnstalleerde SleufBase smoke-test faalde met exitcode $($installedProcess.ExitCode)"
           }
           if (-not (Test-Path $installedTrace) -or -not (Select-String -Path $installedTrace -Pattern '^smoke:ok$' -Quiet)) {
             throw 'Geïnstalleerde SleufBase smoke-test bereikte smoke:ok niet'
@@ -220,7 +244,7 @@ jobs:
           - kabels, leidingen en dekbandlijnen kunnen daardoor niet meer buiten de gemeten 3D-POLYLINE zichtbaar blijven, ook niet bij fallback-lijnlengtes of oudere/geïmporteerde lagen
           - lokale doorsnedes blijven per object op de eigen chainage berekend; de polygonmasker-clipping is nu een onvoorwaardelijke tweede beveiliging
           - regressietest reproduceert bewust een te lange fallback-lijn en controleert dat pixels buiten de actieve sleufpolygon transparant zijn
-          - Windows fast- en portable-builds worden na PyInstaller nu daadwerkelijk met --smoke-test gestart
+          - Windows fast- en portable-builds worden na PyInstaller nu daadwerkelijk met --smoke-test gestart en afgewacht
           - SleufBase-Setup.exe wordt in de Windows CI stil geïnstalleerd in een schone tijdelijke map en de geïnstalleerde SleufBase.exe moet daarna dezelfde runtime smoke-test doorstaan
           - een installer die wel compileert maar niet installeert of niet start kan daardoor niet meer als geslaagde release worden gepubliceerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
