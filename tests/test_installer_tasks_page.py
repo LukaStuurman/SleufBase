@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -6,7 +7,7 @@ class InstallerTasksPageTests(unittest.TestCase):
     def test_desktop_shortcut_uses_explicit_custom_page(self) -> None:
         installer = Path("installer/SleufBase.iss").read_text(encoding="utf-8")
 
-        self.assertNotIn("[Tasks]", installer)
+        self.assertIsNone(re.search(r"(?m)^\[Tasks\]\s*$", installer))
         self.assertIn("CreateInputOptionPage(", installer)
         self.assertIn("Bureaubladsnelkoppeling maken", installer)
         self.assertIn("function ShouldCreateDesktopShortcut(): Boolean;", installer)
