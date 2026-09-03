@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.33'
+  SLEUFBASE_RELEASE_VERSION: '0.3.34'
 
 permissions:
   contents: write
@@ -218,7 +218,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.33
+          name: SleufBase-Windows-v0.3.34
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -237,15 +237,15 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.33
+          SleufBase Windows v0.3.34
 
           Verbeteringen:
-          - herstelt de installerpagina `Selecteer extra taken`, die in v0.3.32 leeg kon worden weergegeven en waardoor de interactieve installatie niet normaal verderging
-          - de fragiele standaard Inno Setup `[Tasks]`-pagina is vervangen door een expliciete SleufBase-wizardpagina
-          - de optie `Bureaubladsnelkoppeling maken` is opnieuw zichtbaar en bestuurt rechtstreeks of het desktopicoon wordt aangemaakt
-          - een regressietest bewaakt dat de installer niet terugvalt op de lege standaard takenpagina en dat de checkbox aan het desktopicoon gekoppeld blijft
-          - de bestaande stille installer-smoketest blijft controleren dat Setup daadwerkelijk installeert en dat de geïnstalleerde SleufBase.exe start
-          - bevat daarnaast alle verbeteringen uit v0.3.32 en v0.3.31 voor lokale MarXact polygon-clipping
+          - verwijdert de aparte `Selecteer extra taken`-wizardstap volledig; juist die stap liep bij interactieve installaties nog vast
+          - `Bureaubladsnelkoppeling maken` staat nu als checkbox op de ingebouwde `Gereed om te installeren`-pagina
+          - de installer gebruikt daardoor voor Volgende/Installeren uitsluitend de standaard Inno Setup-wizardnavigatie
+          - de Ready-pagina wordt expliciet ingeschakeld en toont altijd de installatiemap, ook bij upgrades
+          - regressietest controleert dat geen `[Tasks]`- of `CreateInputOptionPage`-pagina meer terugkomt
+          - de bestaande compile-, stille installatie- en runtime-smoketests blijven actief
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
