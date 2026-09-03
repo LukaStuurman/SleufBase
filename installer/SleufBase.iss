@@ -1,5 +1,5 @@
 #define MyAppName "SleufBase"
-#define MyAppVersion "0.3.33"
+#define MyAppVersion "0.3.34"
 #define MyAppPublisher "Techbase"
 #define MyAppExeName "SleufBase.exe"
 
@@ -11,6 +11,8 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={localappdata}\Programs\Techbase\SleufBase
 DefaultGroupName=Techbase\SleufBase
 DisableProgramGroupPage=yes
+DisableReadyPage=no
+AlwaysShowDirOnReadyPage=yes
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -24,7 +26,7 @@ WizardStyle=modern
 CloseApplications=yes
 RestartApplications=yes
 UsePreviousAppDir=yes
-VersionInfoVersion=0.3.33.0
+VersionInfoVersion=0.3.34.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription=SleufBase Windows installer
 VersionInfoProductName={#MyAppName}
@@ -45,30 +47,33 @@ Filename: "{app}\{#MyAppExeName}"; Description: "SleufBase starten"; Flags: nowa
 
 [Code]
 var
-  ExtraTasksPage: TInputOptionWizardPage;
+  DesktopShortcutCheckBox: TNewCheckBox;
 
 procedure InitializeWizard;
 begin
-  { Gebruik bewust een eigen pagina in plaats van de standaard [Tasks]-pagina.
-    In v0.3.32 kon de standaard Inno Setup-pagina leeg worden weergegeven. }
-  ExtraTasksPage := CreateInputOptionPage(
-    wpSelectDir,
-    'Selecteer extra taken',
-    'Welke extra taken moeten uitgevoerd worden?',
-    'Selecteer de extra taken die u door Setup wilt laten uitvoeren en klik vervolgens op Volgende.',
-    False,
-    False
-  );
-  ExtraTasksPage.Add('Bureaubladsnelkoppeling maken');
-  ExtraTasksPage.Values[0] := False;
+  { Geen aparte Tasks/custom wizardpagina meer. In v0.3.32 en v0.3.33 kon
+    juist die extra stap interactief vastlopen. De keuze staat daarom op de
+    bestaande Ready to Install-pagina, zodat de normale Inno Setup-navigatie
+    volledig intact blijft. }
+  WizardForm.ReadyMemo.Height := WizardForm.ReadyMemo.Height - ScaleY(24);
+
+  DesktopShortcutCheckBox := TNewCheckBox.Create(WizardForm);
+  DesktopShortcutCheckBox.Parent := WizardForm.ReadyMemo.Parent;
+  DesktopShortcutCheckBox.Left := WizardForm.ReadyMemo.Left;
+  DesktopShortcutCheckBox.Top :=
+    WizardForm.ReadyMemo.Top + WizardForm.ReadyMemo.Height + ScaleY(8);
+  DesktopShortcutCheckBox.Width := WizardForm.ReadyMemo.Width;
+  DesktopShortcutCheckBox.Height := ScaleY(17);
+  DesktopShortcutCheckBox.Caption := 'Bureaubladsnelkoppeling maken';
+  DesktopShortcutCheckBox.Checked := False;
 end;
 
 function ShouldCreateDesktopShortcut(): Boolean;
 begin
-  if ExtraTasksPage = nil then
+  if DesktopShortcutCheckBox = nil then
   begin
     Result := False;
     Exit;
   end;
-  Result := ExtraTasksPage.Values[0];
+  Result := DesktopShortcutCheckBox.Checked;
 end;
