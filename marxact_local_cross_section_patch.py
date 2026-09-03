@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 from .models import Bounds, GeoTransform
 
 
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 _EPSILON = 1e-9
 _INTERSECTION_TOLERANCE = 1e-8
 
@@ -169,8 +169,6 @@ def install_marxact_local_cross_section_patch() -> None:
     if int(getattr(vt, "_marxact_local_cross_section_patch_version", 0) or 0) >= PATCH_VERSION:
         return
 
-    boundary_reader = getattr(vt, "virtual_trench_boundary_3d", None)
-
     def build_virtual_trench_render_local(
         layer,
         *,
@@ -191,6 +189,9 @@ def install_marxact_local_cross_section_patch() -> None:
             )
 
         width_meters = vt.virtual_trench_width(layer)
+        # This is the single source of truth for what may be visible. For a
+        # MarXact layer the boundary patch returns the measured 3D-POLYLINE XY
+        # contour here; for a normal virtual trench it returns the rectangle.
         polygon = vt.virtual_trench_polygon(layer)
         world_points = [
             (vt._to_float(point.get("x"), 0.0), vt._to_float(point.get("y"), 0.0))
@@ -326,15 +327,18 @@ def install_marxact_local_cross_section_patch() -> None:
                 width=border_width,
             )
 
-        # Keep the hard alpha mask as a final safety net for stroke caps and
-        # anti-aliasing at the exact polygon edge. The geometry itself is already
-        # local-width clipped before this point.
-        boundary = boundary_reader(layer) if callable(boundary_reader) else []
-        if boundary:
+        # Hard-clip every render to the exact same polygon that was used for
+        # the geometry. Previously this final safety net depended on a second
+        # metadata lookup (boundary_reader). That allowed stale/imported layers
+        # to render coloured marker strokes outside the black contour even when
+        # virtual_trench_polygon() already returned the correct measured shape.
+        # By masking unconditionally against `polygon`, no cable/pipe/dekband
+        # pixel can survive outside the visible SleufBase trench contour.
+        if len(polygon) >= 3:
             _clip_render_to_measured_boundary(
                 image,
                 bounds,
-                boundary,
+                [(float(x), float(y), None) for x, y in polygon],
                 border_rgba=vt.VIRTUAL_TRENCH_BORDER_RGBA,
                 border_width=border_width,
             )
