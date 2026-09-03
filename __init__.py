@@ -13,6 +13,7 @@ from .template_asset_memory_patch import install_template_asset_memory_patch
 from .virtual_trench_template_patch import install_virtual_trench_template_patch
 from .pdok_high_quality_patch import install_pdok_high_quality_patch
 from .marxact_boundary_patch import install_marxact_boundary_patch
+from .marxact_local_cross_section_patch import install_marxact_local_cross_section_patch
 from .marxact_alignment_ui_patch import install_marxact_alignment_ui_hook
 
 
@@ -27,4 +28,5 @@ install_template_asset_memory_patch()
 install_virtual_trench_template_patch()
 install_pdok_high_quality_patch()
 install_marxact_boundary_patch()
+install_marxact_local_cross_section_patch()
 install_marxact_alignment_ui_hook()
