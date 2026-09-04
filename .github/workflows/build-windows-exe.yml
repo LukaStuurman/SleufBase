@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.34'
+  SLEUFBASE_RELEASE_VERSION: '0.3.35'
 
 permissions:
   contents: write
@@ -72,6 +72,15 @@ jobs:
       - name: Check release integrity
         shell: pwsh
         run: python tools/check_release_integrity.py
+
+      - name: Verify v0.3.31 installer structure
+        shell: pwsh
+        run: |
+          $iss = Get-Content 'installer/SleufBase.iss' -Raw
+          if ($iss -notmatch '(?m)^\[Tasks\]\s*$') { throw 'Standaard [Tasks]-sectie ontbreekt' }
+          if ($iss -notmatch 'Tasks:\s*desktopicon') { throw 'Desktop shortcut gebruikt de standaard desktopicon-task niet' }
+          if ($iss -match '(?m)^\[Code\]\s*$') { throw 'Custom [Code]-wizardlogica mag niet terugkomen' }
+          if ($iss -match 'CreateInputOptionPage|TNewCheckBox|InitializeWizard|WizardForm') { throw 'Custom wizard-controls aangetroffen' }
 
       - name: Prepare Windows branding
         shell: pwsh
@@ -152,12 +161,13 @@ jobs:
           Compress-Archive -Path 'dist/SleufBase/*' -DestinationPath 'dist/SleufBase-Windows-Fast.zip' -Force
           if (-not (Test-Path 'dist/SleufBase-Windows-Fast.zip')) { throw 'Fast ZIP ontbreekt' }
 
-      - name: Install Inno Setup
+      - name: Install pinned Inno Setup 6.7.1
         shell: pwsh
         run: |
+          choco install innosetup --version=6.7.1 -y --no-progress --allow-downgrade
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
-          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
           if (-not (Test-Path $iscc)) { throw "Inno Setup compiler niet gevonden: $iscc" }
+          (Get-Item $iscc).VersionInfo | Select-Object ProductVersion,FileVersion | Format-List
 
       - name: Build professional installer
         shell: pwsh
@@ -166,6 +176,12 @@ jobs:
           & $iscc 'installer/SleufBase.iss'
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup faalde met exitcode $LASTEXITCODE" }
           if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) { throw 'SleufBase-Setup.exe ontbreekt' }
+
+      - name: Interactive installer UI regression test
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP 'SleufBase-Interactive'
+          & './tools/test_installer_ui.ps1' -SetupPath 'dist-installer/SleufBase-Setup.exe' -InstallDir $installDir
 
       - name: Install and smoke test professional installer
         shell: pwsh
@@ -218,7 +234,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.34
+          name: SleufBase-Windows-v0.3.35
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -237,15 +253,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.34
+          SleufBase Windows v0.3.35
 
-          Verbeteringen:
-          - verwijdert de aparte `Selecteer extra taken`-wizardstap volledig; juist die stap liep bij interactieve installaties nog vast
-          - `Bureaubladsnelkoppeling maken` staat nu als checkbox op de ingebouwde `Gereed om te installeren`-pagina
-          - de installer gebruikt daardoor voor Volgende/Installeren uitsluitend de standaard Inno Setup-wizardnavigatie
-          - de Ready-pagina wordt expliciet ingeschakeld en toont altijd de installatiemap, ook bij upgrades
-          - regressietest controleert dat geen `[Tasks]`- of `CreateInputOptionPage`-pagina meer terugkomt
-          - de bestaande compile-, stille installatie- en runtime-smoketests blijven actief
+          Installerfix:
+          - installerwizard is teruggezet naar dezelfde standaard Inno Setup-opbouw als de werkende v0.3.31: geen custom [Code], geen custom wizard-controls
+          - `Bureaubladsnelkoppeling maken` gebruikt weer de ingebouwde `[Tasks]`-pagina en `Tasks: desktopicon`
+          - alle normale wizardknoppen komen daardoor rechtstreeks van Inno Setup zelf
+          - Inno Setup is voor deze build expliciet vastgezet op versie 6.7.1
+          - nieuwe interactieve UI-regressietest opent de echte Setup.exe, klikt Volgende/Installeren/Voltooien en schakelt de desktop-checkbox in
+          - de test controleert daarna zowel SleufBase.exe als de daadwerkelijk aangemaakte bureaubladsnelkoppeling
+          - bestaande stille installer- en runtime-smoketests blijven daarnaast actief
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
