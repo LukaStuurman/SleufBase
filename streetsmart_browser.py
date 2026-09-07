@@ -3,10 +3,10 @@ from __future__ import annotations
 import threading
 import time
 
-from .legacy_bytecode import load_legacy_module
+from .source_migration import load_source_or_legacy
 
 
-load_legacy_module("streetsmart_browser", globals(), __file__)
+load_source_or_legacy("streetsmart_browser", globals(), __file__)
 
 
 # StreetSmart exposes getBearerToken() as part of its documented JavaScript API.
