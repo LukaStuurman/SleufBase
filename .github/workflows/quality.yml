@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'hardening/**'
+      - 'migration/**'
   pull_request:
 
 permissions:
@@ -61,6 +62,9 @@ jobs:
             exit 1
           fi
 
+      - name: Validate legacy bytecode migration contract
+        run: python tools/snapshot_legacy_api.py --check
+
       - name: Check release integrity
         run: python tools/check_release_integrity.py
 
@@ -68,6 +72,12 @@ jobs:
         run: |
           python -m compileall -q . -x '(^|/)(_bytecode|__pycache__)(/|$)'
 
-      - name: Run reliability regression tests
+      - name: Run reliability regression tests in legacy mode
+        env:
+          SLEUFBASE_MIGRATION_SETTINGS: legacy
+          SLEUFBASE_MIGRATION_STREETSMART: legacy
+          SLEUFBASE_MIGRATION_STREETSMART_BROWSER: legacy
+          SLEUFBASE_MIGRATION_STREETSMART_PANEL: legacy
+          SLEUFBASE_MIGRATION_APP: legacy
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -v
