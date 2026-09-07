@@ -1,0 +1,68 @@
+name: Bytecode Small Module Fragments
+
+on:
+  push:
+    branches:
+      - migration/source-bytecode-kernel
+    paths:
+      - '.github/workflows/bytecode-small-fragments.yml'
+      - 'tools/recover_function_fragments.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bytecode-small-fragments-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recover-small-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements-windows.txt
+            requirements-windows.lock
+
+      - name: Install recovery dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'depyf==0.20.0'
+          python -m pip install -r requirements-windows.txt
+
+      - name: Recover StreetSmart and settings fragments
+        run: |
+          python tools/recover_function_fragments.py \
+            --output-dir migration/fragments \
+            --modules streetsmart streetsmart_browser streetsmart_panel settings
+
+      - name: Upload fragment evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: bytecode-small-module-fragments
+          path: migration/fragments/
+          if-no-files-found: error
+
+      - name: Commit fragment evidence
+        shell: bash
+        run: |
+          git add migration/fragments
+          if git diff --cached --quiet; then
+            echo 'Fragment evidence unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Recover small core source fragments [skip ci]'
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin HEAD:${GITHUB_REF_NAME}
