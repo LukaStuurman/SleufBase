@@ -14,6 +14,8 @@ on:
       - 'streetsmart_panel.py'
       - 'settings.py'
       - 'app.py'
+      - 'sleufbase_launcher.py'
+      - 'tools/apply_core_migration_scaffold.py'
       - 'tools/recover_legacy_source.py'
       - 'tools/snapshot_legacy_api.py'
       - 'tests/test_source_migration.py'
@@ -60,6 +62,9 @@ jobs:
             'mapbox-vector-tile>=2,<3' \
             'ezdxf>=1.4.4,<2'
 
+      - name: Apply large-file migration scaffold
+        run: python tools/apply_core_migration_scaffold.py
+
       - name: Verify migration switch
         run: python -m unittest tests.test_source_migration -v
 
@@ -87,15 +92,15 @@ jobs:
             migration/recovered/
           if-no-files-found: error
 
-      - name: Commit generated migration evidence
+      - name: Commit migration scaffold and generated evidence
         shell: bash
         run: |
-          git add migration/contracts migration/recovered
+          git add app.py sleufbase_launcher.py migration/contracts migration/recovered
           if git diff --cached --quiet; then
-            echo 'Migration evidence is unchanged.'
+            echo 'Migration scaffold/evidence is unchanged.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Refresh bytecode migration evidence [skip ci]'
+          git commit -m 'Apply core bytecode migration scaffold and refresh evidence [skip ci]'
           git push origin HEAD:${GITHUB_REF_NAME}
