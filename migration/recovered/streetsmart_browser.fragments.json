@@ -1,0 +1,254 @@
+[
+  {
+    "argcount": 1,
+    "argument_names": [
+      "username"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 24,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 1,
+    "kwonlyargcount": 0,
+    "name": "_storage_path_for_username",
+    "posonlyargcount": 0,
+    "qualname": "_storage_path_for_username",
+    "source": "def _storage_path_for_username(username):\n    target_dir = streetsmart_browser_storage_dir(username)\n    target_dir.mkdir(parents=True, exist_ok=True)\n    return str(target_dir)\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 30,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 2,
+    "kwonlyargcount": 0,
+    "name": "_load_state",
+    "posonlyargcount": 0,
+    "qualname": "_load_state",
+    "source": "def _load_state():\n    state = load_streetsmart_state()\n    if isinstance(state, dict):\n        return state\n    else:\n        return {}\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "state"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=152, starts_line=38, is_jump_target=False) in _state_version",
+    "firstlineno": 35,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 3,
+    "kwonlyargcount": 0,
+    "name": "_state_version",
+    "posonlyargcount": 0,
+    "qualname": "_state_version"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "state"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 43,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 4,
+    "kwonlyargcount": 0,
+    "name": "_selection_from_state",
+    "posonlyargcount": 0,
+    "qualname": "_selection_from_state",
+    "source": "def _selection_from_state(state):\n    if isinstance(state, dict):\n        current_state = state\n    else:\n        current_state = _load_state()\n    selection = current_state.get('selection')\n    if isinstance(selection, dict):\n        return selection\n    else:\n        return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "selection"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 49,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 5,
+    "kwonlyargcount": 0,
+    "name": "_selection_url",
+    "posonlyargcount": 0,
+    "qualname": "_selection_url",
+    "source": "def _selection_url(selection):\n    return streetsmart_selection_url(selection)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "selection"
+    ],
+    "cellvars": [],
+    "compile_error": "IndentationError: expected an indented block after 'if' statement on line 4 (<streetsmart_browser:_window_title>, line 5)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 53,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 6,
+    "kwonlyargcount": 0,
+    "name": "_window_title",
+    "posonlyargcount": 0,
+    "qualname": "_window_title",
+    "source": "def _window_title(selection):\n    if isinstance(selection, dict):\n        __temp_83 = selection.get('name')\n        if not __temp_83:\n        else:\n            str(__temp_83).strip()\n        name = str('').strip()\n    else:\n        name = ''\n    if not name:\n        return WINDOW_TITLE\n    else:\n        return str(WINDOW_TITLE) + ' - ' + str(name)\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "window",
+      "username",
+      "password"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=78, starts_line=64, is_jump_target=False) in _inject_browser_script",
+    "firstlineno": 58,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 7,
+    "kwonlyargcount": 0,
+    "name": "_inject_browser_script",
+    "posonlyargcount": 0,
+    "qualname": "_inject_browser_script"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=96, starts_line=74, is_jump_target=False) in _browser_go_back",
+    "firstlineno": 69,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 8,
+    "kwonlyargcount": 0,
+    "name": "_browser_go_back",
+    "posonlyargcount": 0,
+    "qualname": "_browser_go_back"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=106, starts_line=84, is_jump_target=False) in _browser_go_home",
+    "firstlineno": 79,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 9,
+    "kwonlyargcount": 0,
+    "name": "_browser_go_home",
+    "posonlyargcount": 0,
+    "qualname": "_browser_go_home"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=146, starts_line=94, is_jump_target=False) in _browser_go_selection",
+    "firstlineno": 89,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 10,
+    "kwonlyargcount": 0,
+    "name": "_browser_go_selection",
+    "posonlyargcount": 0,
+    "qualname": "_browser_go_selection"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=96, starts_line=104, is_jump_target=False) in _browser_refresh",
+    "firstlineno": 99,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 11,
+    "kwonlyargcount": 0,
+    "name": "_browser_refresh",
+    "posonlyargcount": 0,
+    "qualname": "_browser_refresh"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "window",
+      "username",
+      "password"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=114, opname='POP_JUMP_FORWARD_IF_FALSE', arg=1, argval=480, argrepr='to 480', offset=476, starts_line=131, is_jump_target=False) in _sync_selection",
+    "firstlineno": 109,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 12,
+    "kwonlyargcount": 0,
+    "name": "_sync_selection",
+    "posonlyargcount": 0,
+    "qualname": "_sync_selection"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [
+      "password",
+      "username"
+    ],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 147,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 13,
+    "kwonlyargcount": 0,
+    "name": "main",
+    "posonlyargcount": 0,
+    "qualname": "main",
+    "source": "def main():\n    settings = load_settings()\n    if not settings.streetsmart_username:\n        username = str('').strip()\n    else:\n        username = str(settings.streetsmart_username).strip()\n    if not settings.streetsmart_password:\n        password = str('')\n    else:\n        password = str(settings.streetsmart_password)\n    initial_state = _load_state()\n    initial_selection = _selection_from_state(initial_state)\n    menu = [Menu('Navigatie', [MenuAction('Terug', _browser_go_back),\n        MenuAction('Start', _browser_go_home), MenuAction('Naar selectie',\n        _browser_go_selection), MenuSeparator(), MenuAction('Vernieuwen',\n        _browser_refresh)])]\n    webview.settings['OPEN_EXTERNAL_LINKS_IN_BROWSER'] = False\n    webview.settings['SHOW_DEFAULT_MENUS'] = False\n    window = webview.create_window(_window_title(initial_selection), url=\n        _selection_url(initial_selection), width=WINDOW_WIDTH, height=\n        WINDOW_HEIGHT, min_size=WINDOW_MIN_SIZE, text_select=True,\n        background_color='#FFFFFF', menu=menu)\n    \n    \n    def __temp_3590(window):\n        nonlocal password, username\n        return _inject_browser_script(window, username, password)\n    \n    \n    window.events.loaded += __temp_3590\n    window.events.loaded = window.events.loaded\n    webview.start(_sync_selection, args=(window, username, password), gui=None,\n        debug=False, private_mode=False, storage_path=\n        _storage_path_for_username(username), menu=menu)\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "window"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<streetsmart_browser:main.<locals>.<lambda>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 177,
+    "flags": 16777235,
+    "freevars": [
+      "password",
+      "username"
+    ],
+    "index": 14,
+    "kwonlyargcount": 0,
+    "name": "<lambda>",
+    "posonlyargcount": 0,
+    "qualname": "main.<locals>.<lambda>",
+    "source": "def <lambda>(window):\n    nonlocal password, username\n    return _inject_browser_script(window, username, password)\n"
+  }
+]

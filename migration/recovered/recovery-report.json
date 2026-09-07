@@ -68,7 +68,7 @@
         "compile_ok": false,
         "decompiled": false,
         "engine": "pycdc",
-        "error": "RuntimeError: pycdc faalde (1): Error decompyling /tmp/sleufbase-settings-0r20pjyq.marshal: std::bad_cast"
+        "error": "RuntimeError: pycdc faalde (1): Error decompyling /tmp/sleufbase-settings-9rwkduml.marshal: std::bad_cast"
       }
     ],
     "disassembly": "settings.dis.txt",
@@ -87,7 +87,7 @@
         "compile_ok": false,
         "decompiled": false,
         "engine": "pycdc",
-        "error": "RuntimeError: pycdc faalde (1): Error decompyling /tmp/sleufbase-app-0x_ixcc0.marshal: std::bad_cast"
+        "error": "RuntimeError: pycdc faalde (1): Error decompyling /tmp/sleufbase-app-2sinmyln.marshal: std::bad_cast"
       }
     ],
     "disassembly": "app.dis.txt",

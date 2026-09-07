@@ -1,0 +1,42 @@
+[
+  {
+    "compile_ok": 12,
+    "decompiled": 12,
+    "module": "streetsmart",
+    "path": "streetsmart.fragments.json",
+    "timeouts": 0,
+    "total": 13
+  },
+  {
+    "compile_ok": 5,
+    "decompiled": 7,
+    "module": "streetsmart_browser",
+    "path": "streetsmart_browser.fragments.json",
+    "timeouts": 0,
+    "total": 14
+  },
+  {
+    "compile_ok": 13,
+    "decompiled": 20,
+    "module": "streetsmart_panel",
+    "path": "streetsmart_panel.fragments.json",
+    "timeouts": 0,
+    "total": 30
+  },
+  {
+    "compile_ok": 22,
+    "decompiled": 27,
+    "module": "settings",
+    "path": "settings.fragments.json",
+    "timeouts": 0,
+    "total": 32
+  },
+  {
+    "compile_ok": 314,
+    "decompiled": 592,
+    "module": "app",
+    "path": "app.fragments.json",
+    "timeouts": 0,
+    "total": 648
+  }
+]
