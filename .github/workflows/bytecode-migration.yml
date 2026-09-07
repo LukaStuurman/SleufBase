@@ -17,6 +17,8 @@ on:
       - 'sleufbase_launcher.py'
       - 'requirements-windows.txt'
       - 'tools/apply_core_migration_scaffold.py'
+      - 'tools/compare_core_contract.py'
+      - 'tools/recover_function_fragments.py'
       - 'tools/recover_legacy_source.py'
       - 'tools/snapshot_legacy_api.py'
       - 'tests/test_source_migration.py'
@@ -82,6 +84,9 @@ jobs:
           python tools/recover_legacy_source.py \
             --output-dir migration/recovered \
             --pycdc /tmp/sleufbase-pycdc-build/pycdc
+
+      - name: Recover nested functions and methods independently
+        run: python tools/recover_function_fragments.py --output-dir migration/recovered
 
       - name: Compile all recovered Python candidates that are syntactically valid
         shell: bash
