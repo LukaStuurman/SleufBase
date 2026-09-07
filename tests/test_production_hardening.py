@@ -82,12 +82,13 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("Release-integriteit OK: SleufBase ", result.stdout)
 
-    def test_legacy_wrappers_do_not_duplicate_marshal_loader(self) -> None:
+    def test_legacy_wrappers_use_central_migration_switch(self) -> None:
         forbidden_loader_token = "marshal" + ".loads"
         for filename in ("settings.py", "streetsmart.py", "streetsmart_panel.py", "streetsmart_browser.py"):
             text = (REPO_ROOT / filename).read_text(encoding="utf-8")
             self.assertNotIn(forbidden_loader_token, text, filename)
-            self.assertIn("load_legacy_module", text, filename)
+            self.assertNotIn("load_legacy_module", text, filename)
+            self.assertIn("load_migrating_module", text, filename)
 
 
 if __name__ == "__main__":

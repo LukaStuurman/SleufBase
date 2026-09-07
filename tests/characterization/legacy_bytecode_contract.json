@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "python_cache_tag": "cpython-311",
+  "modules": {
+    "app": {
+      "path": "_bytecode/app.cpython-311.pyc",
+      "size": 731007,
+      "git_blob_sha": "b339e90236859eb4f47af0697d7fafcc137e8280"
+    },
+    "settings": {
+      "path": "_bytecode/settings.cpython-311.pyc",
+      "size": 25683,
+      "git_blob_sha": "513dc4261cd0ec341e99b41547eb84b857e3ca7e"
+    },
+    "streetsmart": {
+      "path": "_bytecode/streetsmart.cpython-311.pyc",
+      "size": 24570,
+      "git_blob_sha": "32a8792579fdd542369c7e3bf551fc713ab1ab3b"
+    },
+    "streetsmart_browser": {
+      "path": "_bytecode/streetsmart_browser.cpython-311.pyc",
+      "size": 8667,
+      "git_blob_sha": "5e014a3efc25184efd593ea4cd85a25732108061"
+    },
+    "streetsmart_panel": {
+      "path": "_bytecode/streetsmart_panel.cpython-311.pyc",
+      "size": 25263,
+      "git_blob_sha": "95f56427cd7eee62c339f28644c589280d3bf0fe"
+    }
+  }
+}

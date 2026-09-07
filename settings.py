@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .legacy_bytecode import load_legacy_module
+from .source_migration import load_migrating_module
 
 
-load_legacy_module("settings", globals(), __file__)
+load_migrating_module("settings", globals(), __file__)
 
 
 # Deze instellingen zijn toegevoegd boven op de oudere, gebundelde settings-module.
