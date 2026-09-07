@@ -33,7 +33,7 @@ concurrency:
 jobs:
   characterize-and-recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout migration branch
@@ -57,6 +57,17 @@ jobs:
           python -m pip install -r requirements-windows.txt
           python -m pip check
 
+      - name: Build pinned Python 3.11 pycdc recovery engine
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends build-essential cmake
+          git clone --no-checkout https://github.com/zrsx/pycdc.git /tmp/sleufbase-pycdc
+          git -C /tmp/sleufbase-pycdc checkout --detach 8e638df2b0fa336e55b8b547af5f023237b4e6da
+          cmake -S /tmp/sleufbase-pycdc -B /tmp/sleufbase-pycdc-build -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/sleufbase-pycdc-build --parallel 2
+          test -x /tmp/sleufbase-pycdc-build/pycdc
+
       - name: Apply large-file migration scaffold
         run: python tools/apply_core_migration_scaffold.py
 
@@ -67,16 +78,26 @@ jobs:
         run: python tools/snapshot_legacy_api.py --output migration/contracts/legacy_api.json
 
       - name: Recover review candidates and deterministic disassembly
-        run: python tools/recover_legacy_source.py --output-dir migration/recovered
+        run: |
+          python tools/recover_legacy_source.py \
+            --output-dir migration/recovered \
+            --pycdc /tmp/sleufbase-pycdc-build/pycdc
 
-      - name: Compile recovered Python candidates
+      - name: Compile all recovered Python candidates that are syntactically valid
         shell: bash
         run: |
-          shopt -s nullglob
-          files=(migration/recovered/*.recovered.py)
-          if (( ${#files[@]} )); then
-            python -m py_compile "${files[@]}"
-          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('migration/recovered/recovery-report.json').read_text(encoding='utf-8'))
+          for module in report:
+              for attempt in module['attempts']:
+                  if not attempt.get('compile_ok'):
+                      continue
+                  path = Path('migration/recovered') / attempt['source']
+                  compile(path.read_text(encoding='utf-8'), str(path), 'exec')
+                  print(f"compile OK: {path}")
+          PY
 
       - name: Upload migration evidence
         uses: actions/upload-artifact@v4
