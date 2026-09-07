@@ -1,37 +1,97 @@
 [
   {
-    "compile_ok": false,
-    "decompiled": false,
+    "attempts": [
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "depyf",
+        "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=144, starts_line=39, is_jump_target=False) in <module>"
+      },
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "pycdc",
+        "error": "RuntimeError: pycdc faalde (1): PycBuffer::getByte(): Unexpected end of stream"
+      }
+    ],
     "disassembly": "streetsmart.dis.txt",
-    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=144, starts_line=39, is_jump_target=False) in <module>",
+    "has_compilable_candidate": false,
     "module": "streetsmart"
   },
   {
-    "compile_ok": false,
-    "decompiled": false,
+    "attempts": [
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "depyf",
+        "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=132, starts_line=35, is_jump_target=False) in <module>"
+      },
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "pycdc",
+        "error": "RuntimeError: pycdc faalde (1): Warning: Refusing to pop last block when there is more code to parse pos: 618 OP: ec\nPycBuffer::getByte(): Unexpected end of stream"
+      }
+    ],
     "disassembly": "streetsmart_browser.dis.txt",
-    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=132, starts_line=35, is_jump_target=False) in <module>",
+    "has_compilable_candidate": false,
     "module": "streetsmart_browser"
   },
   {
-    "compile_ok": false,
-    "decompiled": false,
+    "attempts": [
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "depyf",
+        "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>"
+      },
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "pycdc",
+        "error": "RuntimeError: pycdc faalde (1): PycBuffer::getByte(): Unexpected end of stream"
+      }
+    ],
     "disassembly": "streetsmart_panel.dis.txt",
-    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>",
+    "has_compilable_candidate": false,
     "module": "streetsmart_panel"
   },
   {
-    "compile_ok": false,
-    "decompiled": false,
+    "attempts": [
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "depyf",
+        "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>"
+      },
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "pycdc",
+        "error": "RuntimeError: pycdc faalde (1): Error decompyling /home/runner/work/SleufBase/SleufBase/_bytecode/settings.cpython-311.pyc: std::bad_cast"
+      }
+    ],
     "disassembly": "settings.dis.txt",
-    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>",
+    "has_compilable_candidate": false,
     "module": "settings"
   },
   {
-    "compile_ok": false,
-    "decompiled": false,
+    "attempts": [
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "depyf",
+        "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=71, opname='LOAD_BUILD_CLASS', arg=None, argval=None, argrepr='', offset=704, starts_line=84, is_jump_target=False) in <module>"
+      },
+      {
+        "compile_ok": false,
+        "decompiled": false,
+        "engine": "pycdc",
+        "error": "RuntimeError: pycdc faalde (1): Error decompyling /home/runner/work/SleufBase/SleufBase/_bytecode/app.cpython-311.pyc: std::bad_cast"
+      }
+    ],
     "disassembly": "app.dis.txt",
-    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=71, opname='LOAD_BUILD_CLASS', arg=None, argval=None, argrepr='', offset=704, starts_line=84, is_jump_target=False) in <module>",
+    "has_compilable_candidate": false,
     "module": "app"
   }
 ]
