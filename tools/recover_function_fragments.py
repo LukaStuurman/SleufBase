@@ -6,11 +6,16 @@ Module-level decompilers often fail on Python 3.11 MAKE_FUNCTION/class-building
 instructions even when individual function code objects are straightforward.
 This tool decompiles every nested code object independently and records enough
 metadata to stitch reviewed modules/classes back together deterministically.
+
+A hard per-fragment timeout prevents one pathological code object from blocking
+the rest of the migration evidence.
 """
 
 import argparse
+from contextlib import contextmanager
 import json
 from pathlib import Path
+import signal
 import sys
 from types import CodeType
 from typing import Any
@@ -29,6 +34,10 @@ CORE_MODULES = (
     "settings",
     "app",
 )
+
+
+class FragmentTimeoutError(TimeoutError):
+    pass
 
 
 def _walk(code: CodeType):
@@ -58,7 +67,30 @@ def _metadata(code: CodeType) -> dict[str, Any]:
     }
 
 
-def recover_fragments(module_name: str, output_dir: Path) -> dict[str, Any]:
+@contextmanager
+def _fragment_timeout(seconds: float):
+    if seconds <= 0 or not hasattr(signal, "SIGALRM"):
+        yield
+        return
+
+    def handle_timeout(_signum, _frame):
+        raise FragmentTimeoutError(f"depyf fragment timeout na {seconds:g}s")
+
+    old_handler = signal.signal(signal.SIGALRM, handle_timeout)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+
+def recover_fragments(
+    module_name: str,
+    output_dir: Path,
+    *,
+    timeout_seconds: float,
+) -> dict[str, Any]:
     try:
         import depyf
     except ImportError as exc:
@@ -66,11 +98,17 @@ def recover_fragments(module_name: str, output_dir: Path) -> dict[str, Any]:
 
     root = read_validated_code(module_name, REPO_ROOT / "legacy_bytecode.py")
     fragments: list[dict[str, Any]] = []
-    for index, code in enumerate(_walk(root), start=1):
+    code_objects = list(_walk(root))
+    for index, code in enumerate(code_objects, start=1):
         item = _metadata(code)
         item["index"] = index
+        print(
+            f"[{module_name} {index}/{len(code_objects)}] {item['qualname']} line {item['firstlineno']}",
+            flush=True,
+        )
         try:
-            source = depyf.decompile(code)
+            with _fragment_timeout(timeout_seconds):
+                source = depyf.decompile(code)
             if not isinstance(source, str) or not source.strip():
                 raise RuntimeError("lege depyf-output")
             item["source"] = source.rstrip() + "\n"
@@ -95,12 +133,23 @@ def recover_fragments(module_name: str, output_dir: Path) -> dict[str, Any]:
     )
     successful = sum(1 for item in fragments if item["decompiled"])
     compilable = sum(1 for item in fragments if item["compile_ok"])
+    timed_out = sum(
+        1
+        for item in fragments
+        if "FragmentTimeoutError" in str(item.get("error", ""))
+    )
+    print(
+        f"{module_name}: {successful}/{len(fragments)} gedecompileerd, "
+        f"{compilable} compile-ok, {timed_out} timeout(s)",
+        flush=True,
+    )
     return {
         "module": module_name,
         "path": path.name,
         "total": len(fragments),
         "decompiled": successful,
         "compile_ok": compilable,
+        "timeouts": timed_out,
     }
 
 
@@ -117,22 +166,30 @@ def main() -> int:
         choices=CORE_MODULES,
         default=list(CORE_MODULES),
     )
+    parser.add_argument(
+        "--fragment-timeout",
+        type=float,
+        default=5.0,
+        help="Maximum depyf time per nested code object on POSIX CI runners.",
+    )
     args = parser.parse_args()
 
     if sys.version_info[:2] != (3, 11):
         raise SystemExit("Function-fragment recovery moet onder Python 3.11 draaien")
 
-    report = [recover_fragments(name, args.output_dir) for name in args.modules]
+    report = [
+        recover_fragments(
+            name,
+            args.output_dir,
+            timeout_seconds=args.fragment_timeout,
+        )
+        for name in args.modules
+    ]
     report_path = args.output_dir / "fragment-recovery-report.json"
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    for item in report:
-        print(
-            f"{item['module']}: {item['decompiled']}/{item['total']} gedecompileerd, "
-            f"{item['compile_ok']} standalone compile-ok"
-        )
     return 0
 
 
