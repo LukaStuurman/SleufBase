@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-"""Create a deterministic contract snapshot of the current legacy bytecode core.
+"""Create deterministic API-contract snapshots for the core migration.
 
-The snapshot is characterization data, not a source-code substitute. It records
-which names/classes/signatures the rest of SleufBase can currently observe so a
-reviewed Python replacement can be compared before cut-over.
+Legacy mode characterizes the current bytecode implementation. Source mode runs
+one or more wrappers with their explicit ``SleufBase._source`` implementation.
+The output is deliberately structural: names, signatures, classes and simple
+constants. It is not a source-code substitute.
 """
 
 import argparse
@@ -73,6 +74,7 @@ def _class_contract(cls: type[Any]) -> dict[str, Any]:
             entry["value"] = simple
         members[name] = entry
     return {
+        "module": cls.__module__,
         "bases": [base.__module__ + "." + base.__qualname__ for base in cls.__bases__],
         "members": members,
     }
@@ -82,6 +84,10 @@ def _module_contract(module_name: str) -> dict[str, Any]:
     module = importlib.import_module(f"SleufBase.{module_name}")
     namespace = vars(module)
     names = sorted(name for name in namespace if not name.startswith("__"))
+    allowed_class_modules = {
+        module.__name__,
+        f"SleufBase._source.{module_name}",
+    }
 
     functions: dict[str, Any] = {}
     classes: dict[str, Any] = {}
@@ -89,8 +95,11 @@ def _module_contract(module_name: str) -> dict[str, Any]:
     for name in names:
         value = namespace[name]
         if inspect.isfunction(value) or inspect.isbuiltin(value):
-            functions[name] = {"signature": _safe_signature(value)}
-        elif inspect.isclass(value) and value.__module__ == module.__name__:
+            functions[name] = {
+                "module": getattr(value, "__module__", None),
+                "signature": _safe_signature(value),
+            }
+        elif inspect.isclass(value) and value.__module__ in allowed_class_modules:
             classes[name] = _class_contract(value)
         elif name.isupper():
             simple = _simple_value(value)
@@ -106,10 +115,10 @@ def _module_contract(module_name: str) -> dict[str, Any]:
     }
 
 
-def _bytecode_inventory() -> dict[str, Any]:
+def _bytecode_inventory(modules: tuple[str, ...]) -> dict[str, Any]:
     inventory: dict[str, Any] = {}
     bytecode_dir = REPO_ROOT / "_bytecode"
-    for module_name in CORE_MODULES:
+    for module_name in modules:
         matches = sorted(bytecode_dir.glob(f"{module_name}.cpython-*.pyc"))
         if len(matches) != 1:
             inventory[module_name] = {
@@ -126,15 +135,24 @@ def _bytecode_inventory() -> dict[str, Any]:
     return inventory
 
 
-def build_snapshot() -> dict[str, Any]:
-    # Characterization must always describe the legacy baseline, independent of
-    # a developer's local migration environment.
-    os.environ.pop(SOURCE_ENV, None)
+def build_snapshot(
+    modules: tuple[str, ...] = CORE_MODULES,
+    *,
+    implementation: str = "legacy",
+) -> dict[str, Any]:
+    if implementation == "legacy":
+        os.environ.pop(SOURCE_ENV, None)
+    elif implementation == "source":
+        os.environ[SOURCE_ENV] = ",".join(modules)
+    else:
+        raise ValueError(f"onbekende implementatie: {implementation}")
+
     return {
-        "format": 1,
+        "format": 2,
+        "implementation": implementation,
         "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-        "bytecode": _bytecode_inventory(),
-        "modules": {name: _module_contract(name) for name in CORE_MODULES},
+        "bytecode": _bytecode_inventory(modules),
+        "modules": {name: _module_contract(name) for name in modules},
     }
 
 
@@ -145,9 +163,21 @@ def main() -> int:
         type=Path,
         default=REPO_ROOT / "migration" / "contracts" / "legacy_api.json",
     )
+    parser.add_argument(
+        "--implementation",
+        choices=("legacy", "source"),
+        default="legacy",
+    )
+    parser.add_argument(
+        "--modules",
+        nargs="*",
+        choices=CORE_MODULES,
+        default=list(CORE_MODULES),
+    )
     args = parser.parse_args()
 
-    payload = build_snapshot()
+    modules = tuple(args.modules)
+    payload = build_snapshot(modules, implementation=args.implementation)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
