@@ -26,7 +26,8 @@
       "size": 25263
     }
   },
-  "format": 1,
+  "format": 2,
+  "implementation": "legacy",
   "modules": {
     "app": {
       "classes": {
@@ -1806,7 +1807,8 @@
               "kind": "function",
               "signature": "(self) -> 'None'"
             }
-          }
+          },
+          "module": "SleufBase.app"
         },
         "RoundedPanel": {
           "bases": [
@@ -1833,7 +1835,8 @@
               "kind": "function",
               "signature": "(self, height: 'int') -> 'None'"
             }
-          }
+          },
+          "module": "SleufBase.app"
         }
       },
       "constants": {
@@ -1844,150 +1847,199 @@
       },
       "functions": {
         "_install_ai_maaiveld_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_bgt_surface_autofill_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_fast_kickthemap_start_points_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_inline_location_search_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_kickthemap_jobs_browser_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_kickthemap_material_choices_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_modern_combobox_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_modern_dialog_style_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_modern_dropdown_menu_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_sleufbase_branding_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_streetsmart_selector_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_install_template_variant_order_patch": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "_load_cached_module": {
+          "module": "SleufBase.app",
           "signature": "() -> 'None'"
         },
         "as_completed": {
+          "module": "concurrent.futures._base",
           "signature": "(fs, timeout=None)"
         },
         "build_numbered_maaiveld_image": {
+          "module": "SleufBase.ai_maaiveld",
           "signature": "(*, layer: 'GeoTiffLayer', points: 'list[AiMaaiveldPoint]', renderer: 'MapRenderer', dxf_overlays: 'list[DxfOverlay] | None' = None, background_provider: 'Any | None' = None, size: 'tuple[int, int]' = (1400, 1000)) -> 'Image.Image'"
         },
         "build_object_layer_rules": {
+          "module": "SleufBase.kickthemap_dxf_export",
           "signature": "(rule_rows: 'list[tuple] | None' = None) -> 'tuple[ObjectLayerRule, ...]'"
         },
         "build_virtual_trench_dataset": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer', *, include_endpoints: 'bool' = True) -> 'KickTheMapObjectDataset | None'"
         },
         "clear_kickthemap_browser_session": {
+          "module": "SleufBase.kickthemap",
           "signature": "(email: 'str' = '') -> 'list[Path]'"
         },
         "clear_streetsmart_storage": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str' = '') -> 'list[Path]'"
         },
         "dxf_trench_export_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "dxf_trench_export_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         },
         "hex_color_to_rgb": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'tuple[int, int, int]'"
         },
         "install_rounded_buttons": {
+          "module": "SleufBase.rounded_widgets",
           "signature": "() -> 'None'"
         },
         "is_virtual_trench_layer": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer') -> 'bool'"
         },
         "load_dxf": {
+          "module": "SleufBase.dxf",
           "signature": "(path: 'str | Path') -> 'DxfOverlay'"
         },
         "load_geotiff": {
+          "module": "SleufBase.geotiff",
           "signature": "(path: 'str | Path') -> 'GeoTiffLayer'"
         },
         "load_job_feature_dataset": {
+          "module": "SleufBase.kickthemap_dxf_export",
           "signature": "(path: 'str | Path', job_id: 'int', job_title: 'str') -> 'KickTheMapObjectDataset'"
         },
         "load_settings": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'AppSettings'"
         },
         "load_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'dict[str, Any]'"
         },
         "main": {
+          "module": "SleufBase.app",
           "signature": "(startup_paths: 'list[str] | None' = None) -> 'None'"
         },
         "map_export_background_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "map_export_background_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         },
         "number_key_to_segment_key": {
+          "module": "SleufBase.ai_maaiveld",
           "signature": "(number_key: 'str') -> 'str | None'"
         },
         "ordered_virtual_trench_points": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer') -> 'list[dict[str, Any]]'"
         },
         "pick_features": {
+          "module": "SleufBase.renderer",
           "signature": "(x: 'float', y: 'float', overlays: 'list[DxfOverlay]', tolerance_meters: 'float') -> 'list[CableFeature]'"
         },
         "point_chainage": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(point: 'dict[str, Any]', start_point: 'dict[str, Any]', end_point: 'dict[str, Any]') -> 'float'"
         },
         "project_point_onto_virtual_trench": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer', x: 'float', y: 'float') -> 'tuple[float, float, float, float]'"
         },
         "quote": {
+          "module": "urllib.parse",
           "signature": "(string, safe='/', encoding=None, errors=None)"
         },
         "refresh_virtual_trench_layer": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer', *, quality_multiplier: 'float' = 1.0) -> 'None'"
         },
         "request_maaiveld_from_vllm": {
+          "module": "SleufBase.ai_maaiveld",
           "signature": "(image: 'Image.Image', *, model: 'str | None' = None, base_url: 'str | None' = None, api_key: 'str | None' = None, timeout_seconds: 'int' = 180) -> 'AiMaaiveldResult'"
         },
         "rotate_geotiff_layer": {
+          "module": "SleufBase.geotiff",
           "signature": "(layer: 'GeoTiffLayer', angle_degrees: 'float') -> 'GeoTiffLayer'"
         },
         "save_settings": {
+          "module": "SleufBase.settings",
           "signature": "(settings: 'AppSettings') -> 'Path'"
         },
         "save_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'Path'"
         },
         "set_geotiff_layer_rotation": {
+          "module": "SleufBase.geotiff",
           "signature": "(layer: 'GeoTiffLayer', angle_degrees: 'float') -> 'GeoTiffLayer'"
         },
         "template_client_logo_preset_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "template_client_logo_preset_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         },
         "virtual_trench_endpoints": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer') -> 'tuple[dict[str, Any] | None, dict[str, Any] | None]'"
         },
         "virtual_trench_points": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer') -> 'list[dict[str, Any]]'"
         },
         "virtual_trench_width": {
+          "module": "SleufBase.virtual_trench",
           "signature": "(layer: 'GeoTiffLayer') -> 'float'"
         }
       },
@@ -2243,7 +2295,8 @@
               "kind": "bool",
               "value": true
             }
-          }
+          },
+          "module": "SleufBase.settings"
         },
         "KickTheMapObjectLayerRule": {
           "bases": [
@@ -2262,7 +2315,8 @@
               "kind": "str",
               "value": ""
             }
-          }
+          },
+          "module": "SleufBase.settings"
         },
         "KickTheMapSavedAccount": {
           "bases": [
@@ -2277,7 +2331,8 @@
               "kind": "str",
               "value": ""
             }
-          }
+          },
+          "module": "SleufBase.settings"
         }
       },
       "constants": {
@@ -2317,102 +2372,135 @@
       },
       "functions": {
         "_bgt_surface_option_value": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'bool'"
         },
         "_choice_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
         },
         "_choice_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
         },
         "_default_profile_label": {
+          "module": "SleufBase.settings",
           "signature": "(target_layer: 'str', keywords: 'str' = '') -> 'str'"
         },
         "_load_settings_without_bgt_surface_option": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'AppSettings'"
         },
         "_normalize_bool": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'bool') -> 'bool'"
         },
         "_normalize_choice": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
         },
         "_normalize_choice_list": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'list[str]'"
         },
         "_normalize_email": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'str' = '') -> 'str'"
         },
         "_normalize_float": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'float', minimum: 'float', maximum: 'float') -> 'float'"
         },
         "_normalize_hex_color": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'str') -> 'str'"
         },
         "_normalize_kickthemap_accounts": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'list[KickTheMapSavedAccount]'"
         },
         "_normalize_kickthemap_object_layer_rules": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'list[KickTheMapObjectLayerRule]'"
         },
         "_normalize_kickthemap_rule_color": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'int' = 256) -> 'int'"
         },
         "_normalize_text": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object', default: 'str' = '') -> 'str'"
         },
         "_save_settings_without_bgt_surface_option": {
+          "module": "SleufBase.settings",
           "signature": "(settings: 'AppSettings') -> 'Path'"
         },
         "_settings_path": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'Path'"
         },
         "asdict": {
+          "module": "dataclasses",
           "signature": "(obj, *, dict_factory=<class 'dict'>)"
         },
         "dataclass": {
+          "module": "dataclasses",
           "signature": "(cls=None, /, *, init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)"
         },
         "default_kickthemap_object_layer_rules": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'list[KickTheMapObjectLayerRule]'"
         },
         "dxf_trench_export_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "dxf_trench_export_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         },
         "hex_color_to_rgb": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'tuple[int, int, int]'"
         },
         "load_settings": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'AppSettings'"
         },
         "load_source_or_legacy": {
+          "module": "SleufBase.source_migration",
           "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
         },
         "map_export_background_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "map_export_background_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         },
         "normalize_kickthemap_material_choices": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'list[str]'"
         },
         "normalize_kickthemap_profile_extra_choices": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'list[str]'"
         },
         "normalize_marxact_name_mappings": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'object') -> 'dict[str, str]'"
         },
         "save_settings": {
+          "module": "SleufBase.settings",
           "signature": "(settings: 'AppSettings') -> 'Path'"
         },
         "template_client_logo_preset_label": {
+          "module": "SleufBase.settings",
           "signature": "(value: 'str') -> 'str'"
         },
         "template_client_logo_preset_value_from_label": {
+          "module": "SleufBase.settings",
           "signature": "(label: 'str') -> 'str'"
         }
       },
@@ -2505,48 +2593,63 @@
       },
       "functions": {
         "_safe_streetsmart_slug": {
+          "module": "SleufBase.streetsmart",
           "signature": "(value: 'str') -> 'str'"
         },
         "clear_streetsmart_storage": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str' = '') -> 'list[Path]'"
         },
         "default_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'dict[str, Any]'"
         },
         "load_source_or_legacy": {
+          "module": "SleufBase.source_migration",
           "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
         },
         "load_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'dict[str, Any]'"
         },
         "quote": {
+          "module": "urllib.parse",
           "signature": "(string, safe='/', encoding=None, errors=None)"
         },
         "save_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'Path'"
         },
         "streetsmart_browser_sessions_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'Path'"
         },
         "streetsmart_browser_storage_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str') -> 'Path'"
         },
         "streetsmart_data_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'Path'"
         },
         "streetsmart_embedded_storage_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'Path'"
         },
         "streetsmart_login_script": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str', password: 'str') -> 'str'"
         },
         "streetsmart_selection_center": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'tuple[float, float] | None'"
         },
         "streetsmart_selection_url": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
         },
         "streetsmart_state_path": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'Path'"
         }
       },
@@ -2594,72 +2697,95 @@
       },
       "functions": {
         "_browser_go_back": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'None'"
         },
         "_browser_go_home": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'None'"
         },
         "_browser_go_selection": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'None'"
         },
         "_browser_refresh": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'None'"
         },
         "_capture_documented_streetsmart_bearer": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(window) -> 'bool'"
         },
         "_inject_browser_script": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(*args, **kwargs)"
         },
         "_load_state": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'dict'"
         },
         "_original_inject_browser_script": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(window: 'webview.Window', username: 'str', password: 'str') -> 'None'"
         },
         "_schedule_bearer_capture": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(window) -> 'None'"
         },
         "_selection_from_state": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(state: 'dict | None' = None) -> 'dict | None'"
         },
         "_selection_url": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(selection: 'dict | None') -> 'str'"
         },
         "_state_version": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(state: 'dict | None' = None) -> 'int'"
         },
         "_storage_path_for_username": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(username: 'str') -> 'str'"
         },
         "_sync_selection": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(window: 'webview.Window', username: 'str', password: 'str') -> 'None'"
         },
         "_window_title": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "(selection: 'dict | None') -> 'str'"
         },
         "load_settings": {
+          "module": "SleufBase.settings",
           "signature": "() -> 'AppSettings'"
         },
         "load_source_or_legacy": {
+          "module": "SleufBase.source_migration",
           "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
         },
         "load_streetsmart_state": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'dict[str, Any]'"
         },
         "main": {
+          "module": "SleufBase.streetsmart_browser",
           "signature": "() -> 'None'"
         },
         "save_streetsmart_bearer_token": {
+          "module": "SleufBase.streetsmart_bearer",
           "signature": "(token: 'str', permissions: 'Any' = None) -> 'bool'"
         },
         "streetsmart_browser_storage_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str') -> 'Path'"
         },
         "streetsmart_login_script": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str', password: 'str') -> 'str'"
         },
         "streetsmart_selection_url": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
         }
       },
@@ -2763,7 +2889,8 @@
               "kind": "function",
               "signature": "(self, username: 'str', password: 'str') -> 'None'"
             }
-          }
+          },
+          "module": "SleufBase.streetsmart_panel"
         }
       },
       "constants": {
@@ -2779,21 +2906,27 @@
       },
       "functions": {
         "_ensure_webview2_runtime_dirs": {
+          "module": "SleufBase.streetsmart_panel",
           "signature": "(base_dir: 'Path') -> 'None'"
         },
         "_webview_lib_dir": {
+          "module": "SleufBase.streetsmart_panel",
           "signature": "() -> 'Path'"
         },
         "load_source_or_legacy": {
+          "module": "SleufBase.source_migration",
           "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
         },
         "streetsmart_embedded_storage_dir": {
+          "module": "SleufBase.streetsmart",
           "signature": "() -> 'Path'"
         },
         "streetsmart_login_script": {
+          "module": "SleufBase.streetsmart",
           "signature": "(username: 'str', password: 'str') -> 'str'"
         },
         "streetsmart_selection_url": {
+          "module": "SleufBase.streetsmart",
           "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
         }
       },

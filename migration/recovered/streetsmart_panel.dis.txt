@@ -95,18 +95,18 @@
             150 STORE_SUBSCR
 
  32         154 LOAD_CONST              24 (('return', 'Path'))
-            156 LOAD_CONST              18 (<code object _webview_lib_dir at 0x7f577322c390, file "app\streetsmart_panel.py", line 32>)
+            156 LOAD_CONST              18 (<code object _webview_lib_dir at 0x7fb0986e8390, file "app\streetsmart_panel.py", line 32>)
             158 MAKE_FUNCTION            4 (annotations)
             160 STORE_NAME              27 (_webview_lib_dir)
 
  36         162 LOAD_CONST              25 (('base_dir', 'Path', 'return', 'None'))
-            164 LOAD_CONST              21 (<code object _ensure_webview2_runtime_dirs at 0x7f5773526970, file "app\streetsmart_panel.py", line 36>)
+            164 LOAD_CONST              21 (<code object _ensure_webview2_runtime_dirs at 0x7fb098a56970, file "app\streetsmart_panel.py", line 36>)
             166 MAKE_FUNCTION            4 (annotations)
             168 STORE_NAME              28 (_ensure_webview2_runtime_dirs)
 
  50         170 PUSH_NULL
             172 LOAD_BUILD_CLASS
-            174 LOAD_CONST              22 (<code object EmbeddedStreetSmartPanel at 0x7f5773586470, file "app\streetsmart_panel.py", line 50>)
+            174 LOAD_CONST              22 (<code object EmbeddedStreetSmartPanel at 0x7fb098ada330, file "app\streetsmart_panel.py", line 50>)
             176 MAKE_FUNCTION            0
             178 LOAD_CONST              23 ('EmbeddedStreetSmartPanel')
             180 PRECALL                  2
@@ -208,68 +208,68 @@
  51          12 LOAD_CONST               2 (('status_callback',))
              14 BUILD_CONST_KEY_MAP      1
              16 LOAD_CONST              33 (('host', 'tk.Misc', 'status_callback', 'Callable[[str], None] | None', 'return', 'None'))
-             18 LOAD_CONST               9 (<code object __init__ at 0x5603e79faa10, file "app\streetsmart_panel.py", line 51>)
+             18 LOAD_CONST               9 (<code object __init__ at 0x562fbf95ac70, file "app\streetsmart_panel.py", line 51>)
              20 MAKE_FUNCTION            6 (kwdefaults, annotations)
              22 STORE_NAME               3 (__init__)
 
  74          24 LOAD_CONST              34 (('selection', 'dict | None', 'return', 'None'))
-             26 LOAD_CONST              12 (<code object navigate_selection at 0x7f577322c4b0, file "app\streetsmart_panel.py", line 74>)
+             26 LOAD_CONST              12 (<code object navigate_selection at 0x7fb0986e84b0, file "app\streetsmart_panel.py", line 74>)
              28 MAKE_FUNCTION            4 (annotations)
              30 STORE_NAME               4 (navigate_selection)
 
  77          32 LOAD_CONST              35 (('url', 'str', 'return', 'None'))
-             34 LOAD_CONST              15 (<code object navigate_url at 0x7f577322c5d0, file "app\streetsmart_panel.py", line 77>)
+             34 LOAD_CONST              15 (<code object navigate_url at 0x7fb0986e85d0, file "app\streetsmart_panel.py", line 77>)
              36 MAKE_FUNCTION            4 (annotations)
              38 STORE_NAME               5 (navigate_url)
 
  80          40 LOAD_CONST              36 (('return', 'None'))
-             42 LOAD_CONST              16 (<code object reload at 0x7f57735fa5b0, file "app\streetsmart_panel.py", line 80>)
+             42 LOAD_CONST              16 (<code object reload at 0x7fb098b2a3d0, file "app\streetsmart_panel.py", line 80>)
              44 MAKE_FUNCTION            4 (annotations)
              46 STORE_NAME               6 (reload)
 
  83          48 LOAD_CONST              36 (('return', 'None'))
-             50 LOAD_CONST              17 (<code object focus at 0x7f57735fa2e0, file "app\streetsmart_panel.py", line 83>)
+             50 LOAD_CONST              17 (<code object focus at 0x7fb098b2a100, file "app\streetsmart_panel.py", line 83>)
              52 MAKE_FUNCTION            4 (annotations)
              54 STORE_NAME               7 (focus)
 
  86          56 LOAD_CONST              37 (('username', 'str', 'password', 'str', 'return', 'None'))
-             58 LOAD_CONST              20 (<code object update_credentials at 0x7f57735ae4f0, file "app\streetsmart_panel.py", line 86>)
+             58 LOAD_CONST              20 (<code object update_credentials at 0x7fb098ade640, file "app\streetsmart_panel.py", line 86>)
              60 MAKE_FUNCTION            4 (annotations)
              62 STORE_NAME               8 (update_credentials)
 
  99          64 LOAD_CONST              36 (('return', 'None'))
-             66 LOAD_CONST              21 (<code object destroy at 0x7f5774427cf0, file "app\streetsmart_panel.py", line 99>)
+             66 LOAD_CONST              21 (<code object destroy at 0x7fb09982bcf0, file "app\streetsmart_panel.py", line 99>)
              68 MAKE_FUNCTION            4 (annotations)
              70 STORE_NAME               9 (destroy)
 
 108          72 LOAD_CONST              38 (('return', 'tuple[int, int, int]'))
-             74 LOAD_CONST              23 (<code object _host_geometry at 0x5603e7a4f370, file "app\streetsmart_panel.py", line 108>)
+             74 LOAD_CONST              23 (<code object _host_geometry at 0x562fbf91c130, file "app\streetsmart_panel.py", line 108>)
              76 MAKE_FUNCTION            4 (annotations)
              78 STORE_NAME              10 (_host_geometry)
 
 116          80 LOAD_CONST              39 (('name', 'str', 'payload', 'object', 'return', 'None'))
-             82 LOAD_CONST              27 (<code object _queue_command at 0x7f577322c810, file "app\streetsmart_panel.py", line 116>)
+             82 LOAD_CONST              27 (<code object _queue_command at 0x7fb0986e8810, file "app\streetsmart_panel.py", line 116>)
              84 MAKE_FUNCTION            4 (annotations)
              86 STORE_NAME              11 (_queue_command)
 
 121          88 LOAD_CONST              40 ((None,))
              90 LOAD_CONST              36 (('return', 'None'))
-             92 LOAD_CONST              28 (<code object _on_host_configure at 0x7f577322c930, file "app\streetsmart_panel.py", line 121>)
+             92 LOAD_CONST              28 (<code object _on_host_configure at 0x7fb0986e8930, file "app\streetsmart_panel.py", line 121>)
              94 MAKE_FUNCTION            5 (defaults, annotations)
              96 STORE_NAME              12 (_on_host_configure)
 
 126          98 LOAD_CONST              41 (('message', 'str', 'return', 'None'))
-            100 LOAD_CONST              30 (<code object _post_status at 0x7f5773523660, file "app\streetsmart_panel.py", line 126>)
+            100 LOAD_CONST              30 (<code object _post_status at 0x7fb0986b2890, file "app\streetsmart_panel.py", line 126>)
             102 MAKE_FUNCTION            4 (annotations)
             104 STORE_NAME              13 (_post_status)
 
 129         106 LOAD_CONST              36 (('return', 'None'))
-            108 LOAD_CONST              31 (<code object _pump_status_queue at 0x7f5773507430, file "app\streetsmart_panel.py", line 129>)
+            108 LOAD_CONST              31 (<code object _pump_status_queue at 0x7fb098a37430, file "app\streetsmart_panel.py", line 129>)
             110 MAKE_FUNCTION            4 (annotations)
             112 STORE_NAME              14 (_pump_status_queue)
 
 147         114 LOAD_CONST              36 (('return', 'None'))
-            116 LOAD_CONST              32 (<code object _run_thread at 0x5603e7a0d500, file "app\streetsmart_panel.py", line 147>)
+            116 LOAD_CONST              32 (<code object _run_thread at 0x562fbf953490, file "app\streetsmart_panel.py", line 147>)
             118 MAKE_FUNCTION            4 (annotations)
             120 STORE_NAME              15 (_run_thread)
             122 LOAD_CONST               1 (None)
@@ -356,7 +356,7 @@
             456 LOAD_CONST               7 ('<ButtonPress-1>')
             458 LOAD_CLOSURE             0 (self)
             460 BUILD_TUPLE              1
-            462 LOAD_CONST               8 (<code object <lambda> at 0x7f5773567780, file "app\streetsmart_panel.py", line 67>)
+            462 LOAD_CONST               8 (<code object <lambda> at 0x7fb098a97870, file "app\streetsmart_panel.py", line 67>)
             464 MAKE_FUNCTION            8 (closure)
             466 LOAD_CONST               5 ('+')
             468 KW_NAMES                 6
@@ -370,7 +370,7 @@
             520 LOAD_CONST               9 ('<FocusIn>')
             522 LOAD_CLOSURE             0 (self)
             524 BUILD_TUPLE              1
-            526 LOAD_CONST              10 (<code object <lambda> at 0x7f57735fa3d0, file "app\streetsmart_panel.py", line 68>)
+            526 LOAD_CONST              10 (<code object <lambda> at 0x7fb098b2a4c0, file "app\streetsmart_panel.py", line 68>)
             528 MAKE_FUNCTION            8 (closure)
             530 LOAD_CONST               5 ('+')
             532 KW_NAMES                 6
@@ -384,7 +384,7 @@
             584 LOAD_CONST              11 ('<Destroy>')
             586 LOAD_CLOSURE             0 (self)
             588 BUILD_TUPLE              1
-            590 LOAD_CONST              12 (<code object <lambda> at 0x7f57735fa4c0, file "app\streetsmart_panel.py", line 69>)
+            590 LOAD_CONST              12 (<code object <lambda> at 0x7fb098b2a5b0, file "app\streetsmart_panel.py", line 69>)
             592 MAKE_FUNCTION            8 (closure)
             594 LOAD_CONST               5 ('+')
             596 KW_NAMES                 6
@@ -1106,7 +1106,7 @@ ExceptionTable:
 198        1174 LOAD_CLOSURE            20 (browser)
            1176 LOAD_CLOSURE            22 (controller_field)
            1178 BUILD_TUPLE              2
-           1180 LOAD_CONST              20 (<code object browser_controller at 0x7f577322ca50, file "app\streetsmart_panel.py", line 198>)
+           1180 LOAD_CONST              20 (<code object browser_controller at 0x7fb0986e8a50, file "app\streetsmart_panel.py", line 198>)
            1182 MAKE_FUNCTION            8 (closure)
            1184 STORE_DEREF             21 (browser_controller)
 
@@ -1114,7 +1114,7 @@ ExceptionTable:
            1188 LOAD_CLOSURE            30 (kernel32)
            1190 LOAD_CLOSURE            38 (user32)
            1192 BUILD_TUPLE              2
-           1194 LOAD_CONST              24 (<code object set_keyboard_focus at 0x5603e7a4e6f0, file "app\streetsmart_panel.py", line 206>)
+           1194 LOAD_CONST              24 (<code object set_keyboard_focus at 0x562fbf994cd0, file "app\streetsmart_panel.py", line 206>)
            1196 MAKE_FUNCTION           12 (annotations, closure)
            1198 STORE_DEREF             35 (set_keyboard_focus)
 
@@ -1122,7 +1122,7 @@ ExceptionTable:
            1202 LOAD_CLOSURE            16 (Rectangle)
            1204 LOAD_CLOSURE            21 (browser_controller)
            1206 BUILD_TUPLE              2
-           1208 LOAD_CONST              27 (<code object sync_controller_bounds at 0x7f5773526b50, file "app\streetsmart_panel.py", line 229>)
+           1208 LOAD_CONST              27 (<code object sync_controller_bounds at 0x7fb098a56b50, file "app\streetsmart_panel.py", line 229>)
            1210 MAKE_FUNCTION           12 (annotations, closure)
            1212 STORE_DEREF             36 (sync_controller_bounds)
 
@@ -1133,7 +1133,7 @@ ExceptionTable:
            1222 LOAD_CLOSURE            36 (sync_controller_bounds)
            1224 LOAD_CLOSURE            38 (user32)
            1226 BUILD_TUPLE              5
-           1228 LOAD_CONST              30 (<code object apply_host_geometry at 0x5603e7a49830, file "app\streetsmart_panel.py", line 242>)
+           1228 LOAD_CONST              30 (<code object apply_host_geometry at 0x562fbf98ed10, file "app\streetsmart_panel.py", line 242>)
            1230 MAKE_FUNCTION           12 (annotations, closure)
            1232 STORE_DEREF             19 (apply_host_geometry)
 
@@ -1145,7 +1145,7 @@ ExceptionTable:
            1244 LOAD_CLOSURE            29 (form)
            1246 LOAD_CLOSURE            35 (set_keyboard_focus)
            1248 BUILD_TUPLE              6
-           1250 LOAD_CONST              31 (<code object focus_browser at 0x5603e79db010, file "app\streetsmart_panel.py", line 268>)
+           1250 LOAD_CONST              31 (<code object focus_browser at 0x562fbf94cb50, file "app\streetsmart_panel.py", line 268>)
            1252 MAKE_FUNCTION           12 (annotations, closure)
            1254 STORE_DEREF             27 (focus_browser)
 
@@ -1154,7 +1154,7 @@ ExceptionTable:
            1260 LOAD_CLOSURE            23 (current_password)
            1262 LOAD_CLOSURE            26 (current_username)
            1264 BUILD_TUPLE              3
-           1266 LOAD_CONST              32 (<code object try_login_script at 0x7f57735866f0, file "app\streetsmart_panel.py", line 297>)
+           1266 LOAD_CONST              32 (<code object try_login_script at 0x7fb098ada5b0, file "app\streetsmart_panel.py", line 297>)
            1268 MAKE_FUNCTION           12 (annotations, closure)
            1270 STORE_DEREF             37 (try_login_script)
 
@@ -1165,7 +1165,7 @@ ExceptionTable:
            1280 LOAD_CLOSURE            25 (current_url)
            1282 LOAD_CLOSURE             0 (self)
            1284 BUILD_TUPLE              5
-           1286 LOAD_CONST              35 (<code object navigate_to_selection at 0x7f5773200db0, file "app\streetsmart_panel.py", line 305>)
+           1286 LOAD_CONST              35 (<code object navigate_to_selection at 0x7fb0986b8db0, file "app\streetsmart_panel.py", line 305>)
            1288 MAKE_FUNCTION           12 (annotations, closure)
            1290 STORE_DEREF             31 (navigate_to_selection)
 
@@ -1187,7 +1187,7 @@ ExceptionTable:
            1322 LOAD_CLOSURE             0 (self)
            1324 LOAD_CLOSURE            37 (try_login_script)
            1326 BUILD_TUPLE             15
-           1328 LOAD_CONST              36 (<code object process_command_queue at 0x5603e7a0b7f0, file "app\streetsmart_panel.py", line 318>)
+           1328 LOAD_CONST              36 (<code object process_command_queue at 0x562fbf995c50, file "app\streetsmart_panel.py", line 318>)
            1330 MAKE_FUNCTION           13 (defaults, annotations, closure)
            1332 STORE_FAST              12 (process_command_queue)
 
@@ -1198,7 +1198,7 @@ ExceptionTable:
            1342 LOAD_CLOSURE             0 (self)
            1344 LOAD_CLOSURE            37 (try_login_script)
            1346 BUILD_TUPLE              4
-           1348 LOAD_CONST              37 (<code object on_core_ready at 0x7f57735aeb80, file "app\streetsmart_panel.py", line 386>)
+           1348 LOAD_CONST              37 (<code object on_core_ready at 0x7fb098adecd0, file "app\streetsmart_panel.py", line 386>)
            1350 MAKE_FUNCTION           13 (defaults, annotations, closure)
            1352 STORE_DEREF             32 (on_core_ready)
 
@@ -1208,7 +1208,7 @@ ExceptionTable:
            1360 LOAD_CLOSURE             0 (self)
            1362 LOAD_CLOSURE            37 (try_login_script)
            1364 BUILD_TUPLE              3
-           1366 LOAD_CONST              38 (<code object on_navigation_completed at 0x7f577322cb70, file "app\streetsmart_panel.py", line 393>)
+           1366 LOAD_CONST              38 (<code object on_navigation_completed at 0x7fb0986e8b70, file "app\streetsmart_panel.py", line 393>)
            1368 MAKE_FUNCTION           13 (defaults, annotations, closure)
            1370 STORE_DEREF             33 (on_navigation_completed)
 
@@ -1233,7 +1233,7 @@ ExceptionTable:
            1440 LOAD_ATTR               49 (MouseDown)
            1450 LOAD_CLOSURE            27 (focus_browser)
            1452 BUILD_TUPLE              1
-           1454 LOAD_CONST              39 (<code object <lambda> at 0x7f577324fd20, file "app\streetsmart_panel.py", line 400>)
+           1454 LOAD_CONST              39 (<code object <lambda> at 0x7fb098707c50, file "app\streetsmart_panel.py", line 400>)
            1456 MAKE_FUNCTION            8 (closure)
            1458 BINARY_OP               13 (+=)
            1462 SWAP                     2
