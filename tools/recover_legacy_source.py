@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 from types import CodeType
 from typing import Any
 
@@ -83,17 +84,34 @@ def _decompile_depyf(code: CodeType) -> str:
 
 
 def _decompile_pycdc(executable: Path, module_name: str) -> str:
-    process = subprocess.run(
-        [str(executable), str(_legacy_pyc_path(module_name))],
-        cwd=REPO_ROOT,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-        timeout=120,
-    )
+    # SleufBase's production loader deliberately skips the 16-byte PYC header
+    # and unmarshals the code object itself. Feed pycdc the same payload and
+    # declare Python 3.11 explicitly; this avoids depending on pycdc's handling
+    # of the exact CPython 3.11.x PYC container/magic value.
+    pyc_data = _legacy_pyc_path(module_name).read_bytes()
+    if len(pyc_data) < 17:
+        raise RuntimeError("legacy PYC is te kort voor een 16-byte header")
+
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=f"sleufbase-{module_name}-", suffix=".marshal", delete=False) as handle:
+            handle.write(pyc_data[16:])
+            temporary_path = Path(handle.name)
+        process = subprocess.run(
+            [str(executable), "-c", "-v", "3.11", str(temporary_path)],
+            cwd=REPO_ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+            timeout=120,
+        )
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
     source = process.stdout
     if process.returncode != 0:
         detail = process.stderr.strip() or source.strip() or f"exitcode {process.returncode}"
