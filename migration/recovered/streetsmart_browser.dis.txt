@@ -1,0 +1,904 @@
+===== <module> (line 1) =====
+  0           0 RESUME                   0
+
+  1           2 LOAD_CONST               0 (0)
+              4 LOAD_CONST               1 (('annotations',))
+              6 IMPORT_NAME              0 (__future__)
+              8 IMPORT_FROM              1 (annotations)
+             10 STORE_NAME               1 (annotations)
+             12 POP_TOP
+
+  3          14 LOAD_CONST               0 (0)
+             16 LOAD_CONST               2 (None)
+             18 IMPORT_NAME              2 (time)
+             20 STORE_NAME               2 (time)
+
+  5          22 LOAD_CONST               0 (0)
+             24 LOAD_CONST               2 (None)
+             26 IMPORT_NAME              3 (webview)
+             28 STORE_NAME               3 (webview)
+
+  6          30 LOAD_CONST               0 (0)
+             32 LOAD_CONST               3 (('Menu', 'MenuAction', 'MenuSeparator'))
+             34 IMPORT_NAME              4 (webview.menu)
+             36 IMPORT_FROM              5 (Menu)
+             38 STORE_NAME               5 (Menu)
+             40 IMPORT_FROM              6 (MenuAction)
+             42 STORE_NAME               6 (MenuAction)
+             44 IMPORT_FROM              7 (MenuSeparator)
+             46 STORE_NAME               7 (MenuSeparator)
+             48 POP_TOP
+
+  8          50 LOAD_CONST               4 (1)
+             52 LOAD_CONST               5 (('load_settings',))
+             54 IMPORT_NAME              8 (settings)
+             56 IMPORT_FROM              9 (load_settings)
+             58 STORE_NAME               9 (load_settings)
+             60 POP_TOP
+
+  9          62 LOAD_CONST               4 (1)
+             64 LOAD_CONST               6 (('STREETSMART_WEB_URL', 'load_streetsmart_state', 'streetsmart_browser_storage_dir', 'streetsmart_login_script', 'streetsmart_selection_url'))
+             66 IMPORT_NAME             10 (streetsmart)
+             68 IMPORT_FROM             11 (STREETSMART_WEB_URL)
+             70 STORE_NAME              11 (STREETSMART_WEB_URL)
+             72 IMPORT_FROM             12 (load_streetsmart_state)
+             74 STORE_NAME              12 (load_streetsmart_state)
+             76 IMPORT_FROM             13 (streetsmart_browser_storage_dir)
+             78 STORE_NAME              13 (streetsmart_browser_storage_dir)
+             80 IMPORT_FROM             14 (streetsmart_login_script)
+             82 STORE_NAME              14 (streetsmart_login_script)
+             84 IMPORT_FROM             15 (streetsmart_selection_url)
+             86 STORE_NAME              15 (streetsmart_selection_url)
+             88 POP_TOP
+
+ 18          90 LOAD_CONST               7 ('StreetSmart')
+             92 STORE_NAME              16 (WINDOW_TITLE)
+
+ 19          94 LOAD_CONST               8 (1560)
+             96 STORE_NAME              17 (WINDOW_WIDTH)
+
+ 20          98 LOAD_CONST               9 (980)
+            100 STORE_NAME              18 (WINDOW_HEIGHT)
+
+ 21         102 LOAD_CONST              10 ((1120, 720))
+            104 STORE_NAME              19 (WINDOW_MIN_SIZE)
+
+ 22         106 LOAD_CONST              11 (0.9)
+            108 STORE_NAME              20 (STATE_POLL_INTERVAL_SECONDS)
+
+ 24         110 LOAD_CONST              37 (('username', 'str', 'return', 'str'))
+            112 LOAD_CONST              15 (<code object _storage_path_for_username at 0x7fee03dca500, file "app\streetsmart_browser.py", line 24>)
+            114 MAKE_FUNCTION            4 (annotations)
+            116 STORE_NAME              21 (_storage_path_for_username)
+
+ 30         118 LOAD_CONST              38 (('return', 'dict'))
+            120 LOAD_CONST              17 (<code object _load_state at 0x7fee03d2b550, file "app\streetsmart_browser.py", line 30>)
+            122 MAKE_FUNCTION            4 (annotations)
+            124 STORE_NAME              22 (_load_state)
+
+ 35         126 LOAD_CONST              39 ((None,))
+            128 LOAD_CONST              40 (('state', 'dict | None', 'return', 'int'))
+            130 LOAD_CONST              21 (<code object _state_version at 0x7fee03d90db0, file "app\streetsmart_browser.py", line 35>)
+            132 MAKE_FUNCTION            5 (defaults, annotations)
+            134 STORE_NAME              23 (_state_version)
+
+ 43         136 LOAD_CONST              39 ((None,))
+            138 LOAD_CONST              41 (('state', 'dict | None', 'return', 'dict | None'))
+            140 LOAD_CONST              22 (<code object _selection_from_state at 0x7fee03d19790, file "app\streetsmart_browser.py", line 43>)
+            142 MAKE_FUNCTION            5 (defaults, annotations)
+            144 STORE_NAME              24 (_selection_from_state)
+
+ 49         146 LOAD_CONST              42 (('selection', 'dict | None', 'return', 'str'))
+            148 LOAD_CONST              24 (<code object _selection_url at 0x7fee03d52250, file "app\streetsmart_browser.py", line 49>)
+            150 MAKE_FUNCTION            4 (annotations)
+            152 STORE_NAME              25 (_selection_url)
+
+ 53         154 LOAD_CONST              42 (('selection', 'dict | None', 'return', 'str'))
+            156 LOAD_CONST              25 (<code object _window_title at 0x7fee03d922b0, file "app\streetsmart_browser.py", line 53>)
+            158 MAKE_FUNCTION            4 (annotations)
+            160 STORE_NAME              26 (_window_title)
+
+ 58         162 LOAD_CONST              43 (('window', 'webview.Window', 'username', 'str', 'password', 'str', 'return', 'None'))
+            164 LOAD_CONST              30 (<code object _inject_browser_script at 0x7fee03dca760, file "app\streetsmart_browser.py", line 58>)
+            166 MAKE_FUNCTION            4 (annotations)
+            168 STORE_NAME              27 (_inject_browser_script)
+
+ 69         170 LOAD_CONST              44 (('return', 'None'))
+            172 LOAD_CONST              31 (<code object _browser_go_back at 0x7fee03da21f0, file "app\streetsmart_browser.py", line 69>)
+            174 MAKE_FUNCTION            4 (annotations)
+            176 STORE_NAME              28 (_browser_go_back)
+
+ 79         178 LOAD_CONST              44 (('return', 'None'))
+            180 LOAD_CONST              32 (<code object _browser_go_home at 0x7fee03db0ff0, file "app\streetsmart_browser.py", line 79>)
+            182 MAKE_FUNCTION            4 (annotations)
+            184 STORE_NAME              29 (_browser_go_home)
+
+ 89         186 LOAD_CONST              44 (('return', 'None'))
+            188 LOAD_CONST              33 (<code object _browser_go_selection at 0x7fee04cfab50, file "app\streetsmart_browser.py", line 89>)
+            190 MAKE_FUNCTION            4 (annotations)
+            192 STORE_NAME              30 (_browser_go_selection)
+
+ 99         194 LOAD_CONST              44 (('return', 'None'))
+            196 LOAD_CONST              34 (<code object _browser_refresh at 0x7fee03da2330, file "app\streetsmart_browser.py", line 99>)
+            198 MAKE_FUNCTION            4 (annotations)
+            200 STORE_NAME              31 (_browser_refresh)
+
+109         202 LOAD_CONST              43 (('window', 'webview.Window', 'username', 'str', 'password', 'str', 'return', 'None'))
+            204 LOAD_CONST              35 (<code object _sync_selection at 0x559eadddeea0, file "app\streetsmart_browser.py", line 109>)
+            206 MAKE_FUNCTION            4 (annotations)
+            208 STORE_NAME              32 (_sync_selection)
+
+147         210 LOAD_CONST              44 (('return', 'None'))
+            212 LOAD_CONST              36 (<code object main at 0x559eaddb9fa0, file "app\streetsmart_browser.py", line 147>)
+            214 MAKE_FUNCTION            4 (annotations)
+            216 STORE_NAME              33 (main)
+            218 LOAD_CONST               2 (None)
+            220 RETURN_VALUE
+
+===== <module>._storage_path_for_username (line 24) =====
+ 24           0 RESUME                   0
+
+ 25           2 LOAD_GLOBAL              1 (NULL + streetsmart_browser_storage_dir)
+             14 LOAD_FAST                0 (username)
+             16 PRECALL                  1
+             20 CALL                     1
+             30 STORE_FAST               1 (target_dir)
+
+ 26          32 LOAD_FAST                1 (target_dir)
+             34 LOAD_METHOD              1 (mkdir)
+             56 LOAD_CONST               1 (True)
+             58 LOAD_CONST               1 (True)
+             60 KW_NAMES                 2
+             62 PRECALL                  2
+             66 CALL                     2
+             76 POP_TOP
+
+ 27          78 LOAD_GLOBAL              5 (NULL + str)
+             90 LOAD_FAST                1 (target_dir)
+             92 PRECALL                  1
+             96 CALL                     1
+            106 RETURN_VALUE
+
+===== <module>._load_state (line 30) =====
+ 30           0 RESUME                   0
+
+ 31           2 LOAD_GLOBAL              1 (NULL + load_streetsmart_state)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               0 (state)
+
+ 32          30 LOAD_GLOBAL              3 (NULL + isinstance)
+             42 LOAD_FAST                0 (state)
+             44 LOAD_GLOBAL              4 (dict)
+             56 PRECALL                  2
+             60 CALL                     2
+             70 POP_JUMP_FORWARD_IF_FALSE     2 (to 76)
+             72 LOAD_FAST                0 (state)
+             74 JUMP_FORWARD             1 (to 78)
+        >>   76 BUILD_MAP                0
+        >>   78 RETURN_VALUE
+
+===== <module>._state_version (line 35) =====
+ 35           0 RESUME                   0
+
+ 36           2 LOAD_GLOBAL              1 (NULL + isinstance)
+             14 LOAD_FAST                0 (state)
+             16 LOAD_GLOBAL              2 (dict)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 POP_JUMP_FORWARD_IF_FALSE     2 (to 48)
+             44 LOAD_FAST                0 (state)
+             46 JUMP_FORWARD            13 (to 74)
+        >>   48 LOAD_GLOBAL              5 (NULL + _load_state)
+             60 PRECALL                  0
+             64 CALL                     0
+        >>   74 STORE_FAST               1 (current_state)
+
+ 37          76 NOP
+
+ 38          78 LOAD_GLOBAL              7 (NULL + int)
+             90 LOAD_FAST                1 (current_state)
+             92 LOAD_METHOD              4 (get)
+            114 LOAD_CONST               1 ('version')
+            116 LOAD_CONST               2 (0)
+            118 PRECALL                  2
+            122 CALL                     2
+            132 JUMP_IF_TRUE_OR_POP      1 (to 136)
+            134 LOAD_CONST               2 (0)
+        >>  136 PRECALL                  1
+            140 CALL                     1
+            150 RETURN_VALUE
+        >>  152 PUSH_EXC_INFO
+
+ 39         154 LOAD_GLOBAL             10 (TypeError)
+            166 LOAD_GLOBAL             12 (ValueError)
+            178 BUILD_TUPLE              2
+            180 CHECK_EXC_MATCH
+            182 POP_JUMP_FORWARD_IF_FALSE     4 (to 192)
+            184 POP_TOP
+
+ 40         186 POP_EXCEPT
+            188 LOAD_CONST               2 (0)
+            190 RETURN_VALUE
+
+ 39     >>  192 RERAISE                  0
+        >>  194 COPY                     3
+            196 POP_EXCEPT
+            198 RERAISE                  1
+ExceptionTable:
+  78 to 148 -> 152 [0]
+  152 to 184 -> 194 [1] lasti
+  192 to 192 -> 194 [1] lasti
+
+===== <module>._selection_from_state (line 43) =====
+ 43           0 RESUME                   0
+
+ 44           2 LOAD_GLOBAL              1 (NULL + isinstance)
+             14 LOAD_FAST                0 (state)
+             16 LOAD_GLOBAL              2 (dict)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 POP_JUMP_FORWARD_IF_FALSE     2 (to 48)
+             44 LOAD_FAST                0 (state)
+             46 JUMP_FORWARD            13 (to 74)
+        >>   48 LOAD_GLOBAL              5 (NULL + _load_state)
+             60 PRECALL                  0
+             64 CALL                     0
+        >>   74 STORE_FAST               1 (current_state)
+
+ 45          76 LOAD_FAST                1 (current_state)
+             78 LOAD_METHOD              3 (get)
+            100 LOAD_CONST               1 ('selection')
+            102 PRECALL                  1
+            106 CALL                     1
+            116 STORE_FAST               2 (selection)
+
+ 46         118 LOAD_GLOBAL              1 (NULL + isinstance)
+            130 LOAD_FAST                2 (selection)
+            132 LOAD_GLOBAL              2 (dict)
+            144 PRECALL                  2
+            148 CALL                     2
+            158 POP_JUMP_FORWARD_IF_FALSE     2 (to 164)
+            160 LOAD_FAST                2 (selection)
+            162 JUMP_FORWARD             1 (to 166)
+        >>  164 LOAD_CONST               0 (None)
+        >>  166 RETURN_VALUE
+
+===== <module>._selection_url (line 49) =====
+ 49           0 RESUME                   0
+
+ 50           2 LOAD_GLOBAL              1 (NULL + streetsmart_selection_url)
+             14 LOAD_FAST                0 (selection)
+             16 PRECALL                  1
+             20 CALL                     1
+             30 RETURN_VALUE
+
+===== <module>._window_title (line 53) =====
+ 53           0 RESUME                   0
+
+ 54           2 LOAD_GLOBAL              1 (NULL + isinstance)
+             14 LOAD_FAST                0 (selection)
+             16 LOAD_GLOBAL              2 (dict)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 POP_JUMP_FORWARD_IF_FALSE    54 (to 152)
+             44 LOAD_GLOBAL              5 (NULL + str)
+             56 LOAD_FAST                0 (selection)
+             58 LOAD_METHOD              3 (get)
+             80 LOAD_CONST               1 ('name')
+             82 PRECALL                  1
+             86 CALL                     1
+             96 JUMP_IF_TRUE_OR_POP      1 (to 100)
+             98 LOAD_CONST               2 ('')
+        >>  100 PRECALL                  1
+            104 CALL                     1
+            114 LOAD_METHOD              4 (strip)
+            136 PRECALL                  0
+            140 CALL                     0
+            150 JUMP_FORWARD             1 (to 154)
+        >>  152 LOAD_CONST               2 ('')
+        >>  154 STORE_FAST               1 (name)
+
+ 55         156 LOAD_FAST                1 (name)
+            158 POP_JUMP_FORWARD_IF_TRUE     7 (to 174)
+            160 LOAD_GLOBAL             10 (WINDOW_TITLE)
+            172 JUMP_FORWARD            11 (to 196)
+        >>  174 LOAD_GLOBAL             10 (WINDOW_TITLE)
+            186 FORMAT_VALUE             0
+            188 LOAD_CONST               3 (' - ')
+            190 LOAD_FAST                1 (name)
+            192 FORMAT_VALUE             0
+            194 BUILD_STRING             3
+        >>  196 RETURN_VALUE
+
+===== <module>._inject_browser_script (line 58) =====
+ 58           0 RESUME                   0
+
+ 63           2 NOP
+
+ 64           4 LOAD_FAST                0 (window)
+              6 LOAD_METHOD              0 (evaluate_js)
+             28 LOAD_GLOBAL              3 (NULL + streetsmart_login_script)
+             40 LOAD_FAST                1 (username)
+             42 LOAD_FAST                2 (password)
+             44 PRECALL                  2
+             48 CALL                     2
+             58 PRECALL                  1
+             62 CALL                     1
+             72 POP_TOP
+             74 LOAD_CONST               0 (None)
+             76 RETURN_VALUE
+        >>   78 PUSH_EXC_INFO
+
+ 65          80 LOAD_GLOBAL              4 (Exception)
+             92 CHECK_EXC_MATCH
+             94 POP_JUMP_FORWARD_IF_FALSE     4 (to 104)
+             96 POP_TOP
+
+ 66          98 POP_EXCEPT
+            100 LOAD_CONST               0 (None)
+            102 RETURN_VALUE
+
+ 65     >>  104 RERAISE                  0
+        >>  106 COPY                     3
+            108 POP_EXCEPT
+            110 RERAISE                  1
+ExceptionTable:
+  4 to 72 -> 78 [0]
+  78 to 96 -> 106 [1] lasti
+  104 to 104 -> 106 [1] lasti
+
+===== <module>._browser_go_back (line 69) =====
+ 69           0 RESUME                   0
+
+ 70           2 LOAD_GLOBAL              1 (NULL + webview)
+             14 LOAD_ATTR                1 (active_window)
+             24 PRECALL                  0
+             28 CALL                     0
+             38 STORE_FAST               0 (active_window)
+
+ 71          40 LOAD_FAST                0 (active_window)
+             42 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 48)
+
+ 72          44 LOAD_CONST               0 (None)
+             46 RETURN_VALUE
+
+ 73     >>   48 NOP
+
+ 74          50 LOAD_FAST                0 (active_window)
+             52 LOAD_METHOD              2 (run_js)
+             74 LOAD_CONST               1 ('history.back();')
+             76 PRECALL                  1
+             80 CALL                     1
+             90 POP_TOP
+             92 LOAD_CONST               0 (None)
+             94 RETURN_VALUE
+        >>   96 PUSH_EXC_INFO
+
+ 75          98 LOAD_GLOBAL              6 (Exception)
+            110 CHECK_EXC_MATCH
+            112 POP_JUMP_FORWARD_IF_FALSE     4 (to 122)
+            114 POP_TOP
+
+ 76         116 POP_EXCEPT
+            118 LOAD_CONST               0 (None)
+            120 RETURN_VALUE
+
+ 75     >>  122 RERAISE                  0
+        >>  124 COPY                     3
+            126 POP_EXCEPT
+            128 RERAISE                  1
+ExceptionTable:
+  50 to 90 -> 96 [0]
+  96 to 114 -> 124 [1] lasti
+  122 to 122 -> 124 [1] lasti
+
+===== <module>._browser_go_home (line 79) =====
+ 79           0 RESUME                   0
+
+ 80           2 LOAD_GLOBAL              1 (NULL + webview)
+             14 LOAD_ATTR                1 (active_window)
+             24 PRECALL                  0
+             28 CALL                     0
+             38 STORE_FAST               0 (active_window)
+
+ 81          40 LOAD_FAST                0 (active_window)
+             42 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 48)
+
+ 82          44 LOAD_CONST               0 (None)
+             46 RETURN_VALUE
+
+ 83     >>   48 NOP
+
+ 84          50 LOAD_FAST                0 (active_window)
+             52 LOAD_METHOD              2 (load_url)
+             74 LOAD_GLOBAL              6 (STREETSMART_WEB_URL)
+             86 PRECALL                  1
+             90 CALL                     1
+            100 POP_TOP
+            102 LOAD_CONST               0 (None)
+            104 RETURN_VALUE
+        >>  106 PUSH_EXC_INFO
+
+ 85         108 LOAD_GLOBAL              8 (Exception)
+            120 CHECK_EXC_MATCH
+            122 POP_JUMP_FORWARD_IF_FALSE     4 (to 132)
+            124 POP_TOP
+
+ 86         126 POP_EXCEPT
+            128 LOAD_CONST               0 (None)
+            130 RETURN_VALUE
+
+ 85     >>  132 RERAISE                  0
+        >>  134 COPY                     3
+            136 POP_EXCEPT
+            138 RERAISE                  1
+ExceptionTable:
+  50 to 100 -> 106 [0]
+  106 to 124 -> 134 [1] lasti
+  132 to 132 -> 134 [1] lasti
+
+===== <module>._browser_go_selection (line 89) =====
+ 89           0 RESUME                   0
+
+ 90           2 LOAD_GLOBAL              1 (NULL + webview)
+             14 LOAD_ATTR                1 (active_window)
+             24 PRECALL                  0
+             28 CALL                     0
+             38 STORE_FAST               0 (active_window)
+
+ 91          40 LOAD_FAST                0 (active_window)
+             42 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 48)
+
+ 92          44 LOAD_CONST               0 (None)
+             46 RETURN_VALUE
+
+ 93     >>   48 NOP
+
+ 94          50 LOAD_FAST                0 (active_window)
+             52 LOAD_METHOD              2 (load_url)
+             74 LOAD_GLOBAL              7 (NULL + _selection_url)
+             86 LOAD_GLOBAL              9 (NULL + _selection_from_state)
+             98 PRECALL                  0
+            102 CALL                     0
+            112 PRECALL                  1
+            116 CALL                     1
+            126 PRECALL                  1
+            130 CALL                     1
+            140 POP_TOP
+            142 LOAD_CONST               0 (None)
+            144 RETURN_VALUE
+        >>  146 PUSH_EXC_INFO
+
+ 95         148 LOAD_GLOBAL             10 (Exception)
+            160 CHECK_EXC_MATCH
+            162 POP_JUMP_FORWARD_IF_FALSE     4 (to 172)
+            164 POP_TOP
+
+ 96         166 POP_EXCEPT
+            168 LOAD_CONST               0 (None)
+            170 RETURN_VALUE
+
+ 95     >>  172 RERAISE                  0
+        >>  174 COPY                     3
+            176 POP_EXCEPT
+            178 RERAISE                  1
+ExceptionTable:
+  50 to 140 -> 146 [0]
+  146 to 164 -> 174 [1] lasti
+  172 to 172 -> 174 [1] lasti
+
+===== <module>._browser_refresh (line 99) =====
+ 99           0 RESUME                   0
+
+100           2 LOAD_GLOBAL              1 (NULL + webview)
+             14 LOAD_ATTR                1 (active_window)
+             24 PRECALL                  0
+             28 CALL                     0
+             38 STORE_FAST               0 (active_window)
+
+101          40 LOAD_FAST                0 (active_window)
+             42 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 48)
+
+102          44 LOAD_CONST               0 (None)
+             46 RETURN_VALUE
+
+103     >>   48 NOP
+
+104          50 LOAD_FAST                0 (active_window)
+             52 LOAD_METHOD              2 (run_js)
+             74 LOAD_CONST               1 ('window.location.reload();')
+             76 PRECALL                  1
+             80 CALL                     1
+             90 POP_TOP
+             92 LOAD_CONST               0 (None)
+             94 RETURN_VALUE
+        >>   96 PUSH_EXC_INFO
+
+105          98 LOAD_GLOBAL              6 (Exception)
+            110 CHECK_EXC_MATCH
+            112 POP_JUMP_FORWARD_IF_FALSE     4 (to 122)
+            114 POP_TOP
+
+106         116 POP_EXCEPT
+            118 LOAD_CONST               0 (None)
+            120 RETURN_VALUE
+
+105     >>  122 RERAISE                  0
+        >>  124 COPY                     3
+            126 POP_EXCEPT
+            128 RERAISE                  1
+ExceptionTable:
+  50 to 90 -> 96 [0]
+  96 to 114 -> 124 [1] lasti
+  122 to 122 -> 124 [1] lasti
+
+===== <module>._sync_selection (line 109) =====
+109           0 RESUME                   0
+
+114           2 LOAD_GLOBAL              1 (NULL + _load_state)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               3 (initial_state)
+
+115          30 LOAD_GLOBAL              3 (NULL + _state_version)
+             42 LOAD_FAST                3 (initial_state)
+             44 PRECALL                  1
+             48 CALL                     1
+             58 STORE_FAST               4 (last_version)
+
+116          60 LOAD_GLOBAL              5 (NULL + _selection_url)
+             72 LOAD_GLOBAL              7 (NULL + _selection_from_state)
+             84 LOAD_FAST                3 (initial_state)
+             86 PRECALL                  1
+             90 CALL                     1
+            100 PRECALL                  1
+            104 CALL                     1
+            114 STORE_FAST               5 (last_url)
+
+117         116 LOAD_GLOBAL              9 (NULL + _window_title)
+            128 LOAD_GLOBAL              7 (NULL + _selection_from_state)
+            140 LOAD_FAST                3 (initial_state)
+            142 PRECALL                  1
+            146 CALL                     1
+            156 PRECALL                  1
+            160 CALL                     1
+            170 STORE_FAST               6 (last_title)
+
+118     >>  172 NOP
+
+119     >>  174 LOAD_GLOBAL             11 (NULL + time)
+            186 LOAD_ATTR                6 (sleep)
+            196 LOAD_GLOBAL             14 (STATE_POLL_INTERVAL_SECONDS)
+            208 PRECALL                  1
+            212 CALL                     1
+            222 POP_TOP
+
+120         224 LOAD_GLOBAL              1 (NULL + _load_state)
+            236 PRECALL                  0
+            240 CALL                     0
+            250 STORE_FAST               7 (current_state)
+
+121         252 LOAD_GLOBAL              7 (NULL + _selection_from_state)
+            264 LOAD_FAST                7 (current_state)
+            266 PRECALL                  1
+            270 CALL                     1
+            280 STORE_FAST               8 (selection)
+
+122         282 LOAD_GLOBAL              3 (NULL + _state_version)
+            294 LOAD_FAST                7 (current_state)
+            296 PRECALL                  1
+            300 CALL                     1
+            310 STORE_FAST               9 (current_version)
+
+123         312 LOAD_GLOBAL              5 (NULL + _selection_url)
+            324 LOAD_FAST                8 (selection)
+            326 PRECALL                  1
+            330 CALL                     1
+            340 STORE_FAST              10 (current_url)
+
+124         342 LOAD_GLOBAL              9 (NULL + _window_title)
+            354 LOAD_FAST                8 (selection)
+            356 PRECALL                  1
+            360 CALL                     1
+            370 STORE_FAST              11 (current_title)
+
+125         372 LOAD_FAST               11 (current_title)
+            374 LOAD_FAST                6 (last_title)
+            376 COMPARE_OP               3 (!=)
+            382 POP_JUMP_FORWARD_IF_FALSE    41 (to 466)
+
+126         384 LOAD_FAST               11 (current_title)
+            386 STORE_FAST               6 (last_title)
+
+127         388 NOP
+
+128         390 LOAD_FAST                0 (window)
+            392 LOAD_METHOD              8 (set_title)
+            414 LOAD_FAST               11 (current_title)
+            416 PRECALL                  1
+            420 CALL                     1
+            430 POP_TOP
+            432 JUMP_FORWARD            16 (to 466)
+        >>  434 PUSH_EXC_INFO
+
+129         436 LOAD_GLOBAL             18 (Exception)
+            448 CHECK_EXC_MATCH
+            450 POP_JUMP_FORWARD_IF_FALSE     3 (to 458)
+            452 POP_TOP
+
+130         454 POP_EXCEPT
+            456 JUMP_FORWARD             4 (to 466)
+
+129     >>  458 RERAISE                  0
+        >>  460 COPY                     3
+            462 POP_EXCEPT
+            464 RERAISE                  1
+
+131     >>  466 LOAD_FAST                9 (current_version)
+            468 LOAD_FAST                4 (last_version)
+            470 COMPARE_OP               2 (==)
+            476 POP_JUMP_FORWARD_IF_FALSE     1 (to 480)
+
+132         478 JUMP_BACKWARD          154 (to 172)
+
+133     >>  480 LOAD_FAST                9 (current_version)
+            482 STORE_FAST               4 (last_version)
+
+134         484 LOAD_FAST               10 (current_url)
+            486 LOAD_FAST                5 (last_url)
+            488 COMPARE_OP               2 (==)
+            494 POP_JUMP_FORWARD_IF_FALSE    36 (to 568)
+
+135         496 NOP
+
+136         498 LOAD_GLOBAL             21 (NULL + _inject_browser_script)
+            510 LOAD_FAST                0 (window)
+            512 LOAD_FAST                1 (username)
+            514 LOAD_FAST                2 (password)
+            516 PRECALL                  3
+            520 CALL                     3
+            530 POP_TOP
+            532 JUMP_FORWARD            16 (to 566)
+        >>  534 PUSH_EXC_INFO
+
+137         536 LOAD_GLOBAL             18 (Exception)
+            548 CHECK_EXC_MATCH
+            550 POP_JUMP_FORWARD_IF_FALSE     3 (to 558)
+            552 POP_TOP
+
+138         554 POP_EXCEPT
+            556 JUMP_FORWARD             4 (to 566)
+
+137     >>  558 RERAISE                  0
+        >>  560 COPY                     3
+            562 POP_EXCEPT
+            564 RERAISE                  1
+
+139     >>  566 JUMP_BACKWARD          198 (to 172)
+
+140     >>  568 LOAD_FAST               10 (current_url)
+            570 STORE_FAST               5 (last_url)
+
+141         572 NOP
+
+142         574 LOAD_FAST                0 (window)
+            576 LOAD_METHOD             11 (load_url)
+            598 LOAD_FAST               10 (current_url)
+            600 PRECALL                  1
+            604 CALL                     1
+            614 POP_TOP
+            616 JUMP_FORWARD            16 (to 650)
+        >>  618 PUSH_EXC_INFO
+
+143         620 LOAD_GLOBAL             18 (Exception)
+            632 CHECK_EXC_MATCH
+            634 POP_JUMP_FORWARD_IF_FALSE     3 (to 642)
+            636 POP_TOP
+
+144         638 POP_EXCEPT
+            640 JUMP_FORWARD             4 (to 650)
+
+143     >>  642 RERAISE                  0
+        >>  644 COPY                     3
+            646 POP_EXCEPT
+            648 RERAISE                  1
+
+118     >>  650 JUMP_BACKWARD          239 (to 174)
+ExceptionTable:
+  390 to 430 -> 434 [0]
+  434 to 452 -> 460 [1] lasti
+  458 to 458 -> 460 [1] lasti
+  498 to 530 -> 534 [0]
+  534 to 552 -> 560 [1] lasti
+  558 to 558 -> 560 [1] lasti
+  574 to 614 -> 618 [0]
+  618 to 636 -> 644 [1] lasti
+  642 to 642 -> 644 [1] lasti
+
+===== <module>.main (line 147) =====
+              0 MAKE_CELL                5 (password)
+              2 MAKE_CELL                6 (username)
+
+147           4 RESUME                   0
+
+148           6 LOAD_GLOBAL              1 (NULL + load_settings)
+             18 PRECALL                  0
+             22 CALL                     0
+             32 STORE_FAST               0 (settings)
+
+149          34 LOAD_GLOBAL              3 (NULL + str)
+             46 LOAD_FAST                0 (settings)
+             48 LOAD_ATTR                2 (streetsmart_username)
+             58 JUMP_IF_TRUE_OR_POP      1 (to 62)
+             60 LOAD_CONST               1 ('')
+        >>   62 PRECALL                  1
+             66 CALL                     1
+             76 LOAD_METHOD              3 (strip)
+             98 PRECALL                  0
+            102 CALL                     0
+            112 STORE_DEREF              6 (username)
+
+150         114 LOAD_GLOBAL              3 (NULL + str)
+            126 LOAD_FAST                0 (settings)
+            128 LOAD_ATTR                4 (streetsmart_password)
+            138 JUMP_IF_TRUE_OR_POP      1 (to 142)
+            140 LOAD_CONST               1 ('')
+        >>  142 PRECALL                  1
+            146 CALL                     1
+            156 STORE_DEREF              5 (password)
+
+151         158 LOAD_GLOBAL             11 (NULL + _load_state)
+            170 PRECALL                  0
+            174 CALL                     0
+            184 STORE_FAST               1 (initial_state)
+
+152         186 LOAD_GLOBAL             13 (NULL + _selection_from_state)
+            198 LOAD_FAST                1 (initial_state)
+            200 PRECALL                  1
+            204 CALL                     1
+            214 STORE_FAST               2 (initial_selection)
+
+154         216 LOAD_GLOBAL             15 (NULL + Menu)
+
+155         228 LOAD_CONST               2 ('Navigatie')
+
+157         230 LOAD_GLOBAL             17 (NULL + MenuAction)
+            242 LOAD_CONST               3 ('Terug')
+            244 LOAD_GLOBAL             18 (_browser_go_back)
+            256 PRECALL                  2
+            260 CALL                     2
+
+158         270 LOAD_GLOBAL             17 (NULL + MenuAction)
+            282 LOAD_CONST               4 ('Start')
+            284 LOAD_GLOBAL             20 (_browser_go_home)
+            296 PRECALL                  2
+            300 CALL                     2
+
+159         310 LOAD_GLOBAL             17 (NULL + MenuAction)
+            322 LOAD_CONST               5 ('Naar selectie')
+            324 LOAD_GLOBAL             22 (_browser_go_selection)
+            336 PRECALL                  2
+            340 CALL                     2
+
+160         350 LOAD_GLOBAL             25 (NULL + MenuSeparator)
+            362 PRECALL                  0
+            366 CALL                     0
+
+161         376 LOAD_GLOBAL             17 (NULL + MenuAction)
+            388 LOAD_CONST               6 ('Vernieuwen')
+            390 LOAD_GLOBAL             26 (_browser_refresh)
+            402 PRECALL                  2
+            406 CALL                     2
+
+156         416 BUILD_LIST               5
+
+154         418 PRECALL                  2
+            422 CALL                     2
+
+153         432 BUILD_LIST               1
+            434 STORE_FAST               3 (menu)
+
+165         436 LOAD_CONST               7 (False)
+            438 LOAD_GLOBAL             28 (webview)
+            450 LOAD_ATTR               15 (settings)
+            460 LOAD_CONST               8 ('OPEN_EXTERNAL_LINKS_IN_BROWSER')
+            462 STORE_SUBSCR
+
+166         466 LOAD_CONST               7 (False)
+            468 LOAD_GLOBAL             28 (webview)
+            480 LOAD_ATTR               15 (settings)
+            490 LOAD_CONST               9 ('SHOW_DEFAULT_MENUS')
+            492 STORE_SUBSCR
+
+167         496 LOAD_GLOBAL             29 (NULL + webview)
+            508 LOAD_ATTR               16 (create_window)
+
+168         518 LOAD_GLOBAL             35 (NULL + _window_title)
+            530 LOAD_FAST                2 (initial_selection)
+            532 PRECALL                  1
+            536 CALL                     1
+
+169         546 LOAD_GLOBAL             37 (NULL + _selection_url)
+            558 LOAD_FAST                2 (initial_selection)
+            560 PRECALL                  1
+            564 CALL                     1
+
+170         574 LOAD_GLOBAL             38 (WINDOW_WIDTH)
+
+171         586 LOAD_GLOBAL             40 (WINDOW_HEIGHT)
+
+172         598 LOAD_GLOBAL             42 (WINDOW_MIN_SIZE)
+
+173         610 LOAD_CONST              10 (True)
+
+174         612 LOAD_CONST              11 ('#FFFFFF')
+
+175         614 LOAD_FAST                3 (menu)
+
+167         616 KW_NAMES                12
+            618 PRECALL                  8
+            622 CALL                     8
+            632 STORE_FAST               4 (window)
+
+177         634 LOAD_FAST                4 (window)
+            636 LOAD_ATTR               22 (events)
+            646 COPY                     1
+            648 LOAD_ATTR               23 (loaded)
+            658 LOAD_CLOSURE             5 (password)
+            660 LOAD_CLOSURE             6 (username)
+            662 BUILD_TUPLE              2
+            664 LOAD_CONST              13 (<code object <lambda> at 0x7fee039edd10, file "app\streetsmart_browser.py", line 177>)
+            666 MAKE_FUNCTION            8 (closure)
+            668 BINARY_OP               13 (+=)
+            672 SWAP                     2
+            674 STORE_ATTR              23 (loaded)
+
+182         684 LOAD_GLOBAL             29 (NULL + webview)
+            696 LOAD_ATTR               24 (start)
+
+183         706 LOAD_GLOBAL             50 (_sync_selection)
+
+185         718 LOAD_FAST                4 (window)
+
+186         720 LOAD_DEREF               6 (username)
+
+187         722 LOAD_DEREF               5 (password)
+
+184         724 BUILD_TUPLE              3
+
+189         726 LOAD_CONST               0 (None)
+
+190         728 LOAD_CONST               7 (False)
+
+191         730 LOAD_CONST               7 (False)
+
+192         732 LOAD_GLOBAL             53 (NULL + _storage_path_for_username)
+            744 LOAD_DEREF               6 (username)
+            746 PRECALL                  1
+            750 CALL                     1
+
+193         760 LOAD_FAST                3 (menu)
+
+182         762 KW_NAMES                14
+            764 PRECALL                  7
+            768 CALL                     7
+            778 POP_TOP
+            780 LOAD_CONST               0 (None)
+            782 RETURN_VALUE
+
+===== <module>.main.main.<locals>.<lambda> (line 177) =====
+              0 COPY_FREE_VARS           2
+
+177           2 RESUME                   0
+              4 LOAD_GLOBAL              1 (NULL + _inject_browser_script)
+
+178          16 LOAD_FAST                0 (window)
+
+179          18 LOAD_DEREF               2 (username)
+
+180          20 LOAD_DEREF               1 (password)
+
+177          22 PRECALL                  3
+             26 CALL                     3
+             36 RETURN_VALUE

@@ -1,0 +1,2831 @@
+{
+  "bytecode": {
+    "app": {
+      "path": "_bytecode/app.cpython-311.pyc",
+      "sha256": "723928f95127363585753065d5440c4e3be242089d590d58029a2214f0caebec",
+      "size": 731007
+    },
+    "settings": {
+      "path": "_bytecode/settings.cpython-311.pyc",
+      "sha256": "030bafbc57797c4c5268980e8303aff94574ba72f7bec4595f3d4c97f4922076",
+      "size": 25683
+    },
+    "streetsmart": {
+      "path": "_bytecode/streetsmart.cpython-311.pyc",
+      "sha256": "9df0577eb09d560974b7b6e8d19a933bba427254ab71e86d2e27d50076c706fa",
+      "size": 24570
+    },
+    "streetsmart_browser": {
+      "path": "_bytecode/streetsmart_browser.cpython-311.pyc",
+      "sha256": "e5f0df92a8c68313fdc301b938dd65264976858c94a3245b6c2aac187a4c318c",
+      "size": 8667
+    },
+    "streetsmart_panel": {
+      "path": "_bytecode/streetsmart_panel.cpython-311.pyc",
+      "sha256": "adf30310720cf55be8aaaf10449575167b762c83b7f624932786b88da06617ca",
+      "size": 25263
+    }
+  },
+  "format": 1,
+  "modules": {
+    "app": {
+      "classes": {
+        "KlicViewerApp": {
+          "bases": [
+            "tkinterdnd2.TkinterDnD.Tk"
+          ],
+          "members": {
+            "ACCENT": {
+              "kind": "str",
+              "value": "#f97316"
+            },
+            "ACCENT_DARK": {
+              "kind": "str",
+              "value": "#c2410c"
+            },
+            "ACCENT_LIGHT": {
+              "kind": "str",
+              "value": "#fdba74"
+            },
+            "APP_BG": {
+              "kind": "str",
+              "value": "#f5f7fb"
+            },
+            "BORDER": {
+              "kind": "str",
+              "value": "#dde4ee"
+            },
+            "BORDER_SOFT": {
+              "kind": "str",
+              "value": "#e9eef5"
+            },
+            "CADASTRAL_LABEL": {
+              "kind": "str",
+              "value": "PDOK kadastrale kaart"
+            },
+            "CADASTRAL_MAX_VISIBLE_METERS_PER_PIXEL": {
+              "kind": "float",
+              "value": 2.0
+            },
+            "CANVAS_BG": {
+              "kind": "str",
+              "value": "#f2f6fb"
+            },
+            "CHARCOAL": {
+              "kind": "str",
+              "value": "#050608"
+            },
+            "CYCLOMEDIA_AERIAL_LABEL": {
+              "kind": "str",
+              "value": "Cyclomedia Luchtfoto NL (nieuwste jaar / laagste cm)"
+            },
+            "INPUT_BG": {
+              "kind": "str",
+              "value": "#fbfcfe"
+            },
+            "MAAIVELD_DEFAULT_COLOR": {
+              "kind": "str",
+              "value": "#808080"
+            },
+            "MAAIVELD_MARKER_PIXEL_RADIUS": {
+              "kind": "int",
+              "value": 9
+            },
+            "MUTED": {
+              "kind": "str",
+              "value": "#667085"
+            },
+            "OSM_LABEL": {
+              "kind": "str",
+              "value": "OpenStreetMap"
+            },
+            "PDOK_LABEL": {
+              "kind": "str",
+              "value": "Luchtfoto NL actueel (8 cm, deels 5 cm)"
+            },
+            "PROJECT_FILE_EXTENSION": {
+              "kind": "str",
+              "value": ".klicproject"
+            },
+            "PROJECT_FILE_VERSION": {
+              "kind": "int",
+              "value": 1
+            },
+            "REFERENCE_POINT_MARKER_PIXEL_RADIUS": {
+              "kind": "int",
+              "value": 9
+            },
+            "ROTATION_HANDLE_RADIUS_PX": {
+              "kind": "float",
+              "value": 10.0
+            },
+            "ROTATION_RING_HIT_TOLERANCE_PX": {
+              "kind": "float",
+              "value": 18.0
+            },
+            "ROTATION_RING_PADDING_PX": {
+              "kind": "float",
+              "value": 28.0
+            },
+            "START_POINT_MARKER_PIXEL_RADIUS": {
+              "kind": "int",
+              "value": 9
+            },
+            "SURFACE": {
+              "kind": "str",
+              "value": "#ffffff"
+            },
+            "SURFACE_ALT": {
+              "kind": "str",
+              "value": "#fafbfd"
+            },
+            "SURFACE_SOFT": {
+              "kind": "str",
+              "value": "#f3f6fa"
+            },
+            "TEMPLATE_EXPORT_INCLUDE_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_export_include"
+            },
+            "TEMPLATE_EXPORT_ORDER_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_export_order"
+            },
+            "TEMPLATE_EXPORT_PS_NUMBER_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_export_ps_number"
+            },
+            "TEMPLATE_EXPORT_SCALE_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_cross_section_scale_denominator"
+            },
+            "TEMPLATE_EXPORT_SCALE_OPTIONS": {
+              "kind": "tuple",
+              "value": [
+                20,
+                40,
+                60,
+                80,
+                100,
+                120,
+                160,
+                200,
+                250,
+                500
+              ]
+            },
+            "TEMPLATE_EXPORT_VARIANT_CODE_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_export_variant_code"
+            },
+            "TEMPLATE_EXPORT_VARIANT_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_export_variant"
+            },
+            "TEMPLATE_PROEFSLEUF_LABEL_METADATA_KEY": {
+              "kind": "str",
+              "value": "template_proefsleuf_label"
+            },
+            "TEXT": {
+              "kind": "str",
+              "value": "#111827"
+            },
+            "TIFF_COMMENT_METADATA_KEY": {
+              "kind": "str",
+              "value": "tiff_comment_text"
+            },
+            "TIFF_SELECTION_CLICK_ZOOM_FACTOR": {
+              "kind": "float",
+              "value": 0.7
+            },
+            "TIFF_SELECTION_MIN_VIEW_METERS": {
+              "kind": "float",
+              "value": 60.0
+            },
+            "TIFF_SELECTION_SCALE_FACTOR": {
+              "kind": "float",
+              "value": 6.0
+            },
+            "VIRTUAL_TRENCH_WIDTH_METERS": {
+              "kind": "float",
+              "value": 0.6
+            },
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, *args, **kwargs)"
+            },
+            "_active_map_markers": {
+              "kind": "function",
+              "signature": "(self) -> 'list[MapMarker]'"
+            },
+            "_ai_maaiveld_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_ai_maaiveld_points_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer)"
+            },
+            "_append_template_dekband_metadata": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', start_chainage: 'float', end_chainage: 'float', start_depth: 'float', end_depth: 'float', source_name: 'str' = 'Dekband') -> 'None'"
+            },
+            "_apply_ai_maaiveld_result": {
+              "kind": "function",
+              "signature": "(self, layer, result) -> 'int'"
+            },
+            "_apply_image_rounding": {
+              "kind": "function",
+              "signature": "(self, image: 'Image.Image', radius: 'int') -> 'Image.Image'"
+            },
+            "_apply_native_window_chrome": {
+              "kind": "function",
+              "signature": "(self, window: 'tk.Misc | None' = None) -> 'None'"
+            },
+            "_apply_sleufbase_window_chrome": {
+              "kind": "staticmethod",
+              "signature": "(window: 'tk.Misc') -> 'None'"
+            },
+            "_apply_template_export_settings_payload": {
+              "kind": "function",
+              "signature": "(self, value: 'object') -> 'None'"
+            },
+            "_apply_tiff_list_click_zoom": {
+              "kind": "function",
+              "signature": "(self, index: 'int') -> 'None'"
+            },
+            "_apply_tiff_rotation": {
+              "kind": "function",
+              "signature": "(self, index: 'int', absolute_angle_degrees: 'float') -> 'None'"
+            },
+            "_apply_virtual_trench_template_to_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', template: 'dict[str, object]', start_world: 'tuple[float, float]', end_world: 'tuple[float, float]') -> 'None'"
+            },
+            "_apply_window_icon": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_auto_cross_section_start_candidate_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', dataset: 'KickTheMapObjectDataset', resolved_rules, *, road_centerline_client: 'RoadCenterlineClient | None' = None, terrain_boundary_client: 'BgtTerrainBoundaryClient | None' = None)"
+            },
+            "_background_attribution": {
+              "kind": "function",
+              "signature": "(self) -> 'str | None'"
+            },
+            "_background_cache_covers_view": {
+              "kind": "function",
+              "signature": "(self, bounds: 'Bounds', size: 'tuple[int, int]') -> 'bool'"
+            },
+            "_background_key": {
+              "kind": "function",
+              "signature": "(self, bounds: 'Bounds', size: 'tuple[int, int]') -> 'tuple'"
+            },
+            "_bgt_surface_autofill_enabled": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_bgt_surface_autofill_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_build_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_build_layout": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_build_maaiveld_profile_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer')"
+            },
+            "_build_menu": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_build_modern_menu_bar": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_build_virtual_trench_copy_template": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[dict[str, object] | None, str | None]'"
+            },
+            "_build_virtual_trench_layer": {
+              "kind": "function",
+              "signature": "(self, *, layer_name: 'str', payload: 'dict[str, object]') -> 'GeoTiffLayer'"
+            },
+            "_build_virtual_trench_payload_from_template": {
+              "kind": "function",
+              "signature": "(self, template: 'dict[str, object]', start_world: 'tuple[float, float]', end_world: 'tuple[float, float]') -> 'dict[str, object]'"
+            },
+            "_build_virtual_trench_transform_template": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'dict[str, object] | None'"
+            },
+            "_bundled_cadastral_template_path": {
+              "kind": "function",
+              "signature": "(self) -> 'Path'"
+            },
+            "_bundled_techbase_logo_path": {
+              "kind": "function",
+              "signature": "(self) -> 'Path'"
+            },
+            "_bundled_template_client_logo_paths": {
+              "kind": "function",
+              "signature": "(self) -> 'dict[str, Path]'"
+            },
+            "_cadastral_background_too_far": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_cancel_tiff_rotation_mode": {
+              "kind": "function",
+              "signature": "(self, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_cancel_virtual_trench_interaction": {
+              "kind": "function",
+              "signature": "(self, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_canvas_event_screen_position": {
+              "kind": "function",
+              "signature": "(self, event) -> 'tuple[float, float]'"
+            },
+            "_canvas_event_world_position": {
+              "kind": "function",
+              "signature": "(self, event) -> 'tuple[float, float]'"
+            },
+            "_canvas_size": {
+              "kind": "function",
+              "signature": "(self) -> 'tuple[int, int]'"
+            },
+            "_capture_modern_menu_specs": {
+              "kind": "function",
+              "signature": "(self, menu_bar) -> 'list[dict]'"
+            },
+            "_choose_template_export_order": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_clear_background_cache": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_clear_dekband_mode_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_clear_feature_selection": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_clear_reference_point_mode_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_clear_selected_tiff_comment": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_clear_start_point_mode_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_close_modern_menu_dropdown": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_close_selection_popup": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_coerce_float": {
+              "kind": "staticmethod",
+              "signature": "(value: 'object', default: 'float' = 0.0) -> 'float'"
+            },
+            "_coerce_template_export_scale_denominator": {
+              "kind": "function",
+              "signature": "(self, value: 'object') -> 'int | None'"
+            },
+            "_collect_template_cross_section_datasets": {
+              "kind": "function",
+              "signature": "(self, layers: 'list[GeoTiffLayer]') -> 'tuple[dict[int, object], list[str]]'"
+            },
+            "_configure_modern_combobox_style": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_configure_modern_dialog_styles": {
+              "kind": "staticmethod",
+              "signature": "(widget: 'tk.Misc') -> 'None'"
+            },
+            "_configure_styles": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_create_chip_label": {
+              "kind": "function",
+              "signature": "(self, parent: 'tk.Widget', value_var: 'tk.StringVar', accent: 'bool' = False) -> 'tk.Label'"
+            },
+            "_create_metric_tile": {
+              "kind": "function",
+              "signature": "(self, parent: 'tk.Widget', title: 'str', value_var: 'tk.StringVar', column: 'int', accent: 'bool' = False) -> 'tk.Frame'"
+            },
+            "_create_rounded_combobox": {
+              "kind": "function",
+              "signature": "(self, *args, **kwargs)"
+            },
+            "_create_rounded_entry": {
+              "kind": "function",
+              "signature": "(self, parent: 'tk.Misc', *, textvariable: 'tk.Variable', width: 'int', show: 'str | None' = None, outer_bg: 'str | None' = None, fixed_canvas_width: 'int | None' = None) -> 'tuple[RoundedPanel, ttk.Entry]'"
+            },
+            "_create_rounded_spinbox": {
+              "kind": "function",
+              "signature": "(self, parent: 'tk.Misc', *, textvariable: 'tk.Variable', width: 'int', from_: 'float', to: 'float', increment: 'float', format_: 'str | None' = None, outer_bg: 'str | None' = None, fixed_canvas_width: 'int | None' = None) -> 'tuple[RoundedPanel, ttk.Spinbox]'"
+            },
+            "_create_tiff_context_menu": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_create_virtual_copy_from_selected_tiff": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_create_virtual_trench_copy_layer": {
+              "kind": "function",
+              "signature": "(self, template: 'dict[str, object]', start_world: 'tuple[float, float]', end_world: 'tuple[float, float]') -> 'GeoTiffLayer'"
+            },
+            "_create_virtual_trench_layer": {
+              "kind": "function",
+              "signature": "(self, start_world: 'tuple[float, float]', end_world: 'tuple[float, float]') -> 'GeoTiffLayer'"
+            },
+            "_cross_section_marker_scale": {
+              "kind": "function",
+              "signature": "(self) -> 'float'"
+            },
+            "_cross_section_start_candidates_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'list[dict[str, object]]'"
+            },
+            "_current_background_notice": {
+              "kind": "function",
+              "signature": "(self) -> 'str | None'"
+            },
+            "_current_background_provider": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_current_background_source_id": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_current_project_payload": {
+              "kind": "function",
+              "signature": "(self) -> 'dict[str, object]'"
+            },
+            "_current_template_export_settings_payload": {
+              "kind": "function",
+              "signature": "(self) -> 'dict[str, object]'"
+            },
+            "_current_tiff_layer_for_dekband": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_current_tiff_layer_for_maaiveld": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_current_tiff_layer_for_reference": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_current_tiff_layer_for_start_point": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_current_tiff_layer_for_streetsmart": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_current_view_bounds": {
+              "kind": "function",
+              "signature": "(self) -> 'Bounds'"
+            },
+            "_dataset_with_template_cross_section_start_point": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', dataset: 'KickTheMapObjectDataset') -> 'KickTheMapObjectDataset'"
+            },
+            "_dataset_with_template_dekbanden": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', dataset: 'KickTheMapObjectDataset', resolved_rules, road_centerline_paths: 'list[list[tuple[float, float]]]', terrain_boundary_paths: 'list[list[tuple[float, float]]]', *, reverse_profile_direction: 'bool' = False) -> 'KickTheMapObjectDataset'"
+            },
+            "_default_info_text": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_default_project_directory": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_default_template_export_ps_number": {
+              "kind": "function",
+              "signature": "(self, layer, fallback_index: 'int') -> 'str'"
+            },
+            "_default_virtual_trench_point_name": {
+              "kind": "staticmethod",
+              "signature": "(role: 'str', index: 'int') -> 'str'"
+            },
+            "_draw_attribution": {
+              "kind": "function",
+              "signature": "(self, image: 'Image.Image', attribution: 'str') -> 'None'"
+            },
+            "_draw_dekband_overlay": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_draw_rotation_overlay": {
+              "kind": "function",
+              "signature": "(self, geometry: 'dict[str, object]') -> 'None'"
+            },
+            "_draw_virtual_trench_distance_badge": {
+              "kind": "function",
+              "signature": "(self, screen_x: 'float', screen_y: 'float', text: 'str') -> 'None'"
+            },
+            "_draw_virtual_trench_overlay": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer | None') -> 'None'"
+            },
+            "_draw_virtual_trench_profile_preview": {
+              "kind": "function",
+              "signature": "(self, canvas: 'tk.Canvas', layer: 'GeoTiffLayer', info_var: 'tk.StringVar | None' = None, *, profile: 'TemplateCrossSectionProfile | None' = None, point_rows: 'list[dict[str, object]] | None' = None, dekband_rows: 'list[dict[str, float]] | None' = None, bottom_z_override: 'float | None' = None, drag_overlay_text: 'str | None' = None) -> 'dict[str, object] | None'"
+            },
+            "_edit_context_virtual_trench": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_edit_selected_tiff_comment": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_edit_selected_virtual_trench": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_edit_virtual_trench_point_from_canvas": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point: 'dict[str, object]') -> 'bool'"
+            },
+            "_enable_window_drop": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_ensure_streetsmart_panel": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_extract_drop_paths": {
+              "kind": "function",
+              "signature": "(self, raw_data: 'str') -> 'list[str]'"
+            },
+            "_fast_kickthemap_start_points_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_feature_summary_label": {
+              "kind": "function",
+              "signature": "(self, feature: 'CableFeature') -> 'str'"
+            },
+            "_find_comment_index_near": {
+              "kind": "function",
+              "signature": "(self, x: 'float', y: 'float') -> 'int | None'"
+            },
+            "_find_maaiveld_marker_near_screen": {
+              "kind": "function",
+              "signature": "(self, screen_x: 'float', screen_y: 'float') -> 'dict[str, object] | None'"
+            },
+            "_find_virtual_trench_layer_near": {
+              "kind": "function",
+              "signature": "(self, world_x: 'float', world_y: 'float') -> 'GeoTiffLayer | None'"
+            },
+            "_find_virtual_trench_point_near": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', world_x: 'float', world_y: 'float') -> 'dict[str, object] | None'"
+            },
+            "_focus_window": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_format_feature_info": {
+              "kind": "function",
+              "signature": "(self, features: 'list[CableFeature]') -> 'str'"
+            },
+            "_format_template_export_scale_denominator": {
+              "kind": "function",
+              "signature": "(self, denominator: 'int | None') -> 'str'"
+            },
+            "_format_tiff_list_label": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'str'"
+            },
+            "_format_zoom_metric": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_go_to_location": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'None'"
+            },
+            "_handle_dekband_canvas_click": {
+              "kind": "function",
+              "signature": "(self, world_x: 'float', world_y: 'float') -> 'bool'"
+            },
+            "_handle_reference_point_canvas_click": {
+              "kind": "function",
+              "signature": "(self, world_x: 'float', world_y: 'float') -> 'bool'"
+            },
+            "_handle_start_point_canvas_click": {
+              "kind": "function",
+              "signature": "(self, world_x: 'float', world_y: 'float') -> 'bool'"
+            },
+            "_handle_virtual_trench_canvas_click": {
+              "kind": "function",
+              "signature": "(self, world_x: 'float', world_y: 'float') -> 'bool'"
+            },
+            "_has_streetsmart_credentials": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_has_workspace_content": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_hide_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_initial_template_export_order_state": {
+              "kind": "function",
+              "signature": "(self) -> 'tuple[list[GeoTiffLayer | None], list[bool], list[int | None]]'"
+            },
+            "_initial_virtual_trench_surface_state": {
+              "kind": "function",
+              "signature": "(self, x: 'float', y: 'float') -> 'tuple[float, str, bool]'"
+            },
+            "_inline_location_search_choose_selected": {
+              "kind": "function",
+              "signature": "(self, _event=None)"
+            },
+            "_inline_location_search_focus_suggestions": {
+              "kind": "function",
+              "signature": "(self, _event=None)"
+            },
+            "_inline_location_search_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_inline_location_search_return_to_entry": {
+              "kind": "function",
+              "signature": "(self, _event=None)"
+            },
+            "_inline_location_search_submit": {
+              "kind": "function",
+              "signature": "(self, _event=None)"
+            },
+            "_is_virtual_trench_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer | None') -> 'bool'"
+            },
+            "_json_safe_project_value": {
+              "kind": "staticmethod",
+              "signature": "(value: 'object') -> 'object'"
+            },
+            "_kickthemap_browser_launch_command": {
+              "kind": "function",
+              "signature": "(self) -> 'tuple[str, list[str]]'"
+            },
+            "_kickthemap_job_id_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'int | None'"
+            },
+            "_kickthemap_jobs_browser_launch_command": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_kickthemap_jobs_browser_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_kickthemap_material_choices_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_kickthemap_overlay_export_directory": {
+              "kind": "function",
+              "signature": "(self) -> 'Path'"
+            },
+            "_kickthemap_overlay_export_path": {
+              "kind": "function",
+              "signature": "(self, source_labels: 'list[str]') -> 'Path'"
+            },
+            "_kickthemap_saved_account": {
+              "kind": "function",
+              "signature": "(self, email: 'str') -> 'KickTheMapSavedAccount | None'"
+            },
+            "_kickthemap_saved_account_emails": {
+              "kind": "function",
+              "signature": "(self) -> 'list[str]'"
+            },
+            "_kickthemap_tiff_metadata": {
+              "kind": "function",
+              "signature": "(self, job: 'KickTheMapJob', job_features_path: 'Path | None' = None) -> 'dict[str, object]'"
+            },
+            "_layout_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_line_local_coordinates": {
+              "kind": "staticmethod",
+              "signature": "(point_x: 'float', point_y: 'float', start_world: 'tuple[float, float]', end_world: 'tuple[float, float]') -> 'tuple[float, float, float]'"
+            },
+            "_line_point_from_local_coordinates": {
+              "kind": "staticmethod",
+              "signature": "(start_world: 'tuple[float, float]', end_world: 'tuple[float, float]', along_ratio: 'float', offset: 'float') -> 'tuple[float, float]'"
+            },
+            "_load_dxf_paths": {
+              "kind": "function",
+              "signature": "(self, file_names: 'list[str]') -> 'tuple[int, list[str]]'"
+            },
+            "_load_exported_dxf_overlay": {
+              "kind": "function",
+              "signature": "(self, path: 'Path') -> 'tuple[bool, list[str]]'"
+            },
+            "_load_local_maaiveld_dataset_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer)"
+            },
+            "_load_maaiveld_dataset_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer)"
+            },
+            "_load_project_from_path": {
+              "kind": "function",
+              "signature": "(self, project_path: 'Path') -> 'None'"
+            },
+            "_load_tiff_paths": {
+              "kind": "function",
+              "signature": "(self, file_names: 'list[str]', metadata_by_path: 'dict[str, dict[str, object]] | None' = None) -> 'tuple[int, list[str]]'"
+            },
+            "_local_kickthemap_job_features_path": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'Path | None'"
+            },
+            "_location_world_to_screen": {
+              "kind": "function",
+              "signature": "(self, x_coord: 'float', y_coord: 'float') -> 'tuple[float, float]'"
+            },
+            "_lookup_tiff_address_record": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'dict[str, str]'"
+            },
+            "_maaiveld_segment_metadata_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', segment_key: 'str') -> 'dict[str, object]'"
+            },
+            "_map_export_background_attribution": {
+              "kind": "function",
+              "signature": "(self) -> 'str | None'"
+            },
+            "_map_export_background_provider": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_map_export_dxf_overlays": {
+              "kind": "function",
+              "signature": "(self) -> 'list[DxfOverlay]'"
+            },
+            "_modern_combobox_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_modern_dialog_style_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_modern_dropdown_menu_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_next_virtual_trench_job_id": {
+              "kind": "function",
+              "signature": "(self) -> 'int'"
+            },
+            "_next_virtual_trench_name": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_next_virtual_trench_point_number": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'int'"
+            },
+            "_normalize_input_paths": {
+              "kind": "function",
+              "signature": "(self, values: 'list[str]') -> 'list[str]'"
+            },
+            "_normalize_kickthemap_email": {
+              "kind": "staticmethod",
+              "signature": "(email: 'str') -> 'str'"
+            },
+            "_normalize_rotation_degrees": {
+              "kind": "staticmethod",
+              "signature": "(angle_degrees: 'float') -> 'float'"
+            },
+            "_normalize_template_export_slot_entries": {
+              "kind": "function",
+              "signature": "(self, value)"
+            },
+            "_normalize_virtual_trench_name": {
+              "kind": "function",
+              "signature": "(self, name: 'str') -> 'str'"
+            },
+            "_on_background_source_changed": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'None'"
+            },
+            "_on_background_toggle": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_on_canvas_drag": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_middle_drag": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_middle_press": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_middle_release": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_move": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_press": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_release": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_canvas_right_click": {
+              "kind": "function",
+              "signature": "(self, event) -> 'str'"
+            },
+            "_on_close": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_on_drop_enter": {
+              "kind": "function",
+              "signature": "(self, _event)"
+            },
+            "_on_drop_files": {
+              "kind": "function",
+              "signature": "(self, event)"
+            },
+            "_on_drop_position": {
+              "kind": "function",
+              "signature": "(self, _event)"
+            },
+            "_on_dxf_canvas_configure": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_mousewheel": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_on_opacity_changed": {
+              "kind": "function",
+              "signature": "(self, _value=None) -> 'None'"
+            },
+            "_on_tiff_list_left_click": {
+              "kind": "function",
+              "signature": "(self, event) -> 'str | None'"
+            },
+            "_on_tiff_list_right_click": {
+              "kind": "function",
+              "signature": "(self, event) -> 'str | None'"
+            },
+            "_on_tiff_selected": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'None'"
+            },
+            "_open_inline_location_result": {
+              "kind": "function",
+              "signature": "(self, index: 'int') -> 'None'"
+            },
+            "_open_maaiveld_marker_dialog": {
+              "kind": "function",
+              "signature": "(self, marker_payload: 'dict[str, object]') -> 'None'"
+            },
+            "_open_template_dekband_dialog": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, start_chainage: 'float', end_chainage: 'float') -> 'dict[str, object] | None'"
+            },
+            "_open_tiff_addresses_dialog": {
+              "kind": "function",
+              "signature": "(self, records: 'list[dict[str, str]]') -> 'None'"
+            },
+            "_open_virtual_trench_dekband_entry_dialog": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, axis_length: 'float', initial_row: 'dict[str, float] | None' = None, parent=None) -> 'dict[str, object] | None'"
+            },
+            "_open_virtual_trench_dekband_manager": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, profile: 'TemplateCrossSectionProfile | None' = None, parent=None) -> 'bool'"
+            },
+            "_open_virtual_trench_editor": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_open_virtual_trench_point_chainage_dialog": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, axis_length: 'float', initial_chainage: 'float | None' = None, parent=None) -> 'float | None'"
+            },
+            "_open_virtual_trench_point_dialog": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point: 'dict[str, object]') -> 'dict[str, object] | None'"
+            },
+            "_parse_inline_coordinate_query": {
+              "kind": "function",
+              "signature": "(self, query: 'str')"
+            },
+            "_parse_template_export_scale_text": {
+              "kind": "function",
+              "signature": "(self, text: 'str') -> 'int | None'"
+            },
+            "_pick_cross_section_start_candidate": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', world_x: 'float', world_y: 'float') -> 'dict[str, object] | None'"
+            },
+            "_point_segment_distance": {
+              "kind": "staticmethod",
+              "signature": "(point: 'tuple[float, float]', start: 'tuple[float, float]', end: 'tuple[float, float]') -> 'float'"
+            },
+            "_poll_background_queue": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_poll_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_popup_layer_labels": {
+              "kind": "function",
+              "signature": "(self, features: 'list[CableFeature]') -> 'list[str]'"
+            },
+            "_preview_background": {
+              "kind": "function",
+              "signature": "(self, bounds: 'Bounds', size: 'tuple[int, int]') -> 'Image.Image | None'"
+            },
+            "_profile_chainage_from_display_world": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', profile: 'TemplateCrossSectionProfile', world_x: 'float', world_y: 'float') -> 'float'"
+            },
+            "_profile_display_world_point": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', profile: 'TemplateCrossSectionProfile', chainage: 'float') -> 'tuple[float, float]'"
+            },
+            "_prompt_multiline_input": {
+              "kind": "function",
+              "signature": "(self, *, title: 'str', prompt: 'str', initialvalue: 'str' = '', confirm_label: 'str' = 'OK', height: 'int' = 7) -> 'str | None'"
+            },
+            "_prompt_single_line_input": {
+              "kind": "function",
+              "signature": "(self, *, title: 'str', prompt: 'str', initialvalue: 'str' = '', confirm_label: 'str' = 'OK') -> 'str | None'"
+            },
+            "_prompt_virtual_trench_name": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'str | None'"
+            },
+            "_pulse_inline_location_only": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_queue_pending_virtual_trench_surface_lookups": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_queue_virtual_trench_surface_lookup": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point: 'dict[str, object]') -> 'None'"
+            },
+            "_redraw_canvas_overlays": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_reference_point_marker_position": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[float, float] | None'"
+            },
+            "_refresh_dashboard_metrics": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_dekband_button_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_dxf_list": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_dxf_scrollregion": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_maaiveld_button_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_maaiveld_markers": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_refresh_map_edit_button_states": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_map_edit_markers": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_map_mode_cursor": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_reference_point_button_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_reference_point_markers": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_refresh_start_point_button_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_start_point_markers": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_refresh_streetsmart_layout": {
+              "kind": "function",
+              "signature": "(self, *, sync_selection: 'bool' = True) -> 'None'"
+            },
+            "_refresh_tiff_list": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_refresh_virtual_trench_layer_state": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, select: 'bool' = False, zoom_to_layer: 'bool' = False, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_refresh_virtual_trench_layer_visuals": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', *, refetch_background: 'bool' = False) -> 'None'"
+            },
+            "_register_child_process": {
+              "kind": "function",
+              "signature": "(self, kind: 'str', process: 'subprocess.Popen') -> 'None'"
+            },
+            "_remove_kickthemap_account": {
+              "kind": "function",
+              "signature": "(self, email: 'str') -> 'None'"
+            },
+            "_remove_selected_dxf": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'str | None'"
+            },
+            "_remove_selected_tiff": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'str | None'"
+            },
+            "_rename_selected_virtual_trench": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_rename_virtual_trench": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'bool'"
+            },
+            "_render_now": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_reset_selected_tiff_rotation": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_reset_workspace_state": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_resolve_virtual_trench_point": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point_id: 'str', fallback_point: 'dict[str, object] | None' = None) -> 'dict[str, object] | None'"
+            },
+            "_resolved_cross_section_layer_rules": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_resource_path": {
+              "kind": "staticmethod",
+              "signature": "(*parts: 'str') -> 'Path'"
+            },
+            "_reverse_template_export_path": {
+              "kind": "staticmethod",
+              "signature": "(output_path: 'str | Path') -> 'Path'"
+            },
+            "_rotate_point_around_center": {
+              "kind": "staticmethod",
+              "signature": "(x: 'float', y: 'float', center_x: 'float', center_y: 'float', rotation_degrees: 'float') -> 'tuple[float, float]'"
+            },
+            "_rotate_selected_tiff": {
+              "kind": "function",
+              "signature": "(self, angle_degrees: 'float') -> 'None'"
+            },
+            "_rotate_selected_tiff_custom": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_rotate_virtual_trench_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', absolute_angle_degrees: 'float') -> 'None'"
+            },
+            "_rotation_degrees_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'float'"
+            },
+            "_rotation_hit_test": {
+              "kind": "function",
+              "signature": "(self, screen_x: 'float', screen_y: 'float') -> 'dict[str, object] | None'"
+            },
+            "_rotation_overlay_geometry": {
+              "kind": "function",
+              "signature": "(self) -> 'dict[str, object] | None'"
+            },
+            "_safe_kickthemap_export_stem": {
+              "kind": "staticmethod",
+              "signature": "(value: 'str') -> 'str'"
+            },
+            "_save_project_to_path": {
+              "kind": "function",
+              "signature": "(self, output_path: 'Path') -> 'None'"
+            },
+            "_schedule_background_fetch": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_schedule_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_schedule_style_dialog_children": {
+              "kind": "staticmethod",
+              "signature": "(dialog: 'tk.Misc') -> 'None'"
+            },
+            "_screen_angle_from_center": {
+              "kind": "staticmethod",
+              "signature": "(center_x: 'float', center_y: 'float', screen_x: 'float', screen_y: 'float') -> 'float'"
+            },
+            "_screen_to_world": {
+              "kind": "function",
+              "signature": "(self, x: 'float', y: 'float') -> 'tuple[float, float]'"
+            },
+            "_select_dxf_overlay": {
+              "kind": "function",
+              "signature": "(self, index: 'int | None') -> 'None'"
+            },
+            "_select_layer_in_tiff_list": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'bool'"
+            },
+            "_select_tiff_index": {
+              "kind": "function",
+              "signature": "(self, index: 'int | None') -> 'None'"
+            },
+            "_selected_kickthemap_auto_login_account": {
+              "kind": "function",
+              "signature": "(self) -> 'KickTheMapSavedAccount | None'"
+            },
+            "_selected_template_client_logo_path": {
+              "kind": "function",
+              "signature": "(self) -> 'Path | None'"
+            },
+            "_selected_tiff_layer": {
+              "kind": "function",
+              "signature": "(self) -> 'GeoTiffLayer | None'"
+            },
+            "_selection_tolerance_meters": {
+              "kind": "function",
+              "signature": "(self) -> 'float'"
+            },
+            "_selection_view_bounds_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'Bounds'"
+            },
+            "_set_dekband_mode_active": {
+              "kind": "function",
+              "signature": "(self, active: 'bool', *, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_set_info_text": {
+              "kind": "function",
+              "signature": "(self, value: 'str') -> 'None'"
+            },
+            "_set_initial_main_pane_size": {
+              "kind": "function",
+              "signature": "(self, container: 'ttk.Panedwindow') -> 'None'"
+            },
+            "_set_initial_sidebar_pane_sizes": {
+              "kind": "function",
+              "signature": "(self, sidebar_panes: 'ttk.Panedwindow') -> 'None'"
+            },
+            "_set_inline_location_suggestions": {
+              "kind": "function",
+              "signature": "(self, token: 'int', suggestions_data: 'list[tuple[str, float, float, str]]') -> 'None'"
+            },
+            "_set_maaiveld_mode_active": {
+              "kind": "function",
+              "signature": "(self, active: 'bool', *, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_set_maaiveld_segment_metadata": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', segment_key: 'str', text_value: 'str', color_value: 'str') -> 'None'"
+            },
+            "_set_reference_point_metadata": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', world_x: 'float', world_y: 'float') -> 'None'"
+            },
+            "_set_reference_point_mode_active": {
+              "kind": "function",
+              "signature": "(self, active: 'bool', *, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_set_start_point_mode_active": {
+              "kind": "function",
+              "signature": "(self, active: 'bool', *, status_text: 'str | None' = None) -> 'None'"
+            },
+            "_set_streetsmart_panel_status": {
+              "kind": "function",
+              "signature": "(self, text: 'str') -> 'None'"
+            },
+            "_set_streetsmart_panel_visible": {
+              "kind": "function",
+              "signature": "(self, visible: 'bool', *, sync_selection: 'bool' = True) -> 'None'"
+            },
+            "_set_template_cross_section_start_metadata": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', x_coord: 'float', y_coord: 'float') -> 'None'"
+            },
+            "_set_template_dekband_rows": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', rows: 'list[dict[str, float]] | tuple[dict[str, float], ...]') -> 'None'"
+            },
+            "_set_tiff_comment_text": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', text: 'str') -> 'None'"
+            },
+            "_set_tiff_rotation": {
+              "kind": "function",
+              "signature": "(self, index: 'int', absolute_angle_degrees: 'float', *, refresh_list: 'bool', sync_streetsmart: 'bool', announce_status: 'bool', refetch_background: 'bool', refresh_maaiveld_markers: 'bool' = True) -> 'GeoTiffLayer | None'"
+            },
+            "_set_virtual_trench_end_chainage": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', target_chainage: 'float', *, end_surface_z: 'float | None' = None, template: 'dict[str, object] | None' = None) -> 'bool'"
+            },
+            "_set_virtual_trench_name": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', new_name: 'str') -> 'bool'"
+            },
+            "_show_feature_popup": {
+              "kind": "function",
+              "signature": "(self, screen_x: 'int', screen_y: 'int', features: 'list[CableFeature]') -> 'None'"
+            },
+            "_show_image": {
+              "kind": "function",
+              "signature": "(self, image: 'Image.Image', bounds: 'Bounds', size: 'tuple[int, int]') -> 'None'"
+            },
+            "_show_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_show_interaction_preview": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_show_modern_menu_dropdown": {
+              "kind": "function",
+              "signature": "(self, button: 'tk.Widget', spec: 'dict') -> 'None'"
+            },
+            "_sleufbase_branding_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_split_input_paths": {
+              "kind": "function",
+              "signature": "(self, file_names: 'list[str]') -> 'tuple[list[str], list[str], list[str], list[str]]'"
+            },
+            "_start_background_fetch": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_context_virtual_trench_move": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_context_virtual_trench_rotation": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_inline_location_search": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_location_pulse": {
+              "kind": "function",
+              "signature": "(self, x_coord: 'float', y_coord: 'float') -> 'None'"
+            },
+            "_start_selected_tiff_rotation_mode": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_selected_virtual_trench_move": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_virtual_trench_copy_from_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_start_virtual_trench_creation": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_start_virtual_trench_dekband_pick": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_start_virtual_trench_layer_move": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', anchor_world: 'tuple[float, float] | None' = None) -> 'None'"
+            },
+            "_start_virtual_trench_point_move": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point: 'dict[str, object]') -> 'None'"
+            },
+            "_start_virtual_trench_point_pick": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_stop_dekband_map_mode": {
+              "kind": "function",
+              "signature": "(self, *, status_text: 'str | None' = None, reopen_virtual_editor: 'bool' = False) -> 'None'"
+            },
+            "_store_kickthemap_account": {
+              "kind": "function",
+              "signature": "(self, email: 'str', password: 'str') -> 'None'"
+            },
+            "_store_template_export_order_state": {
+              "kind": "function",
+              "signature": "(self, ordered_layers: 'list[GeoTiffLayer | None]', included_flags: 'list[bool]', scale_denominators: 'list[int | None]') -> 'None'"
+            },
+            "_store_template_export_variant_state": {
+              "kind": "function",
+              "signature": "(self, ordered_layers, included_flags, scale_denominators, ps_numbers, variant_codes, labels) -> 'None'"
+            },
+            "_streetsmart_browser_launch_command": {
+              "kind": "function",
+              "signature": "(self) -> 'tuple[str, list[str]]'"
+            },
+            "_streetsmart_selection_payload": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'dict[str, object]'"
+            },
+            "_style_dialog_children": {
+              "kind": "staticmethod",
+              "signature": "(widget: 'tk.Misc') -> 'None'"
+            },
+            "_suggest_kickthemap_dxf_export_filename": {
+              "kind": "function",
+              "signature": "(self, source_labels: 'list[str]') -> 'str'"
+            },
+            "_suggest_project_filename": {
+              "kind": "function",
+              "signature": "(self) -> 'str'"
+            },
+            "_sync_all_virtual_trench_layer_colors": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_sync_streetsmart_panel": {
+              "kind": "function",
+              "signature": "(self, selection: 'dict[str, object] | None', *, reload_view: 'bool' = False) -> 'None'"
+            },
+            "_sync_virtual_trench_dekband_colors": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_sync_virtual_trench_object_surfaces_to_start": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_sync_virtual_trench_point_colors": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'None'"
+            },
+            "_template_cross_section_start_metadata_point": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[float, float] | None'"
+            },
+            "_template_dekband_rows_for_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[dict[str, float], ...]'"
+            },
+            "_template_dekband_summary_text": {
+              "kind": "staticmethod",
+              "signature": "(row: 'dict[str, float]') -> 'str'"
+            },
+            "_template_export_layer_include": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'bool'"
+            },
+            "_template_export_layer_key": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'str'"
+            },
+            "_template_export_layer_order": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'int | None'"
+            },
+            "_template_export_layer_scale_denominator": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'int | None'"
+            },
+            "_template_export_layer_sort_key": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[int, int, tuple[int, int, str]]'"
+            },
+            "_template_export_ps_numbers_for_order": {
+              "kind": "function",
+              "signature": "(self, ordered_layers) -> 'list[str]'"
+            },
+            "_template_export_scale_denominators_for_slots": {
+              "kind": "function",
+              "signature": "(self, ordered_slots: 'list[GeoTiffLayer | None]') -> 'dict[int, int]'"
+            },
+            "_template_export_sort_key": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[int, int, str]'"
+            },
+            "_template_export_variant_codes_for_order": {
+              "kind": "function",
+              "signature": "(self, ordered_layers) -> 'list[str]'"
+            },
+            "_template_export_variant_flags_for_order": {
+              "kind": "function",
+              "signature": "(self, ordered_layers) -> 'list[bool]'"
+            },
+            "_template_export_variant_labels": {
+              "kind": "staticmethod",
+              "signature": "(ordered_layers, included_flags, variant_codes, ps_numbers=None)"
+            },
+            "_template_export_variant_suffix": {
+              "kind": "staticmethod",
+              "signature": "(position: 'int') -> 'str'"
+            },
+            "_template_map_comments": {
+              "kind": "function",
+              "signature": "(self) -> 'list[MapComment]'"
+            },
+            "_template_variant_order_patch": {
+              "kind": "bool",
+              "value": true
+            },
+            "_terminate_child_processes": {
+              "kind": "function",
+              "signature": "(self, *, kind: 'str | None' = None) -> 'None'"
+            },
+            "_tiff_comment_text": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'str'"
+            },
+            "_tiff_layer_center_world": {
+              "kind": "staticmethod",
+              "signature": "(layer: 'GeoTiffLayer') -> 'tuple[float, float]'"
+            },
+            "_tiff_layer_footprint": {
+              "kind": "staticmethod",
+              "signature": "(layer: 'GeoTiffLayer') -> 'list[list[float]]'"
+            },
+            "_toggle_dekband_mode": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_toggle_dxf_visibility": {
+              "kind": "function",
+              "signature": "(self, index: 'int') -> 'None'"
+            },
+            "_toggle_maaiveld_mode": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_toggle_reference_point_mode": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_toggle_start_point_mode": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_toggle_streetsmart_fullscreen": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_toggle_streetsmart_panel": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_transform_image_between_views": {
+              "kind": "function",
+              "signature": "(self, image: 'Image.Image', source_bounds: 'Bounds', target_bounds: 'Bounds', target_size: 'tuple[int, int]') -> 'Image.Image'"
+            },
+            "_translate_virtual_trench_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', dx: 'float', dy: 'float') -> 'None'"
+            },
+            "_try_auto_login_kickthemap": {
+              "kind": "function",
+              "signature": "(self) -> 'bool'"
+            },
+            "_update_streetsmart_selection_state": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer | None') -> 'None'"
+            },
+            "_update_window_title": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_virtual_trench_copy_source_endpoints": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[tuple[float, float], tuple[float, float]]'"
+            },
+            "_virtual_trench_copy_specs_from_existing_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', source_start: 'tuple[float, float]', source_end: 'tuple[float, float]') -> 'tuple[list[dict[str, object]], int, str | None, tuple[float, float], tuple[float, float], list[dict[str, float]]]'"
+            },
+            "_virtual_trench_copy_specs_from_virtual_layer": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'tuple[list[dict[str, object]], int]'"
+            },
+            "_virtual_trench_copy_target_end": {
+              "kind": "function",
+              "signature": "(self, template: 'dict[str, object]', start_world: 'tuple[float, float]', direction_world: 'tuple[float, float]') -> 'tuple[float, float] | None'"
+            },
+            "_virtual_trench_default_surface_from_start": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'float'"
+            },
+            "_virtual_trench_dekband_rows_from_polylines": {
+              "kind": "function",
+              "signature": "(self, dataset: 'KickTheMapObjectDataset', profile: 'TemplateCrossSectionProfile') -> 'list[dict[str, float]]'"
+            },
+            "_virtual_trench_display_rgb_for_source_name": {
+              "kind": "function",
+              "signature": "(self, source_name: 'str', *, role: 'str' = '') -> 'tuple[int, int, int]'"
+            },
+            "_virtual_trench_endpoint_spec": {
+              "kind": "function",
+              "signature": "(self, *, role: 'str', point_id: 'str', x: 'float', y: 'float', surface_z_fallback: 'float' = 0.0) -> 'dict[str, object]'"
+            },
+            "_virtual_trench_layer_center_world": {
+              "kind": "staticmethod",
+              "signature": "(layer: 'GeoTiffLayer') -> 'tuple[float, float]'"
+            },
+            "_virtual_trench_layer_rules": {
+              "kind": "function",
+              "signature": "(self)"
+            },
+            "_virtual_trench_name_conflicts": {
+              "kind": "function",
+              "signature": "(self, name: 'str', *, exclude_layer: 'GeoTiffLayer | None' = None) -> 'bool'"
+            },
+            "_virtual_trench_payload": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'dict[str, object]'"
+            },
+            "_virtual_trench_point_depth": {
+              "kind": "function",
+              "signature": "(self, point: 'dict[str, object]') -> 'float'"
+            },
+            "_virtual_trench_point_display_rgb": {
+              "kind": "function",
+              "signature": "(self, point: 'dict[str, object]') -> 'tuple[int, int, int]'"
+            },
+            "_virtual_trench_point_from_copy_spec": {
+              "kind": "function",
+              "signature": "(self, spec: 'dict[str, object]', point_x: 'float', point_y: 'float') -> 'tuple[dict[str, object], bool]'"
+            },
+            "_virtual_trench_point_summary": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer', point: 'dict[str, object]') -> 'str'"
+            },
+            "_virtual_trench_point_surface_status": {
+              "kind": "function",
+              "signature": "(self, point: 'dict[str, object]') -> 'str'"
+            },
+            "_virtual_trench_point_uses_auto_surface": {
+              "kind": "function",
+              "signature": "(self, point: 'dict[str, object]') -> 'bool'"
+            },
+            "_virtual_trench_points_match": {
+              "kind": "staticmethod",
+              "signature": "(x1: 'float', y1: 'float', x2: 'float', y2: 'float', tolerance: 'float' = 0.5) -> 'bool'"
+            },
+            "_virtual_trench_preview_profile": {
+              "kind": "function",
+              "signature": "(self, layer: 'GeoTiffLayer') -> 'TemplateCrossSectionProfile | None'"
+            },
+            "_virtual_trench_source_choices": {
+              "kind": "function",
+              "signature": "(self) -> 'list[str]'"
+            },
+            "_virtual_trench_surface_level": {
+              "kind": "function",
+              "signature": "(self, x: 'float', y: 'float') -> 'float'"
+            },
+            "_visible_dxf_overlays": {
+              "kind": "function",
+              "signature": "(self) -> 'list[DxfOverlay]'"
+            },
+            "_world_to_screen": {
+              "kind": "function",
+              "signature": "(self, x: 'float', y: 'float') -> 'tuple[float, float]'"
+            },
+            "_zoom_for_location_type": {
+              "kind": "function",
+              "signature": "(self, location_type: 'str') -> 'float'"
+            },
+            "clear_all": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "clear_all_reference_points": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "clear_comments": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "destroy": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "export_cadastral_dxf": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "export_cadastral_template_dxf": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "export_maps": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "kickthemap_logout": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "load_all_kickthemap_start_points": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "load_dxf": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "load_project": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "load_tiffs": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_input_paths": {
+              "kind": "function",
+              "signature": "(self, file_names: 'list[str]') -> 'None'"
+            },
+            "open_kickthemap_browser": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_kickthemap_dxf_export_dialog": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_kickthemap_jobs_browser_window": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_kickthemap_jobs_dialog": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_kickthemap_login_dialog": {
+              "kind": "function",
+              "signature": "(self, open_jobs_on_success: 'bool' = False, open_export_on_success: 'bool' = False, open_browser_on_success: 'bool' = False) -> 'None'"
+            },
+            "open_location_dialog": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_settings_dialog": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_streetsmart_browser": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "open_streetsmart_login_dialog": {
+              "kind": "function",
+              "signature": "(self, open_browser_on_success: 'bool' = False) -> 'None'"
+            },
+            "request_render": {
+              "kind": "function",
+              "signature": "(self, refetch_background: 'bool') -> 'None'"
+            },
+            "run_ai_maaiveld_for_selected_layer": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "save_project": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "save_project_as": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "set_status": {
+              "kind": "function",
+              "signature": "(self, text: 'str') -> 'None'"
+            },
+            "show_tiff_addresses_dialog": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "streetsmart_logout": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "zoom_to_all": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            }
+          }
+        },
+        "RoundedPanel": {
+          "bases": [
+            "tkinter.Frame"
+          ],
+          "members": {
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, parent: 'tk.Misc', *, title: 'str | None', outer_bg: 'str', panel_bg: 'str', border_color: 'str', title_fg: 'str', radius: 'int' = 18, padding: 'tuple[int, int]' = (14, 14), auto_height: 'bool' = False) -> 'None'"
+            },
+            "_on_body_configure": {
+              "kind": "function",
+              "signature": "(self, _event) -> 'None'"
+            },
+            "_on_canvas_configure": {
+              "kind": "function",
+              "signature": "(self, event) -> 'None'"
+            },
+            "_rounded_rectangle_points": {
+              "kind": "function",
+              "signature": "(self, x1: 'float', y1: 'float', x2: 'float', y2: 'float', radius: 'float') -> 'list[float]'"
+            },
+            "set_content_height": {
+              "kind": "function",
+              "signature": "(self, height: 'int') -> 'None'"
+            }
+          }
+        }
+      },
+      "constants": {
+        "DND_COPY": "copy",
+        "DND_FILES": "DND_Files",
+        "STREETSMART_WEB_URL": "https://streetsmart.cyclomedia.com/streetsmart",
+        "VIRTUAL_TRENCH_METADATA_KEY": "virtual_trench_payload"
+      },
+      "functions": {
+        "_install_ai_maaiveld_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_bgt_surface_autofill_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_fast_kickthemap_start_points_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_inline_location_search_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_kickthemap_jobs_browser_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_kickthemap_material_choices_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_modern_combobox_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_modern_dialog_style_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_modern_dropdown_menu_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_sleufbase_branding_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_streetsmart_selector_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_install_template_variant_order_patch": {
+          "signature": "() -> 'None'"
+        },
+        "_load_cached_module": {
+          "signature": "() -> 'None'"
+        },
+        "as_completed": {
+          "signature": "(fs, timeout=None)"
+        },
+        "build_numbered_maaiveld_image": {
+          "signature": "(*, layer: 'GeoTiffLayer', points: 'list[AiMaaiveldPoint]', renderer: 'MapRenderer', dxf_overlays: 'list[DxfOverlay] | None' = None, background_provider: 'Any | None' = None, size: 'tuple[int, int]' = (1400, 1000)) -> 'Image.Image'"
+        },
+        "build_object_layer_rules": {
+          "signature": "(rule_rows: 'list[tuple] | None' = None) -> 'tuple[ObjectLayerRule, ...]'"
+        },
+        "build_virtual_trench_dataset": {
+          "signature": "(layer: 'GeoTiffLayer', *, include_endpoints: 'bool' = True) -> 'KickTheMapObjectDataset | None'"
+        },
+        "clear_kickthemap_browser_session": {
+          "signature": "(email: 'str' = '') -> 'list[Path]'"
+        },
+        "clear_streetsmart_storage": {
+          "signature": "(username: 'str' = '') -> 'list[Path]'"
+        },
+        "dxf_trench_export_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "dxf_trench_export_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        },
+        "hex_color_to_rgb": {
+          "signature": "(value: 'str') -> 'tuple[int, int, int]'"
+        },
+        "install_rounded_buttons": {
+          "signature": "() -> 'None'"
+        },
+        "is_virtual_trench_layer": {
+          "signature": "(layer: 'GeoTiffLayer') -> 'bool'"
+        },
+        "load_dxf": {
+          "signature": "(path: 'str | Path') -> 'DxfOverlay'"
+        },
+        "load_geotiff": {
+          "signature": "(path: 'str | Path') -> 'GeoTiffLayer'"
+        },
+        "load_job_feature_dataset": {
+          "signature": "(path: 'str | Path', job_id: 'int', job_title: 'str') -> 'KickTheMapObjectDataset'"
+        },
+        "load_settings": {
+          "signature": "() -> 'AppSettings'"
+        },
+        "load_streetsmart_state": {
+          "signature": "() -> 'dict[str, Any]'"
+        },
+        "main": {
+          "signature": "(startup_paths: 'list[str] | None' = None) -> 'None'"
+        },
+        "map_export_background_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "map_export_background_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        },
+        "number_key_to_segment_key": {
+          "signature": "(number_key: 'str') -> 'str | None'"
+        },
+        "ordered_virtual_trench_points": {
+          "signature": "(layer: 'GeoTiffLayer') -> 'list[dict[str, Any]]'"
+        },
+        "pick_features": {
+          "signature": "(x: 'float', y: 'float', overlays: 'list[DxfOverlay]', tolerance_meters: 'float') -> 'list[CableFeature]'"
+        },
+        "point_chainage": {
+          "signature": "(point: 'dict[str, Any]', start_point: 'dict[str, Any]', end_point: 'dict[str, Any]') -> 'float'"
+        },
+        "project_point_onto_virtual_trench": {
+          "signature": "(layer: 'GeoTiffLayer', x: 'float', y: 'float') -> 'tuple[float, float, float, float]'"
+        },
+        "quote": {
+          "signature": "(string, safe='/', encoding=None, errors=None)"
+        },
+        "refresh_virtual_trench_layer": {
+          "signature": "(layer: 'GeoTiffLayer', *, quality_multiplier: 'float' = 1.0) -> 'None'"
+        },
+        "request_maaiveld_from_vllm": {
+          "signature": "(image: 'Image.Image', *, model: 'str | None' = None, base_url: 'str | None' = None, api_key: 'str | None' = None, timeout_seconds: 'int' = 180) -> 'AiMaaiveldResult'"
+        },
+        "rotate_geotiff_layer": {
+          "signature": "(layer: 'GeoTiffLayer', angle_degrees: 'float') -> 'GeoTiffLayer'"
+        },
+        "save_settings": {
+          "signature": "(settings: 'AppSettings') -> 'Path'"
+        },
+        "save_streetsmart_state": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'Path'"
+        },
+        "set_geotiff_layer_rotation": {
+          "signature": "(layer: 'GeoTiffLayer', angle_degrees: 'float') -> 'GeoTiffLayer'"
+        },
+        "template_client_logo_preset_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "template_client_logo_preset_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        },
+        "virtual_trench_endpoints": {
+          "signature": "(layer: 'GeoTiffLayer') -> 'tuple[dict[str, Any] | None, dict[str, Any] | None]'"
+        },
+        "virtual_trench_points": {
+          "signature": "(layer: 'GeoTiffLayer') -> 'list[dict[str, Any]]'"
+        },
+        "virtual_trench_width": {
+          "signature": "(layer: 'GeoTiffLayer') -> 'float'"
+        }
+      },
+      "implementation": "legacy-bytecode",
+      "names": [
+        "AiMaaiveldError",
+        "AiMaaiveldPoint",
+        "AppSettings",
+        "BgtTerrainBoundaryClient",
+        "Bounds",
+        "CableFeature",
+        "CadastralDxfExporter",
+        "CadastralExportError",
+        "CadastralWfsClient",
+        "Counter",
+        "CyclomediaAerialClient",
+        "DND_COPY",
+        "DND_FILES",
+        "DXF_TRENCH_EXPORT_OPTIONS",
+        "DxfError",
+        "DxfOverlay",
+        "EmbeddedStreetSmartPanel",
+        "GeoTiffError",
+        "GeoTiffLayer",
+        "GeoTransform",
+        "Image",
+        "ImageChops",
+        "ImageDraw",
+        "ImageTk",
+        "InstanceMessageServer",
+        "KickTheMapClient",
+        "KickTheMapDxfExporter",
+        "KickTheMapError",
+        "KickTheMapJob",
+        "KickTheMapObjectDataset",
+        "KickTheMapObjectLayerRule",
+        "KickTheMapObjectPolyline",
+        "KickTheMapSavedAccount",
+        "KlicViewerApp",
+        "MAP_EXPORT_BACKGROUND_OPTIONS",
+        "MapComment",
+        "MapExporter",
+        "MapMarker",
+        "MapRenderer",
+        "OpenStreetMapTileClient",
+        "Path",
+        "PdokAhnClient",
+        "PdokAhnError",
+        "PdokError",
+        "PdokKadastralekaartWmtsTileClient",
+        "PdokLocationClient",
+        "PdokWmsClient",
+        "PdokWmtsTileClient",
+        "ReverseLocationResult",
+        "RoadCenterlineClient",
+        "RoundedPanel",
+        "STREETSMART_WEB_URL",
+        "TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS",
+        "TemplateCrossSectionProfile",
+        "ThreadPoolExecutor",
+        "TileClientError",
+        "TkinterDnD",
+        "VIRTUAL_TRENCH_METADATA_KEY",
+        "ViewportTransform",
+        "_ORIGINAL_TK_ENTRY",
+        "_ORIGINAL_TK_TOPLEVEL",
+        "_ORIGINAL_TTK_COMBOBOX",
+        "_install_ai_maaiveld_patch",
+        "_install_bgt_surface_autofill_patch",
+        "_install_fast_kickthemap_start_points_patch",
+        "_install_inline_location_search_patch",
+        "_install_kickthemap_jobs_browser_patch",
+        "_install_kickthemap_material_choices_patch",
+        "_install_modern_combobox_patch",
+        "_install_modern_dialog_style_patch",
+        "_install_modern_dropdown_menu_patch",
+        "_install_sleufbase_branding_patch",
+        "_install_streetsmart_selector_patch",
+        "_install_template_variant_order_patch",
+        "_load_cached_module",
+        "annotations",
+        "as_completed",
+        "build_numbered_maaiveld_image",
+        "build_object_layer_rules",
+        "build_virtual_trench_dataset",
+        "clear_kickthemap_browser_session",
+        "clear_streetsmart_storage",
+        "colorchooser",
+        "ctypes",
+        "datetime",
+        "dxf_trench_export_label",
+        "dxf_trench_export_value_from_label",
+        "ezdxf_colors",
+        "filedialog",
+        "hex_color_to_rgb",
+        "install_rounded_buttons",
+        "is_virtual_trench_layer",
+        "json",
+        "load_dxf",
+        "load_geotiff",
+        "load_job_feature_dataset",
+        "load_settings",
+        "load_streetsmart_state",
+        "main",
+        "map_export_background_label",
+        "map_export_background_value_from_label",
+        "math",
+        "messagebox",
+        "number_key_to_segment_key",
+        "ordered_virtual_trench_points",
+        "pick_features",
+        "point_chainage",
+        "project_point_onto_virtual_trench",
+        "queue",
+        "quote",
+        "re",
+        "refresh_virtual_trench_layer",
+        "request_maaiveld_from_vllm",
+        "rotate_geotiff_layer",
+        "save_settings",
+        "save_streetsmart_state",
+        "set_geotiff_layer_rotation",
+        "simpledialog",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "template_client_logo_preset_label",
+        "template_client_logo_preset_value_from_label",
+        "threading",
+        "time",
+        "tk",
+        "tkfont",
+        "ttk",
+        "virtual_trench_endpoints",
+        "virtual_trench_points",
+        "virtual_trench_width"
+      ]
+    },
+    "settings": {
+      "classes": {
+        "AppSettings": {
+          "bases": [
+            "builtins.object"
+          ],
+          "members": {
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, map_export_background_source: 'str' = 'pdok', dxf_trench_export_mode: 'str' = 'centerline', include_tiffs_in_dxf_export: 'bool' = False, include_klic_in_map_exports: 'bool' = False, dxf_label_gap: 'float' = 3.5, dxf_centerline_color: 'str' = '#000000', dxf_label_color: 'str' = '#000000', cadastral_template_path: 'str' = '', template_client_logo_preset: 'str' = 'bgm', template_client_logo_path: 'str' = '', template_include_cross_sections: 'bool' = True, template_generate_reverse_cross_section_sheet: 'bool' = False, template_show_profile_direction: 'bool' = True, template_enable_maaiveld_edit_points: 'bool' = True, template_avoid_multileader_collisions: 'bool' = True, template_clip_cross_section_markers_to_profile: 'bool' = True, template_cross_section_marker_diameter: 'float' = 0.02, template_cross_section_diameter_text: 'str' = '', streetsmart_username: 'str' = '', streetsmart_password: 'str' = '', kickthemap_last_email: 'str' = '', kickthemap_saved_accounts: 'list[KickTheMapSavedAccount] | None' = None, kickthemap_object_layer_rules: 'list[KickTheMapObjectLayerRule] | None' = None) -> None"
+            },
+            "cadastral_template_path": {
+              "kind": "str",
+              "value": ""
+            },
+            "dxf_centerline_color": {
+              "kind": "str",
+              "value": "#000000"
+            },
+            "dxf_label_color": {
+              "kind": "str",
+              "value": "#000000"
+            },
+            "dxf_label_gap": {
+              "kind": "float",
+              "value": 3.5
+            },
+            "dxf_trench_export_mode": {
+              "kind": "str",
+              "value": "centerline"
+            },
+            "include_klic_in_map_exports": {
+              "kind": "bool",
+              "value": false
+            },
+            "include_tiffs_in_dxf_export": {
+              "kind": "bool",
+              "value": false
+            },
+            "kickthemap_last_email": {
+              "kind": "str",
+              "value": ""
+            },
+            "kickthemap_material_choices": {
+              "kind": "list",
+              "value": []
+            },
+            "kickthemap_object_layer_rules": {
+              "kind": "NoneType"
+            },
+            "kickthemap_profile_extra_choices": {
+              "kind": "list",
+              "value": []
+            },
+            "kickthemap_saved_accounts": {
+              "kind": "NoneType"
+            },
+            "map_export_background_source": {
+              "kind": "str",
+              "value": "pdok"
+            },
+            "marxact_name_mappings": {
+              "kind": "dict",
+              "value": {}
+            },
+            "streetsmart_password": {
+              "kind": "str",
+              "value": ""
+            },
+            "streetsmart_username": {
+              "kind": "str",
+              "value": ""
+            },
+            "template_auto_fill_bgt_fysiek_voorkomen": {
+              "kind": "bool",
+              "value": true
+            },
+            "template_avoid_multileader_collisions": {
+              "kind": "bool",
+              "value": true
+            },
+            "template_client_logo_path": {
+              "kind": "str",
+              "value": ""
+            },
+            "template_client_logo_preset": {
+              "kind": "str",
+              "value": "bgm"
+            },
+            "template_clip_cross_section_markers_to_profile": {
+              "kind": "bool",
+              "value": true
+            },
+            "template_cross_section_diameter_text": {
+              "kind": "str",
+              "value": ""
+            },
+            "template_cross_section_marker_diameter": {
+              "kind": "float",
+              "value": 0.02
+            },
+            "template_enable_maaiveld_edit_points": {
+              "kind": "bool",
+              "value": true
+            },
+            "template_generate_reverse_cross_section_sheet": {
+              "kind": "bool",
+              "value": false
+            },
+            "template_include_cross_sections": {
+              "kind": "bool",
+              "value": true
+            },
+            "template_show_profile_direction": {
+              "kind": "bool",
+              "value": true
+            }
+          }
+        },
+        "KickTheMapObjectLayerRule": {
+          "bases": [
+            "builtins.object"
+          ],
+          "members": {
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, keywords: 'str', target_layer: 'str', color: 'int' = 256, profile_label: 'str' = '') -> None"
+            },
+            "color": {
+              "kind": "int",
+              "value": 256
+            },
+            "profile_label": {
+              "kind": "str",
+              "value": ""
+            }
+          }
+        },
+        "KickTheMapSavedAccount": {
+          "bases": [
+            "builtins.object"
+          ],
+          "members": {
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, email: 'str', password: 'str' = '') -> None"
+            },
+            "password": {
+              "kind": "str",
+              "value": ""
+            }
+          }
+        }
+      },
+      "constants": {
+        "DEFAULT_CADASTRAL_TEMPLATE_PATH": "",
+        "DEFAULT_DXF_CENTERLINE_COLOR": "#000000",
+        "DEFAULT_DXF_LABEL_COLOR": "#000000",
+        "DEFAULT_DXF_LABEL_GAP": 3.5,
+        "DEFAULT_DXF_TRENCH_EXPORT_MODE": "centerline",
+        "DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS": false,
+        "DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT": false,
+        "DEFAULT_KICKTHEMAP_LAST_EMAIL": "",
+        "DEFAULT_KICKTHEMAP_RULE_COLOR": 256,
+        "DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE": "pdok",
+        "DEFAULT_STREETSMART_PASSWORD": "",
+        "DEFAULT_STREETSMART_USERNAME": "",
+        "DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN": true,
+        "DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS": true,
+        "DEFAULT_TEMPLATE_CLIENT_LOGO_PATH": "",
+        "DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET": "bgm",
+        "DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE": true,
+        "DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT": "",
+        "DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER": 0.02,
+        "DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS": true,
+        "DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET": false,
+        "DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS": true,
+        "DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION": true,
+        "KICKTHEMAP_MATERIAL_CHOICES_KEY": "kickthemap_material_choices",
+        "KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY": "kickthemap_profile_extra_choices",
+        "MARXACT_NAME_MAPPINGS_KEY": "marxact_name_mappings",
+        "MAX_DXF_LABEL_GAP": 100.0,
+        "MAX_KICKTHEMAP_RULE_COLOR": 256,
+        "MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER": 0.2,
+        "MIN_DXF_LABEL_GAP": 0.0,
+        "MIN_KICKTHEMAP_RULE_COLOR": 1,
+        "MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER": 0.005,
+        "TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY": "template_auto_fill_bgt_fysiek_voorkomen"
+      },
+      "functions": {
+        "_bgt_surface_option_value": {
+          "signature": "(value: 'object') -> 'bool'"
+        },
+        "_choice_label": {
+          "signature": "(value: 'str', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
+        },
+        "_choice_value_from_label": {
+          "signature": "(label: 'str', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
+        },
+        "_default_profile_label": {
+          "signature": "(target_layer: 'str', keywords: 'str' = '') -> 'str'"
+        },
+        "_load_settings_without_bgt_surface_option": {
+          "signature": "() -> 'AppSettings'"
+        },
+        "_normalize_bool": {
+          "signature": "(value: 'object', default: 'bool') -> 'bool'"
+        },
+        "_normalize_choice": {
+          "signature": "(value: 'object', options: 'tuple[tuple[str, str], ...]', default: 'str') -> 'str'"
+        },
+        "_normalize_choice_list": {
+          "signature": "(value: 'object') -> 'list[str]'"
+        },
+        "_normalize_email": {
+          "signature": "(value: 'object', default: 'str' = '') -> 'str'"
+        },
+        "_normalize_float": {
+          "signature": "(value: 'object', default: 'float', minimum: 'float', maximum: 'float') -> 'float'"
+        },
+        "_normalize_hex_color": {
+          "signature": "(value: 'object', default: 'str') -> 'str'"
+        },
+        "_normalize_kickthemap_accounts": {
+          "signature": "(value: 'object') -> 'list[KickTheMapSavedAccount]'"
+        },
+        "_normalize_kickthemap_object_layer_rules": {
+          "signature": "(value: 'object') -> 'list[KickTheMapObjectLayerRule]'"
+        },
+        "_normalize_kickthemap_rule_color": {
+          "signature": "(value: 'object', default: 'int' = 256) -> 'int'"
+        },
+        "_normalize_text": {
+          "signature": "(value: 'object', default: 'str' = '') -> 'str'"
+        },
+        "_save_settings_without_bgt_surface_option": {
+          "signature": "(settings: 'AppSettings') -> 'Path'"
+        },
+        "_settings_path": {
+          "signature": "() -> 'Path'"
+        },
+        "asdict": {
+          "signature": "(obj, *, dict_factory=<class 'dict'>)"
+        },
+        "dataclass": {
+          "signature": "(cls=None, /, *, init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)"
+        },
+        "default_kickthemap_object_layer_rules": {
+          "signature": "() -> 'list[KickTheMapObjectLayerRule]'"
+        },
+        "dxf_trench_export_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "dxf_trench_export_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        },
+        "hex_color_to_rgb": {
+          "signature": "(value: 'str') -> 'tuple[int, int, int]'"
+        },
+        "load_settings": {
+          "signature": "() -> 'AppSettings'"
+        },
+        "load_source_or_legacy": {
+          "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
+        },
+        "map_export_background_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "map_export_background_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        },
+        "normalize_kickthemap_material_choices": {
+          "signature": "(value: 'object') -> 'list[str]'"
+        },
+        "normalize_kickthemap_profile_extra_choices": {
+          "signature": "(value: 'object') -> 'list[str]'"
+        },
+        "normalize_marxact_name_mappings": {
+          "signature": "(value: 'object') -> 'dict[str, str]'"
+        },
+        "save_settings": {
+          "signature": "(settings: 'AppSettings') -> 'Path'"
+        },
+        "template_client_logo_preset_label": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "template_client_logo_preset_value_from_label": {
+          "signature": "(label: 'str') -> 'str'"
+        }
+      },
+      "implementation": "legacy-bytecode",
+      "names": [
+        "AppSettings",
+        "DEFAULT_CADASTRAL_TEMPLATE_PATH",
+        "DEFAULT_DXF_CENTERLINE_COLOR",
+        "DEFAULT_DXF_LABEL_COLOR",
+        "DEFAULT_DXF_LABEL_GAP",
+        "DEFAULT_DXF_TRENCH_EXPORT_MODE",
+        "DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS",
+        "DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT",
+        "DEFAULT_KICKTHEMAP_LAST_EMAIL",
+        "DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES",
+        "DEFAULT_KICKTHEMAP_RULE_COLOR",
+        "DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE",
+        "DEFAULT_STREETSMART_PASSWORD",
+        "DEFAULT_STREETSMART_USERNAME",
+        "DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN",
+        "DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS",
+        "DEFAULT_TEMPLATE_CLIENT_LOGO_PATH",
+        "DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET",
+        "DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE",
+        "DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT",
+        "DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER",
+        "DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS",
+        "DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET",
+        "DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS",
+        "DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION",
+        "DXF_TRENCH_EXPORT_OPTIONS",
+        "KICKTHEMAP_MATERIAL_CHOICES_KEY",
+        "KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY",
+        "KickTheMapObjectLayerRule",
+        "KickTheMapSavedAccount",
+        "MAP_EXPORT_BACKGROUND_OPTIONS",
+        "MARXACT_NAME_MAPPINGS_KEY",
+        "MAX_DXF_LABEL_GAP",
+        "MAX_KICKTHEMAP_RULE_COLOR",
+        "MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER",
+        "MIN_DXF_LABEL_GAP",
+        "MIN_KICKTHEMAP_RULE_COLOR",
+        "MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER",
+        "Path",
+        "TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY",
+        "TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS",
+        "_bgt_surface_option_value",
+        "_choice_label",
+        "_choice_value_from_label",
+        "_default_profile_label",
+        "_load_settings_without_bgt_surface_option",
+        "_normalize_bool",
+        "_normalize_choice",
+        "_normalize_choice_list",
+        "_normalize_email",
+        "_normalize_float",
+        "_normalize_hex_color",
+        "_normalize_kickthemap_accounts",
+        "_normalize_kickthemap_object_layer_rules",
+        "_normalize_kickthemap_rule_color",
+        "_normalize_text",
+        "_save_settings_without_bgt_surface_option",
+        "_settings_path",
+        "annotations",
+        "asdict",
+        "dataclass",
+        "default_kickthemap_object_layer_rules",
+        "dxf_trench_export_label",
+        "dxf_trench_export_value_from_label",
+        "hex_color_to_rgb",
+        "json",
+        "load_settings",
+        "load_source_or_legacy",
+        "map_export_background_label",
+        "map_export_background_value_from_label",
+        "normalize_kickthemap_material_choices",
+        "normalize_kickthemap_profile_extra_choices",
+        "normalize_marxact_name_mappings",
+        "os",
+        "save_settings",
+        "template_client_logo_preset_label",
+        "template_client_logo_preset_value_from_label"
+      ]
+    },
+    "streetsmart": {
+      "classes": {},
+      "constants": {
+        "STREETSMART_RD_SRS": "EPSG:28992",
+        "STREETSMART_WEB_URL": "https://streetsmart.cyclomedia.com/streetsmart"
+      },
+      "functions": {
+        "_safe_streetsmart_slug": {
+          "signature": "(value: 'str') -> 'str'"
+        },
+        "clear_streetsmart_storage": {
+          "signature": "(username: 'str' = '') -> 'list[Path]'"
+        },
+        "default_streetsmart_state": {
+          "signature": "() -> 'dict[str, Any]'"
+        },
+        "load_source_or_legacy": {
+          "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
+        },
+        "load_streetsmart_state": {
+          "signature": "() -> 'dict[str, Any]'"
+        },
+        "quote": {
+          "signature": "(string, safe='/', encoding=None, errors=None)"
+        },
+        "save_streetsmart_state": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'Path'"
+        },
+        "streetsmart_browser_sessions_dir": {
+          "signature": "() -> 'Path'"
+        },
+        "streetsmart_browser_storage_dir": {
+          "signature": "(username: 'str') -> 'Path'"
+        },
+        "streetsmart_data_dir": {
+          "signature": "() -> 'Path'"
+        },
+        "streetsmart_embedded_storage_dir": {
+          "signature": "() -> 'Path'"
+        },
+        "streetsmart_login_script": {
+          "signature": "(username: 'str', password: 'str') -> 'str'"
+        },
+        "streetsmart_selection_center": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'tuple[float, float] | None'"
+        },
+        "streetsmart_selection_url": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
+        },
+        "streetsmart_state_path": {
+          "signature": "() -> 'Path'"
+        }
+      },
+      "implementation": "legacy-bytecode",
+      "names": [
+        "Any",
+        "Path",
+        "STREETSMART_RD_SRS",
+        "STREETSMART_WEB_URL",
+        "_safe_streetsmart_slug",
+        "annotations",
+        "clear_streetsmart_storage",
+        "default_streetsmart_state",
+        "json",
+        "load_source_or_legacy",
+        "load_streetsmart_state",
+        "os",
+        "quote",
+        "re",
+        "save_streetsmart_state",
+        "shutil",
+        "streetsmart_browser_sessions_dir",
+        "streetsmart_browser_storage_dir",
+        "streetsmart_data_dir",
+        "streetsmart_embedded_storage_dir",
+        "streetsmart_login_script",
+        "streetsmart_selection_center",
+        "streetsmart_selection_url",
+        "streetsmart_state_path",
+        "time"
+      ]
+    },
+    "streetsmart_browser": {
+      "classes": {},
+      "constants": {
+        "STATE_POLL_INTERVAL_SECONDS": 0.9,
+        "STREETSMART_WEB_URL": "https://streetsmart.cyclomedia.com/streetsmart",
+        "WINDOW_HEIGHT": 980,
+        "WINDOW_MIN_SIZE": [
+          1120,
+          720
+        ],
+        "WINDOW_TITLE": "StreetSmart",
+        "WINDOW_WIDTH": 1560
+      },
+      "functions": {
+        "_browser_go_back": {
+          "signature": "() -> 'None'"
+        },
+        "_browser_go_home": {
+          "signature": "() -> 'None'"
+        },
+        "_browser_go_selection": {
+          "signature": "() -> 'None'"
+        },
+        "_browser_refresh": {
+          "signature": "() -> 'None'"
+        },
+        "_capture_documented_streetsmart_bearer": {
+          "signature": "(window) -> 'bool'"
+        },
+        "_inject_browser_script": {
+          "signature": "(*args, **kwargs)"
+        },
+        "_load_state": {
+          "signature": "() -> 'dict'"
+        },
+        "_original_inject_browser_script": {
+          "signature": "(window: 'webview.Window', username: 'str', password: 'str') -> 'None'"
+        },
+        "_schedule_bearer_capture": {
+          "signature": "(window) -> 'None'"
+        },
+        "_selection_from_state": {
+          "signature": "(state: 'dict | None' = None) -> 'dict | None'"
+        },
+        "_selection_url": {
+          "signature": "(selection: 'dict | None') -> 'str'"
+        },
+        "_state_version": {
+          "signature": "(state: 'dict | None' = None) -> 'int'"
+        },
+        "_storage_path_for_username": {
+          "signature": "(username: 'str') -> 'str'"
+        },
+        "_sync_selection": {
+          "signature": "(window: 'webview.Window', username: 'str', password: 'str') -> 'None'"
+        },
+        "_window_title": {
+          "signature": "(selection: 'dict | None') -> 'str'"
+        },
+        "load_settings": {
+          "signature": "() -> 'AppSettings'"
+        },
+        "load_source_or_legacy": {
+          "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
+        },
+        "load_streetsmart_state": {
+          "signature": "() -> 'dict[str, Any]'"
+        },
+        "main": {
+          "signature": "() -> 'None'"
+        },
+        "save_streetsmart_bearer_token": {
+          "signature": "(token: 'str', permissions: 'Any' = None) -> 'bool'"
+        },
+        "streetsmart_browser_storage_dir": {
+          "signature": "(username: 'str') -> 'Path'"
+        },
+        "streetsmart_login_script": {
+          "signature": "(username: 'str', password: 'str') -> 'str'"
+        },
+        "streetsmart_selection_url": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
+        }
+      },
+      "implementation": "legacy-bytecode",
+      "names": [
+        "Menu",
+        "MenuAction",
+        "MenuSeparator",
+        "STATE_POLL_INTERVAL_SECONDS",
+        "STREETSMART_WEB_URL",
+        "WINDOW_HEIGHT",
+        "WINDOW_MIN_SIZE",
+        "WINDOW_TITLE",
+        "WINDOW_WIDTH",
+        "_browser_go_back",
+        "_browser_go_home",
+        "_browser_go_selection",
+        "_browser_refresh",
+        "_capture_documented_streetsmart_bearer",
+        "_inject_browser_script",
+        "_load_state",
+        "_original_inject_browser_script",
+        "_schedule_bearer_capture",
+        "_selection_from_state",
+        "_selection_url",
+        "_sleufbase_bearer_capture_installed",
+        "_state_version",
+        "_storage_path_for_username",
+        "_sync_selection",
+        "_window_title",
+        "annotations",
+        "load_settings",
+        "load_source_or_legacy",
+        "load_streetsmart_state",
+        "main",
+        "save_streetsmart_bearer_token",
+        "streetsmart_browser_storage_dir",
+        "streetsmart_login_script",
+        "streetsmart_selection_url",
+        "threading",
+        "time",
+        "webview"
+      ]
+    },
+    "streetsmart_panel": {
+      "classes": {
+        "EmbeddedStreetSmartPanel": {
+          "bases": [
+            "builtins.object"
+          ],
+          "members": {
+            "__init__": {
+              "kind": "function",
+              "signature": "(self, host: 'tk.Misc', *, status_callback: 'Callable[[str], None] | None' = None) -> 'None'"
+            },
+            "_host_geometry": {
+              "kind": "function",
+              "signature": "(self) -> 'tuple[int, int, int]'"
+            },
+            "_on_host_configure": {
+              "kind": "function",
+              "signature": "(self, _event=None) -> 'None'"
+            },
+            "_post_status": {
+              "kind": "function",
+              "signature": "(self, message: 'str') -> 'None'"
+            },
+            "_pump_status_queue": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "_queue_command": {
+              "kind": "function",
+              "signature": "(self, name: 'str', payload: 'object') -> 'None'"
+            },
+            "_run_thread": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "destroy": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "focus": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "navigate_selection": {
+              "kind": "function",
+              "signature": "(self, selection: 'dict | None') -> 'None'"
+            },
+            "navigate_url": {
+              "kind": "function",
+              "signature": "(self, url: 'str') -> 'None'"
+            },
+            "reload": {
+              "kind": "function",
+              "signature": "(self) -> 'None'"
+            },
+            "update_credentials": {
+              "kind": "function",
+              "signature": "(self, username: 'str', password: 'str') -> 'None'"
+            }
+          }
+        }
+      },
+      "constants": {
+        "COINIT_APARTMENTTHREADED": 2,
+        "COMMAND_POLL_MS": 80,
+        "GWL_STYLE": -16,
+        "STREETSMART_WEB_URL": "https://streetsmart.cyclomedia.com/streetsmart",
+        "SWP_NOACTIVATE": 16,
+        "SWP_NOZORDER": 4,
+        "WS_CHILD": 1073741824,
+        "WS_VISIBLE": 268435456,
+        "_DLL_DIRECTORY_HANDLES": []
+      },
+      "functions": {
+        "_ensure_webview2_runtime_dirs": {
+          "signature": "(base_dir: 'Path') -> 'None'"
+        },
+        "_webview_lib_dir": {
+          "signature": "() -> 'Path'"
+        },
+        "load_source_or_legacy": {
+          "signature": "(module_stem: 'str', namespace: 'MutableMapping[str, Any]', package_file: 'str') -> 'str'"
+        },
+        "streetsmart_embedded_storage_dir": {
+          "signature": "() -> 'Path'"
+        },
+        "streetsmart_login_script": {
+          "signature": "(username: 'str', password: 'str') -> 'str'"
+        },
+        "streetsmart_selection_url": {
+          "signature": "(selection: 'dict[str, Any] | None') -> 'str'"
+        }
+      },
+      "implementation": "legacy-bytecode",
+      "names": [
+        "COINIT_APARTMENTTHREADED",
+        "COMMAND_POLL_MS",
+        "Callable",
+        "EmbeddedStreetSmartPanel",
+        "GWL_STYLE",
+        "Path",
+        "STREETSMART_WEB_URL",
+        "SWP_NOACTIVATE",
+        "SWP_NOZORDER",
+        "WS_CHILD",
+        "WS_VISIBLE",
+        "_DLL_DIRECTORY_HANDLES",
+        "_ensure_webview2_runtime_dirs",
+        "_webview_lib_dir",
+        "annotations",
+        "ctypes",
+        "load_source_or_legacy",
+        "os",
+        "queue",
+        "streetsmart_embedded_storage_dir",
+        "streetsmart_login_script",
+        "streetsmart_selection_url",
+        "threading",
+        "tk",
+        "webview"
+      ]
+    }
+  },
+  "python": "3.11.16"
+}

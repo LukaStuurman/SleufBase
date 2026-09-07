@@ -1,0 +1,2715 @@
+===== <module> (line 1) =====
+  0           0 RESUME                   0
+
+  1           2 SETUP_ANNOTATIONS
+              4 LOAD_CONST               0 (0)
+              6 LOAD_CONST               1 (('annotations',))
+              8 IMPORT_NAME              0 (__future__)
+             10 IMPORT_FROM              1 (annotations)
+             12 STORE_NAME               1 (annotations)
+             14 POP_TOP
+
+  3          16 LOAD_CONST               0 (0)
+             18 LOAD_CONST               2 (None)
+             20 IMPORT_NAME              2 (ctypes)
+             22 STORE_NAME               2 (ctypes)
+
+  4          24 LOAD_CONST               0 (0)
+             26 LOAD_CONST               2 (None)
+             28 IMPORT_NAME              3 (os)
+             30 STORE_NAME               3 (os)
+
+  5          32 LOAD_CONST               0 (0)
+             34 LOAD_CONST               2 (None)
+             36 IMPORT_NAME              4 (queue)
+             38 STORE_NAME               4 (queue)
+
+  6          40 LOAD_CONST               0 (0)
+             42 LOAD_CONST               2 (None)
+             44 IMPORT_NAME              5 (threading)
+             46 STORE_NAME               5 (threading)
+
+  7          48 LOAD_CONST               0 (0)
+             50 LOAD_CONST               2 (None)
+             52 IMPORT_NAME              6 (tkinter)
+             54 STORE_NAME               7 (tk)
+
+  8          56 LOAD_CONST               0 (0)
+             58 LOAD_CONST               3 (('Path',))
+             60 IMPORT_NAME              8 (pathlib)
+             62 IMPORT_FROM              9 (Path)
+             64 STORE_NAME               9 (Path)
+             66 POP_TOP
+
+  9          68 LOAD_CONST               0 (0)
+             70 LOAD_CONST               4 (('Callable',))
+             72 IMPORT_NAME             10 (typing)
+             74 IMPORT_FROM             11 (Callable)
+             76 STORE_NAME              11 (Callable)
+             78 POP_TOP
+
+ 11          80 LOAD_CONST               0 (0)
+             82 LOAD_CONST               2 (None)
+             84 IMPORT_NAME             12 (webview)
+             86 STORE_NAME              12 (webview)
+
+ 13          88 LOAD_CONST               5 (1)
+             90 LOAD_CONST               6 (('STREETSMART_WEB_URL', 'streetsmart_embedded_storage_dir', 'streetsmart_login_script', 'streetsmart_selection_url'))
+             92 IMPORT_NAME             13 (streetsmart)
+             94 IMPORT_FROM             14 (STREETSMART_WEB_URL)
+             96 STORE_NAME              14 (STREETSMART_WEB_URL)
+             98 IMPORT_FROM             15 (streetsmart_embedded_storage_dir)
+            100 STORE_NAME              15 (streetsmart_embedded_storage_dir)
+            102 IMPORT_FROM             16 (streetsmart_login_script)
+            104 STORE_NAME              16 (streetsmart_login_script)
+            106 IMPORT_FROM             17 (streetsmart_selection_url)
+            108 STORE_NAME              17 (streetsmart_selection_url)
+            110 POP_TOP
+
+ 21         112 LOAD_CONST               7 (2)
+            114 STORE_NAME              18 (COINIT_APARTMENTTHREADED)
+
+ 22         116 LOAD_CONST               8 (-16)
+            118 STORE_NAME              19 (GWL_STYLE)
+
+ 23         120 LOAD_CONST               9 (1073741824)
+            122 STORE_NAME              20 (WS_CHILD)
+
+ 24         124 LOAD_CONST              10 (268435456)
+            126 STORE_NAME              21 (WS_VISIBLE)
+
+ 25         128 LOAD_CONST              11 (4)
+            130 STORE_NAME              22 (SWP_NOZORDER)
+
+ 26         132 LOAD_CONST              12 (16)
+            134 STORE_NAME              23 (SWP_NOACTIVATE)
+
+ 27         136 LOAD_CONST              13 (80)
+            138 STORE_NAME              24 (COMMAND_POLL_MS)
+
+ 29         140 BUILD_LIST               0
+            142 STORE_GLOBAL            25 (_DLL_DIRECTORY_HANDLES)
+            144 LOAD_CONST              14 ('list[object]')
+            146 LOAD_NAME               26 (__annotations__)
+            148 LOAD_CONST              15 ('_DLL_DIRECTORY_HANDLES')
+            150 STORE_SUBSCR
+
+ 32         154 LOAD_CONST              24 (('return', 'Path'))
+            156 LOAD_CONST              18 (<code object _webview_lib_dir at 0x7fee03a085d0, file "app\streetsmart_panel.py", line 32>)
+            158 MAKE_FUNCTION            4 (annotations)
+            160 STORE_NAME              27 (_webview_lib_dir)
+
+ 36         162 LOAD_CONST              25 (('base_dir', 'Path', 'return', 'None'))
+            164 LOAD_CONST              21 (<code object _ensure_webview2_runtime_dirs at 0x7fee03d2e970, file "app\streetsmart_panel.py", line 36>)
+            166 MAKE_FUNCTION            4 (annotations)
+            168 STORE_NAME              28 (_ensure_webview2_runtime_dirs)
+
+ 50         170 PUSH_NULL
+            172 LOAD_BUILD_CLASS
+            174 LOAD_CONST              22 (<code object EmbeddedStreetSmartPanel at 0x7fee03da21f0, file "app\streetsmart_panel.py", line 50>)
+            176 MAKE_FUNCTION            0
+            178 LOAD_CONST              23 ('EmbeddedStreetSmartPanel')
+            180 PRECALL                  2
+            184 CALL                     2
+            194 STORE_NAME              29 (EmbeddedStreetSmartPanel)
+            196 LOAD_CONST               2 (None)
+            198 RETURN_VALUE
+
+===== <module>._webview_lib_dir (line 32) =====
+ 32           0 RESUME                   0
+
+ 33           2 LOAD_GLOBAL              1 (NULL + Path)
+             14 LOAD_GLOBAL              2 (webview)
+             26 LOAD_ATTR                2 (__file__)
+             36 PRECALL                  1
+             40 CALL                     1
+             50 LOAD_METHOD              3 (resolve)
+             72 PRECALL                  0
+             76 CALL                     0
+             86 LOAD_ATTR                4 (parent)
+             96 LOAD_CONST               1 ('lib')
+             98 BINARY_OP               11 (/)
+            102 RETURN_VALUE
+
+===== <module>._ensure_webview2_runtime_dirs (line 36) =====
+ 36           0 RESUME                   0
+
+ 38           2 LOAD_GLOBAL              0 (_DLL_DIRECTORY_HANDLES)
+             14 POP_JUMP_FORWARD_IF_FALSE     2 (to 20)
+
+ 39          16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+ 40     >>   20 LOAD_GLOBAL              3 (NULL + ctypes)
+             32 LOAD_ATTR                2 (sizeof)
+             42 LOAD_GLOBAL              2 (ctypes)
+             54 LOAD_ATTR                3 (c_void_p)
+             64 PRECALL                  1
+             68 CALL                     1
+             78 LOAD_CONST               1 (8)
+             80 COMPARE_OP               2 (==)
+             86 POP_JUMP_FORWARD_IF_FALSE     2 (to 92)
+             88 LOAD_CONST               2 ('win-x64')
+             90 JUMP_FORWARD             1 (to 94)
+        >>   92 LOAD_CONST               3 ('win-x86')
+        >>   94 STORE_FAST               1 (runtime_arch)
+
+ 42          96 LOAD_FAST                0 (base_dir)
+
+ 43          98 LOAD_FAST                0 (base_dir)
+            100 LOAD_CONST               4 ('runtimes')
+            102 BINARY_OP               11 (/)
+            106 LOAD_FAST                1 (runtime_arch)
+            108 BINARY_OP               11 (/)
+            112 LOAD_CONST               5 ('native')
+            114 BINARY_OP               11 (/)
+
+ 41         118 BUILD_LIST               2
+            120 STORE_FAST               2 (candidates)
+
+ 45         122 LOAD_FAST                2 (candidates)
+            124 GET_ITER
+        >>  126 FOR_ITER                79 (to 286)
+            128 STORE_FAST               3 (candidate)
+
+ 46         130 LOAD_FAST                3 (candidate)
+            132 LOAD_METHOD              4 (exists)
+            154 PRECALL                  0
+            158 CALL                     0
+            168 POP_JUMP_FORWARD_IF_FALSE    57 (to 284)
+
+ 47         170 LOAD_GLOBAL              0 (_DLL_DIRECTORY_HANDLES)
+            182 LOAD_METHOD              5 (append)
+            204 LOAD_GLOBAL             13 (NULL + os)
+            216 LOAD_ATTR                7 (add_dll_directory)
+            226 LOAD_GLOBAL             17 (NULL + str)
+            238 LOAD_FAST                3 (candidate)
+            240 PRECALL                  1
+            244 CALL                     1
+            254 PRECALL                  1
+            258 CALL                     1
+            268 PRECALL                  1
+            272 CALL                     1
+            282 POP_TOP
+        >>  284 JUMP_BACKWARD           80 (to 126)
+
+ 45     >>  286 LOAD_CONST               0 (None)
+            288 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel (line 50) =====
+ 50           0 RESUME                   0
+              2 LOAD_NAME                0 (__name__)
+              4 STORE_NAME               1 (__module__)
+              6 LOAD_CONST               0 ('EmbeddedStreetSmartPanel')
+              8 STORE_NAME               2 (__qualname__)
+
+ 55          10 LOAD_CONST               1 (None)
+
+ 51          12 LOAD_CONST               2 (('status_callback',))
+             14 BUILD_CONST_KEY_MAP      1
+             16 LOAD_CONST              33 (('host', 'tk.Misc', 'status_callback', 'Callable[[str], None] | None', 'return', 'None'))
+             18 LOAD_CONST               9 (<code object __init__ at 0x559eadda3c20, file "app\streetsmart_panel.py", line 51>)
+             20 MAKE_FUNCTION            6 (kwdefaults, annotations)
+             22 STORE_NAME               3 (__init__)
+
+ 74          24 LOAD_CONST              34 (('selection', 'dict | None', 'return', 'None'))
+             26 LOAD_CONST              12 (<code object navigate_selection at 0x7fee03a086f0, file "app\streetsmart_panel.py", line 74>)
+             28 MAKE_FUNCTION            4 (annotations)
+             30 STORE_NAME               4 (navigate_selection)
+
+ 77          32 LOAD_CONST              35 (('url', 'str', 'return', 'None'))
+             34 LOAD_CONST              15 (<code object navigate_url at 0x7fee03a08810, file "app\streetsmart_panel.py", line 77>)
+             36 MAKE_FUNCTION            4 (annotations)
+             38 STORE_NAME               5 (navigate_url)
+
+ 80          40 LOAD_CONST              36 (('return', 'None'))
+             42 LOAD_CONST              16 (<code object reload at 0x7fee03dfe2e0, file "app\streetsmart_panel.py", line 80>)
+             44 MAKE_FUNCTION            4 (annotations)
+             46 STORE_NAME               6 (reload)
+
+ 83          48 LOAD_CONST              36 (('return', 'None'))
+             50 LOAD_CONST              17 (<code object focus at 0x7fee03dfe3d0, file "app\streetsmart_panel.py", line 83>)
+             52 MAKE_FUNCTION            4 (annotations)
+             54 STORE_NAME               7 (focus)
+
+ 86          56 LOAD_CONST              37 (('username', 'str', 'password', 'str', 'return', 'None'))
+             58 LOAD_CONST              20 (<code object update_credentials at 0x7fee03db24f0, file "app\streetsmart_panel.py", line 86>)
+             60 MAKE_FUNCTION            4 (annotations)
+             62 STORE_NAME               8 (update_credentials)
+
+ 99          64 LOAD_CONST              36 (('return', 'None'))
+             66 LOAD_CONST              21 (<code object destroy at 0x7fee04c2bcf0, file "app\streetsmart_panel.py", line 99>)
+             68 MAKE_FUNCTION            4 (annotations)
+             70 STORE_NAME               9 (destroy)
+
+108          72 LOAD_CONST              38 (('return', 'tuple[int, int, int]'))
+             74 LOAD_CONST              23 (<code object _host_geometry at 0x559eade00b30, file "app\streetsmart_panel.py", line 108>)
+             76 MAKE_FUNCTION            4 (annotations)
+             78 STORE_NAME              10 (_host_geometry)
+
+116          80 LOAD_CONST              39 (('name', 'str', 'payload', 'object', 'return', 'None'))
+             82 LOAD_CONST              27 (<code object _queue_command at 0x7fee03a08a50, file "app\streetsmart_panel.py", line 116>)
+             84 MAKE_FUNCTION            4 (annotations)
+             86 STORE_NAME              11 (_queue_command)
+
+121          88 LOAD_CONST              40 ((None,))
+             90 LOAD_CONST              36 (('return', 'None'))
+             92 LOAD_CONST              28 (<code object _on_host_configure at 0x7fee03a08b70, file "app\streetsmart_panel.py", line 121>)
+             94 MAKE_FUNCTION            5 (defaults, annotations)
+             96 STORE_NAME              12 (_on_host_configure)
+
+126          98 LOAD_CONST              41 (('message', 'str', 'return', 'None'))
+            100 LOAD_CONST              30 (<code object _post_status at 0x7fee03d2b990, file "app\streetsmart_panel.py", line 126>)
+            102 MAKE_FUNCTION            4 (annotations)
+            104 STORE_NAME              13 (_post_status)
+
+129         106 LOAD_CONST              36 (('return', 'None'))
+            108 LOAD_CONST              31 (<code object _pump_status_queue at 0x7fee03d0b430, file "app\streetsmart_panel.py", line 129>)
+            110 MAKE_FUNCTION            4 (annotations)
+            112 STORE_NAME              14 (_pump_status_queue)
+
+147         114 LOAD_CONST              36 (('return', 'None'))
+            116 LOAD_CONST              32 (<code object _run_thread at 0x559eaddc3620, file "app\streetsmart_panel.py", line 147>)
+            118 MAKE_FUNCTION            4 (annotations)
+            120 STORE_NAME              15 (_run_thread)
+            122 LOAD_CONST               1 (None)
+            124 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.__init__ (line 51) =====
+              0 MAKE_CELL                0 (self)
+
+ 51           2 RESUME                   0
+
+ 57           4 LOAD_FAST                1 (host)
+              6 LOAD_DEREF               0 (self)
+              8 STORE_ATTR               0 (host)
+
+ 58          18 LOAD_FAST                2 (status_callback)
+             20 LOAD_DEREF               0 (self)
+             22 STORE_ATTR               1 (status_callback)
+
+ 59          32 LOAD_GLOBAL              5 (NULL + queue)
+             44 LOAD_ATTR                3 (Queue)
+             54 PRECALL                  0
+             58 CALL                     0
+             68 LOAD_DEREF               0 (self)
+             70 STORE_ATTR               4 (_command_queue)
+
+ 60          80 LOAD_GLOBAL              5 (NULL + queue)
+             92 LOAD_ATTR                3 (Queue)
+            102 PRECALL                  0
+            106 CALL                     0
+            116 LOAD_DEREF               0 (self)
+            118 STORE_ATTR               5 (_status_queue)
+
+ 61         128 LOAD_CONST               1 (False)
+            130 LOAD_DEREF               0 (self)
+            132 STORE_ATTR               6 (_destroyed)
+
+ 62         142 LOAD_GLOBAL             15 (NULL + threading)
+            154 LOAD_ATTR                8 (Event)
+            164 PRECALL                  0
+            168 CALL                     0
+            178 LOAD_DEREF               0 (self)
+            180 STORE_ATTR               9 (_disposed_event)
+
+ 63         190 LOAD_DEREF               0 (self)
+            192 LOAD_METHOD             10 (_host_geometry)
+            214 PRECALL                  0
+            218 CALL                     0
+            228 LOAD_DEREF               0 (self)
+            230 STORE_ATTR              11 (_initial_host_geometry)
+
+ 64         240 LOAD_GLOBAL             15 (NULL + threading)
+            252 LOAD_ATTR               12 (Thread)
+            262 LOAD_DEREF               0 (self)
+            264 LOAD_ATTR               13 (_run_thread)
+            274 LOAD_CONST               2 (True)
+            276 KW_NAMES                 3
+            278 PRECALL                  2
+            282 CALL                     2
+            292 LOAD_DEREF               0 (self)
+            294 STORE_ATTR              14 (_thread)
+
+ 65         304 LOAD_DEREF               0 (self)
+            306 LOAD_ATTR               14 (_thread)
+            316 LOAD_METHOD             15 (start)
+            338 PRECALL                  0
+            342 CALL                     0
+            352 POP_TOP
+
+ 66         354 LOAD_DEREF               0 (self)
+            356 LOAD_ATTR                0 (host)
+            366 LOAD_METHOD             16 (bind)
+            388 LOAD_CONST               4 ('<Configure>')
+            390 LOAD_DEREF               0 (self)
+            392 LOAD_ATTR               17 (_on_host_configure)
+            402 LOAD_CONST               5 ('+')
+            404 KW_NAMES                 6
+            406 PRECALL                  3
+            410 CALL                     3
+            420 POP_TOP
+
+ 67         422 LOAD_DEREF               0 (self)
+            424 LOAD_ATTR                0 (host)
+            434 LOAD_METHOD             16 (bind)
+            456 LOAD_CONST               7 ('<ButtonPress-1>')
+            458 LOAD_CLOSURE             0 (self)
+            460 BUILD_TUPLE              1
+            462 LOAD_CONST               8 (<code object <lambda> at 0x7fee03d674b0, file "app\streetsmart_panel.py", line 67>)
+            464 MAKE_FUNCTION            8 (closure)
+            466 LOAD_CONST               5 ('+')
+            468 KW_NAMES                 6
+            470 PRECALL                  3
+            474 CALL                     3
+            484 POP_TOP
+
+ 68         486 LOAD_DEREF               0 (self)
+            488 LOAD_ATTR                0 (host)
+            498 LOAD_METHOD             16 (bind)
+            520 LOAD_CONST               9 ('<FocusIn>')
+            522 LOAD_CLOSURE             0 (self)
+            524 BUILD_TUPLE              1
+            526 LOAD_CONST              10 (<code object <lambda> at 0x7fee03dfe1f0, file "app\streetsmart_panel.py", line 68>)
+            528 MAKE_FUNCTION            8 (closure)
+            530 LOAD_CONST               5 ('+')
+            532 KW_NAMES                 6
+            534 PRECALL                  3
+            538 CALL                     3
+            548 POP_TOP
+
+ 69         550 LOAD_DEREF               0 (self)
+            552 LOAD_ATTR                0 (host)
+            562 LOAD_METHOD             16 (bind)
+            584 LOAD_CONST              11 ('<Destroy>')
+            586 LOAD_CLOSURE             0 (self)
+            588 BUILD_TUPLE              1
+            590 LOAD_CONST              12 (<code object <lambda> at 0x7fee03dfdf20, file "app\streetsmart_panel.py", line 69>)
+            592 MAKE_FUNCTION            8 (closure)
+            594 LOAD_CONST               5 ('+')
+            596 KW_NAMES                 6
+            598 PRECALL                  3
+            602 CALL                     3
+            612 POP_TOP
+
+ 70         614 LOAD_DEREF               0 (self)
+            616 LOAD_ATTR                0 (host)
+            626 LOAD_METHOD             18 (after)
+            648 LOAD_CONST              13 (120)
+            650 LOAD_DEREF               0 (self)
+            652 LOAD_ATTR               19 (_pump_status_queue)
+            662 PRECALL                  2
+            666 CALL                     2
+            676 POP_TOP
+
+ 71         678 LOAD_DEREF               0 (self)
+            680 LOAD_METHOD             20 (_queue_command)
+            702 LOAD_CONST              14 ('attach')
+            704 LOAD_DEREF               0 (self)
+            706 LOAD_ATTR               11 (_initial_host_geometry)
+            716 PRECALL                  2
+            720 CALL                     2
+            730 POP_TOP
+
+ 72         732 LOAD_DEREF               0 (self)
+            734 LOAD_METHOD             20 (_queue_command)
+            756 LOAD_CONST              15 ('navigate')
+            758 LOAD_GLOBAL             42 (STREETSMART_WEB_URL)
+            770 PRECALL                  2
+            774 CALL                     2
+            784 POP_TOP
+            786 LOAD_CONST               0 (None)
+            788 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.__init__.EmbeddedStreetSmartPanel.__init__.<locals>.<lambda> (line 67) =====
+              0 COPY_FREE_VARS           1
+
+ 67           2 RESUME                   0
+              4 LOAD_DEREF               1 (self)
+              6 LOAD_METHOD              0 (focus)
+             28 PRECALL                  0
+             32 CALL                     0
+             42 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.__init__.EmbeddedStreetSmartPanel.__init__.<locals>.<lambda> (line 68) =====
+              0 COPY_FREE_VARS           1
+
+ 68           2 RESUME                   0
+              4 LOAD_DEREF               1 (self)
+              6 LOAD_METHOD              0 (focus)
+             28 PRECALL                  0
+             32 CALL                     0
+             42 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.__init__.EmbeddedStreetSmartPanel.__init__.<locals>.<lambda> (line 69) =====
+              0 COPY_FREE_VARS           1
+
+ 69           2 RESUME                   0
+              4 LOAD_DEREF               1 (self)
+              6 LOAD_METHOD              0 (destroy)
+             28 PRECALL                  0
+             32 CALL                     0
+             42 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.navigate_selection (line 74) =====
+ 74           0 RESUME                   0
+
+ 75           2 LOAD_FAST                0 (self)
+              4 LOAD_METHOD              0 (_queue_command)
+             26 LOAD_CONST               1 ('selection')
+             28 LOAD_GLOBAL              3 (NULL + isinstance)
+             40 LOAD_FAST                1 (selection)
+             42 LOAD_GLOBAL              4 (dict)
+             54 PRECALL                  2
+             58 CALL                     2
+             68 POP_JUMP_FORWARD_IF_FALSE     2 (to 74)
+             70 LOAD_FAST                1 (selection)
+             72 JUMP_FORWARD             1 (to 76)
+        >>   74 LOAD_CONST               0 (None)
+        >>   76 PRECALL                  2
+             80 CALL                     2
+             90 POP_TOP
+             92 LOAD_CONST               0 (None)
+             94 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.navigate_url (line 77) =====
+ 77           0 RESUME                   0
+
+ 78           2 LOAD_FAST                0 (self)
+              4 LOAD_METHOD              0 (_queue_command)
+             26 LOAD_CONST               1 ('navigate')
+             28 LOAD_GLOBAL              3 (NULL + str)
+             40 LOAD_FAST                1 (url)
+             42 JUMP_IF_TRUE_OR_POP      6 (to 56)
+             44 LOAD_GLOBAL              4 (STREETSMART_WEB_URL)
+        >>   56 PRECALL                  1
+             60 CALL                     1
+             70 PRECALL                  2
+             74 CALL                     2
+             84 POP_TOP
+             86 LOAD_CONST               0 (None)
+             88 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.reload (line 80) =====
+ 80           0 RESUME                   0
+
+ 81           2 LOAD_FAST                0 (self)
+              4 LOAD_METHOD              0 (_queue_command)
+             26 LOAD_CONST               1 ('reload')
+             28 LOAD_CONST               0 (None)
+             30 PRECALL                  2
+             34 CALL                     2
+             44 POP_TOP
+             46 LOAD_CONST               0 (None)
+             48 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.focus (line 83) =====
+ 83           0 RESUME                   0
+
+ 84           2 LOAD_FAST                0 (self)
+              4 LOAD_METHOD              0 (_queue_command)
+             26 LOAD_CONST               1 ('focus')
+             28 LOAD_CONST               0 (None)
+             30 PRECALL                  2
+             34 CALL                     2
+             44 POP_TOP
+             46 LOAD_CONST               0 (None)
+             48 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.update_credentials (line 86) =====
+ 86           0 RESUME                   0
+
+ 91           2 LOAD_FAST                0 (self)
+              4 LOAD_METHOD              0 (_queue_command)
+
+ 92          26 LOAD_CONST               1 ('credentials')
+
+ 94          28 LOAD_GLOBAL              3 (NULL + str)
+             40 LOAD_FAST                1 (username)
+             42 JUMP_IF_TRUE_OR_POP      1 (to 46)
+             44 LOAD_CONST               2 ('')
+        >>   46 PRECALL                  1
+             50 CALL                     1
+             60 LOAD_METHOD              2 (strip)
+             82 PRECALL                  0
+             86 CALL                     0
+
+ 95          96 LOAD_GLOBAL              3 (NULL + str)
+            108 LOAD_FAST                2 (password)
+            110 JUMP_IF_TRUE_OR_POP      1 (to 114)
+            112 LOAD_CONST               2 ('')
+        >>  114 PRECALL                  1
+            118 CALL                     1
+
+ 93         128 BUILD_TUPLE              2
+
+ 91         130 PRECALL                  2
+            134 CALL                     2
+            144 POP_TOP
+            146 LOAD_CONST               0 (None)
+            148 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel.destroy (line 99) =====
+ 99           0 RESUME                   0
+
+100           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (_destroyed)
+             14 POP_JUMP_FORWARD_IF_FALSE     2 (to 20)
+
+101          16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+102     >>   20 LOAD_CONST               1 (True)
+             22 LOAD_FAST                0 (self)
+             24 STORE_ATTR               0 (_destroyed)
+
+103          34 LOAD_FAST                0 (self)
+             36 LOAD_METHOD              1 (_queue_command)
+             58 LOAD_CONST               2 ('dispose')
+             60 LOAD_CONST               0 (None)
+             62 PRECALL                  2
+             66 CALL                     2
+             76 POP_TOP
+
+104          78 LOAD_FAST                0 (self)
+             80 LOAD_ATTR                2 (_disposed_event)
+             90 LOAD_METHOD              3 (wait)
+            112 LOAD_CONST               3 (4.5)
+            114 KW_NAMES                 4
+            116 PRECALL                  1
+            120 CALL                     1
+            130 POP_TOP
+
+105         132 LOAD_FAST                0 (self)
+            134 LOAD_ATTR                4 (_thread)
+            144 LOAD_METHOD              5 (is_alive)
+            166 PRECALL                  0
+            170 CALL                     0
+            180 POP_JUMP_FORWARD_IF_FALSE    29 (to 240)
+
+106         182 LOAD_FAST                0 (self)
+            184 LOAD_ATTR                4 (_thread)
+            194 LOAD_METHOD              6 (join)
+            216 LOAD_CONST               5 (3.5)
+            218 KW_NAMES                 4
+            220 PRECALL                  1
+            224 CALL                     1
+            234 POP_TOP
+            236 LOAD_CONST               0 (None)
+            238 RETURN_VALUE
+
+105     >>  240 LOAD_CONST               0 (None)
+            242 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._host_geometry (line 108) =====
+108           0 RESUME                   0
+
+109           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (host)
+             14 LOAD_METHOD              1 (update_idletasks)
+             36 PRECALL                  0
+             40 CALL                     0
+             50 POP_TOP
+
+111          52 LOAD_GLOBAL              5 (NULL + int)
+             64 LOAD_FAST                0 (self)
+             66 LOAD_ATTR                0 (host)
+             76 LOAD_METHOD              3 (winfo_id)
+             98 PRECALL                  0
+            102 CALL                     0
+            112 PRECALL                  1
+            116 CALL                     1
+
+112         126 LOAD_GLOBAL              9 (NULL + max)
+            138 LOAD_GLOBAL              5 (NULL + int)
+            150 LOAD_FAST                0 (self)
+            152 LOAD_ATTR                0 (host)
+            162 LOAD_METHOD              5 (winfo_width)
+            184 PRECALL                  0
+            188 CALL                     0
+            198 PRECALL                  1
+            202 CALL                     1
+            212 LOAD_CONST               1 (32)
+            214 PRECALL                  2
+            218 CALL                     2
+
+113         228 LOAD_GLOBAL              9 (NULL + max)
+            240 LOAD_GLOBAL              5 (NULL + int)
+            252 LOAD_FAST                0 (self)
+            254 LOAD_ATTR                0 (host)
+            264 LOAD_METHOD              6 (winfo_height)
+            286 PRECALL                  0
+            290 CALL                     0
+            300 PRECALL                  1
+            304 CALL                     1
+            314 LOAD_CONST               1 (32)
+            316 PRECALL                  2
+            320 CALL                     2
+
+110         330 BUILD_TUPLE              3
+            332 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._queue_command (line 116) =====
+116           0 RESUME                   0
+
+117           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (_destroyed)
+             14 POP_JUMP_FORWARD_IF_FALSE     8 (to 32)
+             16 LOAD_FAST                1 (name)
+             18 LOAD_CONST               1 ('dispose')
+             20 COMPARE_OP               3 (!=)
+             26 POP_JUMP_FORWARD_IF_FALSE     2 (to 32)
+
+118          28 LOAD_CONST               0 (None)
+             30 RETURN_VALUE
+
+119     >>   32 LOAD_FAST                0 (self)
+             34 LOAD_ATTR                1 (_command_queue)
+             44 LOAD_METHOD              2 (put)
+             66 LOAD_FAST                1 (name)
+             68 LOAD_FAST                2 (payload)
+             70 BUILD_TUPLE              2
+             72 PRECALL                  1
+             76 CALL                     1
+             86 POP_TOP
+             88 LOAD_CONST               0 (None)
+             90 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._on_host_configure (line 121) =====
+121           0 RESUME                   0
+
+122           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (_destroyed)
+             14 POP_JUMP_FORWARD_IF_FALSE     2 (to 20)
+
+123          16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+124     >>   20 LOAD_FAST                0 (self)
+             22 LOAD_METHOD              1 (_queue_command)
+             44 LOAD_CONST               1 ('attach')
+             46 LOAD_FAST                0 (self)
+             48 LOAD_METHOD              2 (_host_geometry)
+             70 PRECALL                  0
+             74 CALL                     0
+             84 PRECALL                  2
+             88 CALL                     2
+             98 POP_TOP
+            100 LOAD_CONST               0 (None)
+            102 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._post_status (line 126) =====
+126           0 RESUME                   0
+
+127           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (_status_queue)
+             14 LOAD_METHOD              1 (put)
+             36 LOAD_GLOBAL              5 (NULL + str)
+             48 LOAD_FAST                1 (message)
+             50 PRECALL                  1
+             54 CALL                     1
+             64 PRECALL                  1
+             68 CALL                     1
+             78 POP_TOP
+             80 LOAD_CONST               0 (None)
+             82 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._pump_status_queue (line 129) =====
+129           0 RESUME                   0
+
+130           2 LOAD_FAST                0 (self)
+              4 LOAD_ATTR                0 (_destroyed)
+             14 POP_JUMP_FORWARD_IF_FALSE     2 (to 20)
+
+131          16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+132     >>   20 LOAD_FAST                0 (self)
+             22 LOAD_ATTR                1 (status_callback)
+             32 POP_JUMP_FORWARD_IF_NONE    89 (to 212)
+
+133     >>   34 NOP
+
+134     >>   36 NOP
+
+135          38 LOAD_FAST                0 (self)
+             40 LOAD_ATTR                2 (_status_queue)
+             50 LOAD_METHOD              3 (get_nowait)
+             72 PRECALL                  0
+             76 CALL                     0
+             86 STORE_FAST               1 (message)
+             88 JUMP_FORWARD            21 (to 132)
+        >>   90 PUSH_EXC_INFO
+
+136          92 LOAD_GLOBAL              8 (queue)
+            104 LOAD_ATTR                5 (Empty)
+            114 CHECK_EXC_MATCH
+            116 POP_JUMP_FORWARD_IF_FALSE     3 (to 124)
+            118 POP_TOP
+
+137         120 POP_EXCEPT
+            122 JUMP_FORWARD            44 (to 212)
+
+136     >>  124 RERAISE                  0
+        >>  126 COPY                     3
+            128 POP_EXCEPT
+            130 RERAISE                  1
+
+138     >>  132 NOP
+
+139         134 LOAD_FAST                0 (self)
+            136 LOAD_METHOD              1 (status_callback)
+            158 LOAD_FAST                1 (message)
+            160 PRECALL                  1
+            164 CALL                     1
+            174 POP_TOP
+            176 JUMP_FORWARD            16 (to 210)
+        >>  178 PUSH_EXC_INFO
+
+140         180 LOAD_GLOBAL             12 (Exception)
+            192 CHECK_EXC_MATCH
+            194 POP_JUMP_FORWARD_IF_FALSE     3 (to 202)
+            196 POP_TOP
+
+141         198 POP_EXCEPT
+            200 JUMP_BACKWARD           84 (to 34)
+
+140     >>  202 RERAISE                  0
+        >>  204 COPY                     3
+            206 POP_EXCEPT
+            208 RERAISE                  1
+
+133     >>  210 JUMP_BACKWARD           88 (to 36)
+
+142     >>  212 NOP
+
+143         214 LOAD_FAST                0 (self)
+            216 LOAD_ATTR                7 (host)
+            226 LOAD_METHOD              8 (after)
+            248 LOAD_CONST               2 (120)
+            250 LOAD_FAST                0 (self)
+            252 LOAD_ATTR                9 (_pump_status_queue)
+            262 PRECALL                  2
+            266 CALL                     2
+            276 POP_TOP
+            278 LOAD_CONST               0 (None)
+            280 RETURN_VALUE
+        >>  282 PUSH_EXC_INFO
+
+144         284 LOAD_GLOBAL             20 (tk)
+            296 LOAD_ATTR               11 (TclError)
+            306 CHECK_EXC_MATCH
+            308 POP_JUMP_FORWARD_IF_FALSE     4 (to 318)
+            310 POP_TOP
+
+145         312 POP_EXCEPT
+            314 LOAD_CONST               0 (None)
+            316 RETURN_VALUE
+
+144     >>  318 RERAISE                  0
+        >>  320 COPY                     3
+            322 POP_EXCEPT
+            324 RERAISE                  1
+ExceptionTable:
+  38 to 86 -> 90 [0]
+  90 to 118 -> 126 [1] lasti
+  124 to 124 -> 126 [1] lasti
+  134 to 174 -> 178 [0]
+  178 to 196 -> 204 [1] lasti
+  202 to 202 -> 204 [1] lasti
+  214 to 276 -> 282 [0]
+  282 to 310 -> 320 [1] lasti
+  318 to 318 -> 320 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread (line 147) =====
+              0 MAKE_CELL                0 (self)
+              2 MAKE_CELL               14 (Application)
+              4 MAKE_CELL               15 (CoreWebView2MoveFocusReason)
+              6 MAKE_CELL               16 (Rectangle)
+              8 MAKE_CELL               17 (Uri)
+             10 MAKE_CELL               18 (active_parent_hwnd)
+             12 MAKE_CELL               19 (apply_host_geometry)
+             14 MAKE_CELL               20 (browser)
+             16 MAKE_CELL               21 (browser_controller)
+             18 MAKE_CELL               22 (controller_field)
+             20 MAKE_CELL               23 (current_password)
+             22 MAKE_CELL               24 (current_selection)
+             24 MAKE_CELL               25 (current_url)
+             26 MAKE_CELL               26 (current_username)
+             28 MAKE_CELL               27 (focus_browser)
+             30 MAKE_CELL               28 (focus_in_progress)
+             32 MAKE_CELL               29 (form)
+             34 MAKE_CELL               30 (kernel32)
+             36 MAKE_CELL               31 (navigate_to_selection)
+             38 MAKE_CELL               32 (on_core_ready)
+             40 MAKE_CELL               33 (on_navigation_completed)
+             42 MAKE_CELL               34 (poll_timer)
+             44 MAKE_CELL               35 (set_keyboard_focus)
+             46 MAKE_CELL               36 (sync_controller_bounds)
+             48 MAKE_CELL               37 (try_login_script)
+             50 MAKE_CELL               38 (user32)
+
+147          52 RESUME                   0
+
+148          54 LOAD_GLOBAL              0 (ctypes)
+             66 LOAD_ATTR                1 (windll)
+             76 LOAD_ATTR                2 (ole32)
+             86 STORE_FAST               1 (ole32)
+
+149          88 LOAD_GLOBAL              0 (ctypes)
+            100 LOAD_ATTR                1 (windll)
+            110 LOAD_ATTR                3 (kernel32)
+            120 STORE_DEREF             30 (kernel32)
+
+150         122 LOAD_GLOBAL              0 (ctypes)
+            134 LOAD_ATTR                1 (windll)
+            144 LOAD_ATTR                4 (user32)
+            154 STORE_DEREF             38 (user32)
+
+151         156 LOAD_FAST                1 (ole32)
+            158 LOAD_METHOD              5 (CoInitializeEx)
+            180 LOAD_CONST               0 (None)
+            182 LOAD_GLOBAL             12 (COINIT_APARTMENTTHREADED)
+            194 PRECALL                  2
+            198 CALL                     2
+            208 POP_TOP
+
+152         210 NOP
+
+153         212 LOAD_GLOBAL             15 (NULL + _webview_lib_dir)
+            224 PRECALL                  0
+            228 CALL                     0
+            238 STORE_FAST               2 (base_dir)
+
+154         240 LOAD_GLOBAL             17 (NULL + _ensure_webview2_runtime_dirs)
+            252 LOAD_FAST                2 (base_dir)
+            254 PRECALL                  1
+            258 CALL                     1
+            268 POP_TOP
+
+156         270 LOAD_CONST               1 (0)
+            272 LOAD_CONST               0 (None)
+            274 IMPORT_NAME              9 (clr)
+            276 STORE_FAST               3 (clr)
+
+158         278 LOAD_FAST                3 (clr)
+            280 LOAD_METHOD             10 (AddReference)
+            302 LOAD_GLOBAL             23 (NULL + str)
+            314 LOAD_FAST                2 (base_dir)
+            316 LOAD_CONST               2 ('Microsoft.Web.WebView2.Core.dll')
+            318 BINARY_OP               11 (/)
+            322 PRECALL                  1
+            326 CALL                     1
+            336 PRECALL                  1
+            340 CALL                     1
+            350 POP_TOP
+
+159         352 LOAD_FAST                3 (clr)
+            354 LOAD_METHOD             10 (AddReference)
+            376 LOAD_GLOBAL             23 (NULL + str)
+            388 LOAD_FAST                2 (base_dir)
+            390 LOAD_CONST               3 ('Microsoft.Web.WebView2.WinForms.dll')
+            392 BINARY_OP               11 (/)
+            396 PRECALL                  1
+            400 CALL                     1
+            410 PRECALL                  1
+            414 CALL                     1
+            424 POP_TOP
+
+160         426 LOAD_FAST                3 (clr)
+            428 LOAD_METHOD             10 (AddReference)
+            450 LOAD_CONST               4 ('System')
+            452 PRECALL                  1
+            456 CALL                     1
+            466 POP_TOP
+
+161         468 LOAD_FAST                3 (clr)
+            470 LOAD_METHOD             10 (AddReference)
+            492 LOAD_CONST               5 ('System.Drawing')
+            494 PRECALL                  1
+            498 CALL                     1
+            508 POP_TOP
+
+162         510 LOAD_FAST                3 (clr)
+            512 LOAD_METHOD             10 (AddReference)
+            534 LOAD_CONST               6 ('System.Reflection')
+            536 PRECALL                  1
+            540 CALL                     1
+            550 POP_TOP
+
+163         552 LOAD_FAST                3 (clr)
+            554 LOAD_METHOD             10 (AddReference)
+            576 LOAD_CONST               7 ('System.Windows.Forms')
+            578 PRECALL                  1
+            582 CALL                     1
+            592 POP_TOP
+
+165         594 LOAD_CONST               1 (0)
+            596 LOAD_CONST               8 (('Uri',))
+            598 IMPORT_NAME             12 (System)
+            600 IMPORT_FROM             13 (Uri)
+            602 STORE_DEREF             17 (Uri)
+            604 POP_TOP
+
+166         606 LOAD_CONST               1 (0)
+            608 LOAD_CONST               9 (('Rectangle',))
+            610 IMPORT_NAME             14 (System.Drawing)
+            612 IMPORT_FROM             15 (Rectangle)
+            614 STORE_DEREF             16 (Rectangle)
+            616 POP_TOP
+
+167         618 LOAD_CONST               1 (0)
+            620 LOAD_CONST              10 (('BindingFlags',))
+            622 IMPORT_NAME             16 (System.Reflection)
+            624 IMPORT_FROM             17 (BindingFlags)
+            626 STORE_FAST               4 (BindingFlags)
+            628 POP_TOP
+
+168         630 LOAD_CONST               1 (0)
+            632 LOAD_CONST              11 (('Application', 'DockStyle', 'Form', 'FormBorderStyle', 'Timer'))
+            634 IMPORT_NAME             18 (System.Windows.Forms)
+            636 IMPORT_FROM             19 (Application)
+            638 STORE_DEREF             14 (Application)
+            640 IMPORT_FROM             20 (DockStyle)
+            642 STORE_FAST               5 (DockStyle)
+            644 IMPORT_FROM             21 (Form)
+            646 STORE_FAST               6 (Form)
+            648 IMPORT_FROM             22 (FormBorderStyle)
+            650 STORE_FAST               7 (FormBorderStyle)
+            652 IMPORT_FROM             23 (Timer)
+            654 STORE_FAST               8 (Timer)
+            656 POP_TOP
+
+169         658 LOAD_CONST               1 (0)
+            660 LOAD_CONST              12 (('CoreWebView2MoveFocusReason',))
+            662 IMPORT_NAME             24 (Microsoft.Web.WebView2.Core)
+            664 IMPORT_FROM             25 (CoreWebView2MoveFocusReason)
+            666 STORE_DEREF             15 (CoreWebView2MoveFocusReason)
+            668 POP_TOP
+
+170         670 LOAD_CONST               1 (0)
+            672 LOAD_CONST              13 (('CoreWebView2CreationProperties', 'WebView2'))
+            674 IMPORT_NAME             26 (Microsoft.Web.WebView2.WinForms)
+            676 IMPORT_FROM             27 (CoreWebView2CreationProperties)
+            678 STORE_FAST               9 (CoreWebView2CreationProperties)
+            680 IMPORT_FROM             28 (WebView2)
+            682 STORE_FAST              10 (WebView2)
+            684 POP_TOP
+
+172         686 PUSH_NULL
+            688 LOAD_FAST                6 (Form)
+            690 PRECALL                  0
+            694 CALL                     0
+            704 STORE_DEREF             29 (form)
+
+173         706 LOAD_CONST              14 ('StreetSmart')
+            708 LOAD_DEREF              29 (form)
+            710 STORE_ATTR              29 (Text)
+
+174         720 LOAD_CONST              15 (False)
+            722 LOAD_DEREF              29 (form)
+            724 STORE_ATTR              30 (TopLevel)
+
+175         734 LOAD_GLOBAL             63 (NULL + getattr)
+            746 LOAD_FAST                7 (FormBorderStyle)
+            748 LOAD_CONST              16 ('None')
+            750 PRECALL                  2
+            754 CALL                     2
+            764 LOAD_DEREF              29 (form)
+            766 STORE_ATTR              22 (FormBorderStyle)
+
+176         776 LOAD_CONST              15 (False)
+            778 LOAD_DEREF              29 (form)
+            780 STORE_ATTR              32 (ShowInTaskbar)
+
+178         790 PUSH_NULL
+            792 LOAD_FAST               10 (WebView2)
+            794 PRECALL                  0
+            798 CALL                     0
+            808 STORE_DEREF             20 (browser)
+
+179         810 LOAD_FAST                5 (DockStyle)
+            812 LOAD_ATTR               33 (Fill)
+            822 LOAD_DEREF              20 (browser)
+            824 STORE_ATTR              34 (Dock)
+
+180         834 LOAD_CONST              17 (True)
+            836 LOAD_DEREF              20 (browser)
+            838 STORE_ATTR              35 (TabStop)
+
+181         848 PUSH_NULL
+            850 LOAD_FAST                9 (CoreWebView2CreationProperties)
+            852 PRECALL                  0
+            856 CALL                     0
+            866 STORE_FAST              11 (creation_properties)
+
+182         868 LOAD_GLOBAL             23 (NULL + str)
+            880 LOAD_GLOBAL             73 (NULL + streetsmart_embedded_storage_dir)
+            892 PRECALL                  0
+            896 CALL                     0
+            906 LOAD_METHOD             37 (resolve)
+            928 PRECALL                  0
+            932 CALL                     0
+            942 PRECALL                  1
+            946 CALL                     1
+            956 LOAD_FAST               11 (creation_properties)
+            958 STORE_ATTR              38 (UserDataFolder)
+
+183         968 LOAD_FAST               11 (creation_properties)
+            970 LOAD_DEREF              20 (browser)
+            972 STORE_ATTR              39 (CreationProperties)
+
+184         982 LOAD_DEREF              29 (form)
+            984 LOAD_ATTR               40 (Controls)
+            994 LOAD_METHOD             41 (Add)
+           1016 LOAD_DEREF              20 (browser)
+           1018 PRECALL                  1
+           1022 CALL                     1
+           1032 POP_TOP
+
+186        1034 LOAD_DEREF              20 (browser)
+           1036 LOAD_METHOD             42 (GetType)
+           1058 PRECALL                  0
+           1062 CALL                     0
+           1072 LOAD_METHOD             43 (GetField)
+
+187        1094 LOAD_CONST              18 ('_coreWebView2Controller')
+
+188        1096 LOAD_FAST                4 (BindingFlags)
+           1098 LOAD_ATTR               44 (Instance)
+           1108 LOAD_FAST                4 (BindingFlags)
+           1110 LOAD_ATTR               45 (NonPublic)
+           1120 BINARY_OP                7 (|)
+
+186        1124 PRECALL                  2
+           1128 CALL                     2
+           1138 STORE_DEREF             22 (controller_field)
+
+191        1140 LOAD_GLOBAL             92 (STREETSMART_WEB_URL)
+           1152 STORE_DEREF             25 (current_url)
+
+192        1154 LOAD_CONST              19 ('')
+           1156 STORE_DEREF             26 (current_username)
+
+193        1158 LOAD_CONST              19 ('')
+           1160 STORE_DEREF             23 (current_password)
+
+194        1162 LOAD_CONST               0 (None)
+           1164 STORE_DEREF             24 (current_selection)
+
+195        1166 LOAD_CONST               1 (0)
+           1168 STORE_DEREF             18 (active_parent_hwnd)
+
+196        1170 LOAD_CONST              15 (False)
+           1172 STORE_DEREF             28 (focus_in_progress)
+
+198        1174 LOAD_CLOSURE            20 (browser)
+           1176 LOAD_CLOSURE            22 (controller_field)
+           1178 BUILD_TUPLE              2
+           1180 LOAD_CONST              20 (<code object browser_controller at 0x7fee03a08c90, file "app\streetsmart_panel.py", line 198>)
+           1182 MAKE_FUNCTION            8 (closure)
+           1184 STORE_DEREF             21 (browser_controller)
+
+206        1186 LOAD_CONST              42 (('target_hwnd', 'int', 'return', 'None'))
+           1188 LOAD_CLOSURE            30 (kernel32)
+           1190 LOAD_CLOSURE            38 (user32)
+           1192 BUILD_TUPLE              2
+           1194 LOAD_CONST              24 (<code object set_keyboard_focus at 0x559eade03c40, file "app\streetsmart_panel.py", line 206>)
+           1196 MAKE_FUNCTION           12 (annotations, closure)
+           1198 STORE_DEREF             35 (set_keyboard_focus)
+
+229        1200 LOAD_CONST              43 (('width', 'int', 'height', 'int', 'return', 'None'))
+           1202 LOAD_CLOSURE            16 (Rectangle)
+           1204 LOAD_CLOSURE            21 (browser_controller)
+           1206 BUILD_TUPLE              2
+           1208 LOAD_CONST              27 (<code object sync_controller_bounds at 0x7fee03d2eb50, file "app\streetsmart_panel.py", line 229>)
+           1210 MAKE_FUNCTION           12 (annotations, closure)
+           1212 STORE_DEREF             36 (sync_controller_bounds)
+
+242        1214 LOAD_CONST              44 (('host_geometry', 'tuple[int, int, int]', 'return', 'None'))
+           1216 LOAD_CLOSURE            16 (Rectangle)
+           1218 LOAD_CLOSURE            18 (active_parent_hwnd)
+           1220 LOAD_CLOSURE            29 (form)
+           1222 LOAD_CLOSURE            36 (sync_controller_bounds)
+           1224 LOAD_CLOSURE            38 (user32)
+           1226 BUILD_TUPLE              5
+           1228 LOAD_CONST              30 (<code object apply_host_geometry at 0x559eaddfe470, file "app\streetsmart_panel.py", line 242>)
+           1230 MAKE_FUNCTION           12 (annotations, closure)
+           1232 STORE_DEREF             19 (apply_host_geometry)
+
+268        1234 LOAD_CONST              45 (('return', 'None'))
+           1236 LOAD_CLOSURE            15 (CoreWebView2MoveFocusReason)
+           1238 LOAD_CLOSURE            20 (browser)
+           1240 LOAD_CLOSURE            21 (browser_controller)
+           1242 LOAD_CLOSURE            28 (focus_in_progress)
+           1244 LOAD_CLOSURE            29 (form)
+           1246 LOAD_CLOSURE            35 (set_keyboard_focus)
+           1248 BUILD_TUPLE              6
+           1250 LOAD_CONST              31 (<code object focus_browser at 0x559eadde4bf0, file "app\streetsmart_panel.py", line 268>)
+           1252 MAKE_FUNCTION           12 (annotations, closure)
+           1254 STORE_DEREF             27 (focus_browser)
+
+297        1256 LOAD_CONST              45 (('return', 'None'))
+           1258 LOAD_CLOSURE            20 (browser)
+           1260 LOAD_CLOSURE            23 (current_password)
+           1262 LOAD_CLOSURE            26 (current_username)
+           1264 BUILD_TUPLE              3
+           1266 LOAD_CONST              32 (<code object try_login_script at 0x7fee03da2470, file "app\streetsmart_panel.py", line 297>)
+           1268 MAKE_FUNCTION           12 (annotations, closure)
+           1270 STORE_DEREF             37 (try_login_script)
+
+305        1272 LOAD_CONST              46 (('selection', 'dict | None', 'return', 'None'))
+           1274 LOAD_CLOSURE            17 (Uri)
+           1276 LOAD_CLOSURE            20 (browser)
+           1278 LOAD_CLOSURE            24 (current_selection)
+           1280 LOAD_CLOSURE            25 (current_url)
+           1282 LOAD_CLOSURE             0 (self)
+           1284 BUILD_TUPLE              5
+           1286 LOAD_CONST              35 (<code object navigate_to_selection at 0x7fee039e4db0, file "app\streetsmart_panel.py", line 305>)
+           1288 MAKE_FUNCTION           12 (annotations, closure)
+           1290 STORE_DEREF             31 (navigate_to_selection)
+
+318        1292 LOAD_CONST              47 ((None, None))
+           1294 LOAD_CONST              45 (('return', 'None'))
+           1296 LOAD_CLOSURE            14 (Application)
+           1298 LOAD_CLOSURE            17 (Uri)
+           1300 LOAD_CLOSURE            19 (apply_host_geometry)
+           1302 LOAD_CLOSURE            20 (browser)
+           1304 LOAD_CLOSURE            23 (current_password)
+           1306 LOAD_CLOSURE            25 (current_url)
+           1308 LOAD_CLOSURE            26 (current_username)
+           1310 LOAD_CLOSURE            27 (focus_browser)
+           1312 LOAD_CLOSURE            29 (form)
+           1314 LOAD_CLOSURE            31 (navigate_to_selection)
+           1316 LOAD_CLOSURE            32 (on_core_ready)
+           1318 LOAD_CLOSURE            33 (on_navigation_completed)
+           1320 LOAD_CLOSURE            34 (poll_timer)
+           1322 LOAD_CLOSURE             0 (self)
+           1324 LOAD_CLOSURE            37 (try_login_script)
+           1326 BUILD_TUPLE             15
+           1328 LOAD_CONST              36 (<code object process_command_queue at 0x559eaddc2980, file "app\streetsmart_panel.py", line 318>)
+           1330 MAKE_FUNCTION           13 (defaults, annotations, closure)
+           1332 STORE_FAST              12 (process_command_queue)
+
+386        1334 LOAD_CONST              47 ((None, None))
+           1336 LOAD_CONST              45 (('return', 'None'))
+           1338 LOAD_CLOSURE            19 (apply_host_geometry)
+           1340 LOAD_CLOSURE            27 (focus_browser)
+           1342 LOAD_CLOSURE             0 (self)
+           1344 LOAD_CLOSURE            37 (try_login_script)
+           1346 BUILD_TUPLE              4
+           1348 LOAD_CONST              37 (<code object on_core_ready at 0x7fee03db2b80, file "app\streetsmart_panel.py", line 386>)
+           1350 MAKE_FUNCTION           13 (defaults, annotations, closure)
+           1352 STORE_DEREF             32 (on_core_ready)
+
+393        1354 LOAD_CONST              47 ((None, None))
+           1356 LOAD_CONST              45 (('return', 'None'))
+           1358 LOAD_CLOSURE            27 (focus_browser)
+           1360 LOAD_CLOSURE             0 (self)
+           1362 LOAD_CLOSURE            37 (try_login_script)
+           1364 BUILD_TUPLE              3
+           1366 LOAD_CONST              38 (<code object on_navigation_completed at 0x7fee03a08db0, file "app\streetsmart_panel.py", line 393>)
+           1368 MAKE_FUNCTION           13 (defaults, annotations, closure)
+           1370 STORE_DEREF             33 (on_navigation_completed)
+
+398        1372 LOAD_DEREF              20 (browser)
+           1374 COPY                     1
+           1376 LOAD_ATTR               47 (CoreWebView2InitializationCompleted)
+           1386 LOAD_DEREF              32 (on_core_ready)
+           1388 BINARY_OP               13 (+=)
+           1392 SWAP                     2
+           1394 STORE_ATTR              47 (CoreWebView2InitializationCompleted)
+
+399        1404 LOAD_DEREF              20 (browser)
+           1406 COPY                     1
+           1408 LOAD_ATTR               48 (NavigationCompleted)
+           1418 LOAD_DEREF              33 (on_navigation_completed)
+           1420 BINARY_OP               13 (+=)
+           1424 SWAP                     2
+           1426 STORE_ATTR              48 (NavigationCompleted)
+
+400        1436 LOAD_DEREF              20 (browser)
+           1438 COPY                     1
+           1440 LOAD_ATTR               49 (MouseDown)
+           1450 LOAD_CLOSURE            27 (focus_browser)
+           1452 BUILD_TUPLE              1
+           1454 LOAD_CONST              39 (<code object <lambda> at 0x7fee039da8d0, file "app\streetsmart_panel.py", line 400>)
+           1456 MAKE_FUNCTION            8 (closure)
+           1458 BINARY_OP               13 (+=)
+           1462 SWAP                     2
+           1464 STORE_ATTR              49 (MouseDown)
+
+402        1474 PUSH_NULL
+           1476 LOAD_FAST                8 (Timer)
+           1478 PRECALL                  0
+           1482 CALL                     0
+           1492 STORE_DEREF             34 (poll_timer)
+
+403        1494 LOAD_GLOBAL            100 (COMMAND_POLL_MS)
+           1506 LOAD_DEREF              34 (poll_timer)
+           1508 STORE_ATTR              51 (Interval)
+
+404        1518 LOAD_DEREF              34 (poll_timer)
+           1520 COPY                     1
+           1522 LOAD_ATTR               52 (Tick)
+           1532 LOAD_FAST               12 (process_command_queue)
+           1534 BINARY_OP               13 (+=)
+           1538 SWAP                     2
+           1540 STORE_ATTR              52 (Tick)
+
+406        1550 PUSH_NULL
+           1552 LOAD_DEREF              19 (apply_host_geometry)
+           1554 LOAD_DEREF               0 (self)
+           1556 LOAD_ATTR               53 (_initial_host_geometry)
+           1566 PRECALL                  1
+           1570 CALL                     1
+           1580 POP_TOP
+
+407        1582 LOAD_DEREF              29 (form)
+           1584 LOAD_METHOD             54 (Show)
+           1606 PRECALL                  0
+           1610 CALL                     0
+           1620 POP_TOP
+
+408        1622 LOAD_DEREF              34 (poll_timer)
+           1624 LOAD_METHOD             55 (Start)
+           1646 PRECALL                  0
+           1650 CALL                     0
+           1660 POP_TOP
+
+409        1662 PUSH_NULL
+           1664 LOAD_FAST               12 (process_command_queue)
+           1666 PRECALL                  0
+           1670 CALL                     0
+           1680 POP_TOP
+
+410        1682 LOAD_DEREF               0 (self)
+           1684 LOAD_METHOD             56 (_post_status)
+           1706 LOAD_CONST              40 ('StreetSmart laden...')
+           1708 PRECALL                  1
+           1712 CALL                     1
+           1722 POP_TOP
+
+411        1724 LOAD_DEREF              14 (Application)
+           1726 LOAD_METHOD             57 (Run)
+           1748 LOAD_DEREF              29 (form)
+           1750 PRECALL                  1
+           1754 CALL                     1
+           1764 POP_TOP
+           1766 JUMP_FORWARD            47 (to 1862)
+        >> 1768 PUSH_EXC_INFO
+
+412        1770 LOAD_GLOBAL            116 (Exception)
+           1782 CHECK_EXC_MATCH
+           1784 POP_JUMP_FORWARD_IF_FALSE    34 (to 1854)
+           1786 STORE_FAST              13 (exc)
+
+413        1788 LOAD_DEREF               0 (self)
+           1790 LOAD_METHOD             56 (_post_status)
+           1812 LOAD_CONST              41 ('StreetSmart paneel niet beschikbaar: ')
+           1814 LOAD_FAST               13 (exc)
+           1816 FORMAT_VALUE             0
+           1818 BUILD_STRING             2
+           1820 PRECALL                  1
+           1824 CALL                     1
+           1834 POP_TOP
+           1836 POP_EXCEPT
+           1838 LOAD_CONST               0 (None)
+           1840 STORE_FAST              13 (exc)
+           1842 DELETE_FAST             13 (exc)
+           1844 JUMP_FORWARD             8 (to 1862)
+        >> 1846 LOAD_CONST               0 (None)
+           1848 STORE_FAST              13 (exc)
+           1850 DELETE_FAST             13 (exc)
+           1852 RERAISE                  1
+
+412     >> 1854 RERAISE                  0
+        >> 1856 COPY                     3
+           1858 POP_EXCEPT
+           1860 RERAISE                  1
+
+415     >> 1862 LOAD_DEREF               0 (self)
+           1864 LOAD_ATTR               59 (_disposed_event)
+           1874 LOAD_METHOD             60 (set)
+           1896 PRECALL                  0
+           1900 CALL                     0
+           1910 POP_TOP
+
+416        1912 NOP
+
+417        1914 LOAD_FAST                1 (ole32)
+           1916 LOAD_METHOD             61 (CoUninitialize)
+           1938 PRECALL                  0
+           1942 CALL                     0
+           1952 POP_TOP
+           1954 LOAD_CONST               0 (None)
+           1956 RETURN_VALUE
+        >> 1958 PUSH_EXC_INFO
+
+418        1960 LOAD_GLOBAL            116 (Exception)
+           1972 CHECK_EXC_MATCH
+           1974 POP_JUMP_FORWARD_IF_FALSE     4 (to 1984)
+           1976 POP_TOP
+
+419        1978 POP_EXCEPT
+           1980 LOAD_CONST               0 (None)
+           1982 RETURN_VALUE
+
+418     >> 1984 RERAISE                  0
+        >> 1986 COPY                     3
+           1988 POP_EXCEPT
+           1990 RERAISE                  1
+        >> 1992 PUSH_EXC_INFO
+
+415        1994 LOAD_DEREF               0 (self)
+           1996 LOAD_ATTR               59 (_disposed_event)
+           2006 LOAD_METHOD             60 (set)
+           2028 PRECALL                  0
+           2032 CALL                     0
+           2042 POP_TOP
+
+416        2044 NOP
+
+417        2046 LOAD_FAST                1 (ole32)
+           2048 LOAD_METHOD             61 (CoUninitialize)
+           2070 PRECALL                  0
+           2074 CALL                     0
+           2084 POP_TOP
+           2086 RERAISE                  0
+        >> 2088 PUSH_EXC_INFO
+
+418        2090 LOAD_GLOBAL            116 (Exception)
+           2102 CHECK_EXC_MATCH
+           2104 POP_JUMP_FORWARD_IF_FALSE     3 (to 2112)
+           2106 POP_TOP
+
+419        2108 POP_EXCEPT
+           2110 RERAISE                  0
+
+418     >> 2112 RERAISE                  0
+        >> 2114 COPY                     3
+           2116 POP_EXCEPT
+           2118 RERAISE                  1
+        >> 2120 COPY                     3
+           2122 POP_EXCEPT
+           2124 RERAISE                  1
+ExceptionTable:
+  212 to 1764 -> 1768 [0]
+  1766 to 1766 -> 1992 [0]
+  1768 to 1786 -> 1856 [1] lasti
+  1788 to 1834 -> 1846 [1] lasti
+  1836 to 1844 -> 1992 [0]
+  1846 to 1854 -> 1856 [1] lasti
+  1856 to 1860 -> 1992 [0]
+  1914 to 1952 -> 1958 [0]
+  1958 to 1976 -> 1986 [1] lasti
+  1984 to 1984 -> 1986 [1] lasti
+  1992 to 2042 -> 2120 [1] lasti
+  2046 to 2084 -> 2088 [2]
+  2086 to 2086 -> 2120 [1] lasti
+  2088 to 2106 -> 2114 [3] lasti
+  2108 to 2110 -> 2120 [1] lasti
+  2112 to 2112 -> 2114 [3] lasti
+  2114 to 2118 -> 2120 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.browser_controller (line 198) =====
+              0 COPY_FREE_VARS           2
+
+198           2 RESUME                   0
+
+199           4 LOAD_DEREF               1 (controller_field)
+              6 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 12)
+
+200           8 LOAD_CONST               0 (None)
+             10 RETURN_VALUE
+
+201     >>   12 NOP
+
+202          14 LOAD_DEREF               1 (controller_field)
+             16 LOAD_METHOD              0 (GetValue)
+             38 LOAD_DEREF               0 (browser)
+             40 PRECALL                  1
+             44 CALL                     1
+             54 RETURN_VALUE
+        >>   56 PUSH_EXC_INFO
+
+203          58 LOAD_GLOBAL              2 (Exception)
+             70 CHECK_EXC_MATCH
+             72 POP_JUMP_FORWARD_IF_FALSE     4 (to 82)
+             74 POP_TOP
+
+204          76 POP_EXCEPT
+             78 LOAD_CONST               0 (None)
+             80 RETURN_VALUE
+
+203     >>   82 RERAISE                  0
+        >>   84 COPY                     3
+             86 POP_EXCEPT
+             88 RERAISE                  1
+ExceptionTable:
+  14 to 52 -> 56 [0]
+  56 to 74 -> 84 [1] lasti
+  82 to 82 -> 84 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.set_keyboard_focus (line 206) =====
+              0 COPY_FREE_VARS           2
+
+206           2 RESUME                   0
+
+207           4 LOAD_FAST                0 (target_hwnd)
+              6 LOAD_CONST               1 (0)
+              8 COMPARE_OP               1 (<=)
+             14 POP_JUMP_FORWARD_IF_FALSE     2 (to 20)
+
+208          16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+209     >>   20 LOAD_DEREF               5 (kernel32)
+             22 LOAD_METHOD              0 (GetCurrentThreadId)
+             44 PRECALL                  0
+             48 CALL                     0
+             58 STORE_FAST               1 (current_thread_id)
+
+210          60 LOAD_DEREF               6 (user32)
+             62 LOAD_METHOD              1 (GetForegroundWindow)
+             84 PRECALL                  0
+             88 CALL                     0
+             98 STORE_FAST               2 (foreground_hwnd)
+
+211         100 LOAD_CONST               1 (0)
+            102 STORE_FAST               3 (attached_thread_id)
+
+212         104 LOAD_FAST                2 (foreground_hwnd)
+            106 POP_JUMP_FORWARD_IF_FALSE    75 (to 258)
+
+213         108 LOAD_DEREF               6 (user32)
+            110 LOAD_METHOD              2 (GetWindowThreadProcessId)
+            132 LOAD_FAST                2 (foreground_hwnd)
+            134 LOAD_CONST               0 (None)
+            136 PRECALL                  2
+            140 CALL                     2
+            150 STORE_FAST               4 (foreground_thread_id)
+
+214         152 LOAD_FAST                4 (foreground_thread_id)
+            154 POP_JUMP_FORWARD_IF_FALSE    51 (to 258)
+            156 LOAD_FAST                4 (foreground_thread_id)
+            158 LOAD_FAST                1 (current_thread_id)
+            160 COMPARE_OP               3 (!=)
+            166 POP_JUMP_FORWARD_IF_FALSE    45 (to 258)
+
+215         168 NOP
+
+216         170 LOAD_DEREF               6 (user32)
+            172 LOAD_METHOD              3 (AttachThreadInput)
+            194 LOAD_FAST                4 (foreground_thread_id)
+            196 LOAD_FAST                1 (current_thread_id)
+            198 LOAD_CONST               2 (True)
+            200 PRECALL                  3
+            204 CALL                     3
+            214 POP_JUMP_FORWARD_IF_FALSE     2 (to 220)
+
+217         216 LOAD_FAST                4 (foreground_thread_id)
+            218 STORE_FAST               3 (attached_thread_id)
+        >>  220 JUMP_FORWARD            18 (to 258)
+        >>  222 PUSH_EXC_INFO
+
+218         224 LOAD_GLOBAL              8 (Exception)
+            236 CHECK_EXC_MATCH
+            238 POP_JUMP_FORWARD_IF_FALSE     5 (to 250)
+            240 POP_TOP
+
+219         242 LOAD_CONST               1 (0)
+            244 STORE_FAST               3 (attached_thread_id)
+            246 POP_EXCEPT
+            248 JUMP_FORWARD             4 (to 258)
+
+218     >>  250 RERAISE                  0
+        >>  252 COPY                     3
+            254 POP_EXCEPT
+            256 RERAISE                  1
+
+220     >>  258 NOP
+
+221         260 LOAD_DEREF               6 (user32)
+            262 LOAD_METHOD              5 (SetFocus)
+            284 LOAD_FAST                0 (target_hwnd)
+            286 PRECALL                  1
+            290 CALL                     1
+            300 POP_TOP
+
+223         302 LOAD_FAST                3 (attached_thread_id)
+            304 POP_JUMP_FORWARD_IF_FALSE    43 (to 392)
+
+224         306 NOP
+
+225         308 LOAD_DEREF               6 (user32)
+            310 LOAD_METHOD              3 (AttachThreadInput)
+            332 LOAD_FAST                3 (attached_thread_id)
+            334 LOAD_FAST                1 (current_thread_id)
+            336 LOAD_CONST               3 (False)
+            338 PRECALL                  3
+            342 CALL                     3
+            352 POP_TOP
+            354 LOAD_CONST               0 (None)
+            356 RETURN_VALUE
+        >>  358 PUSH_EXC_INFO
+
+226         360 LOAD_GLOBAL              8 (Exception)
+            372 CHECK_EXC_MATCH
+            374 POP_JUMP_FORWARD_IF_FALSE     4 (to 384)
+            376 POP_TOP
+
+227         378 POP_EXCEPT
+            380 LOAD_CONST               0 (None)
+            382 RETURN_VALUE
+
+226     >>  384 RERAISE                  0
+        >>  386 COPY                     3
+            388 POP_EXCEPT
+            390 RERAISE                  1
+
+223     >>  392 LOAD_CONST               0 (None)
+            394 RETURN_VALUE
+        >>  396 PUSH_EXC_INFO
+            398 LOAD_FAST                3 (attached_thread_id)
+            400 POP_JUMP_FORWARD_IF_FALSE    41 (to 484)
+
+224         402 NOP
+
+225         404 LOAD_DEREF               6 (user32)
+            406 LOAD_METHOD              3 (AttachThreadInput)
+            428 LOAD_FAST                3 (attached_thread_id)
+            430 LOAD_FAST                1 (current_thread_id)
+            432 LOAD_CONST               3 (False)
+            434 PRECALL                  3
+            438 CALL                     3
+            448 POP_TOP
+            450 RERAISE                  0
+        >>  452 PUSH_EXC_INFO
+
+226         454 LOAD_GLOBAL              8 (Exception)
+            466 CHECK_EXC_MATCH
+            468 POP_JUMP_FORWARD_IF_FALSE     3 (to 476)
+            470 POP_TOP
+
+227         472 POP_EXCEPT
+            474 RERAISE                  0
+
+226     >>  476 RERAISE                  0
+        >>  478 COPY                     3
+            480 POP_EXCEPT
+            482 RERAISE                  1
+
+223     >>  484 RERAISE                  0
+        >>  486 COPY                     3
+            488 POP_EXCEPT
+            490 RERAISE                  1
+ExceptionTable:
+  170 to 218 -> 222 [0]
+  222 to 244 -> 252 [1] lasti
+  250 to 250 -> 252 [1] lasti
+  260 to 300 -> 396 [0]
+  308 to 352 -> 358 [0]
+  358 to 376 -> 386 [1] lasti
+  384 to 384 -> 386 [1] lasti
+  396 to 400 -> 486 [1] lasti
+  404 to 448 -> 452 [2]
+  450 to 450 -> 486 [1] lasti
+  452 to 470 -> 478 [3] lasti
+  472 to 474 -> 486 [1] lasti
+  476 to 476 -> 478 [3] lasti
+  478 to 484 -> 486 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.sync_controller_bounds (line 229) =====
+              0 COPY_FREE_VARS           2
+
+229           2 RESUME                   0
+
+230           4 PUSH_NULL
+              6 LOAD_DEREF               4 (browser_controller)
+              8 PRECALL                  0
+             12 CALL                     0
+             22 STORE_FAST               2 (controller)
+
+231          24 LOAD_FAST                2 (controller)
+             26 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 32)
+
+232          28 LOAD_CONST               0 (None)
+             30 RETURN_VALUE
+
+233     >>   32 NOP
+
+234          34 PUSH_NULL
+             36 LOAD_DEREF               3 (Rectangle)
+             38 LOAD_CONST               1 (0)
+             40 LOAD_CONST               1 (0)
+             42 LOAD_GLOBAL              1 (NULL + max)
+             54 LOAD_GLOBAL              3 (NULL + int)
+             66 LOAD_FAST                0 (width)
+             68 PRECALL                  1
+             72 CALL                     1
+             82 LOAD_CONST               2 (32)
+             84 PRECALL                  2
+             88 CALL                     2
+             98 LOAD_GLOBAL              1 (NULL + max)
+            110 LOAD_GLOBAL              3 (NULL + int)
+            122 LOAD_FAST                1 (height)
+            124 PRECALL                  1
+            128 CALL                     1
+            138 LOAD_CONST               2 (32)
+            140 PRECALL                  2
+            144 CALL                     2
+            154 PRECALL                  4
+            158 CALL                     4
+            168 LOAD_FAST                2 (controller)
+            170 STORE_ATTR               2 (Bounds)
+            180 JUMP_FORWARD            16 (to 214)
+        >>  182 PUSH_EXC_INFO
+
+235         184 LOAD_GLOBAL              6 (Exception)
+            196 CHECK_EXC_MATCH
+            198 POP_JUMP_FORWARD_IF_FALSE     3 (to 206)
+            200 POP_TOP
+
+236         202 POP_EXCEPT
+            204 JUMP_FORWARD             4 (to 214)
+
+235     >>  206 RERAISE                  0
+        >>  208 COPY                     3
+            210 POP_EXCEPT
+            212 RERAISE                  1
+
+237     >>  214 NOP
+
+238         216 LOAD_FAST                2 (controller)
+            218 LOAD_METHOD              4 (NotifyParentWindowPositionChanged)
+            240 PRECALL                  0
+            244 CALL                     0
+            254 POP_TOP
+            256 LOAD_CONST               0 (None)
+            258 RETURN_VALUE
+        >>  260 PUSH_EXC_INFO
+
+239         262 LOAD_GLOBAL              6 (Exception)
+            274 CHECK_EXC_MATCH
+            276 POP_JUMP_FORWARD_IF_FALSE     4 (to 286)
+            278 POP_TOP
+
+240         280 POP_EXCEPT
+            282 LOAD_CONST               0 (None)
+            284 RETURN_VALUE
+
+239     >>  286 RERAISE                  0
+        >>  288 COPY                     3
+            290 POP_EXCEPT
+            292 RERAISE                  1
+ExceptionTable:
+  34 to 178 -> 182 [0]
+  182 to 200 -> 208 [1] lasti
+  206 to 206 -> 208 [1] lasti
+  216 to 254 -> 260 [0]
+  260 to 278 -> 288 [1] lasti
+  286 to 286 -> 288 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.apply_host_geometry (line 242) =====
+              0 COPY_FREE_VARS           5
+
+242           2 RESUME                   0
+
+244           4 LOAD_FAST                0 (host_geometry)
+              6 UNPACK_SEQUENCE          3
+             10 STORE_FAST               1 (parent_hwnd)
+             12 STORE_FAST               2 (width)
+             14 STORE_FAST               3 (height)
+
+245          16 LOAD_FAST                1 (parent_hwnd)
+             18 LOAD_CONST               1 (0)
+             20 COMPARE_OP               1 (<=)
+             26 POP_JUMP_FORWARD_IF_FALSE     2 (to 32)
+
+246          28 LOAD_CONST               0 (None)
+             30 RETURN_VALUE
+
+247     >>   32 LOAD_DEREF               8 (form)
+             34 LOAD_ATTR                0 (Handle)
+             44 LOAD_METHOD              1 (ToInt64)
+             66 PRECALL                  0
+             70 CALL                     0
+             80 STORE_FAST               4 (hwnd)
+
+248          82 LOAD_DEREF               7 (active_parent_hwnd)
+             84 LOAD_FAST                1 (parent_hwnd)
+             86 COMPARE_OP               3 (!=)
+             92 POP_JUMP_FORWARD_IF_FALSE    95 (to 284)
+
+249          94 LOAD_DEREF              10 (user32)
+             96 LOAD_METHOD              2 (SetParent)
+            118 LOAD_FAST                4 (hwnd)
+            120 LOAD_FAST                1 (parent_hwnd)
+            122 PRECALL                  2
+            126 CALL                     2
+            136 POP_TOP
+
+250         138 LOAD_DEREF              10 (user32)
+            140 LOAD_METHOD              3 (GetWindowLongW)
+            162 LOAD_FAST                4 (hwnd)
+            164 LOAD_GLOBAL              8 (GWL_STYLE)
+            176 PRECALL                  2
+            180 CALL                     2
+            190 STORE_FAST               5 (style)
+
+251         192 LOAD_DEREF              10 (user32)
+            194 LOAD_METHOD              5 (SetWindowLongW)
+            216 LOAD_FAST                4 (hwnd)
+            218 LOAD_GLOBAL              8 (GWL_STYLE)
+            230 LOAD_FAST                5 (style)
+            232 LOAD_GLOBAL             12 (WS_CHILD)
+            244 BINARY_OP                7 (|)
+            248 LOAD_GLOBAL             14 (WS_VISIBLE)
+            260 BINARY_OP                7 (|)
+            264 PRECALL                  3
+            268 CALL                     3
+            278 POP_TOP
+
+252         280 LOAD_FAST                1 (parent_hwnd)
+            282 STORE_DEREF              7 (active_parent_hwnd)
+
+253     >>  284 LOAD_DEREF              10 (user32)
+            286 LOAD_METHOD              8 (SetWindowPos)
+
+254         308 LOAD_FAST                4 (hwnd)
+
+255         310 LOAD_CONST               1 (0)
+
+256         312 LOAD_CONST               1 (0)
+
+257         314 LOAD_CONST               1 (0)
+
+258         316 LOAD_GLOBAL             19 (NULL + max)
+            328 LOAD_GLOBAL             21 (NULL + int)
+            340 LOAD_FAST                2 (width)
+            342 PRECALL                  1
+            346 CALL                     1
+            356 LOAD_CONST               2 (32)
+            358 PRECALL                  2
+            362 CALL                     2
+
+259         372 LOAD_GLOBAL             19 (NULL + max)
+            384 LOAD_GLOBAL             21 (NULL + int)
+            396 LOAD_FAST                3 (height)
+            398 PRECALL                  1
+            402 CALL                     1
+            412 LOAD_CONST               2 (32)
+            414 PRECALL                  2
+            418 CALL                     2
+
+260         428 LOAD_GLOBAL             22 (SWP_NOZORDER)
+            440 LOAD_GLOBAL             24 (SWP_NOACTIVATE)
+            452 BINARY_OP                7 (|)
+
+253         456 PRECALL                  7
+            460 CALL                     7
+            470 POP_TOP
+
+262         472 NOP
+
+263         474 PUSH_NULL
+            476 LOAD_DEREF               6 (Rectangle)
+            478 LOAD_CONST               1 (0)
+            480 LOAD_CONST               1 (0)
+            482 LOAD_GLOBAL             19 (NULL + max)
+            494 LOAD_GLOBAL             21 (NULL + int)
+            506 LOAD_FAST                2 (width)
+            508 PRECALL                  1
+            512 CALL                     1
+            522 LOAD_CONST               2 (32)
+            524 PRECALL                  2
+            528 CALL                     2
+            538 LOAD_GLOBAL             19 (NULL + max)
+            550 LOAD_GLOBAL             21 (NULL + int)
+            562 LOAD_FAST                3 (height)
+            564 PRECALL                  1
+            568 CALL                     1
+            578 LOAD_CONST               2 (32)
+            580 PRECALL                  2
+            584 CALL                     2
+            594 PRECALL                  4
+            598 CALL                     4
+            608 LOAD_DEREF               8 (form)
+            610 STORE_ATTR              13 (Bounds)
+            620 JUMP_FORWARD            16 (to 654)
+        >>  622 PUSH_EXC_INFO
+
+264         624 LOAD_GLOBAL             28 (Exception)
+            636 CHECK_EXC_MATCH
+            638 POP_JUMP_FORWARD_IF_FALSE     3 (to 646)
+            640 POP_TOP
+
+265         642 POP_EXCEPT
+            644 JUMP_FORWARD             4 (to 654)
+
+264     >>  646 RERAISE                  0
+        >>  648 COPY                     3
+            650 POP_EXCEPT
+            652 RERAISE                  1
+
+266     >>  654 PUSH_NULL
+            656 LOAD_DEREF               9 (sync_controller_bounds)
+            658 LOAD_FAST                2 (width)
+            660 LOAD_FAST                3 (height)
+            662 PRECALL                  2
+            666 CALL                     2
+            676 POP_TOP
+            678 LOAD_CONST               0 (None)
+            680 RETURN_VALUE
+ExceptionTable:
+  474 to 618 -> 622 [0]
+  622 to 640 -> 648 [1] lasti
+  646 to 646 -> 648 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.focus_browser (line 268) =====
+              0 COPY_FREE_VARS           6
+
+268           2 RESUME                   0
+
+270           4 LOAD_DEREF               5 (focus_in_progress)
+              6 POP_JUMP_FORWARD_IF_FALSE     2 (to 12)
+
+271           8 LOAD_CONST               0 (None)
+             10 RETURN_VALUE
+
+272     >>   12 LOAD_CONST               1 (True)
+             14 STORE_DEREF              5 (focus_in_progress)
+
+273          16 NOP
+
+274          18 NOP
+
+275          20 LOAD_DEREF               6 (form)
+             22 LOAD_METHOD              0 (Focus)
+             44 PRECALL                  0
+             48 CALL                     0
+             58 POP_TOP
+             60 JUMP_FORWARD            16 (to 94)
+        >>   62 PUSH_EXC_INFO
+
+276          64 LOAD_GLOBAL              2 (Exception)
+             76 CHECK_EXC_MATCH
+             78 POP_JUMP_FORWARD_IF_FALSE     3 (to 86)
+             80 POP_TOP
+
+277          82 POP_EXCEPT
+             84 JUMP_FORWARD             4 (to 94)
+
+276     >>   86 RERAISE                  0
+        >>   88 COPY                     3
+             90 POP_EXCEPT
+             92 RERAISE                  1
+
+278     >>   94 NOP
+
+279          96 LOAD_DEREF               3 (browser)
+             98 LOAD_METHOD              0 (Focus)
+            120 PRECALL                  0
+            124 CALL                     0
+            134 POP_TOP
+            136 JUMP_FORWARD            16 (to 170)
+        >>  138 PUSH_EXC_INFO
+
+280         140 LOAD_GLOBAL              2 (Exception)
+            152 CHECK_EXC_MATCH
+            154 POP_JUMP_FORWARD_IF_FALSE     3 (to 162)
+            156 POP_TOP
+
+281         158 POP_EXCEPT
+            160 JUMP_FORWARD             4 (to 170)
+
+280     >>  162 RERAISE                  0
+        >>  164 COPY                     3
+            166 POP_EXCEPT
+            168 RERAISE                  1
+
+282     >>  170 NOP
+
+283         172 PUSH_NULL
+            174 LOAD_DEREF               4 (browser_controller)
+            176 PRECALL                  0
+            180 CALL                     0
+            190 STORE_FAST               0 (controller)
+
+284         192 LOAD_FAST                0 (controller)
+            194 POP_JUMP_FORWARD_IF_NONE    26 (to 248)
+
+285         196 LOAD_FAST                0 (controller)
+            198 LOAD_METHOD              2 (MoveFocus)
+            220 LOAD_DEREF               2 (CoreWebView2MoveFocusReason)
+            222 LOAD_ATTR                3 (Programmatic)
+            232 PRECALL                  1
+            236 CALL                     1
+            246 POP_TOP
+        >>  248 JUMP_FORWARD            16 (to 282)
+        >>  250 PUSH_EXC_INFO
+
+286         252 LOAD_GLOBAL              2 (Exception)
+            264 CHECK_EXC_MATCH
+            266 POP_JUMP_FORWARD_IF_FALSE     3 (to 274)
+            268 POP_TOP
+
+287         270 POP_EXCEPT
+            272 JUMP_FORWARD             4 (to 282)
+
+286     >>  274 RERAISE                  0
+        >>  276 COPY                     3
+            278 POP_EXCEPT
+            280 RERAISE                  1
+
+288     >>  282 NOP
+
+289         284 LOAD_DEREF               3 (browser)
+            286 LOAD_ATTR                4 (Handle)
+            296 LOAD_METHOD              5 (ToInt64)
+            318 PRECALL                  0
+            322 CALL                     0
+            332 STORE_FAST               1 (browser_hwnd)
+
+290         334 LOAD_FAST                1 (browser_hwnd)
+            336 LOAD_CONST               2 (0)
+            338 COMPARE_OP               4 (>)
+            344 POP_JUMP_FORWARD_IF_FALSE    11 (to 368)
+
+291         346 PUSH_NULL
+            348 LOAD_DEREF               7 (set_keyboard_focus)
+            350 LOAD_FAST                1 (browser_hwnd)
+            352 PRECALL                  1
+            356 CALL                     1
+            366 POP_TOP
+        >>  368 JUMP_FORWARD            16 (to 402)
+        >>  370 PUSH_EXC_INFO
+
+292         372 LOAD_GLOBAL              2 (Exception)
+            384 CHECK_EXC_MATCH
+            386 POP_JUMP_FORWARD_IF_FALSE     3 (to 394)
+            388 POP_TOP
+
+293         390 POP_EXCEPT
+            392 JUMP_FORWARD             4 (to 402)
+
+292     >>  394 RERAISE                  0
+        >>  396 COPY                     3
+            398 POP_EXCEPT
+            400 RERAISE                  1
+
+295     >>  402 LOAD_CONST               3 (False)
+            404 STORE_DEREF              5 (focus_in_progress)
+            406 LOAD_CONST               0 (None)
+            408 RETURN_VALUE
+        >>  410 PUSH_EXC_INFO
+            412 LOAD_CONST               3 (False)
+            414 STORE_DEREF              5 (focus_in_progress)
+            416 RERAISE                  0
+        >>  418 COPY                     3
+            420 POP_EXCEPT
+            422 RERAISE                  1
+ExceptionTable:
+  20 to 58 -> 62 [0]
+  60 to 60 -> 410 [0]
+  62 to 80 -> 88 [1] lasti
+  82 to 84 -> 410 [0]
+  86 to 86 -> 88 [1] lasti
+  88 to 92 -> 410 [0]
+  96 to 134 -> 138 [0]
+  136 to 136 -> 410 [0]
+  138 to 156 -> 164 [1] lasti
+  158 to 160 -> 410 [0]
+  162 to 162 -> 164 [1] lasti
+  164 to 168 -> 410 [0]
+  172 to 246 -> 250 [0]
+  248 to 248 -> 410 [0]
+  250 to 268 -> 276 [1] lasti
+  270 to 272 -> 410 [0]
+  274 to 274 -> 276 [1] lasti
+  276 to 280 -> 410 [0]
+  284 to 366 -> 370 [0]
+  368 to 368 -> 410 [0]
+  370 to 388 -> 396 [1] lasti
+  390 to 392 -> 410 [0]
+  394 to 394 -> 396 [1] lasti
+  396 to 400 -> 410 [0]
+  410 to 416 -> 418 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.try_login_script (line 297) =====
+              0 COPY_FREE_VARS           3
+
+297           2 RESUME                   0
+
+298           4 LOAD_DEREF               2 (current_username)
+              6 POP_JUMP_FORWARD_IF_FALSE     2 (to 12)
+              8 LOAD_DEREF               1 (current_password)
+             10 POP_JUMP_FORWARD_IF_TRUE     2 (to 16)
+
+299     >>   12 LOAD_CONST               0 (None)
+             14 RETURN_VALUE
+
+300     >>   16 NOP
+
+301          18 LOAD_DEREF               0 (browser)
+             20 LOAD_METHOD              0 (ExecuteScriptAsync)
+             42 LOAD_GLOBAL              3 (NULL + streetsmart_login_script)
+             54 LOAD_DEREF               2 (current_username)
+             56 LOAD_DEREF               1 (current_password)
+             58 PRECALL                  2
+             62 CALL                     2
+             72 PRECALL                  1
+             76 CALL                     1
+             86 POP_TOP
+             88 LOAD_CONST               0 (None)
+             90 RETURN_VALUE
+        >>   92 PUSH_EXC_INFO
+
+302          94 LOAD_GLOBAL              4 (Exception)
+            106 CHECK_EXC_MATCH
+            108 POP_JUMP_FORWARD_IF_FALSE     4 (to 118)
+            110 POP_TOP
+
+303         112 POP_EXCEPT
+            114 LOAD_CONST               0 (None)
+            116 RETURN_VALUE
+
+302     >>  118 RERAISE                  0
+        >>  120 COPY                     3
+            122 POP_EXCEPT
+            124 RERAISE                  1
+ExceptionTable:
+  18 to 86 -> 92 [0]
+  92 to 110 -> 120 [1] lasti
+  118 to 118 -> 120 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.navigate_to_selection (line 305) =====
+              0 COPY_FREE_VARS           5
+
+305           2 RESUME                   0
+
+307           4 LOAD_GLOBAL              1 (NULL + isinstance)
+             16 LOAD_FAST                0 (selection)
+             18 LOAD_GLOBAL              2 (dict)
+             30 PRECALL                  2
+             34 CALL                     2
+             44 POP_JUMP_FORWARD_IF_FALSE     2 (to 50)
+             46 LOAD_FAST                0 (selection)
+             48 JUMP_FORWARD             1 (to 52)
+        >>   50 LOAD_CONST               0 (None)
+        >>   52 STORE_DEREF              5 (current_selection)
+
+308          54 LOAD_GLOBAL              5 (NULL + streetsmart_selection_url)
+             66 LOAD_DEREF               5 (current_selection)
+             68 PRECALL                  1
+             72 CALL                     1
+             82 STORE_FAST               1 (target_url)
+
+309          84 LOAD_DEREF               6 (current_url)
+             86 LOAD_FAST                1 (target_url)
+             88 COMPARE_OP               2 (==)
+             94 POP_JUMP_FORWARD_IF_FALSE     2 (to 100)
+
+310          96 LOAD_CONST               0 (None)
+             98 RETURN_VALUE
+
+311     >>  100 LOAD_FAST                1 (target_url)
+            102 STORE_DEREF              6 (current_url)
+
+312         104 NOP
+
+313         106 PUSH_NULL
+            108 LOAD_DEREF               3 (Uri)
+            110 LOAD_FAST                1 (target_url)
+            112 PRECALL                  1
+            116 CALL                     1
+            126 LOAD_DEREF               4 (browser)
+            128 STORE_ATTR               3 (Source)
+            138 LOAD_CONST               0 (None)
+            140 RETURN_VALUE
+        >>  142 PUSH_EXC_INFO
+
+314         144 LOAD_GLOBAL              8 (Exception)
+            156 CHECK_EXC_MATCH
+            158 POP_JUMP_FORWARD_IF_FALSE    35 (to 230)
+            160 STORE_FAST               2 (exc)
+
+315         162 LOAD_DEREF               7 (self)
+            164 LOAD_METHOD              5 (_post_status)
+            186 LOAD_CONST               1 ('StreetSmart navigatie mislukt: ')
+            188 LOAD_FAST                2 (exc)
+            190 FORMAT_VALUE             0
+            192 BUILD_STRING             2
+            194 PRECALL                  1
+            198 CALL                     1
+            208 POP_TOP
+
+316         210 POP_EXCEPT
+            212 LOAD_CONST               0 (None)
+            214 STORE_FAST               2 (exc)
+            216 DELETE_FAST              2 (exc)
+            218 LOAD_CONST               0 (None)
+            220 RETURN_VALUE
+        >>  222 LOAD_CONST               0 (None)
+            224 STORE_FAST               2 (exc)
+            226 DELETE_FAST              2 (exc)
+            228 RERAISE                  1
+
+314     >>  230 RERAISE                  0
+        >>  232 COPY                     3
+            234 POP_EXCEPT
+            236 RERAISE                  1
+ExceptionTable:
+  106 to 136 -> 142 [0]
+  142 to 160 -> 232 [1] lasti
+  162 to 208 -> 222 [1] lasti
+  222 to 230 -> 232 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.process_command_queue (line 318) =====
+              0 COPY_FREE_VARS          15
+
+318           2 RESUME                   0
+
+320           4 NOP
+
+321     >>    6 NOP
+
+322           8 LOAD_DEREF              21 (self)
+             10 LOAD_ATTR                0 (_command_queue)
+             20 LOAD_METHOD              1 (get_nowait)
+             42 PRECALL                  0
+             46 CALL                     0
+             56 UNPACK_SEQUENCE          2
+             60 STORE_FAST               2 (command)
+             62 STORE_FAST               3 (payload)
+             64 JUMP_FORWARD            22 (to 110)
+        >>   66 PUSH_EXC_INFO
+
+323          68 LOAD_GLOBAL              4 (queue)
+             80 LOAD_ATTR                3 (Empty)
+             90 CHECK_EXC_MATCH
+             92 POP_JUMP_FORWARD_IF_FALSE     4 (to 102)
+             94 POP_TOP
+
+324          96 POP_EXCEPT
+             98 LOAD_CONST               0 (None)
+            100 RETURN_VALUE
+
+323     >>  102 RERAISE                  0
+        >>  104 COPY                     3
+            106 POP_EXCEPT
+            108 RERAISE                  1
+
+325     >>  110 LOAD_FAST                2 (command)
+            112 LOAD_CONST               2 ('attach')
+            114 COMPARE_OP               2 (==)
+            120 POP_JUMP_FORWARD_IF_FALSE    13 (to 148)
+
+326         122 PUSH_NULL
+            124 LOAD_DEREF              10 (apply_host_geometry)
+            126 LOAD_FAST                3 (payload)
+            128 PRECALL                  1
+            132 CALL                     1
+            142 POP_TOP
+            144 EXTENDED_ARG             2
+            146 JUMP_FORWARD           604 (to 1356)
+
+327     >>  148 LOAD_FAST                2 (command)
+            150 LOAD_CONST               3 ('navigate')
+            152 COMPARE_OP               2 (==)
+            158 POP_JUMP_FORWARD_IF_FALSE    91 (to 342)
+
+328         160 LOAD_GLOBAL              9 (NULL + str)
+            172 LOAD_FAST                3 (payload)
+            174 JUMP_IF_TRUE_OR_POP      6 (to 188)
+            176 LOAD_GLOBAL             10 (STREETSMART_WEB_URL)
+        >>  188 PRECALL                  1
+            192 CALL                     1
+            202 STORE_FAST               4 (target_url)
+
+329         204 LOAD_FAST                4 (target_url)
+            206 STORE_DEREF             13 (current_url)
+
+330         208 NOP
+
+331         210 PUSH_NULL
+            212 LOAD_DEREF               9 (Uri)
+            214 LOAD_FAST                4 (target_url)
+            216 PRECALL                  1
+            220 CALL                     1
+            230 LOAD_DEREF              11 (browser)
+            232 STORE_ATTR               6 (Source)
+            242 EXTENDED_ARG             2
+            244 JUMP_FORWARD           555 (to 1356)
+        >>  246 PUSH_EXC_INFO
+
+332         248 LOAD_GLOBAL             14 (Exception)
+            260 CHECK_EXC_MATCH
+            262 POP_JUMP_FORWARD_IF_FALSE    35 (to 334)
+            264 STORE_FAST               5 (exc)
+
+333         266 LOAD_DEREF              21 (self)
+            268 LOAD_METHOD              8 (_post_status)
+            290 LOAD_CONST               4 ('StreetSmart navigatie mislukt: ')
+            292 LOAD_FAST                5 (exc)
+            294 FORMAT_VALUE             0
+            296 BUILD_STRING             2
+            298 PRECALL                  1
+            302 CALL                     1
+            312 POP_TOP
+            314 POP_EXCEPT
+            316 LOAD_CONST               0 (None)
+            318 STORE_FAST               5 (exc)
+            320 DELETE_FAST              5 (exc)
+            322 EXTENDED_ARG             2
+            324 JUMP_FORWARD           515 (to 1356)
+        >>  326 LOAD_CONST               0 (None)
+            328 STORE_FAST               5 (exc)
+            330 DELETE_FAST              5 (exc)
+            332 RERAISE                  1
+
+332     >>  334 RERAISE                  0
+        >>  336 COPY                     3
+            338 POP_EXCEPT
+            340 RERAISE                  1
+
+334     >>  342 LOAD_FAST                2 (command)
+            344 LOAD_CONST               5 ('selection')
+            346 COMPARE_OP               2 (==)
+            352 POP_JUMP_FORWARD_IF_FALSE    36 (to 426)
+
+335         354 PUSH_NULL
+            356 LOAD_DEREF              17 (navigate_to_selection)
+            358 LOAD_GLOBAL             19 (NULL + isinstance)
+            370 LOAD_FAST                3 (payload)
+            372 LOAD_GLOBAL             20 (dict)
+            384 PRECALL                  2
+            388 CALL                     2
+            398 POP_JUMP_FORWARD_IF_FALSE     2 (to 404)
+            400 LOAD_FAST                3 (payload)
+            402 JUMP_FORWARD             1 (to 406)
+        >>  404 LOAD_CONST               0 (None)
+        >>  406 PRECALL                  1
+            410 CALL                     1
+            420 POP_TOP
+            422 EXTENDED_ARG             1
+            424 JUMP_FORWARD           465 (to 1356)
+
+336     >>  426 LOAD_FAST                2 (command)
+            428 LOAD_CONST               6 ('reload')
+            430 COMPARE_OP               2 (==)
+            436 POP_JUMP_FORWARD_IF_FALSE    74 (to 586)
+
+337         438 NOP
+
+338         440 LOAD_DEREF              11 (browser)
+            442 LOAD_METHOD             11 (Reload)
+            464 PRECALL                  0
+            468 CALL                     0
+            478 POP_TOP
+            480 EXTENDED_ARG             1
+            482 JUMP_FORWARD           436 (to 1356)
+        >>  484 PUSH_EXC_INFO
+
+339         486 LOAD_GLOBAL             14 (Exception)
+            498 CHECK_EXC_MATCH
+            500 POP_JUMP_FORWARD_IF_FALSE    38 (to 578)
+            502 POP_TOP
+
+340         504 NOP
+
+341         506 PUSH_NULL
+            508 LOAD_DEREF               9 (Uri)
+            510 LOAD_DEREF              13 (current_url)
+            512 PRECALL                  1
+            516 CALL                     1
+            526 LOAD_DEREF              11 (browser)
+            528 STORE_ATTR               6 (Source)
+            538 JUMP_FORWARD            16 (to 572)
+        >>  540 PUSH_EXC_INFO
+
+342         542 LOAD_GLOBAL             14 (Exception)
+            554 CHECK_EXC_MATCH
+            556 POP_JUMP_FORWARD_IF_FALSE     3 (to 564)
+            558 POP_TOP
+
+343         560 POP_EXCEPT
+            562 JUMP_FORWARD             4 (to 572)
+
+342     >>  564 RERAISE                  0
+        >>  566 COPY                     3
+            568 POP_EXCEPT
+            570 RERAISE                  1
+        >>  572 POP_EXCEPT
+            574 EXTENDED_ARG             1
+            576 JUMP_FORWARD           389 (to 1356)
+
+339     >>  578 RERAISE                  0
+        >>  580 COPY                     3
+            582 POP_EXCEPT
+            584 RERAISE                  1
+
+344     >>  586 LOAD_FAST                2 (command)
+            588 LOAD_CONST               7 ('focus')
+            590 COMPARE_OP               2 (==)
+            596 POP_JUMP_FORWARD_IF_FALSE    12 (to 622)
+
+345         598 PUSH_NULL
+            600 LOAD_DEREF              15 (focus_browser)
+            602 PRECALL                  0
+            606 CALL                     0
+            616 POP_TOP
+            618 EXTENDED_ARG             1
+            620 JUMP_FORWARD           367 (to 1356)
+
+346     >>  622 LOAD_FAST                2 (command)
+            624 LOAD_CONST               8 ('credentials')
+            626 COMPARE_OP               2 (==)
+            632 POP_JUMP_FORWARD_IF_FALSE    51 (to 736)
+
+347         634 LOAD_FAST                3 (payload)
+            636 UNPACK_SEQUENCE          2
+            640 STORE_FAST               6 (username)
+            642 STORE_FAST               7 (password)
+
+348         644 LOAD_GLOBAL              9 (NULL + str)
+            656 LOAD_FAST                6 (username)
+            658 JUMP_IF_TRUE_OR_POP      1 (to 662)
+            660 LOAD_CONST               9 ('')
+        >>  662 PRECALL                  1
+            666 CALL                     1
+            676 STORE_DEREF             14 (current_username)
+
+349         678 LOAD_GLOBAL              9 (NULL + str)
+            690 LOAD_FAST                7 (password)
+            692 JUMP_IF_TRUE_OR_POP      1 (to 696)
+            694 LOAD_CONST               9 ('')
+        >>  696 PRECALL                  1
+            700 CALL                     1
+            710 STORE_DEREF             12 (current_password)
+
+350         712 PUSH_NULL
+            714 LOAD_DEREF              22 (try_login_script)
+            716 PRECALL                  0
+            720 CALL                     0
+            730 POP_TOP
+            732 EXTENDED_ARG             1
+            734 JUMP_FORWARD           310 (to 1356)
+
+351     >>  736 LOAD_FAST                2 (command)
+            738 LOAD_CONST              10 ('dispose')
+            740 COMPARE_OP               2 (==)
+            746 EXTENDED_ARG             1
+            748 POP_JUMP_FORWARD_IF_FALSE   303 (to 1356)
+
+352         750 NOP
+
+353         752 LOAD_DEREF              20 (poll_timer)
+            754 LOAD_METHOD             12 (Stop)
+            776 PRECALL                  0
+            780 CALL                     0
+            790 POP_TOP
+            792 JUMP_FORWARD            16 (to 826)
+        >>  794 PUSH_EXC_INFO
+
+354         796 LOAD_GLOBAL             14 (Exception)
+            808 CHECK_EXC_MATCH
+            810 POP_JUMP_FORWARD_IF_FALSE     3 (to 818)
+            812 POP_TOP
+
+355         814 POP_EXCEPT
+            816 JUMP_FORWARD             4 (to 826)
+
+354     >>  818 RERAISE                  0
+        >>  820 COPY                     3
+            822 POP_EXCEPT
+            824 RERAISE                  1
+
+356     >>  826 NOP
+
+357         828 LOAD_DEREF              11 (browser)
+            830 COPY                     1
+            832 LOAD_ATTR               13 (NavigationCompleted)
+            842 LOAD_DEREF              19 (on_navigation_completed)
+            844 BINARY_OP               23 (-=)
+            848 SWAP                     2
+            850 STORE_ATTR              13 (NavigationCompleted)
+            860 JUMP_FORWARD            16 (to 894)
+        >>  862 PUSH_EXC_INFO
+
+358         864 LOAD_GLOBAL             14 (Exception)
+            876 CHECK_EXC_MATCH
+            878 POP_JUMP_FORWARD_IF_FALSE     3 (to 886)
+            880 POP_TOP
+
+359         882 POP_EXCEPT
+            884 JUMP_FORWARD             4 (to 894)
+
+358     >>  886 RERAISE                  0
+        >>  888 COPY                     3
+            890 POP_EXCEPT
+            892 RERAISE                  1
+
+360     >>  894 NOP
+
+361         896 LOAD_DEREF              11 (browser)
+            898 COPY                     1
+            900 LOAD_ATTR               14 (CoreWebView2InitializationCompleted)
+            910 LOAD_DEREF              18 (on_core_ready)
+            912 BINARY_OP               23 (-=)
+            916 SWAP                     2
+            918 STORE_ATTR              14 (CoreWebView2InitializationCompleted)
+            928 JUMP_FORWARD            16 (to 962)
+        >>  930 PUSH_EXC_INFO
+
+362         932 LOAD_GLOBAL             14 (Exception)
+            944 CHECK_EXC_MATCH
+            946 POP_JUMP_FORWARD_IF_FALSE     3 (to 954)
+            948 POP_TOP
+
+363         950 POP_EXCEPT
+            952 JUMP_FORWARD             4 (to 962)
+
+362     >>  954 RERAISE                  0
+        >>  956 COPY                     3
+            958 POP_EXCEPT
+            960 RERAISE                  1
+
+364     >>  962 NOP
+
+365         964 LOAD_DEREF              11 (browser)
+            966 LOAD_METHOD             15 (Dispose)
+            988 PRECALL                  0
+            992 CALL                     0
+           1002 POP_TOP
+           1004 JUMP_FORWARD            16 (to 1038)
+        >> 1006 PUSH_EXC_INFO
+
+366        1008 LOAD_GLOBAL             14 (Exception)
+           1020 CHECK_EXC_MATCH
+           1022 POP_JUMP_FORWARD_IF_FALSE     3 (to 1030)
+           1024 POP_TOP
+
+367        1026 POP_EXCEPT
+           1028 JUMP_FORWARD             4 (to 1038)
+
+366     >> 1030 RERAISE                  0
+        >> 1032 COPY                     3
+           1034 POP_EXCEPT
+           1036 RERAISE                  1
+
+368     >> 1038 NOP
+
+369        1040 LOAD_DEREF              16 (form)
+           1042 LOAD_ATTR               16 (Controls)
+           1052 LOAD_METHOD             17 (Clear)
+           1074 PRECALL                  0
+           1078 CALL                     0
+           1088 POP_TOP
+           1090 JUMP_FORWARD            16 (to 1124)
+        >> 1092 PUSH_EXC_INFO
+
+370        1094 LOAD_GLOBAL             14 (Exception)
+           1106 CHECK_EXC_MATCH
+           1108 POP_JUMP_FORWARD_IF_FALSE     3 (to 1116)
+           1110 POP_TOP
+
+371        1112 POP_EXCEPT
+           1114 JUMP_FORWARD             4 (to 1124)
+
+370     >> 1116 RERAISE                  0
+        >> 1118 COPY                     3
+           1120 POP_EXCEPT
+           1122 RERAISE                  1
+
+372     >> 1124 NOP
+
+373        1126 LOAD_DEREF              16 (form)
+           1128 LOAD_METHOD             18 (Close)
+           1150 PRECALL                  0
+           1154 CALL                     0
+           1164 POP_TOP
+           1166 JUMP_FORWARD            16 (to 1200)
+        >> 1168 PUSH_EXC_INFO
+
+374        1170 LOAD_GLOBAL             14 (Exception)
+           1182 CHECK_EXC_MATCH
+           1184 POP_JUMP_FORWARD_IF_FALSE     3 (to 1192)
+           1186 POP_TOP
+
+375        1188 POP_EXCEPT
+           1190 JUMP_FORWARD             4 (to 1200)
+
+374     >> 1192 RERAISE                  0
+        >> 1194 COPY                     3
+           1196 POP_EXCEPT
+           1198 RERAISE                  1
+
+376     >> 1200 NOP
+
+377        1202 LOAD_DEREF              16 (form)
+           1204 LOAD_METHOD             15 (Dispose)
+           1226 PRECALL                  0
+           1230 CALL                     0
+           1240 POP_TOP
+           1242 JUMP_FORWARD            16 (to 1276)
+        >> 1244 PUSH_EXC_INFO
+
+378        1246 LOAD_GLOBAL             14 (Exception)
+           1258 CHECK_EXC_MATCH
+           1260 POP_JUMP_FORWARD_IF_FALSE     3 (to 1268)
+           1262 POP_TOP
+
+379        1264 POP_EXCEPT
+           1266 JUMP_FORWARD             4 (to 1276)
+
+378     >> 1268 RERAISE                  0
+        >> 1270 COPY                     3
+           1272 POP_EXCEPT
+           1274 RERAISE                  1
+
+380     >> 1276 NOP
+
+381        1278 LOAD_DEREF               8 (Application)
+           1280 LOAD_METHOD             19 (ExitThread)
+           1302 PRECALL                  0
+           1306 CALL                     0
+           1316 POP_TOP
+           1318 JUMP_FORWARD            16 (to 1352)
+        >> 1320 PUSH_EXC_INFO
+
+382        1322 LOAD_GLOBAL             14 (Exception)
+           1334 CHECK_EXC_MATCH
+           1336 POP_JUMP_FORWARD_IF_FALSE     3 (to 1344)
+           1338 POP_TOP
+
+383        1340 POP_EXCEPT
+           1342 JUMP_FORWARD             4 (to 1352)
+
+382     >> 1344 RERAISE                  0
+        >> 1346 COPY                     3
+           1348 POP_EXCEPT
+           1350 RERAISE                  1
+
+384     >> 1352 LOAD_CONST               0 (None)
+           1354 RETURN_VALUE
+
+320     >> 1356 EXTENDED_ARG             2
+           1358 JUMP_BACKWARD          677 (to 6)
+ExceptionTable:
+  8 to 62 -> 66 [0]
+  66 to 94 -> 104 [1] lasti
+  102 to 102 -> 104 [1] lasti
+  210 to 240 -> 246 [0]
+  246 to 264 -> 336 [1] lasti
+  266 to 312 -> 326 [1] lasti
+  326 to 334 -> 336 [1] lasti
+  440 to 478 -> 484 [0]
+  484 to 502 -> 580 [1] lasti
+  506 to 536 -> 540 [1]
+  538 to 538 -> 580 [1] lasti
+  540 to 558 -> 566 [2] lasti
+  560 to 562 -> 580 [1] lasti
+  564 to 564 -> 566 [2] lasti
+  566 to 570 -> 580 [1] lasti
+  578 to 578 -> 580 [1] lasti
+  752 to 790 -> 794 [0]
+  794 to 812 -> 820 [1] lasti
+  818 to 818 -> 820 [1] lasti
+  828 to 858 -> 862 [0]
+  862 to 880 -> 888 [1] lasti
+  886 to 886 -> 888 [1] lasti
+  896 to 926 -> 930 [0]
+  930 to 948 -> 956 [1] lasti
+  954 to 954 -> 956 [1] lasti
+  964 to 1002 -> 1006 [0]
+  1006 to 1024 -> 1032 [1] lasti
+  1030 to 1030 -> 1032 [1] lasti
+  1040 to 1088 -> 1092 [0]
+  1092 to 1110 -> 1118 [1] lasti
+  1116 to 1116 -> 1118 [1] lasti
+  1126 to 1164 -> 1168 [0]
+  1168 to 1186 -> 1194 [1] lasti
+  1192 to 1192 -> 1194 [1] lasti
+  1202 to 1240 -> 1244 [0]
+  1244 to 1262 -> 1270 [1] lasti
+  1268 to 1268 -> 1270 [1] lasti
+  1278 to 1316 -> 1320 [0]
+  1320 to 1338 -> 1346 [1] lasti
+  1344 to 1344 -> 1346 [1] lasti
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.on_core_ready (line 386) =====
+              0 COPY_FREE_VARS           4
+
+386           2 RESUME                   0
+
+387           4 LOAD_DEREF               5 (self)
+              6 LOAD_METHOD              0 (_post_status)
+             28 LOAD_CONST               1 ('StreetSmart gereed.')
+             30 PRECALL                  1
+             34 CALL                     1
+             44 POP_TOP
+
+388          46 LOAD_DEREF               5 (self)
+             48 LOAD_METHOD              1 (_host_geometry)
+             70 PRECALL                  0
+             74 CALL                     0
+             84 STORE_FAST               2 (geometry)
+
+389          86 PUSH_NULL
+             88 LOAD_DEREF               3 (apply_host_geometry)
+             90 LOAD_FAST                2 (geometry)
+             92 PRECALL                  1
+             96 CALL                     1
+            106 POP_TOP
+
+390         108 PUSH_NULL
+            110 LOAD_DEREF               6 (try_login_script)
+            112 PRECALL                  0
+            116 CALL                     0
+            126 POP_TOP
+
+391         128 PUSH_NULL
+            130 LOAD_DEREF               4 (focus_browser)
+            132 PRECALL                  0
+            136 CALL                     0
+            146 POP_TOP
+            148 LOAD_CONST               0 (None)
+            150 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.on_navigation_completed (line 393) =====
+              0 COPY_FREE_VARS           3
+
+393           2 RESUME                   0
+
+394           4 LOAD_DEREF               3 (self)
+              6 LOAD_METHOD              0 (_post_status)
+             28 LOAD_CONST               1 ('StreetSmart gesynchroniseerd.')
+             30 PRECALL                  1
+             34 CALL                     1
+             44 POP_TOP
+
+395          46 PUSH_NULL
+             48 LOAD_DEREF               4 (try_login_script)
+             50 PRECALL                  0
+             54 CALL                     0
+             64 POP_TOP
+
+396          66 PUSH_NULL
+             68 LOAD_DEREF               2 (focus_browser)
+             70 PRECALL                  0
+             74 CALL                     0
+             84 POP_TOP
+             86 LOAD_CONST               0 (None)
+             88 RETURN_VALUE
+
+===== <module>.EmbeddedStreetSmartPanel.EmbeddedStreetSmartPanel._run_thread.EmbeddedStreetSmartPanel._run_thread.<locals>.<lambda> (line 400) =====
+              0 COPY_FREE_VARS           1
+
+400           2 RESUME                   0
+              4 PUSH_NULL
+              6 LOAD_DEREF               1 (focus_browser)
+              8 PRECALL                  0
+             12 CALL                     0
+             22 RETURN_VALUE

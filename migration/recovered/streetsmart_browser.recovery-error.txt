@@ -1,0 +1,1 @@
+DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=132, starts_line=35, is_jump_target=False) in <module>

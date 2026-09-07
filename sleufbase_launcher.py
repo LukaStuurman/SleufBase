@@ -37,6 +37,11 @@ def _smoke_trace(stage: str) -> None:
 
 
 def _validate_core_legacy_bytecode() -> None:
+    from SleufBase.source_migration import source_enabled
+
+    if source_enabled("app"):
+        return
+
     from SleufBase import legacy_bytecode
 
     legacy_bytecode.validate_legacy_bytecode("app", legacy_bytecode.__file__)

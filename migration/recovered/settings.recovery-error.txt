@@ -1,0 +1,1 @@
+DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>

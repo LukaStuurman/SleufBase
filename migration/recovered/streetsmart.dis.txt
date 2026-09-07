@@ -1,0 +1,750 @@
+===== <module> (line 1) =====
+  0           0 RESUME                   0
+
+  1           2 LOAD_CONST               0 (0)
+              4 LOAD_CONST               1 (('annotations',))
+              6 IMPORT_NAME              0 (__future__)
+              8 IMPORT_FROM              1 (annotations)
+             10 STORE_NAME               1 (annotations)
+             12 POP_TOP
+
+  3          14 LOAD_CONST               0 (0)
+             16 LOAD_CONST               2 (None)
+             18 IMPORT_NAME              2 (json)
+             20 STORE_NAME               2 (json)
+
+  4          22 LOAD_CONST               0 (0)
+             24 LOAD_CONST               2 (None)
+             26 IMPORT_NAME              3 (os)
+             28 STORE_NAME               3 (os)
+
+  5          30 LOAD_CONST               0 (0)
+             32 LOAD_CONST               2 (None)
+             34 IMPORT_NAME              4 (re)
+             36 STORE_NAME               4 (re)
+
+  6          38 LOAD_CONST               0 (0)
+             40 LOAD_CONST               2 (None)
+             42 IMPORT_NAME              5 (shutil)
+             44 STORE_NAME               5 (shutil)
+
+  7          46 LOAD_CONST               0 (0)
+             48 LOAD_CONST               2 (None)
+             50 IMPORT_NAME              6 (time)
+             52 STORE_NAME               6 (time)
+
+  8          54 LOAD_CONST               0 (0)
+             56 LOAD_CONST               3 (('Path',))
+             58 IMPORT_NAME              7 (pathlib)
+             60 IMPORT_FROM              8 (Path)
+             62 STORE_NAME               8 (Path)
+             64 POP_TOP
+
+  9          66 LOAD_CONST               0 (0)
+             68 LOAD_CONST               4 (('Any',))
+             70 IMPORT_NAME              9 (typing)
+             72 IMPORT_FROM             10 (Any)
+             74 STORE_NAME              10 (Any)
+             76 POP_TOP
+
+ 10          78 LOAD_CONST               0 (0)
+             80 LOAD_CONST               5 (('quote',))
+             82 IMPORT_NAME             11 (urllib.parse)
+             84 IMPORT_FROM             12 (quote)
+             86 STORE_NAME              12 (quote)
+             88 POP_TOP
+
+ 13          90 LOAD_CONST               6 ('https://streetsmart.cyclomedia.com/streetsmart')
+             92 STORE_NAME              13 (STREETSMART_WEB_URL)
+
+ 14          94 LOAD_CONST               7 ('EPSG:28992')
+             96 STORE_NAME              14 (STREETSMART_RD_SRS)
+
+ 17          98 LOAD_CONST              33 (('return', 'Path'))
+            100 LOAD_CONST              10 (<code object streetsmart_data_dir at 0x7fee06965790, file "app\streetsmart.py", line 17>)
+            102 MAKE_FUNCTION            4 (annotations)
+            104 STORE_NAME              15 (streetsmart_data_dir)
+
+ 22         106 LOAD_CONST              34 (('value', 'str', 'return', 'str'))
+            108 LOAD_CONST              13 (<code object _safe_streetsmart_slug at 0x7fee03d90c30, file "app\streetsmart.py", line 22>)
+            110 MAKE_FUNCTION            4 (annotations)
+            112 STORE_NAME              16 (_safe_streetsmart_slug)
+
+ 27         114 LOAD_CONST              33 (('return', 'Path'))
+            116 LOAD_CONST              14 (<code object streetsmart_browser_sessions_dir at 0x7fee069e6a30, file "app\streetsmart.py", line 27>)
+            118 MAKE_FUNCTION            4 (annotations)
+            120 STORE_NAME              17 (streetsmart_browser_sessions_dir)
+
+ 31         122 LOAD_CONST              35 (('username', 'str', 'return', 'Path'))
+            124 LOAD_CONST              16 (<code object streetsmart_browser_storage_dir at 0x7fee03dcd130, file "app\streetsmart.py", line 31>)
+            126 MAKE_FUNCTION            4 (annotations)
+            128 STORE_NAME              18 (streetsmart_browser_storage_dir)
+
+ 35         130 LOAD_CONST              33 (('return', 'Path'))
+            132 LOAD_CONST              17 (<code object streetsmart_embedded_storage_dir at 0x7fee03d517d0, file "app\streetsmart.py", line 35>)
+            134 MAKE_FUNCTION            4 (annotations)
+            136 STORE_NAME              19 (streetsmart_embedded_storage_dir)
+
+ 39         138 LOAD_CONST              36 (('',))
+            140 LOAD_CONST              37 (('username', 'str', 'return', 'list[Path]'))
+            142 LOAD_CONST              20 (<code object clear_streetsmart_storage at 0x559eadda9e30, file "app\streetsmart.py", line 39>)
+            144 MAKE_FUNCTION            5 (defaults, annotations)
+            146 STORE_NAME              20 (clear_streetsmart_storage)
+
+ 70         148 LOAD_CONST              33 (('return', 'Path'))
+            150 LOAD_CONST              21 (<code object streetsmart_state_path at 0x7fee03d52250, file "app\streetsmart.py", line 70>)
+            152 MAKE_FUNCTION            4 (annotations)
+            154 STORE_NAME              21 (streetsmart_state_path)
+
+ 74         156 LOAD_CONST              38 (('return', 'dict[str, Any]'))
+            158 LOAD_CONST              23 (<code object default_streetsmart_state at 0x7fee03d5b290, file "app\streetsmart.py", line 74>)
+            160 MAKE_FUNCTION            4 (annotations)
+            162 STORE_NAME              22 (default_streetsmart_state)
+
+ 81         164 LOAD_CONST              38 (('return', 'dict[str, Any]'))
+            166 LOAD_CONST              24 (<code object load_streetsmart_state at 0x559eadde0ca0, file "app\streetsmart.py", line 81>)
+            168 MAKE_FUNCTION            4 (annotations)
+            170 STORE_NAME              23 (load_streetsmart_state)
+
+103         172 LOAD_CONST              39 (('selection', 'dict[str, Any] | None', 'return', 'Path'))
+            174 LOAD_CONST              27 (<code object save_streetsmart_state at 0x7fee04cf13b0, file "app\streetsmart.py", line 103>)
+            176 MAKE_FUNCTION            4 (annotations)
+            178 STORE_NAME              24 (save_streetsmart_state)
+
+114         180 LOAD_CONST              40 (('selection', 'dict[str, Any] | None', 'return', 'tuple[float, float] | None'))
+            182 LOAD_CONST              29 (<code object streetsmart_selection_center at 0x559eacea0330, file "app\streetsmart.py", line 114>)
+            184 MAKE_FUNCTION            4 (annotations)
+            186 STORE_NAME              25 (streetsmart_selection_center)
+
+130         188 LOAD_CONST              41 (('selection', 'dict[str, Any] | None', 'return', 'str'))
+            190 LOAD_CONST              30 (<code object streetsmart_selection_url at 0x7fee03d19790, file "app\streetsmart.py", line 130>)
+            192 MAKE_FUNCTION            4 (annotations)
+            194 STORE_NAME              26 (streetsmart_selection_url)
+
+138         196 LOAD_CONST              42 (('username', 'str', 'password', 'str', 'return', 'str'))
+            198 LOAD_CONST              32 (<code object streetsmart_login_script at 0x7fee03d76670, file "app\streetsmart.py", line 138>)
+            200 MAKE_FUNCTION            4 (annotations)
+            202 STORE_NAME              27 (streetsmart_login_script)
+            204 LOAD_CONST               2 (None)
+            206 RETURN_VALUE
+
+===== <module>.streetsmart_data_dir (line 17) =====
+ 17           0 RESUME                   0
+
+ 18           2 LOAD_GLOBAL              1 (NULL + Path)
+             14 LOAD_GLOBAL              2 (os)
+             26 LOAD_ATTR                2 (environ)
+             36 LOAD_METHOD              3 (get)
+             58 LOAD_CONST               1 ('LOCALAPPDATA')
+             60 LOAD_GLOBAL              1 (NULL + Path)
+             72 LOAD_ATTR                4 (home)
+             82 PRECALL                  0
+             86 CALL                     0
+             96 LOAD_CONST               2 ('AppData')
+             98 BINARY_OP               11 (/)
+            102 LOAD_CONST               3 ('Local')
+            104 BINARY_OP               11 (/)
+            108 PRECALL                  2
+            112 CALL                     2
+            122 PRECALL                  1
+            126 CALL                     1
+            136 STORE_FAST               0 (local_appdata)
+
+ 19         138 LOAD_FAST                0 (local_appdata)
+            140 LOAD_CONST               4 ('KlicTiffKaarten')
+            142 BINARY_OP               11 (/)
+            146 LOAD_CONST               5 ('streetsmart')
+            148 BINARY_OP               11 (/)
+            152 RETURN_VALUE
+
+===== <module>._safe_streetsmart_slug (line 22) =====
+ 22           0 RESUME                   0
+
+ 23           2 LOAD_GLOBAL              1 (NULL + re)
+             14 LOAD_ATTR                1 (sub)
+             24 LOAD_CONST               1 ('[^A-Za-z0-9._-]+')
+             26 LOAD_CONST               2 ('_')
+             28 LOAD_GLOBAL              5 (NULL + str)
+             40 LOAD_FAST                0 (value)
+             42 JUMP_IF_TRUE_OR_POP      1 (to 46)
+             44 LOAD_CONST               3 ('')
+        >>   46 PRECALL                  1
+             50 CALL                     1
+             60 LOAD_METHOD              3 (strip)
+             82 PRECALL                  0
+             86 CALL                     0
+             96 LOAD_METHOD              4 (lower)
+            118 PRECALL                  0
+            122 CALL                     0
+            132 PRECALL                  3
+            136 CALL                     3
+            146 STORE_FAST               1 (sanitized)
+
+ 24         148 LOAD_FAST                1 (sanitized)
+            150 LOAD_METHOD              3 (strip)
+            172 LOAD_CONST               4 ('._-')
+            174 PRECALL                  1
+            178 CALL                     1
+            188 JUMP_IF_TRUE_OR_POP      1 (to 192)
+            190 LOAD_CONST               5 ('default')
+        >>  192 RETURN_VALUE
+
+===== <module>.streetsmart_browser_sessions_dir (line 27) =====
+ 27           0 RESUME                   0
+
+ 28           2 LOAD_GLOBAL              1 (NULL + streetsmart_data_dir)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 LOAD_CONST               1 ('browser_sessions')
+             30 BINARY_OP               11 (/)
+             34 RETURN_VALUE
+
+===== <module>.streetsmart_browser_storage_dir (line 31) =====
+ 31           0 RESUME                   0
+
+ 32           2 LOAD_GLOBAL              1 (NULL + streetsmart_browser_sessions_dir)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 LOAD_GLOBAL              3 (NULL + _safe_streetsmart_slug)
+             40 LOAD_FAST                0 (username)
+             42 PRECALL                  1
+             46 CALL                     1
+             56 BINARY_OP               11 (/)
+             60 RETURN_VALUE
+
+===== <module>.streetsmart_embedded_storage_dir (line 35) =====
+ 35           0 RESUME                   0
+
+ 36           2 LOAD_GLOBAL              1 (NULL + streetsmart_data_dir)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 LOAD_CONST               1 ('embedded_webview2')
+             30 BINARY_OP               11 (/)
+             34 RETURN_VALUE
+
+===== <module>.clear_streetsmart_storage (line 39) =====
+ 39           0 RESUME                   0
+
+ 40           2 LOAD_GLOBAL              1 (NULL + str)
+             14 LOAD_FAST                0 (username)
+             16 JUMP_IF_TRUE_OR_POP      1 (to 20)
+             18 LOAD_CONST               1 ('')
+        >>   20 PRECALL                  1
+             24 CALL                     1
+             34 LOAD_METHOD              1 (strip)
+             56 PRECALL                  0
+             60 CALL                     0
+             70 STORE_FAST               1 (normalized_username)
+
+ 42          72 LOAD_GLOBAL              5 (NULL + streetsmart_embedded_storage_dir)
+             84 PRECALL                  0
+             88 CALL                     0
+
+ 43          98 LOAD_FAST                1 (normalized_username)
+            100 POP_JUMP_FORWARD_IF_FALSE    15 (to 132)
+            102 LOAD_GLOBAL              7 (NULL + streetsmart_browser_storage_dir)
+            114 LOAD_FAST                1 (normalized_username)
+            116 PRECALL                  1
+            120 CALL                     1
+            130 JUMP_FORWARD            13 (to 158)
+        >>  132 LOAD_GLOBAL              9 (NULL + streetsmart_browser_sessions_dir)
+            144 PRECALL                  0
+            148 CALL                     0
+
+ 41     >>  158 BUILD_LIST               2
+            160 STORE_FAST               2 (targets)
+
+ 45         162 BUILD_LIST               0
+            164 STORE_FAST               3 (removed)
+
+ 46         166 LOAD_GLOBAL             11 (NULL + set)
+            178 PRECALL                  0
+            182 CALL                     0
+            192 STORE_FAST               4 (seen)
+
+ 47         194 LOAD_FAST                2 (targets)
+            196 GET_ITER
+        >>  198 FOR_ITER               209 (to 618)
+            200 STORE_FAST               5 (target)
+
+ 48         202 LOAD_GLOBAL              1 (NULL + str)
+            214 LOAD_FAST                5 (target)
+            216 PRECALL                  1
+            220 CALL                     1
+            230 LOAD_METHOD              6 (lower)
+            252 PRECALL                  0
+            256 CALL                     0
+            266 STORE_FAST               6 (key)
+
+ 49         268 LOAD_FAST                6 (key)
+            270 LOAD_FAST                4 (seen)
+            272 CONTAINS_OP              0
+            274 POP_JUMP_FORWARD_IF_TRUE    20 (to 316)
+            276 LOAD_FAST                5 (target)
+            278 LOAD_METHOD              7 (exists)
+            300 PRECALL                  0
+            304 CALL                     0
+            314 POP_JUMP_FORWARD_IF_TRUE     1 (to 318)
+
+ 50     >>  316 JUMP_BACKWARD           60 (to 198)
+
+ 51     >>  318 LOAD_FAST                4 (seen)
+            320 LOAD_METHOD              8 (add)
+            342 LOAD_FAST                6 (key)
+            344 PRECALL                  1
+            348 CALL                     1
+            358 POP_TOP
+
+ 52         360 LOAD_CONST               0 (None)
+            362 STORE_FAST               7 (last_error)
+
+ 53         364 LOAD_GLOBAL             19 (NULL + range)
+            376 LOAD_CONST               2 (20)
+            378 PRECALL                  1
+            382 CALL                     1
+            392 GET_ITER
+        >>  394 FOR_ITER                85 (to 566)
+            396 STORE_FAST               8 (_attempt)
+
+ 54         398 NOP
+
+ 55         400 LOAD_GLOBAL             21 (NULL + shutil)
+            412 LOAD_ATTR               11 (rmtree)
+            422 LOAD_FAST                5 (target)
+            424 PRECALL                  1
+            428 CALL                     1
+            438 POP_TOP
+
+ 56         440 LOAD_CONST               0 (None)
+            442 STORE_FAST               7 (last_error)
+
+ 57         444 POP_TOP
+            446 JUMP_FORWARD            59 (to 566)
+        >>  448 PUSH_EXC_INFO
+
+ 58         450 LOAD_GLOBAL             24 (FileNotFoundError)
+            462 CHECK_EXC_MATCH
+            464 POP_JUMP_FORWARD_IF_FALSE     6 (to 478)
+            466 POP_TOP
+
+ 59         468 LOAD_CONST               0 (None)
+            470 STORE_FAST               7 (last_error)
+
+ 60         472 POP_EXCEPT
+            474 POP_TOP
+            476 JUMP_FORWARD            44 (to 566)
+
+ 61     >>  478 LOAD_GLOBAL             26 (OSError)
+            490 CHECK_EXC_MATCH
+            492 POP_JUMP_FORWARD_IF_FALSE    32 (to 558)
+            494 STORE_FAST               9 (exc)
+
+ 62         496 LOAD_FAST                9 (exc)
+            498 STORE_FAST               7 (last_error)
+
+ 63         500 LOAD_GLOBAL             29 (NULL + time)
+            512 LOAD_ATTR               15 (sleep)
+            522 LOAD_CONST               3 (0.2)
+            524 PRECALL                  1
+            528 CALL                     1
+            538 POP_TOP
+            540 POP_EXCEPT
+            542 LOAD_CONST               0 (None)
+            544 STORE_FAST               9 (exc)
+            546 DELETE_FAST              9 (exc)
+            548 JUMP_BACKWARD           78 (to 394)
+        >>  550 LOAD_CONST               0 (None)
+            552 STORE_FAST               9 (exc)
+            554 DELETE_FAST              9 (exc)
+            556 RERAISE                  1
+
+ 61     >>  558 RERAISE                  0
+        >>  560 COPY                     3
+            562 POP_EXCEPT
+            564 RERAISE                  1
+
+ 64     >>  566 LOAD_FAST                7 (last_error)
+            568 POP_JUMP_FORWARD_IF_NONE     2 (to 574)
+
+ 65         570 LOAD_FAST                7 (last_error)
+            572 RAISE_VARARGS            1
+
+ 66     >>  574 LOAD_FAST                3 (removed)
+            576 LOAD_METHOD             16 (append)
+            598 LOAD_FAST                5 (target)
+            600 PRECALL                  1
+            604 CALL                     1
+            614 POP_TOP
+            616 JUMP_BACKWARD          210 (to 198)
+
+ 67     >>  618 LOAD_FAST                3 (removed)
+            620 RETURN_VALUE
+ExceptionTable:
+  400 to 442 -> 448 [2]
+  448 to 470 -> 560 [3] lasti
+  478 to 494 -> 560 [3] lasti
+  496 to 538 -> 550 [3] lasti
+  550 to 558 -> 560 [3] lasti
+
+===== <module>.streetsmart_state_path (line 70) =====
+ 70           0 RESUME                   0
+
+ 71           2 LOAD_GLOBAL              1 (NULL + streetsmart_data_dir)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 LOAD_CONST               1 ('state.json')
+             30 BINARY_OP               11 (/)
+             34 RETURN_VALUE
+
+===== <module>.default_streetsmart_state (line 74) =====
+ 74           0 RESUME                   0
+
+ 76           2 LOAD_CONST               1 (0)
+
+ 77           4 LOAD_CONST               0 (None)
+
+ 75           6 LOAD_CONST               2 (('version', 'selection'))
+              8 BUILD_CONST_KEY_MAP      2
+             10 RETURN_VALUE
+
+===== <module>.load_streetsmart_state (line 81) =====
+ 81           0 RESUME                   0
+
+ 82           2 LOAD_GLOBAL              1 (NULL + streetsmart_state_path)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               0 (state_path)
+
+ 83          30 NOP
+
+ 84          32 LOAD_GLOBAL              3 (NULL + json)
+             44 LOAD_ATTR                2 (loads)
+             54 LOAD_FAST                0 (state_path)
+             56 LOAD_METHOD              3 (read_text)
+             78 LOAD_CONST               1 ('utf-8')
+             80 KW_NAMES                 2
+             82 PRECALL                  1
+             86 CALL                     1
+             96 PRECALL                  1
+            100 CALL                     1
+            110 STORE_FAST               1 (payload)
+            112 JUMP_FORWARD            60 (to 234)
+        >>  114 PUSH_EXC_INFO
+
+ 85         116 LOAD_GLOBAL              8 (FileNotFoundError)
+            128 LOAD_GLOBAL             10 (OSError)
+            140 LOAD_GLOBAL              2 (json)
+            152 LOAD_ATTR                6 (JSONDecodeError)
+            162 LOAD_GLOBAL             14 (TypeError)
+            174 LOAD_GLOBAL             16 (ValueError)
+            186 BUILD_TUPLE              5
+            188 CHECK_EXC_MATCH
+            190 POP_JUMP_FORWARD_IF_FALSE    17 (to 226)
+            192 POP_TOP
+
+ 86         194 LOAD_GLOBAL             19 (NULL + default_streetsmart_state)
+            206 PRECALL                  0
+            210 CALL                     0
+            220 SWAP                     2
+            222 POP_EXCEPT
+            224 RETURN_VALUE
+
+ 85     >>  226 RERAISE                  0
+        >>  228 COPY                     3
+            230 POP_EXCEPT
+            232 RERAISE                  1
+
+ 87     >>  234 LOAD_GLOBAL             21 (NULL + isinstance)
+            246 LOAD_FAST                1 (payload)
+            248 LOAD_GLOBAL             22 (dict)
+            260 PRECALL                  2
+            264 CALL                     2
+            274 POP_JUMP_FORWARD_IF_TRUE    14 (to 304)
+
+ 88         276 LOAD_GLOBAL             19 (NULL + default_streetsmart_state)
+            288 PRECALL                  0
+            292 CALL                     0
+            302 RETURN_VALUE
+
+ 89     >>  304 LOAD_FAST                1 (payload)
+            306 LOAD_METHOD             12 (get)
+            328 LOAD_CONST               3 ('version')
+            330 LOAD_CONST               4 (0)
+            332 PRECALL                  2
+            336 CALL                     2
+            346 STORE_FAST               2 (version)
+
+ 90         348 NOP
+
+ 91         350 LOAD_GLOBAL             27 (NULL + int)
+            362 LOAD_FAST                2 (version)
+            364 PRECALL                  1
+            368 CALL                     1
+            378 STORE_FAST               3 (normalized_version)
+            380 JUMP_FORWARD            25 (to 432)
+        >>  382 PUSH_EXC_INFO
+
+ 92         384 LOAD_GLOBAL             14 (TypeError)
+            396 LOAD_GLOBAL             16 (ValueError)
+            408 BUILD_TUPLE              2
+            410 CHECK_EXC_MATCH
+            412 POP_JUMP_FORWARD_IF_FALSE     5 (to 424)
+            414 POP_TOP
+
+ 93         416 LOAD_CONST               4 (0)
+            418 STORE_FAST               3 (normalized_version)
+            420 POP_EXCEPT
+            422 JUMP_FORWARD             4 (to 432)
+
+ 92     >>  424 RERAISE                  0
+        >>  426 COPY                     3
+            428 POP_EXCEPT
+            430 RERAISE                  1
+
+ 94     >>  432 LOAD_FAST                1 (payload)
+            434 LOAD_METHOD             12 (get)
+            456 LOAD_CONST               5 ('selection')
+            458 PRECALL                  1
+            462 CALL                     1
+            472 STORE_FAST               4 (selection)
+
+ 95         474 LOAD_FAST                4 (selection)
+            476 POP_JUMP_FORWARD_IF_NONE    23 (to 524)
+            478 LOAD_GLOBAL             21 (NULL + isinstance)
+            490 LOAD_FAST                4 (selection)
+            492 LOAD_GLOBAL             22 (dict)
+            504 PRECALL                  2
+            508 CALL                     2
+            518 POP_JUMP_FORWARD_IF_TRUE     2 (to 524)
+
+ 96         520 LOAD_CONST               0 (None)
+            522 STORE_FAST               4 (selection)
+
+ 98     >>  524 LOAD_FAST                3 (normalized_version)
+
+ 99         526 LOAD_FAST                4 (selection)
+
+ 97         528 LOAD_CONST               6 (('version', 'selection'))
+            530 BUILD_CONST_KEY_MAP      2
+            532 RETURN_VALUE
+ExceptionTable:
+  32 to 110 -> 114 [0]
+  114 to 220 -> 228 [1] lasti
+  226 to 226 -> 228 [1] lasti
+  350 to 378 -> 382 [0]
+  382 to 418 -> 426 [1] lasti
+  424 to 424 -> 426 [1] lasti
+
+===== <module>.save_streetsmart_state (line 103) =====
+103           0 RESUME                   0
+
+104           2 LOAD_GLOBAL              1 (NULL + streetsmart_state_path)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               1 (state_path)
+
+105          30 LOAD_FAST                1 (state_path)
+             32 LOAD_ATTR                1 (parent)
+             42 LOAD_METHOD              2 (mkdir)
+             64 LOAD_CONST               1 (True)
+             66 LOAD_CONST               1 (True)
+             68 KW_NAMES                 2
+             70 PRECALL                  2
+             74 CALL                     2
+             84 POP_TOP
+
+107          86 LOAD_GLOBAL              7 (NULL + time)
+             98 LOAD_ATTR                4 (time_ns)
+            108 PRECALL                  0
+            112 CALL                     0
+
+108         122 LOAD_FAST                0 (selection)
+
+106         124 LOAD_CONST               3 (('version', 'selection'))
+            126 BUILD_CONST_KEY_MAP      2
+            128 STORE_FAST               2 (payload)
+
+110         130 LOAD_FAST                1 (state_path)
+            132 LOAD_METHOD              5 (write_text)
+            154 LOAD_GLOBAL             13 (NULL + json)
+            166 LOAD_ATTR                7 (dumps)
+            176 LOAD_FAST                2 (payload)
+            178 LOAD_CONST               1 (True)
+            180 LOAD_CONST               4 (2)
+            182 KW_NAMES                 5
+            184 PRECALL                  3
+            188 CALL                     3
+            198 LOAD_CONST               6 ('utf-8')
+            200 KW_NAMES                 7
+            202 PRECALL                  2
+            206 CALL                     2
+            216 POP_TOP
+
+111         218 LOAD_FAST                1 (state_path)
+            220 RETURN_VALUE
+
+===== <module>.streetsmart_selection_center (line 114) =====
+114           0 RESUME                   0
+
+115           2 LOAD_GLOBAL              1 (NULL + isinstance)
+             14 LOAD_FAST                0 (selection)
+             16 LOAD_GLOBAL              2 (dict)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 POP_JUMP_FORWARD_IF_TRUE     2 (to 48)
+
+116          44 LOAD_CONST               0 (None)
+             46 RETURN_VALUE
+
+117     >>   48 LOAD_FAST                0 (selection)
+             50 LOAD_METHOD              2 (get)
+             72 LOAD_CONST               1 ('center')
+             74 PRECALL                  1
+             78 CALL                     1
+             88 STORE_FAST               1 (center)
+
+118          90 LOAD_GLOBAL              1 (NULL + isinstance)
+            102 LOAD_FAST                1 (center)
+            104 LOAD_GLOBAL              6 (list)
+            116 LOAD_GLOBAL              8 (tuple)
+            128 BUILD_TUPLE              2
+            130 PRECALL                  2
+            134 CALL                     2
+            144 POP_JUMP_FORWARD_IF_FALSE    19 (to 184)
+            146 LOAD_GLOBAL             11 (NULL + len)
+            158 LOAD_FAST                1 (center)
+            160 PRECALL                  1
+            164 CALL                     1
+            174 LOAD_CONST               2 (2)
+            176 COMPARE_OP               0 (<)
+            182 POP_JUMP_FORWARD_IF_FALSE     2 (to 188)
+
+119     >>  184 LOAD_CONST               0 (None)
+            186 RETURN_VALUE
+
+120     >>  188 NOP
+
+121         190 LOAD_GLOBAL             13 (NULL + float)
+            202 LOAD_FAST                1 (center)
+            204 LOAD_CONST               3 (0)
+            206 BINARY_SUBSCR
+            216 PRECALL                  1
+            220 CALL                     1
+            230 STORE_FAST               2 (x)
+
+122         232 LOAD_GLOBAL             13 (NULL + float)
+            244 LOAD_FAST                1 (center)
+            246 LOAD_CONST               4 (1)
+            248 BINARY_SUBSCR
+            258 PRECALL                  1
+            262 CALL                     1
+            272 STORE_FAST               3 (y)
+            274 JUMP_FORWARD            24 (to 324)
+        >>  276 PUSH_EXC_INFO
+
+123         278 LOAD_GLOBAL             14 (TypeError)
+            290 LOAD_GLOBAL             16 (ValueError)
+            302 BUILD_TUPLE              2
+            304 CHECK_EXC_MATCH
+            306 POP_JUMP_FORWARD_IF_FALSE     4 (to 316)
+            308 POP_TOP
+
+124         310 POP_EXCEPT
+            312 LOAD_CONST               0 (None)
+            314 RETURN_VALUE
+
+123     >>  316 RERAISE                  0
+        >>  318 COPY                     3
+            320 POP_EXCEPT
+            322 RERAISE                  1
+
+125     >>  324 LOAD_FAST                2 (x)
+            326 LOAD_FAST                2 (x)
+            328 COMPARE_OP               2 (==)
+            334 POP_JUMP_FORWARD_IF_FALSE     6 (to 348)
+            336 LOAD_FAST                3 (y)
+            338 LOAD_FAST                3 (y)
+            340 COMPARE_OP               2 (==)
+            346 POP_JUMP_FORWARD_IF_TRUE     2 (to 352)
+
+126     >>  348 LOAD_CONST               0 (None)
+            350 RETURN_VALUE
+
+127     >>  352 LOAD_FAST                2 (x)
+            354 LOAD_FAST                3 (y)
+            356 BUILD_TUPLE              2
+            358 RETURN_VALUE
+ExceptionTable:
+  190 to 272 -> 276 [0]
+  276 to 308 -> 318 [1] lasti
+  316 to 316 -> 318 [1] lasti
+
+===== <module>.streetsmart_selection_url (line 130) =====
+130           0 RESUME                   0
+
+131           2 LOAD_GLOBAL              1 (NULL + streetsmart_selection_center)
+             14 LOAD_FAST                0 (selection)
+             16 PRECALL                  1
+             20 CALL                     1
+             30 STORE_FAST               1 (center)
+
+132          32 LOAD_FAST                1 (center)
+             34 POP_JUMP_FORWARD_IF_NOT_NONE     7 (to 50)
+
+133          36 LOAD_GLOBAL              2 (STREETSMART_WEB_URL)
+             48 RETURN_VALUE
+
+134     >>   50 LOAD_FAST                1 (center)
+             52 LOAD_CONST               1 (0)
+             54 BINARY_SUBSCR
+             64 LOAD_CONST               2 ('.2f')
+             66 FORMAT_VALUE             4 (with format)
+             68 LOAD_CONST               3 (';')
+             70 LOAD_FAST                1 (center)
+             72 LOAD_CONST               4 (1)
+             74 BINARY_SUBSCR
+             84 LOAD_CONST               2 ('.2f')
+             86 FORMAT_VALUE             4 (with format)
+             88 LOAD_CONST               3 (';')
+             90 LOAD_GLOBAL              4 (STREETSMART_RD_SRS)
+            102 FORMAT_VALUE             0
+            104 BUILD_STRING             5
+            106 STORE_FAST               2 (query)
+
+135         108 LOAD_GLOBAL              2 (STREETSMART_WEB_URL)
+            120 FORMAT_VALUE             0
+            122 LOAD_CONST               5 ('?q=')
+            124 LOAD_GLOBAL              7 (NULL + quote)
+            136 LOAD_FAST                2 (query)
+            138 LOAD_CONST               6 (';:.-')
+            140 KW_NAMES                 7
+            142 PRECALL                  2
+            146 CALL                     2
+            156 FORMAT_VALUE             0
+            158 BUILD_STRING             3
+            160 RETURN_VALUE
+
+===== <module>.streetsmart_login_script (line 138) =====
+138           0 RESUME                   0
+
+139           2 LOAD_CONST               1 ('\n    (() => {\n      const USERNAME = ')
+
+141           4 LOAD_GLOBAL              1 (NULL + json)
+             16 LOAD_ATTR                1 (dumps)
+             26 LOAD_FAST                0 (username)
+             28 PRECALL                  1
+             32 CALL                     1
+
+139          42 FORMAT_VALUE             0
+             44 LOAD_CONST               2 (';\n      const PASSWORD = ')
+
+142          46 LOAD_GLOBAL              1 (NULL + json)
+             58 LOAD_ATTR                1 (dumps)
+             68 LOAD_FAST                1 (password)
+             70 PRECALL                  1
+             74 CALL                     1
+
+139          84 FORMAT_VALUE             0
+             86 LOAD_CONST               3 (';\n      const AUTO_LOGIN_COUNTER_KEY = \'klic-streetsmart-auto-login-count\';\n      const NEXT_LABELS = [\'volgende\', \'next\', \'continue\', \'doorgaan\'];\n      const SUBMIT_LABELS = [\'inloggen\', \'log in\', \'login\', \'sign in\', \'aanmelden\'];\n      const DASHBOARD_HEIGHT_THRESHOLD = 120;\n      const ACTION_DEBOUNCE_MS = 1400;\n      const FIELD_SETTLE_MS = 260;\n      const MAX_AUTO_LOGIN_ACTIONS = 6;\n\n      const normalizeText = (value) => String(value || \'\').replace(/\\s+/g, \' \').trim().toLowerCase();\n\n      const isVisible = (element) => {\n        if (!(element instanceof HTMLElement)) {\n          return false;\n        }\n        if (element.hidden || element.getAttribute(\'aria-hidden\') === \'true\' || element.disabled) {\n          return false;\n        }\n        const style = window.getComputedStyle(element);\n        const rect = element.getBoundingClientRect();\n        return style.display !== \'none\' && style.visibility !== \'hidden\' && rect.width > 0 && rect.height > 0;\n      };\n\n      const firstVisible = (selectors) => {\n        for (const selector of selectors) {\n          const matches = Array.from(document.querySelectorAll(selector));\n          for (const element of matches) {\n            if (isVisible(element)) {\n              return element;\n            }\n          }\n        }\n        return null;\n      };\n\n      const setFieldValue = (element, value) => {\n        if (!element) {\n          return;\n        }\n        const prototype = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;\n        const descriptor = Object.getOwnPropertyDescriptor(prototype, \'value\');\n        if (descriptor && typeof descriptor.set === \'function\') {\n          descriptor.set.call(element, value);\n        } else {\n          element.value = value;\n        }\n        element.dispatchEvent(new Event(\'input\', { bubbles: true }));\n        element.dispatchEvent(new Event(\'change\', { bubbles: true }));\n      };\n\n      const findActionButton = (labels) => {\n        const candidates = Array.from(\n          document.querySelectorAll(\'button, input[type="submit"], input[type="button"]\')\n        );\n        for (const candidate of candidates) {\n          if (!(candidate instanceof HTMLElement) || !isVisible(candidate)) {\n            continue;\n          }\n          const label = normalizeText(\n            candidate.textContent || candidate.value || candidate.getAttribute(\'aria-label\') || \'\'\n          );\n          if (labels.some((expected) => label.includes(expected))) {\n            return candidate;\n          }\n        }\n        return null;\n      };\n\n      const clickElement = (element) => {\n        if (!(element instanceof HTMLElement) || !isVisible(element)) {\n          return false;\n        }\n        element.dispatchEvent(new MouseEvent(\'mousedown\', { bubbles: true, cancelable: true, view: window }));\n        element.dispatchEvent(new MouseEvent(\'mouseup\', { bubbles: true, cancelable: true, view: window }));\n        element.click();\n        return true;\n      };\n\n      const submitForm = (form, submitter) => {\n        if (!(form instanceof HTMLFormElement)) {\n          return false;\n        }\n        if (typeof form.requestSubmit === \'function\') {\n          if (submitter instanceof HTMLElement) {\n            form.requestSubmit(submitter);\n          } else {\n            form.requestSubmit();\n          }\n        } else {\n          form.submit();\n        }\n        return true;\n      };\n\n      const navigateSameWindow = (rawUrl) => {\n        if (!rawUrl) {\n          return window;\n        }\n        const urlText = String(rawUrl).trim();\n        if (!urlText || urlText.startsWith(\'javascript:\') || urlText.startsWith(\'mailto:\') || urlText.startsWith(\'tel:\')) {\n          return window;\n        }\n        try {\n          window.location.href = new URL(urlText, window.location.href).href;\n        } catch (_error) {\n          window.location.href = urlText;\n        }\n        return window;\n      };\n\n      if (!window.__klicStreetSmartBrowserPatched) {\n        window.__klicStreetSmartBrowserPatched = true;\n\n        window.open = function(url) {\n          return navigateSameWindow(url);\n        };\n\n        document.addEventListener(\'click\', (event) => {\n          if (event.defaultPrevented || event.button !== 0) {\n            return;\n          }\n          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {\n            return;\n          }\n          const anchor = event.target instanceof Element ? event.target.closest(\'a[href]\') : null;\n          if (!anchor || anchor.hasAttribute(\'download\')) {\n            return;\n          }\n          const target = String(anchor.getAttribute(\'target\') || \'\').trim().toLowerCase();\n          if (target !== \'_blank\' && target !== \'_new\') {\n            return;\n          }\n          event.preventDefault();\n          navigateSameWindow(anchor.href || anchor.getAttribute(\'href\'));\n        }, true);\n      }\n\n      const collapseDashboard = () => {\n        const tabsContainer = document.querySelector(\'.tabs-container\');\n        if (!(tabsContainer instanceof HTMLElement) || !isVisible(tabsContainer)) {\n          return false;\n        }\n        const rect = tabsContainer.getBoundingClientRect();\n        if (rect.height <= DASHBOARD_HEIGHT_THRESHOLD) {\n          return false;\n        }\n        const now = Date.now();\n        const lastClickAt = Number(window.__klicStreetSmartDashboardClickAt || \'0\');\n        if ((now - lastClickAt) < ACTION_DEBOUNCE_MS) {\n          return false;\n        }\n        const collapseButton = firstVisible([\n          \'button[data-testid="dashboard-collapse-button"]\',\n          \'button.dashboard-expand\',\n        ]);\n        if (collapseButton) {\n          window.__klicStreetSmartDashboardClickAt = now;\n          return clickElement(collapseButton);\n        }\n        tabsContainer.style.maxHeight = \'0px\';\n        tabsContainer.style.overflow = \'hidden\';\n        tabsContainer.style.border = \'0\';\n        tabsContainer.style.padding = \'0\';\n        return true;\n      };\n\n      const mosaicWindows = () => Array.from(\n        document.querySelectorAll(\'.mosaic-window.cm-mosaic-window, .mosaic-window\')\n      ).filter((element) => {\n        if (!(element instanceof HTMLElement) || !isVisible(element)) {\n          return false;\n        }\n        const rect = element.getBoundingClientRect();\n        return rect.width >= 180 && rect.height >= 140;\n      });\n\n      const windowSignature = (windows) => windows\n        .map((element) => {\n          const rect = element.getBoundingClientRect();\n          return `${Math.round(rect.left)}:${Math.round(rect.top)}:${Math.round(rect.width)}:${Math.round(rect.height)}`;\n        })\n        .join(\'|\');\n\n      const preferredWindow = (windows) => {\n        const viewportCenter = window.innerWidth / 2;\n        const items = windows.map((element) => {\n          const rect = element.getBoundingClientRect();\n          const haystack = normalizeText([\n            element.className || \'\',\n            element.getAttribute(\'data-testid\') || \'\',\n            element.textContent || \'\',\n            Array.from(element.querySelectorAll(\'[class],[data-testid]\'))\n              .slice(0, 28)\n              .map((node) => [node.className || \'\', node.getAttribute(\'data-testid\') || \'\'].join(\' \'))\n              .join(\' \'),\n          ].join(\' \'));\n          let score = 0;\n          if (haystack.includes(\'panorama\')) {\n            score += 40;\n          }\n          if (haystack.includes(\'cyclorama\') || haystack.includes(\'recording\') || haystack.includes(\'street\')) {\n            score += 30;\n          }\n          if (haystack.includes(\'oblique\')) {\n            score += 12;\n          }\n          if (haystack.includes(\'point cloud\')) {\n            score += 8;\n          }\n          if (haystack.includes(\'viewer-container__map\') || haystack.includes(\'location-map\') || haystack.includes(\'basemap\')) {\n            score -= 30;\n          }\n          const centerX = rect.left + (rect.width / 2);\n          score -= Math.abs(centerX - viewportCenter) / Math.max(window.innerWidth, 1);\n          return {\n            element,\n            rect,\n            centerX,\n            score,\n          };\n        });\n        if (!items.length) {\n          return null;\n        }\n        if (items.length >= 3) {\n          const middleItem = [...items].sort((left, right) => left.centerX - right.centerX)[Math.floor(items.length / 2)];\n          if (middleItem) {\n            return middleItem.element;\n          }\n        }\n        items.sort((left, right) => right.score - left.score);\n        return items[0].element;\n      };\n\n      const maximizePreferredWindow = () => {\n        const windows = mosaicWindows();\n        if (windows.length < 2) {\n          return false;\n        }\n        const signature = windowSignature(windows);\n        if (window.__klicStreetSmartMaximizedSignature === signature) {\n          return false;\n        }\n        const now = Date.now();\n        const lastClickAt = Number(window.__klicStreetSmartMaximizeClickAt || \'0\');\n        if ((now - lastClickAt) < ACTION_DEBOUNCE_MS) {\n          return false;\n        }\n        const targetWindow = preferredWindow(windows);\n        if (!(targetWindow instanceof HTMLElement)) {\n          return false;\n        }\n        const maximizeButton = Array.from(\n          targetWindow.querySelectorAll(\n            \'button.btn-maximize, button[data-testid^="maxmize-"], button[data-testid^="maximize-"]\'\n          )\n        ).find((element) => isVisible(element));\n        if (!(maximizeButton instanceof HTMLElement)) {\n          return false;\n        }\n        window.__klicStreetSmartMaximizeClickAt = now;\n        window.__klicStreetSmartMaximizedSignature = signature;\n        return clickElement(maximizeButton);\n      };\n\n      const applyViewerLayout = () => {\n        try {\n          collapseDashboard();\n        } catch (_error) {\n        }\n        try {\n          maximizePreferredWindow();\n        } catch (_error) {\n        }\n      };\n\n      if (!window.__klicStreetSmartLayoutTimer) {\n        window.__klicStreetSmartLayoutTimer = window.setInterval(() => {\n          applyViewerLayout();\n        }, 1200);\n        document.addEventListener(\'visibilitychange\', () => {\n          if (!document.hidden) {\n            applyViewerLayout();\n          }\n        }, true);\n      }\n      window.setTimeout(applyViewerLayout, 120);\n      window.setTimeout(applyViewerLayout, 850);\n      window.setTimeout(applyViewerLayout, 2400);\n\n      const authState = window.__klicStreetSmartAuthState || (window.__klicStreetSmartAuthState = {\n        lastActionAt: 0,\n        lastActionKey: \'\',\n        lastFieldFillAt: 0,\n        lastFieldStage: \'\',\n      });\n\n      const getAttempts = () => Number(sessionStorage.getItem(AUTO_LOGIN_COUNTER_KEY) || \'0\');\n      const clearAttempts = () => {\n        sessionStorage.removeItem(AUTO_LOGIN_COUNTER_KEY);\n        authState.lastActionKey = \'\';\n      };\n      const bumpAttempts = () => {\n        const nextAttempts = getAttempts() + 1;\n        sessionStorage.setItem(AUTO_LOGIN_COUNTER_KEY, String(nextAttempts));\n        return nextAttempts;\n      };\n      const canPerformAction = (actionKey) => {\n        const now = Date.now();\n        if (authState.lastActionKey === actionKey && (now - authState.lastActionAt) < ACTION_DEBOUNCE_MS) {\n          return false;\n        }\n        authState.lastActionAt = now;\n        authState.lastActionKey = actionKey;\n        return true;\n      };\n      const noteFieldFill = (stage) => {\n        authState.lastFieldStage = stage;\n        authState.lastFieldFillAt = Date.now();\n      };\n      const fieldRecentlyFilled = (stage) => {\n        return authState.lastFieldStage === stage && (Date.now() - authState.lastFieldFillAt) < FIELD_SETTLE_MS;\n      };\n      const syncFieldValue = (element, value, stage) => {\n        if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLTextAreaElement)) {\n          return false;\n        }\n        if (String(element.value || \'\') === String(value || \'\')) {\n          return false;\n        }\n        element.focus();\n        setFieldValue(element, value);\n        noteFieldFill(stage);\n        return true;\n      };\n\n      const loginFields = () => {\n        return {\n          usernameInput: firstVisible([\n            \'input[name="username"]\',\n            \'input[name="email"]\',\n            \'input[name="identifier"]\',\n            \'input[name="loginfmt"]\',\n            \'input[type="email"]\',\n            \'input[autocomplete="username"]\',\n            \'input[id*="user"]\',\n            \'input[id*="email"]\',\n            \'input[id*="login"]\',\n          ]),\n          passwordInput: firstVisible([\n            \'input[name="password"]\',\n            \'input[name="passwd"]\',\n            \'input[type="password"]\',\n            \'input[autocomplete="current-password"]\',\n            \'input[id*="pass"]\',\n          ]),\n        };\n      };\n\n      const runAutoLoginStep = () => {\n        const fields = loginFields();\n        const usernameInput = fields.usernameInput;\n        const passwordInput = fields.passwordInput;\n        if (!usernameInput && !passwordInput) {\n          clearAttempts();\n          return \'no-login-form\';\n        }\n\n        if (!USERNAME || !PASSWORD) {\n          return \'missing-saved-credentials\';\n        }\n\n        if (getAttempts() >= MAX_AUTO_LOGIN_ACTIONS) {\n          return \'max-attempts-reached\';\n        }\n\n        let changed = false;\n        if (usernameInput) {\n          changed = syncFieldValue(usernameInput, USERNAME, passwordInput ? \'username-password\' : \'username-only\') || changed;\n        }\n        if (passwordInput) {\n          changed = syncFieldValue(passwordInput, PASSWORD, \'password-only\') || changed;\n        }\n        if (changed) {\n          return passwordInput ? \'filled-login-form\' : \'filled-username-form\';\n        }\n\n        if (\n          fieldRecentlyFilled(\'username-only\')\n          || fieldRecentlyFilled(\'username-password\')\n          || fieldRecentlyFilled(\'password-only\')\n        ) {\n          return \'awaiting-field-settle\';\n        }\n\n        const form =\n          (passwordInput && passwordInput.form)\n          || (usernameInput && usernameInput.form)\n          || document.querySelector(\'form\');\n\n        if (passwordInput) {\n          const submitButton = findActionButton(SUBMIT_LABELS) || findActionButton(NEXT_LABELS);\n          if (submitButton && canPerformAction(\'password-button\')) {\n            bumpAttempts();\n            clickElement(submitButton);\n            return \'clicked-login-button\';\n          }\n          if (form && canPerformAction(\'password-form\')) {\n            bumpAttempts();\n            submitForm(form, submitButton);\n            return \'submitted-login-form\';\n          }\n          return \'filled-login-form\';\n        }\n\n        const nextButton = findActionButton(NEXT_LABELS) || findActionButton(SUBMIT_LABELS);\n        if (nextButton && canPerformAction(\'username-button\')) {\n          bumpAttempts();\n          clickElement(nextButton);\n          return \'clicked-next-button\';\n        }\n        if (form && canPerformAction(\'username-form\')) {\n          bumpAttempts();\n          submitForm(form, nextButton);\n          return \'submitted-username-form\';\n        }\n\n        return \'filled-username-form\';\n      };\n\n      const scheduleAutoLogin = (delay = 80) => {\n        if (!USERNAME || !PASSWORD) {\n          return;\n        }\n        window.clearTimeout(window.__klicStreetSmartAutoLoginHandle || 0);\n        window.__klicStreetSmartAutoLoginHandle = window.setTimeout(() => {\n          try {\n            window.__klicStreetSmartLastLoginResult = runAutoLoginStep();\n          } catch (_error) {\n          }\n        }, delay);\n      };\n\n      if (!window.__klicStreetSmartAutoLoginObserverAdded) {\n        window.__klicStreetSmartAutoLoginObserverAdded = true;\n        const observerTarget = document.documentElement || document.body;\n        if (observerTarget) {\n          const observer = new MutationObserver(() => {\n            scheduleAutoLogin(90);\n          });\n          observer.observe(observerTarget, {\n            childList: true,\n            subtree: true,\n            attributes: true,\n            attributeFilter: [\'class\', \'style\', \'hidden\', \'aria-hidden\', \'type\', \'value\'],\n          });\n        }\n        document.addEventListener(\'input\', () => scheduleAutoLogin(160), true);\n        document.addEventListener(\'change\', () => scheduleAutoLogin(160), true);\n        window.addEventListener(\'focus\', () => scheduleAutoLogin(60), true);\n        window.addEventListener(\'pageshow\', () => scheduleAutoLogin(60), true);\n        window.__klicStreetSmartAutoLoginTimer = window.setInterval(() => {\n          scheduleAutoLogin(0);\n        }, 1200);\n      }\n\n      const initialResult = runAutoLoginStep();\n      scheduleAutoLogin(320);\n      return initialResult;\n    })()\n    ')
+             88 BUILD_STRING             5
+             90 RETURN_VALUE

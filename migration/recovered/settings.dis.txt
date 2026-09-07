@@ -1,0 +1,2424 @@
+===== <module> (line 1) =====
+  0           0 RESUME                   0
+
+  1           2 SETUP_ANNOTATIONS
+              4 LOAD_CONST               0 (0)
+              6 LOAD_CONST               1 (('annotations',))
+              8 IMPORT_NAME              0 (__future__)
+             10 IMPORT_FROM              1 (annotations)
+             12 STORE_NAME               1 (annotations)
+             14 POP_TOP
+
+  3          16 LOAD_CONST               0 (0)
+             18 LOAD_CONST               2 (None)
+             20 IMPORT_NAME              2 (json)
+             22 STORE_NAME               2 (json)
+
+  4          24 LOAD_CONST               0 (0)
+             26 LOAD_CONST               2 (None)
+             28 IMPORT_NAME              3 (os)
+             30 STORE_NAME               3 (os)
+
+  5          32 LOAD_CONST               0 (0)
+             34 LOAD_CONST               3 (('asdict', 'dataclass'))
+             36 IMPORT_NAME              4 (dataclasses)
+             38 IMPORT_FROM              5 (asdict)
+             40 STORE_NAME               5 (asdict)
+             42 IMPORT_FROM              6 (dataclass)
+             44 STORE_NAME               6 (dataclass)
+             46 POP_TOP
+
+  6          48 LOAD_CONST               0 (0)
+             50 LOAD_CONST               4 (('Path',))
+             52 IMPORT_NAME              7 (pathlib)
+             54 IMPORT_FROM              8 (Path)
+             56 STORE_NAME               8 (Path)
+             58 POP_TOP
+
+  9          60 LOAD_CONST               5 ((('cyclomedia_aerial', 'Cyclomedia Luchtfoto NL (nieuwste jaar / laagste cm)'), ('pdok', 'Luchtfoto NL actueel (8 cm, deels 5 cm)'), ('cadastral', 'PDOK kadastrale kaart'), ('osm', 'OpenStreetMap')))
+             62 STORE_NAME               9 (MAP_EXPORT_BACKGROUND_OPTIONS)
+             64 LOAD_CONST               6 ('tuple[tuple[str, str], ...]')
+             66 LOAD_NAME               10 (__annotations__)
+             68 LOAD_CONST               7 ('MAP_EXPORT_BACKGROUND_OPTIONS')
+             70 STORE_SUBSCR
+
+ 16          74 LOAD_CONST               8 ((('polygon', 'Witte vlakken per TIFF'), ('centerline', 'Detecteer proefsleuf als polyline (breedte 0.6 m)')))
+             76 STORE_NAME              11 (DXF_TRENCH_EXPORT_OPTIONS)
+             78 LOAD_CONST               6 ('tuple[tuple[str, str], ...]')
+             80 LOAD_NAME               10 (__annotations__)
+             82 LOAD_CONST               9 ('DXF_TRENCH_EXPORT_OPTIONS')
+             84 STORE_SUBSCR
+
+ 21          88 LOAD_CONST              10 ('pdok')
+             90 STORE_NAME              12 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+
+ 22          92 LOAD_CONST              11 ('centerline')
+             94 STORE_NAME              13 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+
+ 23          96 LOAD_CONST              12 (False)
+             98 STORE_NAME              14 (DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT)
+
+ 24         100 LOAD_CONST              12 (False)
+            102 STORE_NAME              15 (DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS)
+
+ 25         104 LOAD_CONST              13 (3.5)
+            106 STORE_NAME              16 (DEFAULT_DXF_LABEL_GAP)
+
+ 26         108 LOAD_CONST              14 ('#000000')
+            110 STORE_NAME              17 (DEFAULT_DXF_CENTERLINE_COLOR)
+
+ 27         112 LOAD_CONST              14 ('#000000')
+            114 STORE_NAME              18 (DEFAULT_DXF_LABEL_COLOR)
+
+ 28         116 LOAD_CONST              15 ('')
+            118 STORE_NAME              19 (DEFAULT_CADASTRAL_TEMPLATE_PATH)
+
+ 29         120 LOAD_CONST              16 ('bgm')
+            122 STORE_NAME              20 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+
+ 30         124 LOAD_CONST              15 ('')
+            126 STORE_NAME              21 (DEFAULT_TEMPLATE_CLIENT_LOGO_PATH)
+
+ 31         128 LOAD_CONST              17 (True)
+            130 STORE_NAME              22 (DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS)
+
+ 32         132 LOAD_CONST              12 (False)
+            134 STORE_NAME              23 (DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET)
+
+ 33         136 LOAD_CONST              17 (True)
+            138 STORE_NAME              24 (DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION)
+
+ 34         140 LOAD_CONST              17 (True)
+            142 STORE_NAME              25 (DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS)
+
+ 35         144 LOAD_CONST              17 (True)
+            146 STORE_NAME              26 (DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS)
+
+ 36         148 LOAD_CONST              17 (True)
+            150 STORE_NAME              27 (DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE)
+
+ 37         152 LOAD_CONST              18 (0.02)
+            154 STORE_NAME              28 (DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+ 38         156 LOAD_CONST              19 (0.005)
+            158 STORE_NAME              29 (MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+ 39         160 LOAD_CONST              20 (0.2)
+            162 STORE_NAME              30 (MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+ 40         164 LOAD_CONST              15 ('')
+            166 STORE_NAME              31 (DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT)
+
+ 41         168 LOAD_CONST              15 ('')
+            170 STORE_NAME              32 (DEFAULT_STREETSMART_USERNAME)
+
+ 42         172 LOAD_CONST              15 ('')
+            174 STORE_NAME              33 (DEFAULT_STREETSMART_PASSWORD)
+
+ 43         176 LOAD_CONST              15 ('')
+            178 STORE_NAME              34 (DEFAULT_KICKTHEMAP_LAST_EMAIL)
+
+ 44         180 LOAD_CONST              21 (0.0)
+            182 STORE_NAME              35 (MIN_DXF_LABEL_GAP)
+
+ 45         184 LOAD_CONST              22 (100.0)
+            186 STORE_NAME              36 (MAX_DXF_LABEL_GAP)
+
+ 46         188 LOAD_CONST              23 (256)
+            190 STORE_NAME              37 (DEFAULT_KICKTHEMAP_RULE_COLOR)
+
+ 47         192 LOAD_CONST              24 (1)
+            194 STORE_NAME              38 (MIN_KICKTHEMAP_RULE_COLOR)
+
+ 48         196 LOAD_CONST              23 (256)
+            198 STORE_NAME              39 (MAX_KICKTHEMAP_RULE_COLOR)
+
+ 49         200 LOAD_CONST              25 ((('water', 'N-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G', 5, 'Waterleiding'), ('data', 'N-OI-KL-DATA-G', 3, 'Datakabel'), ('glasvezel,gv', 'N-OI-KL-DATA_GLASVEZEL-G', 100, 'Glasvezel'), ('ld', 'N-OI-KL-GAS_LD-G', 50, 'Gasleiding LD'), ('hd', 'N-OI-KL-GAS_HD-G', 30, 'Gasleiding HD'), ('ls', 'N-OI-KL-ET_LS-G', 190, 'Laagspanning'), ('ms', 'N-OI-KL-ET_MS-G', 4, 'Middenspanning'), ('monitoring,x', 'N-OI-KL-MONITORING_KABEL-G', 1, 'ONBEKEND'), ('rio,druk', 'N-OI-RI-DRUK-G', 210, 'Riool druk'), ('verval,vrijverval', 'N-OI-RI-VRIJVERVAL-G', 210, 'Riool vrijverval'), ('gevaarlijke inhoud,gs', 'N-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD-G', 20, 'Buisleiding GS'), ('warm', 'B-WE-KL-WARMTENET-G', 80, 'Warmtenet'), ('hs', 'B-WE-KL-ET_HS-G', 1, 'Hoogspanning')))
+            202 STORE_NAME              40 (DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES)
+            204 LOAD_CONST              26 ('tuple[tuple[str, str, int, str], ...]')
+            206 LOAD_NAME               10 (__annotations__)
+            208 LOAD_CONST              27 ('DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES')
+            210 STORE_SUBSCR
+
+ 66         214 LOAD_CONST              28 ((('', 'Geen'), ('brabant_water', 'Brabant Water'), ('enexis', 'Enexis'), ('wml', 'WML'), ('hurkmans', 'Hurkmans groep'), ('hanab', 'Hanab'), ('bgm', 'BGM'), ('apk', 'APK'), ('custom', 'Eigen bestand')))
+            216 STORE_NAME              41 (TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS)
+            218 LOAD_CONST               6 ('tuple[tuple[str, str], ...]')
+            220 LOAD_NAME               10 (__annotations__)
+            222 LOAD_CONST              29 ('TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS')
+            224 STORE_SUBSCR
+
+ 79         228 LOAD_NAME                6 (dataclass)
+
+ 80         230 PUSH_NULL
+            232 LOAD_BUILD_CLASS
+            234 LOAD_CONST              30 (<code object KickTheMapObjectLayerRule at 0x7fee03dcfe30, file "app\settings.py", line 79>)
+            236 MAKE_FUNCTION            0
+            238 LOAD_CONST              31 ('KickTheMapObjectLayerRule')
+            240 PRECALL                  2
+            244 CALL                     2
+
+ 79         254 PRECALL                  0
+            258 CALL                     0
+
+ 80         268 STORE_NAME              42 (KickTheMapObjectLayerRule)
+
+ 87         270 LOAD_NAME                6 (dataclass)
+
+ 88         272 PUSH_NULL
+            274 LOAD_BUILD_CLASS
+            276 LOAD_CONST              32 (<code object KickTheMapSavedAccount at 0x7fee03d52250, file "app\settings.py", line 87>)
+            278 MAKE_FUNCTION            0
+            280 LOAD_CONST              33 ('KickTheMapSavedAccount')
+            282 PRECALL                  2
+            286 CALL                     2
+
+ 87         296 PRECALL                  0
+            300 CALL                     0
+
+ 88         310 STORE_NAME              43 (KickTheMapSavedAccount)
+
+ 93         312 LOAD_NAME                6 (dataclass)
+
+ 94         314 PUSH_NULL
+            316 LOAD_BUILD_CLASS
+            318 LOAD_CONST              34 (<code object AppSettings at 0x559eade03110, file "app\settings.py", line 93>)
+            320 MAKE_FUNCTION            0
+            322 LOAD_CONST              35 ('AppSettings')
+            324 PRECALL                  2
+            328 CALL                     2
+
+ 93         338 PRECALL                  0
+            342 CALL                     0
+
+ 94         352 STORE_NAME              44 (AppSettings)
+
+129         354 LOAD_CONST              78 (('return', 'list[KickTheMapObjectLayerRule]'))
+            356 LOAD_CONST              38 (<code object default_kickthemap_object_layer_rules at 0x7fee039edd10, file "app\settings.py", line 129>)
+            358 MAKE_FUNCTION            4 (annotations)
+            360 STORE_NAME              45 (default_kickthemap_object_layer_rules)
+
+141         362 LOAD_CONST              79 (('return', 'Path'))
+            364 LOAD_CONST              40 (<code object _settings_path at 0x7fee03d1a130, file "app\settings.py", line 141>)
+            366 MAKE_FUNCTION            4 (annotations)
+            368 STORE_NAME              46 (_settings_path)
+
+146         370 LOAD_CONST              80 (('value', 'object', 'options', 'tuple[tuple[str, str], ...]', 'default', 'str', 'return', 'str'))
+            372 LOAD_CONST              46 (<code object _normalize_choice at 0x7fee03db0ff0, file "app\settings.py", line 146>)
+            374 MAKE_FUNCTION            4 (annotations)
+            376 STORE_NAME              47 (_normalize_choice)
+
+152         378 LOAD_CONST              81 (('value', 'object', 'default', 'bool', 'return', 'bool'))
+            380 LOAD_CONST              48 (<code object _normalize_bool at 0x7fee03d39080, file "app\settings.py", line 152>)
+            382 MAKE_FUNCTION            4 (annotations)
+            384 STORE_NAME              48 (_normalize_bool)
+
+166         386 LOAD_CONST              82 (('value', 'object', 'default', 'float', 'minimum', 'float', 'maximum', 'float', 'return', 'float'))
+            388 LOAD_CONST              52 (<code object _normalize_float at 0x7fee03d19790, file "app\settings.py", line 166>)
+            390 MAKE_FUNCTION            4 (annotations)
+            392 STORE_NAME              49 (_normalize_float)
+
+176         394 LOAD_CONST              83 (('',))
+            396 LOAD_CONST              84 (('value', 'object', 'default', 'str', 'return', 'str'))
+            398 LOAD_CONST              53 (<code object _normalize_text at 0x7fee03d2b990, file "app\settings.py", line 176>)
+            400 MAKE_FUNCTION            5 (defaults, annotations)
+            402 STORE_NAME              50 (_normalize_text)
+
+182         404 LOAD_CONST              83 (('',))
+            406 LOAD_CONST              84 (('value', 'object', 'default', 'str', 'return', 'str'))
+            408 LOAD_CONST              54 (<code object _normalize_email at 0x7fee03d2b660, file "app\settings.py", line 182>)
+            410 MAKE_FUNCTION            5 (defaults, annotations)
+            412 STORE_NAME              51 (_normalize_email)
+
+187         414 LOAD_CONST              85 (('value', 'object', 'return', 'list[KickTheMapSavedAccount]'))
+            416 LOAD_CONST              56 (<code object _normalize_kickthemap_accounts at 0x559eaddfc140, file "app\settings.py", line 187>)
+            418 MAKE_FUNCTION            4 (annotations)
+            420 STORE_NAME              52 (_normalize_kickthemap_accounts)
+
+214         422 LOAD_CONST              84 (('value', 'object', 'default', 'str', 'return', 'str'))
+            424 LOAD_CONST              57 (<code object _normalize_hex_color at 0x7fee03d2e970, file "app\settings.py", line 214>)
+            426 MAKE_FUNCTION            4 (annotations)
+            428 STORE_NAME              53 (_normalize_hex_color)
+
+225         430 LOAD_NAME               37 (DEFAULT_KICKTHEMAP_RULE_COLOR)
+            432 BUILD_TUPLE              1
+            434 LOAD_CONST              86 (('value', 'object', 'default', 'int', 'return', 'int'))
+            436 LOAD_CONST              59 (<code object _normalize_kickthemap_rule_color at 0x7fee03d1a810, file "app\settings.py", line 225>)
+            438 MAKE_FUNCTION            5 (defaults, annotations)
+            440 STORE_NAME              54 (_normalize_kickthemap_rule_color)
+
+233         442 LOAD_CONST              83 (('',))
+            444 LOAD_CONST              87 (('target_layer', 'str', 'keywords', 'str', 'return', 'str'))
+            446 LOAD_CONST              62 (<code object _default_profile_label at 0x559eadd8a5c0, file "app\settings.py", line 233>)
+            448 MAKE_FUNCTION            5 (defaults, annotations)
+            450 STORE_NAME              55 (_default_profile_label)
+
+263         452 LOAD_CONST              88 (('value', 'object', 'return', 'list[KickTheMapObjectLayerRule]'))
+            454 LOAD_CONST              63 (<code object _normalize_kickthemap_object_layer_rules at 0x559eaddf2f90, file "app\settings.py", line 263>)
+            456 MAKE_FUNCTION            4 (annotations)
+            458 STORE_NAME              56 (_normalize_kickthemap_object_layer_rules)
+
+291         460 LOAD_CONST              89 (('return', 'AppSettings'))
+            462 LOAD_CONST              64 (<code object load_settings at 0x559eade0a050, file "app\settings.py", line 291>)
+            464 MAKE_FUNCTION            4 (annotations)
+            466 STORE_NAME              57 (load_settings)
+
+402         468 LOAD_CONST              90 (('settings', 'AppSettings', 'return', 'Path'))
+            470 LOAD_CONST              66 (<code object save_settings at 0x559eade11b70, file "app\settings.py", line 402>)
+            472 MAKE_FUNCTION            4 (annotations)
+            474 STORE_NAME              58 (save_settings)
+
+508         476 LOAD_CONST              91 (('value', 'str', 'options', 'tuple[tuple[str, str], ...]', 'default', 'str', 'return', 'str'))
+            478 LOAD_CONST              67 (<code object _choice_label at 0x7fee03da26f0, file "app\settings.py", line 508>)
+            480 MAKE_FUNCTION            4 (annotations)
+            482 STORE_NAME              59 (_choice_label)
+
+516         484 LOAD_CONST              92 (('label', 'str', 'options', 'tuple[tuple[str, str], ...]', 'default', 'str', 'return', 'str'))
+            486 LOAD_CONST              69 (<code object _choice_value_from_label at 0x7fee03dfe1f0, file "app\settings.py", line 516>)
+            488 MAKE_FUNCTION            4 (annotations)
+            490 STORE_NAME              60 (_choice_value_from_label)
+
+523         492 LOAD_CONST              93 (('value', 'str', 'return', 'str'))
+            494 LOAD_CONST              70 (<code object map_export_background_label at 0x7fee03dfdf20, file "app\settings.py", line 523>)
+            496 MAKE_FUNCTION            4 (annotations)
+            498 STORE_NAME              61 (map_export_background_label)
+
+527         500 LOAD_CONST              94 (('label', 'str', 'return', 'str'))
+            502 LOAD_CONST              71 (<code object map_export_background_value_from_label at 0x7fee03dfe2e0, file "app\settings.py", line 527>)
+            504 MAKE_FUNCTION            4 (annotations)
+            506 STORE_NAME              62 (map_export_background_value_from_label)
+
+531         508 LOAD_CONST              93 (('value', 'str', 'return', 'str'))
+            510 LOAD_CONST              72 (<code object dxf_trench_export_label at 0x7fee03dfe3d0, file "app\settings.py", line 531>)
+            512 MAKE_FUNCTION            4 (annotations)
+            514 STORE_NAME              63 (dxf_trench_export_label)
+
+535         516 LOAD_CONST              94 (('label', 'str', 'return', 'str'))
+            518 LOAD_CONST              73 (<code object dxf_trench_export_value_from_label at 0x7fee03dfe4c0, file "app\settings.py", line 535>)
+            520 MAKE_FUNCTION            4 (annotations)
+            522 STORE_NAME              64 (dxf_trench_export_value_from_label)
+
+539         524 LOAD_CONST              93 (('value', 'str', 'return', 'str'))
+            526 LOAD_CONST              74 (<code object template_client_logo_preset_label at 0x7fee03dfe5b0, file "app\settings.py", line 539>)
+            528 MAKE_FUNCTION            4 (annotations)
+            530 STORE_NAME              65 (template_client_logo_preset_label)
+
+543         532 LOAD_CONST              94 (('label', 'str', 'return', 'str'))
+            534 LOAD_CONST              75 (<code object template_client_logo_preset_value_from_label at 0x7fee03dfe6a0, file "app\settings.py", line 543>)
+            536 MAKE_FUNCTION            4 (annotations)
+            538 STORE_NAME              66 (template_client_logo_preset_value_from_label)
+
+547         540 LOAD_CONST              95 (('value', 'str', 'return', 'tuple[int, int, int]'))
+            542 LOAD_CONST              77 (<code object hex_color_to_rgb at 0x7fee03d90db0, file "app\settings.py", line 547>)
+            544 MAKE_FUNCTION            4 (annotations)
+            546 STORE_NAME              67 (hex_color_to_rgb)
+            548 LOAD_CONST               2 (None)
+            550 RETURN_VALUE
+
+===== <module>.KickTheMapObjectLayerRule (line 79) =====
+ 79           0 RESUME                   0
+              2 LOAD_NAME                0 (__name__)
+              4 STORE_NAME               1 (__module__)
+              6 LOAD_CONST               0 ('KickTheMapObjectLayerRule')
+              8 STORE_NAME               2 (__qualname__)
+             10 SETUP_ANNOTATIONS
+
+ 81          12 LOAD_CONST               1 ('str')
+             14 LOAD_NAME                3 (__annotations__)
+             16 LOAD_CONST               2 ('keywords')
+             18 STORE_SUBSCR
+
+ 82          22 LOAD_CONST               1 ('str')
+             24 LOAD_NAME                3 (__annotations__)
+             26 LOAD_CONST               3 ('target_layer')
+             28 STORE_SUBSCR
+
+ 83          32 LOAD_NAME                4 (DEFAULT_KICKTHEMAP_RULE_COLOR)
+             34 STORE_NAME               5 (color)
+             36 LOAD_CONST               4 ('int')
+             38 LOAD_NAME                3 (__annotations__)
+             40 LOAD_CONST               5 ('color')
+             42 STORE_SUBSCR
+
+ 84          46 LOAD_CONST               6 ('')
+             48 STORE_NAME               6 (profile_label)
+             50 LOAD_CONST               1 ('str')
+             52 LOAD_NAME                3 (__annotations__)
+             54 LOAD_CONST               7 ('profile_label')
+             56 STORE_SUBSCR
+             60 LOAD_CONST               8 (None)
+             62 RETURN_VALUE
+
+===== <module>.KickTheMapSavedAccount (line 87) =====
+ 87           0 RESUME                   0
+              2 LOAD_NAME                0 (__name__)
+              4 STORE_NAME               1 (__module__)
+              6 LOAD_CONST               0 ('KickTheMapSavedAccount')
+              8 STORE_NAME               2 (__qualname__)
+             10 SETUP_ANNOTATIONS
+
+ 89          12 LOAD_CONST               1 ('str')
+             14 LOAD_NAME                3 (__annotations__)
+             16 LOAD_CONST               2 ('email')
+             18 STORE_SUBSCR
+
+ 90          22 LOAD_CONST               3 ('')
+             24 STORE_NAME               4 (password)
+             26 LOAD_CONST               1 ('str')
+             28 LOAD_NAME                3 (__annotations__)
+             30 LOAD_CONST               4 ('password')
+             32 STORE_SUBSCR
+             36 LOAD_CONST               5 (None)
+             38 RETURN_VALUE
+
+===== <module>.AppSettings (line 93) =====
+ 93           0 RESUME                   0
+              2 LOAD_NAME                0 (__name__)
+              4 STORE_NAME               1 (__module__)
+              6 LOAD_CONST               0 ('AppSettings')
+              8 STORE_NAME               2 (__qualname__)
+             10 SETUP_ANNOTATIONS
+
+ 95          12 LOAD_NAME                3 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+             14 STORE_NAME               4 (map_export_background_source)
+             16 LOAD_CONST               1 ('str')
+             18 LOAD_NAME                5 (__annotations__)
+             20 LOAD_CONST               2 ('map_export_background_source')
+             22 STORE_SUBSCR
+
+ 96          26 LOAD_NAME                6 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+             28 STORE_NAME               7 (dxf_trench_export_mode)
+             30 LOAD_CONST               1 ('str')
+             32 LOAD_NAME                5 (__annotations__)
+             34 LOAD_CONST               3 ('dxf_trench_export_mode')
+             36 STORE_SUBSCR
+
+ 97          40 LOAD_NAME                8 (DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT)
+             42 STORE_NAME               9 (include_tiffs_in_dxf_export)
+             44 LOAD_CONST               4 ('bool')
+             46 LOAD_NAME                5 (__annotations__)
+             48 LOAD_CONST               5 ('include_tiffs_in_dxf_export')
+             50 STORE_SUBSCR
+
+ 98          54 LOAD_NAME               10 (DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS)
+             56 STORE_NAME              11 (include_klic_in_map_exports)
+             58 LOAD_CONST               4 ('bool')
+             60 LOAD_NAME                5 (__annotations__)
+             62 LOAD_CONST               6 ('include_klic_in_map_exports')
+             64 STORE_SUBSCR
+
+ 99          68 LOAD_NAME               12 (DEFAULT_DXF_LABEL_GAP)
+             70 STORE_NAME              13 (dxf_label_gap)
+             72 LOAD_CONST               7 ('float')
+             74 LOAD_NAME                5 (__annotations__)
+             76 LOAD_CONST               8 ('dxf_label_gap')
+             78 STORE_SUBSCR
+
+100          82 LOAD_NAME               14 (DEFAULT_DXF_CENTERLINE_COLOR)
+             84 STORE_NAME              15 (dxf_centerline_color)
+             86 LOAD_CONST               1 ('str')
+             88 LOAD_NAME                5 (__annotations__)
+             90 LOAD_CONST               9 ('dxf_centerline_color')
+             92 STORE_SUBSCR
+
+101          96 LOAD_NAME               16 (DEFAULT_DXF_LABEL_COLOR)
+             98 STORE_NAME              17 (dxf_label_color)
+            100 LOAD_CONST               1 ('str')
+            102 LOAD_NAME                5 (__annotations__)
+            104 LOAD_CONST              10 ('dxf_label_color')
+            106 STORE_SUBSCR
+
+102         110 LOAD_NAME               18 (DEFAULT_CADASTRAL_TEMPLATE_PATH)
+            112 STORE_NAME              19 (cadastral_template_path)
+            114 LOAD_CONST               1 ('str')
+            116 LOAD_NAME                5 (__annotations__)
+            118 LOAD_CONST              11 ('cadastral_template_path')
+            120 STORE_SUBSCR
+
+103         124 LOAD_NAME               20 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+            126 STORE_NAME              21 (template_client_logo_preset)
+            128 LOAD_CONST               1 ('str')
+            130 LOAD_NAME                5 (__annotations__)
+            132 LOAD_CONST              12 ('template_client_logo_preset')
+            134 STORE_SUBSCR
+
+104         138 LOAD_NAME               22 (DEFAULT_TEMPLATE_CLIENT_LOGO_PATH)
+            140 STORE_NAME              23 (template_client_logo_path)
+            142 LOAD_CONST               1 ('str')
+            144 LOAD_NAME                5 (__annotations__)
+            146 LOAD_CONST              13 ('template_client_logo_path')
+            148 STORE_SUBSCR
+
+105         152 LOAD_NAME               24 (DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS)
+            154 STORE_NAME              25 (template_include_cross_sections)
+            156 LOAD_CONST               4 ('bool')
+            158 LOAD_NAME                5 (__annotations__)
+            160 LOAD_CONST              14 ('template_include_cross_sections')
+            162 STORE_SUBSCR
+
+106         166 LOAD_NAME               26 (DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET)
+            168 STORE_NAME              27 (template_generate_reverse_cross_section_sheet)
+            170 LOAD_CONST               4 ('bool')
+            172 LOAD_NAME                5 (__annotations__)
+            174 LOAD_CONST              15 ('template_generate_reverse_cross_section_sheet')
+            176 STORE_SUBSCR
+
+107         180 LOAD_NAME               28 (DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION)
+            182 STORE_NAME              29 (template_show_profile_direction)
+            184 LOAD_CONST               4 ('bool')
+            186 LOAD_NAME                5 (__annotations__)
+            188 LOAD_CONST              16 ('template_show_profile_direction')
+            190 STORE_SUBSCR
+
+108         194 LOAD_NAME               30 (DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS)
+            196 STORE_NAME              31 (template_enable_maaiveld_edit_points)
+            198 LOAD_CONST               4 ('bool')
+            200 LOAD_NAME                5 (__annotations__)
+            202 LOAD_CONST              17 ('template_enable_maaiveld_edit_points')
+            204 STORE_SUBSCR
+
+109         208 LOAD_NAME               32 (DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS)
+            210 STORE_NAME              33 (template_avoid_multileader_collisions)
+            212 LOAD_CONST               4 ('bool')
+            214 LOAD_NAME                5 (__annotations__)
+            216 LOAD_CONST              18 ('template_avoid_multileader_collisions')
+            218 STORE_SUBSCR
+
+110         222 LOAD_NAME               34 (DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE)
+            224 STORE_NAME              35 (template_clip_cross_section_markers_to_profile)
+            226 LOAD_CONST               4 ('bool')
+            228 LOAD_NAME                5 (__annotations__)
+            230 LOAD_CONST              19 ('template_clip_cross_section_markers_to_profile')
+            232 STORE_SUBSCR
+
+111         236 LOAD_NAME               36 (DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+            238 STORE_NAME              37 (template_cross_section_marker_diameter)
+            240 LOAD_CONST               7 ('float')
+            242 LOAD_NAME                5 (__annotations__)
+            244 LOAD_CONST              20 ('template_cross_section_marker_diameter')
+            246 STORE_SUBSCR
+
+112         250 LOAD_NAME               38 (DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT)
+            252 STORE_NAME              39 (template_cross_section_diameter_text)
+            254 LOAD_CONST               1 ('str')
+            256 LOAD_NAME                5 (__annotations__)
+            258 LOAD_CONST              21 ('template_cross_section_diameter_text')
+            260 STORE_SUBSCR
+
+113         264 LOAD_NAME               40 (DEFAULT_STREETSMART_USERNAME)
+            266 STORE_NAME              41 (streetsmart_username)
+            268 LOAD_CONST               1 ('str')
+            270 LOAD_NAME                5 (__annotations__)
+            272 LOAD_CONST              22 ('streetsmart_username')
+            274 STORE_SUBSCR
+
+114         278 LOAD_NAME               42 (DEFAULT_STREETSMART_PASSWORD)
+            280 STORE_NAME              43 (streetsmart_password)
+            282 LOAD_CONST               1 ('str')
+            284 LOAD_NAME                5 (__annotations__)
+            286 LOAD_CONST              23 ('streetsmart_password')
+            288 STORE_SUBSCR
+
+115         292 LOAD_NAME               44 (DEFAULT_KICKTHEMAP_LAST_EMAIL)
+            294 STORE_NAME              45 (kickthemap_last_email)
+            296 LOAD_CONST               1 ('str')
+            298 LOAD_NAME                5 (__annotations__)
+            300 LOAD_CONST              24 ('kickthemap_last_email')
+            302 STORE_SUBSCR
+
+116         306 LOAD_CONST              25 (None)
+            308 STORE_NAME              46 (kickthemap_saved_accounts)
+            310 LOAD_CONST              26 ('list[KickTheMapSavedAccount] | None')
+            312 LOAD_NAME                5 (__annotations__)
+            314 LOAD_CONST              27 ('kickthemap_saved_accounts')
+            316 STORE_SUBSCR
+
+117         320 LOAD_CONST              25 (None)
+            322 STORE_NAME              47 (kickthemap_object_layer_rules)
+            324 LOAD_CONST              28 ('list[KickTheMapObjectLayerRule] | None')
+            326 LOAD_NAME                5 (__annotations__)
+            328 LOAD_CONST              29 ('kickthemap_object_layer_rules')
+            330 STORE_SUBSCR
+
+119         334 LOAD_CONST              33 (('return', 'None'))
+            336 LOAD_CONST              32 (<code object __post_init__ at 0x7fee03d0b430, file "app\settings.py", line 119>)
+            338 MAKE_FUNCTION            4 (annotations)
+            340 STORE_NAME              48 (__post_init__)
+            342 LOAD_CONST              25 (None)
+            344 RETURN_VALUE
+
+===== <module>.AppSettings.AppSettings.__post_init__ (line 119) =====
+119           0 RESUME                   0
+
+120           2 LOAD_GLOBAL              1 (NULL + _normalize_email)
+             14 LOAD_FAST                0 (self)
+             16 LOAD_ATTR                1 (kickthemap_last_email)
+             26 PRECALL                  1
+             30 CALL                     1
+             40 LOAD_FAST                0 (self)
+             42 STORE_ATTR               1 (kickthemap_last_email)
+
+121          52 LOAD_GLOBAL              5 (NULL + _normalize_kickthemap_accounts)
+             64 LOAD_FAST                0 (self)
+             66 LOAD_ATTR                3 (kickthemap_saved_accounts)
+             76 PRECALL                  1
+             80 CALL                     1
+             90 LOAD_FAST                0 (self)
+             92 STORE_ATTR               3 (kickthemap_saved_accounts)
+
+122         102 LOAD_CONST               1 (<code object <setcomp> at 0x7fee039edb50, file "app\settings.py", line 122>)
+            104 MAKE_FUNCTION            0
+            106 LOAD_FAST                0 (self)
+            108 LOAD_ATTR                3 (kickthemap_saved_accounts)
+            118 GET_ITER
+            120 PRECALL                  0
+            124 CALL                     0
+            134 STORE_FAST               1 (account_emails)
+
+123         136 LOAD_FAST                0 (self)
+            138 LOAD_ATTR                1 (kickthemap_last_email)
+            148 POP_JUMP_FORWARD_IF_FALSE    55 (to 260)
+            150 LOAD_FAST                0 (self)
+            152 LOAD_ATTR                1 (kickthemap_last_email)
+            162 LOAD_FAST                1 (account_emails)
+            164 CONTAINS_OP              1
+            166 POP_JUMP_FORWARD_IF_FALSE    46 (to 260)
+
+124         168 LOAD_FAST                0 (self)
+            170 LOAD_ATTR                3 (kickthemap_saved_accounts)
+            180 LOAD_METHOD              4 (insert)
+            202 LOAD_CONST               2 (0)
+            204 LOAD_GLOBAL             11 (NULL + KickTheMapSavedAccount)
+            216 LOAD_FAST                0 (self)
+            218 LOAD_ATTR                1 (kickthemap_last_email)
+            228 KW_NAMES                 3
+            230 PRECALL                  1
+            234 CALL                     1
+            244 PRECALL                  2
+            248 CALL                     2
+            258 POP_TOP
+
+125     >>  260 LOAD_FAST                0 (self)
+            262 LOAD_ATTR                6 (kickthemap_object_layer_rules)
+            272 POP_JUMP_FORWARD_IF_NOT_NONE    21 (to 316)
+
+126         274 LOAD_GLOBAL             15 (NULL + default_kickthemap_object_layer_rules)
+            286 PRECALL                  0
+            290 CALL                     0
+            300 LOAD_FAST                0 (self)
+            302 STORE_ATTR               6 (kickthemap_object_layer_rules)
+            312 LOAD_CONST               0 (None)
+            314 RETURN_VALUE
+
+125     >>  316 LOAD_CONST               0 (None)
+            318 RETURN_VALUE
+
+===== <module>.AppSettings.AppSettings.__post_init__.AppSettings.__post_init__.<locals>.<setcomp> (line 122) =====
+122           0 RESUME                   0
+              2 BUILD_SET                0
+              4 LOAD_FAST                0 (.0)
+        >>    6 FOR_ITER                 9 (to 26)
+              8 STORE_FAST               1 (account)
+             10 LOAD_FAST                1 (account)
+             12 LOAD_ATTR                0 (email)
+             22 SET_ADD                  2
+             24 JUMP_BACKWARD           10 (to 6)
+        >>   26 RETURN_VALUE
+
+===== <module>.default_kickthemap_object_layer_rules (line 129) =====
+129           0 RESUME                   0
+
+130           2 LOAD_CONST               1 (<code object <listcomp> at 0x7fee03dcd430, file "app\settings.py", line 130>)
+              4 MAKE_FUNCTION            0
+
+137           6 LOAD_GLOBAL              0 (DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES)
+
+130          18 GET_ITER
+             20 PRECALL                  0
+             24 CALL                     0
+             34 RETURN_VALUE
+
+===== <module>.default_kickthemap_object_layer_rules.default_kickthemap_object_layer_rules.<locals>.<listcomp> (line 130) =====
+130           0 RESUME                   0
+              2 BUILD_LIST               0
+              4 LOAD_FAST                0 (.0)
+        >>    6 FOR_ITER                26 (to 60)
+
+137           8 UNPACK_SEQUENCE          4
+             12 STORE_FAST               1 (keywords)
+             14 STORE_FAST               2 (target_layer)
+             16 STORE_FAST               3 (color)
+             18 STORE_FAST               4 (profile_label)
+
+131          20 LOAD_GLOBAL              1 (NULL + KickTheMapObjectLayerRule)
+
+132          32 LOAD_FAST                1 (keywords)
+
+133          34 LOAD_FAST                2 (target_layer)
+
+134          36 LOAD_FAST                3 (color)
+
+135          38 LOAD_FAST                4 (profile_label)
+
+131          40 KW_NAMES                 0
+             42 PRECALL                  4
+             46 CALL                     4
+
+130          56 LIST_APPEND              2
+             58 JUMP_BACKWARD           27 (to 6)
+        >>   60 RETURN_VALUE
+
+===== <module>._settings_path (line 141) =====
+141           0 RESUME                   0
+
+142           2 LOAD_GLOBAL              1 (NULL + Path)
+             14 LOAD_GLOBAL              2 (os)
+             26 LOAD_ATTR                2 (environ)
+             36 LOAD_METHOD              3 (get)
+             58 LOAD_CONST               1 ('LOCALAPPDATA')
+             60 LOAD_GLOBAL              1 (NULL + Path)
+             72 LOAD_ATTR                4 (home)
+             82 PRECALL                  0
+             86 CALL                     0
+             96 LOAD_CONST               2 ('AppData')
+             98 BINARY_OP               11 (/)
+            102 LOAD_CONST               3 ('Local')
+            104 BINARY_OP               11 (/)
+            108 PRECALL                  2
+            112 CALL                     2
+            122 PRECALL                  1
+            126 CALL                     1
+            136 STORE_FAST               0 (local_appdata)
+
+143         138 LOAD_FAST                0 (local_appdata)
+            140 LOAD_CONST               4 ('KlicTiffKaarten')
+            142 BINARY_OP               11 (/)
+            146 LOAD_CONST               5 ('settings.json')
+            148 BINARY_OP               11 (/)
+            152 RETURN_VALUE
+
+===== <module>._normalize_choice (line 146) =====
+146           0 RESUME                   0
+
+147           2 LOAD_CONST               1 (<code object <setcomp> at 0x7fee03d5b360, file "app\settings.py", line 147>)
+              4 MAKE_FUNCTION            0
+              6 LOAD_FAST                1 (options)
+              8 GET_ITER
+             10 PRECALL                  0
+             14 CALL                     0
+             24 STORE_FAST               3 (valid)
+
+148          26 LOAD_FAST                0 (value)
+             28 POP_JUMP_FORWARD_IF_NONE    51 (to 132)
+             30 LOAD_GLOBAL              1 (NULL + str)
+             42 LOAD_FAST                0 (value)
+             44 PRECALL                  1
+             48 CALL                     1
+             58 LOAD_METHOD              1 (strip)
+             80 PRECALL                  0
+             84 CALL                     0
+             94 LOAD_METHOD              2 (lower)
+            116 PRECALL                  0
+            120 CALL                     0
+            130 JUMP_FORWARD             1 (to 134)
+        >>  132 LOAD_CONST               2 ('')
+        >>  134 STORE_FAST               4 (candidate)
+
+149         136 LOAD_FAST                4 (candidate)
+            138 LOAD_FAST                3 (valid)
+            140 CONTAINS_OP              0
+            142 POP_JUMP_FORWARD_IF_FALSE     2 (to 148)
+            144 LOAD_FAST                4 (candidate)
+            146 JUMP_FORWARD             1 (to 150)
+        >>  148 LOAD_FAST                2 (default)
+        >>  150 RETURN_VALUE
+
+===== <module>._normalize_choice._normalize_choice.<locals>.<setcomp> (line 147) =====
+147           0 RESUME                   0
+              2 BUILD_SET                0
+              4 LOAD_FAST                0 (.0)
+        >>    6 FOR_ITER                 7 (to 22)
+              8 UNPACK_SEQUENCE          2
+             12 STORE_FAST               1 (option_id)
+             14 STORE_FAST               2 (_)
+             16 LOAD_FAST                1 (option_id)
+             18 SET_ADD                  2
+             20 JUMP_BACKWARD            8 (to 6)
+        >>   22 RETURN_VALUE
+
+===== <module>._normalize_bool (line 152) =====
+152           0 RESUME                   0
+
+153           2 LOAD_GLOBAL              1 (NULL + isinstance)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_GLOBAL              2 (bool)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 POP_JUMP_FORWARD_IF_FALSE     2 (to 48)
+
+154          44 LOAD_FAST                0 (value)
+             46 RETURN_VALUE
+
+155     >>   48 LOAD_GLOBAL              1 (NULL + isinstance)
+             60 LOAD_FAST                0 (value)
+             62 LOAD_GLOBAL              4 (str)
+             74 PRECALL                  2
+             78 CALL                     2
+             88 POP_JUMP_FORWARD_IF_FALSE    50 (to 190)
+
+156          90 LOAD_FAST                0 (value)
+             92 LOAD_METHOD              3 (strip)
+            114 PRECALL                  0
+            118 CALL                     0
+            128 LOAD_METHOD              4 (lower)
+            150 PRECALL                  0
+            154 CALL                     0
+            164 STORE_FAST               2 (candidate)
+
+157         166 LOAD_FAST                2 (candidate)
+            168 LOAD_CONST               1 (frozenset({'on', '1', 'yes', 'true', 'ja'}))
+            170 CONTAINS_OP              0
+            172 POP_JUMP_FORWARD_IF_FALSE     2 (to 178)
+
+158         174 LOAD_CONST               2 (True)
+            176 RETURN_VALUE
+
+159     >>  178 LOAD_FAST                2 (candidate)
+            180 LOAD_CONST               3 (frozenset({'false', 'off', '0', 'nee', 'no'}))
+            182 CONTAINS_OP              0
+            184 POP_JUMP_FORWARD_IF_FALSE     2 (to 190)
+
+160         186 LOAD_CONST               4 (False)
+            188 RETURN_VALUE
+
+161     >>  190 LOAD_GLOBAL              1 (NULL + isinstance)
+            202 LOAD_FAST                0 (value)
+            204 LOAD_GLOBAL             10 (int)
+            216 LOAD_GLOBAL             12 (float)
+            228 BUILD_TUPLE              2
+            230 PRECALL                  2
+            234 CALL                     2
+            244 POP_JUMP_FORWARD_IF_FALSE    15 (to 276)
+
+162         246 LOAD_GLOBAL              3 (NULL + bool)
+            258 LOAD_FAST                0 (value)
+            260 PRECALL                  1
+            264 CALL                     1
+            274 RETURN_VALUE
+
+163     >>  276 LOAD_FAST                1 (default)
+            278 RETURN_VALUE
+
+===== <module>._normalize_float (line 166) =====
+166           0 RESUME                   0
+
+167           2 NOP
+
+168           4 LOAD_GLOBAL              1 (NULL + float)
+             16 LOAD_FAST                0 (value)
+             18 PRECALL                  1
+             22 CALL                     1
+             32 STORE_FAST               4 (candidate)
+             34 JUMP_FORWARD            25 (to 86)
+        >>   36 PUSH_EXC_INFO
+
+169          38 LOAD_GLOBAL              2 (TypeError)
+             50 LOAD_GLOBAL              4 (ValueError)
+             62 BUILD_TUPLE              2
+             64 CHECK_EXC_MATCH
+             66 POP_JUMP_FORWARD_IF_FALSE     5 (to 78)
+             68 POP_TOP
+
+170          70 LOAD_FAST                1 (default)
+             72 SWAP                     2
+             74 POP_EXCEPT
+             76 RETURN_VALUE
+
+169     >>   78 RERAISE                  0
+        >>   80 COPY                     3
+             82 POP_EXCEPT
+             84 RERAISE                  1
+
+171     >>   86 LOAD_FAST                4 (candidate)
+             88 LOAD_FAST                4 (candidate)
+             90 COMPARE_OP               3 (!=)
+             96 POP_JUMP_FORWARD_IF_FALSE     2 (to 102)
+
+172          98 LOAD_FAST                1 (default)
+            100 RETURN_VALUE
+
+173     >>  102 LOAD_GLOBAL              7 (NULL + max)
+            114 LOAD_FAST                2 (minimum)
+            116 LOAD_GLOBAL              9 (NULL + min)
+            128 LOAD_FAST                3 (maximum)
+            130 LOAD_FAST                4 (candidate)
+            132 PRECALL                  2
+            136 CALL                     2
+            146 PRECALL                  2
+            150 CALL                     2
+            160 RETURN_VALUE
+ExceptionTable:
+  4 to 32 -> 36 [0]
+  36 to 72 -> 80 [1] lasti
+  78 to 78 -> 80 [1] lasti
+
+===== <module>._normalize_text (line 176) =====
+176           0 RESUME                   0
+
+177           2 LOAD_FAST                0 (value)
+              4 POP_JUMP_FORWARD_IF_NOT_NONE     2 (to 10)
+
+178           6 LOAD_FAST                1 (default)
+              8 RETURN_VALUE
+
+179     >>   10 LOAD_GLOBAL              1 (NULL + str)
+             22 LOAD_FAST                0 (value)
+             24 PRECALL                  1
+             28 CALL                     1
+             38 LOAD_METHOD              1 (strip)
+             60 PRECALL                  0
+             64 CALL                     0
+             74 RETURN_VALUE
+
+===== <module>._normalize_email (line 182) =====
+182           0 RESUME                   0
+
+183           2 LOAD_GLOBAL              1 (NULL + _normalize_text)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_FAST                1 (default)
+             18 PRECALL                  2
+             22 CALL                     2
+             32 STORE_FAST               2 (candidate)
+
+184          34 LOAD_FAST                2 (candidate)
+             36 LOAD_METHOD              1 (lower)
+             58 PRECALL                  0
+             62 CALL                     0
+             72 RETURN_VALUE
+
+===== <module>._normalize_kickthemap_accounts (line 187) =====
+187           0 RESUME                   0
+
+188           2 LOAD_FAST                0 (value)
+              4 POP_JUMP_FORWARD_IF_NONE    21 (to 48)
+              6 LOAD_GLOBAL              1 (NULL + isinstance)
+             18 LOAD_FAST                0 (value)
+             20 LOAD_GLOBAL              2 (list)
+             32 PRECALL                  2
+             36 CALL                     2
+             46 POP_JUMP_FORWARD_IF_TRUE     2 (to 52)
+
+189     >>   48 BUILD_LIST               0
+             50 RETURN_VALUE
+
+190     >>   52 BUILD_LIST               0
+             54 STORE_FAST               1 (normalized)
+
+191          56 LOAD_GLOBAL              5 (NULL + set)
+             68 PRECALL                  0
+             72 CALL                     0
+             82 STORE_FAST               2 (seen)
+
+192          84 LOAD_FAST                0 (value)
+             86 GET_ITER
+        >>   88 FOR_ITER               235 (to 560)
+             90 STORE_FAST               3 (item)
+
+193          92 LOAD_GLOBAL              1 (NULL + isinstance)
+            104 LOAD_FAST                3 (item)
+            106 LOAD_GLOBAL              6 (KickTheMapSavedAccount)
+            118 PRECALL                  2
+            122 CALL                     2
+            132 POP_JUMP_FORWARD_IF_FALSE    41 (to 216)
+
+194         134 LOAD_GLOBAL              9 (NULL + _normalize_email)
+            146 LOAD_FAST                3 (item)
+            148 LOAD_ATTR                5 (email)
+            158 PRECALL                  1
+            162 CALL                     1
+            172 STORE_FAST               4 (candidate_email)
+
+195         174 LOAD_GLOBAL             13 (NULL + _normalize_text)
+            186 LOAD_FAST                3 (item)
+            188 LOAD_ATTR                7 (password)
+            198 PRECALL                  1
+            202 CALL                     1
+            212 STORE_FAST               5 (candidate_password)
+            214 JUMP_FORWARD           107 (to 430)
+
+196     >>  216 LOAD_GLOBAL              1 (NULL + isinstance)
+            228 LOAD_FAST                3 (item)
+            230 LOAD_GLOBAL             16 (dict)
+            242 PRECALL                  2
+            246 CALL                     2
+            256 POP_JUMP_FORWARD_IF_FALSE    69 (to 396)
+
+197         258 LOAD_GLOBAL              9 (NULL + _normalize_email)
+            270 LOAD_FAST                3 (item)
+            272 LOAD_METHOD              9 (get)
+            294 LOAD_CONST               1 ('email')
+            296 PRECALL                  1
+            300 CALL                     1
+            310 PRECALL                  1
+            314 CALL                     1
+            324 STORE_FAST               4 (candidate_email)
+
+198         326 LOAD_GLOBAL             13 (NULL + _normalize_text)
+            338 LOAD_FAST                3 (item)
+            340 LOAD_METHOD              9 (get)
+            362 LOAD_CONST               2 ('password')
+            364 PRECALL                  1
+            368 CALL                     1
+            378 PRECALL                  1
+            382 CALL                     1
+            392 STORE_FAST               5 (candidate_password)
+            394 JUMP_FORWARD            17 (to 430)
+
+200     >>  396 LOAD_GLOBAL              9 (NULL + _normalize_email)
+            408 LOAD_FAST                3 (item)
+            410 PRECALL                  1
+            414 CALL                     1
+            424 STORE_FAST               4 (candidate_email)
+
+201         426 LOAD_CONST               3 ('')
+            428 STORE_FAST               5 (candidate_password)
+
+202     >>  430 LOAD_FAST                4 (candidate_email)
+            432 POP_JUMP_FORWARD_IF_FALSE     4 (to 442)
+            434 LOAD_FAST                4 (candidate_email)
+            436 LOAD_FAST                2 (seen)
+            438 CONTAINS_OP              0
+            440 POP_JUMP_FORWARD_IF_FALSE     1 (to 444)
+
+203     >>  442 JUMP_BACKWARD          178 (to 88)
+
+204     >>  444 LOAD_FAST                2 (seen)
+            446 LOAD_METHOD             10 (add)
+            468 LOAD_FAST                4 (candidate_email)
+            470 PRECALL                  1
+            474 CALL                     1
+            484 POP_TOP
+
+205         486 LOAD_FAST                1 (normalized)
+            488 LOAD_METHOD             11 (append)
+
+206         510 LOAD_GLOBAL              7 (NULL + KickTheMapSavedAccount)
+
+207         522 LOAD_FAST                4 (candidate_email)
+
+208         524 LOAD_FAST                5 (candidate_password)
+
+206         526 KW_NAMES                 4
+            528 PRECALL                  2
+            532 CALL                     2
+
+205         542 PRECALL                  1
+            546 CALL                     1
+            556 POP_TOP
+            558 JUMP_BACKWARD          236 (to 88)
+
+211     >>  560 LOAD_FAST                1 (normalized)
+            562 RETURN_VALUE
+
+===== <module>._normalize_hex_color (line 214) =====
+214           0 RESUME                   0
+
+215           2 LOAD_FAST                0 (value)
+              4 POP_JUMP_FORWARD_IF_NONE    51 (to 108)
+              6 LOAD_GLOBAL              1 (NULL + str)
+             18 LOAD_FAST                0 (value)
+             20 PRECALL                  1
+             24 CALL                     1
+             34 LOAD_METHOD              1 (strip)
+             56 PRECALL                  0
+             60 CALL                     0
+             70 LOAD_METHOD              2 (upper)
+             92 PRECALL                  0
+             96 CALL                     0
+            106 JUMP_FORWARD             1 (to 110)
+        >>  108 LOAD_CONST               1 ('')
+        >>  110 STORE_FAST               2 (candidate)
+
+216         112 LOAD_GLOBAL              7 (NULL + len)
+            124 LOAD_FAST                2 (candidate)
+            126 PRECALL                  1
+            130 CALL                     1
+            140 LOAD_CONST               2 (7)
+            142 COMPARE_OP               3 (!=)
+            148 POP_JUMP_FORWARD_IF_TRUE    21 (to 192)
+            150 LOAD_FAST                2 (candidate)
+            152 LOAD_METHOD              4 (startswith)
+            174 LOAD_CONST               3 ('#')
+            176 PRECALL                  1
+            180 CALL                     1
+            190 POP_JUMP_FORWARD_IF_TRUE     2 (to 196)
+
+217     >>  192 LOAD_FAST                1 (default)
+            194 RETURN_VALUE
+
+218     >>  196 NOP
+
+219         198 LOAD_GLOBAL             11 (NULL + int)
+            210 LOAD_FAST                2 (candidate)
+            212 LOAD_CONST               4 (1)
+            214 LOAD_CONST               0 (None)
+            216 BUILD_SLICE              2
+            218 BINARY_SUBSCR
+            228 LOAD_CONST               5 (16)
+            230 PRECALL                  2
+            234 CALL                     2
+            244 POP_TOP
+            246 JUMP_FORWARD            18 (to 284)
+        >>  248 PUSH_EXC_INFO
+
+220         250 LOAD_GLOBAL             12 (ValueError)
+            262 CHECK_EXC_MATCH
+            264 POP_JUMP_FORWARD_IF_FALSE     5 (to 276)
+            266 POP_TOP
+
+221         268 LOAD_FAST                1 (default)
+            270 SWAP                     2
+            272 POP_EXCEPT
+            274 RETURN_VALUE
+
+220     >>  276 RERAISE                  0
+        >>  278 COPY                     3
+            280 POP_EXCEPT
+            282 RERAISE                  1
+
+222     >>  284 LOAD_FAST                2 (candidate)
+            286 RETURN_VALUE
+ExceptionTable:
+  198 to 244 -> 248 [0]
+  248 to 270 -> 278 [1] lasti
+  276 to 276 -> 278 [1] lasti
+
+===== <module>._normalize_kickthemap_rule_color (line 225) =====
+225           0 RESUME                   0
+
+226           2 NOP
+
+227           4 LOAD_GLOBAL              1 (NULL + int)
+             16 LOAD_FAST                0 (value)
+             18 PRECALL                  1
+             22 CALL                     1
+             32 STORE_FAST               2 (candidate)
+             34 JUMP_FORWARD            25 (to 86)
+        >>   36 PUSH_EXC_INFO
+
+228          38 LOAD_GLOBAL              2 (TypeError)
+             50 LOAD_GLOBAL              4 (ValueError)
+             62 BUILD_TUPLE              2
+             64 CHECK_EXC_MATCH
+             66 POP_JUMP_FORWARD_IF_FALSE     5 (to 78)
+             68 POP_TOP
+
+229          70 LOAD_FAST                1 (default)
+             72 SWAP                     2
+             74 POP_EXCEPT
+             76 RETURN_VALUE
+
+228     >>   78 RERAISE                  0
+        >>   80 COPY                     3
+             82 POP_EXCEPT
+             84 RERAISE                  1
+
+230     >>   86 LOAD_GLOBAL              7 (NULL + max)
+             98 LOAD_GLOBAL              8 (MIN_KICKTHEMAP_RULE_COLOR)
+            110 LOAD_GLOBAL             11 (NULL + min)
+            122 LOAD_GLOBAL             12 (MAX_KICKTHEMAP_RULE_COLOR)
+            134 LOAD_FAST                2 (candidate)
+            136 PRECALL                  2
+            140 CALL                     2
+            150 PRECALL                  2
+            154 CALL                     2
+            164 RETURN_VALUE
+ExceptionTable:
+  4 to 32 -> 36 [0]
+  36 to 72 -> 80 [1] lasti
+  78 to 78 -> 80 [1] lasti
+
+===== <module>._default_profile_label (line 233) =====
+233           0 RESUME                   0
+
+234           2 LOAD_GLOBAL              1 (NULL + str)
+             14 LOAD_FAST                0 (target_layer)
+             16 PRECALL                  1
+             20 CALL                     1
+             30 LOAD_METHOD              1 (strip)
+             52 PRECALL                  0
+             56 CALL                     0
+             66 LOAD_METHOD              2 (upper)
+             88 PRECALL                  0
+             92 CALL                     0
+            102 STORE_FAST               2 (upper_layer)
+
+235         104 LOAD_GLOBAL              1 (NULL + str)
+            116 LOAD_FAST                1 (keywords)
+            118 PRECALL                  1
+            122 CALL                     1
+            132 LOAD_METHOD              1 (strip)
+            154 PRECALL                  0
+            158 CALL                     0
+            168 LOAD_METHOD              2 (upper)
+            190 PRECALL                  0
+            194 CALL                     0
+            204 STORE_FAST               3 (upper_keywords)
+
+236         206 LOAD_CONST               1 ('WARM')
+            208 LOAD_FAST                2 (upper_layer)
+            210 CONTAINS_OP              0
+            212 POP_JUMP_FORWARD_IF_TRUE     4 (to 222)
+            214 LOAD_CONST               1 ('WARM')
+            216 LOAD_FAST                3 (upper_keywords)
+            218 CONTAINS_OP              0
+            220 POP_JUMP_FORWARD_IF_FALSE     2 (to 226)
+
+237     >>  222 LOAD_CONST               2 ('Warmtenet')
+            224 RETURN_VALUE
+
+238     >>  226 LOAD_CONST               3 ('GLASVEZEL')
+            228 LOAD_FAST                2 (upper_layer)
+            230 CONTAINS_OP              0
+            232 POP_JUMP_FORWARD_IF_FALSE     2 (to 238)
+
+239         234 LOAD_CONST               4 ('Glasvezel')
+            236 RETURN_VALUE
+
+240     >>  238 LOAD_CONST               5 ('DATA')
+            240 LOAD_FAST                2 (upper_layer)
+            242 CONTAINS_OP              0
+            244 POP_JUMP_FORWARD_IF_FALSE     2 (to 250)
+
+241         246 LOAD_CONST               6 ('Datakabel')
+            248 RETURN_VALUE
+
+242     >>  250 LOAD_CONST               7 ('WATER')
+            252 LOAD_FAST                2 (upper_layer)
+            254 CONTAINS_OP              0
+            256 POP_JUMP_FORWARD_IF_FALSE     2 (to 262)
+
+243         258 LOAD_CONST               8 ('Waterleiding')
+            260 RETURN_VALUE
+
+244     >>  262 LOAD_CONST               9 ('ET_LS')
+            264 LOAD_FAST                2 (upper_layer)
+            266 CONTAINS_OP              0
+            268 POP_JUMP_FORWARD_IF_FALSE     2 (to 274)
+
+245         270 LOAD_CONST              10 ('Laagspanning')
+            272 RETURN_VALUE
+
+246     >>  274 LOAD_CONST              11 ('ET_MS')
+            276 LOAD_FAST                2 (upper_layer)
+            278 CONTAINS_OP              0
+            280 POP_JUMP_FORWARD_IF_FALSE     2 (to 286)
+
+247         282 LOAD_CONST              12 ('Middenspanning')
+            284 RETURN_VALUE
+
+248     >>  286 LOAD_CONST              13 ('GAS_LD')
+            288 LOAD_FAST                2 (upper_layer)
+            290 CONTAINS_OP              0
+            292 POP_JUMP_FORWARD_IF_FALSE     2 (to 298)
+
+249         294 LOAD_CONST              14 ('Gasleiding LD')
+            296 RETURN_VALUE
+
+250     >>  298 LOAD_CONST              15 ('GAS_HD')
+            300 LOAD_FAST                2 (upper_layer)
+            302 CONTAINS_OP              0
+            304 POP_JUMP_FORWARD_IF_FALSE     2 (to 310)
+
+251         306 LOAD_CONST              16 ('Gasleiding HD')
+            308 RETURN_VALUE
+
+252     >>  310 LOAD_CONST              17 ('MONITORING')
+            312 LOAD_FAST                2 (upper_layer)
+            314 CONTAINS_OP              0
+            316 POP_JUMP_FORWARD_IF_FALSE     2 (to 322)
+
+253         318 LOAD_CONST              18 ('Monitoring')
+            320 RETURN_VALUE
+
+254     >>  322 LOAD_CONST              19 ('VRIJVERVAL')
+            324 LOAD_FAST                2 (upper_layer)
+            326 CONTAINS_OP              0
+            328 POP_JUMP_FORWARD_IF_FALSE     2 (to 334)
+
+255         330 LOAD_CONST              20 ('Riool vrijverval')
+            332 RETURN_VALUE
+
+256     >>  334 LOAD_CONST              21 ('DRUK')
+            336 LOAD_FAST                2 (upper_layer)
+            338 CONTAINS_OP              0
+            340 POP_JUMP_FORWARD_IF_FALSE     2 (to 346)
+
+257         342 LOAD_CONST              22 ('Riool druk')
+            344 RETURN_VALUE
+
+258     >>  346 LOAD_CONST              23 ('GEVAARLIJKE')
+            348 LOAD_FAST                2 (upper_layer)
+            350 CONTAINS_OP              0
+            352 POP_JUMP_FORWARD_IF_FALSE     2 (to 358)
+
+259         354 LOAD_CONST              24 ('Buisleiding GS')
+            356 RETURN_VALUE
+
+260     >>  358 LOAD_GLOBAL              1 (NULL + str)
+            370 LOAD_FAST                1 (keywords)
+            372 PRECALL                  1
+            376 CALL                     1
+            386 LOAD_METHOD              3 (replace)
+            408 LOAD_CONST              25 (';')
+            410 LOAD_CONST              26 (',')
+            412 PRECALL                  2
+            416 CALL                     2
+            426 LOAD_METHOD              4 (split)
+            448 LOAD_CONST              26 (',')
+            450 LOAD_CONST              27 (1)
+            452 PRECALL                  2
+            456 CALL                     2
+            466 LOAD_CONST              28 (0)
+            468 BINARY_SUBSCR
+            478 LOAD_METHOD              1 (strip)
+            500 PRECALL                  0
+            504 CALL                     0
+            514 RETURN_VALUE
+
+===== <module>._normalize_kickthemap_object_layer_rules (line 263) =====
+263           0 RESUME                   0
+
+264           2 LOAD_FAST                0 (value)
+              4 POP_JUMP_FORWARD_IF_NOT_NONE    14 (to 34)
+
+265           6 LOAD_GLOBAL              1 (NULL + default_kickthemap_object_layer_rules)
+             18 PRECALL                  0
+             22 CALL                     0
+             32 RETURN_VALUE
+
+266     >>   34 LOAD_GLOBAL              3 (NULL + isinstance)
+             46 LOAD_FAST                0 (value)
+             48 LOAD_GLOBAL              4 (list)
+             60 PRECALL                  2
+             64 CALL                     2
+             74 POP_JUMP_FORWARD_IF_TRUE    14 (to 104)
+
+267          76 LOAD_GLOBAL              1 (NULL + default_kickthemap_object_layer_rules)
+             88 PRECALL                  0
+             92 CALL                     0
+            102 RETURN_VALUE
+
+269     >>  104 BUILD_LIST               0
+            106 STORE_FAST               1 (normalized_rules)
+
+270         108 LOAD_FAST                0 (value)
+            110 GET_ITER
+        >>  112 FOR_ITER               214 (to 542)
+            114 STORE_FAST               2 (item)
+
+271         116 LOAD_GLOBAL              3 (NULL + isinstance)
+            128 LOAD_FAST                2 (item)
+            130 LOAD_GLOBAL              6 (dict)
+            142 PRECALL                  2
+            146 CALL                     2
+            156 POP_JUMP_FORWARD_IF_TRUE     1 (to 160)
+
+272         158 JUMP_BACKWARD           24 (to 112)
+
+273     >>  160 LOAD_GLOBAL              9 (NULL + _normalize_text)
+            172 LOAD_FAST                2 (item)
+            174 LOAD_METHOD              5 (get)
+            196 LOAD_CONST               1 ('keywords')
+            198 PRECALL                  1
+            202 CALL                     1
+            212 PRECALL                  1
+            216 CALL                     1
+            226 STORE_FAST               3 (keywords)
+
+274         228 LOAD_GLOBAL              9 (NULL + _normalize_text)
+            240 LOAD_FAST                2 (item)
+            242 LOAD_METHOD              5 (get)
+            264 LOAD_CONST               2 ('target_layer')
+            266 PRECALL                  1
+            270 CALL                     1
+            280 PRECALL                  1
+            284 CALL                     1
+            294 STORE_FAST               4 (target_layer)
+
+275         296 LOAD_FAST                3 (keywords)
+            298 POP_JUMP_FORWARD_IF_FALSE     2 (to 304)
+            300 LOAD_FAST                4 (target_layer)
+            302 POP_JUMP_FORWARD_IF_TRUE     1 (to 306)
+
+276     >>  304 JUMP_BACKWARD           97 (to 112)
+
+277     >>  306 LOAD_FAST                1 (normalized_rules)
+            308 LOAD_METHOD              6 (append)
+
+278         330 LOAD_GLOBAL             15 (NULL + KickTheMapObjectLayerRule)
+
+279         342 LOAD_FAST                3 (keywords)
+
+280         344 LOAD_FAST                4 (target_layer)
+
+281         346 LOAD_GLOBAL             17 (NULL + _normalize_kickthemap_rule_color)
+            358 LOAD_FAST                2 (item)
+            360 LOAD_METHOD              5 (get)
+            382 LOAD_CONST               3 ('color')
+            384 PRECALL                  1
+            388 CALL                     1
+            398 PRECALL                  1
+            402 CALL                     1
+
+282         412 LOAD_GLOBAL              9 (NULL + _normalize_text)
+
+283         424 LOAD_FAST                2 (item)
+            426 LOAD_METHOD              5 (get)
+            448 LOAD_CONST               4 ('profile_label')
+            450 PRECALL                  1
+            454 CALL                     1
+
+284         464 LOAD_GLOBAL             19 (NULL + _default_profile_label)
+            476 LOAD_FAST                4 (target_layer)
+            478 LOAD_FAST                3 (keywords)
+            480 PRECALL                  2
+            484 CALL                     2
+
+282         494 PRECALL                  2
+            498 CALL                     2
+
+278         508 KW_NAMES                 5
+            510 PRECALL                  4
+            514 CALL                     4
+
+277         524 PRECALL                  1
+            528 CALL                     1
+            538 POP_TOP
+            540 JUMP_BACKWARD          215 (to 112)
+
+288     >>  542 LOAD_FAST                1 (normalized_rules)
+            544 RETURN_VALUE
+
+===== <module>.load_settings (line 291) =====
+291           0 RESUME                   0
+
+292           2 LOAD_GLOBAL              1 (NULL + _settings_path)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               0 (settings_path)
+
+293          30 NOP
+
+294          32 LOAD_GLOBAL              3 (NULL + json)
+             44 LOAD_ATTR                2 (loads)
+             54 LOAD_FAST                0 (settings_path)
+             56 LOAD_METHOD              3 (read_text)
+             78 LOAD_CONST               1 ('utf-8')
+             80 KW_NAMES                 2
+             82 PRECALL                  1
+             86 CALL                     1
+             96 PRECALL                  1
+            100 CALL                     1
+            110 STORE_FAST               1 (payload)
+            112 JUMP_FORWARD            60 (to 234)
+        >>  114 PUSH_EXC_INFO
+
+295         116 LOAD_GLOBAL              8 (FileNotFoundError)
+            128 LOAD_GLOBAL             10 (OSError)
+            140 LOAD_GLOBAL              2 (json)
+            152 LOAD_ATTR                6 (JSONDecodeError)
+            162 LOAD_GLOBAL             14 (TypeError)
+            174 LOAD_GLOBAL             16 (ValueError)
+            186 BUILD_TUPLE              5
+            188 CHECK_EXC_MATCH
+            190 POP_JUMP_FORWARD_IF_FALSE    17 (to 226)
+            192 POP_TOP
+
+296         194 LOAD_GLOBAL             19 (NULL + AppSettings)
+            206 PRECALL                  0
+            210 CALL                     0
+            220 SWAP                     2
+            222 POP_EXCEPT
+            224 RETURN_VALUE
+
+295     >>  226 RERAISE                  0
+        >>  228 COPY                     3
+            230 POP_EXCEPT
+            232 RERAISE                  1
+
+298     >>  234 LOAD_GLOBAL             21 (NULL + isinstance)
+            246 LOAD_FAST                1 (payload)
+            248 LOAD_GLOBAL             22 (dict)
+            260 PRECALL                  2
+            264 CALL                     2
+            274 POP_JUMP_FORWARD_IF_TRUE    14 (to 304)
+
+299         276 LOAD_GLOBAL             19 (NULL + AppSettings)
+            288 PRECALL                  0
+            292 CALL                     0
+            302 RETURN_VALUE
+
+301     >>  304 LOAD_GLOBAL             19 (NULL + AppSettings)
+            316 LOAD_CONST              26 (())
+            318 BUILD_MAP                0
+            320 LOAD_CONST               3 ('map_export_background_source')
+
+302         322 LOAD_GLOBAL             25 (NULL + _normalize_choice)
+
+303         334 LOAD_FAST                1 (payload)
+            336 LOAD_METHOD             13 (get)
+            358 LOAD_CONST               3 ('map_export_background_source')
+            360 PRECALL                  1
+            364 CALL                     1
+
+304         374 LOAD_GLOBAL             28 (MAP_EXPORT_BACKGROUND_OPTIONS)
+
+305         386 LOAD_GLOBAL             30 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+
+302         398 PRECALL                  3
+            402 CALL                     3
+            412 MAP_ADD                  1
+
+301         414 LOAD_CONST               4 ('dxf_trench_export_mode')
+
+307         416 LOAD_GLOBAL             25 (NULL + _normalize_choice)
+
+308         428 LOAD_FAST                1 (payload)
+            430 LOAD_METHOD             13 (get)
+            452 LOAD_CONST               4 ('dxf_trench_export_mode')
+            454 PRECALL                  1
+            458 CALL                     1
+
+309         468 LOAD_GLOBAL             32 (DXF_TRENCH_EXPORT_OPTIONS)
+
+310         480 LOAD_GLOBAL             34 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+
+307         492 PRECALL                  3
+            496 CALL                     3
+            506 MAP_ADD                  1
+
+301         508 LOAD_CONST               5 ('include_tiffs_in_dxf_export')
+
+312         510 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+313         522 LOAD_FAST                1 (payload)
+            524 LOAD_METHOD             13 (get)
+            546 LOAD_CONST               5 ('include_tiffs_in_dxf_export')
+            548 PRECALL                  1
+            552 CALL                     1
+
+314         562 LOAD_GLOBAL             38 (DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT)
+
+312         574 PRECALL                  2
+            578 CALL                     2
+            588 MAP_ADD                  1
+
+301         590 LOAD_CONST               6 ('include_klic_in_map_exports')
+
+316         592 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+317         604 LOAD_FAST                1 (payload)
+            606 LOAD_METHOD             13 (get)
+            628 LOAD_CONST               6 ('include_klic_in_map_exports')
+            630 PRECALL                  1
+            634 CALL                     1
+
+318         644 LOAD_GLOBAL             40 (DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS)
+
+316         656 PRECALL                  2
+            660 CALL                     2
+            670 MAP_ADD                  1
+
+301         672 LOAD_CONST               7 ('dxf_label_gap')
+
+320         674 LOAD_GLOBAL             43 (NULL + _normalize_float)
+
+321         686 LOAD_FAST                1 (payload)
+            688 LOAD_METHOD             13 (get)
+            710 LOAD_CONST               7 ('dxf_label_gap')
+            712 PRECALL                  1
+            716 CALL                     1
+
+322         726 LOAD_GLOBAL             44 (DEFAULT_DXF_LABEL_GAP)
+
+323         738 LOAD_GLOBAL             46 (MIN_DXF_LABEL_GAP)
+
+324         750 LOAD_GLOBAL             48 (MAX_DXF_LABEL_GAP)
+
+320         762 PRECALL                  4
+            766 CALL                     4
+            776 MAP_ADD                  1
+
+301         778 LOAD_CONST               8 ('dxf_centerline_color')
+
+326         780 LOAD_GLOBAL             51 (NULL + _normalize_hex_color)
+
+327         792 LOAD_FAST                1 (payload)
+            794 LOAD_METHOD             13 (get)
+            816 LOAD_CONST               8 ('dxf_centerline_color')
+            818 PRECALL                  1
+            822 CALL                     1
+
+328         832 LOAD_GLOBAL             52 (DEFAULT_DXF_CENTERLINE_COLOR)
+
+326         844 PRECALL                  2
+            848 CALL                     2
+            858 MAP_ADD                  1
+
+301         860 LOAD_CONST               9 ('dxf_label_color')
+
+330         862 LOAD_GLOBAL             51 (NULL + _normalize_hex_color)
+
+331         874 LOAD_FAST                1 (payload)
+            876 LOAD_METHOD             13 (get)
+            898 LOAD_CONST               9 ('dxf_label_color')
+            900 PRECALL                  1
+            904 CALL                     1
+
+332         914 LOAD_GLOBAL             54 (DEFAULT_DXF_LABEL_COLOR)
+
+330         926 PRECALL                  2
+            930 CALL                     2
+            940 MAP_ADD                  1
+
+301         942 LOAD_CONST              10 ('cadastral_template_path')
+
+334         944 LOAD_GLOBAL             57 (NULL + _normalize_text)
+
+335         956 LOAD_FAST                1 (payload)
+            958 LOAD_METHOD             13 (get)
+            980 LOAD_CONST              10 ('cadastral_template_path')
+            982 PRECALL                  1
+            986 CALL                     1
+
+336         996 LOAD_GLOBAL             58 (DEFAULT_CADASTRAL_TEMPLATE_PATH)
+
+334        1008 PRECALL                  2
+           1012 CALL                     2
+           1022 MAP_ADD                  1
+
+301        1024 LOAD_CONST              11 ('template_client_logo_preset')
+
+338        1026 LOAD_GLOBAL             25 (NULL + _normalize_choice)
+
+339        1038 LOAD_FAST                1 (payload)
+           1040 LOAD_METHOD             13 (get)
+           1062 LOAD_CONST              11 ('template_client_logo_preset')
+           1064 PRECALL                  1
+           1068 CALL                     1
+
+340        1078 LOAD_GLOBAL             60 (TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS)
+
+341        1090 LOAD_GLOBAL             62 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+
+338        1102 PRECALL                  3
+           1106 CALL                     3
+           1116 MAP_ADD                  1
+
+301        1118 LOAD_CONST              12 ('template_client_logo_path')
+
+343        1120 LOAD_GLOBAL             57 (NULL + _normalize_text)
+
+344        1132 LOAD_FAST                1 (payload)
+           1134 LOAD_METHOD             13 (get)
+           1156 LOAD_CONST              12 ('template_client_logo_path')
+           1158 PRECALL                  1
+           1162 CALL                     1
+
+345        1172 LOAD_GLOBAL             64 (DEFAULT_TEMPLATE_CLIENT_LOGO_PATH)
+
+343        1184 PRECALL                  2
+           1188 CALL                     2
+           1198 MAP_ADD                  1
+
+301        1200 LOAD_CONST              13 ('template_include_cross_sections')
+
+347        1202 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+348        1214 LOAD_FAST                1 (payload)
+           1216 LOAD_METHOD             13 (get)
+           1238 LOAD_CONST              13 ('template_include_cross_sections')
+           1240 PRECALL                  1
+           1244 CALL                     1
+
+349        1254 LOAD_GLOBAL             66 (DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS)
+
+347        1266 PRECALL                  2
+           1270 CALL                     2
+           1280 MAP_ADD                  1
+
+301        1282 LOAD_CONST              14 ('template_generate_reverse_cross_section_sheet')
+
+351        1284 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+352        1296 LOAD_FAST                1 (payload)
+           1298 LOAD_METHOD             13 (get)
+           1320 LOAD_CONST              14 ('template_generate_reverse_cross_section_sheet')
+           1322 PRECALL                  1
+           1326 CALL                     1
+
+353        1336 LOAD_GLOBAL             68 (DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET)
+
+351        1348 PRECALL                  2
+           1352 CALL                     2
+           1362 MAP_ADD                  1
+
+301        1364 LOAD_CONST              15 ('template_show_profile_direction')
+
+355        1366 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+356        1378 LOAD_FAST                1 (payload)
+           1380 LOAD_METHOD             13 (get)
+           1402 LOAD_CONST              15 ('template_show_profile_direction')
+           1404 PRECALL                  1
+           1408 CALL                     1
+
+357        1418 LOAD_GLOBAL             70 (DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION)
+
+355        1430 PRECALL                  2
+           1434 CALL                     2
+           1444 MAP_ADD                  1
+
+301        1446 LOAD_CONST              16 ('template_enable_maaiveld_edit_points')
+
+359        1448 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+360        1460 LOAD_FAST                1 (payload)
+           1462 LOAD_METHOD             13 (get)
+           1484 LOAD_CONST              16 ('template_enable_maaiveld_edit_points')
+           1486 PRECALL                  1
+           1490 CALL                     1
+
+361        1500 LOAD_GLOBAL             72 (DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS)
+
+359        1512 PRECALL                  2
+           1516 CALL                     2
+           1526 MAP_ADD                  1
+
+301        1528 LOAD_CONST              17 ('template_avoid_multileader_collisions')
+
+363        1530 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+364        1542 LOAD_FAST                1 (payload)
+           1544 LOAD_METHOD             13 (get)
+           1566 LOAD_CONST              17 ('template_avoid_multileader_collisions')
+           1568 PRECALL                  1
+           1572 CALL                     1
+
+365        1582 LOAD_GLOBAL             74 (DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS)
+
+363        1594 PRECALL                  2
+           1598 CALL                     2
+           1608 MAP_ADD                  1
+
+301        1610 LOAD_CONST              18 ('template_clip_cross_section_markers_to_profile')
+
+367        1612 LOAD_GLOBAL             37 (NULL + _normalize_bool)
+
+368        1624 LOAD_FAST                1 (payload)
+           1626 LOAD_METHOD             13 (get)
+           1648 LOAD_CONST              18 ('template_clip_cross_section_markers_to_profile')
+           1650 PRECALL                  1
+           1654 CALL                     1
+
+369        1664 LOAD_GLOBAL             76 (DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE)
+
+367        1676 PRECALL                  2
+           1680 CALL                     2
+           1690 MAP_ADD                  1
+
+301        1692 LOAD_CONST              19 ('template_cross_section_marker_diameter')
+
+371        1694 LOAD_GLOBAL             43 (NULL + _normalize_float)
+
+372        1706 LOAD_FAST                1 (payload)
+           1708 LOAD_METHOD             13 (get)
+           1730 LOAD_CONST              19 ('template_cross_section_marker_diameter')
+           1732 PRECALL                  1
+           1736 CALL                     1
+
+373        1746 LOAD_GLOBAL             78 (DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+374        1758 LOAD_GLOBAL             80 (MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+375        1770 LOAD_GLOBAL             82 (MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+371        1782 PRECALL                  4
+           1786 CALL                     4
+           1796 MAP_ADD                  1
+
+301        1798 LOAD_CONST              20 ('template_cross_section_diameter_text')
+
+377        1800 LOAD_GLOBAL             57 (NULL + _normalize_text)
+
+378        1812 LOAD_FAST                1 (payload)
+           1814 LOAD_METHOD             13 (get)
+           1836 LOAD_CONST              20 ('template_cross_section_diameter_text')
+           1838 PRECALL                  1
+           1842 CALL                     1
+
+379        1852 LOAD_GLOBAL             84 (DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT)
+
+377        1864 PRECALL                  2
+           1868 CALL                     2
+           1878 MAP_ADD                  1
+
+301        1880 LOAD_CONST              21 ('streetsmart_username')
+
+381        1882 LOAD_GLOBAL             57 (NULL + _normalize_text)
+
+382        1894 LOAD_FAST                1 (payload)
+           1896 LOAD_METHOD             13 (get)
+           1918 LOAD_CONST              21 ('streetsmart_username')
+           1920 PRECALL                  1
+           1924 CALL                     1
+
+383        1934 LOAD_GLOBAL             86 (DEFAULT_STREETSMART_USERNAME)
+
+381        1946 PRECALL                  2
+           1950 CALL                     2
+           1960 MAP_ADD                  1
+
+301        1962 LOAD_CONST              22 ('streetsmart_password')
+
+385        1964 LOAD_GLOBAL             57 (NULL + _normalize_text)
+
+386        1976 LOAD_FAST                1 (payload)
+           1978 LOAD_METHOD             13 (get)
+           2000 LOAD_CONST              22 ('streetsmart_password')
+           2002 PRECALL                  1
+           2006 CALL                     1
+
+387        2016 LOAD_GLOBAL             88 (DEFAULT_STREETSMART_PASSWORD)
+
+385        2028 PRECALL                  2
+           2032 CALL                     2
+           2042 MAP_ADD                  1
+
+301        2044 LOAD_CONST              23 ('kickthemap_last_email')
+
+389        2046 LOAD_GLOBAL             91 (NULL + _normalize_email)
+
+390        2058 LOAD_FAST                1 (payload)
+           2060 LOAD_METHOD             13 (get)
+           2082 LOAD_CONST              23 ('kickthemap_last_email')
+           2084 PRECALL                  1
+           2088 CALL                     1
+
+391        2098 LOAD_GLOBAL             92 (DEFAULT_KICKTHEMAP_LAST_EMAIL)
+
+389        2110 PRECALL                  2
+           2114 CALL                     2
+           2124 MAP_ADD                  1
+
+301        2126 LOAD_CONST              24 ('kickthemap_saved_accounts')
+
+393        2128 LOAD_GLOBAL             95 (NULL + _normalize_kickthemap_accounts)
+
+394        2140 LOAD_FAST                1 (payload)
+           2142 LOAD_METHOD             13 (get)
+           2164 LOAD_CONST              24 ('kickthemap_saved_accounts')
+           2166 PRECALL                  1
+           2170 CALL                     1
+
+393        2180 PRECALL                  1
+           2184 CALL                     1
+           2194 MAP_ADD                  1
+
+301        2196 LOAD_CONST              25 ('kickthemap_object_layer_rules')
+
+396        2198 LOAD_GLOBAL             97 (NULL + _normalize_kickthemap_object_layer_rules)
+
+397        2210 LOAD_FAST                1 (payload)
+           2212 LOAD_METHOD             13 (get)
+           2234 LOAD_CONST              25 ('kickthemap_object_layer_rules')
+           2236 PRECALL                  1
+           2240 CALL                     1
+
+396        2250 PRECALL                  1
+           2254 CALL                     1
+           2264 MAP_ADD                  1
+
+301        2266 CALL_FUNCTION_EX         1
+           2268 RETURN_VALUE
+ExceptionTable:
+  32 to 110 -> 114 [0]
+  114 to 220 -> 228 [1] lasti
+  226 to 226 -> 228 [1] lasti
+
+===== <module>.save_settings (line 402) =====
+402           0 RESUME                   0
+
+403           2 LOAD_GLOBAL              1 (NULL + _settings_path)
+             14 PRECALL                  0
+             18 CALL                     0
+             28 STORE_FAST               1 (settings_path)
+
+404          30 LOAD_FAST                1 (settings_path)
+             32 LOAD_ATTR                1 (parent)
+             42 LOAD_METHOD              2 (mkdir)
+             64 LOAD_CONST               1 (True)
+             66 LOAD_CONST               1 (True)
+             68 KW_NAMES                 2
+             70 PRECALL                  2
+             74 CALL                     2
+             84 POP_TOP
+
+405          86 LOAD_GLOBAL              7 (NULL + AppSettings)
+             98 LOAD_CONST              31 (())
+            100 BUILD_MAP                0
+            102 LOAD_CONST               3 ('map_export_background_source')
+
+406         104 LOAD_GLOBAL              9 (NULL + _normalize_choice)
+
+407         116 LOAD_FAST                0 (settings)
+            118 LOAD_ATTR                5 (map_export_background_source)
+
+408         128 LOAD_GLOBAL             12 (MAP_EXPORT_BACKGROUND_OPTIONS)
+
+409         140 LOAD_GLOBAL             14 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+
+406         152 PRECALL                  3
+            156 CALL                     3
+            166 MAP_ADD                  1
+
+405         168 LOAD_CONST               4 ('dxf_trench_export_mode')
+
+411         170 LOAD_GLOBAL              9 (NULL + _normalize_choice)
+
+412         182 LOAD_FAST                0 (settings)
+            184 LOAD_ATTR                8 (dxf_trench_export_mode)
+
+413         194 LOAD_GLOBAL             18 (DXF_TRENCH_EXPORT_OPTIONS)
+
+414         206 LOAD_GLOBAL             20 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+
+411         218 PRECALL                  3
+            222 CALL                     3
+            232 MAP_ADD                  1
+
+405         234 LOAD_CONST               5 ('include_tiffs_in_dxf_export')
+
+416         236 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+417         248 LOAD_FAST                0 (settings)
+            250 LOAD_ATTR               12 (include_tiffs_in_dxf_export)
+
+418         260 LOAD_GLOBAL             26 (DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT)
+
+416         272 PRECALL                  2
+            276 CALL                     2
+            286 MAP_ADD                  1
+
+405         288 LOAD_CONST               6 ('include_klic_in_map_exports')
+
+420         290 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+421         302 LOAD_FAST                0 (settings)
+            304 LOAD_ATTR               14 (include_klic_in_map_exports)
+
+422         314 LOAD_GLOBAL             30 (DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS)
+
+420         326 PRECALL                  2
+            330 CALL                     2
+            340 MAP_ADD                  1
+
+405         342 LOAD_CONST               7 ('dxf_label_gap')
+
+424         344 LOAD_GLOBAL             33 (NULL + _normalize_float)
+
+425         356 LOAD_FAST                0 (settings)
+            358 LOAD_ATTR               17 (dxf_label_gap)
+
+426         368 LOAD_GLOBAL             36 (DEFAULT_DXF_LABEL_GAP)
+
+427         380 LOAD_GLOBAL             38 (MIN_DXF_LABEL_GAP)
+
+428         392 LOAD_GLOBAL             40 (MAX_DXF_LABEL_GAP)
+
+424         404 PRECALL                  4
+            408 CALL                     4
+            418 MAP_ADD                  1
+
+405         420 LOAD_CONST               8 ('dxf_centerline_color')
+
+430         422 LOAD_GLOBAL             43 (NULL + _normalize_hex_color)
+
+431         434 LOAD_FAST                0 (settings)
+            436 LOAD_ATTR               22 (dxf_centerline_color)
+
+432         446 LOAD_GLOBAL             46 (DEFAULT_DXF_CENTERLINE_COLOR)
+
+430         458 PRECALL                  2
+            462 CALL                     2
+            472 MAP_ADD                  1
+
+405         474 LOAD_CONST               9 ('dxf_label_color')
+
+434         476 LOAD_GLOBAL             43 (NULL + _normalize_hex_color)
+
+435         488 LOAD_FAST                0 (settings)
+            490 LOAD_ATTR               24 (dxf_label_color)
+
+436         500 LOAD_GLOBAL             50 (DEFAULT_DXF_LABEL_COLOR)
+
+434         512 PRECALL                  2
+            516 CALL                     2
+            526 MAP_ADD                  1
+
+405         528 LOAD_CONST              10 ('cadastral_template_path')
+
+438         530 LOAD_GLOBAL             53 (NULL + _normalize_text)
+
+439         542 LOAD_FAST                0 (settings)
+            544 LOAD_ATTR               27 (cadastral_template_path)
+
+440         554 LOAD_GLOBAL             56 (DEFAULT_CADASTRAL_TEMPLATE_PATH)
+
+438         566 PRECALL                  2
+            570 CALL                     2
+            580 MAP_ADD                  1
+
+405         582 LOAD_CONST              11 ('template_client_logo_preset')
+
+442         584 LOAD_GLOBAL              9 (NULL + _normalize_choice)
+
+443         596 LOAD_FAST                0 (settings)
+            598 LOAD_ATTR               29 (template_client_logo_preset)
+
+444         608 LOAD_GLOBAL             60 (TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS)
+
+445         620 LOAD_GLOBAL             62 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+
+442         632 PRECALL                  3
+            636 CALL                     3
+            646 MAP_ADD                  1
+
+405         648 LOAD_CONST              12 ('template_client_logo_path')
+
+447         650 LOAD_GLOBAL             53 (NULL + _normalize_text)
+
+448         662 LOAD_FAST                0 (settings)
+            664 LOAD_ATTR               32 (template_client_logo_path)
+
+449         674 LOAD_GLOBAL             66 (DEFAULT_TEMPLATE_CLIENT_LOGO_PATH)
+
+447         686 PRECALL                  2
+            690 CALL                     2
+            700 MAP_ADD                  1
+
+405         702 LOAD_CONST              13 ('template_include_cross_sections')
+
+451         704 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+452         716 LOAD_FAST                0 (settings)
+            718 LOAD_ATTR               34 (template_include_cross_sections)
+
+453         728 LOAD_GLOBAL             70 (DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS)
+
+451         740 PRECALL                  2
+            744 CALL                     2
+            754 MAP_ADD                  1
+
+405         756 LOAD_CONST              14 ('template_generate_reverse_cross_section_sheet')
+
+455         758 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+456         770 LOAD_FAST                0 (settings)
+            772 LOAD_ATTR               36 (template_generate_reverse_cross_section_sheet)
+
+457         782 LOAD_GLOBAL             74 (DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET)
+
+455         794 PRECALL                  2
+            798 CALL                     2
+            808 MAP_ADD                  1
+
+405         810 LOAD_CONST              15 ('template_show_profile_direction')
+
+459         812 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+460         824 LOAD_FAST                0 (settings)
+            826 LOAD_ATTR               38 (template_show_profile_direction)
+
+461         836 LOAD_GLOBAL             78 (DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION)
+
+459         848 PRECALL                  2
+            852 CALL                     2
+            862 MAP_ADD                  1
+
+405         864 LOAD_CONST              16 ('template_enable_maaiveld_edit_points')
+
+463         866 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+464         878 LOAD_FAST                0 (settings)
+            880 LOAD_ATTR               40 (template_enable_maaiveld_edit_points)
+
+465         890 LOAD_GLOBAL             82 (DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS)
+
+463         902 PRECALL                  2
+            906 CALL                     2
+            916 MAP_ADD                  1
+
+405         918 LOAD_CONST              17 ('template_avoid_multileader_collisions')
+
+467         920 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+468         932 LOAD_FAST                0 (settings)
+            934 LOAD_ATTR               42 (template_avoid_multileader_collisions)
+
+469         944 LOAD_GLOBAL             86 (DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS)
+
+467         956 PRECALL                  2
+            960 CALL                     2
+            970 MAP_ADD                  1
+
+405         972 LOAD_CONST              18 ('template_clip_cross_section_markers_to_profile')
+
+471         974 LOAD_GLOBAL             23 (NULL + _normalize_bool)
+
+472         986 LOAD_FAST                0 (settings)
+            988 LOAD_ATTR               44 (template_clip_cross_section_markers_to_profile)
+
+473         998 LOAD_GLOBAL             90 (DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE)
+
+471        1010 PRECALL                  2
+           1014 CALL                     2
+           1024 MAP_ADD                  1
+
+405        1026 LOAD_CONST              19 ('template_cross_section_marker_diameter')
+
+475        1028 LOAD_GLOBAL             33 (NULL + _normalize_float)
+
+476        1040 LOAD_FAST                0 (settings)
+           1042 LOAD_ATTR               46 (template_cross_section_marker_diameter)
+
+477        1052 LOAD_GLOBAL             94 (DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+478        1064 LOAD_GLOBAL             96 (MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+479        1076 LOAD_GLOBAL             98 (MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER)
+
+475        1088 PRECALL                  4
+           1092 CALL                     4
+           1102 MAP_ADD                  1
+
+405        1104 LOAD_CONST              20 ('template_cross_section_diameter_text')
+
+481        1106 LOAD_GLOBAL             53 (NULL + _normalize_text)
+
+482        1118 LOAD_FAST                0 (settings)
+           1120 LOAD_ATTR               50 (template_cross_section_diameter_text)
+
+483        1130 LOAD_GLOBAL            102 (DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT)
+
+481        1142 PRECALL                  2
+           1146 CALL                     2
+           1156 MAP_ADD                  1
+
+405        1158 LOAD_CONST              21 ('streetsmart_username')
+
+485        1160 LOAD_GLOBAL             53 (NULL + _normalize_text)
+
+486        1172 LOAD_FAST                0 (settings)
+           1174 LOAD_ATTR               52 (streetsmart_username)
+
+487        1184 LOAD_GLOBAL            106 (DEFAULT_STREETSMART_USERNAME)
+
+485        1196 PRECALL                  2
+           1200 CALL                     2
+           1210 MAP_ADD                  1
+
+405        1212 LOAD_CONST              22 ('streetsmart_password')
+
+489        1214 LOAD_GLOBAL             53 (NULL + _normalize_text)
+
+490        1226 LOAD_FAST                0 (settings)
+           1228 LOAD_ATTR               54 (streetsmart_password)
+
+491        1238 LOAD_GLOBAL            110 (DEFAULT_STREETSMART_PASSWORD)
+
+489        1250 PRECALL                  2
+           1254 CALL                     2
+           1264 MAP_ADD                  1
+
+405        1266 LOAD_CONST              23 ('kickthemap_last_email')
+
+493        1268 LOAD_GLOBAL            113 (NULL + _normalize_email)
+
+494        1280 LOAD_FAST                0 (settings)
+           1282 LOAD_ATTR               57 (kickthemap_last_email)
+
+495        1292 LOAD_GLOBAL            116 (DEFAULT_KICKTHEMAP_LAST_EMAIL)
+
+493        1304 PRECALL                  2
+           1308 CALL                     2
+           1318 MAP_ADD                  1
+
+405        1320 LOAD_CONST              24 ('kickthemap_saved_accounts')
+
+497        1322 LOAD_GLOBAL            119 (NULL + _normalize_kickthemap_accounts)
+
+498        1334 LOAD_FAST                0 (settings)
+           1336 LOAD_ATTR               60 (kickthemap_saved_accounts)
+
+497        1346 PRECALL                  1
+           1350 CALL                     1
+           1360 MAP_ADD                  1
+
+405        1362 LOAD_CONST              25 ('kickthemap_object_layer_rules')
+
+500        1364 LOAD_GLOBAL            123 (NULL + _normalize_kickthemap_object_layer_rules)
+
+501        1376 LOAD_CONST              26 (<code object <listcomp> at 0x7fee03d673c0, file "app\settings.py", line 501>)
+           1378 MAKE_FUNCTION            0
+           1380 LOAD_FAST                0 (settings)
+           1382 LOAD_ATTR               62 (kickthemap_object_layer_rules)
+           1392 JUMP_IF_TRUE_OR_POP      1 (to 1396)
+           1394 BUILD_LIST               0
+        >> 1396 GET_ITER
+           1398 PRECALL                  0
+           1402 CALL                     0
+
+500        1412 PRECALL                  1
+           1416 CALL                     1
+           1426 MAP_ADD                  1
+
+405        1428 CALL_FUNCTION_EX         1
+           1430 STORE_FAST               2 (normalized)
+
+504        1432 LOAD_FAST                1 (settings_path)
+           1434 LOAD_METHOD             63 (write_text)
+           1456 LOAD_GLOBAL            129 (NULL + json)
+           1468 LOAD_ATTR               65 (dumps)
+           1478 LOAD_GLOBAL            133 (NULL + asdict)
+           1490 LOAD_FAST                2 (normalized)
+           1492 PRECALL                  1
+           1496 CALL                     1
+           1506 LOAD_CONST              27 (2)
+           1508 KW_NAMES                28
+           1510 PRECALL                  2
+           1514 CALL                     2
+           1524 LOAD_CONST              29 ('utf-8')
+           1526 KW_NAMES                30
+           1528 PRECALL                  2
+           1532 CALL                     2
+           1542 POP_TOP
+
+505        1544 LOAD_FAST                1 (settings_path)
+           1546 RETURN_VALUE
+
+===== <module>.save_settings.save_settings.<locals>.<listcomp> (line 501) =====
+501           0 RESUME                   0
+              2 BUILD_LIST               0
+              4 LOAD_FAST                0 (.0)
+        >>    6 FOR_ITER                17 (to 42)
+              8 STORE_FAST               1 (rule)
+             10 LOAD_GLOBAL              1 (NULL + asdict)
+             22 LOAD_FAST                1 (rule)
+             24 PRECALL                  1
+             28 CALL                     1
+             38 LIST_APPEND              2
+             40 JUMP_BACKWARD           18 (to 6)
+        >>   42 RETURN_VALUE
+
+===== <module>._choice_label (line 508) =====
+              0 MAKE_CELL                2 (default)
+
+508           2 RESUME                   0
+
+509           4 LOAD_GLOBAL              1 (NULL + _normalize_choice)
+             16 LOAD_FAST                0 (value)
+             18 LOAD_FAST                1 (options)
+             20 LOAD_DEREF               2 (default)
+             22 PRECALL                  3
+             26 CALL                     3
+             36 STORE_FAST               3 (normalized)
+
+510          38 LOAD_FAST                1 (options)
+             40 GET_ITER
+        >>   42 FOR_ITER                15 (to 74)
+             44 UNPACK_SEQUENCE          2
+             48 STORE_FAST               4 (option_id)
+             50 STORE_FAST               5 (label)
+
+511          52 LOAD_FAST                4 (option_id)
+             54 LOAD_FAST                3 (normalized)
+             56 COMPARE_OP               2 (==)
+             62 POP_JUMP_FORWARD_IF_FALSE     4 (to 72)
+
+512          64 LOAD_FAST                5 (label)
+             66 SWAP                     2
+             68 POP_TOP
+             70 RETURN_VALUE
+
+511     >>   72 JUMP_BACKWARD           16 (to 42)
+
+513     >>   74 LOAD_GLOBAL              3 (NULL + next)
+             86 LOAD_CLOSURE             2 (default)
+             88 BUILD_TUPLE              1
+             90 LOAD_CONST               1 (<code object <genexpr> at 0x7fee03d674b0, file "app\settings.py", line 513>)
+             92 MAKE_FUNCTION            8 (closure)
+             94 LOAD_FAST                1 (options)
+             96 GET_ITER
+             98 PRECALL                  0
+            102 CALL                     0
+            112 PRECALL                  1
+            116 CALL                     1
+            126 RETURN_VALUE
+
+===== <module>._choice_label._choice_label.<locals>.<genexpr> (line 513) =====
+              0 COPY_FREE_VARS           1
+
+513           2 RETURN_GENERATOR
+              4 POP_TOP
+              6 RESUME                   0
+              8 LOAD_FAST                0 (.0)
+        >>   10 FOR_ITER                15 (to 42)
+             12 UNPACK_SEQUENCE          2
+             16 STORE_FAST               1 (option_id)
+             18 STORE_FAST               2 (label)
+             20 LOAD_FAST                1 (option_id)
+             22 LOAD_DEREF               3 (default)
+             24 COMPARE_OP               2 (==)
+             30 POP_JUMP_BACKWARD_IF_FALSE    11 (to 10)
+             32 LOAD_FAST                2 (label)
+             34 YIELD_VALUE
+             36 RESUME                   1
+             38 POP_TOP
+             40 JUMP_BACKWARD           16 (to 10)
+        >>   42 LOAD_CONST               0 (None)
+             44 RETURN_VALUE
+
+===== <module>._choice_value_from_label (line 516) =====
+516           0 RESUME                   0
+
+517           2 LOAD_FAST                1 (options)
+              4 GET_ITER
+        >>    6 FOR_ITER                15 (to 38)
+              8 UNPACK_SEQUENCE          2
+             12 STORE_FAST               3 (option_id)
+             14 STORE_FAST               4 (option_label)
+
+518          16 LOAD_FAST                4 (option_label)
+             18 LOAD_FAST                0 (label)
+             20 COMPARE_OP               2 (==)
+             26 POP_JUMP_FORWARD_IF_FALSE     4 (to 36)
+
+519          28 LOAD_FAST                3 (option_id)
+             30 SWAP                     2
+             32 POP_TOP
+             34 RETURN_VALUE
+
+518     >>   36 JUMP_BACKWARD           16 (to 6)
+
+520     >>   38 LOAD_FAST                2 (default)
+             40 RETURN_VALUE
+
+===== <module>.map_export_background_label (line 523) =====
+523           0 RESUME                   0
+
+524           2 LOAD_GLOBAL              1 (NULL + _choice_label)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_GLOBAL              2 (MAP_EXPORT_BACKGROUND_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.map_export_background_value_from_label (line 527) =====
+527           0 RESUME                   0
+
+528           2 LOAD_GLOBAL              1 (NULL + _choice_value_from_label)
+             14 LOAD_FAST                0 (label)
+             16 LOAD_GLOBAL              2 (MAP_EXPORT_BACKGROUND_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.dxf_trench_export_label (line 531) =====
+531           0 RESUME                   0
+
+532           2 LOAD_GLOBAL              1 (NULL + _choice_label)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_GLOBAL              2 (DXF_TRENCH_EXPORT_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.dxf_trench_export_value_from_label (line 535) =====
+535           0 RESUME                   0
+
+536           2 LOAD_GLOBAL              1 (NULL + _choice_value_from_label)
+             14 LOAD_FAST                0 (label)
+             16 LOAD_GLOBAL              2 (DXF_TRENCH_EXPORT_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_DXF_TRENCH_EXPORT_MODE)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.template_client_logo_preset_label (line 539) =====
+539           0 RESUME                   0
+
+540           2 LOAD_GLOBAL              1 (NULL + _choice_label)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_GLOBAL              2 (TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.template_client_logo_preset_value_from_label (line 543) =====
+543           0 RESUME                   0
+
+544           2 LOAD_GLOBAL              1 (NULL + _choice_value_from_label)
+             14 LOAD_FAST                0 (label)
+             16 LOAD_GLOBAL              2 (TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS)
+             28 LOAD_GLOBAL              4 (DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)
+             40 PRECALL                  3
+             44 CALL                     3
+             54 RETURN_VALUE
+
+===== <module>.hex_color_to_rgb (line 547) =====
+547           0 RESUME                   0
+
+548           2 LOAD_GLOBAL              1 (NULL + _normalize_hex_color)
+             14 LOAD_FAST                0 (value)
+             16 LOAD_GLOBAL              2 (DEFAULT_DXF_CENTERLINE_COLOR)
+             28 PRECALL                  2
+             32 CALL                     2
+             42 STORE_FAST               1 (normalized)
+
+550          44 LOAD_GLOBAL              5 (NULL + int)
+             56 LOAD_FAST                1 (normalized)
+             58 LOAD_CONST               1 (1)
+             60 LOAD_CONST               2 (3)
+             62 BUILD_SLICE              2
+             64 BINARY_SUBSCR
+             74 LOAD_CONST               3 (16)
+             76 PRECALL                  2
+             80 CALL                     2
+
+551          90 LOAD_GLOBAL              5 (NULL + int)
+            102 LOAD_FAST                1 (normalized)
+            104 LOAD_CONST               2 (3)
+            106 LOAD_CONST               4 (5)
+            108 BUILD_SLICE              2
+            110 BINARY_SUBSCR
+            120 LOAD_CONST               3 (16)
+            122 PRECALL                  2
+            126 CALL                     2
+
+552         136 LOAD_GLOBAL              5 (NULL + int)
+            148 LOAD_FAST                1 (normalized)
+            150 LOAD_CONST               4 (5)
+            152 LOAD_CONST               5 (7)
+            154 BUILD_SLICE              2
+            156 BINARY_SUBSCR
+            166 LOAD_CONST               3 (16)
+            168 PRECALL                  2
+            172 CALL                     2
+
+549         182 BUILD_TUPLE              3
+            184 RETURN_VALUE

@@ -1,0 +1,1 @@
+DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=71, opname='LOAD_BUILD_CLASS', arg=None, argval=None, argrepr='', offset=704, starts_line=84, is_jump_target=False) in <module>

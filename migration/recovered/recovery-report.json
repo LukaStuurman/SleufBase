@@ -1,0 +1,37 @@
+[
+  {
+    "compile_ok": false,
+    "decompiled": false,
+    "disassembly": "streetsmart.dis.txt",
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=144, starts_line=39, is_jump_target=False) in <module>",
+    "module": "streetsmart"
+  },
+  {
+    "compile_ok": false,
+    "decompiled": false,
+    "disassembly": "streetsmart_browser.dis.txt",
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=5, argval=5, argrepr='defaults, annotations', offset=132, starts_line=35, is_jump_target=False) in <module>",
+    "module": "streetsmart_browser"
+  },
+  {
+    "compile_ok": false,
+    "decompiled": false,
+    "disassembly": "streetsmart_panel.dis.txt",
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>",
+    "module": "streetsmart_panel"
+  },
+  {
+    "compile_ok": false,
+    "decompiled": false,
+    "disassembly": "settings.dis.txt",
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=2, starts_line=1, is_jump_target=False) in <module>",
+    "module": "settings"
+  },
+  {
+    "compile_ok": false,
+    "decompiled": false,
+    "disassembly": "app.dis.txt",
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=71, opname='LOAD_BUILD_CLASS', arg=None, argval=None, argrepr='', offset=704, starts_line=84, is_jump_target=False) in <module>",
+    "module": "app"
+  }
+]
