@@ -1,0 +1,98 @@
+name: Bytecode Source Migration
+
+on:
+  push:
+    branches:
+      - migration/source-bytecode-kernel
+    paths:
+      - '_bytecode/**'
+      - 'legacy_bytecode.py'
+      - 'source_migration.py'
+      - '_source/**'
+      - 'streetsmart.py'
+      - 'streetsmart_browser.py'
+      - 'streetsmart_panel.py'
+      - 'settings.py'
+      - 'app.py'
+      - 'tools/recover_legacy_source.py'
+      - 'tools/snapshot_legacy_api.py'
+      - 'tests/test_source_migration.py'
+      - '.github/workflows/bytecode-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bytecode-migration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  characterize-and-recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install migration and runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'depyf==0.20.0'
+          python -m pip install \
+            'Pillow>=10.0' \
+            'numpy>=1.26,<2.3' \
+            'pyproj>=3.6' \
+            'requests>=2.32' \
+            'shapely>=2.0,<3' \
+            'mapbox-vector-tile>=2,<3' \
+            'ezdxf>=1.4.4,<2'
+
+      - name: Verify migration switch
+        run: python -m unittest tests.test_source_migration -v
+
+      - name: Snapshot legacy API contract
+        run: python tools/snapshot_legacy_api.py --output migration/contracts/legacy_api.json
+
+      - name: Recover review candidates and deterministic disassembly
+        run: python tools/recover_legacy_source.py --output-dir migration/recovered
+
+      - name: Compile recovered Python candidates
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(migration/recovered/*.recovered.py)
+          if (( ${#files[@]} )); then
+            python -m py_compile "${files[@]}"
+          fi
+
+      - name: Upload migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: bytecode-migration-evidence
+          path: |
+            migration/contracts/legacy_api.json
+            migration/recovered/
+          if-no-files-found: error
+
+      - name: Commit generated migration evidence
+        shell: bash
+        run: |
+          git add migration/contracts migration/recovered
+          if git diff --cached --quiet; then
+            echo 'Migration evidence is unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Refresh bytecode migration evidence [skip ci]'
+          git push origin HEAD:${GITHUB_REF_NAME}
