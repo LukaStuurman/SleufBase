@@ -1,0 +1,590 @@
+[
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=10, starts_line=79, is_jump_target=False) in KickTheMapObjectLayerRule",
+    "firstlineno": 79,
+    "flags": 16777216,
+    "freevars": [],
+    "index": 1,
+    "kwonlyargcount": 0,
+    "name": "KickTheMapObjectLayerRule",
+    "posonlyargcount": 0,
+    "qualname": "KickTheMapObjectLayerRule"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=10, starts_line=87, is_jump_target=False) in KickTheMapSavedAccount",
+    "firstlineno": 87,
+    "flags": 16777216,
+    "freevars": [],
+    "index": 2,
+    "kwonlyargcount": 0,
+    "name": "KickTheMapSavedAccount",
+    "posonlyargcount": 0,
+    "qualname": "KickTheMapSavedAccount"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=85, opname='SETUP_ANNOTATIONS', arg=None, argval=None, argrepr='', offset=10, starts_line=93, is_jump_target=False) in AppSettings",
+    "firstlineno": 93,
+    "flags": 16777216,
+    "freevars": [],
+    "index": 3,
+    "kwonlyargcount": 0,
+    "name": "AppSettings",
+    "posonlyargcount": 0,
+    "qualname": "AppSettings"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 119,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 4,
+    "kwonlyargcount": 0,
+    "name": "__post_init__",
+    "posonlyargcount": 0,
+    "qualname": "AppSettings.__post_init__",
+    "source": "def __post_init__(self):\n    self.kickthemap_last_email = _normalize_email(self.kickthemap_last_email)\n    self.kickthemap_saved_accounts = _normalize_kickthemap_accounts(self.\n        kickthemap_saved_accounts)\n    \n    \n    def __temp_187561(comp_arg_0):\n        __temp_187562 = set()\n        for __temp_187563 in comp_arg_0:\n            account = __temp_187563\n            __temp_187562.add(account.email)\n            continue\n        return __temp_187562\n    \n    \n    account_emails = __temp_187561(iter(self.kickthemap_saved_accounts))\n    if self.kickthemap_last_email:\n        if self.kickthemap_last_email not in account_emails:\n            self.kickthemap_saved_accounts.insert(0, KickTheMapSavedAccount(\n                email=self.kickthemap_last_email))\n    if self.kickthemap_object_layer_rules is None:\n        self.kickthemap_object_layer_rules = default_kickthemap_object_layer_rules(\n            )\n        return None\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      ".0"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<settings:AppSettings.__post_init__.<locals>.<setcomp>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 122,
+    "flags": 16777235,
+    "freevars": [],
+    "index": 5,
+    "kwonlyargcount": 0,
+    "name": "<setcomp>",
+    "posonlyargcount": 0,
+    "qualname": "AppSettings.__post_init__.<locals>.<setcomp>",
+    "source": "def <setcomp>(comp_arg_0):\n    __temp_187568 = set()\n    for __temp_187569 in comp_arg_0:\n        account = __temp_187569\n        __temp_187568.add(account.email)\n        continue\n    return __temp_187568\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 129,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 6,
+    "kwonlyargcount": 0,
+    "name": "default_kickthemap_object_layer_rules",
+    "posonlyargcount": 0,
+    "qualname": "default_kickthemap_object_layer_rules",
+    "source": "def default_kickthemap_object_layer_rules():\n    def __temp_187570(comp_arg_0):\n        __temp_187571 = []\n        for __temp_187572 in comp_arg_0:\n            __temp_187573, __temp_187574, __temp_187575, __temp_187576 = (\n                __temp_187572)\n            keywords = __temp_187573\n            target_layer = __temp_187574\n            color = __temp_187575\n            profile_label = __temp_187576\n            __temp_187571.append(KickTheMapObjectLayerRule(keywords=keywords,\n                target_layer=target_layer, color=color, profile_label=\n                profile_label))\n            continue\n        return __temp_187571\n    \n    \n    return __temp_187570(iter(DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES))\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      ".0"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<settings:default_kickthemap_object_layer_rules.<locals>.<listcomp>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 130,
+    "flags": 16777235,
+    "freevars": [],
+    "index": 7,
+    "kwonlyargcount": 0,
+    "name": "<listcomp>",
+    "posonlyargcount": 0,
+    "qualname": "default_kickthemap_object_layer_rules.<locals>.<listcomp>",
+    "source": "def <listcomp>(comp_arg_0):\n    __temp_187579 = []\n    for __temp_187580 in comp_arg_0:\n        __temp_187581, __temp_187582, __temp_187583, __temp_187584 = __temp_187580\n        keywords = __temp_187581\n        target_layer = __temp_187582\n        color = __temp_187583\n        profile_label = __temp_187584\n        __temp_187579.append(KickTheMapObjectLayerRule(keywords=keywords,\n            target_layer=target_layer, color=color, profile_label=profile_label))\n        continue\n    return __temp_187579\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 141,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 8,
+    "kwonlyargcount": 0,
+    "name": "_settings_path",
+    "posonlyargcount": 0,
+    "qualname": "_settings_path",
+    "source": "def _settings_path():\n    local_appdata = Path(os.environ.get('LOCALAPPDATA', Path.home() / 'AppData' /\n        'Local'))\n    return local_appdata / 'KlicTiffKaarten' / 'settings.json'\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "value",
+      "options",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 146,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 9,
+    "kwonlyargcount": 0,
+    "name": "_normalize_choice",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_choice",
+    "source": "def _normalize_choice(value, options, default):\n    def __temp_187589(comp_arg_0):\n        __temp_187590 = set()\n        for __temp_187591 in comp_arg_0:\n            __temp_187592, __temp_187593 = __temp_187591\n            option_id = __temp_187592\n            _ = __temp_187593\n            __temp_187590.add(option_id)\n            continue\n        return __temp_187590\n    \n    \n    valid = __temp_187589(iter(options))\n    if value is not None:\n        candidate = str(value).strip().lower()\n    else:\n        candidate = ''\n    if candidate in valid:\n        return candidate\n    else:\n        return default\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      ".0"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<settings:_normalize_choice.<locals>.<setcomp>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 147,
+    "flags": 16777235,
+    "freevars": [],
+    "index": 10,
+    "kwonlyargcount": 0,
+    "name": "<setcomp>",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_choice.<locals>.<setcomp>",
+    "source": "def <setcomp>(comp_arg_0):\n    __temp_187598 = set()\n    for __temp_187599 in comp_arg_0:\n        __temp_187600, __temp_187601 = __temp_187599\n        option_id = __temp_187600\n        _ = __temp_187601\n        __temp_187598.add(option_id)\n        continue\n    return __temp_187598\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "value",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 152,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 11,
+    "kwonlyargcount": 0,
+    "name": "_normalize_bool",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_bool",
+    "source": "def _normalize_bool(value, default):\n    if isinstance(value, bool):\n        return value\n    if isinstance(value, str):\n        candidate = value.strip().lower()\n        if candidate in frozenset({'on', 'ja', '1', 'true', 'yes'}):\n            return True\n        if candidate in frozenset({'nee', '0', 'false', 'no', 'off'}):\n            return False\n    if isinstance(value, (int, float)):\n        return bool(value)\n    return default\n"
+  },
+  {
+    "argcount": 4,
+    "argument_names": [
+      "value",
+      "default",
+      "minimum",
+      "maximum"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 166,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 12,
+    "kwonlyargcount": 0,
+    "name": "_normalize_float",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_float",
+    "source": "def _normalize_float(value, default, minimum, maximum):\n    candidate = float(value)\n    if candidate != candidate:\n        return default\n    return max(minimum, min(maximum, candidate))\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "value",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 176,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 13,
+    "kwonlyargcount": 0,
+    "name": "_normalize_text",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_text",
+    "source": "def _normalize_text(value, default):\n    if value is None:\n        return default\n    return str(value).strip()\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "value",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 182,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 14,
+    "kwonlyargcount": 0,
+    "name": "_normalize_email",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_email",
+    "source": "def _normalize_email(value, default):\n    candidate = _normalize_text(value, default)\n    return candidate.lower()\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 187,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 15,
+    "kwonlyargcount": 0,
+    "name": "_normalize_kickthemap_accounts",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_kickthemap_accounts",
+    "source": "def _normalize_kickthemap_accounts(value):\n    if value is not None:\n        if not isinstance(value, list):\n            return []\n    else:\n        return []\n    normalized = []\n    seen = set()\n    for __temp_187620 in iter(value):\n        item = __temp_187620\n        if isinstance(item, KickTheMapSavedAccount):\n            candidate_email = _normalize_email(item.email)\n            candidate_password = _normalize_text(item.password)\n        elif isinstance(item, dict):\n            candidate_email = _normalize_email(item.get('email'))\n            candidate_password = _normalize_text(item.get('password'))\n        else:\n            candidate_email = _normalize_email(item)\n            candidate_password = ''\n        if candidate_email:\n            if candidate_email in seen:\n                continue\n                seen.add(candidate_email)\n                normalized.append(KickTheMapSavedAccount(email=candidate_email,\n                    password=candidate_password))\n            else:\n                seen.add(candidate_email)\n                normalized.append(KickTheMapSavedAccount(email=candidate_email,\n                    password=candidate_password))\n        else:\n            continue\n            seen.add(candidate_email)\n            normalized.append(KickTheMapSavedAccount(email=candidate_email,\n                password=candidate_password))\n        continue\n    return normalized\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "value",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 214,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 16,
+    "kwonlyargcount": 0,
+    "name": "_normalize_hex_color",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_hex_color",
+    "source": "def _normalize_hex_color(value, default):\n    if value is not None:\n        candidate = str(value).strip().upper()\n    else:\n        candidate = ''\n    if not len(candidate) != 7:\n        if not candidate.startswith('#'):\n            return default\n    else:\n        return default\n    int(candidate[slice(1, None)], 16)\n    return candidate\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "value",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 225,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 17,
+    "kwonlyargcount": 0,
+    "name": "_normalize_kickthemap_rule_color",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_kickthemap_rule_color",
+    "source": "def _normalize_kickthemap_rule_color(value, default):\n    candidate = int(value)\n    return max(MIN_KICKTHEMAP_RULE_COLOR, min(MAX_KICKTHEMAP_RULE_COLOR, candidate)\n        )\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "target_layer",
+      "keywords"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 233,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 18,
+    "kwonlyargcount": 0,
+    "name": "_default_profile_label",
+    "posonlyargcount": 0,
+    "qualname": "_default_profile_label",
+    "source": "def _default_profile_label(target_layer, keywords):\n    upper_layer = str(target_layer).strip().upper()\n    upper_keywords = str(keywords).strip().upper()\n    if not 'WARM' in upper_layer:\n        if 'WARM' in upper_keywords:\n            return 'Warmtenet'\n    else:\n        return 'Warmtenet'\n    if 'GLASVEZEL' in upper_layer:\n        return 'Glasvezel'\n    if 'DATA' in upper_layer:\n        return 'Datakabel'\n    if 'WATER' in upper_layer:\n        return 'Waterleiding'\n    if 'ET_LS' in upper_layer:\n        return 'Laagspanning'\n    if 'ET_MS' in upper_layer:\n        return 'Middenspanning'\n    if 'GAS_LD' in upper_layer:\n        return 'Gasleiding LD'\n    if 'GAS_HD' in upper_layer:\n        return 'Gasleiding HD'\n    if 'MONITORING' in upper_layer:\n        return 'Monitoring'\n    if 'VRIJVERVAL' in upper_layer:\n        return 'Riool vrijverval'\n    if 'DRUK' in upper_layer:\n        return 'Riool druk'\n    if 'GEVAARLIJKE' in upper_layer:\n        return 'Buisleiding GS'\n    return str(keywords).replace(';', ',').split(',', 1)[0].strip()\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 263,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 19,
+    "kwonlyargcount": 0,
+    "name": "_normalize_kickthemap_object_layer_rules",
+    "posonlyargcount": 0,
+    "qualname": "_normalize_kickthemap_object_layer_rules",
+    "source": "def _normalize_kickthemap_object_layer_rules(value):\n    if value is None:\n        return default_kickthemap_object_layer_rules()\n    if not isinstance(value, list):\n        return default_kickthemap_object_layer_rules()\n    normalized_rules = []\n    for __temp_187662 in iter(value):\n        item = __temp_187662\n        if not isinstance(item, dict):\n            continue\n            keywords = _normalize_text(item.get('keywords'))\n        else:\n            keywords = _normalize_text(item.get('keywords'))\n        target_layer = _normalize_text(item.get('target_layer'))\n        if keywords:\n            if not target_layer:\n                continue\n                normalized_rules.append(KickTheMapObjectLayerRule(keywords=\n                    keywords, target_layer=target_layer, color=\n                    _normalize_kickthemap_rule_color(item.get('color')),\n                    profile_label=_normalize_text(item.get('profile_label'),\n                    _default_profile_label(target_layer, keywords))))\n            else:\n                normalized_rules.append(KickTheMapObjectLayerRule(keywords=\n                    keywords, target_layer=target_layer, color=\n                    _normalize_kickthemap_rule_color(item.get('color')),\n                    profile_label=_normalize_text(item.get('profile_label'),\n                    _default_profile_label(target_layer, keywords))))\n        else:\n            continue\n            normalized_rules.append(KickTheMapObjectLayerRule(keywords=keywords,\n                target_layer=target_layer, color=\n                _normalize_kickthemap_rule_color(item.get('color')),\n                profile_label=_normalize_text(item.get('profile_label'),\n                _default_profile_label(target_layer, keywords))))\n        continue\n    return normalized_rules\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 291,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 20,
+    "kwonlyargcount": 0,
+    "name": "load_settings",
+    "posonlyargcount": 0,
+    "qualname": "load_settings",
+    "source": "def load_settings():\n    settings_path = _settings_path()\n    payload = json.loads(settings_path.read_text(encoding='utf-8'))\n    if not isinstance(payload, dict):\n        return AppSettings()\n    \"\"\"map_export_background_source\"\"\".__setitem__('map_export_background_source',\n        _normalize_choice(payload.get('map_export_background_source'),\n        MAP_EXPORT_BACKGROUND_OPTIONS, DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE))\n    \"\"\"dxf_trench_export_mode\"\"\".__setitem__('dxf_trench_export_mode',\n        _normalize_choice(payload.get('dxf_trench_export_mode'),\n        DXF_TRENCH_EXPORT_OPTIONS, DEFAULT_DXF_TRENCH_EXPORT_MODE))\n    \"\"\"include_tiffs_in_dxf_export\"\"\".__setitem__('include_tiffs_in_dxf_export',\n        _normalize_bool(payload.get('include_tiffs_in_dxf_export'),\n        DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT))\n    \"\"\"include_klic_in_map_exports\"\"\".__setitem__('include_klic_in_map_exports',\n        _normalize_bool(payload.get('include_klic_in_map_exports'),\n        DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS))\n    \"\"\"dxf_label_gap\"\"\".__setitem__('dxf_label_gap', _normalize_float(payload.\n        get('dxf_label_gap'), DEFAULT_DXF_LABEL_GAP, MIN_DXF_LABEL_GAP,\n        MAX_DXF_LABEL_GAP))\n    \"\"\"dxf_centerline_color\"\"\".__setitem__('dxf_centerline_color',\n        _normalize_hex_color(payload.get('dxf_centerline_color'),\n        DEFAULT_DXF_CENTERLINE_COLOR))\n    \"\"\"dxf_label_color\"\"\".__setitem__('dxf_label_color', _normalize_hex_color(\n        payload.get('dxf_label_color'), DEFAULT_DXF_LABEL_COLOR))\n    \"\"\"cadastral_template_path\"\"\".__setitem__('cadastral_template_path',\n        _normalize_text(payload.get('cadastral_template_path'),\n        DEFAULT_CADASTRAL_TEMPLATE_PATH))\n    \"\"\"template_client_logo_preset\"\"\".__setitem__('template_client_logo_preset',\n        _normalize_choice(payload.get('template_client_logo_preset'),\n        TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS, DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET))\n    \"\"\"template_client_logo_path\"\"\".__setitem__('template_client_logo_path',\n        _normalize_text(payload.get('template_client_logo_path'),\n        DEFAULT_TEMPLATE_CLIENT_LOGO_PATH))\n    \"\"\"template_include_cross_sections\"\"\".__setitem__(\n        'template_include_cross_sections', _normalize_bool(payload.get(\n        'template_include_cross_sections'),\n        DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS))\n    \"\"\"template_generate_reverse_cross_section_sheet\"\"\".__setitem__(\n        'template_generate_reverse_cross_section_sheet', _normalize_bool(\n        payload.get('template_generate_reverse_cross_section_sheet'),\n        DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET))\n    \"\"\"template_show_profile_direction\"\"\".__setitem__(\n        'template_show_profile_direction', _normalize_bool(payload.get(\n        'template_show_profile_direction'),\n        DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION))\n    \"\"\"template_enable_maaiveld_edit_points\"\"\".__setitem__(\n        'template_enable_maaiveld_edit_points', _normalize_bool(payload.get(\n        'template_enable_maaiveld_edit_points'),\n        DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS))\n    \"\"\"template_avoid_multileader_collisions\"\"\".__setitem__(\n        'template_avoid_multileader_collisions', _normalize_bool(payload.get(\n        'template_avoid_multileader_collisions'),\n        DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS))\n    \"\"\"template_clip_cross_section_markers_to_profile\"\"\".__setitem__(\n        'template_clip_cross_section_markers_to_profile', _normalize_bool(\n        payload.get('template_clip_cross_section_markers_to_profile'),\n        DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE))\n    \"\"\"template_cross_section_marker_diameter\"\"\".__setitem__(\n        'template_cross_section_marker_diameter', _normalize_float(payload.get(\n        'template_cross_section_marker_diameter'),\n        DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER,\n        MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER,\n        MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER))\n    \"\"\"template_cross_section_diameter_text\"\"\".__setitem__(\n        'template_cross_section_diameter_text', _normalize_text(payload.get(\n        'template_cross_section_diameter_text'),\n        DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT))\n    \"\"\"streetsmart_username\"\"\".__setitem__('streetsmart_username',\n        _normalize_text(payload.get('streetsmart_username'),\n        DEFAULT_STREETSMART_USERNAME))\n    \"\"\"streetsmart_password\"\"\".__setitem__('streetsmart_password',\n        _normalize_text(payload.get('streetsmart_password'),\n        DEFAULT_STREETSMART_PASSWORD))\n    \"\"\"kickthemap_last_email\"\"\".__setitem__('kickthemap_last_email',\n        _normalize_email(payload.get('kickthemap_last_email'),\n        DEFAULT_KICKTHEMAP_LAST_EMAIL))\n    \"\"\"kickthemap_saved_accounts\"\"\".__setitem__('kickthemap_saved_accounts',\n        _normalize_kickthemap_accounts(payload.get('kickthemap_saved_accounts')))\n    \"\"\"kickthemap_object_layer_rules\"\"\".__setitem__('kickthemap_object_layer_rules'\n        , _normalize_kickthemap_object_layer_rules(payload.get(\n        'kickthemap_object_layer_rules')))\n    return AppSettings(*(), **{})\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "settings"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 402,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 21,
+    "kwonlyargcount": 0,
+    "name": "save_settings",
+    "posonlyargcount": 0,
+    "qualname": "save_settings",
+    "source": "def save_settings(settings):\n    settings_path = _settings_path()\n    settings_path.parent.mkdir(parents=True, exist_ok=True)\n    __temp_187746 = {}\n    \"\"\"map_export_background_source\"\"\".__setitem__('map_export_background_source',\n        _normalize_choice(settings.map_export_background_source,\n        MAP_EXPORT_BACKGROUND_OPTIONS, DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE))\n    \"\"\"dxf_trench_export_mode\"\"\".__setitem__('dxf_trench_export_mode',\n        _normalize_choice(settings.dxf_trench_export_mode,\n        DXF_TRENCH_EXPORT_OPTIONS, DEFAULT_DXF_TRENCH_EXPORT_MODE))\n    \"\"\"include_tiffs_in_dxf_export\"\"\".__setitem__('include_tiffs_in_dxf_export',\n        _normalize_bool(settings.include_tiffs_in_dxf_export,\n        DEFAULT_INCLUDE_TIFFS_IN_DXF_EXPORT))\n    \"\"\"include_klic_in_map_exports\"\"\".__setitem__('include_klic_in_map_exports',\n        _normalize_bool(settings.include_klic_in_map_exports,\n        DEFAULT_INCLUDE_KLIC_IN_MAP_EXPORTS))\n    \"\"\"dxf_label_gap\"\"\".__setitem__('dxf_label_gap', _normalize_float(settings.\n        dxf_label_gap, DEFAULT_DXF_LABEL_GAP, MIN_DXF_LABEL_GAP, MAX_DXF_LABEL_GAP)\n        )\n    \"\"\"dxf_centerline_color\"\"\".__setitem__('dxf_centerline_color',\n        _normalize_hex_color(settings.dxf_centerline_color,\n        DEFAULT_DXF_CENTERLINE_COLOR))\n    \"\"\"dxf_label_color\"\"\".__setitem__('dxf_label_color', _normalize_hex_color(\n        settings.dxf_label_color, DEFAULT_DXF_LABEL_COLOR))\n    \"\"\"cadastral_template_path\"\"\".__setitem__('cadastral_template_path',\n        _normalize_text(settings.cadastral_template_path,\n        DEFAULT_CADASTRAL_TEMPLATE_PATH))\n    \"\"\"template_client_logo_preset\"\"\".__setitem__('template_client_logo_preset',\n        _normalize_choice(settings.template_client_logo_preset,\n        TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS, DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET))\n    \"\"\"template_client_logo_path\"\"\".__setitem__('template_client_logo_path',\n        _normalize_text(settings.template_client_logo_path,\n        DEFAULT_TEMPLATE_CLIENT_LOGO_PATH))\n    \"\"\"template_include_cross_sections\"\"\".__setitem__(\n        'template_include_cross_sections', _normalize_bool(settings.\n        template_include_cross_sections, DEFAULT_TEMPLATE_INCLUDE_CROSS_SECTIONS))\n    \"\"\"template_generate_reverse_cross_section_sheet\"\"\".__setitem__(\n        'template_generate_reverse_cross_section_sheet', _normalize_bool(\n        settings.template_generate_reverse_cross_section_sheet,\n        DEFAULT_TEMPLATE_GENERATE_REVERSE_CROSS_SECTION_SHEET))\n    \"\"\"template_show_profile_direction\"\"\".__setitem__(\n        'template_show_profile_direction', _normalize_bool(settings.\n        template_show_profile_direction, DEFAULT_TEMPLATE_SHOW_PROFILE_DIRECTION))\n    \"\"\"template_enable_maaiveld_edit_points\"\"\".__setitem__(\n        'template_enable_maaiveld_edit_points', _normalize_bool(settings.\n        template_enable_maaiveld_edit_points,\n        DEFAULT_TEMPLATE_ENABLE_MAAIVELD_EDIT_POINTS))\n    \"\"\"template_avoid_multileader_collisions\"\"\".__setitem__(\n        'template_avoid_multileader_collisions', _normalize_bool(settings.\n        template_avoid_multileader_collisions,\n        DEFAULT_TEMPLATE_AVOID_MULTILEADER_COLLISIONS))\n    \"\"\"template_clip_cross_section_markers_to_profile\"\"\".__setitem__(\n        'template_clip_cross_section_markers_to_profile', _normalize_bool(\n        settings.template_clip_cross_section_markers_to_profile,\n        DEFAULT_TEMPLATE_CLIP_CROSS_SECTION_MARKERS_TO_PROFILE))\n    \"\"\"template_cross_section_marker_diameter\"\"\".__setitem__(\n        'template_cross_section_marker_diameter', _normalize_float(settings.\n        template_cross_section_marker_diameter,\n        DEFAULT_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER,\n        MIN_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER,\n        MAX_TEMPLATE_CROSS_SECTION_MARKER_DIAMETER))\n    \"\"\"template_cross_section_diameter_text\"\"\".__setitem__(\n        'template_cross_section_diameter_text', _normalize_text(settings.\n        template_cross_section_diameter_text,\n        DEFAULT_TEMPLATE_CROSS_SECTION_DIAMETER_TEXT))\n    \"\"\"streetsmart_username\"\"\".__setitem__('streetsmart_username',\n        _normalize_text(settings.streetsmart_username,\n        DEFAULT_STREETSMART_USERNAME))\n    \"\"\"streetsmart_password\"\"\".__setitem__('streetsmart_password',\n        _normalize_text(settings.streetsmart_password,\n        DEFAULT_STREETSMART_PASSWORD))\n    \"\"\"kickthemap_last_email\"\"\".__setitem__('kickthemap_last_email',\n        _normalize_email(settings.kickthemap_last_email,\n        DEFAULT_KICKTHEMAP_LAST_EMAIL))\n    \"\"\"kickthemap_saved_accounts\"\"\".__setitem__('kickthemap_saved_accounts',\n        _normalize_kickthemap_accounts(settings.kickthemap_saved_accounts))\n    \n    \n    def __temp_187769(comp_arg_0):\n        __temp_187770 = []\n        for __temp_187771 in comp_arg_0:\n            rule = __temp_187771\n            __temp_187770.append(asdict(rule))\n            continue\n        return __temp_187770\n    \n    \n    if not settings.kickthemap_object_layer_rules:\n        \"\"\"kickthemap_object_layer_rules\"\"\".__setitem__(\n            'kickthemap_object_layer_rules',\n            _normalize_kickthemap_object_layer_rules(__temp_187769(iter([]))))\n        normalized = AppSettings(*(), **__temp_187746)\n    else:\n        \"\"\"kickthemap_object_layer_rules\"\"\".__setitem__(\n            'kickthemap_object_layer_rules',\n            _normalize_kickthemap_object_layer_rules(__temp_187769(iter(\n            settings.kickthemap_object_layer_rules))))\n        normalized = AppSettings(*(), **__temp_187746)\n    settings_path.write_text(json.dumps(asdict(normalized), indent=2), encoding\n        ='utf-8')\n    return settings_path\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      ".0"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<settings:save_settings.<locals>.<listcomp>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 501,
+    "flags": 16777235,
+    "freevars": [],
+    "index": 22,
+    "kwonlyargcount": 0,
+    "name": "<listcomp>",
+    "posonlyargcount": 0,
+    "qualname": "save_settings.<locals>.<listcomp>",
+    "source": "def <listcomp>(comp_arg_0):\n    __temp_187783 = []\n    for __temp_187784 in comp_arg_0:\n        rule = __temp_187784\n        __temp_187783.append(asdict(rule))\n        continue\n    return __temp_187783\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "value",
+      "options",
+      "default"
+    ],
+    "cellvars": [
+      "default"
+    ],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=93, opname='FOR_ITER', arg=15, argval=74, argrepr='to 74', offset=42, starts_line=510, is_jump_target=True) in _choice_label",
+    "firstlineno": 508,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 23,
+    "kwonlyargcount": 0,
+    "name": "_choice_label",
+    "posonlyargcount": 0,
+    "qualname": "_choice_label"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      ".0"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<settings:_choice_label.<locals>.<genexpr>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 513,
+    "flags": 16777267,
+    "freevars": [
+      "default"
+    ],
+    "index": 24,
+    "kwonlyargcount": 0,
+    "name": "<genexpr>",
+    "posonlyargcount": 0,
+    "qualname": "_choice_label.<locals>.<genexpr>",
+    "source": "def <genexpr>(comp_arg_0):\n    nonlocal default\n    for __temp_187790 in comp_arg_0:\n        __temp_187791, __temp_187792 = __temp_187790\n        option_id = __temp_187791\n        label = __temp_187792\n        if not option_id == default:\n            continue\n        yield label\n        continue\n    return None\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "label",
+      "options",
+      "default"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=93, opname='FOR_ITER', arg=15, argval=38, argrepr='to 38', offset=6, starts_line=517, is_jump_target=True) in _choice_value_from_label",
+    "firstlineno": 516,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 25,
+    "kwonlyargcount": 0,
+    "name": "_choice_value_from_label",
+    "posonlyargcount": 0,
+    "qualname": "_choice_value_from_label"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 523,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 26,
+    "kwonlyargcount": 0,
+    "name": "map_export_background_label",
+    "posonlyargcount": 0,
+    "qualname": "map_export_background_label",
+    "source": "def map_export_background_label(value):\n    return _choice_label(value, MAP_EXPORT_BACKGROUND_OPTIONS,\n        DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "label"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 527,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 27,
+    "kwonlyargcount": 0,
+    "name": "map_export_background_value_from_label",
+    "posonlyargcount": 0,
+    "qualname": "map_export_background_value_from_label",
+    "source": "def map_export_background_value_from_label(label):\n    return _choice_value_from_label(label, MAP_EXPORT_BACKGROUND_OPTIONS,\n        DEFAULT_MAP_EXPORT_BACKGROUND_SOURCE)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 531,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 28,
+    "kwonlyargcount": 0,
+    "name": "dxf_trench_export_label",
+    "posonlyargcount": 0,
+    "qualname": "dxf_trench_export_label",
+    "source": "def dxf_trench_export_label(value):\n    return _choice_label(value, DXF_TRENCH_EXPORT_OPTIONS,\n        DEFAULT_DXF_TRENCH_EXPORT_MODE)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "label"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 535,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 29,
+    "kwonlyargcount": 0,
+    "name": "dxf_trench_export_value_from_label",
+    "posonlyargcount": 0,
+    "qualname": "dxf_trench_export_value_from_label",
+    "source": "def dxf_trench_export_value_from_label(label):\n    return _choice_value_from_label(label, DXF_TRENCH_EXPORT_OPTIONS,\n        DEFAULT_DXF_TRENCH_EXPORT_MODE)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 539,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 30,
+    "kwonlyargcount": 0,
+    "name": "template_client_logo_preset_label",
+    "posonlyargcount": 0,
+    "qualname": "template_client_logo_preset_label",
+    "source": "def template_client_logo_preset_label(value):\n    return _choice_label(value, TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS,\n        DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "label"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 543,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 31,
+    "kwonlyargcount": 0,
+    "name": "template_client_logo_preset_value_from_label",
+    "posonlyargcount": 0,
+    "qualname": "template_client_logo_preset_value_from_label",
+    "source": "def template_client_logo_preset_value_from_label(label):\n    return _choice_value_from_label(label, TEMPLATE_CLIENT_LOGO_PRESET_OPTIONS,\n        DEFAULT_TEMPLATE_CLIENT_LOGO_PRESET)\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "value"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 547,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 32,
+    "kwonlyargcount": 0,
+    "name": "hex_color_to_rgb",
+    "posonlyargcount": 0,
+    "qualname": "hex_color_to_rgb",
+    "source": "def hex_color_to_rgb(value):\n    normalized = _normalize_hex_color(value, DEFAULT_DXF_CENTERLINE_COLOR)\n    return int(normalized[slice(1, 3)], 16), int(normalized[slice(3, 5)], 16), int(\n        normalized[slice(5, 7)], 16)\n"
+  }
+]

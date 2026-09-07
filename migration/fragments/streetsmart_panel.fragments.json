@@ -1,0 +1,645 @@
+[
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 32,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 1,
+    "kwonlyargcount": 0,
+    "name": "_webview_lib_dir",
+    "posonlyargcount": 0,
+    "qualname": "_webview_lib_dir",
+    "source": "def _webview_lib_dir():\n    return Path(webview.__file__).resolve().parent / 'lib'\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "base_dir"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 36,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 2,
+    "kwonlyargcount": 0,
+    "name": "_ensure_webview2_runtime_dirs",
+    "posonlyargcount": 0,
+    "qualname": "_ensure_webview2_runtime_dirs",
+    "source": "def _ensure_webview2_runtime_dirs(base_dir):\n    if _DLL_DIRECTORY_HANDLES:\n        return None\n    if ctypes.sizeof(ctypes.c_void_p) == 8:\n        runtime_arch = 'win-x64'\n    else:\n        runtime_arch = 'win-x86'\n    candidates = [base_dir, base_dir / 'runtimes' / runtime_arch / 'native']\n    for __temp_3599 in iter(candidates):\n        candidate = __temp_3599\n        if candidate.exists():\n            _DLL_DIRECTORY_HANDLES.append(os.add_dll_directory(str(candidate)))\n            continue\n        else:\n            continue\n    return None\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=4, argval=4, argrepr='annotations', offset=110, starts_line=129, is_jump_target=False) in EmbeddedStreetSmartPanel",
+    "firstlineno": 50,
+    "flags": 16777216,
+    "freevars": [],
+    "index": 3,
+    "kwonlyargcount": 0,
+    "name": "EmbeddedStreetSmartPanel",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "self",
+      "host",
+      "status_callback"
+    ],
+    "cellvars": [
+      "self"
+    ],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 51,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 4,
+    "kwonlyargcount": 1,
+    "name": "__init__",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.__init__",
+    "source": "def __init__(self, host, status_callback):\n    self.host = host\n    self.status_callback = status_callback\n    self._command_queue = queue.Queue()\n    self._status_queue = queue.Queue()\n    self._destroyed = False\n    self._disposed_event = threading.Event()\n    self._initial_host_geometry = self._host_geometry()\n    self._thread = threading.Thread(target=self._run_thread, daemon=True)\n    self._thread.start()\n    self.host.bind('<Configure>', self._on_host_configure, add='+')\n    \n    \n    def __temp_64025(_event):\n        nonlocal self\n        return self.focus()\n    \n    \n    self.host.bind('<ButtonPress-1>', __temp_64025, add='+')\n    \n    \n    def __temp_64028(_event):\n        nonlocal self\n        return self.focus()\n    \n    \n    self.host.bind('<FocusIn>', __temp_64028, add='+')\n    \n    \n    def __temp_64031(_event):\n        nonlocal self\n        return self.destroy()\n    \n    \n    self.host.bind('<Destroy>', __temp_64031, add='+')\n    self.host.after(120, self._pump_status_queue)\n    self._queue_command('attach', self._initial_host_geometry)\n    self._queue_command('navigate', STREETSMART_WEB_URL)\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<streetsmart_panel:EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 67,
+    "flags": 16777235,
+    "freevars": [
+      "self"
+    ],
+    "index": 5,
+    "kwonlyargcount": 0,
+    "name": "<lambda>",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>",
+    "source": "def <lambda>(_event):\n    nonlocal self\n    return self.focus()\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<streetsmart_panel:EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 68,
+    "flags": 16777235,
+    "freevars": [
+      "self"
+    ],
+    "index": 6,
+    "kwonlyargcount": 0,
+    "name": "<lambda>",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>",
+    "source": "def <lambda>(_event):\n    nonlocal self\n    return self.focus()\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<streetsmart_panel:EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 69,
+    "flags": 16777235,
+    "freevars": [
+      "self"
+    ],
+    "index": 7,
+    "kwonlyargcount": 0,
+    "name": "<lambda>",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.__init__.<locals>.<lambda>",
+    "source": "def <lambda>(_event):\n    nonlocal self\n    return self.destroy()\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "self",
+      "selection"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 74,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 8,
+    "kwonlyargcount": 0,
+    "name": "navigate_selection",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.navigate_selection",
+    "source": "def navigate_selection(self, selection):\n    if isinstance(selection, dict):\n        self._queue_command('selection', selection)\n        return None\n    else:\n        self._queue_command('selection', None)\n        return None\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "self",
+      "url"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 77,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 9,
+    "kwonlyargcount": 0,
+    "name": "navigate_url",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.navigate_url",
+    "source": "def navigate_url(self, url):\n    if not url:\n        self._queue_command('navigate', str(STREETSMART_WEB_URL))\n        return None\n    else:\n        self._queue_command('navigate', str(url))\n        return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 80,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 10,
+    "kwonlyargcount": 0,
+    "name": "reload",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.reload",
+    "source": "def reload(self):\n    self._queue_command('reload', None)\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 83,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 11,
+    "kwonlyargcount": 0,
+    "name": "focus",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.focus",
+    "source": "def focus(self):\n    self._queue_command('focus', None)\n    return None\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "self",
+      "username",
+      "password"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 86,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 12,
+    "kwonlyargcount": 0,
+    "name": "update_credentials",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.update_credentials",
+    "source": "def update_credentials(self, username, password):\n    if not username:\n        __temp_64050 = str('').strip()\n    else:\n        str(username).strip()\n    if not password:\n        self._queue_command('credentials', (__temp_64050, str('')))\n        return None\n    else:\n        self._queue_command('credentials', (__temp_64050, str(password)))\n        return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 99,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 13,
+    "kwonlyargcount": 0,
+    "name": "destroy",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel.destroy",
+    "source": "def destroy(self):\n    if self._destroyed:\n        return None\n    self._destroyed = True\n    self._queue_command('dispose', None)\n    self._disposed_event.wait(timeout=4.5)\n    if self._thread.is_alive():\n        self._thread.join(timeout=3.5)\n        return None\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 108,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 14,
+    "kwonlyargcount": 0,
+    "name": "_host_geometry",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._host_geometry",
+    "source": "def _host_geometry(self):\n    self.host.update_idletasks()\n    return int(self.host.winfo_id()), max(int(self.host.winfo_width()), 32), max(\n        int(self.host.winfo_height()), 32)\n"
+  },
+  {
+    "argcount": 3,
+    "argument_names": [
+      "self",
+      "name",
+      "payload"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 116,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 15,
+    "kwonlyargcount": 0,
+    "name": "_queue_command",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._queue_command",
+    "source": "def _queue_command(self, name, payload):\n    if self._destroyed:\n        if name != 'dispose':\n            return None\n    self._command_queue.put((name, payload))\n    return None\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "self",
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 121,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 16,
+    "kwonlyargcount": 0,
+    "name": "_on_host_configure",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._on_host_configure",
+    "source": "def _on_host_configure(self, _event):\n    if self._destroyed:\n        return None\n    self._queue_command('attach', self._host_geometry())\n    return None\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "self",
+      "message"
+    ],
+    "cellvars": [],
+    "compile_ok": true,
+    "decompiled": true,
+    "firstlineno": 126,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 17,
+    "kwonlyargcount": 0,
+    "name": "_post_status",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._post_status",
+    "source": "def _post_status(self, message):\n    self._status_queue.put(str(message))\n    return None\n"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=129, opname='POP_JUMP_FORWARD_IF_NONE', arg=89, argval=212, argrepr='to 212', offset=32, starts_line=132, is_jump_target=False) in _pump_status_queue",
+    "firstlineno": 129,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 18,
+    "kwonlyargcount": 0,
+    "name": "_pump_status_queue",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._pump_status_queue"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "self"
+    ],
+    "cellvars": [
+      "self",
+      "Application",
+      "CoreWebView2MoveFocusReason",
+      "Rectangle",
+      "Uri",
+      "active_parent_hwnd",
+      "apply_host_geometry",
+      "browser",
+      "browser_controller",
+      "controller_field",
+      "current_password",
+      "current_selection",
+      "current_url",
+      "current_username",
+      "focus_browser",
+      "focus_in_progress",
+      "form",
+      "kernel32",
+      "navigate_to_selection",
+      "on_core_ready",
+      "on_navigation_completed",
+      "poll_timer",
+      "set_keyboard_focus",
+      "sync_controller_bounds",
+      "try_login_script",
+      "user32"
+    ],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=132, opname='MAKE_FUNCTION', arg=8, argval=8, argrepr='closure', offset=1182, starts_line=198, is_jump_target=False) in _run_thread",
+    "firstlineno": 147,
+    "flags": 16777219,
+    "freevars": [],
+    "index": 19,
+    "kwonlyargcount": 0,
+    "name": "_run_thread",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=56, starts_line=202, is_jump_target=False) in browser_controller",
+    "firstlineno": 198,
+    "flags": 16777235,
+    "freevars": [
+      "browser",
+      "controller_field"
+    ],
+    "index": 20,
+    "kwonlyargcount": 0,
+    "name": "browser_controller",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.browser_controller"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "target_hwnd"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=114, opname='POP_JUMP_FORWARD_IF_FALSE', arg=43, argval=392, argrepr='to 392', offset=304, starts_line=223, is_jump_target=False) in set_keyboard_focus",
+    "firstlineno": 206,
+    "flags": 16777235,
+    "freevars": [
+      "kernel32",
+      "user32"
+    ],
+    "index": 21,
+    "kwonlyargcount": 0,
+    "name": "set_keyboard_focus",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.set_keyboard_focus"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "width",
+      "height"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=260, starts_line=238, is_jump_target=False) in sync_controller_bounds",
+    "firstlineno": 229,
+    "flags": 16777235,
+    "freevars": [
+      "Rectangle",
+      "browser_controller"
+    ],
+    "index": 22,
+    "kwonlyargcount": 0,
+    "name": "sync_controller_bounds",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.sync_controller_bounds"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "host_geometry"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: no binding for nonlocal 'Rectangle' found (<streetsmart_panel:EmbeddedStreetSmartPanel._run_thread.<locals>.apply_host_geometry>, line 2)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 242,
+    "flags": 16777235,
+    "freevars": [
+      "Rectangle",
+      "active_parent_hwnd",
+      "form",
+      "sync_controller_bounds",
+      "user32"
+    ],
+    "index": 23,
+    "kwonlyargcount": 0,
+    "name": "apply_host_geometry",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.apply_host_geometry",
+    "source": "def apply_host_geometry(host_geometry):\n    nonlocal Rectangle, active_parent_hwnd, form, sync_controller_bounds, user32\n    __temp_124220, __temp_124221, __temp_124222 = host_geometry\n    parent_hwnd = __temp_124220\n    width = __temp_124221\n    height = __temp_124222\n    if parent_hwnd <= 0:\n        return None\n    hwnd = form.Handle.ToInt64()\n    if active_parent_hwnd != parent_hwnd:\n        user32.SetParent(hwnd, parent_hwnd)\n        style = user32.GetWindowLongW(hwnd, GWL_STYLE)\n        user32.SetWindowLongW(hwnd, GWL_STYLE, style | WS_CHILD | WS_VISIBLE)\n        active_parent_hwnd = parent_hwnd\n    user32.SetWindowPos(hwnd, 0, 0, 0, max(int(width), 32), max(int(height), 32\n        ), SWP_NOZORDER | SWP_NOACTIVATE)\n    form.Bounds = Rectangle(0, 0, max(int(width), 32), max(int(height), 32))\n    sync_controller_bounds(width, height)\n    return None\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=114, opname='POP_JUMP_FORWARD_IF_FALSE', arg=3, argval=274, argrepr='to 274', offset=266, starts_line=286, is_jump_target=False) in focus_browser",
+    "firstlineno": 268,
+    "flags": 16777235,
+    "freevars": [
+      "CoreWebView2MoveFocusReason",
+      "browser",
+      "browser_controller",
+      "focus_in_progress",
+      "form",
+      "set_keyboard_focus"
+    ],
+    "index": 24,
+    "kwonlyargcount": 0,
+    "name": "focus_browser",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.focus_browser"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=92, starts_line=301, is_jump_target=False) in try_login_script",
+    "firstlineno": 297,
+    "flags": 16777235,
+    "freevars": [
+      "browser",
+      "current_password",
+      "current_username"
+    ],
+    "index": 25,
+    "kwonlyargcount": 0,
+    "name": "try_login_script",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.try_login_script"
+  },
+  {
+    "argcount": 1,
+    "argument_names": [
+      "selection"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=35, opname='PUSH_EXC_INFO', arg=None, argval=None, argrepr='', offset=142, starts_line=313, is_jump_target=False) in navigate_to_selection",
+    "firstlineno": 305,
+    "flags": 16777235,
+    "freevars": [
+      "Uri",
+      "browser",
+      "current_selection",
+      "current_url",
+      "self"
+    ],
+    "index": 26,
+    "kwonlyargcount": 0,
+    "name": "navigate_to_selection",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.navigate_to_selection"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "_sender",
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_ok": false,
+    "decompiled": false,
+    "error": "DecompilationError: DecompilationError: Failed to decompile instruction Instruction(opcode=92, opname='UNPACK_SEQUENCE', arg=2, argval=2, argrepr='', offset=56, starts_line=322, is_jump_target=False) in process_command_queue",
+    "firstlineno": 318,
+    "flags": 16777235,
+    "freevars": [
+      "Application",
+      "Uri",
+      "apply_host_geometry",
+      "browser",
+      "current_password",
+      "current_url",
+      "current_username",
+      "focus_browser",
+      "form",
+      "navigate_to_selection",
+      "on_core_ready",
+      "on_navigation_completed",
+      "poll_timer",
+      "self",
+      "try_login_script"
+    ],
+    "index": 27,
+    "kwonlyargcount": 0,
+    "name": "process_command_queue",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.process_command_queue"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "_sender",
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: no binding for nonlocal 'apply_host_geometry' found (<streetsmart_panel:EmbeddedStreetSmartPanel._run_thread.<locals>.on_core_ready>, line 2)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 386,
+    "flags": 16777235,
+    "freevars": [
+      "apply_host_geometry",
+      "focus_browser",
+      "self",
+      "try_login_script"
+    ],
+    "index": 28,
+    "kwonlyargcount": 0,
+    "name": "on_core_ready",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.on_core_ready",
+    "source": "def on_core_ready(_sender, _event):\n    nonlocal apply_host_geometry, focus_browser, self, try_login_script\n    self._post_status('StreetSmart gereed.')\n    geometry = self._host_geometry()\n    apply_host_geometry(geometry)\n    try_login_script()\n    focus_browser()\n    return None\n"
+  },
+  {
+    "argcount": 2,
+    "argument_names": [
+      "_sender",
+      "_event"
+    ],
+    "cellvars": [],
+    "compile_error": "SyntaxError: no binding for nonlocal 'focus_browser' found (<streetsmart_panel:EmbeddedStreetSmartPanel._run_thread.<locals>.on_navigation_completed>, line 2)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 393,
+    "flags": 16777235,
+    "freevars": [
+      "focus_browser",
+      "self",
+      "try_login_script"
+    ],
+    "index": 29,
+    "kwonlyargcount": 0,
+    "name": "on_navigation_completed",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.on_navigation_completed",
+    "source": "def on_navigation_completed(_sender, _event):\n    nonlocal focus_browser, self, try_login_script\n    self._post_status('StreetSmart gesynchroniseerd.')\n    try_login_script()\n    focus_browser()\n    return None\n"
+  },
+  {
+    "argcount": 0,
+    "argument_names": [],
+    "cellvars": [],
+    "compile_error": "SyntaxError: invalid syntax (<streetsmart_panel:EmbeddedStreetSmartPanel._run_thread.<locals>.<lambda>>, line 1)",
+    "compile_ok": false,
+    "decompiled": true,
+    "firstlineno": 400,
+    "flags": 16777239,
+    "freevars": [
+      "focus_browser"
+    ],
+    "index": 30,
+    "kwonlyargcount": 0,
+    "name": "<lambda>",
+    "posonlyargcount": 0,
+    "qualname": "EmbeddedStreetSmartPanel._run_thread.<locals>.<lambda>",
+    "source": "def <lambda>(*_args):\n    nonlocal focus_browser\n    return focus_browser()\n"
+  }
+]
