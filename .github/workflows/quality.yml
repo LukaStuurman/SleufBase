@@ -65,6 +65,9 @@ jobs:
       - name: Validate legacy bytecode migration contract
         run: python tools/snapshot_legacy_api.py --check
 
+      - name: Print legacy bytecode SHA-256 snapshot
+        run: python tools/snapshot_legacy_api.py
+
       - name: Check release integrity
         run: python tools/check_release_integrity.py
 
