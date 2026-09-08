@@ -11,6 +11,19 @@ _UINT8_PTR = POINTER(c_uint8)
 _INT32_PTR = POINTER(c_int32)
 _DOUBLE_PTR = POINTER(c_double)
 
+EXPECTED_NATIVE_ABI_VERSION = 1
+_REQUIRED_NATIVE_SYMBOLS = (
+    "ktk_accel_version",
+    "ktk_edge_connected_mask",
+    "ktk_component_from_seed",
+    "ktk_fill_holes",
+    "ktk_best_component",
+    "ktk_boundary_edge_count",
+    "ktk_mask_to_loops",
+    "ktk_render_dxf_overlay",
+    "ktk_paint_axis_aligned_tiff",
+)
+
 
 def _candidate_paths() -> list[Path]:
     module_dir = Path(__file__).resolve().parent
@@ -29,16 +42,44 @@ def _candidate_paths() -> list[Path]:
 
 
 def _load_library():
+    errors: list[str] = []
+    observed_version: int | None = None
     for path in _candidate_paths():
-        if path.exists():
-            try:
-                return cdll.LoadLibrary(str(path))
-            except OSError:
-                continue
-    return None
+        if not path.exists():
+            continue
+        try:
+            library = cdll.LoadLibrary(str(path))
+        except OSError as exc:
+            errors.append(f"{path}: laden mislukt ({exc})")
+            continue
+
+        try:
+            version_function = library.ktk_accel_version
+            version_function.argtypes = []
+            version_function.restype = c_int
+            observed_version = int(version_function())
+        except (AttributeError, OSError, TypeError, ValueError) as exc:
+            errors.append(f"{path}: ktk_accel_version ontbreekt of faalt ({exc})")
+            continue
+
+        if observed_version != EXPECTED_NATIVE_ABI_VERSION:
+            errors.append(
+                f"{path}: incompatibele native ABI {observed_version}; "
+                f"verwacht {EXPECTED_NATIVE_ABI_VERSION}"
+            )
+            continue
+
+        missing_symbols = [name for name in _REQUIRED_NATIVE_SYMBOLS if not hasattr(library, name)]
+        if missing_symbols:
+            errors.append(f"{path}: ontbrekende native exports: {', '.join(missing_symbols)}")
+            continue
+        return library, observed_version, None
+
+    error = "; ".join(errors) if errors else None
+    return None, observed_version, error
 
 
-_LIB = _load_library()
+_LIB, _NATIVE_ABI_VERSION, _NATIVE_LOAD_ERROR = _load_library()
 
 if _LIB is not None:
     _LIB.ktk_accel_version.argtypes = []
@@ -114,6 +155,14 @@ if _LIB is not None:
 
 def is_available() -> bool:
     return _LIB is not None
+
+
+def native_abi_version() -> int | None:
+    return _NATIVE_ABI_VERSION
+
+
+def native_load_error() -> str | None:
+    return _NATIVE_LOAD_ERROR
 
 
 def _bool_array(mask: np.ndarray) -> np.ndarray:
