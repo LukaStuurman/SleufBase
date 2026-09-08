@@ -51,7 +51,12 @@ class WebMercatorTileClient:
         self.cache_dir = local_appdata / "SleufBase" / "cache" / cache_namespace
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.min_cache_ttl = timedelta(days=min_cache_ttl_days)
-        self._memory_cache: OrderedDict[tuple[int, int, int], Image.Image] = OrderedDict()
+        # Keep the source timestamp alongside each image. Without this metadata a
+        # stale disk tile loaded for preview can be mistaken for a fresh memory
+        # cache hit by the following refresh request.
+        self._memory_cache: OrderedDict[
+            tuple[int, int, int], tuple[Image.Image, datetime]
+        ] = OrderedDict()
         self._memory_cache_lock = threading.RLock()
 
     def build_tile_url(self, zoom: int, x: int, y: int) -> str:
@@ -83,19 +88,23 @@ class WebMercatorTileClient:
             raise TileClientError("Kaartgrootte moet groter dan nul zijn.")
 
         tile_request = self._prepare_tile_request(bounds, size)
-        stitched, preview_tile_count = self._build_preview_stitched(tile_request, return_tile_count=True)
-        total_tiles = len(tile_request["tile_coords"])
+        stitched, preview_tile_count, pending_coords = self._build_fetch_stitched(tile_request)
         if on_progress is not None and preview_tile_count > 0:
             on_progress(self._render_tile_request(tile_request, stitched))
-        if total_tiles == 0:
+
+        # The common pan/backtrack case is now a true cache fast path: when every
+        # exact tile is still fresh there is no executor, no duplicate cache copy
+        # and no second alpha-composite pass.
+        if not pending_coords:
             return self._render_tile_request(tile_request, stitched)
 
-        progress_interval = max(1, min(8, total_tiles // 4 or 1))
-        max_workers = min(self.max_workers, total_tiles)
+        pending_count = len(pending_coords)
+        progress_interval = max(1, min(8, pending_count // 4 or 1))
+        max_workers = min(self.max_workers, pending_count)
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_map = {
                 executor.submit(self._fetch_tile, int(tile_request["zoom"]), tile_x, tile_y): (tile_x, tile_y)
-                for tile_x, tile_y in tile_request["tile_coords"]
+                for tile_x, tile_y in pending_coords
             }
             completed = 0
             last_error: Exception | None = None
@@ -106,17 +115,20 @@ class WebMercatorTileClient:
                 except Exception as exc:
                     last_error = exc
                     continue
-                stitched.alpha_composite(
-                    tile,
-                    (
-                        (tile_x - int(tile_request["min_tile_x"])) * 256,
-                        (tile_y - int(tile_request["min_tile_y"])) * 256,
-                    ),
-                )
+                try:
+                    stitched.alpha_composite(
+                        tile,
+                        (
+                            (tile_x - int(tile_request["min_tile_x"])) * 256,
+                            (tile_y - int(tile_request["min_tile_y"])) * 256,
+                        ),
+                    )
+                finally:
+                    tile.close()
                 completed += 1
                 if on_progress is not None and (
                     completed == 1
-                    or completed == total_tiles
+                    or completed == pending_count
                     or completed % progress_interval == 0
                 ):
                     on_progress(self._render_tile_request(tile_request, stitched))
@@ -176,6 +188,38 @@ class WebMercatorTileClient:
             "target_size": size,
         }
 
+    def _build_fetch_stitched(
+        self,
+        tile_request: dict[str, object],
+    ) -> tuple[Image.Image, int, list[tuple[int, int]]]:
+        """Compose fresh exact hits once and return only tiles needing refresh."""
+        stitched = Image.new("RGBA", tuple(tile_request["stitched_size"]), (243, 243, 243, 255))
+        zoom = int(tile_request["zoom"])
+        min_tile_x = int(tile_request["min_tile_x"])
+        min_tile_y = int(tile_request["min_tile_y"])
+        preview_tile_count = 0
+        pending_coords: list[tuple[int, int]] = []
+
+        for tile_x, tile_y in tile_request["tile_coords"]:
+            tile = self._load_cached_tile(zoom, tile_x, tile_y, allow_stale=False)
+            if tile is None:
+                pending_coords.append((tile_x, tile_y))
+                tile = self._best_available_tile(zoom, tile_x, tile_y)
+            if tile is None:
+                continue
+            try:
+                preview_tile_count += 1
+                stitched.alpha_composite(
+                    tile,
+                    (
+                        (tile_x - min_tile_x) * 256,
+                        (tile_y - min_tile_y) * 256,
+                    ),
+                )
+            finally:
+                tile.close()
+        return stitched, preview_tile_count, pending_coords
+
     def _build_preview_stitched(
         self,
         tile_request: dict[str, object],
@@ -191,14 +235,17 @@ class WebMercatorTileClient:
             preview_tile = self._best_available_tile(zoom, tile_x, tile_y)
             if preview_tile is None:
                 continue
-            preview_tile_count += 1
-            stitched.alpha_composite(
-                preview_tile,
-                (
-                    (tile_x - min_tile_x) * 256,
-                    (tile_y - min_tile_y) * 256,
-                ),
-            )
+            try:
+                preview_tile_count += 1
+                stitched.alpha_composite(
+                    preview_tile,
+                    (
+                        (tile_x - min_tile_x) * 256,
+                        (tile_y - min_tile_y) * 256,
+                    ),
+                )
+            finally:
+                preview_tile.close()
         if return_tile_count:
             return stitched, preview_tile_count
         return stitched
@@ -218,7 +265,9 @@ class WebMercatorTileClient:
         bottom = int(round((tile_origin_y - mercator_bounds.min_y) / resolution))
         cropped = stitched.crop((left, top, right, bottom))
         if cropped.size != target_size:
-            cropped = cropped.resize(target_size, Image.Resampling.BILINEAR)
+            resized = cropped.resize(target_size, Image.Resampling.BILINEAR)
+            cropped.close()
+            return resized
         return cropped
 
     def _choose_zoom(self, mercator_bounds: Bounds, size: tuple[int, int]) -> int:
@@ -231,11 +280,15 @@ class WebMercatorTileClient:
 
     def _load_cached_tile(self, zoom: int, x: int, y: int, *, allow_stale: bool) -> Image.Image | None:
         cache_key = (zoom, x, y)
+        now = datetime.now(timezone.utc)
         with self._memory_cache_lock:
-            cached_image = self._memory_cache.get(cache_key)
-            if cached_image is not None:
-                self._memory_cache.move_to_end(cache_key)
-                return cached_image.copy()
+            cached_entry = self._memory_cache.get(cache_key)
+            if cached_entry is not None:
+                cached_image, cached_at = cached_entry
+                age = now - cached_at
+                if allow_stale or age <= self.min_cache_ttl:
+                    self._memory_cache.move_to_end(cache_key)
+                    return cached_image.copy()
 
         tile_path = self._tile_path(zoom, x, y)
         try:
@@ -245,7 +298,8 @@ class WebMercatorTileClient:
         except OSError:
             return None
 
-        age = datetime.now(timezone.utc) - datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+        cached_at = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+        age = now - cached_at
         if not allow_stale and age > self.min_cache_ttl:
             return None
         try:
@@ -259,13 +313,16 @@ class WebMercatorTileClient:
                 pass
             return None
         if tile.size != (256, 256):
+            tile.close()
             try:
                 tile_path.unlink(missing_ok=True)
             except OSError:
                 pass
             return None
-        self._remember_tile(cache_key, tile)
-        return tile.copy()
+        self._remember_tile(cache_key, tile, cached_at=cached_at)
+        result = tile.copy()
+        tile.close()
+        return result
 
     def _best_available_tile(self, zoom: int, x: int, y: int) -> Image.Image | None:
         exact_tile = self._load_cached_tile(zoom, x, y, allow_stale=True)
@@ -278,18 +335,24 @@ class WebMercatorTileClient:
             parent_tile = self._load_cached_tile(parent_zoom, parent_x, parent_y, allow_stale=True)
             if parent_tile is None:
                 continue
-            scale = 2**levels_up
-            sub_tile_size = 256 / scale
-            offset_x = x % scale
-            offset_y = y % scale
-            left = int(round(offset_x * sub_tile_size))
-            top = int(round(offset_y * sub_tile_size))
-            right = int(round((offset_x + 1) * sub_tile_size))
-            bottom = int(round((offset_y + 1) * sub_tile_size))
-            if right <= left or bottom <= top:
-                continue
-            cropped = parent_tile.crop((left, top, right, bottom))
-            return cropped.resize((256, 256), Image.Resampling.BILINEAR)
+            try:
+                scale = 2**levels_up
+                sub_tile_size = 256 / scale
+                offset_x = x % scale
+                offset_y = y % scale
+                left = int(round(offset_x * sub_tile_size))
+                top = int(round(offset_y * sub_tile_size))
+                right = int(round((offset_x + 1) * sub_tile_size))
+                bottom = int(round((offset_y + 1) * sub_tile_size))
+                if right <= left or bottom <= top:
+                    continue
+                cropped = parent_tile.crop((left, top, right, bottom))
+                try:
+                    return cropped.resize((256, 256), Image.Resampling.BILINEAR)
+                finally:
+                    cropped.close()
+            finally:
+                parent_tile.close()
         return None
 
     def _write_tile_atomically(self, tile_path: Path, tile: Image.Image) -> None:
@@ -325,12 +388,15 @@ class WebMercatorTileClient:
                     tile = source.convert("RGBA")
                     tile.load()
                 if tile.size != (256, 256):
+                    tile.close()
                     raise TileClientError(
                         f"Ongeldige tegelgrootte {tile.size} voor {zoom}/{x}/{y}; 256x256 verwacht."
                     )
                 self._write_tile_atomically(tile_path, tile)
                 self._remember_tile(cache_key, tile)
-                return tile.copy()
+                result = tile.copy()
+                tile.close()
+                return result
             except (requests.RequestException, OSError, UnidentifiedImageError, ValueError, TileClientError) as exc:
                 last_error = exc
                 if attempt < self.retries:
@@ -340,9 +406,28 @@ class WebMercatorTileClient:
             return stale_tile
         raise TileClientError(f"Tegel {zoom}/{x}/{y} kon niet worden geladen: {last_error}") from last_error
 
-    def _remember_tile(self, cache_key: tuple[int, int, int], tile: Image.Image) -> None:
+    def _remember_tile(
+        self,
+        cache_key: tuple[int, int, int],
+        tile: Image.Image,
+        *,
+        cached_at: datetime | None = None,
+    ) -> None:
+        timestamp = cached_at or datetime.now(timezone.utc)
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
         with self._memory_cache_lock:
-            self._memory_cache[cache_key] = tile.copy()
+            previous = self._memory_cache.pop(cache_key, None)
+            if previous is not None:
+                try:
+                    previous[0].close()
+                except Exception:
+                    pass
+            self._memory_cache[cache_key] = (tile.copy(), timestamp)
             self._memory_cache.move_to_end(cache_key)
             while len(self._memory_cache) > self.memory_cache_limit:
-                self._memory_cache.popitem(last=False)
+                _old_key, (old_image, _old_timestamp) = self._memory_cache.popitem(last=False)
+                try:
+                    old_image.close()
+                except Exception:
+                    pass
