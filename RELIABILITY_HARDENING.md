@@ -47,12 +47,22 @@ Deze hardening is bewust incrementeel. Grote herschrijvingen worden niet gecombi
 - Een echte regressietest-suite is toegevoegd voor bovenstaande foutklassen.
 - GitHub Actions compileert de Python-bron en draait de reliability-tests op Python 3.11.
 - `.gitignore` voorkomt nieuwe gegenereerde Python-, build-, IDE- en runtimebestanden in commits.
+- De volledige regressiesuite draait zowel met de actuele productie-migratieconfiguratie (`streetsmart=source`) als met de volledige legacy-rollbackconfiguratie.
+- CI weigert nieuwe losse `marshal.load`/`marshal.loads`-loaders buiten `legacy_bytecode.py`.
+
+### Legacy-bytecode-integriteit
+
+- Alle resterende legacy `.pyc`-bestanden hebben een bevroren SHA-256 en bestandsgrootte in `_bytecode/legacy_bytecode_manifest.json`.
+- `legacy_bytecode.py` valideert grootte, SHA-256, Python magic en het code-object voordat bytecode uitgevoerd mag worden.
+- Een ontbrekend of ongeldig runtime-manifest faalt gesloten; bytecode wordt dan niet uitgevoerd.
+- `app.py` gebruikt dezelfde centrale `source_migration`/`legacy_bytecode`-route als de andere migratiemodules en bevat geen eigen `marshal`-loader meer.
+- De Windows smoke-test valideert de centrale app-bytecode-route in de daadwerkelijk verpakte executable.
 
 ## P0 technische schuld — bytecode naar broncode
 
-De belangrijkste resterende architectuurbeperking is dat delen van de kern (`app.py`, `settings.py` en StreetSmart-gerelateerde code) gedrag uit `_bytecode/*.pyc` laden via `marshal` en `exec`.
+De belangrijkste resterende architectuurbeperking is dat delen van de kern (`app.py`, `settings.py` en StreetSmart-gerelateerde code) nog gedrag uit `_bytecode/*.pyc` uitvoeren. De uitvoering daarvan loopt nu wel via één centrale, gehashte en fail-closed compatibiliteitslaag.
 
-Dit maakt volledige statische analyse, typechecking, security-review en normale Python-version upgrades onmogelijk. De huidige Windows-distributie is hierdoor bovendien hard gekoppeld aan Python 3.11.
+Dit maakt volledige statische analyse, typechecking, security-review en normale Python-version upgrades nog steeds onmogelijk. De huidige Windows-distributie is hierdoor bovendien hard gekoppeld aan Python 3.11.
 
 De professionele eindtoestand is:
 
