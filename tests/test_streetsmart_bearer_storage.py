@@ -1,19 +1,20 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from pathlib import Path
-import sys
 import tempfile
 import unittest
 from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_PARENT = REPO_ROOT.parent
-if str(PACKAGE_PARENT) not in sys.path:
-    sys.path.insert(0, str(PACKAGE_PARENT))
-
-from SleufBase import streetsmart_bearer
+MODULE_PATH = REPO_ROOT / "streetsmart_bearer.py"
+_SPEC = importlib.util.spec_from_file_location("_sleufbase_streetsmart_bearer_test", MODULE_PATH)
+if _SPEC is None or _SPEC.loader is None:
+    raise RuntimeError(f"Kan StreetSmart bearer-module niet laden: {MODULE_PATH}")
+streetsmart_bearer = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(streetsmart_bearer)
 
 
 class StreetSmartBearerStorageTests(unittest.TestCase):
