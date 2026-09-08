@@ -289,9 +289,9 @@ jobs:
           SleufBase Windows v0.3.37
 
           Performance:
-          - native DXF-rendercache hergebruikt de overlay-signature na de eerste opbouw in plaats van iedere frame alle features opnieuw te valideren
           - selectie- en highlightflags gebruiken een begrensde feature-ID-index, waardoor geselecteerde objecten niet telkens een volledige Python-scan door alle DXF-features veroorzaken
           - hit-testing van kabel- en leidingsegmenten gebruikt een directe minimumloop met minder Python-object- en generatoroverhead
+          - de bestaande automatische invalidatie van de native DXF-cache bij in-place kleur- en geometriewijzigingen blijft volledig behouden
           - bevat ook de eerdere render-, tegelcache- en parallelle sjabloonfetch-optimalisaties uit de huidige main
 
           Windows:
