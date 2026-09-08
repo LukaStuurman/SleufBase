@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import marshal
 import re
 import subprocess
 import sys
@@ -31,14 +30,9 @@ _ORIGINAL_TTK_COMBOBOX = ttk.Combobox
 
 
 def _load_cached_module() -> None:
-    cache_tag = sys.implementation.cache_tag
-    if not cache_tag:
-        raise ImportError("Python cache tag is niet beschikbaar.")
-    pyc_path = Path(__file__).with_name("_bytecode") / f"app.{cache_tag}.pyc"
-    if not pyc_path.exists():
-        raise ImportError(f"Bytecode voor app.app niet gevonden: {pyc_path}")
-    code = marshal.loads(pyc_path.read_bytes()[16:])
-    exec(code, globals())
+    from .source_migration import load_migrating_module
+
+    load_migrating_module("app", globals(), __file__)
 
 
 def _install_kickthemap_jobs_browser_patch() -> None:

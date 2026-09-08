@@ -1,0 +1,31 @@
+{
+  "hash_algorithm": "sha256",
+  "modules": {
+    "app": {
+      "filename": "app.cpython-311.pyc",
+      "sha256": "723928f95127363585753065d5440c4e3be242089d590d58029a2214f0caebec",
+      "size": 731007
+    },
+    "settings": {
+      "filename": "settings.cpython-311.pyc",
+      "sha256": "030bafbc57797c4c5268980e8303aff94574ba72f7bec4595f3d4c97f4922076",
+      "size": 25683
+    },
+    "streetsmart": {
+      "filename": "streetsmart.cpython-311.pyc",
+      "sha256": "9df0577eb09d560974b7b6e8d19a933bba427254ab71e86d2e27d50076c706fa",
+      "size": 24570
+    },
+    "streetsmart_browser": {
+      "filename": "streetsmart_browser.cpython-311.pyc",
+      "sha256": "e5f0df92a8c68313fdc301b938dd65264976858c94a3245b6c2aac187a4c318c",
+      "size": 8667
+    },
+    "streetsmart_panel": {
+      "filename": "streetsmart_panel.cpython-311.pyc",
+      "sha256": "adf30310720cf55be8aaaf10449575167b762c83b7f624932786b88da06617ca",
+      "size": 25263
+    }
+  },
+  "schema_version": 1
+}
