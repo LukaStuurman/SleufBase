@@ -87,7 +87,9 @@ def _run_smoke_test() -> None:
     from SleufBase.app import KlicViewerApp
     from SleufBase.autosave_backup_patch import AutosaveSettings
     from SleufBase.cadastral_export import CadastralDxfExporter
+    from SleufBase.workflow_usability_patch import install_workflow_usability_patch
 
+    install_workflow_usability_patch(KlicViewerApp)
     _smoke_trace("app-import:ok")
     from SleufBase.cyclomedia import CyclomediaAerialClient
 
@@ -128,6 +130,12 @@ def _run_smoke_test() -> None:
         raise RuntimeError("MarXact importactie ontbreekt in frozen build")
     if int(getattr(KlicViewerApp, "_sleufbase_autosave_patch_version", 0) or 0) < 1:
         raise RuntimeError("Automatische back-uppatch ontbreekt in frozen build")
+    if int(getattr(KlicViewerApp, "_sleufbase_workflow_usability_version", 0) or 0) < 1:
+        raise RuntimeError("Workflow-gebruiksvriendelijkheidspatch ontbreekt in frozen build")
+    if not callable(getattr(KlicViewerApp, "show_command_palette", None)):
+        raise RuntimeError("Ctrl+K actiezoeker ontbreekt in frozen build")
+    if not callable(getattr(KlicViewerApp, "show_activity_history", None)):
+        raise RuntimeError("Activiteitenhistorie ontbreekt in frozen build")
     autosave_defaults = AutosaveSettings()
     if (
         not autosave_defaults.enabled
@@ -230,7 +238,9 @@ def main() -> int:
     _install_runtime_patches()
     from SleufBase.app import KlicViewerApp
     from SleufBase.jobs_memory_patch import install_jobs_launcher_guard
+    from SleufBase.workflow_usability_patch import install_workflow_usability_patch
 
+    install_workflow_usability_patch(KlicViewerApp)
     install_jobs_launcher_guard(KlicViewerApp)
 
     app = KlicViewerApp()
