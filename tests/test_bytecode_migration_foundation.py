@@ -17,10 +17,17 @@ from SleufBase import source_migration
 
 
 class SourceMigrationSelectionTests(unittest.TestCase):
-    def test_every_target_defaults_to_legacy(self) -> None:
+    def test_migration_defaults_are_explicit(self) -> None:
         state = source_migration.migration_state(environ={})
         self.assertEqual(set(state), set(source_migration.MIGRATABLE_MODULES))
-        self.assertTrue(all(value == "legacy" for value in state.values()))
+        self.assertEqual(state["streetsmart"], "source")
+        self.assertTrue(
+            all(
+                value == "legacy"
+                for module, value in state.items()
+                if module != "streetsmart"
+            )
+        )
 
     def test_source_and_legacy_aliases_are_explicit(self) -> None:
         variable = source_migration.migration_environment_variable("streetsmart")
@@ -43,13 +50,13 @@ class SourceMigrationSelectionTests(unittest.TestCase):
             source_migration.selected_implementation("unknown", {})
 
     def test_source_without_implementation_fails_closed(self) -> None:
-        variable = source_migration.migration_environment_variable("streetsmart")
+        variable = source_migration.migration_environment_variable("settings")
         with mock.patch.dict(os.environ, {variable: "source"}, clear=False):
             with self.assertRaisesRegex(source_migration.SourceMigrationError, "nog niet beschikbaar"):
                 source_migration.load_migrating_module(
-                    "streetsmart",
+                    "settings",
                     {},
-                    REPO_ROOT / "streetsmart.py",
+                    REPO_ROOT / "settings.py",
                 )
 
     def test_source_loader_is_used_without_legacy_fallback(self) -> None:

@@ -72,7 +72,17 @@ jobs:
         run: |
           python -m compileall -q . -x '(^|/)(_bytecode|__pycache__)(/|$)'
 
-      - name: Run reliability regression tests in legacy mode
+      - name: Run StreetSmart source parity tests
+        env:
+          SLEUFBASE_MIGRATION_SETTINGS: legacy
+          SLEUFBASE_MIGRATION_STREETSMART: source
+          SLEUFBASE_MIGRATION_STREETSMART_BROWSER: legacy
+          SLEUFBASE_MIGRATION_STREETSMART_PANEL: legacy
+          SLEUFBASE_MIGRATION_APP: legacy
+        run: |
+          python -m unittest tests.test_streetsmart_source_migration -v
+
+      - name: Run full reliability regression tests with legacy rollback
         env:
           SLEUFBASE_MIGRATION_SETTINGS: legacy
           SLEUFBASE_MIGRATION_STREETSMART: legacy

@@ -15,6 +15,13 @@ MIGRATABLE_MODULES = (
     "app",
 )
 
+# Modules move to source here only after their implementation has passed
+# characterization and regression tests. Legacy remains explicitly selectable
+# as a rollback while the corresponding .pyc is still bundled.
+DEFAULT_IMPLEMENTATIONS = {
+    "streetsmart": "source",
+}
+
 
 class SourceMigrationError(ImportError):
     """Raised when an explicit source/legacy migration selection cannot be honoured."""
@@ -35,14 +42,16 @@ def selected_implementation(
 ) -> str:
     """Return ``legacy`` or ``source`` for a migratable module.
 
-    Legacy remains the hard default until a module has passed its characterization
-    tests. There is intentionally no automatic fallback from source to legacy:
-    source-mode failures must remain visible during the migration.
+    A module stays on legacy until it is listed in ``DEFAULT_IMPLEMENTATIONS``.
+    Environment variables remain explicit overrides during the migration. There
+    is intentionally no automatic fallback from source to legacy: source-mode
+    failures must stay visible.
     """
 
     variable = migration_environment_variable(module_stem)
     environment = os.environ if environ is None else environ
-    raw_value = str(environment.get(variable, "legacy") or "legacy").strip().casefold()
+    default = DEFAULT_IMPLEMENTATIONS.get(module_stem, "legacy")
+    raw_value = str(environment.get(variable, default) or default).strip().casefold()
     if raw_value in {"legacy", "bytecode"}:
         return "legacy"
     if raw_value in {"source", "python"}:
@@ -65,10 +74,9 @@ def load_migrating_module(
 ) -> Path | None:
     """Load the selected implementation into ``namespace``.
 
-    During the migration every wrapper can keep calling this helper. Legacy is
-    used by default. Once normal Python source exists, the wrapper supplies a
-    ``source_loader`` and CI can run the same characterization tests in both
-    modes. Selecting source before such a loader exists fails explicitly.
+    During the migration every wrapper can keep calling this helper. Modules
+    default to legacy until promoted in ``DEFAULT_IMPLEMENTATIONS``. Selecting
+    source before a source loader exists fails explicitly.
     """
 
     implementation = selected_implementation(module_stem)

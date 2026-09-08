@@ -6,7 +6,7 @@ De legacy Python 3.11-bytecode in `_bytecode/` wordt stapsgewijs vervangen door 
 
 ## Veiligheidsregels
 
-1. Productie blijft standaard `legacy` gebruiken totdat de betreffende broncode-implementatie characterization- en regressietests doorstaat.
+1. Een module blijft standaard `legacy` gebruiken totdat de betreffende broncode-implementatie characterization-, regressie- en relevante Windows-smoke-tests doorstaat.
 2. Er is geen automatische fallback van `source` naar `legacy`. Een fout in source-mode moet zichtbaar blijven.
 3. Een legacy `.pyc` mag alleen bewust worden vervangen; `tests/characterization/legacy_bytecode_contract.json` bevriest de huidige bytes op grootte en Git blob-hash.
 4. Nieuwe functionaliteit wordt niet gecombineerd met een bytecode-naar-source omzetting. Eerst gedragspariteit, daarna refactoring.
@@ -22,7 +22,7 @@ De tijdelijke switches zijn environment variables. Geldige waarden zijn `legacy`
 - `SLEUFBASE_MIGRATION_STREETSMART_PANEL`
 - `SLEUFBASE_MIGRATION_APP`
 
-Niet ingestelde variabelen gebruiken altijd `legacy`.
+Niet ingestelde variabelen gebruiken de per-module default uit `source_migration.DEFAULT_IMPLEMENTATIONS`. `streetsmart` gebruikt inmiddels standaard `source`; de overige migratiedoelen blijven voorlopig `legacy`.
 
 `source_migration.py` bevat de centrale selectie. Een wrapper die nog geen broncode-implementatie heeft, faalt expliciet als `source` wordt geselecteerd.
 
@@ -56,30 +56,37 @@ Deze snapshot is bedoeld als hulpmiddel bij reconstructie; de regressie- en char
 
 ### Fase 0 — baseline en migratie-infrastructuur
 
-Status: **in uitvoering / foundation aanwezig**.
+Status: **afgerond**.
 
-- bytecodecontract vastleggen;
-- statische snapshottool toevoegen;
-- expliciete legacy/source-selectie toevoegen;
-- fail-closed source-mode testen;
-- wrappers voorbereiden op dual-mode tests;
-- CI laten controleren dat de baseline niet ongemerkt verandert.
-
-Exitcriterium: productiegedrag is ongewijzigd en alle bestaande tests blijven groen.
+- bytecodecontract vastgelegd;
+- statische snapshottool toegevoegd;
+- expliciete legacy/source-selectie toegevoegd;
+- fail-closed source-mode getest;
+- wrappers voorbereid op dual-mode tests;
+- CI controleert dat de baseline niet ongemerkt verandert.
 
 ### Fase 1 — `streetsmart.py`
 
-1. Leg de publieke exports en state/save/load-contracten vast.
-2. Reconstrueer dezelfde functionaliteit in normale Python-broncode.
-3. Geef de wrapper een `source_loader`.
-4. Draai characterization-tests in `legacy` en `source`.
-5. Maak `source` de standaard nadat Windows smoke-tests groen zijn.
-6. Houd legacy nog één release als expliciete rollback.
-7. Verwijder daarna `streetsmart.cpython-311.pyc` en de tijdelijke switch voor deze module.
+Status: **source actief; legacy rollback tijdelijk behouden**.
+
+- [x] Publieke exports en state/save/load-contracten vastgelegd uit de echte Python 3.11-bytecode.
+- [x] Functionaliteit gereconstrueerd in normale Python-broncode (`streetsmart_source.py`).
+- [x] Wrapper voorzien van een expliciete `source_loader`.
+- [x] Legacy en source rechtstreeks vergeleken op signatures, constants, state, opslagpaden, cleanup, selectie-URL's en login-JavaScript.
+- [x] `source` is de standaard voor `streetsmart`.
+- [x] Quality Gate, Windows frozen executables en installer-smoke-tests zijn groen met de source-default.
+- [ ] Houd `streetsmart.cpython-311.pyc` nog één stabiele release als expliciete rollback.
+- [ ] Verwijder daarna de StreetSmart `.pyc` en de tijdelijke switch voor deze module.
+
+Rollback tijdens deze overgang:
+
+```text
+SLEUFBASE_MIGRATION_STREETSMART=legacy
+```
 
 ### Fase 2 — `streetsmart_browser.py`
 
-Zelfde patroon. Extra regressies: browser bootstrap, bearer-token capture, login/reopen en shutdown.
+Volgende implementatiestap. Zelfde patroon. Extra regressies: browser bootstrap, bearer-token capture, login/reopen en shutdown.
 
 ### Fase 3 — `streetsmart_panel.py`
 
@@ -146,4 +153,4 @@ Voor `app.py` gelden daarnaast expliciete regressiechecks voor DXF/MarXact/templ
 
 ## Eerstvolgende implementatiestap
 
-Na deze foundation is `streetsmart.py` de eerste echte omzetting. `app.py` blijft bewust legacy totdat de kleinere modules het dual-mode proces succesvol hebben doorlopen.
+Na de StreetSmart-core is `streetsmart_browser.py` het volgende bytecodebestand. `app.py` blijft bewust legacy totdat de kleinere modules het dual-mode proces succesvol hebben doorlopen.
