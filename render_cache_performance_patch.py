@@ -3,11 +3,10 @@ from __future__ import annotations
 from collections import OrderedDict
 import math
 import threading
-from typing import Any
 
 import numpy as np
 
-from .models import CableFeature, DxfOverlay
+from .models import CableFeature
 from .renderer import MapRenderer
 
 
@@ -17,21 +16,6 @@ _flag_index_cache: OrderedDict[
     tuple[int, int], tuple[tuple[str, ...], dict[str, tuple[int, ...]]]
 ] = OrderedDict()
 _flag_index_cache_lock = threading.RLock()
-
-
-def _overlay_signature_state(overlay: DxfOverlay) -> tuple[object, ...]:
-    """O(1) state check for the effectively immutable DXF feature list."""
-    features = overlay.features
-    feature_count = len(features)
-    if feature_count == 0:
-        return (id(features), 0)
-    return (
-        id(features),
-        feature_count,
-        id(features[0]),
-        id(features[feature_count // 2]),
-        id(features[-1]),
-    )
 
 
 def _feature_index(feature_ids: tuple[str, ...]) -> dict[str, tuple[int, ...]]:
@@ -69,7 +53,8 @@ def _feature_flags_fast(
     index_map = _feature_index(feature_ids)
     for feature_id in enabled_ids:
         for index in index_map.get(feature_id, ()):
-            flags[index] = 1
+            if index < feature_count:
+                flags[index] = 1
     return flags
 
 
@@ -113,39 +98,16 @@ def install_render_cache_performance_patch() -> None:
     if current >= PATCH_VERSION:
         return
 
-    if not hasattr(DxfOverlay, "_sleufbase_original_native_render_signature"):
-        DxfOverlay._sleufbase_original_native_render_signature = DxfOverlay.native_render_signature
-    if not hasattr(DxfOverlay, "_sleufbase_original_invalidate_native_render_cache"):
-        DxfOverlay._sleufbase_original_invalidate_native_render_cache = DxfOverlay.invalidate_native_render_cache
     if not hasattr(CableFeature, "_sleufbase_original_distance_to"):
         CableFeature._sleufbase_original_distance_to = CableFeature.distance_to
     if not hasattr(MapRenderer, "_sleufbase_original_feature_flags"):
-        MapRenderer._sleufbase_original_feature_flags = MapRenderer._feature_flags
+        MapRenderer._sleufbase_original_feature_flags = staticmethod(MapRenderer._feature_flags)
 
-    original_signature = DxfOverlay._sleufbase_original_native_render_signature
-    original_invalidate = DxfOverlay._sleufbase_original_invalidate_native_render_cache
-
-    def native_render_signature_cached(self: DxfOverlay) -> tuple[tuple[object, ...], ...]:
-        state = _overlay_signature_state(self)
-        cached_state = getattr(self, "_sleufbase_native_signature_state", None)
-        cached_signature = getattr(self, "_sleufbase_native_signature_cache", None)
-        if cached_signature is not None and cached_state == state:
-            return cached_signature
-        signature = original_signature(self)
-        self._sleufbase_native_signature_state = state
-        self._sleufbase_native_signature_cache = signature
-        return signature
-
-    def invalidate_native_render_cache_fast(self: DxfOverlay) -> None:
-        original_invalidate(self)
-        self.__dict__.pop("_sleufbase_native_signature_state", None)
-        self.__dict__.pop("_sleufbase_native_signature_cache", None)
-
-    DxfOverlay.native_render_signature = native_render_signature_cached
-    DxfOverlay.invalidate_native_render_cache = invalidate_native_render_cache_fast
+    # Keep DxfOverlay.native_render_signature untouched. SleufBase deliberately
+    # detects in-place point, bounds and colour edits there; skipping that scan
+    # would make the native render cache stale after legitimate edits.
     CableFeature.distance_to = _distance_to_fast
     MapRenderer._feature_flags = staticmethod(_feature_flags_fast)
 
-    DxfOverlay._sleufbase_render_cache_performance_patch_version = PATCH_VERSION
     CableFeature._sleufbase_render_cache_performance_patch_version = PATCH_VERSION
     MapRenderer._sleufbase_render_cache_performance_patch_version = PATCH_VERSION
