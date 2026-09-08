@@ -9,8 +9,9 @@ De legacy Python 3.11-bytecode in `_bytecode/` wordt stapsgewijs vervangen door 
 1. Een module blijft standaard `legacy` gebruiken totdat de betreffende broncode-implementatie characterization-, regressie- en relevante Windows-smoke-tests doorstaat.
 2. Er is geen automatische fallback van `source` naar `legacy`. Een fout in source-mode moet zichtbaar blijven.
 3. Een legacy `.pyc` mag alleen bewust worden vervangen; `tests/characterization/legacy_bytecode_contract.json` bevriest de huidige bytes op grootte en Git blob-hash.
-4. Nieuwe functionaliteit wordt niet gecombineerd met een bytecode-naar-source omzetting. Eerst gedragspariteit, daarna refactoring.
-5. `app.py` wordt als laatste gemigreerd. De kleinere StreetSmart-modules bewijzen eerst het proces.
+4. Iedere resterende legacy `.pyc` wordt vóór `marshal`/`exec` runtime gevalideerd tegen `_bytecode/legacy_bytecode_manifest.json` op bestandsgrootte en SHA-256. Een ontbrekend of afwijkend manifest faalt gesloten.
+5. Nieuwe functionaliteit wordt niet gecombineerd met een bytecode-naar-source omzetting. Eerst gedragspariteit, daarna refactoring.
+6. `app.py` wordt als laatste gemigreerd. De kleinere StreetSmart-modules bewijzen eerst het proces.
 
 ## Migratieschakelaars
 
@@ -24,7 +25,7 @@ De tijdelijke switches zijn environment variables. Geldige waarden zijn `legacy`
 
 Niet ingestelde variabelen gebruiken de per-module default uit `source_migration.DEFAULT_IMPLEMENTATIONS`. `streetsmart` gebruikt inmiddels standaard `source`; de overige migratiedoelen blijven voorlopig `legacy`.
 
-`source_migration.py` bevat de centrale selectie. Een wrapper die nog geen broncode-implementatie heeft, faalt expliciet als `source` wordt geselecteerd.
+`source_migration.py` bevat de centrale selectie. Een wrapper die nog geen broncode-implementatie heeft, faalt expliciet als `source` wordt geselecteerd. Ook `app.py` gebruikt inmiddels deze centrale route voor zijn nog-legacy implementatie; een losse app-specifieke `marshal`-loader is niet meer toegestaan.
 
 ## Characterization-baseline
 
@@ -43,6 +44,8 @@ Controleer de baseline met:
 ```bash
 python tools/snapshot_legacy_api.py --check
 ```
+
+Dezelfde bestanden staan voor runtimegebruik met hun SHA-256 en grootte in `_bytecode/legacy_bytecode_manifest.json`. Omdat de snapshottool via `legacy_bytecode.py` leest, faalt de contractcheck ook wanneer een runtime-hash niet meer overeenkomt.
 
 Een volledige statische snapshot van code-objecten, namen, signatures en SHA256 kan zonder uitvoering van de applicatie worden geschreven met:
 
@@ -63,6 +66,10 @@ Status: **afgerond**.
 - expliciete legacy/source-selectie toegevoegd;
 - fail-closed source-mode getest;
 - wrappers voorbereid op dual-mode tests;
+- runtime SHA-256-integriteitsmanifest toegevoegd voor alle resterende legacy-bytecode;
+- `app.py` gebruikt dezelfde centrale legacy/source-loader in plaats van een eigen `marshal`-loader;
+- CI blokkeert nieuwe losse bytecode-loaders;
+- de volledige regressiesuite draait zowel in de actuele productie-migratiemodus als in volledige legacy-rollbackmodus;
 - CI controleert dat de baseline niet ongemerkt verandert.
 
 ### Fase 1 — `streetsmart.py`
@@ -135,7 +142,7 @@ Pas nadat alle source-implementaties stabiel zijn:
 - verwijder `legacy_bytecode.py`;
 - verwijder tijdelijke migratieschakelaars;
 - verwijder launcher-validatie voor legacy app-bytecode;
-- maak CI streng: iedere toekomstige `marshal.loads` of getrackte `.pyc` buiten normale buildcache is een fout.
+- behoud de CI-regel dat iedere toekomstige losse `marshal.load`/`marshal.loads` of getrackte `.pyc` buiten normale buildcache een fout is.
 
 ## Definition of Done per module
 
@@ -153,4 +160,4 @@ Voor `app.py` gelden daarnaast expliciete regressiechecks voor DXF/MarXact/templ
 
 ## Eerstvolgende implementatiestap
 
-Na de StreetSmart-core is `streetsmart_browser.py` het volgende bytecodebestand. `app.py` blijft bewust legacy totdat de kleinere modules het dual-mode proces succesvol hebben doorlopen.
+Na deze CI- en integriteitshardening is `streetsmart_browser.py` het volgende bytecodebestand. `app.py` blijft bewust legacy totdat de kleinere modules het dual-mode proces succesvol hebben doorlopen.
