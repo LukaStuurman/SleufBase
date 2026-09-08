@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.36'
+  SLEUFBASE_RELEASE_VERSION: '0.3.37'
 
 permissions:
   contents: write
@@ -267,7 +267,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.36
+          name: SleufBase-Windows-v0.3.37
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -286,17 +286,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.36
+          SleufBase Windows v0.3.37
 
-          MarXact-weergave:
-          - de normale SleufBase-kaart bouwt oude/stale MarXact-renders automatisch opnieuw op met de actuele lokale 3D-POLYLINE-clipping
-          - kabels en leidingen worden per object op hun eigen lokale doorsnede van de gemeten contour begrensd, ook bij onregelmatige en concave proefsleuven
-          - de native rastercache wordt na een automatische render-upgrade ongeldig gemaakt zodat geen oude pixels zichtbaar blijven
-          - MarXact-objecten slaan hun ingestelde kabel-/leidingkleur als RGB op; de kaartafbeelding in het DXF-sjabloon valt daardoor niet meer terug naar één blauwe kleur
-          - SleufBase-kaart, MarXact-detailraster en DXF-sjabloonkaart gebruiken dezelfde actuele render- en kleurinformatie
+          Performance:
+          - selectie- en highlightflags gebruiken een begrensde feature-ID-index, waardoor geselecteerde objecten niet telkens een volledige Python-scan door alle DXF-features veroorzaken
+          - hit-testing van kabel- en leidingsegmenten gebruikt een directe minimumloop met minder Python-object- en generatoroverhead
+          - de bestaande automatische invalidatie van de native DXF-cache bij in-place kleur- en geometriewijzigingen blijft volledig behouden
+          - bevat ook de eerdere render-, tegelcache- en parallelle sjabloonfetch-optimalisaties uit de huidige main
 
           Windows:
-          - standaard Inno Setup `[Tasks]`-wizardstructuur en gepinde Inno Setup 6.7.1 blijven behouden
+          - professionele installer, Fast ZIP en Portable EXE worden opnieuw volledig gebouwd en smoke-getest
           - installer-, desktopshortcut-, runtime- en regressietests blijven onderdeel van de releasebuild
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
