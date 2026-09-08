@@ -4,12 +4,15 @@ import dis
 import inspect
 import json
 from pathlib import Path
-from types import CodeType, FunctionType
-
-from legacy_bytecode import read_validated_code
+import sys
+from types import FunctionType
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from legacy_bytecode import read_validated_code
 
 
 def _safe_constant(value):
