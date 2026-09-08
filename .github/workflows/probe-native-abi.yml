@@ -1,4 +1,4 @@
-name: Probe native ABI
+name: Apply native ABI guard
 
 on:
   push:
@@ -8,17 +8,52 @@ on:
       - '.github/workflows/probe-native-abi.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  probe:
-    runs-on: windows-2022
+  apply:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Read ktk_accel ABI version
-        shell: pwsh
+          ref: hardening/native-abi-guard
+
+      - name: Apply ABI guard
+        shell: bash
         run: |
-          python -c "import ctypes; lib=ctypes.CDLL(r'native\\ktk_accel.dll'); lib.ktk_accel_version.argtypes=[]; lib.ktk_accel_version.restype=ctypes.c_int; print('KTK_ACCEL_ABI_VERSION=' + str(lib.ktk_accel_version()))"
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('native_accel.py')
+          text = path.read_text(encoding='utf-8')
+
+          marker = '_DOUBLE_PTR = POINTER(c_double)\n\n\n'
+          replacement = '''_DOUBLE_PTR = POINTER(c_double)\n\nEXPECTED_NATIVE_ABI_VERSION = 1\n_REQUIRED_NATIVE_SYMBOLS = (\n    "ktk_accel_version",\n    "ktk_edge_connected_mask",\n    "ktk_component_from_seed",\n    "ktk_fill_holes",\n    "ktk_best_component",\n    "ktk_boundary_edge_count",\n    "ktk_mask_to_loops",\n    "ktk_render_dxf_overlay",\n    "ktk_paint_axis_aligned_tiff",\n)\n\n\n'''
+          if text.count(marker) != 1:
+              raise SystemExit('pointer marker niet exact eenmaal gevonden')
+          text = text.replace(marker, replacement, 1)
+
+          old = '''def _load_library():\n    for path in _candidate_paths():\n        if path.exists():\n            try:\n                return cdll.LoadLibrary(str(path))\n            except OSError:\n                continue\n    return None\n\n\n_LIB = _load_library()\n'''
+          new = '''def _load_library():\n    errors: list[str] = []\n    observed_version: int | None = None\n    for path in _candidate_paths():\n        if not path.exists():\n            continue\n        try:\n            library = cdll.LoadLibrary(str(path))\n        except OSError as exc:\n            errors.append(f"{path}: laden mislukt ({exc})")\n            continue\n\n        try:\n            version_function = library.ktk_accel_version\n            version_function.argtypes = []\n            version_function.restype = c_int\n            observed_version = int(version_function())\n        except (AttributeError, OSError, TypeError, ValueError) as exc:\n            errors.append(f"{path}: ktk_accel_version ontbreekt of faalt ({exc})")\n            continue\n\n        if observed_version != EXPECTED_NATIVE_ABI_VERSION:\n            errors.append(\n                f"{path}: incompatibele native ABI {observed_version}; "\n                f"verwacht {EXPECTED_NATIVE_ABI_VERSION}"\n            )\n            continue\n\n        missing_symbols = [name for name in _REQUIRED_NATIVE_SYMBOLS if not hasattr(library, name)]\n        if missing_symbols:\n            errors.append(f"{path}: ontbrekende native exports: {', '.join(missing_symbols)}")\n            continue\n        return library, observed_version, None\n\n    error = "; ".join(errors) if errors else None\n    return None, observed_version, error\n\n\n_LIB, _NATIVE_ABI_VERSION, _NATIVE_LOAD_ERROR = _load_library()\n'''
+          if text.count(old) != 1:
+              raise SystemExit('oude native loader niet exact eenmaal gevonden')
+          text = text.replace(old, new, 1)
+
+          old_status = '''def is_available() -> bool:\n    return _LIB is not None\n'''
+          new_status = '''def is_available() -> bool:\n    return _LIB is not None\n\n\ndef native_abi_version() -> int | None:\n    return _NATIVE_ABI_VERSION\n\n\ndef native_load_error() -> str | None:\n    return _NATIVE_LOAD_ERROR\n'''
+          if text.count(old_status) != 1:
+              raise SystemExit('is_available marker niet exact eenmaal gevonden')
+          text = text.replace(old_status, new_status, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit ABI guard
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add native_accel.py
+          git diff --cached --check
+          git commit -m 'Weiger incompatibele native acceleration ABI'
+          git push origin HEAD:hardening/native-abi-guard
