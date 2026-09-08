@@ -1,0 +1,24 @@
+name: Probe native ABI
+
+on:
+  push:
+    branches:
+      - hardening/native-abi-guard
+    paths:
+      - '.github/workflows/probe-native-abi.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Read ktk_accel ABI version
+        shell: pwsh
+        run: |
+          python -c "import ctypes; lib=ctypes.CDLL(r'native\\ktk_accel.dll'); lib.ktk_accel_version.argtypes=[]; lib.ktk_accel_version.restype=ctypes.c_int; print('KTK_ACCEL_ABI_VERSION=' + str(lib.ktk_accel_version()))"
