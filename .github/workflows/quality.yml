@@ -65,6 +65,9 @@ jobs:
       - name: Validate legacy bytecode migration contract
         run: python tools/snapshot_legacy_api.py --check
 
+      - name: Characterize legacy StreetSmart core
+        run: python tools/dump_streetsmart_legacy.py
+
       - name: Check release integrity
         run: python tools/check_release_integrity.py
 
