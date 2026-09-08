@@ -1,0 +1,45 @@
+name: Windows Security Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'streetsmart_bearer.py'
+      - 'tests/test_streetsmart_bearer_storage.py'
+      - '.github/workflows/windows-security.yml'
+  pull_request:
+    paths:
+      - 'streetsmart_bearer.py'
+      - 'tests/test_streetsmart_bearer_storage.py'
+      - '.github/workflows/windows-security.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dpapi:
+    name: StreetSmart DPAPI (Python 3.11)
+    runs-on: windows-2022
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile token storage
+        shell: pwsh
+        run: python -m py_compile streetsmart_bearer.py tests/test_streetsmart_bearer_storage.py
+
+      - name: Run StreetSmart bearer storage tests
+        shell: pwsh
+        run: python -m unittest tests.test_streetsmart_bearer_storage -v
