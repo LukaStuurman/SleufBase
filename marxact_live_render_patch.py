@@ -11,7 +11,9 @@ from .virtual_trench import VIRTUAL_TRENCH_METADATA_KEY
 
 
 PATCH_VERSION = 1
+COLOR_PATCH_VERSION = 1
 LIVE_RENDER_VERSION_KEY = "_sleufbase_marxact_live_render_version"
+LIVE_RENDER_COLOR_VERSION_KEY = "_sleufbase_marxact_live_render_color_version"
 
 
 def _is_marxact_virtual_layer(layer: Any) -> bool:
@@ -87,6 +89,11 @@ def _matching_rule(source_name: str, rules: Iterable[ObjectLayerRule]) -> Object
     return None
 
 
+def _has_display_rgb(row: dict[str, Any]) -> bool:
+    value = row.get("display_rgb")
+    return isinstance(value, (list, tuple)) and len(value) >= 3
+
+
 def apply_marxact_display_colors(
     layer: Any,
     rules: Iterable[ObjectLayerRule] | None = None,
@@ -99,6 +106,10 @@ def apply_marxact_display_colors(
     ``display_rgb`` is absent. MarXact imports previously never populated that
     field, so the overview map in the DXF template could only show blue even
     though the cross-section itself used the configured ACI colours.
+
+    Rule resolution can load settings and is relatively expensive. Gather only
+    rows that actually need colouring first, so already-coloured live layers do
+    not touch settings on every pan/zoom render.
     """
 
     if not _is_marxact_virtual_layer(layer):
@@ -108,16 +119,35 @@ def apply_marxact_display_colors(
     points = payload.get("points") if isinstance(payload, dict) else None
     if not isinstance(points, list):
         return False
-    resolved_rules = tuple(rules) if rules is not None else _configured_object_layer_rules()
-    changed = False
+
+    pending_points: list[dict[str, Any]] = []
     for point in points:
         if not isinstance(point, dict) or str(point.get("role", "")).casefold() != "object":
             continue
-        if not overwrite and isinstance(point.get("display_rgb"), (list, tuple)) and len(point["display_rgb"]) >= 3:
+        if not overwrite and _has_display_rgb(point):
             continue
+        if str(point.get("source_name", "") or "").strip():
+            pending_points.append(point)
+
+    pending_dekbanden: list[dict[str, Any]] = []
+    raw_dekbanden = metadata.get("template_dekband_lines")
+    if isinstance(raw_dekbanden, list):
+        for row in raw_dekbanden:
+            if not isinstance(row, dict):
+                continue
+            if not overwrite and _has_display_rgb(row):
+                continue
+            source_name = str(row.get("source_name", "") or row.get("label", "") or "").strip()
+            if source_name:
+                pending_dekbanden.append(row)
+
+    if not pending_points and not pending_dekbanden:
+        return False
+
+    resolved_rules = tuple(rules) if rules is not None else _configured_object_layer_rules()
+    changed = False
+    for point in pending_points:
         source_name = str(point.get("source_name", "") or "").strip()
-        if not source_name:
-            continue
         rule = _matching_rule(source_name, resolved_rules)
         if rule is None:
             continue
@@ -131,23 +161,24 @@ def apply_marxact_display_colors(
 
     # Keep any configured dekband colour in the same metadata form. These rows
     # are optional, but when present they should follow the same map-render path.
-    raw_dekbanden = metadata.get("template_dekband_lines")
-    if isinstance(raw_dekbanden, list):
-        for row in raw_dekbanden:
-            if not isinstance(row, dict):
-                continue
-            if not overwrite and isinstance(row.get("display_rgb"), (list, tuple)) and len(row["display_rgb"]) >= 3:
-                continue
-            source_name = str(row.get("source_name", "") or row.get("label", "") or "").strip()
-            rule = _matching_rule(source_name, resolved_rules) if source_name else None
-            rgb = _aci_rgb(rule.color) if rule is not None else None
-            if rgb is None:
-                continue
-            new_value = [rgb[0], rgb[1], rgb[2]]
-            if row.get("display_rgb") != new_value:
-                row["display_rgb"] = new_value
-                changed = True
+    for row in pending_dekbanden:
+        source_name = str(row.get("source_name", "") or row.get("label", "") or "").strip()
+        rule = _matching_rule(source_name, resolved_rules)
+        rgb = _aci_rgb(rule.color) if rule is not None else None
+        if rgb is None:
+            continue
+        new_value = [rgb[0], rgb[1], rgb[2]]
+        if row.get("display_rgb") != new_value:
+            row["display_rgb"] = new_value
+            changed = True
     return changed
+
+
+def _metadata_version(metadata: dict[str, Any], key: str) -> int:
+    try:
+        return int(metadata.get(key, 0) or 0)
+    except (TypeError, ValueError):
+        return 0
 
 
 def refresh_marxact_live_render(
@@ -161,8 +192,9 @@ def refresh_marxact_live_render(
     The detailed template raster is rebuilt immediately before export, but the
     SleufBase map and the template overview map consume ``GeoTiffLayer.image``.
     Old projects can therefore keep an image produced before local polygon
-    clipping existed. Rebuild it once on first live render and cache the version
-    in metadata so normal panning/zooming remains cheap.
+    clipping existed. Rebuild it once on first live render and cache both the
+    raster and colour migration versions so normal panning/zooming is a cheap
+    metadata check rather than a settings load plus per-object scan.
     """
 
     if not _is_marxact_virtual_layer(layer):
@@ -170,12 +202,15 @@ def refresh_marxact_live_render(
     metadata = getattr(layer, "metadata", None)
     if not isinstance(metadata, dict):
         return False
+
+    current_version = _metadata_version(metadata, LIVE_RENDER_VERSION_KEY)
+    color_version = _metadata_version(metadata, LIVE_RENDER_COLOR_VERSION_KEY)
+    if not force and current_version >= PATCH_VERSION and color_version >= COLOR_PATCH_VERSION:
+        return False
+
     colors_changed = apply_marxact_display_colors(layer, rules)
-    try:
-        current_version = int(metadata.get(LIVE_RENDER_VERSION_KEY, 0) or 0)
-    except (TypeError, ValueError):
-        current_version = 0
-    if not force and not colors_changed and current_version >= PATCH_VERSION:
+    if not force and current_version >= PATCH_VERSION and not colors_changed:
+        metadata[LIVE_RENDER_COLOR_VERSION_KEY] = COLOR_PATCH_VERSION
         return False
 
     from . import virtual_trench as vt
@@ -199,6 +234,7 @@ def refresh_marxact_live_render(
         except Exception:
             pass
     metadata[LIVE_RENDER_VERSION_KEY] = PATCH_VERSION
+    metadata[LIVE_RENDER_COLOR_VERSION_KEY] = COLOR_PATCH_VERSION
     if old_image is not None and old_image is not image:
         try:
             old_image.close()
