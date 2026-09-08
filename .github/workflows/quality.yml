@@ -19,7 +19,7 @@ jobs:
   reliability:
     name: Reliability tests (Python 3.11)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -55,18 +55,20 @@ jobs:
             echo 'Gegenereerde Python-cachebestanden zijn getrackt.' >&2
             exit 1
           fi
-          if grep -R --line-number --include='*.py' 'marshal\.loads' . \
+          if grep -R --line-number --include='*.py' -E 'marshal\.load(s)?[[:space:]]*\(' . \
+            | grep -v './legacy_bytecode.py:'; then
+            echo 'Nieuwe losse marshal bytecode-loader gevonden; gebruik legacy_bytecode.py.' >&2
+            exit 1
+          fi
+          if grep -R --line-number --include='*.py' -E '^[[:space:]]*(from[[:space:]]+marshal[[:space:]]+import|import[[:space:]]+marshal([[:space:],]|$))' . \
             | grep -v './legacy_bytecode.py:' \
-            | grep -v './app.py:'; then
-            echo 'Nieuwe losse marshal bytecode-loader gevonden.' >&2
+            | grep -v './tests/'; then
+            echo 'Nieuwe productie-import van marshal gevonden; legacy-bytecode hoort via legacy_bytecode.py te lopen.' >&2
             exit 1
           fi
 
       - name: Validate legacy bytecode migration contract
         run: python tools/snapshot_legacy_api.py --check
-
-      - name: Print legacy bytecode SHA-256 snapshot
-        run: python tools/snapshot_legacy_api.py
 
       - name: Check release integrity
         run: python tools/check_release_integrity.py
@@ -85,7 +87,17 @@ jobs:
         run: |
           python -m unittest tests.test_streetsmart_source_migration -v
 
-      - name: Run full reliability regression tests with legacy rollback
+      - name: Run full reliability suite in production migration mode
+        env:
+          SLEUFBASE_MIGRATION_SETTINGS: legacy
+          SLEUFBASE_MIGRATION_STREETSMART: source
+          SLEUFBASE_MIGRATION_STREETSMART_BROWSER: legacy
+          SLEUFBASE_MIGRATION_STREETSMART_PANEL: legacy
+          SLEUFBASE_MIGRATION_APP: legacy
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Run full reliability suite with all-legacy rollback
         env:
           SLEUFBASE_MIGRATION_SETTINGS: legacy
           SLEUFBASE_MIGRATION_STREETSMART: legacy
