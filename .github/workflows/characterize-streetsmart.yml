@@ -6,14 +6,29 @@ on:
       - migration/streetsmart-source
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   characterize:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: migration/streetsmart-source
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python tools/dump_streetsmart_legacy.py
+      - name: Generate normal Python StreetSmart source
+        run: python tools/generate_streetsmart_source.py
+      - name: Commit generated source once
+        shell: bash
+        run: |
+          git add streetsmart_source.py
+          if git diff --cached --quiet; then
+            echo 'StreetSmart source is already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Generate StreetSmart Python source from legacy reference'
+          git push origin HEAD:migration/streetsmart-source
