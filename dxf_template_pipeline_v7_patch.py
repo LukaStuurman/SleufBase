@@ -4,18 +4,21 @@ from pathlib import Path
 import time
 from typing import Any
 
+from . import autocad_dynamic_visibility as dv
 from . import dxf_template_pipeline_patch as pipeline
 from . import dxf_template_pipeline_v3_patch as pipeline_v3
 from . import dxf_template_pipeline_v4_patch as pipeline_v4
 from . import dxf_template_pipeline_v5_patch as pipeline_v5
 from . import dxf_template_pipeline_v6_patch as pipeline_v6
+from . import template_dynamic_visibility_patch as dynamic_patch
 from . import template_reverse_patch as reverse_patch
 
 
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 _MISSING = object()
 _CACHE_MISS = object()
 _V6_PROFILE_BUILDER = None
+_PREVIOUS_PROMOTE = None
 
 
 def _captured_normal_document(final_output_path: Path):
@@ -31,6 +34,22 @@ def _captured_normal_document(final_output_path: Path):
     cache.pop("normal_document", None)
     cache.pop("normal_document_path", None)
     pipeline._increment_pair_counter("normal_dxf_reads_skipped")
+    return document
+
+
+def _captured_merged_document(final_output_path: Path):
+    """Take the in-memory merged Drawing before Dynamic Visibility promotion."""
+
+    cache = pipeline._pair_cache()
+    if cache is None:
+        return None
+    captured_path = cache.get("merged_document_path")
+    document = cache.get("merged_document")
+    if document is None or not pipeline_v3._same_path(captured_path, final_output_path):
+        return None
+    cache.pop("merged_document", None)
+    cache.pop("merged_document_path", None)
+    pipeline._increment_pair_counter("dynamic_visibility_input_reads_skipped_v7")
     return document
 
 
@@ -120,7 +139,7 @@ def _merge_reverse_variant_document_v7(
     final_output_path: Path,
     reverse_source_path: Path,
 ) -> int:
-    """Merge both already-built Drawings and write the large DXF only once here."""
+    """Merge normal+reverse Drawings without intermediate large DXF I/O."""
 
     import ezdxf
     from ezdxf import xref
@@ -170,10 +189,104 @@ def _merge_reverse_variant_document_v7(
         elif reverse_patch._is_variant_layer(layer_name, reverse_patch.REVERSE_MODE):
             layer.off()
 
-    target_document.saveas(final_output_path)
-    del target_document
+    cache = pipeline._pair_cache()
+    if cache is not None:
+        cache["merged_document"] = target_document
+        cache["merged_document_path"] = Path(final_output_path)
+        pipeline._increment_pair_counter("merged_dxf_intermediate_writes_skipped_v7")
+    else:
+        # Safe fallback for direct/internal callers without a pair session.
+        target_document.saveas(final_output_path)
+        del target_document
+        pipeline._increment_pair_counter("merged_dxf_capture_fallback_writes_v7")
+
     pipeline._add_pair_phase("reverse_merge", time.perf_counter() - started)
     return len(reverse_inserts)
+
+
+def _promote_exported_variants_from_memory_v7(output_path: Path) -> list[str]:
+    """Start Dynamic Visibility promotion from the merged in-memory Drawing.
+
+    The raw-DXF mutation and final ezdxf structural validation remain unchanged;
+    V7 only removes the intermediate merged-DXF save and immediate reopen.
+    """
+
+    global _PREVIOUS_PROMOTE
+
+    document = _captured_merged_document(output_path)
+    if document is None:
+        if _PREVIOUS_PROMOTE is None:
+            raise RuntimeError("V7 Dynamic Visibility fallback ontbreekt.")
+        return _PREVIOUS_PROMOTE(output_path)
+
+    import ezdxf
+
+    started = time.perf_counter()
+    wrapper_names = dynamic_patch._wrap_variant_pairs_as_static_blocks(document)
+    for layer in document.layers:
+        if dynamic_patch._variant_pair_key(layer.dxf.name) is not None:
+            layer.on()
+
+    selector_locations = pipeline._selector_locations_from_document(document, wrapper_names)
+    working_path = dynamic_patch._working_dynamic_path(output_path)
+    try:
+        # This is now the first large write of the combined normal+reverse DXF.
+        document.saveas(working_path)
+        del document
+
+        pairs, newline, had_bom = dv._read_pairs(working_path)
+        next_handle = max(dv._max_handle_value(pairs) + 1, dv._header_handseed(pairs))
+        records = dv._split_records(pairs)
+        del pairs
+        sections = dv._record_sections(records)
+
+        promoted, next_handle = pipeline._promote_records(
+            records,
+            sections,
+            wrapper_names,
+            next_handle=next_handle,
+        )
+        if promoted != len(wrapper_names):
+            raise RuntimeError(
+                f"Slechts {promoted} van {len(wrapper_names)} proefsleuven kregen Dynamic Visibility."
+            )
+        pipeline._set_handseed_in_records(records, next_handle)
+
+        with pipeline_v3._reuse_record_indexes():
+            finalized = pipeline._finalize_records(
+                records,
+                sections,
+                wrapper_names,
+                selector_locations,
+            )
+            if finalized != len(wrapper_names):
+                raise RuntimeError(
+                    f"Slechts {finalized} van {len(wrapper_names)} Dynamic Blocks zijn geïnitialiseerd."
+                )
+            details = pipeline._inspect_records(records, sections, wrapper_names)
+        pipeline._validate_dynamic_details(details, wrapper_names)
+
+        dv._write_pairs(
+            working_path,
+            pipeline._iter_record_pairs(records),
+            newline=newline,
+            had_bom=had_bom,
+        )
+        del records
+        del sections
+
+        # Keep the proven structural safety check after all raw mutations.
+        validation_document = ezdxf.readfile(working_path)
+        del validation_document
+        working_path.replace(output_path)
+    finally:
+        try:
+            working_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    pipeline._add_pair_phase("dynamic_visibility", time.perf_counter() - started)
+    return wrapper_names
 
 
 def _session_cached_rule(exporter: Any, point: Any, layer_rules: Any, resolver):
@@ -231,16 +344,15 @@ def _session_cached_description(
 def install_dxf_template_pipeline_v7_patch() -> None:
     """Install safe v7 optimizations without normal->reverse profile reuse.
 
-    V7 removes one large normal-DXF save/read roundtrip, caches direction-neutral
-    profile metadata inside the short-lived normal/reverse pair session and
-    restores the forced-start profile fast path for reverse datasets. The latter
-    still rebuilds the reverse profile independently from the reverse dataset;
-    it never mirrors or derives geometry from the normal profile.
+    V7 removes two large intermediate save/read roundtrips, caches direction-
+    neutral profile metadata inside the short-lived pair session and restores the
+    forced-start profile fast path for reverse datasets. Reverse geometry is
+    always rebuilt from the reverse dataset and never mirrored from Normal.
     """
 
     from .cadastral_export import CadastralDxfExporter
 
-    global _V6_PROFILE_BUILDER
+    global _V6_PROFILE_BUILDER, _PREVIOUS_PROMOTE
 
     pipeline_v6.install_dxf_template_pipeline_v6_patch()
     if int(
@@ -252,9 +364,14 @@ def install_dxf_template_pipeline_v7_patch() -> None:
     _install_normal_save_capture()
     _install_normal_call_capture()
 
-    # The Dynamic Visibility merge wrapper resolves this module global at call
-    # time, so replacing it keeps the existing post-merge safety/finalize pass.
+    # Both closures installed by the older pipeline resolve these module globals
+    # at call time, so V7 can preserve their safety/finalize behavior.
     pipeline._merge_reverse_variant_document_one_read = _merge_reverse_variant_document_v7
+    _PREVIOUS_PROMOTE = pipeline._promote_exported_variants_one_pass
+    pipeline._promote_exported_variants_one_pass = _promote_exported_variants_from_memory_v7
+    dynamic_patch._promote_exported_variants_to_dynamic_blocks = (
+        _promote_exported_variants_from_memory_v7
+    )
 
     previous_profile = CadastralDxfExporter._build_template_cross_section_profile
     previous_rule = CadastralDxfExporter._resolve_cross_section_point_rule
@@ -271,9 +388,8 @@ def install_dxf_template_pipeline_v7_patch() -> None:
         reverse_profile_direction: bool = False,
     ):
         if bool(reverse_profile_direction) and getattr(dataset, "cross_section_start_xy", None) is not None:
-            # Independent reverse rebuild: this consumes the reverse dataset's
-            # own forced start/end and Z values. It deliberately does not use
-            # V5's _reverse_profile_from_normal helper.
+            # Independent reverse rebuild: consumes this reverse dataset's own
+            # forced start/end and Z values; never uses _reverse_profile_from_normal.
             result = pipeline_v5._build_forced_profile_fast(
                 self,
                 dataset,
@@ -284,8 +400,8 @@ def install_dxf_template_pipeline_v7_patch() -> None:
                 pipeline._increment_pair_counter("reverse_forced_profile_fast_path_v7")
                 return result
 
-        # Non-forced reverse paths still go through V6, which hides the pair
-        # session and forces the original/core independent reverse builder.
+        # Non-forced reverse paths still go through V6, which forces the original
+        # independent core reverse builder by hiding the pair session temporarily.
         return previous_profile(
             self,
             dataset,
@@ -315,6 +431,7 @@ def install_dxf_template_pipeline_v7_patch() -> None:
     CadastralDxfExporter._cross_section_description = _cross_section_description_v7
     CadastralDxfExporter._sleufbase_dxf_template_pipeline_v7_version = PATCH_VERSION
     CadastralDxfExporter.SLEUFBASE_NORMAL_DXF_IN_MEMORY = True
+    CadastralDxfExporter.SLEUFBASE_MERGED_DXF_IN_MEMORY = True
     CadastralDxfExporter.SLEUFBASE_REVERSE_PROFILE_REUSE = False
     CadastralDxfExporter.SLEUFBASE_REVERSE_PROFILE_FULL_REBUILD = True
     CadastralDxfExporter.SLEUFBASE_REVERSE_PROFILE_INDEPENDENT_BUILD = True
