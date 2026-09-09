@@ -10,6 +10,7 @@ from .marxact_direction_patch import install_marxact_direction_patch
 from .marxact_midpoint_snap_patch import install_marxact_midpoint_snap_patch
 from .template_bgt_fetch_patch import install_template_bgt_fetch_patch
 from .template_asset_memory_patch import install_template_asset_memory_patch
+from .template_png_performance_patch import install_template_png_performance_patch
 from .template_export_performance_patch import install_template_export_performance_patch
 from .virtual_trench_template_patch import install_virtual_trench_template_patch
 from .pdok_high_quality_patch import install_pdok_high_quality_patch
@@ -17,6 +18,8 @@ from .marxact_boundary_patch import install_marxact_boundary_patch
 from .marxact_local_cross_section_patch import install_marxact_local_cross_section_patch
 from .render_hotpath_patch import install_render_hotpath_patch
 from .render_cache_performance_patch import install_render_cache_performance_patch
+from .render_framebuffer_performance_patch import install_render_framebuffer_performance_patch
+from .web_tile_memory_performance_patch import install_web_tile_memory_performance_patch
 from .marxact_live_render_patch import install_marxact_live_render_patch
 from .marxact_alignment_ui_patch import install_marxact_alignment_ui_hook
 from .dxf_template_pipeline_patch import install_dxf_template_pipeline_patch
@@ -25,6 +28,7 @@ from .dxf_template_pipeline_v3_patch import install_dxf_template_pipeline_v3_pat
 from .dxf_template_pipeline_v4_patch import install_dxf_template_pipeline_v4_patch
 from .dxf_template_pipeline_v5_patch import install_dxf_template_pipeline_v5_patch
 from .dxf_template_pipeline_v6_patch import install_dxf_template_pipeline_v6_patch
+from .dxf_template_pipeline_v7_patch import install_dxf_template_pipeline_v7_patch
 
 
 install_settings_ui_patch()
@@ -35,6 +39,7 @@ install_marxact_direction_patch()
 install_marxact_midpoint_snap_patch()
 install_template_bgt_fetch_patch()
 install_template_asset_memory_patch()
+install_template_png_performance_patch()
 install_template_export_performance_patch()
 install_virtual_trench_template_patch()
 install_pdok_high_quality_patch()
@@ -42,6 +47,8 @@ install_marxact_boundary_patch()
 install_marxact_local_cross_section_patch()
 install_render_hotpath_patch()
 install_render_cache_performance_patch()
+install_render_framebuffer_performance_patch()
+install_web_tile_memory_performance_patch()
 install_marxact_live_render_patch()
 install_marxact_alignment_ui_hook()
 install_dxf_template_pipeline_patch()
@@ -50,3 +57,4 @@ install_dxf_template_pipeline_v3_patch()
 install_dxf_template_pipeline_v4_patch()
 install_dxf_template_pipeline_v5_patch()
 install_dxf_template_pipeline_v6_patch()
+install_dxf_template_pipeline_v7_patch()
