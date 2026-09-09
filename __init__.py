@@ -10,6 +10,7 @@ from .marxact_direction_patch import install_marxact_direction_patch
 from .marxact_midpoint_snap_patch import install_marxact_midpoint_snap_patch
 from .template_bgt_fetch_patch import install_template_bgt_fetch_patch
 from .template_asset_memory_patch import install_template_asset_memory_patch
+from .template_png_performance_patch import install_template_png_performance_patch
 from .template_export_performance_patch import install_template_export_performance_patch
 from .virtual_trench_template_patch import install_virtual_trench_template_patch
 from .pdok_high_quality_patch import install_pdok_high_quality_patch
@@ -36,6 +37,7 @@ install_marxact_direction_patch()
 install_marxact_midpoint_snap_patch()
 install_template_bgt_fetch_patch()
 install_template_asset_memory_patch()
+install_template_png_performance_patch()
 install_template_export_performance_patch()
 install_virtual_trench_template_patch()
 install_pdok_high_quality_patch()
