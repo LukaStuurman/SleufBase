@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest import mock
 
 from PIL import Image
 
@@ -15,6 +16,7 @@ from SleufBase.template_asset_memory_patch import (
     TEMPLATE_UI_PUMP_INTERVAL_SECONDS,
     VIRTUAL_TEMPLATE_ROTATION_RESAMPLE,
     _contains_virtual_template_task,
+    _memory_safe_normalize_template_tiff_raster_alpha,
     _pump_template_ui,
 )
 from SleufBase.virtual_trench import build_virtual_trench_render
@@ -61,7 +63,7 @@ class TemplateAssetMemoryPatchTests(unittest.TestCase):
     def test_runtime_patch_uses_high_quality_and_is_installed(self) -> None:
         self.assertGreaterEqual(
             int(getattr(CadastralDxfExporter, "_sleufbase_template_asset_memory_patch_version", 0) or 0),
-            4,
+            5,
         )
         self.assertAlmostEqual(
             CadastralDxfExporter.VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER,
@@ -123,8 +125,6 @@ class TemplateAssetMemoryPatchTests(unittest.TestCase):
             self.assertTrue(output.exists())
             with Image.open(output) as rendered:
                 self.assertEqual(rendered.mode, "RGBA")
-                # 2.5x caps the source raster at 4000 px. Rotation can grow the
-                # diagonal, but one cropped raster at a time keeps memory bounded.
                 self.assertLessEqual(max(rendered.size), 5700)
                 self.assertGreater(rendered.width, 1)
                 self.assertGreater(rendered.height, 1)
@@ -137,8 +137,30 @@ class TemplateAssetMemoryPatchTests(unittest.TestCase):
                 image.putpixel((x, y), (20, 30, 40, 255))
 
         normalized = exporter._normalize_template_tiff_raster_alpha(image)
-        self.assertEqual(normalized.getpixel((0, 0))[3], 0)
-        self.assertEqual(normalized.getpixel((16, 16))[3], 255)
+        try:
+            self.assertEqual(normalized.getpixel((0, 0))[3], 0)
+            self.assertEqual(normalized.getpixel((16, 16))[3], 255)
+        finally:
+            normalized.close()
+            image.close()
+
+    def test_rgba_alpha_cleanup_skips_redundant_pillow_conversion(self) -> None:
+        exporter = CadastralDxfExporter(wfs_client=object())
+        image = Image.new("RGBA", (8, 8), (20, 30, 40, 255))
+        try:
+            with mock.patch.object(
+                Image.Image,
+                "convert",
+                side_effect=AssertionError("RGBA input should not allocate a converted PIL image"),
+            ):
+                normalized = _memory_safe_normalize_template_tiff_raster_alpha(exporter, image)
+            try:
+                self.assertEqual(normalized.mode, "RGBA")
+                self.assertEqual(normalized.size, image.size)
+            finally:
+                normalized.close()
+        finally:
+            image.close()
 
 
 if __name__ == "__main__":
