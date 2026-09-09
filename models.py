@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -179,21 +180,6 @@ class ViewportTransform:
         )
 
 
-def _segment_distance(point: tuple[float, float], start: tuple[float, float], end: tuple[float, float]) -> float:
-    px, py = point
-    x1, y1 = start
-    x2, y2 = end
-    dx = x2 - x1
-    dy = y2 - y1
-    if dx == 0 and dy == 0:
-        return ((px - x1) ** 2 + (py - y1) ** 2) ** 0.5
-    projection = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)
-    projection = max(0.0, min(1.0, projection))
-    nearest_x = x1 + projection * dx
-    nearest_y = y1 + projection * dy
-    return ((px - nearest_x) ** 2 + (py - nearest_y) ** 2) ** 0.5
-
-
 @dataclass
 class CableFeature:
     feature_id: str
@@ -204,12 +190,36 @@ class CableFeature:
     metadata: dict[str, str] = field(default_factory=dict)
 
     def distance_to(self, x: float, y: float) -> float:
-        if len(self.points) < 2:
+        """Distance to the nearest segment without generator/helper-call overhead."""
+        points = self.points
+        if len(points) < 2:
             return float("inf")
-        return min(
-            _segment_distance((x, y), self.points[index], self.points[index + 1])
-            for index in range(len(self.points) - 1)
-        )
+
+        px = float(x)
+        py = float(y)
+        best = float("inf")
+        for index in range(len(points) - 1):
+            x1, y1 = points[index]
+            x2, y2 = points[index + 1]
+            dx = x2 - x1
+            dy = y2 - y1
+            if dx == 0 and dy == 0:
+                distance = math.hypot(px - x1, py - y1)
+            else:
+                projection = ((px - x1) * dx + (py - y1) * dy) / ((dx * dx) + (dy * dy))
+                if projection <= 0.0:
+                    nearest_x, nearest_y = x1, y1
+                elif projection >= 1.0:
+                    nearest_x, nearest_y = x2, y2
+                else:
+                    nearest_x = x1 + projection * dx
+                    nearest_y = y1 + projection * dy
+                distance = math.hypot(px - nearest_x, py - nearest_y)
+            if distance < best:
+                best = distance
+                if best == 0.0:
+                    return 0.0
+        return best
 
     @property
     def display_name(self) -> str:
