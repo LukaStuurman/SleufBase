@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.41'
+  SLEUFBASE_RELEASE_VERSION: '0.3.42'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.41
+          name: SleufBase-Windows-v0.3.42
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,15 +293,23 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.41
+          SleufBase Windows v0.3.42
 
-          DXF-sjabloon export:
-          - normale en reverse kaartdelen blijven de veilige raster-/TIFF-optimalisaties delen
-          - normale dwarsprofielen behouden de bestaande snelle profielberekeningen waar die exact zijn
-          - reverse dwarsprofielen worden nu altijd volledig zelfstandig opnieuw opgebouwd
-          - begin- en eindmaaiveld, Z-waarden, profielgrenzen, reference level en hoogte-afhankelijke geometrie worden voor reverse opnieuw berekend
-          - richting-afhankelijke afstanden, teksten en leaders worden per variant afzonderlijk bepaald
-          - normal->reverse hergebruik van dwarsprofielgeometrie is expliciet uitgeschakeld om afwijkende maaiveldhoogtes correct te verwerken
+          Performance en DXF-export:
+          - DXF pipeline V7 houdt de normale en samengevoegde normal/reverse Drawing langer in geheugen en verwijdert twee tussentijdse grote save/read-cycli vóór Dynamic Visibility
+          - de bewezen raw-DXF Dynamic Visibility-finalisatie en afsluitende ezdxf-structuurvalidatie blijven behouden
+          - reverse dwarsprofielen blijven volledig zelfstandig opgebouwd; normal->reverse profielgeometrie wordt niet hergebruikt
+          - reverse MarXact/virtuele profielen met een expliciet startpunt gebruiken een onafhankelijke forced-start fast path die tegen de volledige V6/core-builder is getest, inclusief verschillende begin- en eindmaaiveldhoogtes
+          - richting-onafhankelijke profielregels en profielbeschrijvingen worden binnen één normal/reverse exportpaar gecachet
+          - tijdelijke template-PNG-rasterassets gebruiken lossless lage compressie om CPU-tijd bij opslaan te beperken
+          - als TIFF en DXF beide native kunnen renderen, delen ze één RGBA-framebuffer; alle andere gevallen vallen terug op de bestaande renderroute
+          - DXF hit-testing vermijdt tijdelijke Bounds-objecten en pick_feature hoeft niet langer alle matches te sorteren
+          - de webkaarttegelcache bewaart immutable RGBA-buffers en maakt lichte disposable views voor cache-hits
+          - CI rapporteert voortaan een echte I/O-benchmark van het 18,9 MB productiesjabloon zonder fragiele timinggrens
+
+          Correctheid:
+          - begin- en eindmaaiveld, Z-waarden, profielgrenzen, reference level en richting-afhankelijke afstanden blijven per reverse variant afzonderlijk bepaald
+          - real-template Dynamic Visibility, AutoCAD proxy resources en normal/reverse rastertests blijven blokkerend
 
           Windows:
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
