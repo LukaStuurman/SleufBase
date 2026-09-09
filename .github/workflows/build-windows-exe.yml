@@ -162,11 +162,16 @@ jobs:
           choco install innosetup --version=6.7.1 -y --no-progress --allow-downgrade
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
           if (-not (Test-Path $iscc)) { throw "Inno Setup compiler niet gevonden: $iscc" }
-          $versionInfo = (Get-Item $iscc).VersionInfo
-          $versionInfo | Select-Object ProductVersion,FileVersion | Format-List
-          $detectedVersion = [string]$versionInfo.ProductVersion
-          if ($detectedVersion -notmatch '^6\.7\.1(?:\.|$)') {
-            throw "Onverwachte Inno Setup compiler: $detectedVersion; exact 6.7.1.x vereist"
+
+          # ISCC.exe itself exposes 0.0.0.0 in its Windows version resource,
+          # so verify the exact Chocolatey package metadata that installed it.
+          $nuspec = Join-Path $env:ProgramData 'chocolatey\lib\innosetup\innosetup.nuspec'
+          if (-not (Test-Path $nuspec)) { throw "Inno Setup package metadata ontbreekt: $nuspec" }
+          [xml]$package = Get-Content $nuspec -Raw
+          $detectedVersion = [string]$package.package.metadata.version
+          Write-Host "Inno Setup package version: $detectedVersion"
+          if ($detectedVersion -ne '6.7.1') {
+            throw "Onverwachte Inno Setup packageversie: $detectedVersion; exact 6.7.1 vereist"
           }
 
       - name: Build professional installer
