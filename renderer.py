@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from collections.abc import Iterable
 from dataclasses import dataclass
+import threading
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -14,6 +16,33 @@ _NATIVE_DXF_MIN_FEATURES = 1000
 _NATIVE_DXF_MIN_POINTS = 6000
 _NATIVE_TIFF_MIN_LAYERS = 2
 _NATIVE_TIFF_MIN_DEST_PIXELS = 900_000
+_FLAG_INDEX_CACHE_LIMIT = 32
+_flag_index_cache: OrderedDict[
+    tuple[int, int], tuple[tuple[str, ...], dict[str, tuple[int, ...]]]
+] = OrderedDict()
+_flag_index_cache_lock = threading.RLock()
+
+
+def _feature_index(feature_ids: tuple[str, ...]) -> dict[str, tuple[int, ...]]:
+    """Build an ID -> indices lookup once per native render-cache feature tuple."""
+    key = (id(feature_ids), len(feature_ids))
+    with _flag_index_cache_lock:
+        cached = _flag_index_cache.get(key)
+        if cached is not None and cached[0] is feature_ids:
+            _flag_index_cache.move_to_end(key)
+            return cached[1]
+
+    mutable_index: dict[str, list[int]] = {}
+    for index, feature_id in enumerate(feature_ids):
+        mutable_index.setdefault(feature_id, []).append(index)
+    index_map = {feature_id: tuple(indices) for feature_id, indices in mutable_index.items()}
+
+    with _flag_index_cache_lock:
+        _flag_index_cache[key] = (feature_ids, index_map)
+        _flag_index_cache.move_to_end(key)
+        while len(_flag_index_cache) > _FLAG_INDEX_CACHE_LIMIT:
+            _flag_index_cache.popitem(last=False)
+    return index_map
 
 
 @dataclass(frozen=True)
@@ -48,23 +77,44 @@ class MapRenderer:
         width, height = size
         if width <= 0 or height <= 0:
             return Image.new("RGBA", (1, 1), (255, 255, 255, 255))
-        canvas = background.copy().convert("RGBA") if background is not None else Image.new("RGBA", size, (245, 245, 245, 255))
+        if background is None:
+            canvas = Image.new("RGBA", size, (245, 245, 245, 255))
+        elif background.mode == "RGBA":
+            canvas = background.copy()
+        else:
+            canvas = background.convert("RGBA")
         transform = ViewportTransform(view_bounds, width, height)
         selected_ids = set(selected_feature_ids or [])
         highlight_ids = set(highlight_feature_ids or [])
         native_tiff_canvas = self._paint_tiff_layers_native(canvas, transform, tiff_layers)
         if native_tiff_canvas is not None:
+            if native_tiff_canvas is not canvas:
+                canvas.close()
             canvas = native_tiff_canvas
         else:
             for layer in tiff_layers:
                 self._paint_tiff(canvas, transform, layer)
 
-        native_canvas = self._render_dxf_overlays_native(canvas, transform, dxf_overlays, selected_ids, highlight_ids)
+        native_canvas = self._render_dxf_overlays_native(
+            canvas,
+            transform,
+            dxf_overlays,
+            selected_ids,
+            highlight_ids,
+        )
         if native_canvas is not None:
+            if native_canvas is not canvas:
+                canvas.close()
             canvas = native_canvas
         else:
             draw = ImageDraw.Draw(canvas, "RGBA")
-            self._draw_dxf_overlays_python(draw, transform, dxf_overlays, selected_ids, highlight_ids)
+            self._draw_dxf_overlays_python(
+                draw,
+                transform,
+                dxf_overlays,
+                selected_ids,
+                highlight_ids,
+            )
 
         draw = ImageDraw.Draw(canvas, "RGBA")
         if map_comments:
@@ -193,10 +243,20 @@ class MapRenderer:
         return cache
 
     @staticmethod
-    def _feature_flags(feature_ids: tuple[str, ...], enabled_ids: set[str], feature_count: int) -> np.ndarray:
-        if not enabled_ids:
-            return np.zeros(feature_count, dtype=np.uint8)
-        return np.fromiter((1 if feature_id in enabled_ids else 0 for feature_id in feature_ids), dtype=np.uint8, count=feature_count)
+    def _feature_flags(
+        feature_ids: tuple[str, ...],
+        enabled_ids: set[str],
+        feature_count: int,
+    ) -> np.ndarray:
+        flags = np.zeros(feature_count, dtype=np.uint8)
+        if not enabled_ids or feature_count <= 0:
+            return flags
+        index_map = _feature_index(feature_ids)
+        for feature_id in enabled_ids:
+            for index in index_map.get(feature_id, ()):
+                if index < feature_count:
+                    flags[index] = 1
+        return flags
 
     def _paint_tiff_layers_native(
         self,
@@ -206,7 +266,9 @@ class MapRenderer:
     ) -> Image.Image | None:
         if not tiff_layers or not native_accel.is_available():
             return None
-        paint_jobs: list[tuple[GeoTiffLayer, tuple[float, float, float, float], tuple[int, int, int, int]]] = []
+        paint_jobs: list[
+            tuple[GeoTiffLayer, tuple[float, float, float, float], tuple[int, int, int, int]]
+        ] = []
         total_dest_pixels = 0
         for layer in tiff_layers:
             if layer.bounds.intersection(transform.bounds) is None:
@@ -224,7 +286,10 @@ class MapRenderer:
 
         if not paint_jobs:
             return canvas
-        if len(paint_jobs) < _NATIVE_TIFF_MIN_LAYERS and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS:
+        if (
+            len(paint_jobs) < _NATIVE_TIFF_MIN_LAYERS
+            and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS
+        ):
             return None
 
         rgba = np.array(canvas.convert("RGBA"), dtype=np.uint8, copy=True)
@@ -290,9 +355,17 @@ class MapRenderer:
         dest_bottom = int(np.ceil(max(screen_top_left[1], screen_bottom_right[1])))
         if dest_right <= dest_left or dest_bottom <= dest_top:
             return None
-        return (float(left), float(upper), float(right), float(lower)), (dest_left, dest_top, dest_right, dest_bottom)
+        return (
+            (float(left), float(upper), float(right), float(lower)),
+            (dest_left, dest_top, dest_right, dest_bottom),
+        )
 
-    def _paint_tiff(self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer) -> None:
+    def _paint_tiff(
+        self,
+        canvas: Image.Image,
+        transform: ViewportTransform,
+        layer: GeoTiffLayer,
+    ) -> None:
         if layer.bounds.width <= 0 or layer.bounds.height <= 0:
             return
         if layer.transform.is_axis_aligned():
@@ -300,7 +373,12 @@ class MapRenderer:
             return
         self._paint_affine_tiff(canvas, transform, layer)
 
-    def _paint_axis_aligned_tiff(self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer) -> None:
+    def _paint_axis_aligned_tiff(
+        self,
+        canvas: Image.Image,
+        transform: ViewportTransform,
+        layer: GeoTiffLayer,
+    ) -> None:
         visible_bounds = layer.bounds.intersection(transform.bounds)
         if visible_bounds is None:
             return
@@ -329,14 +407,22 @@ class MapRenderer:
             dest_bottom = int(np.ceil(max(screen_top_left[1], screen_bottom_right[1])))
             if dest_right <= dest_left or dest_bottom <= dest_top:
                 return
-            resized = crop.resize((dest_right - dest_left, dest_bottom - dest_top), Image.Resampling.BILINEAR)
+            resized = crop.resize(
+                (dest_right - dest_left, dest_bottom - dest_top),
+                Image.Resampling.BILINEAR,
+            )
             canvas.alpha_composite(resized, (dest_left, dest_top))
         finally:
             if resized is not None:
                 resized.close()
             crop.close()
 
-    def _paint_affine_tiff(self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer) -> None:
+    def _paint_affine_tiff(
+        self,
+        canvas: Image.Image,
+        transform: ViewportTransform,
+        layer: GeoTiffLayer,
+    ) -> None:
         pixel_to_world = layer.transform.to_matrix()
         world_to_screen = transform.world_to_screen_matrix()
         pixel_to_screen = world_to_screen @ pixel_to_world
@@ -386,16 +472,31 @@ class MapRenderer:
             draw.line(screen_points, fill=(0, 160, 255, 105), width=10)
         if is_selected:
             draw.line(screen_points, fill=(255, 215, 0, 215), width=7)
-        line_width = 4 if transform.meters_per_pixel < 0.05 else 3 if transform.meters_per_pixel < 0.2 else 2
+        line_width = (
+            4
+            if transform.meters_per_pixel < 0.05
+            else 3
+            if transform.meters_per_pixel < 0.2
+            else 2
+        )
         draw.line(screen_points, fill=(*feature.color, 230), width=line_width)
         if len(screen_points) == 2 and screen_points[0] == screen_points[1]:
             x, y = screen_points[0]
             radius = max(4, line_width + 2)
             if is_highlighted:
-                draw.ellipse((x - radius - 4, y - radius - 4, x + radius + 4, y + radius + 4), fill=(0, 160, 255, 105))
+                draw.ellipse(
+                    (x - radius - 4, y - radius - 4, x + radius + 4, y + radius + 4),
+                    fill=(0, 160, 255, 105),
+                )
             if is_selected:
-                draw.ellipse((x - radius - 3, y - radius - 3, x + radius + 3, y + radius + 3), fill=(255, 215, 0, 215))
-            draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(*feature.color, 230))
+                draw.ellipse(
+                    (x - radius - 3, y - radius - 3, x + radius + 3, y + radius + 3),
+                    fill=(255, 215, 0, 215),
+                )
+            draw.ellipse(
+                (x - radius, y - radius, x + radius, y + radius),
+                fill=(*feature.color, 230),
+            )
 
     def _draw_comments(
         self,
@@ -479,24 +580,51 @@ class MapRenderer:
             )
 
 
+def _bounds_contains_with_tolerance(
+    feature: CableFeature,
+    x: float,
+    y: float,
+    tolerance: float,
+) -> bool:
+    bounds = feature.bounds
+    return (
+        x >= float(bounds.min_x) - tolerance
+        and x <= float(bounds.max_x) + tolerance
+        and y >= float(bounds.min_y) - tolerance
+        and y <= float(bounds.max_y) + tolerance
+    )
+
+
+def _match_sort_key(distance: float, feature: CableFeature) -> tuple[float, str, str, str]:
+    return (
+        float(distance),
+        feature.display_name.lower(),
+        feature.source_path.name.lower(),
+        feature.feature_id,
+    )
+
+
 def pick_features(
     x: float,
     y: float,
     overlays: list[DxfOverlay],
     tolerance_meters: float,
 ) -> list[CableFeature]:
-    matches: list[tuple[float, str, str, CableFeature]] = []
+    px = float(x)
+    py = float(y)
+    tolerance = float(tolerance_meters)
+    matches: list[tuple[float, str, str, str, CableFeature]] = []
     for overlay in overlays:
         if not overlay.visible:
             continue
         for feature in overlay.features:
-            if not feature.bounds.padded(tolerance_meters).contains(x, y):
+            if not _bounds_contains_with_tolerance(feature, px, py, tolerance):
                 continue
-            distance = feature.distance_to(x, y)
-            if distance <= tolerance_meters:
-                matches.append((distance, feature.display_name.lower(), feature.source_path.name.lower(), feature))
-    matches.sort(key=lambda item: (item[0], item[1], item[2], item[3].feature_id))
-    return [feature for _, _, _, feature in matches]
+            distance = feature.distance_to(px, py)
+            if distance <= tolerance:
+                matches.append((*_match_sort_key(distance, feature), feature))
+    matches.sort(key=lambda item: item[:4])
+    return [item[4] for item in matches]
 
 
 def pick_feature(
@@ -505,5 +633,22 @@ def pick_feature(
     overlays: list[DxfOverlay],
     tolerance_meters: float,
 ) -> CableFeature | None:
-    features = pick_features(x, y, overlays, tolerance_meters)
-    return features[0] if features else None
+    px = float(x)
+    py = float(y)
+    tolerance = float(tolerance_meters)
+    best_key: tuple[float, str, str, str] | None = None
+    best_feature: CableFeature | None = None
+    for overlay in overlays:
+        if not overlay.visible:
+            continue
+        for feature in overlay.features:
+            if not _bounds_contains_with_tolerance(feature, px, py, tolerance):
+                continue
+            distance = feature.distance_to(px, py)
+            if distance > tolerance:
+                continue
+            key = _match_sort_key(distance, feature)
+            if best_key is None or key < best_key:
+                best_key = key
+                best_feature = feature
+    return best_feature
