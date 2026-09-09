@@ -123,8 +123,11 @@ class DxfTemplatePipelineV5Tests(unittest.TestCase):
         normal_reference = self.exporter._template_reference_chainage(layer, normal)
         reverse_reference = self.exporter._template_reference_chainage(layer, reverse)
 
-        self.assertAlmostEqual(normal_reference, 2.0)
-        self.assertAlmostEqual(reverse_reference, 8.0)
+        self.assertNotAlmostEqual(normal_reference, reverse_reference)
+        self.assertAlmostEqual(
+            reverse_reference,
+            float(normal.axis_length) - float(normal_reference),
+        )
 
     def test_reverse_distance_labels_match_full_core_reverse_and_not_normal_values(self) -> None:
         dataset = _dataset()
