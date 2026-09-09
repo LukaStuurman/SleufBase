@@ -25,6 +25,7 @@ from .dxf_template_pipeline_v3_patch import install_dxf_template_pipeline_v3_pat
 from .dxf_template_pipeline_v4_patch import install_dxf_template_pipeline_v4_patch
 from .dxf_template_pipeline_v5_patch import install_dxf_template_pipeline_v5_patch
 from .dxf_template_pipeline_v6_patch import install_dxf_template_pipeline_v6_patch
+from .dxf_template_pipeline_v7_patch import install_dxf_template_pipeline_v7_patch
 
 
 install_settings_ui_patch()
@@ -50,3 +51,4 @@ install_dxf_template_pipeline_v3_patch()
 install_dxf_template_pipeline_v4_patch()
 install_dxf_template_pipeline_v5_patch()
 install_dxf_template_pipeline_v6_patch()
+install_dxf_template_pipeline_v7_patch()
