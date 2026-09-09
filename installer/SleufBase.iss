@@ -1,5 +1,5 @@
 #define MyAppName "SleufBase"
-#define MyAppVersion "0.3.38"
+#define MyAppVersion "0.3.39"
 #define MyAppPublisher "Techbase"
 #define MyAppExeName "SleufBase.exe"
 
@@ -20,11 +20,13 @@ SetupIconFile=..\assets\sleufbase_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes
-WizardStyle=modern
+; Keep this on native/classic Inno Setup controls. CI enforces this contract.
+WizardStyle=classic
+WizardResizable=no
 CloseApplications=yes
 RestartApplications=yes
 UsePreviousAppDir=yes
-VersionInfoVersion=0.3.38.0
+VersionInfoVersion=0.3.39.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription=SleufBase Windows installer
 VersionInfoProductName={#MyAppName}
