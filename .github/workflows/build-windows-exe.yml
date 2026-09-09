@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.40'
+  SLEUFBASE_RELEASE_VERSION: '0.3.41'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.40
+          name: SleufBase-Windows-v0.3.41
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,18 +293,20 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.40
+          SleufBase Windows v0.3.41
 
-          DXF-sjabloon export performance:
-          - normale en reverse kaartdelen delen voortaan dezelfde kostbare achtergrond- en overlay-render
-          - de reverse kaart wordt uit dezelfde kaart opgebouwd en verplaatst alleen het witte referentiepunt wanneer dat veilig kan
-          - reverse TIFFs worden bij exact tegengestelde richting rechtstreeks als 180-graden pixeltransformatie van de normale TIFF gemaakt
-          - geocoding en voorbereide rasterassets worden tussen normaal en reverse gedeeld
-          - bij onzekere geometrie blijft de bestaande volledige renderroute als veilige fallback actief
+          DXF-sjabloon export:
+          - normale en reverse kaartdelen blijven de veilige raster-/TIFF-optimalisaties delen
+          - normale dwarsprofielen behouden de bestaande snelle profielberekeningen waar die exact zijn
+          - reverse dwarsprofielen worden nu altijd volledig zelfstandig opnieuw opgebouwd
+          - begin- en eindmaaiveld, Z-waarden, profielgrenzen, reference level en hoogte-afhankelijke geometrie worden voor reverse opnieuw berekend
+          - richting-afhankelijke afstanden, teksten en leaders worden per variant afzonderlijk bepaald
+          - normal->reverse hergebruik van dwarsprofielgeometrie is expliciet uitgeschakeld om afwijkende maaiveldhoogtes correct te verwerken
 
           Windows:
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
-          - release-integriteit, installer-contract en runtime-smoketests blijven blokkerend
+          - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
+          - de geïnstalleerde professionele build wordt na installatie opnieuw met --smoke-test gecontroleerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
