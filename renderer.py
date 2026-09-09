@@ -73,6 +73,8 @@ class _NativeTiffImageCache:
 
 
 class MapRenderer:
+    SLEUFBASE_SHARED_NATIVE_FRAMEBUFFER = True
+
     def render(
         self,
         view_bounds: Bounds,
@@ -88,6 +90,21 @@ class MapRenderer:
         width, height = size
         if width <= 0 or height <= 0:
             return Image.new("RGBA", (1, 1), (255, 255, 255, 255))
+
+        combined = self._render_combined_native(
+            view_bounds,
+            size,
+            tiff_layers,
+            dxf_overlays,
+            background,
+            selected_feature_ids,
+            highlight_feature_ids,
+            map_comments,
+            map_markers,
+        )
+        if combined is not None:
+            return combined
+
         if background is None:
             canvas = Image.new("RGBA", size, (245, 245, 245, 255))
         elif background.mode == "RGBA":
@@ -129,6 +146,126 @@ class MapRenderer:
         if map_markers:
             self._draw_markers(draw, transform, map_markers)
         return canvas
+
+    def _render_combined_native(
+        self,
+        view_bounds: Bounds,
+        size: tuple[int, int],
+        tiff_layers: list[GeoTiffLayer],
+        dxf_overlays: list[DxfOverlay],
+        background: Image.Image | None,
+        selected_feature_ids: Iterable[str] | None,
+        highlight_feature_ids: Iterable[str] | None,
+        map_comments: list[MapComment] | None,
+        map_markers: list[MapMarker] | None,
+    ) -> Image.Image | None:
+        if not tiff_layers or not dxf_overlays:
+            return None
+        transform = ViewportTransform(view_bounds, size[0], size[1])
+        tiff_jobs = self._prepared_native_tiff_jobs(transform, tiff_layers)
+        if not tiff_jobs:
+            return None
+        dxf_jobs = self._prepared_native_dxf_jobs(dxf_overlays)
+        if not dxf_jobs:
+            return None
+
+        if background is None:
+            canvas = Image.new("RGBA", size, (245, 245, 245, 255))
+        elif background.mode == "RGBA":
+            canvas = background.copy()
+        else:
+            canvas = background.convert("RGBA")
+        try:
+            rgba = _rgba_array(canvas)
+            for layer, source_rect, dest_rect, source_rgba in tiff_jobs:
+                if native_accel.paint_axis_aligned_tiff(
+                    rgba, source_rgba, source_rect, dest_rect, layer.opacity
+                ) is None:
+                    return None
+
+            selected_ids = set(selected_feature_ids or [])
+            highlight_ids = set(highlight_feature_ids or [])
+            view_tuple = (
+                float(transform.bounds.min_x),
+                float(transform.bounds.min_y),
+                float(transform.bounds.max_x),
+                float(transform.bounds.max_y),
+            )
+            for cache in dxf_jobs:
+                feature_count = len(cache.feature_ids)
+                if native_accel.render_dxf_overlay(
+                    rgba,
+                    cache.points_xy,
+                    cache.feature_offsets,
+                    cache.feature_bounds,
+                    cache.feature_colors,
+                    self._feature_flags(cache.feature_ids, selected_ids, feature_count),
+                    self._feature_flags(cache.feature_ids, highlight_ids, feature_count),
+                    view_tuple,
+                    transform.meters_per_pixel,
+                ) is None:
+                    return None
+
+            result = Image.fromarray(rgba, mode="RGBA")
+            if map_comments or map_markers:
+                draw = ImageDraw.Draw(result, "RGBA")
+                if map_comments:
+                    self._draw_comments(draw, transform, map_comments)
+                if map_markers:
+                    self._draw_markers(draw, transform, map_markers)
+            return result
+        finally:
+            canvas.close()
+
+    def _prepared_native_tiff_jobs(self, transform: ViewportTransform, tiff_layers: list[GeoTiffLayer]):
+        if not tiff_layers or not native_accel.is_available():
+            return None
+        raw_jobs = []
+        total_dest_pixels = 0
+        for layer in tiff_layers:
+            if layer.bounds.intersection(transform.bounds) is None:
+                continue
+            if not layer.transform.is_axis_aligned():
+                return None
+            job = self._axis_aligned_tiff_paint_job(transform, layer)
+            if job is None:
+                continue
+            source_rect, dest_rect = job
+            total_dest_pixels += max(0, dest_rect[2] - dest_rect[0]) * max(
+                0, dest_rect[3] - dest_rect[1]
+            )
+            raw_jobs.append((layer, source_rect, dest_rect))
+        if not raw_jobs:
+            return []
+        if len(raw_jobs) < _NATIVE_TIFF_MIN_LAYERS and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS:
+            return None
+
+        jobs = []
+        for layer, source_rect, dest_rect in raw_jobs:
+            source_rgba = self._native_tiff_rgba_cache(layer)
+            if source_rgba is None:
+                return None
+            jobs.append((layer, source_rect, dest_rect, source_rgba))
+        return jobs
+
+    def _prepared_native_dxf_jobs(self, dxf_overlays: list[DxfOverlay]):
+        visible = [overlay for overlay in dxf_overlays if overlay.visible and overlay.features]
+        if not visible:
+            return []
+        if not native_accel.is_available():
+            return None
+        total_features = sum(len(overlay.features) for overlay in visible)
+        if total_features < _NATIVE_DXF_MIN_FEATURES:
+            total_points = sum(len(feature.points) for overlay in visible for feature in overlay.features)
+            if total_points < _NATIVE_DXF_MIN_POINTS:
+                return None
+        jobs = []
+        for overlay in visible:
+            cache = self._native_dxf_render_cache(overlay)
+            if cache is None:
+                return None
+            jobs.append(cache)
+        return jobs
 
     def _draw_dxf_overlays_python(
         self,
@@ -201,21 +338,11 @@ class MapRenderer:
         selected_ids: set[str],
         highlight_ids: set[str],
     ) -> Image.Image | None:
-        visible_overlays = [overlay for overlay in dxf_overlays if overlay.visible and overlay.features]
-        if not visible_overlays:
-            return canvas
-        if not native_accel.is_available():
+        jobs = self._prepared_native_dxf_jobs(dxf_overlays)
+        if jobs is None:
             return None
-        total_features = sum(len(overlay.features) for overlay in visible_overlays)
-        if total_features < _NATIVE_DXF_MIN_FEATURES:
-            total_points = sum(
-                len(feature.points)
-                for overlay in visible_overlays
-                for feature in overlay.features
-            )
-            if total_points < _NATIVE_DXF_MIN_POINTS:
-                return None
-
+        if not jobs:
+            return canvas
         rgba = _rgba_array(canvas)
         view_tuple = (
             float(transform.bounds.min_x),
@@ -223,25 +350,19 @@ class MapRenderer:
             float(transform.bounds.max_x),
             float(transform.bounds.max_y),
         )
-        for overlay in visible_overlays:
-            cache = self._native_dxf_render_cache(overlay)
-            if cache is None:
-                return None
+        for cache in jobs:
             feature_count = len(cache.feature_ids)
-            selected_flags = self._feature_flags(cache.feature_ids, selected_ids, feature_count)
-            highlighted_flags = self._feature_flags(cache.feature_ids, highlight_ids, feature_count)
-            rendered = native_accel.render_dxf_overlay(
+            if native_accel.render_dxf_overlay(
                 rgba,
                 cache.points_xy,
                 cache.feature_offsets,
                 cache.feature_bounds,
                 cache.feature_colors,
-                selected_flags,
-                highlighted_flags,
+                self._feature_flags(cache.feature_ids, selected_ids, feature_count),
+                self._feature_flags(cache.feature_ids, highlight_ids, feature_count),
                 view_tuple,
                 transform.meters_per_pixel,
-            )
-            if rendered is None:
+            ) is None:
                 return None
         return Image.fromarray(rgba, mode="RGBA")
 
@@ -315,40 +436,16 @@ class MapRenderer:
         transform: ViewportTransform,
         tiff_layers: list[GeoTiffLayer],
     ) -> Image.Image | None:
-        if not tiff_layers or not native_accel.is_available():
+        jobs = self._prepared_native_tiff_jobs(transform, tiff_layers)
+        if jobs is None:
             return None
-        paint_jobs: list[
-            tuple[GeoTiffLayer, tuple[float, float, float, float], tuple[int, int, int, int]]
-        ] = []
-        total_dest_pixels = 0
-        for layer in tiff_layers:
-            if layer.bounds.intersection(transform.bounds) is None:
-                continue
-            if not layer.transform.is_axis_aligned():
-                return None
-            job = self._axis_aligned_tiff_paint_job(transform, layer)
-            if job is None:
-                continue
-            _source_rect, dest_rect = job
-            total_dest_pixels += max(0, dest_rect[2] - dest_rect[0]) * max(
-                0, dest_rect[3] - dest_rect[1]
-            )
-            paint_jobs.append((layer, job[0], job[1]))
-
-        if not paint_jobs:
+        if not jobs:
             return canvas
-        if len(paint_jobs) < _NATIVE_TIFF_MIN_LAYERS and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS:
-            return None
-
         rgba = _rgba_array(canvas)
-        for layer, source_rect, dest_rect in paint_jobs:
-            source_rgba = self._native_tiff_rgba_cache(layer)
-            if source_rgba is None:
-                return None
-            painted = native_accel.paint_axis_aligned_tiff(
+        for layer, source_rect, dest_rect, source_rgba in jobs:
+            if native_accel.paint_axis_aligned_tiff(
                 rgba, source_rgba, source_rect, dest_rect, layer.opacity
-            )
-            if painted is None:
+            ) is None:
                 return None
         return Image.fromarray(rgba, mode="RGBA")
 
