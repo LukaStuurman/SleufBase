@@ -90,7 +90,10 @@ class DxfTemplatePipelineV5Tests(unittest.TestCase):
             int(getattr(CadastralDxfExporter, "_sleufbase_dxf_template_pipeline_v5_version", 0) or 0),
             1,
         )
-        self.assertTrue(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_PROFILE_REUSE", False))
+        # V5 still provides the normal/forced/dekband fast paths, but V6 deliberately
+        # disables runtime normal->reverse profile reuse because maaiveld geometry can
+        # differ between directions.
+        self.assertFalse(getattr(CadastralDxfExporter, "SLEUFBASE_REVERSE_PROFILE_REUSE", True))
         self.assertTrue(getattr(CadastralDxfExporter, "SLEUFBASE_FORCED_PROFILE_FAST_PATH", False))
         self.assertTrue(getattr(CadastralDxfExporter, "SLEUFBASE_DEKBAND_PROFILE_AUGMENT", False))
 
