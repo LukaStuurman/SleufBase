@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-import math
 import threading
 
 import numpy as np
 
-from .models import CableFeature
 from . import renderer as renderer_module
 from .renderer import MapRenderer
 
 
-PATCH_VERSION = 2
+PATCH_VERSION = 3
 _FLAG_INDEX_CACHE_LIMIT = 32
 _flag_index_cache: OrderedDict[
     tuple[int, int], tuple[tuple[str, ...], dict[str, tuple[int, ...]]]
@@ -59,42 +57,7 @@ def _feature_flags_fast(
     return flags
 
 
-def _distance_to_fast(self: CableFeature, x: float, y: float) -> float:
-    """Avoid generator/function-call overhead in frequent map hit testing."""
-    points = self.points
-    if len(points) < 2:
-        return float("inf")
-
-    px = float(x)
-    py = float(y)
-    best = float("inf")
-    for index in range(len(points) - 1):
-        x1, y1 = points[index]
-        x2, y2 = points[index + 1]
-        dx = x2 - x1
-        dy = y2 - y1
-        if dx == 0 and dy == 0:
-            distance = math.hypot(px - x1, py - y1)
-        else:
-            projection = ((px - x1) * dx + (py - y1) * dy) / ((dx * dx) + (dy * dy))
-            if projection <= 0.0:
-                nearest_x = x1
-                nearest_y = y1
-            elif projection >= 1.0:
-                nearest_x = x2
-                nearest_y = y2
-            else:
-                nearest_x = x1 + projection * dx
-                nearest_y = y1 + projection * dy
-            distance = math.hypot(px - nearest_x, py - nearest_y)
-        if distance < best:
-            best = distance
-            if best == 0.0:
-                return 0.0
-    return best
-
-
-def _bounds_contains_with_tolerance(feature: CableFeature, x: float, y: float, tolerance: float) -> bool:
+def _bounds_contains_with_tolerance(feature, x: float, y: float, tolerance: float) -> bool:
     """Equivalent to feature.bounds.padded(tolerance).contains() without allocation."""
     bounds = feature.bounds
     return (
@@ -105,7 +68,7 @@ def _bounds_contains_with_tolerance(feature: CableFeature, x: float, y: float, t
     )
 
 
-def _match_sort_key(distance: float, feature: CableFeature):
+def _match_sort_key(distance: float, feature):
     return (
         float(distance),
         feature.display_name.lower(),
@@ -161,8 +124,6 @@ def install_render_cache_performance_patch() -> None:
     if current >= PATCH_VERSION:
         return
 
-    if not hasattr(CableFeature, "_sleufbase_original_distance_to"):
-        CableFeature._sleufbase_original_distance_to = CableFeature.distance_to
     if not hasattr(MapRenderer, "_sleufbase_original_feature_flags"):
         MapRenderer._sleufbase_original_feature_flags = staticmethod(MapRenderer._feature_flags)
     if not hasattr(renderer_module, "_sleufbase_original_pick_features"):
@@ -170,13 +131,11 @@ def install_render_cache_performance_patch() -> None:
     if not hasattr(renderer_module, "_sleufbase_original_pick_feature"):
         renderer_module._sleufbase_original_pick_feature = renderer_module.pick_feature
 
-    # Keep DxfOverlay.native_render_signature untouched. SleufBase deliberately
-    # detects in-place point, bounds and colour edits there; skipping that scan
-    # would make the native render cache stale after legitimate edits.
-    CableFeature.distance_to = _distance_to_fast
+    # CableFeature.distance_to is now optimized directly in models.py. Keeping a
+    # second runtime monkey-patch here only duplicated code and obscured which
+    # implementation was actually active.
     MapRenderer._feature_flags = staticmethod(_feature_flags_fast)
     renderer_module.pick_features = _pick_features_fast
     renderer_module.pick_feature = _pick_feature_fast
 
-    CableFeature._sleufbase_render_cache_performance_patch_version = PATCH_VERSION
     MapRenderer._sleufbase_render_cache_performance_patch_version = PATCH_VERSION
