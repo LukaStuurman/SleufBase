@@ -14,9 +14,8 @@ def fail(message: str) -> None:
 def main() -> int:
     text = INSTALLER.read_text(encoding="utf-8")
 
-    # Keep the installer deliberately boring: native/classic Inno Setup controls only.
-    # This deterministic source contract is release-blocking. The separate UIAutomation
-    # probe remains diagnostic because GitHub-hosted runners have no reliable desktop.
+    # Deterministic release-blocking contract: keep the installer on native Inno controls.
+    # UIAutomation remains diagnostic because hosted Windows runners lack a reliable desktop.
     required_patterns = {
         "classic wizard": r"(?m)^WizardStyle=classic\s*$",
         "non-resizable wizard": r"(?m)^WizardResizable=no\s*$",
@@ -42,7 +41,6 @@ def main() -> int:
         if re.search(pattern, text):
             fail(f"verboden installerlogica aangetroffen: {label}")
 
-    # Exactly one desktop task and one task-bound desktop shortcut avoids shadow controls.
     if text.count('Name: "desktopicon";') != 1:
         fail("desktopicon-task moet exact één keer bestaan")
     if text.count('Name: "{autodesktop}\\SleufBase";') != 1:
