@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.39'
+  SLEUFBASE_RELEASE_VERSION: '0.3.40'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.39
+          name: SleufBase-Windows-v0.3.40
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,18 +293,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.39
+          SleufBase Windows v0.3.40
 
-          Installer hotfix:
-          - installer gebruikt voortaan uitsluitend de native/classic Inno Setup-wizard, zonder modern/custom control-laag
-          - wizard is bewust niet resizebaar zodat de standaard Windows-controls en hit-testing zo eenvoudig mogelijk blijven
-          - nieuw installer-contract blokkeert custom [Code], WizardForm-manipulatie, custom wizardpages/styles en dubbele desktop-controls
-          - Inno Setup blijft vastgezet op 6.7.1 en de workflow controleert de exacte geïnstalleerde packageversie
-          - de interactieve kliktest blijft als extra diagnose aanwezig; GitHub-hosted Windows runners garanderen geen bruikbare interactieve desktopsessie
-          - source-contract, gecompileerde desktopshortcut-task, stille installatie en geïnstalleerde runtime-smoketest zijn release-blokkerend
+          DXF-sjabloon export performance:
+          - normale en reverse kaartdelen delen voortaan dezelfde kostbare achtergrond- en overlay-render
+          - de reverse kaart wordt uit dezelfde kaart opgebouwd en verplaatst alleen het witte referentiepunt wanneer dat veilig kan
+          - reverse TIFFs worden bij exact tegengestelde richting rechtstreeks als 180-graden pixeltransformatie van de normale TIFF gemaakt
+          - geocoding en voorbereide rasterassets worden tussen normaal en reverse gedeeld
+          - bij onzekere geometrie blijft de bestaande volledige renderroute als veilige fallback actief
 
           Windows:
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
+          - release-integriteit, installer-contract en runtime-smoketests blijven blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
