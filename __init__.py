@@ -18,6 +18,7 @@ from .marxact_boundary_patch import install_marxact_boundary_patch
 from .marxact_local_cross_section_patch import install_marxact_local_cross_section_patch
 from .render_hotpath_patch import install_render_hotpath_patch
 from .render_cache_performance_patch import install_render_cache_performance_patch
+from .render_framebuffer_performance_patch import install_render_framebuffer_performance_patch
 from .web_tile_memory_performance_patch import install_web_tile_memory_performance_patch
 from .marxact_live_render_patch import install_marxact_live_render_patch
 from .marxact_alignment_ui_patch import install_marxact_alignment_ui_hook
@@ -46,6 +47,7 @@ install_marxact_boundary_patch()
 install_marxact_local_cross_section_patch()
 install_render_hotpath_patch()
 install_render_cache_performance_patch()
+install_render_framebuffer_performance_patch()
 install_web_tile_memory_performance_patch()
 install_marxact_live_render_patch()
 install_marxact_alignment_ui_hook()
