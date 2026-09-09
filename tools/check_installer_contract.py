@@ -41,9 +41,9 @@ def main() -> int:
             fail(f"verboden installerlogica aangetroffen: {label}")
 
     # Exactly one desktop task and one task-bound desktop shortcut avoids shadow controls.
-    if len(re.findall(r'(?m)^Name:\s*"desktopicon";', text)) != 1:
+    if text.count('Name: "desktopicon";') != 1:
         fail("desktopicon-task moet exact één keer bestaan")
-    if len(re.findall(r"(?m)^Name:\s*\"\{autodesktop\}\\\\SleufBase\";", text)) != 1:
+    if text.count('Name: "{autodesktop}\\SleufBase";') != 1:
         fail("desktopshortcut moet exact één keer bestaan")
 
     print("Installer-contract OK: classic native wizard, standaard desktop-task, geen custom controls")
