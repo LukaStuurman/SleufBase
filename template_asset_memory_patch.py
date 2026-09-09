@@ -10,7 +10,7 @@ from PIL import Image
 from .virtual_trench import is_virtual_trench_layer
 
 
-PATCH_VERSION = 3
+PATCH_VERSION = 4
 # The left-hand trench image in the DXF template is vector-like line art. 1.25x
 # was intentionally conservative after the old memory spike, but that left
 # visibly stepped/pixelated edges. 2.5x keeps the source raster at at most
@@ -18,7 +18,7 @@ PATCH_VERSION = 3
 # peak memory bounded.
 SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 2.5
 MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS = 1
-VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL = 1
+TEMPLATE_PNG_COMPRESS_LEVEL = 1
 TEMPLATE_UI_PUMP_INTERVAL_SECONDS = 0.08
 VIRTUAL_TEMPLATE_ROTATION_RESAMPLE = Image.Resampling.BICUBIC
 
@@ -56,13 +56,7 @@ def _memory_safe_normalize_template_tiff_raster_alpha(exporter, image: Image.Ima
 
 
 def _pump_template_ui(status_callback) -> bool:
-    """Keep Tk responsive while the single heavy raster worker is running.
-
-    The legacy template export is invoked from the Tk main thread. Waiting for
-    a Future until a complete slot has finished therefore freezes window events.
-    Pump the callback owner when it is a bound Tk method, or fall back to Tk's
-    default root when the callback is a lambda/wrapper around ``set_status``.
-    """
+    """Keep Tk responsive while the single heavy raster worker is running."""
 
     if threading.current_thread() is not threading.main_thread():
         return False
@@ -168,10 +162,6 @@ def install_template_asset_memory_patch() -> None:
                     )
                     rotated = image.rotate(
                         rotation_degrees,
-                        # Virtual-trench linework now prioritizes edge quality.
-                        # At 2.5x source resolution bicubic interpolation removes
-                        # the visible staircase/block artefacts along diagonals.
-                        # Normal GeoTIFFs already used bicubic and stay unchanged.
                         resample=(
                             VIRTUAL_TEMPLATE_ROTATION_RESAMPLE
                             if virtual_layer
@@ -195,17 +185,16 @@ def install_template_asset_memory_patch() -> None:
                     image = normalized
 
             try:
-                if virtual_layer:
-                    # DXF image assets do not benefit from maximum PNG compression;
-                    # a low level cuts CPU time substantially and remains lossless.
-                    image.save(
-                        image_path,
-                        format="PNG",
-                        compress_level=VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL,
-                        optimize=False,
-                    )
-                else:
-                    image.save(image_path, format="PNG")
+                # All template PNGs are temporary DXF raster assets. Low lossless
+                # compression avoids spending CPU on file size that has no product
+                # value. Applying it here removes the former global Pillow save
+                # monkey-patch and keeps the optimization local to this code path.
+                image.save(
+                    image_path,
+                    format="PNG",
+                    compress_level=TEMPLATE_PNG_COMPRESS_LEVEL,
+                    optimize=False,
+                )
             except OSError as exc:
                 raise CadastralExportError(
                     f"GeoTIFF-afbeelding kon niet worden opgeslagen voor {label}: {exc}"
@@ -279,3 +268,4 @@ def install_template_asset_memory_patch() -> None:
         _prepare_template_slot_assets_batch_memory_safe
     )
     CadastralDxfExporter._sleufbase_template_asset_memory_patch_version = PATCH_VERSION
+    CadastralDxfExporter.SLEUFBASE_TEMPLATE_PNG_FAST_COMPRESSION = True
