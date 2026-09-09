@@ -68,6 +68,18 @@ def _snapshot(profile):
     }
 
 
+def _distance_offsets(exporter, layer, profile):
+    reference_chainage = exporter._template_reference_chainage(layer, profile)
+    return {
+        str(getattr(item.point, "object_name", "")): round(
+            float(item.chainage) - float(reference_chainage),
+            7,
+        )
+        for item in profile.points
+        if not item.is_endpoint
+    }
+
+
 class DxfTemplatePipelineV5Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.exporter = CadastralDxfExporter(SimpleNamespace())
@@ -92,6 +104,63 @@ class DxfTemplatePipelineV5Tests(unittest.TestCase):
         )
         derived_reverse = _reverse_profile_from_normal(normal)
         self.assertEqual(_snapshot(derived_reverse), _snapshot(expected_reverse))
+
+    def test_reverse_distance_reference_chainage_is_recalculated_per_direction(self) -> None:
+        dataset = _dataset()
+        normal = self.exporter._build_template_cross_section_profile(
+            dataset, self.rules, [], [], 0.02, False
+        )
+        reverse = _reverse_profile_from_normal(normal)
+        layer = SimpleNamespace(
+            metadata={
+                self.exporter.TEMPLATE_REFERENCE_POINT_METADATA_KEY: {
+                    "x": 2.0,
+                    "y": 0.0,
+                }
+            }
+        )
+
+        normal_reference = self.exporter._template_reference_chainage(layer, normal)
+        reverse_reference = self.exporter._template_reference_chainage(layer, reverse)
+
+        self.assertNotAlmostEqual(normal_reference, reverse_reference)
+        self.assertAlmostEqual(
+            reverse_reference,
+            float(normal.axis_length) - float(normal_reference),
+        )
+
+    def test_reverse_distance_labels_match_full_core_reverse_and_not_normal_values(self) -> None:
+        dataset = _dataset()
+        normal = self.exporter._build_template_cross_section_profile(
+            dataset, self.rules, [], [], 0.02, False
+        )
+        expected_reverse = self.exporter._build_template_cross_section_profile(
+            dataset, self.rules, [], [], 0.02, True
+        )
+        derived_reverse = _reverse_profile_from_normal(normal)
+        layer = SimpleNamespace(
+            metadata={
+                self.exporter.TEMPLATE_REFERENCE_POINT_METADATA_KEY: {
+                    "x": 2.0,
+                    "y": 0.0,
+                }
+            }
+        )
+
+        normal_offsets = _distance_offsets(self.exporter, layer, normal)
+        expected_reverse_offsets = _distance_offsets(
+            self.exporter, layer, expected_reverse
+        )
+        derived_reverse_offsets = _distance_offsets(
+            self.exporter, layer, derived_reverse
+        )
+
+        self.assertEqual(derived_reverse_offsets, expected_reverse_offsets)
+        self.assertNotEqual(derived_reverse_offsets, normal_offsets)
+        self.assertEqual(normal_offsets["Water"], 1.25)
+        self.assertEqual(derived_reverse_offsets["Water"], -1.25)
+        self.assertEqual(normal_offsets["Data"], 5.5)
+        self.assertEqual(derived_reverse_offsets["Data"], -5.5)
 
     def test_forced_start_fast_path_matches_core_profile(self) -> None:
         dataset = _dataset(forced_start=(0.0, 0.0))
