@@ -5,41 +5,19 @@ import unittest
 from PIL import Image
 
 from SleufBase.cadastral_export import CadastralDxfExporter
-from SleufBase import template_png_performance_patch as png_patch
+from SleufBase.template_asset_memory_patch import TEMPLATE_PNG_COMPRESS_LEVEL
 
 
-class TemplatePngPerformancePatchTests(unittest.TestCase):
-    def test_patch_is_installed_on_exporter(self) -> None:
-        self.assertGreaterEqual(
-            int(getattr(CadastralDxfExporter, "_sleufbase_template_png_performance_version", 0) or 0),
-            1,
-        )
+class TemplatePngPerformanceTests(unittest.TestCase):
+    def test_fast_png_behavior_is_owned_by_exporter_patch(self) -> None:
         self.assertTrue(CadastralDxfExporter.SLEUFBASE_TEMPLATE_PNG_FAST_COMPRESSION)
+        self.assertEqual(TEMPLATE_PNG_COMPRESS_LEVEL, 1)
 
-    def test_fast_png_parameters_are_scoped_and_lossless_mode_only(self) -> None:
-        calls = []
-        original = png_patch._ORIGINAL_IMAGE_SAVE
-
-        def fake_save(image, fp, format=None, **params):
-            calls.append((format, dict(params)))
-            return None
-
-        png_patch._ORIGINAL_IMAGE_SAVE = fake_save
-        image = Image.new("RGBA", (2, 2), (1, 2, 3, 255))
-        try:
-            image.save("outside.png", format="PNG")
-            with png_patch._template_png_fast_save_scope():
-                image.save("inside.png", format="PNG")
-                image.save("inside.jpg", format="JPEG")
-        finally:
-            image.close()
-            png_patch._ORIGINAL_IMAGE_SAVE = original
-
-        self.assertEqual(calls[0], ("PNG", {}))
-        self.assertEqual(calls[1][0], "PNG")
-        self.assertEqual(calls[1][1].get("compress_level"), 1)
-        self.assertFalse(calls[1][1].get("optimize", True))
-        self.assertEqual(calls[2], ("JPEG", {}))
+    def test_pillow_save_is_not_globally_monkey_patched(self) -> None:
+        # Template raster compression is now passed directly by the exporter.
+        # Unrelated PIL saves must continue to use Pillow's own implementation.
+        self.assertNotEqual(getattr(Image.Image.save, "__name__", ""), "save_scoped")
+        self.assertNotIn("template_png_performance_patch", getattr(Image.Image.save, "__module__", ""))
 
 
 if __name__ == "__main__":

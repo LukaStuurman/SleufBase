@@ -18,6 +18,14 @@ from pyproj import Transformer
 from .models import Bounds
 
 
+_TILE_SIZE = (256, 256)
+
+
+def _image_from_cached_rgba(data: bytes) -> Image.Image:
+    """Create a disposable PIL view over immutable cached RGBA bytes."""
+    return Image.frombuffer("RGBA", _TILE_SIZE, data, "raw", "RGBA", 0, 1)
+
+
 class TileClientError(RuntimeError):
     """Raised when a tile-based background cannot be retrieved."""
 
@@ -25,6 +33,7 @@ class TileClientError(RuntimeError):
 class WebMercatorTileClient:
     WEB_MERCATOR_HALF_WORLD = 20037508.342789244
     WEB_MERCATOR_RESOLUTION_0 = (2 * WEB_MERCATOR_HALF_WORLD) / 256.0
+    SLEUFBASE_IMMUTABLE_TILE_BUFFER_CACHE = True
 
     def __init__(
         self,
@@ -51,11 +60,10 @@ class WebMercatorTileClient:
         self.cache_dir = local_appdata / "SleufBase" / "cache" / cache_namespace
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.min_cache_ttl = timedelta(days=min_cache_ttl_days)
-        # Keep the source timestamp alongside each image. Without this metadata a
-        # stale disk tile loaded for preview can be mistaken for a fresh memory
-        # cache hit by the following refresh request.
+        # Immutable raw RGBA buffers are cheaper to retain than mutable PIL
+        # images and let cache hits create a disposable zero-copy image view.
         self._memory_cache: OrderedDict[
-            tuple[int, int, int], tuple[Image.Image, datetime]
+            tuple[int, int, int], tuple[bytes, datetime]
         ] = OrderedDict()
         self._memory_cache_lock = threading.RLock()
 
@@ -92,9 +100,8 @@ class WebMercatorTileClient:
         if on_progress is not None and preview_tile_count > 0:
             on_progress(self._render_tile_request(tile_request, stitched))
 
-        # The common pan/backtrack case is now a true cache fast path: when every
-        # exact tile is still fresh there is no executor, no duplicate cache copy
-        # and no second alpha-composite pass.
+        # The common pan/backtrack case is a true cache fast path: when every
+        # exact tile is still fresh there is no executor and no refresh pass.
         if not pending_coords:
             return self._render_tile_request(tile_request, stitched)
 
@@ -284,23 +291,19 @@ class WebMercatorTileClient:
         with self._memory_cache_lock:
             cached_entry = self._memory_cache.get(cache_key)
             if cached_entry is not None:
-                cached_image, cached_at = cached_entry
-                age = now - cached_at
-                if allow_stale or age <= self.min_cache_ttl:
+                cached_data, cached_at = cached_entry
+                if allow_stale or (now - cached_at) <= self.min_cache_ttl:
                     self._memory_cache.move_to_end(cache_key)
-                    return cached_image.copy()
+                    return _image_from_cached_rgba(cached_data)
 
         tile_path = self._tile_path(zoom, x, y)
         try:
             stat = tile_path.stat()
-        except FileNotFoundError:
-            return None
-        except OSError:
+        except (FileNotFoundError, OSError):
             return None
 
         cached_at = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
-        age = now - cached_at
-        if not allow_stale and age > self.min_cache_ttl:
+        if not allow_stale and (now - cached_at) > self.min_cache_ttl:
             return None
         try:
             with Image.open(tile_path) as image:
@@ -312,7 +315,7 @@ class WebMercatorTileClient:
             except OSError:
                 pass
             return None
-        if tile.size != (256, 256):
+        if tile.size != _TILE_SIZE:
             tile.close()
             try:
                 tile_path.unlink(missing_ok=True)
@@ -320,9 +323,9 @@ class WebMercatorTileClient:
                 pass
             return None
         self._remember_tile(cache_key, tile, cached_at=cached_at)
-        result = tile.copy()
-        tile.close()
-        return result
+        # Cache owns immutable bytes, so the loaded image itself can go straight
+        # to the caller instead of making another full RGBA copy first.
+        return tile
 
     def _best_available_tile(self, zoom: int, x: int, y: int) -> Image.Image | None:
         exact_tile = self._load_cached_tile(zoom, x, y, allow_stale=True)
@@ -348,7 +351,7 @@ class WebMercatorTileClient:
                     continue
                 cropped = parent_tile.crop((left, top, right, bottom))
                 try:
-                    return cropped.resize((256, 256), Image.Resampling.BILINEAR)
+                    return cropped.resize(_TILE_SIZE, Image.Resampling.BILINEAR)
                 finally:
                     cropped.close()
             finally:
@@ -387,16 +390,16 @@ class WebMercatorTileClient:
                 with Image.open(BytesIO(response.content)) as source:
                     tile = source.convert("RGBA")
                     tile.load()
-                if tile.size != (256, 256):
+                if tile.size != _TILE_SIZE:
                     tile.close()
                     raise TileClientError(
                         f"Ongeldige tegelgrootte {tile.size} voor {zoom}/{x}/{y}; 256x256 verwacht."
                     )
                 self._write_tile_atomically(tile_path, tile)
                 self._remember_tile(cache_key, tile)
-                result = tile.copy()
-                tile.close()
-                return result
+                # The cache stores independent immutable bytes; avoid the legacy
+                # tile.copy() + close() pair and return this image directly.
+                return tile
             except (requests.RequestException, OSError, UnidentifiedImageError, ValueError, TileClientError) as exc:
                 last_error = exc
                 if attempt < self.retries:
@@ -416,18 +419,17 @@ class WebMercatorTileClient:
         timestamp = cached_at or datetime.now(timezone.utc)
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=timezone.utc)
+
+        rgba = tile if tile.mode == "RGBA" else tile.convert("RGBA")
+        try:
+            data = rgba.tobytes()
+        finally:
+            if rgba is not tile:
+                rgba.close()
+
         with self._memory_cache_lock:
-            previous = self._memory_cache.pop(cache_key, None)
-            if previous is not None:
-                try:
-                    previous[0].close()
-                except Exception:
-                    pass
-            self._memory_cache[cache_key] = (tile.copy(), timestamp)
+            self._memory_cache.pop(cache_key, None)
+            self._memory_cache[cache_key] = (data, timestamp)
             self._memory_cache.move_to_end(cache_key)
             while len(self._memory_cache) > self.memory_cache_limit:
-                _old_key, (old_image, _old_timestamp) = self._memory_cache.popitem(last=False)
-                try:
-                    old_image.close()
-                except Exception:
-                    pass
+                self._memory_cache.popitem(last=False)

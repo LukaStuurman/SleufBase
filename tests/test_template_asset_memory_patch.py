@@ -11,8 +11,8 @@ from SleufBase.marxact_import import MarXactObject, MarXactTrench, build_marxact
 from SleufBase.template_asset_memory_patch import (
     MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS,
     SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER,
+    TEMPLATE_PNG_COMPRESS_LEVEL,
     TEMPLATE_UI_PUMP_INTERVAL_SECONDS,
-    VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL,
     VIRTUAL_TEMPLATE_ROTATION_RESAMPLE,
     _contains_virtual_template_task,
     _pump_template_ui,
@@ -61,7 +61,7 @@ class TemplateAssetMemoryPatchTests(unittest.TestCase):
     def test_runtime_patch_uses_high_quality_and_is_installed(self) -> None:
         self.assertGreaterEqual(
             int(getattr(CadastralDxfExporter, "_sleufbase_template_asset_memory_patch_version", 0) or 0),
-            3,
+            4,
         )
         self.assertAlmostEqual(
             CadastralDxfExporter.VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER,
@@ -70,7 +70,8 @@ class TemplateAssetMemoryPatchTests(unittest.TestCase):
         self.assertAlmostEqual(SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER, 2.5)
         self.assertEqual(VIRTUAL_TEMPLATE_ROTATION_RESAMPLE, Image.Resampling.BICUBIC)
         self.assertEqual(MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS, 1)
-        self.assertLessEqual(VIRTUAL_TEMPLATE_PNG_COMPRESS_LEVEL, 1)
+        self.assertLessEqual(TEMPLATE_PNG_COMPRESS_LEVEL, 1)
+        self.assertTrue(CadastralDxfExporter.SLEUFBASE_TEMPLATE_PNG_FAST_COMPRESSION)
         self.assertLessEqual(TEMPLATE_UI_PUMP_INTERVAL_SECONDS, 0.1)
 
     def test_virtual_template_tasks_are_detected_for_sequential_rendering(self) -> None:

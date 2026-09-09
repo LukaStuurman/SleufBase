@@ -16,7 +16,7 @@ class _TileClient(WebMercatorTileClient):
         return f"https://example.invalid/{zoom}/{x}/{y}.png"
 
 
-class WebTileMemoryPerformancePatchTests(unittest.TestCase):
+class WebTileMemoryPerformanceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp_dir.cleanup)
@@ -25,11 +25,7 @@ class WebTileMemoryPerformancePatchTests(unittest.TestCase):
         self.addCleanup(self.env_patch.stop)
         self.client = _TileClient("buffer-test", "SleufBase buffer test")
 
-    def test_patch_is_installed(self) -> None:
-        self.assertGreaterEqual(
-            int(getattr(WebMercatorTileClient, "_sleufbase_tile_buffer_cache_version", 0) or 0),
-            1,
-        )
+    def test_immutable_buffer_cache_is_core_behavior(self) -> None:
         self.assertTrue(WebMercatorTileClient.SLEUFBASE_IMMUTABLE_TILE_BUFFER_CACHE)
 
     def test_memory_cache_stores_bytes_and_disposable_views_keep_pixels(self) -> None:
@@ -72,6 +68,21 @@ class WebTileMemoryPerformancePatchTests(unittest.TestCase):
         if stale is not None:
             self.assertEqual(stale.getpixel((0, 0)), (200, 10, 20, 255))
             stale.close()
+
+    def test_disk_load_returns_image_without_legacy_copy_contract(self) -> None:
+        path = self.client._tile_path(5, 7, 8)
+        source = Image.new("RGBA", (256, 256), (4, 5, 6, 255))
+        try:
+            source.save(path, format="PNG")
+        finally:
+            source.close()
+
+        loaded = self.client._load_cached_tile(5, 7, 8, allow_stale=True)
+        self.assertIsNotNone(loaded)
+        if loaded is not None:
+            self.assertEqual(loaded.getpixel((1, 1)), (4, 5, 6, 255))
+            loaded.close()
+        self.assertIsInstance(self.client._memory_cache[(5, 7, 8)][0], bytes)
 
 
 if __name__ == "__main__":
