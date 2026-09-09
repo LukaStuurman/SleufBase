@@ -21,6 +21,7 @@ from .marxact_live_render_patch import install_marxact_live_render_patch
 from .marxact_alignment_ui_patch import install_marxact_alignment_ui_hook
 from .dxf_template_pipeline_patch import install_dxf_template_pipeline_patch
 from .dxf_template_pipeline_bridge import install_dxf_template_pipeline_bridge
+from .dxf_template_pipeline_v3_patch import install_dxf_template_pipeline_v3_patch
 
 
 install_settings_ui_patch()
@@ -42,3 +43,4 @@ install_marxact_live_render_patch()
 install_marxact_alignment_ui_hook()
 install_dxf_template_pipeline_patch()
 install_dxf_template_pipeline_bridge()
+install_dxf_template_pipeline_v3_patch()

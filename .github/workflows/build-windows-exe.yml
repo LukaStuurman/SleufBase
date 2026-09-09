@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.37'
+  SLEUFBASE_RELEASE_VERSION: '0.3.38'
 
 permissions:
   contents: write
@@ -267,7 +267,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.37
+          name: SleufBase-Windows-v0.3.38
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -286,13 +286,14 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.37
+          SleufBase Windows v0.3.38
 
-          Performance:
-          - selectie- en highlightflags gebruiken een begrensde feature-ID-index, waardoor geselecteerde objecten niet telkens een volledige Python-scan door alle DXF-features veroorzaken
-          - hit-testing van kabel- en leidingsegmenten gebruikt een directe minimumloop met minder Python-object- en generatoroverhead
-          - de bestaande automatische invalidatie van de native DXF-cache bij in-place kleur- en geometriewijzigingen blijft volledig behouden
-          - bevat ook de eerdere render-, tegelcache- en parallelle sjabloonfetch-optimalisaties uit de huidige main
+          DXF-sjabloon performance:
+          - de reverse DXF blijft tijdens de paired export in geheugen en wordt niet meer eerst volledig naar een tijdelijk DXF-bestand geschreven en daarna opnieuw ingelezen
+          - Dynamic Visibility bouwt donor-metadata vanuit dezelfde recordindex, voegt alle gekloonde OBJECTS in één batch toe en hergebruikt de post-promotie-index bij validatie
+          - nieuw aangemaakte variant-entiteiten worden via de modelspace-tail gevonden, zodat de tweede volledige modelspace-scan per afbeelding/profiel vervalt
+          - tijdelijke reverse-rasterassets worden waar mogelijk verplaatst en gedeelde assets via hardlinks hergebruikt; kopiëren blijft de veilige fallback
+          - alle eerdere streaming-DXF, normal/reverse cache-, map/TIFF-overlap- en adaptieve geheugenoptimalisaties uit pipeline v2 blijven behouden
 
           Windows:
           - professionele installer, Fast ZIP en Portable EXE worden opnieuw volledig gebouwd en smoke-getest
