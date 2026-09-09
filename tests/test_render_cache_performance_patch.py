@@ -7,8 +7,7 @@ import unittest
 import numpy as np
 
 from SleufBase.models import Bounds, CableFeature
-from SleufBase.renderer import MapRenderer
-from SleufBase.render_cache_performance_patch import PATCH_VERSION, _flag_index_cache
+from SleufBase.renderer import MapRenderer, _flag_index_cache
 
 
 class _CountingFeatureIds(tuple):
@@ -43,14 +42,7 @@ def _reference_distance(points, x: float, y: float) -> float:
     return best
 
 
-class RenderCachePerformancePatchTests(unittest.TestCase):
-    def test_patch_only_owns_renderer_cache_optimizations(self) -> None:
-        self.assertGreaterEqual(
-            int(getattr(MapRenderer, "_sleufbase_render_cache_performance_patch_version", 0) or 0),
-            PATCH_VERSION,
-        )
-        self.assertFalse(hasattr(CableFeature, "_sleufbase_original_distance_to"))
-
+class RendererCachePerformanceTests(unittest.TestCase):
     def test_feature_flags_use_cached_index_and_preserve_duplicate_ids(self) -> None:
         feature_ids = ("a", "b", "a", "c", "d")
         flags = MapRenderer._feature_flags(feature_ids, {"a", "c", "missing"}, len(feature_ids))
