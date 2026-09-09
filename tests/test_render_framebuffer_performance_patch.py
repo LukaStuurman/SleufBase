@@ -7,11 +7,11 @@ from unittest import mock
 from PIL import Image
 
 from SleufBase.models import Bounds, CableFeature, DxfOverlay, GeoTiffLayer, GeoTransform
+from SleufBase import renderer as renderer_module
 from SleufBase.renderer import MapRenderer
-from SleufBase import render_framebuffer_performance_patch as framebuffer
 
 
-class RenderFramebufferPerformancePatchTests(unittest.TestCase):
+class RenderFramebufferPerformanceTests(unittest.TestCase):
     def _tiff_layer(self) -> GeoTiffLayer:
         image = Image.new("RGBA", (4, 4), (10, 20, 30, 255))
         return GeoTiffLayer(
@@ -33,34 +33,27 @@ class RenderFramebufferPerformancePatchTests(unittest.TestCase):
         )
         return DxfOverlay(Path("overlay.dxf"), [feature])
 
-    def test_patch_is_installed(self) -> None:
-        self.assertGreaterEqual(
-            int(getattr(MapRenderer, "_sleufbase_render_framebuffer_performance_version", 0) or 0),
-            1,
-        )
+    def test_shared_native_framebuffer_is_core_capability(self) -> None:
         self.assertTrue(MapRenderer.SLEUFBASE_SHARED_NATIVE_FRAMEBUFFER)
+        self.assertFalse(hasattr(MapRenderer, "_sleufbase_render_framebuffer_performance_version"))
 
     def test_combined_native_path_converts_canvas_to_numpy_once(self) -> None:
         renderer = MapRenderer()
         layer = self._tiff_layer()
         try:
-            with mock.patch.object(framebuffer, "_NATIVE_TIFF_MIN_LAYERS", 0), mock.patch.object(
-                framebuffer, "_NATIVE_TIFF_MIN_DEST_PIXELS", 0
-            ), mock.patch.object(framebuffer, "_NATIVE_DXF_MIN_FEATURES", 0), mock.patch.object(
-                framebuffer, "_NATIVE_DXF_MIN_POINTS", 0
+            with mock.patch.object(renderer_module, "_NATIVE_TIFF_MIN_LAYERS", 0), mock.patch.object(
+                renderer_module, "_NATIVE_TIFF_MIN_DEST_PIXELS", 0
+            ), mock.patch.object(renderer_module, "_NATIVE_DXF_MIN_FEATURES", 0), mock.patch.object(
+                renderer_module, "_NATIVE_DXF_MIN_POINTS", 0
             ), mock.patch.object(
-                framebuffer.native_accel, "is_available", return_value=True
+                renderer_module.native_accel, "is_available", return_value=True
             ), mock.patch.object(
-                framebuffer.native_accel, "paint_axis_aligned_tiff", return_value=1
+                renderer_module.native_accel, "paint_axis_aligned_tiff", return_value=1
             ) as paint, mock.patch.object(
-                framebuffer.native_accel, "render_dxf_overlay", return_value=1
+                renderer_module.native_accel, "render_dxf_overlay", return_value=1
             ) as draw_dxf, mock.patch.object(
-                framebuffer, "_rgba_array", wraps=framebuffer._rgba_array
-            ) as rgba_array, mock.patch.object(
-                framebuffer,
-                "_ORIGINAL_RENDER",
-                side_effect=AssertionError("combined native path should not fall back"),
-            ):
+                renderer_module, "_rgba_array", wraps=renderer_module._rgba_array
+            ) as rgba_array:
                 result = renderer.render(
                     Bounds(0.0, 0.0, 4.0, 4.0),
                     (4, 4),
@@ -77,23 +70,25 @@ class RenderFramebufferPerformancePatchTests(unittest.TestCase):
         finally:
             layer.image.close()
 
-    def test_non_native_path_uses_existing_renderer_unchanged(self) -> None:
+    def test_non_native_path_preserves_background_pixels(self) -> None:
         renderer = MapRenderer()
-        sentinel = Image.new("RGBA", (2, 2), (1, 2, 3, 255))
+        background = Image.new("RGBA", (2, 2), (1, 2, 3, 255))
         try:
-            with mock.patch.object(framebuffer.native_accel, "is_available", return_value=False), mock.patch.object(
-                framebuffer, "_ORIGINAL_RENDER", return_value=sentinel
-            ) as original:
+            with mock.patch.object(renderer_module.native_accel, "is_available", return_value=False):
                 result = renderer.render(
                     Bounds(0.0, 0.0, 1.0, 1.0),
                     (2, 2),
                     [],
                     [],
+                    background=background,
                 )
-            self.assertIs(result, sentinel)
-            original.assert_called_once()
+            try:
+                self.assertIsNot(result, background)
+                self.assertEqual(result.tobytes(), background.tobytes())
+            finally:
+                result.close()
         finally:
-            sentinel.close()
+            background.close()
 
 
 if __name__ == "__main__":
