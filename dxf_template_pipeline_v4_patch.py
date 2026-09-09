@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import os
-import shutil
+import math
 import threading
 import time
 from pathlib import Path
@@ -43,18 +42,46 @@ def _annotation_key(annotation: object) -> tuple[float, float] | None:
         return None
 
 
+def _normalized_vector(value: object) -> tuple[float, float] | None:
+    if value is None:
+        return None
+    try:
+        dx = float(value[0])
+        dy = float(value[1])
+    except Exception:
+        return None
+    length = math.hypot(dx, dy)
+    if length <= 1e-6:
+        return None
+    return dx / length, dy / length
+
+
+def _profile_vector_relation(
+    normal_vector: object,
+    reverse_vector: object,
+) -> str | None:
+    normal = _normalized_vector(normal_vector)
+    reverse = _normalized_vector(reverse_vector)
+    if normal is None or reverse is None:
+        return None
+    dot = (normal[0] * reverse[0]) + (normal[1] * reverse[1])
+    cross = abs((normal[0] * reverse[1]) - (normal[1] * reverse[0]))
+    if cross > 1e-4:
+        return None
+    if dot <= -0.9999:
+        return "reverse"
+    if dot >= 0.9999:
+        return "same"
+    return None
+
+
 def _reverse_reference_annotation(
     exporter: Any,
     layer: Any,
     profile: Any,
     current_annotation: object,
 ) -> ProfileReferenceAnnotation | None:
-    """Derive the reverse map dot without rebuilding the reverse profile map.
-
-    A configured explicit reference point is orientation-independent. Otherwise
-    the normal profile start becomes the reverse profile end and vice versa, so
-    the reverse reference point is the normal profile end point.
-    """
+    """Derive the reverse map dot from the already-built normal profile."""
 
     if current_annotation is None:
         return None
@@ -135,7 +162,7 @@ def _render_normal_and_reverse_map_pair(
     reference_annotation: ProfileReferenceAnnotation,
     profile: Any,
 ) -> tuple[Path, Path | None, ProfileReferenceAnnotation | None]:
-    """Render the expensive map once and compose normal/reverse pages from it."""
+    """Render the expensive map once and compose both direction pages from it."""
 
     padded_bounds = layer.bounds.padded(
         max(1.0, min(4.0, max(layer.bounds.width, layer.bounds.height) * 0.1))
@@ -184,23 +211,13 @@ def _render_normal_and_reverse_map_pair(
         reverse_page.save(reverse_path, format="PNG")
         reverse_path = reverse_path.resolve()
 
-    try:
-        normal_page.close()
-    except Exception:
-        pass
-    if reverse_page is not None:
+    for image in (normal_page, reverse_page, map_image, getattr(export_tiff, "image", None)):
+        if image is None:
+            continue
         try:
-            reverse_page.close()
+            image.close()
         except Exception:
             pass
-    try:
-        map_image.close()
-    except Exception:
-        pass
-    try:
-        export_tiff.image.close()
-    except Exception:
-        pass
     return Path(normal_path).resolve(), reverse_path, reverse_annotation
 
 
@@ -222,12 +239,12 @@ def _cleanup_session(exporter: Any) -> None:
 def install_dxf_template_pipeline_v4_patch() -> None:
     """Reuse normal raster work for reverse DXF variants.
 
-    The normal and reverse template exports share all expensive map content. The
-    reverse TIFF is exactly the normal raster turned 180 degrees whenever an
-    orientation vector exists. The map page shares the same rendered map and only
-    changes the profile reference dot. This patch therefore keeps the proven
-    second DXF/profile pass, but removes the duplicated high-resolution virtual
-    trench render, background fetch and map renderer pass.
+    The proven second DXF/profile pass stays intact, but reverse no longer repeats
+    the expensive map/background render or high-resolution TIFF render. Normal
+    map content is rendered once and composed twice with the reference dot at the
+    normal and reverse profile endpoint. Reverse TIFF output is derived from the
+    normal PNG by an exact 180-degree pixel transform when both profile axes are
+    opposite; ambiguous geometry safely falls back to the original implementation.
     """
 
     from .cadastral_export import CadastralDxfExporter
@@ -241,6 +258,7 @@ def install_dxf_template_pipeline_v4_patch() -> None:
 
     previous_call = reverse_patch._call_original_export
     previous_cleanup = reverse_patch._cleanup_reverse_source
+    previous_batch = CadastralDxfExporter._prepare_template_slot_assets_batch
     previous_prefetch = CadastralDxfExporter._prefetch_template_background_maps
     previous_address = CadastralDxfExporter._reverse_geocoded_template_address
     previous_tiff = CadastralDxfExporter._build_template_tiff_raster
@@ -265,6 +283,7 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                 {
                     "lock": threading.RLock(),
                     "addresses": {},
+                    "normal_profiles": {},
                     "normal_tiffs": {},
                     "normal_maps": {},
                     "reverse_maps": {},
@@ -306,6 +325,24 @@ def install_dxf_template_pipeline_v4_patch() -> None:
             if session_exporter is not None:
                 _cleanup_session(session_exporter)
 
+    def _prepare_template_slot_assets_batch_v4(
+        self,
+        tasks,
+        *,
+        status_callback=None,
+    ):
+        session = _session(self)
+        if session is not None and _mode(self) == reverse_patch.NORMAL_MODE:
+            with session["lock"]:
+                for layer_index, task_kwargs in tasks:
+                    layer = task_kwargs.get("layer")
+                    if layer is None:
+                        continue
+                    label = task_kwargs.get("label", "")
+                    index = task_kwargs.get("index", int(layer_index) + 1)
+                    session["normal_profiles"][_asset_key(layer, label, index)] = task_kwargs.get("profile")
+        return previous_batch(self, tasks, status_callback=status_callback)
+
     def _prefetch_template_background_maps_v4(
         self,
         page_exporter,
@@ -336,11 +373,11 @@ def install_dxf_template_pipeline_v4_patch() -> None:
         if session is None or mode not in {reverse_patch.NORMAL_MODE, reverse_patch.REVERSE_MODE}:
             return previous_address(self, layer, location_client)
         key = id(layer)
-        with session["lock"]:
-            cached = session["addresses"].get(key)
-        if mode == reverse_patch.REVERSE_MODE and cached is not None:
-            pipeline._increment_pair_counter("reverse_geocode_reused")
-            return cached
+        if mode == reverse_patch.REVERSE_MODE:
+            with session["lock"]:
+                if key in session["addresses"]:
+                    pipeline._increment_pair_counter("reverse_geocode_reused")
+                    return session["addresses"][key]
         result = previous_address(self, layer, location_client)
         if mode == reverse_patch.NORMAL_MODE:
             with session["lock"]:
@@ -392,14 +429,14 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                     terrain_boundary_paths,
                     profile=profile,
                 )
-                rotate_180 = vector is not None and (
-                    (float(vector[0]) * float(vector[0]))
-                    + (float(vector[1]) * float(vector[1]))
-                ) > 1e-6
             except Exception:
-                rotate_180 = True
+                vector = None
             with session["lock"]:
-                session["normal_tiffs"][key] = (Path(result), bool(rotate_180))
+                session["normal_tiffs"][key] = (
+                    Path(result),
+                    profile is not None,
+                    _normalized_vector(vector),
+                )
             return result
 
         with session["lock"]:
@@ -416,16 +453,55 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                 profile=profile,
                 reverse_orientation=reverse_orientation,
             )
+
+        normal_path, normal_has_profile, normal_vector = cached
+        try:
+            reverse_vector = self._template_tiff_orientation_pixel_vector(
+                layer,
+                road_orientation_paths,
+                terrain_boundary_paths,
+                profile=profile,
+            )
+        except Exception:
+            reverse_vector = None
+
+        rotate_180: bool | None
+        if bool(normal_has_profile) != bool(profile is not None):
+            rotate_180 = None
+        elif profile is None:
+            rotate_180 = _normalized_vector(normal_vector) is not None
+            if rotate_180 and _normalized_vector(reverse_vector) is None:
+                rotate_180 = None
+            elif not rotate_180 and _normalized_vector(reverse_vector) is not None:
+                rotate_180 = None
+        else:
+            relation = _profile_vector_relation(normal_vector, reverse_vector)
+            rotate_180 = True if relation == "reverse" else False if relation == "same" else None
+
+        if rotate_180 is None:
+            pipeline._increment_pair_counter("reverse_tiff_reuse_fallback")
+            return previous_tiff(
+                self,
+                asset_dir,
+                layer,
+                label,
+                index,
+                road_orientation_paths,
+                terrain_boundary_paths,
+                profile=profile,
+                reverse_orientation=reverse_orientation,
+            )
+
         started = time.perf_counter()
         result = _copy_or_rotate_reverse_tiff(
             self,
-            Path(cached[0]),
+            Path(normal_path),
             Path(asset_dir),
             str(label),
-            rotate_180=bool(cached[1]),
+            rotate_180=rotate_180,
         )
         pipeline._increment_pair_counter(
-            "reverse_tiff_rotated_from_normal" if cached[1] else "reverse_tiff_reused_unchanged"
+            "reverse_tiff_rotated_from_normal" if rotate_180 else "reverse_tiff_reused_unchanged"
         )
         pipeline._add_pair_phase("reverse_raster_transform", time.perf_counter() - started)
         return result
@@ -478,6 +554,7 @@ def install_dxf_template_pipeline_v4_patch() -> None:
             if normal_path is not None and reference_annotation is None and Path(normal_path).exists():
                 pipeline._increment_pair_counter("reverse_map_reused_unchanged")
                 return Path(normal_path)
+            pipeline._increment_pair_counter("reverse_map_reuse_fallback")
             return previous_map(
                 self,
                 asset_dir,
@@ -495,7 +572,11 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                 reference_annotation=reference_annotation,
             )
 
-        # No direction marker means normal and reverse map pages are identical.
+        with session["lock"]:
+            profile = session["normal_profiles"].get(key)
+
+        # Without the direction marker the pages are identical, and the fallback
+        # renderer without MapExporter does not draw the marker at all.
         if reference_annotation is None or page_exporter is None:
             result = previous_map(
                 self,
@@ -518,39 +599,13 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                 session["map_ready_layers"].add(id(layer))
             return result
 
-        started = time.perf_counter()
-        # Normal task receives the normal profile through the annotation helper's
-        # caller; recover it from the task-local exporter context by rebuilding
-        # only the cheap profile endpoint relation from the annotation source.
-        profile = None
-        try:
-            # _build_template_map_raster itself does not receive profile. The
-            # normal annotation is the profile start; derive reverse from the
-            # virtual-trench/dataset reference only when the layer exposes an end
-            # point through the shared payload. Generic layers safely fall back.
-            from .virtual_trench import virtual_trench_endpoints, is_virtual_trench_layer
-
-            if is_virtual_trench_layer(layer):
-                start_row, end_row = virtual_trench_endpoints(layer)
-                if start_row is not None and end_row is not None:
-                    class _Point:
-                        pass
-
-                    class _Profile:
-                        pass
-
-                    point = _Point()
-                    point.x = float(end_row.get("x"))
-                    point.y = float(end_row.get("y"))
-                    profile = _Profile()
-                    profile.end_point = point
-        except Exception:
-            profile = None
-
-        if profile is None:
-            # Non-virtual maps are already cached by v1 when their reference
-            # annotation is identical. Keep that mature path instead of guessing
-            # a reverse endpoint.
+        reverse_annotation = _reverse_reference_annotation(
+            self,
+            layer,
+            profile,
+            reference_annotation,
+        )
+        if reverse_annotation is None:
             result = previous_map(
                 self,
                 asset_dir,
@@ -571,7 +626,8 @@ def install_dxf_template_pipeline_v4_patch() -> None:
                 session["normal_maps"][key] = Path(result)
             return result
 
-        normal_path, reverse_path, reverse_annotation = _render_normal_and_reverse_map_pair(
+        started = time.perf_counter()
+        normal_path, reverse_path, prepared_reverse_annotation = _render_normal_and_reverse_map_pair(
             self,
             asset_dir=Path(asset_dir),
             layer=layer,
@@ -587,10 +643,10 @@ def install_dxf_template_pipeline_v4_patch() -> None:
         with session["lock"]:
             session["normal_maps"][key] = normal_path
             session["map_ready_layers"].add(id(layer))
-            if reverse_path is not None and reverse_annotation is not None:
+            if reverse_path is not None and prepared_reverse_annotation is not None:
                 session["reverse_maps"][key] = (
                     reverse_path,
-                    _annotation_key(reverse_annotation),
+                    _annotation_key(prepared_reverse_annotation),
                 )
                 session["temporary_paths"].add(reverse_path)
         pipeline._increment_pair_counter("normal_map_render_shared_with_reverse")
@@ -599,6 +655,7 @@ def install_dxf_template_pipeline_v4_patch() -> None:
 
     reverse_patch._call_original_export = _call_original_export_v4
     reverse_patch._cleanup_reverse_source = _cleanup_reverse_source_v4
+    CadastralDxfExporter._prepare_template_slot_assets_batch = _prepare_template_slot_assets_batch_v4
     CadastralDxfExporter._prefetch_template_background_maps = _prefetch_template_background_maps_v4
     CadastralDxfExporter._reverse_geocoded_template_address = _reverse_geocoded_template_address_v4
     CadastralDxfExporter._build_template_tiff_raster = _build_template_tiff_raster_v4
@@ -606,5 +663,5 @@ def install_dxf_template_pipeline_v4_patch() -> None:
 
     CadastralDxfExporter._sleufbase_dxf_template_pipeline_v4_version = PATCH_VERSION
     CadastralDxfExporter.SLEUFBASE_REVERSE_RASTER_REUSE = True
-    CadastralDxfExporter.SLEUFBASE_REVERSE_TIFF_TRANSFORM = "normal-180"
+    CadastralDxfExporter.SLEUFBASE_REVERSE_TIFF_TRANSFORM = "normal-180-with-safe-fallback"
     CadastralDxfExporter.SLEUFBASE_REVERSE_MAP_REUSE = "single-render-moved-reference-dot"
