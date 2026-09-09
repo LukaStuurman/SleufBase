@@ -10,7 +10,7 @@ from PIL import Image
 from .virtual_trench import is_virtual_trench_layer
 
 
-PATCH_VERSION = 4
+PATCH_VERSION = 5
 # The left-hand trench image in the DXF template is vector-like line art. 1.25x
 # was intentionally conservative after the old memory spike, but that left
 # visibly stepped/pixelated edges. 2.5x keeps the source raster at at most
@@ -32,16 +32,18 @@ def _contains_virtual_template_task(tasks: list[tuple[int, dict[str, object]]]) 
 
 
 def _memory_safe_normalize_template_tiff_raster_alpha(exporter, image: Image.Image) -> Image.Image:
-    """Normalize TIFF alpha without the former full-size int16 RGB copy.
+    """Normalize TIFF alpha without redundant full-size image buffers."""
+    converted: Image.Image | None = None
+    try:
+        source = image
+        if image.mode != "RGBA":
+            converted = image.convert("RGBA")
+            source = converted
+        pixels = np.array(source, dtype=np.uint8, copy=True)
+    finally:
+        if converted is not None:
+            converted.close()
 
-    The previous implementation converted every RGB channel to int16 before
-    determining whether a pixel was almost white. For a large rotated raster
-    that temporary copy can easily exceed a gigabyte. uint8 min/max subtraction
-    is safe here because max is always greater than or equal to min.
-    """
-
-    rgba = image.convert("RGBA")
-    pixels = np.array(rgba, dtype=np.uint8, copy=True)
     alpha = pixels[:, :, 3]
     rgb = pixels[:, :, :3]
     visible = alpha > exporter.MASK_ALPHA_THRESHOLD
