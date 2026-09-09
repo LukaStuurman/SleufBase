@@ -6,10 +6,6 @@ from unittest import mock
 
 from SleufBase.models import Bounds, CableFeature, DxfOverlay
 from SleufBase import renderer
-from SleufBase.render_cache_performance_patch import (
-    _pick_feature_fast,
-    _pick_features_fast,
-)
 
 
 def _feature(feature_id: str, y: float, *, display: str) -> CableFeature:
@@ -23,7 +19,30 @@ def _feature(feature_id: str, y: float, *, display: str) -> CableFeature:
     )
 
 
-class PickFeaturePerformancePatchTests(unittest.TestCase):
+def _reference_pick_features(x, y, overlays, tolerance):
+    matches = []
+    for overlay in overlays:
+        if not overlay.visible:
+            continue
+        for feature in overlay.features:
+            if not feature.bounds.padded(tolerance).contains(x, y):
+                continue
+            distance = feature.distance_to(x, y)
+            if distance <= tolerance:
+                matches.append(
+                    (
+                        distance,
+                        feature.display_name.lower(),
+                        feature.source_path.name.lower(),
+                        feature.feature_id,
+                        feature,
+                    )
+                )
+    matches.sort(key=lambda item: item[:4])
+    return [item[4] for item in matches]
+
+
+class PickFeaturePerformanceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.a = _feature("a", 0.0, display="B")
         self.b = _feature("b", 0.1, display="A")
@@ -31,30 +50,33 @@ class PickFeaturePerformancePatchTests(unittest.TestCase):
         self.hidden = DxfOverlay(Path("hidden.dxf"), [self.c], visible=False)
         self.visible = DxfOverlay(Path("visible.dxf"), [self.a, self.b, self.c], visible=True)
 
-    def test_fast_pick_features_matches_original_order(self) -> None:
-        original = renderer._sleufbase_original_pick_features
-        expected = original(5.0, 0.05, [self.hidden, self.visible], 0.2)
-        actual = _pick_features_fast(5.0, 0.05, [self.hidden, self.visible], 0.2)
+    def test_pick_features_preserves_reference_order(self) -> None:
+        expected = _reference_pick_features(5.0, 0.05, [self.hidden, self.visible], 0.2)
+        actual = renderer.pick_features(5.0, 0.05, [self.hidden, self.visible], 0.2)
         self.assertEqual([item.feature_id for item in actual], [item.feature_id for item in expected])
 
-    def test_fast_pick_feature_matches_original_best_candidate(self) -> None:
-        original = renderer._sleufbase_original_pick_feature
-        expected = original(5.0, 0.05, [self.visible], 0.2)
-        actual = _pick_feature_fast(5.0, 0.05, [self.visible], 0.2)
+    def test_pick_feature_returns_reference_best_candidate(self) -> None:
+        expected = _reference_pick_features(5.0, 0.05, [self.visible], 0.2)[0]
+        actual = renderer.pick_feature(5.0, 0.05, [self.visible], 0.2)
         self.assertIs(actual, expected)
 
-    def test_fast_picker_does_not_allocate_padded_bounds(self) -> None:
+    def test_core_picker_does_not_allocate_padded_bounds(self) -> None:
         with mock.patch.object(
             Bounds,
             "padded",
-            side_effect=AssertionError("fast hit test must use scalar bounds"),
+            side_effect=AssertionError("core hit test must use scalar bounds"),
         ):
-            result = _pick_feature_fast(5.0, 0.05, [self.visible], 0.2)
+            result = renderer.pick_feature(5.0, 0.05, [self.visible], 0.2)
         self.assertIsNotNone(result)
 
-    def test_renderer_exports_use_fast_functions(self) -> None:
-        self.assertIs(renderer.pick_features, _pick_features_fast)
-        self.assertIs(renderer.pick_feature, _pick_feature_fast)
+    def test_pick_feature_does_not_sort_all_matches(self) -> None:
+        with mock.patch.object(
+            renderer,
+            "pick_features",
+            side_effect=AssertionError("single pick must not build/sort the full match list"),
+        ):
+            result = renderer.pick_feature(5.0, 0.05, [self.visible], 0.2)
+        self.assertIsNotNone(result)
 
 
 if __name__ == "__main__":
