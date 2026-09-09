@@ -15,7 +15,6 @@ from .virtual_trench_template_patch import install_virtual_trench_template_patch
 from .pdok_high_quality_patch import install_pdok_high_quality_patch
 from .marxact_boundary_patch import install_marxact_boundary_patch
 from .marxact_local_cross_section_patch import install_marxact_local_cross_section_patch
-from .render_framebuffer_performance_patch import install_render_framebuffer_performance_patch
 from .marxact_live_render_patch import install_marxact_live_render_patch
 from .marxact_alignment_ui_patch import install_marxact_alignment_ui_hook
 from .dxf_template_pipeline_patch import install_dxf_template_pipeline_patch
@@ -40,7 +39,6 @@ install_virtual_trench_template_patch()
 install_pdok_high_quality_patch()
 install_marxact_boundary_patch()
 install_marxact_local_cross_section_patch()
-install_render_framebuffer_performance_patch()
 install_marxact_live_render_patch()
 install_marxact_alignment_ui_hook()
 install_dxf_template_pipeline_patch()
