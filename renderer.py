@@ -45,6 +45,17 @@ def _feature_index(feature_ids: tuple[str, ...]) -> dict[str, tuple[int, ...]]:
     return index_map
 
 
+def _rgba_array(canvas: Image.Image) -> np.ndarray:
+    """Return one writable RGBA copy, avoiding an extra PIL conversion when possible."""
+    if canvas.mode == "RGBA":
+        return np.array(canvas, dtype=np.uint8, copy=True)
+    converted = canvas.convert("RGBA")
+    try:
+        return np.array(converted, dtype=np.uint8, copy=True)
+    finally:
+        converted.close()
+
+
 @dataclass(frozen=True)
 class _NativeDxfRenderCache:
     key: tuple[tuple[object, ...], ...]
@@ -86,6 +97,7 @@ class MapRenderer:
         transform = ViewportTransform(view_bounds, width, height)
         selected_ids = set(selected_feature_ids or [])
         highlight_ids = set(highlight_feature_ids or [])
+
         native_tiff_canvas = self._paint_tiff_layers_native(canvas, transform, tiff_layers)
         if native_tiff_canvas is not None:
             if native_tiff_canvas is not canvas:
@@ -96,20 +108,15 @@ class MapRenderer:
                 self._paint_tiff(canvas, transform, layer)
 
         native_canvas = self._render_dxf_overlays_native(
-            canvas,
-            transform,
-            dxf_overlays,
-            selected_ids,
-            highlight_ids,
+            canvas, transform, dxf_overlays, selected_ids, highlight_ids
         )
         if native_canvas is not None:
             if native_canvas is not canvas:
                 canvas.close()
             canvas = native_canvas
         else:
-            draw = ImageDraw.Draw(canvas, "RGBA")
             self._draw_dxf_overlays_python(
-                draw,
+                ImageDraw.Draw(canvas, "RGBA"),
                 transform,
                 dxf_overlays,
                 selected_ids,
@@ -131,19 +138,60 @@ class MapRenderer:
         selected_ids: set[str],
         highlight_ids: set[str],
     ) -> None:
+        """Python fallback with frame-invariant transform math hoisted out of loops."""
+        transform._validate()
+        bounds = transform.bounds
+        scale_x = transform.width_px / bounds.width
+        scale_y = transform.height_px / bounds.height
+        min_x = bounds.min_x
+        min_y = bounds.min_y
+        height_px = transform.height_px
+        meters_per_pixel = bounds.width / transform.width_px
+        line_width = 4 if meters_per_pixel < 0.05 else 3 if meters_per_pixel < 0.2 else 2
+
         for overlay in dxf_overlays:
             if not overlay.visible:
                 continue
             for feature in overlay.features:
-                if not feature.bounds.intersects(transform.bounds):
+                feature_bounds = feature.bounds
+                if (
+                    feature_bounds.max_x < bounds.min_x
+                    or feature_bounds.min_x > bounds.max_x
+                    or feature_bounds.max_y < bounds.min_y
+                    or feature_bounds.min_y > bounds.max_y
+                ):
                     continue
-                self._draw_feature(
-                    draw,
-                    transform,
-                    feature,
-                    is_selected=feature.feature_id in selected_ids,
-                    is_highlighted=feature.feature_id in highlight_ids,
-                )
+                points = feature.points
+                if len(points) < 2:
+                    continue
+                screen_points = [
+                    ((float(x) - min_x) * scale_x, height_px - ((float(y) - min_y) * scale_y))
+                    for x, y in points
+                ]
+                is_highlighted = feature.feature_id in highlight_ids
+                is_selected = feature.feature_id in selected_ids
+                if is_highlighted:
+                    draw.line(screen_points, fill=(0, 160, 255, 105), width=10)
+                if is_selected:
+                    draw.line(screen_points, fill=(255, 215, 0, 215), width=7)
+                draw.line(screen_points, fill=(*feature.color, 230), width=line_width)
+                if len(screen_points) == 2 and screen_points[0] == screen_points[1]:
+                    x, y = screen_points[0]
+                    radius = max(4, line_width + 2)
+                    if is_highlighted:
+                        draw.ellipse(
+                            (x - radius - 4, y - radius - 4, x + radius + 4, y + radius + 4),
+                            fill=(0, 160, 255, 105),
+                        )
+                    if is_selected:
+                        draw.ellipse(
+                            (x - radius - 3, y - radius - 3, x + radius + 3, y + radius + 3),
+                            fill=(255, 215, 0, 215),
+                        )
+                    draw.ellipse(
+                        (x - radius, y - radius, x + radius, y + radius),
+                        fill=(*feature.color, 230),
+                    )
 
     def _render_dxf_overlays_native(
         self,
@@ -159,11 +207,16 @@ class MapRenderer:
         if not native_accel.is_available():
             return None
         total_features = sum(len(overlay.features) for overlay in visible_overlays)
-        total_points = sum(len(feature.points) for overlay in visible_overlays for feature in overlay.features)
-        if total_features < _NATIVE_DXF_MIN_FEATURES and total_points < _NATIVE_DXF_MIN_POINTS:
-            return None
+        if total_features < _NATIVE_DXF_MIN_FEATURES:
+            total_points = sum(
+                len(feature.points)
+                for overlay in visible_overlays
+                for feature in overlay.features
+            )
+            if total_points < _NATIVE_DXF_MIN_POINTS:
+                return None
 
-        rgba = np.array(canvas.convert("RGBA"), dtype=np.uint8, copy=True)
+        rgba = _rgba_array(canvas)
         view_tuple = (
             float(transform.bounds.min_x),
             float(transform.bounds.min_y),
@@ -244,9 +297,7 @@ class MapRenderer:
 
     @staticmethod
     def _feature_flags(
-        feature_ids: tuple[str, ...],
-        enabled_ids: set[str],
-        feature_count: int,
+        feature_ids: tuple[str, ...], enabled_ids: set[str], feature_count: int
     ) -> np.ndarray:
         flags = np.zeros(feature_count, dtype=np.uint8)
         if not enabled_ids or feature_count <= 0:
@@ -279,30 +330,23 @@ class MapRenderer:
             if job is None:
                 continue
             _source_rect, dest_rect = job
-            dest_width = max(0, dest_rect[2] - dest_rect[0])
-            dest_height = max(0, dest_rect[3] - dest_rect[1])
-            total_dest_pixels += dest_width * dest_height
+            total_dest_pixels += max(0, dest_rect[2] - dest_rect[0]) * max(
+                0, dest_rect[3] - dest_rect[1]
+            )
             paint_jobs.append((layer, job[0], job[1]))
 
         if not paint_jobs:
             return canvas
-        if (
-            len(paint_jobs) < _NATIVE_TIFF_MIN_LAYERS
-            and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS
-        ):
+        if len(paint_jobs) < _NATIVE_TIFF_MIN_LAYERS and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS:
             return None
 
-        rgba = np.array(canvas.convert("RGBA"), dtype=np.uint8, copy=True)
+        rgba = _rgba_array(canvas)
         for layer, source_rect, dest_rect in paint_jobs:
             source_rgba = self._native_tiff_rgba_cache(layer)
             if source_rgba is None:
                 return None
             painted = native_accel.paint_axis_aligned_tiff(
-                rgba,
-                source_rgba,
-                source_rect,
-                dest_rect,
-                layer.opacity,
+                rgba, source_rgba, source_rect, dest_rect, layer.opacity
             )
             if painted is None:
                 return None
@@ -355,16 +399,15 @@ class MapRenderer:
         dest_bottom = int(np.ceil(max(screen_top_left[1], screen_bottom_right[1])))
         if dest_right <= dest_left or dest_bottom <= dest_top:
             return None
-        return (
-            (float(left), float(upper), float(right), float(lower)),
-            (dest_left, dest_top, dest_right, dest_bottom),
+        return (float(left), float(upper), float(right), float(lower)), (
+            dest_left,
+            dest_top,
+            dest_right,
+            dest_bottom,
         )
 
     def _paint_tiff(
-        self,
-        canvas: Image.Image,
-        transform: ViewportTransform,
-        layer: GeoTiffLayer,
+        self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer
     ) -> None:
         if layer.bounds.width <= 0 or layer.bounds.height <= 0:
             return
@@ -374,10 +417,7 @@ class MapRenderer:
         self._paint_affine_tiff(canvas, transform, layer)
 
     def _paint_axis_aligned_tiff(
-        self,
-        canvas: Image.Image,
-        transform: ViewportTransform,
-        layer: GeoTiffLayer,
+        self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer
     ) -> None:
         visible_bounds = layer.bounds.intersection(transform.bounds)
         if visible_bounds is None:
@@ -408,8 +448,7 @@ class MapRenderer:
             if dest_right <= dest_left or dest_bottom <= dest_top:
                 return
             resized = crop.resize(
-                (dest_right - dest_left, dest_bottom - dest_top),
-                Image.Resampling.BILINEAR,
+                (dest_right - dest_left, dest_bottom - dest_top), Image.Resampling.BILINEAR
             )
             canvas.alpha_composite(resized, (dest_left, dest_top))
         finally:
@@ -418,15 +457,11 @@ class MapRenderer:
             crop.close()
 
     def _paint_affine_tiff(
-        self,
-        canvas: Image.Image,
-        transform: ViewportTransform,
-        layer: GeoTiffLayer,
+        self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer
     ) -> None:
         pixel_to_world = layer.transform.to_matrix()
         world_to_screen = transform.world_to_screen_matrix()
-        pixel_to_screen = world_to_screen @ pixel_to_world
-        screen_to_pixel = np.linalg.inv(pixel_to_screen)
+        screen_to_pixel = np.linalg.inv(world_to_screen @ pixel_to_world)
         coefficients = (
             float(screen_to_pixel[0, 0]),
             float(screen_to_pixel[0, 1]),
@@ -456,47 +491,6 @@ class MapRenderer:
             if warped is not None:
                 warped.close()
             source.close()
-
-    def _draw_feature(
-        self,
-        draw: ImageDraw.ImageDraw,
-        transform: ViewportTransform,
-        feature: CableFeature,
-        is_selected: bool,
-        is_highlighted: bool,
-    ) -> None:
-        screen_points = transform.world_points_to_screen(feature.points)
-        if len(screen_points) < 2:
-            return
-        if is_highlighted:
-            draw.line(screen_points, fill=(0, 160, 255, 105), width=10)
-        if is_selected:
-            draw.line(screen_points, fill=(255, 215, 0, 215), width=7)
-        line_width = (
-            4
-            if transform.meters_per_pixel < 0.05
-            else 3
-            if transform.meters_per_pixel < 0.2
-            else 2
-        )
-        draw.line(screen_points, fill=(*feature.color, 230), width=line_width)
-        if len(screen_points) == 2 and screen_points[0] == screen_points[1]:
-            x, y = screen_points[0]
-            radius = max(4, line_width + 2)
-            if is_highlighted:
-                draw.ellipse(
-                    (x - radius - 4, y - radius - 4, x + radius + 4, y + radius + 4),
-                    fill=(0, 160, 255, 105),
-                )
-            if is_selected:
-                draw.ellipse(
-                    (x - radius - 3, y - radius - 3, x + radius + 3, y + radius + 3),
-                    fill=(255, 215, 0, 215),
-                )
-            draw.ellipse(
-                (x - radius, y - radius, x + radius, y + radius),
-                fill=(*feature.color, 230),
-            )
 
     def _draw_comments(
         self,
@@ -565,8 +559,6 @@ class MapRenderer:
                 continue
             screen_x, screen_y = transform.world_to_screen(marker.x, marker.y)
             radius = max(5, int(marker.radius_px))
-            outline = marker.outline_color + (255,)
-            fill = marker.fill_color + (235,)
             draw.ellipse(
                 (
                     screen_x - radius,
@@ -574,17 +566,14 @@ class MapRenderer:
                     screen_x + radius,
                     screen_y + radius,
                 ),
-                fill=fill,
-                outline=outline,
+                fill=marker.fill_color + (235,),
+                outline=marker.outline_color + (255,),
                 width=3,
             )
 
 
 def _bounds_contains_with_tolerance(
-    feature: CableFeature,
-    x: float,
-    y: float,
-    tolerance: float,
+    feature: CableFeature, x: float, y: float, tolerance: float
 ) -> bool:
     bounds = feature.bounds
     return (
