@@ -20,7 +20,8 @@ SetupIconFile=..\assets\sleufbase_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes
-; Keep this on native/classic Inno Setup controls. CI enforces this contract.
+; Stability contract: use only native/classic Inno Setup controls here.
+; tools/check_installer_contract.py blocks releases that reintroduce custom wizard UI.
 WizardStyle=classic
 WizardResizable=no
 CloseApplications=yes
