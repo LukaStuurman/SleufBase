@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.38'
+  SLEUFBASE_RELEASE_VERSION: '0.3.39'
 
 permissions:
   contents: write
@@ -73,14 +73,9 @@ jobs:
         shell: pwsh
         run: python tools/check_release_integrity.py
 
-      - name: Verify v0.3.31 installer structure
+      - name: Verify known-good installer contract
         shell: pwsh
-        run: |
-          $iss = Get-Content 'installer/SleufBase.iss' -Raw
-          if ($iss -notmatch '(?m)^\[Tasks\]\s*$') { throw 'Standaard [Tasks]-sectie ontbreekt' }
-          if ($iss -notmatch 'Tasks:\s*desktopicon') { throw 'Desktop shortcut gebruikt de standaard desktopicon-task niet' }
-          if ($iss -match '(?m)^\[Code\]\s*$') { throw 'Custom [Code]-wizardlogica mag niet terugkomen' }
-          if ($iss -match 'CreateInputOptionPage|TNewCheckBox|InitializeWizard|WizardForm') { throw 'Custom wizard-controls aangetroffen' }
+        run: python tools/check_installer_contract.py
 
       - name: Prepare Windows branding
         shell: pwsh
@@ -167,7 +162,17 @@ jobs:
           choco install innosetup --version=6.7.1 -y --no-progress --allow-downgrade
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
           if (-not (Test-Path $iscc)) { throw "Inno Setup compiler niet gevonden: $iscc" }
-          (Get-Item $iscc).VersionInfo | Select-Object ProductVersion,FileVersion | Format-List
+
+          # ISCC.exe itself exposes 0.0.0.0 in its Windows version resource,
+          # so verify the exact Chocolatey package metadata that installed it.
+          $nuspec = Join-Path $env:ProgramData 'chocolatey\lib\innosetup\innosetup.nuspec'
+          if (-not (Test-Path $nuspec)) { throw "Inno Setup package metadata ontbreekt: $nuspec" }
+          [xml]$package = Get-Content $nuspec -Raw
+          $detectedVersion = [string]$package.package.metadata.version
+          Write-Host "Inno Setup package version: $detectedVersion"
+          if ($detectedVersion -ne '6.7.1') {
+            throw "Onverwachte Inno Setup packageversie: $detectedVersion; exact 6.7.1 vereist"
+          }
 
       - name: Build professional installer
         shell: pwsh
@@ -177,6 +182,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup faalde met exitcode $LASTEXITCODE" }
           if (-not (Test-Path 'dist-installer/SleufBase-Setup.exe')) { throw 'SleufBase-Setup.exe ontbreekt' }
 
+      # GitHub-hosted Windows runners do not guarantee an interactive desktop session.
+      # Keep this as extra diagnostics, while deterministic installer checks below remain blocking.
       - name: Interactive installer UI diagnostic
         continue-on-error: true
         shell: pwsh
@@ -267,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.38
+          name: SleufBase-Windows-v0.3.39
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -286,18 +293,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.38
+          SleufBase Windows v0.3.39
 
-          DXF-sjabloon performance:
-          - de reverse DXF blijft tijdens de paired export in geheugen en wordt niet meer eerst volledig naar een tijdelijk DXF-bestand geschreven en daarna opnieuw ingelezen
-          - Dynamic Visibility bouwt donor-metadata vanuit dezelfde recordindex, voegt alle gekloonde OBJECTS in één batch toe en hergebruikt de post-promotie-index bij validatie
-          - nieuw aangemaakte variant-entiteiten worden via de modelspace-tail gevonden, zodat de tweede volledige modelspace-scan per afbeelding/profiel vervalt
-          - tijdelijke reverse-rasterassets worden waar mogelijk verplaatst en gedeelde assets via hardlinks hergebruikt; kopiëren blijft de veilige fallback
-          - alle eerdere streaming-DXF, normal/reverse cache-, map/TIFF-overlap- en adaptieve geheugenoptimalisaties uit pipeline v2 blijven behouden
+          Installer hotfix:
+          - installer gebruikt voortaan uitsluitend de native/classic Inno Setup-wizard, zonder modern/custom control-laag
+          - wizard is bewust niet resizebaar zodat de standaard Windows-controls en hit-testing zo eenvoudig mogelijk blijven
+          - nieuw installer-contract blokkeert custom [Code], WizardForm-manipulatie, custom wizardpages/styles en dubbele desktop-controls
+          - Inno Setup blijft vastgezet op 6.7.1 en de workflow controleert de exacte geïnstalleerde packageversie
+          - de interactieve kliktest blijft als extra diagnose aanwezig; GitHub-hosted Windows runners garanderen geen bruikbare interactieve desktopsessie
+          - source-contract, gecompileerde desktopshortcut-task, stille installatie en geïnstalleerde runtime-smoketest zijn release-blokkerend
 
           Windows:
-          - professionele installer, Fast ZIP en Portable EXE worden opnieuw volledig gebouwd en smoke-getest
-          - installer-, desktopshortcut-, runtime- en regressietests blijven onderdeel van de releasebuild
+          - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
