@@ -1,6 +1,6 @@
 """SleufBase product version information."""
 
-__version__ = "0.3.41"
+__version__ = "0.3.42"
 PRODUCT_NAME = "SleufBase"
 COMPANY_NAME = "Techbase"
 APP_USER_MODEL_ID = "Techbase.SleufBase"
