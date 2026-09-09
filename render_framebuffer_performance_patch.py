@@ -12,8 +12,8 @@ from .renderer import (
     _NATIVE_DXF_MIN_POINTS,
     _NATIVE_TIFF_MIN_DEST_PIXELS,
     _NATIVE_TIFF_MIN_LAYERS,
+    _rgba_array,
 )
-from .render_hotpath_patch import _rgba_array
 
 
 PATCH_VERSION = 1
@@ -93,7 +93,9 @@ def _render_combined_native(
         return None
 
     canvas = (
-        background.copy().convert("RGBA")
+        background.copy()
+        if background is not None and background.mode == "RGBA"
+        else background.convert("RGBA")
         if background is not None
         else Image.new("RGBA", size, (245, 245, 245, 255))
     )
