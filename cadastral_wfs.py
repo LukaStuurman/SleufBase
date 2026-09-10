@@ -40,6 +40,8 @@ class CadastralWfsClient:
     MIN_SPLIT_SPAN_METERS = 90.0
     CACHE_LIMIT = 96
     MAX_PAGE_COUNT = 100
+    SLEUFBASE_PARALLEL_SESSIONS = True
+    _sleufbase_parallel_session_version = 1
     FEATURE_TYPES = {
         "kadastralekaart:Perceel": "KAD_PERCEEL",
         "kadastralekaart:KadastraleGrens": "KAD_GRENS",
@@ -56,13 +58,45 @@ class CadastralWfsClient:
         self.retries = max(1, int(retries))
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "SleufBase/0.2"})
+        self._sleufbase_wfs_thread_local = threading.local()
+        self._sleufbase_wfs_session_lock = threading.RLock()
+        self._sleufbase_wfs_worker_sessions: set[requests.Session] = set()
         self._feature_cache: OrderedDict[
             tuple[str, float, float, float, float], list[dict[str, Any]]
         ] = OrderedDict()
         self._feature_cache_lock = threading.RLock()
 
     def close(self) -> None:
-        self.session.close()
+        try:
+            self.session.close()
+        finally:
+            with self._sleufbase_wfs_session_lock:
+                worker_sessions = list(self._sleufbase_wfs_worker_sessions)
+                self._sleufbase_wfs_worker_sessions.clear()
+            for session in worker_sessions:
+                if session is self.session:
+                    continue
+                try:
+                    session.close()
+                except Exception:
+                    pass
+
+    def _request_session(self) -> requests.Session:
+        """Return the caller's dedicated session without sharing Session across workers."""
+        if threading.current_thread() is threading.main_thread():
+            return self.session
+        session = getattr(self._sleufbase_wfs_thread_local, "session", None)
+        if session is not None:
+            return session
+        session = requests.Session()
+        try:
+            session.headers.update(dict(self.session.headers))
+        except Exception:
+            session.headers.update({"User-Agent": "SleufBase/0.2"})
+        self._sleufbase_wfs_thread_local.session = session
+        with self._sleufbase_wfs_session_lock:
+            self._sleufbase_wfs_worker_sessions.add(session)
+        return session
 
     def fetch_linework(self, bounds: Bounds) -> list[CadastralLinework]:
         result: list[CadastralLinework] = []
@@ -291,7 +325,11 @@ class CadastralWfsClient:
         last_error: Exception | None = None
         for attempt in range(1, self.retries + 1):
             try:
-                response = self.session.get(self.BASE_URL, params=params, timeout=self.timeout)
+                response = self._request_session().get(
+                    self.BASE_URL,
+                    params=params,
+                    timeout=self.timeout,
+                )
                 response.raise_for_status()
                 payload = response.json()
                 if not isinstance(payload, dict):
