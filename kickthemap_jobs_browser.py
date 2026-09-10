@@ -844,6 +844,7 @@ class KickTheMapJobsWindow(tk.Tk):
         ttk.Button(button_row, text="Vernieuwen", command=self.refresh_jobs, style="Compact.TButton").pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(button_row, textvariable=self.loaded_jobs_button_var, command=self.toggle_loaded_jobs_only, style="Compact.TButton").pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(button_row, textvariable=self.selected_only_button_var, command=self.toggle_selected_only, style="Compact.TButton").pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(button_row, text="Download herstellen", command=self.repair_download_process, style="Compact.TButton").pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(button_row, text="Kaart", command=self.open_jobs_map, style="Compact.TButton").pack(side=tk.LEFT)
 
         card = ttk.Frame(outer, padding=14, style="Card.TFrame")
@@ -1201,6 +1202,51 @@ class KickTheMapJobsWindow(tk.Tk):
         self.status_var.set(f"{len(jobs)} GeoTIFF(s) downloaden...")
         self._set_controls_enabled(False)
         threading.Thread(target=self._load_selected_geotiffs_worker, args=(jobs,), daemon=True).start()
+
+    def repair_download_process(self) -> None:
+        jobs = self._selected_jobs()
+        if len(jobs) != 1:
+            messagebox.showinfo(
+                "KickTheMap download herstellen",
+                "Selecteer precies één proefsleuf die als proefdownload mag worden gebruikt.",
+            )
+            return
+        job = jobs[0]
+        if not messagebox.askyesno(
+            "KickTheMap download herstellen",
+            f"Gebruik '{job.title}' als proefdownload?\n\n"
+            "SleufBase probeert de bekende KickTheMap-downloadvarianten, "
+            "controleert de GeoTIFF en onthoudt alleen de geslaagde variant.",
+        ):
+            return
+        self.status_var.set(f"Downloadproces testen met '{job.title}'...")
+        self._set_controls_enabled(False)
+        threading.Thread(target=self._repair_download_process_worker, args=(job,), daemon=True).start()
+
+    def _repair_download_process_worker(self, job: KickTheMapJob) -> None:
+        try:
+            if self.account is not None and not self.client.is_logged_in:
+                self.client.login(self.account.email, self.account.password)
+            sample_path, request_mode = self.client.learn_download_strategy(job)
+            self.after(
+                0,
+                lambda sample_path=sample_path, request_mode=request_mode: self._finish_repair_download_process(
+                    sample_path,
+                    request_mode,
+                ),
+            )
+        except Exception as exc:
+            self.after(0, lambda exc=exc: self._show_error(exc))
+
+    def _finish_repair_download_process(self, sample_path: Path, request_mode: str) -> None:
+        self._set_controls_enabled(True)
+        self.status_var.set("KickTheMap-downloadproces bijgewerkt.")
+        messagebox.showinfo(
+            "KickTheMap download hersteld",
+            "De proefdownload is gelukt en de werkwijze is opgeslagen voor volgende downloads.\n\n"
+            f"Variant: {request_mode}\n"
+            f"Proefbestand: {sample_path}",
+        )
 
     def _load_selected_geotiffs_worker(self, jobs: list[KickTheMapJob]) -> None:
         total = len(jobs)

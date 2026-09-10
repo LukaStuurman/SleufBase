@@ -21,6 +21,8 @@ import requests
 LOGIN_TOKEN_PATTERN = re.compile(r'name="_token"\s+value="([^"]+)"', re.IGNORECASE)
 CSRF_META_PATTERN = re.compile(r'<meta\s+name="csrf-token"\s+content="([^"]+)"', re.IGNORECASE)
 PREFIX_PATTERN = re.compile(r"^(?P<email>.+)_(?P<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})$")
+DOWNLOAD_REQUEST_MODES = ("multipart", "form", "json")
+TIFF_SIGNATURES = (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+")
 
 
 class KickTheMapError(RuntimeError):
@@ -114,6 +116,105 @@ class KickTheMapClient:
     def default_download_dir() -> Path:
         local_app_data = Path(os.environ.get("LOCALAPPDATA", str(Path.home())))
         return local_app_data / "SleufBase" / "KickTheMap"
+
+    @classmethod
+    def download_strategy_path(cls) -> Path:
+        return cls.default_download_dir() / "download_strategy.json"
+
+    def learn_download_strategy(
+        self,
+        job: KickTheMapJob,
+        target_dir: Path | None = None,
+    ) -> tuple[Path, str]:
+        """Probe the GeoTIFF endpoint and remember the first valid strategy.
+
+        KickTheMap has changed both the request encoding and the response shape
+        in the past.  The probe deliberately downloads one real sample and
+        accepts a strategy only after the result has a TIFF signature.  The
+        persisted record contains no credentials or signed URLs.
+        """
+
+        self._ensure_logged_in()
+        target_root = target_dir or self.default_download_dir()
+        sample_dir = target_root / "download_recovery_samples"
+        sample_dir.mkdir(parents=True, exist_ok=True)
+        sample_path = sample_dir / f"{job.safe_file_stem}_{job.job_id}.tiff"
+        file_name = f"{job.safe_file_stem}.tiff"
+        failures: list[str] = []
+
+        for request_mode in self._download_request_modes(include_learned=False):
+            attempt_path = sample_path.with_name(f"{sample_path.name}.{request_mode}.tmp")
+            try:
+                signed_url = self._request_project_file_url(
+                    job,
+                    folder="cloud",
+                    remote_file_name=f"{self._job_storage_prefix(job)}.tiff",
+                    export_name=file_name,
+                    request_mode=request_mode,
+                )
+                self._download_url_to_file(signed_url, attempt_path)
+                self._validate_geotiff_file(attempt_path)
+                attempt_path.replace(sample_path)
+                self._save_download_strategy(request_mode, job)
+                return sample_path, request_mode
+            except Exception as exc:
+                failures.append(f"{request_mode}: {exc}")
+                try:
+                    attempt_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+
+        detail = "; ".join(failures[:3])
+        raise KickTheMapError(
+            "KickTheMap kon geen geldige voorbeeld-GeoTIFF downloaden. "
+            f"Geprobeerde varianten: {detail}"
+        )
+
+    def _download_request_modes(self, *, include_learned: bool = True) -> list[str]:
+        modes: list[str] = []
+        if include_learned:
+            learned_mode = self._load_download_strategy()
+            if learned_mode:
+                modes.append(learned_mode)
+        modes.extend(mode for mode in DOWNLOAD_REQUEST_MODES if mode not in modes)
+        return modes
+
+    @classmethod
+    def _load_download_strategy(cls) -> str | None:
+        try:
+            payload = json.loads(cls.download_strategy_path().read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError, TypeError, ValueError):
+            return None
+        if not isinstance(payload, dict):
+            return None
+        request_mode = str(payload.get("request_mode", "")).strip().lower()
+        return request_mode if request_mode in DOWNLOAD_REQUEST_MODES else None
+
+    @classmethod
+    def _save_download_strategy(cls, request_mode: str, job: KickTheMapJob) -> None:
+        strategy_path = cls.download_strategy_path()
+        strategy_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "version": 1,
+            "request_mode": request_mode,
+            "verified_job_id": str(job.job_id),
+            "verified_at": time.time(),
+        }
+        temp_path = strategy_path.with_name(f"{strategy_path.name}.tmp")
+        temp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        temp_path.replace(strategy_path)
+
+    @staticmethod
+    def _validate_geotiff_file(path: Path) -> None:
+        try:
+            if path.stat().st_size < 16:
+                raise KickTheMapError("de voorbeeld-download is te klein om een GeoTIFF te zijn")
+            with path.open("rb") as handle:
+                header = handle.read(4)
+        except OSError as exc:
+            raise KickTheMapError(f"de voorbeeld-download kon niet worden gecontroleerd ({exc})") from exc
+        if header not in TIFF_SIGNATURES:
+            raise KickTheMapError("de voorbeeld-download is geen geldige TIFF/GeoTIFF")
 
     def login(self, email: str, password: str) -> list[KickTheMapJob]:
         with self._recent_job_feature_lock:
@@ -416,6 +517,33 @@ class KickTheMapClient:
         folder: str,
         remote_file_name: str,
         export_name: str,
+        request_mode: str | None = None,
+    ) -> str:
+        modes = [request_mode] if request_mode else self._download_request_modes()
+        last_error: Exception | None = None
+        for mode in modes:
+            try:
+                return self._request_project_file_url_once(
+                    job,
+                    folder=folder,
+                    remote_file_name=remote_file_name,
+                    export_name=export_name,
+                    request_mode=mode,
+                )
+            except Exception as exc:
+                last_error = exc
+        if last_error is not None:
+            raise last_error
+        raise KickTheMapError("Geen KickTheMap-downloadvariant beschikbaar.")
+
+    def _request_project_file_url_once(
+        self,
+        job: KickTheMapJob,
+        *,
+        folder: str,
+        remote_file_name: str,
+        export_name: str,
+        request_mode: str,
     ) -> str:
         form_fields = {
             "projectId": str(job.job_id),
@@ -425,14 +553,21 @@ class KickTheMapClient:
         }
 
         def request(csrf_token: str) -> requests.Response:
-            # KickTheMap's current web client submits this endpoint as
-            # multipart/form-data (via FormData), not as a URL-encoded form.
-            return self.session.post(
-                self.FILE_URL_URL,
-                files={key: (None, value) for key, value in form_fields.items()},
-                headers={"X-CSRF-TOKEN": csrf_token},
-                timeout=self.timeout,
-            )
+            request_kwargs = {
+                "headers": {"X-CSRF-TOKEN": csrf_token},
+                "timeout": self.timeout,
+            }
+            if request_mode == "multipart":
+                # The current web client submits this endpoint as
+                # multipart/form-data (via FormData).
+                request_kwargs["files"] = {key: (None, value) for key, value in form_fields.items()}
+            elif request_mode == "form":
+                request_kwargs["data"] = form_fields
+            elif request_mode == "json":
+                request_kwargs["json"] = form_fields
+            else:
+                raise KickTheMapError(f"Onbekende KickTheMap-downloadvariant: {request_mode}")
+            return self.session.post(self.FILE_URL_URL, **request_kwargs)
 
         csrf_token = self._ensure_csrf_token()
         response = request(csrf_token)
@@ -453,7 +588,17 @@ class KickTheMapClient:
         # current endpoint returns a metadata object with the URL in
         # ``data.url`` (the shape used by the website's own download code).
         response_data = payload.get("data")
-        signed_url = response_data.get("url") if isinstance(response_data, dict) else response_data
+        if isinstance(response_data, dict):
+            signed_url = next(
+                (
+                    response_data.get(key)
+                    for key in ("url", "downloadUrl", "download_url")
+                    if response_data.get(key)
+                ),
+                None,
+            )
+        else:
+            signed_url = response_data or payload.get("url")
         if not isinstance(signed_url, str) or not signed_url.strip():
             raise KickTheMapError("KickTheMap gaf een lege downloadlink terug.")
         return signed_url.strip()
