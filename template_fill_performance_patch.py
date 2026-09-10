@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from typing import Any
 
+from . import dxf_template_pipeline_patch as pipeline_perf
 from . import template_export_performance_patch as template_perf
+from .resource_policy import get_resource_policy
 
 
-PATCH_VERSION = 1
-MAX_PARALLEL_TEMPLATE_MAPS = 4
+PATCH_VERSION = 2
+RESOURCE_POLICY = get_resource_policy()
+MAX_PARALLEL_TEMPLATE_MAPS = max(1, RESOURCE_POLICY.light_map_workers)
+MAX_PARALLEL_TEMPLATE_ASSETS = max(1, RESOURCE_POLICY.template_asset_workers)
 _PROFILE_LAYER_CACHE_ATTR = "_sleufbase_profile_layer_cache_v1"
 _PROFILE_LEADER_CACHE_ATTR = "_sleufbase_profile_leader_block_v1"
 
@@ -58,7 +62,7 @@ def _configure_profile_layers_once(exporter: Any, document: Any, profile_points:
 
 
 def install_template_fill_performance_patch() -> None:
-    """Speed up map batches and repeated DXF cross-section slot filling."""
+    """Speed up template work while scaling safely to the detected hardware."""
 
     from .cadastral_export import CadastralDxfExporter
 
@@ -68,10 +72,18 @@ def install_template_fill_performance_patch() -> None:
     ) >= PATCH_VERSION:
         return
 
-    # Virtual/MarXact exports separate relatively light background-map work from
-    # memory-heavy TIFF preparation. Four map workers matches the normal template
-    # batch width while the existing adaptive TIFF pixel budget remains unchanged.
+    # This patch is installed last in the template performance chain, making it
+    # the single place that publishes the resolved process-wide resource policy
+    # to the older pipeline modules. Output geometry and reverse semantics are
+    # intentionally untouched.
     template_perf.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS = MAX_PARALLEL_TEMPLATE_MAPS
+    template_perf.MAX_HEAVY_TEMPLATE_RASTER_WORKERS = max(
+        1, RESOURCE_POLICY.heavy_raster_workers
+    )
+    pipeline_perf.MAX_ADAPTIVE_TIFF_WORKERS = max(1, RESOURCE_POLICY.heavy_raster_workers)
+    pipeline_perf.VIRTUAL_TIFF_PIXEL_BUDGET = max(
+        4_000_000, RESOURCE_POLICY.virtual_tiff_pixel_budget
+    )
 
     previous_leader_block = CadastralDxfExporter._ensure_template_profile_leader_block
 
@@ -89,11 +101,20 @@ def install_template_fill_performance_patch() -> None:
             pass
         return block_name
 
+    @staticmethod
+    def _template_asset_worker_count_adaptive(asset_count: int) -> int:
+        return max(1, min(MAX_PARALLEL_TEMPLATE_ASSETS, int(asset_count)))
+
     CadastralDxfExporter._ensure_template_profile_layers = _ensure_template_profile_layers_fast
     CadastralDxfExporter._ensure_template_profile_leader_block = (
         _ensure_template_profile_leader_block_fast
     )
+    CadastralDxfExporter._template_asset_worker_count = _template_asset_worker_count_adaptive
     CadastralDxfExporter._sleufbase_template_fill_performance_version = PATCH_VERSION
     CadastralDxfExporter.SLEUFBASE_TEMPLATE_MAP_WORKERS = MAX_PARALLEL_TEMPLATE_MAPS
+    CadastralDxfExporter.SLEUFBASE_TEMPLATE_ASSET_WORKERS = MAX_PARALLEL_TEMPLATE_ASSETS
+    CadastralDxfExporter.SLEUFBASE_HEAVY_RASTER_WORKERS = RESOURCE_POLICY.heavy_raster_workers
+    CadastralDxfExporter.SLEUFBASE_TIFF_PIXEL_BUDGET = RESOURCE_POLICY.virtual_tiff_pixel_budget
+    CadastralDxfExporter.SLEUFBASE_RESOURCE_MODE = RESOURCE_POLICY.mode
     CadastralDxfExporter.SLEUFBASE_PROFILE_LAYER_CACHE = True
     CadastralDxfExporter.SLEUFBASE_PROFILE_LEADER_BLOCK_CACHE = True

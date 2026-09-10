@@ -16,6 +16,10 @@ from shapely.geometry import GeometryCollection, LineString, MultiLineString, Mu
 from shapely.ops import unary_union
 
 from .models import Bounds
+from .resource_policy import get_resource_policy
+
+
+_RESOURCE_POLICY = get_resource_policy()
 
 
 class BgtVectorTileError(RuntimeError):
@@ -50,10 +54,25 @@ class BgtVectorTileClient:
         "wijk",
     }
 
-    def __init__(self, timeout: int = 45, retries: int = 4, max_workers: int = 8) -> None:
+    def __init__(
+        self,
+        timeout: int = 45,
+        retries: int = 4,
+        max_workers: int | None = None,
+    ) -> None:
         self.timeout = max(5, int(timeout))
         self.retries = max(1, int(retries))
-        self.max_workers = max(1, min(12, int(max_workers)))
+        self.max_workers = (
+            max(1, min(12, _RESOURCE_POLICY.network_workers))
+            if max_workers is None
+            else max(1, min(12, int(max_workers)))
+        )
+        # Decoded MVT payloads can be much heavier than 256x256 RGBA tiles.
+        # Scale the cache more conservatively than the normal map-tile cache.
+        self.tile_cache_limit = max(
+            32,
+            min(256, int(_RESOURCE_POLICY.tile_memory_cache_entries // 2)),
+        )
         self._thread_local = threading.local()
         self._cache_lock = threading.RLock()
         self._tile_cache: OrderedDict[tuple[int, int], dict[str, Any]] = OrderedDict()
@@ -83,7 +102,7 @@ class BgtVectorTileClient:
         with self._cache_lock:
             self._tile_cache.pop(key, None)
             self._tile_cache[key] = decoded
-            while len(self._tile_cache) > self.TILE_CACHE_LIMIT:
+            while len(self._tile_cache) > self.tile_cache_limit:
                 self._tile_cache.popitem(last=False)
 
     def fetch_paths(self, bounds: Bounds) -> list[list[tuple[float, float]]]:

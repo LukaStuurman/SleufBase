@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 from .bgt_vector_tiles import BgtSurfaceFeature
 from .cadastral_wfs import CadastralLinework, CadastralTextLabel
+from .resource_policy import get_resource_policy
 from .template_asset_memory_patch import (
     TEMPLATE_UI_PUMP_INTERVAL_SECONDS,
     _contains_virtual_template_task,
@@ -18,11 +19,13 @@ from .template_bgt_fetch_patch import (
 )
 
 
-PATCH_VERSION = 1
-MAX_LOCAL_WFS_WORKERS = 4
-MAX_LOCAL_BGT_WORKERS = 2
-MAX_TEMPLATE_PATH_WORKERS = 4
-MAX_VIRTUAL_TEMPLATE_MAP_WORKERS = 2
+PATCH_VERSION = 2
+RESOURCE_POLICY = get_resource_policy()
+MAX_LOCAL_WFS_WORKERS = max(2, min(12, RESOURCE_POLICY.network_workers))
+MAX_LOCAL_BGT_WORKERS = max(2, min(10, RESOURCE_POLICY.network_workers))
+MAX_TEMPLATE_PATH_WORKERS = max(2, min(12, RESOURCE_POLICY.local_geometry_workers))
+MAX_VIRTUAL_TEMPLATE_MAP_WORKERS = max(1, RESOURCE_POLICY.light_map_workers)
+MAX_HEAVY_TEMPLATE_RASTER_WORKERS = max(1, RESOURCE_POLICY.heavy_raster_workers)
 
 
 def _safe_status(callback, message: str) -> None:
@@ -274,10 +277,8 @@ def _install_parallel_virtual_map_assets(exporter_class, prepared_assets_type) -
         if not tasks or not _contains_virtual_template_task(tasks):
             return previous_batch(self, tasks, status_callback=status_callback)
 
-        # Background prefetching already happens before this batch. Render the
-        # comparatively light map/address assets two-at-a-time, then keep the
-        # high-resolution TIFF rotate/crop stage strictly single-worker. This
-        # preserves the memory fix while removing the old serial map bottleneck.
+        # Background/address assets are relatively light and can scale with CPU,
+        # while TIFF rotate/crop work is explicitly RAM-aware.
         light_workers = max(1, min(MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, len(tasks)))
         with ThreadPoolExecutor(
             max_workers=light_workers,
@@ -293,8 +294,9 @@ def _install_parallel_virtual_map_assets(exporter_class, prepared_assets_type) -
                 "Bereid sjabloonkaarten voor",
             )
 
+        heavy_workers = max(1, min(MAX_HEAVY_TEMPLATE_RASTER_WORKERS, len(tasks)))
         with ThreadPoolExecutor(
-            max_workers=1,
+            max_workers=heavy_workers,
             thread_name_prefix="template-tiff-virtual",
         ) as executor:
             raster_future_map = {
@@ -333,3 +335,4 @@ def install_template_export_performance_patch() -> None:
     _install_template_path_parallel_fetch(CadastralDxfExporter)
     _install_parallel_virtual_map_assets(CadastralDxfExporter, PreparedTemplateSlotAssets)
     CadastralDxfExporter._sleufbase_template_export_performance_version = PATCH_VERSION
+    CadastralDxfExporter.SLEUFBASE_RESOURCE_POLICY = RESOURCE_POLICY.description
