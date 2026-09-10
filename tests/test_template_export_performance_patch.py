@@ -9,6 +9,7 @@ from unittest.mock import patch
 from SleufBase.cadastral_export import CadastralDxfExporter, PreparedTemplateSlotAssets
 from SleufBase.cadastral_wfs import CadastralLinework, CadastralTextLabel, CadastralWfsClient
 from SleufBase.models import Bounds
+from SleufBase.resource_policy import get_resource_policy
 from SleufBase.template_bgt_fetch_patch import _LocalBoundsWfsClient
 from SleufBase import template_export_performance_patch as perf_patch
 
@@ -109,14 +110,18 @@ class TemplateExportPerformancePatchTests(unittest.TestCase):
     def test_patch_is_installed(self) -> None:
         self.assertGreaterEqual(
             int(getattr(CadastralDxfExporter, "_sleufbase_template_export_performance_version", 0) or 0),
-            1,
+            2,
         )
         self.assertGreaterEqual(
             int(getattr(CadastralWfsClient, "_sleufbase_parallel_session_version", 0) or 0),
             1,
         )
         self.assertGreaterEqual(perf_patch.MAX_LOCAL_WFS_WORKERS, 2)
-        self.assertGreaterEqual(perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, 2)
+        self.assertGreaterEqual(perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, 1)
+        self.assertEqual(
+            perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS,
+            get_resource_policy().light_map_workers,
+        )
 
     def test_local_wfs_bounds_are_fetched_concurrently_and_keep_order(self) -> None:
         delegate = _ParallelWfsDelegate()
@@ -161,7 +166,7 @@ class TemplateExportPerformancePatchTests(unittest.TestCase):
             client.close()
         self.assertTrue(fake_session.closed)
 
-    def test_virtual_maps_parallel_but_high_res_tiffs_remain_single_worker(self) -> None:
+    def test_virtual_map_and_tiff_concurrency_respect_hardware_policy(self) -> None:
         exporter = CadastralDxfExporter(wfs_client=object())
         map_tracker = _ConcurrencyTracker()
         tiff_tracker = _ConcurrencyTracker()
@@ -224,8 +229,15 @@ class TemplateExportPerformancePatchTests(unittest.TestCase):
 
         self.assertEqual(set(result), {0, 1, 2, 3})
         self.assertTrue(all(isinstance(item, PreparedTemplateSlotAssets) for item in result.values()))
-        self.assertGreaterEqual(map_tracker.max_active, 2)
-        self.assertEqual(tiff_tracker.max_active, 1)
+
+        map_cap = min(perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, len(tasks))
+        heavy_cap = min(perf_patch.MAX_HEAVY_TEMPLATE_RASTER_WORKERS, len(tasks))
+        self.assertGreaterEqual(map_tracker.max_active, 1)
+        self.assertLessEqual(map_tracker.max_active, map_cap)
+        self.assertGreaterEqual(tiff_tracker.max_active, 1)
+        self.assertLessEqual(tiff_tracker.max_active, heavy_cap)
+        if map_cap > 1:
+            self.assertGreaterEqual(map_tracker.max_active, 2)
 
 
 if __name__ == "__main__":
