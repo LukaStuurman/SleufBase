@@ -127,6 +127,8 @@ class PdokKadastralekaartWmtsTileClient(WebMercatorTileClient):
 class PdokWmsClient:
     BASE_URL = "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0"
     CACHE_LIMIT = 24
+    CACHE_MAX_BYTES = 96 * 1024 * 1024
+    SLEUFBASE_IMMUTABLE_WMS_BUFFER_CACHE = True
 
     def __init__(
         self,
@@ -145,7 +147,11 @@ class PdokWmsClient:
         self.transparent = transparent
         self._thread_local = threading.local()
         self._cache_lock = threading.RLock()
-        self._cache: OrderedDict[tuple[float, float, float, float, int, int], Image.Image] = OrderedDict()
+        self._cache: OrderedDict[
+            tuple[float, float, float, float, int, int],
+            tuple[bytes, tuple[int, int]],
+        ] = OrderedDict()
+        self._cache_bytes = 0
 
     @staticmethod
     def _create_session() -> requests.Session:
@@ -170,24 +176,49 @@ class PdokWmsClient:
             int(size[1]),
         )
 
+    @staticmethod
+    def _rgba_cache_payload(image: Image.Image) -> tuple[bytes, tuple[int, int]]:
+        """Store only immutable raw pixels instead of retaining a full PIL object."""
+        if image.mode == "RGBA":
+            return image.tobytes(), image.size
+        converted = image.convert("RGBA")
+        try:
+            return converted.tobytes(), converted.size
+        finally:
+            converted.close()
+
     def _cache_get(self, key: tuple[float, float, float, float, int, int]) -> Image.Image | None:
         with self._cache_lock:
             cached = self._cache.pop(key, None)
             if cached is None:
                 return None
             self._cache[key] = cached
-            return cached.copy()
+            data, size = cached
+        # Image.frombuffer keeps a lightweight disposable view over immutable
+        # bytes, avoiding another full image-sized copy on every cache hit.
+        return Image.frombuffer("RGBA", size, data, "raw", "RGBA", 0, 1)
 
     def _cache_put(self, key: tuple[float, float, float, float, int, int], image: Image.Image) -> None:
-        stored = image.copy()
+        payload = self._rgba_cache_payload(image)
+        payload_bytes = len(payload[0])
         with self._cache_lock:
             previous = self._cache.pop(key, None)
             if previous is not None:
-                previous.close()
-            self._cache[key] = stored
-            while len(self._cache) > self.CACHE_LIMIT:
-                _old_key, old_image = self._cache.popitem(last=False)
-                old_image.close()
+                self._cache_bytes -= len(previous[0])
+
+            # A single unusually large render must not pin more memory than the
+            # complete WMS cache budget. It can still be returned to the caller.
+            if payload_bytes > self.CACHE_MAX_BYTES:
+                return
+
+            self._cache[key] = payload
+            self._cache_bytes += payload_bytes
+            while self._cache and (
+                len(self._cache) > self.CACHE_LIMIT
+                or self._cache_bytes > self.CACHE_MAX_BYTES
+            ):
+                _old_key, old_payload = self._cache.popitem(last=False)
+                self._cache_bytes -= len(old_payload[0])
 
     def _request_image(self, bounds: Bounds, size: tuple[int, int]) -> Image.Image:
         params = {
