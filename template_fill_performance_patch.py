@@ -25,7 +25,7 @@ def _configure_profile_layers_once(exporter: Any, document: Any, profile_points:
         layer_name = str(getattr(point, "layer_name", "") or "")
         if not layer_name or layer_name == "0":
             continue
-        requested[layer_name] = int(getattr(point, "color", 7) or 7)
+        requested[layer_name] = int(getattr(point, "color", 7))
 
     if not requested:
         return
