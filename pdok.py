@@ -12,12 +12,14 @@ import requests
 from PIL import Image
 
 from .models import Bounds
+from .resource_policy import get_resource_policy
 from .web_tiles import WebMercatorTileClient
 
 
 HIGH_RESOLUTION_WMS_MAX_TILE_SIZE = 2048
 HIGH_RESOLUTION_LAYER_MARKER = "orthohr"
 _WMS_CLIENT_ATTRIBUTE = "_sleufbase_high_resolution_wms_client"
+_RESOURCE_POLICY = get_resource_policy()
 
 
 class _CachedRgbaPayload(tuple):
@@ -46,9 +48,14 @@ class PdokWmtsTileClient(WebMercatorTileClient):
         self,
         layer_name: str = "Actueel_orthoHR",
         timeout: int = 30,
-        max_workers: int = 8,
+        max_workers: int | None = None,
         retries: int = 3,
     ) -> None:
+        resolved_workers = (
+            max(1, min(16, _RESOURCE_POLICY.network_workers))
+            if max_workers is None
+            else max(1, int(max_workers))
+        )
         super().__init__(
             cache_namespace=f"pdok_{layer_name.lower()}",
             user_agent="SleufBase/1.3",
@@ -56,7 +63,8 @@ class PdokWmtsTileClient(WebMercatorTileClient):
             min_zoom=0,
             max_zoom=19,
             min_cache_ttl_days=7,
-            max_workers=max_workers,
+            max_workers=resolved_workers,
+            memory_cache_limit=_RESOURCE_POLICY.tile_memory_cache_entries,
             retries=retries,
         )
         self.layer_name = layer_name
@@ -83,7 +91,7 @@ class PdokWmtsTileClient(WebMercatorTileClient):
             layer_name=self.layer_name,
             timeout=max(1, int(self.timeout or 30)),
             retries=max(1, int(self.retries or 3)),
-            max_workers=max(1, min(int(self.max_workers or 8), 6)),
+            max_workers=max(1, min(int(self.max_workers or _RESOURCE_POLICY.network_workers), 12)),
             transparent=False,
         )
         setattr(self, _WMS_CLIENT_ATTRIBUTE, high_resolution)
@@ -121,7 +129,12 @@ class PdokWmtsTileClient(WebMercatorTileClient):
 class PdokKadastralekaartWmtsTileClient(WebMercatorTileClient):
     BASE_URL = "https://service.pdok.nl/kadaster/kadastralekaart/wmts/v5_0"
 
-    def __init__(self, timeout: int = 30, max_workers: int = 8, retries: int = 3) -> None:
+    def __init__(self, timeout: int = 30, max_workers: int | None = None, retries: int = 3) -> None:
+        resolved_workers = (
+            max(1, min(16, _RESOURCE_POLICY.network_workers))
+            if max_workers is None
+            else max(1, int(max_workers))
+        )
         super().__init__(
             cache_namespace="pdok_kadastralekaart",
             user_agent="SleufBase/1.3",
@@ -129,7 +142,8 @@ class PdokKadastralekaartWmtsTileClient(WebMercatorTileClient):
             min_zoom=0,
             max_zoom=22,
             min_cache_ttl_days=7,
-            max_workers=max_workers,
+            max_workers=resolved_workers,
+            memory_cache_limit=_RESOURCE_POLICY.tile_memory_cache_entries,
             retries=retries,
         )
 
@@ -149,16 +163,23 @@ class PdokWmsClient:
         layer_name: str = "Actueel_orthoHR",
         timeout: int = 30,
         retries: int = 3,
-        max_workers: int = 6,
+        max_workers: int | None = None,
         base_url: str | None = None,
         transparent: bool = False,
     ) -> None:
         self.layer_name = layer_name
         self.timeout = max(1, int(timeout))
         self.retries = max(1, int(retries))
-        self.max_workers = max(1, int(max_workers))
+        self.max_workers = (
+            max(1, min(12, _RESOURCE_POLICY.network_workers))
+            if max_workers is None
+            else max(1, int(max_workers))
+        )
         self.base_url = base_url or self.BASE_URL
         self.transparent = transparent
+        # Preserve the public class constants for compatibility, but make the
+        # actual per-instance byte budget scale with installed RAM.
+        self.CACHE_MAX_BYTES = max(8 * 1024 * 1024, int(_RESOURCE_POLICY.wms_cache_bytes))
         self._thread_local = threading.local()
         self._cache_lock = threading.RLock()
         self._cache: OrderedDict[
