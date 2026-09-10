@@ -195,7 +195,7 @@ class DxfTemplatePipelinePatchTests(unittest.TestCase):
         self.assertEqual(second, first)
         self.assertEqual(_SlotCacheExporter.calls, 1)
 
-    def test_map_and_tiff_work_overlap_and_small_tiffs_can_run_two_at_a_time(self) -> None:
+    def test_map_and_tiff_work_overlap_with_hardware_aware_tiff_parallelism(self) -> None:
         exporter = _FakeExporter()
         pipeline._install_overlapped_asset_pipeline(_FakeExporter, _Prepared)
         tasks = []
@@ -230,7 +230,14 @@ class DxfTemplatePipelinePatchTests(unittest.TestCase):
         self.assertEqual(set(result), {0, 1, 2, 3})
         self.assertGreaterEqual(exporter.all_tracker.max_active, 2)
         self.assertGreaterEqual(exporter.map_tracker.max_active, 2)
-        self.assertGreaterEqual(exporter.tiff_tracker.max_active, 2)
+
+        expected_tiff_cap = max(1, min(pipeline.MAX_ADAPTIVE_TIFF_WORKERS, len(tasks)))
+        self.assertGreaterEqual(exporter.tiff_tracker.max_active, 1)
+        self.assertLessEqual(exporter.tiff_tracker.max_active, expected_tiff_cap)
+        if expected_tiff_cap >= 2:
+            self.assertGreaterEqual(exporter.tiff_tracker.max_active, 2)
+        else:
+            self.assertEqual(exporter.tiff_tracker.max_active, 1)
 
     def test_pair_session_reuses_one_cache_and_publishes_metrics(self) -> None:
         class Exporter:
