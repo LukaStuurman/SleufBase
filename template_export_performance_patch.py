@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
-import threading
 from typing import Any, Callable
 
-import requests
-
 from .bgt_vector_tiles import BgtSurfaceFeature
-from .cadastral_wfs import CadastralLinework, CadastralTextLabel, CadastralWfsClient, CadastralWfsError
+from .cadastral_wfs import CadastralLinework, CadastralTextLabel
 from .template_asset_memory_patch import (
     TEMPLATE_UI_PUMP_INTERVAL_SECONDS,
     _contains_virtual_template_task,
@@ -71,97 +68,6 @@ def _parallel_ordered(
                 else:
                     _safe_status(status_callback, f"{status_label}...")
     return results
-
-
-def _ensure_wfs_worker_state(client: CadastralWfsClient) -> tuple[threading.local, threading.RLock, set[requests.Session]]:
-    thread_local = getattr(client, "_sleufbase_wfs_thread_local", None)
-    session_lock = getattr(client, "_sleufbase_wfs_session_lock", None)
-    worker_sessions = getattr(client, "_sleufbase_wfs_worker_sessions", None)
-    if thread_local is None or session_lock is None or worker_sessions is None:
-        # Instances normally receive these fields from the patched __init__, but
-        # lazily initialize too for embedded/tests that created a client earlier.
-        thread_local = threading.local()
-        session_lock = threading.RLock()
-        worker_sessions = set()
-        client._sleufbase_wfs_thread_local = thread_local
-        client._sleufbase_wfs_session_lock = session_lock
-        client._sleufbase_wfs_worker_sessions = worker_sessions
-    return thread_local, session_lock, worker_sessions
-
-
-def _wfs_worker_session(client: CadastralWfsClient) -> requests.Session:
-    # Keep main-thread compatibility with tests/callers that replace .session.
-    if threading.current_thread() is threading.main_thread():
-        return client.session
-    thread_local, session_lock, worker_sessions = _ensure_wfs_worker_state(client)
-    session = getattr(thread_local, "session", None)
-    if session is not None:
-        return session
-    session = requests.Session()
-    try:
-        session.headers.update(dict(client.session.headers))
-    except Exception:
-        session.headers.update({"User-Agent": "SleufBase/0.2"})
-    thread_local.session = session
-    with session_lock:
-        worker_sessions.add(session)
-    return session
-
-
-def _install_thread_safe_wfs_sessions() -> None:
-    if int(getattr(CadastralWfsClient, "_sleufbase_parallel_session_version", 0) or 0) >= PATCH_VERSION:
-        return
-
-    original_init = CadastralWfsClient.__init__
-    original_close = CadastralWfsClient.close
-
-    def __init__(self, *args, **kwargs):
-        original_init(self, *args, **kwargs)
-        self._sleufbase_wfs_thread_local = threading.local()
-        self._sleufbase_wfs_session_lock = threading.RLock()
-        self._sleufbase_wfs_worker_sessions: set[requests.Session] = set()
-
-    def close(self) -> None:
-        try:
-            original_close(self)
-        finally:
-            _thread_local, session_lock, worker_sessions = _ensure_wfs_worker_state(self)
-            with session_lock:
-                sessions = list(worker_sessions)
-                worker_sessions.clear()
-            for session in sessions:
-                try:
-                    session.close()
-                except Exception:
-                    pass
-
-    def _get_json_parallel(self, params: dict[str, object]) -> dict[str, Any]:
-        last_error: Exception | None = None
-        for attempt in range(1, self.retries + 1):
-            try:
-                response = _wfs_worker_session(self).get(
-                    self.BASE_URL,
-                    params=params,
-                    timeout=self.timeout,
-                )
-                response.raise_for_status()
-                payload = response.json()
-                if not isinstance(payload, dict):
-                    raise CadastralWfsError("De WFS-server gaf geen JSON-object terug.")
-                return payload
-            except (requests.RequestException, ValueError, CadastralWfsError) as exc:
-                last_error = exc
-                if attempt < self.retries:
-                    # Preserve the legacy retry cadence.
-                    import time
-
-                    time.sleep(0.7 * attempt)
-        raise CadastralWfsError(str(last_error))
-
-    CadastralWfsClient.__init__ = __init__
-    CadastralWfsClient.close = close
-    CadastralWfsClient._get_json = _get_json_parallel
-    CadastralWfsClient._sleufbase_parallel_session_version = PATCH_VERSION
 
 
 def _install_local_bounds_parallel_fetch() -> None:
@@ -423,7 +329,6 @@ def install_template_export_performance_patch() -> None:
     if int(getattr(CadastralDxfExporter, "_sleufbase_template_export_performance_version", 0) or 0) >= PATCH_VERSION:
         return
 
-    _install_thread_safe_wfs_sessions()
     _install_local_bounds_parallel_fetch()
     _install_template_path_parallel_fetch(CadastralDxfExporter)
     _install_parallel_virtual_map_assets(CadastralDxfExporter, PreparedTemplateSlotAssets)
