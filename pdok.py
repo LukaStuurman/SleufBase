@@ -20,6 +20,20 @@ HIGH_RESOLUTION_LAYER_MARKER = "orthohr"
 _WMS_CLIENT_ATTRIBUTE = "_sleufbase_high_resolution_wms_client"
 
 
+class _CachedRgbaPayload(tuple):
+    """Tuple-compatible immutable cache entry with legacy no-op close support."""
+
+    __slots__ = ()
+
+    def __new__(cls, data: bytes, size: tuple[int, int]):
+        return super().__new__(cls, (data, size))
+
+    def close(self) -> None:
+        # Older reliability/cleanup callers closed cached PIL images directly.
+        # Raw immutable bytes own no external resource, so close is intentionally a no-op.
+        return None
+
+
 class PdokError(RuntimeError):
     """Raised when the PDOK background cannot be retrieved."""
 
@@ -149,7 +163,7 @@ class PdokWmsClient:
         self._cache_lock = threading.RLock()
         self._cache: OrderedDict[
             tuple[float, float, float, float, int, int],
-            tuple[bytes, tuple[int, int]],
+            _CachedRgbaPayload,
         ] = OrderedDict()
         self._cache_bytes = 0
 
@@ -177,13 +191,13 @@ class PdokWmsClient:
         )
 
     @staticmethod
-    def _rgba_cache_payload(image: Image.Image) -> tuple[bytes, tuple[int, int]]:
+    def _rgba_cache_payload(image: Image.Image) -> _CachedRgbaPayload:
         """Store only immutable raw pixels instead of retaining a full PIL object."""
         if image.mode == "RGBA":
-            return image.tobytes(), image.size
+            return _CachedRgbaPayload(image.tobytes(), image.size)
         converted = image.convert("RGBA")
         try:
-            return converted.tobytes(), converted.size
+            return _CachedRgbaPayload(converted.tobytes(), converted.size)
         finally:
             converted.close()
 
