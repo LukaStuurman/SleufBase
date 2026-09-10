@@ -417,32 +417,29 @@ class KickTheMapClient:
         remote_file_name: str,
         export_name: str,
     ) -> str:
-        csrf_token = self._ensure_csrf_token()
-        response = self.session.post(
-            self.FILE_URL_URL,
-            data={
-                "projectId": str(job.job_id),
-                "folder": str(folder),
-                "fileName": str(remote_file_name),
-                "exportName": str(export_name),
-            },
-            headers={"X-CSRF-TOKEN": csrf_token},
-            timeout=self.timeout,
-        )
-        if response.status_code in {401, 403, 419}:
-            self._csrf_token = None
-            csrf_token = self._ensure_csrf_token()
-            response = self.session.post(
+        form_fields = {
+            "projectId": str(job.job_id),
+            "folder": str(folder),
+            "fileName": str(remote_file_name),
+            "exportName": str(export_name),
+        }
+
+        def request(csrf_token: str) -> requests.Response:
+            # KickTheMap's current web client submits this endpoint as
+            # multipart/form-data (via FormData), not as a URL-encoded form.
+            return self.session.post(
                 self.FILE_URL_URL,
-                data={
-                    "projectId": str(job.job_id),
-                    "folder": str(folder),
-                    "fileName": str(remote_file_name),
-                    "exportName": str(export_name),
-                },
+                files={key: (None, value) for key, value in form_fields.items()},
                 headers={"X-CSRF-TOKEN": csrf_token},
                 timeout=self.timeout,
             )
+
+        csrf_token = self._ensure_csrf_token()
+        response = request(csrf_token)
+        if response.status_code in {401, 403, 419}:
+            self._csrf_token = None
+            csrf_token = self._ensure_csrf_token()
+            response = request(csrf_token)
         response.raise_for_status()
         try:
             payload = response.json()
@@ -452,7 +449,11 @@ class KickTheMapClient:
             message = str(payload.get("message") or payload.get("data") or "").strip()
             detail = f": {message}" if message else ""
             raise KickTheMapError(f"KickTheMap gaf geen downloadlink terug{detail}.")
-        signed_url = payload.get("data")
+        # Older responses returned the signed URL directly in ``data``. The
+        # current endpoint returns a metadata object with the URL in
+        # ``data.url`` (the shape used by the website's own download code).
+        response_data = payload.get("data")
+        signed_url = response_data.get("url") if isinstance(response_data, dict) else response_data
         if not isinstance(signed_url, str) or not signed_url.strip():
             raise KickTheMapError("KickTheMap gaf een lege downloadlink terug.")
         return signed_url.strip()
