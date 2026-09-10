@@ -11,6 +11,7 @@ from .marxact_midpoint_snap_patch import install_marxact_midpoint_snap_patch
 from .template_bgt_fetch_patch import install_template_bgt_fetch_patch
 from .template_asset_memory_patch import install_template_asset_memory_patch
 from .template_export_performance_patch import install_template_export_performance_patch
+from .pdok_default_background_patch import install_pdok_default_background_patch
 from .virtual_trench_template_patch import install_virtual_trench_template_patch
 from .marxact_boundary_patch import install_marxact_boundary_patch
 from .marxact_local_cross_section_patch import install_marxact_local_cross_section_patch
@@ -23,6 +24,7 @@ from .dxf_template_pipeline_v4_patch import install_dxf_template_pipeline_v4_pat
 from .dxf_template_pipeline_v5_patch import install_dxf_template_pipeline_v5_patch
 from .dxf_template_pipeline_v6_patch import install_dxf_template_pipeline_v6_patch
 from .dxf_template_pipeline_v7_patch import install_dxf_template_pipeline_v7_patch
+from .template_fill_performance_patch import install_template_fill_performance_patch
 
 
 install_settings_ui_patch()
@@ -34,6 +36,7 @@ install_marxact_midpoint_snap_patch()
 install_template_bgt_fetch_patch()
 install_template_asset_memory_patch()
 install_template_export_performance_patch()
+install_pdok_default_background_patch()
 install_virtual_trench_template_patch()
 install_marxact_boundary_patch()
 install_marxact_local_cross_section_patch()
@@ -46,3 +49,4 @@ install_dxf_template_pipeline_v4_patch()
 install_dxf_template_pipeline_v5_patch()
 install_dxf_template_pipeline_v6_patch()
 install_dxf_template_pipeline_v7_patch()
+install_template_fill_performance_patch()
