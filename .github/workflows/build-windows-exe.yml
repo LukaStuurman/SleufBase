@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.42'
+  SLEUFBASE_RELEASE_VERSION: '0.3.43'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.42
+          name: SleufBase-Windows-v0.3.43
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,23 +293,20 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.42
+          SleufBase Windows v0.3.43
 
-          Performance en DXF-export:
-          - DXF pipeline V7 houdt de normale en samengevoegde normal/reverse Drawing langer in geheugen en verwijdert twee tussentijdse grote save/read-cycli vóór Dynamic Visibility
-          - de bewezen raw-DXF Dynamic Visibility-finalisatie en afsluitende ezdxf-structuurvalidatie blijven behouden
-          - reverse dwarsprofielen blijven volledig zelfstandig opgebouwd; normal->reverse profielgeometrie wordt niet hergebruikt
-          - reverse MarXact/virtuele profielen met een expliciet startpunt gebruiken een onafhankelijke forced-start fast path die tegen de volledige V6/core-builder is getest, inclusief verschillende begin- en eindmaaiveldhoogtes
-          - richting-onafhankelijke profielregels en profielbeschrijvingen worden binnen één normal/reverse exportpaar gecachet
-          - tijdelijke template-PNG-rasterassets gebruiken lossless lage compressie om CPU-tijd bij opslaan te beperken
-          - als TIFF en DXF beide native kunnen renderen, delen ze één RGBA-framebuffer; alle andere gevallen vallen terug op de bestaande renderroute
-          - DXF hit-testing vermijdt tijdelijke Bounds-objecten en pick_feature hoeft niet langer alle matches te sorteren
-          - de webkaarttegelcache bewaart immutable RGBA-buffers en maakt lichte disposable views voor cache-hits
-          - CI rapporteert voortaan een echte I/O-benchmark van het 18,9 MB productiesjabloon zonder fragiele timinggrens
+          Cleanup en performance:
+          - de renderer-performanceketen is rechtstreeks in renderer.py opgenomen; drie runtime monkey-patchmodules zijn verwijderd
+          - snelle feature picking, feature-ID caching, native TIFF/DXF hotpaths en de gedeelde RGBA-framebuffer blijven behouden als kerncode
+          - onnodige PIL/RGBA-bufferkopieën en tijdelijke renderbuffers zijn verder verminderd en sneller gesloten
+          - de renderer-cleanup is netto kleiner geworden terwijl regressietests voor pixelpariteit, picking en shared-framebuffer gedrag behouden blijven
+          - de PDOK HR-luchtfoto route is rechtstreeks in PdokWmtsTileClient opgenomen; pdok_high_quality_patch.py en de startup-installer zijn verwijderd
+          - HR-orthofoto's blijven voor definitieve hoge-resolutie rendering via WMS lopen, met WMTS als snelle preview en dezelfde WMS-cachevoorkeur
 
-          Correctheid:
+          DXF-correctheid:
+          - normal en reverse dwarsprofielen blijven volledig zelfstandig opgebouwd
           - begin- en eindmaaiveld, Z-waarden, profielgrenzen, reference level en richting-afhankelijke afstanden blijven per reverse variant afzonderlijk bepaald
-          - real-template Dynamic Visibility, AutoCAD proxy resources en normal/reverse rastertests blijven blokkerend
+          - de bestaande V7 in-memory DXF-pipeline, Dynamic Visibility-finalisatie, AutoCAD proxy resources en real-template regressietests blijven intact
 
           Windows:
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
