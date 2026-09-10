@@ -15,12 +15,18 @@ from .models import Bounds
 from .web_tiles import WebMercatorTileClient
 
 
+HIGH_RESOLUTION_WMS_MAX_TILE_SIZE = 2048
+HIGH_RESOLUTION_LAYER_MARKER = "orthohr"
+_WMS_CLIENT_ATTRIBUTE = "_sleufbase_high_resolution_wms_client"
+
+
 class PdokError(RuntimeError):
     """Raised when the PDOK background cannot be retrieved."""
 
 
 class PdokWmtsTileClient(WebMercatorTileClient):
     BASE_URL = "https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0"
+    SLEUFBASE_HIGH_RESOLUTION_WMS_MAX_TILE_SIZE = HIGH_RESOLUTION_WMS_MAX_TILE_SIZE
 
     def __init__(
         self,
@@ -49,6 +55,53 @@ class PdokWmtsTileClient(WebMercatorTileClient):
             f"&TILEMATRIXSET=OGC:1.0:GoogleMapsCompatible"
             f"&TILEMATRIX={matrix_id}&TILEROW={y}&TILECOL={x}"
         )
+
+    def _uses_high_resolution_aerial_layer(self) -> bool:
+        """Whether final imagery should use exact-size WMS instead of zoom-limited WMTS."""
+        return HIGH_RESOLUTION_LAYER_MARKER in str(self.layer_name or "").casefold()
+
+    def _high_resolution_wms_client(self) -> "PdokWmsClient":
+        existing = getattr(self, _WMS_CLIENT_ATTRIBUTE, None)
+        if isinstance(existing, PdokWmsClient) and existing.layer_name == self.layer_name:
+            return existing
+
+        high_resolution = PdokWmsClient(
+            layer_name=self.layer_name,
+            timeout=max(1, int(self.timeout or 30)),
+            retries=max(1, int(self.retries or 3)),
+            max_workers=max(1, min(int(self.max_workers or 8), 6)),
+            transparent=False,
+        )
+        setattr(self, _WMS_CLIENT_ATTRIBUTE, high_resolution)
+        return high_resolution
+
+    def fetch_map(
+        self,
+        bounds: Bounds,
+        size: tuple[int, int],
+        on_progress: Callable[[Image.Image], None] | None = None,
+    ) -> Image.Image:
+        if not self._uses_high_resolution_aerial_layer():
+            return super().fetch_map(bounds, size, on_progress=on_progress)
+        return self._high_resolution_wms_client().fetch_map(
+            bounds,
+            size,
+            max_tile_size=HIGH_RESOLUTION_WMS_MAX_TILE_SIZE,
+            on_progress=on_progress,
+        )
+
+    def preview_map(self, bounds: Bounds, size: tuple[int, int]) -> Image.Image | None:
+        if self._uses_high_resolution_aerial_layer():
+            # Prefer an exact cached WMS image once available; until then the
+            # existing disk-cached WMTS preview stays the fast temporary image.
+            wms = self._high_resolution_wms_client()
+            try:
+                cached = wms._cache_get(wms._cache_key(bounds, size))
+            except Exception:
+                cached = None
+            if cached is not None:
+                return cached
+        return super().preview_map(bounds, size)
 
 
 class PdokKadastralekaartWmtsTileClient(WebMercatorTileClient):

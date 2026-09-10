@@ -6,8 +6,8 @@ from unittest.mock import patch
 from PIL import Image
 
 from SleufBase.models import Bounds
-from SleufBase.pdok import PdokWmtsTileClient
-from SleufBase import pdok_high_quality_patch as quality_patch
+from SleufBase import pdok as pdok_module
+from SleufBase.pdok import HIGH_RESOLUTION_WMS_MAX_TILE_SIZE, PdokWmtsTileClient
 
 
 class _FakeWmsClient:
@@ -44,14 +44,12 @@ class _FakeWmsClient:
         return self.cached_image.copy() if self.cached_image is not None else None
 
 
-class PdokHighQualityPatchTests(unittest.TestCase):
+class PdokHighQualityCoreTests(unittest.TestCase):
     def setUp(self) -> None:
         _FakeWmsClient.created.clear()
 
     @staticmethod
     def _client(layer_name: str = "Actueel_orthoHR") -> PdokWmtsTileClient:
-        # Avoid touching the real tile cache/network; the quality patch only
-        # needs these provider settings to construct its WMS counterpart.
         client = object.__new__(PdokWmtsTileClient)
         client.layer_name = layer_name
         client.timeout = 30
@@ -59,22 +57,19 @@ class PdokHighQualityPatchTests(unittest.TestCase):
         client.max_workers = 8
         return client
 
-    def test_runtime_patch_is_installed(self) -> None:
-        self.assertGreaterEqual(
-            int(getattr(PdokWmtsTileClient, "_sleufbase_high_quality_patch_version", 0) or 0),
-            1,
-        )
+    def test_high_resolution_path_is_core_capability(self) -> None:
         self.assertEqual(
             PdokWmtsTileClient.SLEUFBASE_HIGH_RESOLUTION_WMS_MAX_TILE_SIZE,
-            quality_patch.HIGH_RESOLUTION_WMS_MAX_TILE_SIZE,
+            HIGH_RESOLUTION_WMS_MAX_TILE_SIZE,
         )
+        self.assertFalse(hasattr(PdokWmtsTileClient, "_sleufbase_high_quality_patch_version"))
 
     def test_actueel_hr_final_image_uses_exact_size_wms_path(self) -> None:
         client = self._client()
         bounds = Bounds(100000.0, 450000.0, 100080.0, 450060.0)
         progress = lambda _image: None
 
-        with patch.object(quality_patch, "PdokWmsClient", _FakeWmsClient):
+        with patch.object(pdok_module, "PdokWmsClient", _FakeWmsClient):
             image = client.fetch_map(bounds, (1600, 1200), on_progress=progress)
             try:
                 self.assertEqual(image.size, (1600, 1200))
@@ -85,7 +80,7 @@ class PdokHighQualityPatchTests(unittest.TestCase):
                 call_bounds, call_size, max_tile_size, call_progress = wms.fetch_calls[0]
                 self.assertEqual(call_bounds, bounds)
                 self.assertEqual(call_size, (1600, 1200))
-                self.assertEqual(max_tile_size, quality_patch.HIGH_RESOLUTION_WMS_MAX_TILE_SIZE)
+                self.assertEqual(max_tile_size, HIGH_RESOLUTION_WMS_MAX_TILE_SIZE)
                 self.assertIs(call_progress, progress)
             finally:
                 image.close()
@@ -94,7 +89,7 @@ class PdokHighQualityPatchTests(unittest.TestCase):
         client = self._client()
         bounds = Bounds(100000.0, 450000.0, 100040.0, 450030.0)
 
-        with patch.object(quality_patch, "PdokWmsClient", _FakeWmsClient):
+        with patch.object(pdok_module, "PdokWmsClient", _FakeWmsClient):
             rendered = client.fetch_map(bounds, (800, 600))
             rendered.close()
             preview = client.preview_map(bounds, (800, 600))
@@ -109,9 +104,9 @@ class PdokHighQualityPatchTests(unittest.TestCase):
                     preview.close()
 
     def test_only_hr_orthophoto_is_forced_to_wms(self) -> None:
-        self.assertTrue(quality_patch._uses_high_resolution_aerial_layer(self._client("Actueel_orthoHR")))
-        self.assertTrue(quality_patch._uses_high_resolution_aerial_layer(self._client("2025_orthoHR")))
-        self.assertFalse(quality_patch._uses_high_resolution_aerial_layer(self._client("Actueel_ortho25")))
+        self.assertTrue(self._client("Actueel_orthoHR")._uses_high_resolution_aerial_layer())
+        self.assertTrue(self._client("2025_orthoHR")._uses_high_resolution_aerial_layer())
+        self.assertFalse(self._client("Actueel_ortho25")._uses_high_resolution_aerial_layer())
 
 
 if __name__ == "__main__":
