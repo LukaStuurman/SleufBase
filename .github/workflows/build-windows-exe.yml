@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.45'
+  SLEUFBASE_RELEASE_VERSION: '0.3.46'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.45
+          name: SleufBase-Windows-v0.3.46
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,25 +293,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.45
+          SleufBase Windows v0.3.46
 
-          Sjabloonexport en performance:
-          - meerdere virtuele/MarXact-sjabloonkaarten worden met maximaal vier lichte kaartworkers voorbereid in plaats van twee
-          - normaal en reverse blijven per proefsleuf dezelfde dure achtergrondkaart-render delen; zware TIFF-verwerking blijft via de bestaande geheugenbudgettering begrensd
-          - het vullen van dwarsprofielvakken vermijdt herhaalde DXF-laagtabelbewerkingen voor punten op dezelfde laag en cachet de profiel-leaderblock-resolutie per document
-          - PDOK Actueel_orthoHR is de standaardachtergrond met label Luchtfoto NL actueel (8 cm, deels 5 cm); expliciet gekozen andere achtergronden blijven behouden
-          - de PDOK WMS-geheugencache is op bytes begrensd en gebruikt immutable RGBA-buffers; kadastrale WFS worker-sessies zitten rechtstreeks in de core
-
-          DXF-correctheid:
-          - normal en reverse dwarsprofielgeometrie blijven volledig zelfstandig opgebouwd
-          - begin- en eindmaaiveld, Z-waarden, profielgrenzen, reference level en richting-afhankelijke afstanden worden voor reverse afzonderlijk bepaald
-          - Dynamic Visibility, AutoCAD proxy resources, real-template regressies en de bestaande V7 in-memory DXF-pipeline blijven intact
+          KickTheMap:
+          - voegt een herstelknop toe voor GeoTIFF-downloads wanneer de websiteflow opnieuw wijzigt
+          - kan de actuele handmatige KickTheMap-downloadflow vastleggen en opnieuw toepassen
+          - verbetert de browserintegratie en job-downloadafhandeling voor de vernieuwde my.kickthemap.com-flow
+          - bevat regressietests voor de nieuwe kalibratie- en herstelroute
 
           Windows:
-          - KickTheMap GeoTIFF-downloads werken weer met de nieuwe multipart-downloadrequest en responsevorm (`data.url`)
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.46
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
-          - de geïnstalleerde professionele build wordt na installatie opnieuw met --smoke-test gecontroleerd
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(
