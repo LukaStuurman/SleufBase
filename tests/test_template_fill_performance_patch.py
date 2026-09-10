@@ -5,7 +5,11 @@ import unittest
 
 from SleufBase.cadastral_export import CadastralDxfExporter
 from SleufBase import template_export_performance_patch as template_perf
-from SleufBase.template_fill_performance_patch import MAX_PARALLEL_TEMPLATE_MAPS
+from SleufBase.resource_policy import get_resource_policy
+from SleufBase.template_fill_performance_patch import (
+    MAX_PARALLEL_TEMPLATE_ASSETS,
+    MAX_PARALLEL_TEMPLATE_MAPS,
+)
 
 
 class _FakeLayer:
@@ -41,10 +45,26 @@ class _FakeDocument:
 
 
 class TemplateFillPerformancePatchTests(unittest.TestCase):
-    def test_four_virtual_template_maps_can_run_in_parallel(self) -> None:
-        self.assertEqual(MAX_PARALLEL_TEMPLATE_MAPS, 4)
-        self.assertEqual(template_perf.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, 4)
-        self.assertEqual(CadastralDxfExporter.SLEUFBASE_TEMPLATE_MAP_WORKERS, 4)
+    def test_template_parallelism_matches_resolved_resource_policy(self) -> None:
+        policy = get_resource_policy()
+        self.assertEqual(MAX_PARALLEL_TEMPLATE_MAPS, policy.light_map_workers)
+        self.assertEqual(MAX_PARALLEL_TEMPLATE_ASSETS, policy.template_asset_workers)
+        self.assertEqual(
+            template_perf.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS,
+            policy.light_map_workers,
+        )
+        self.assertEqual(
+            CadastralDxfExporter.SLEUFBASE_TEMPLATE_MAP_WORKERS,
+            policy.light_map_workers,
+        )
+        self.assertEqual(
+            CadastralDxfExporter.SLEUFBASE_TEMPLATE_ASSET_WORKERS,
+            policy.template_asset_workers,
+        )
+        self.assertEqual(
+            CadastralDxfExporter._template_asset_worker_count(999),
+            policy.template_asset_workers,
+        )
 
     def test_profile_layer_table_work_is_compacted_per_unique_layer(self) -> None:
         exporter = CadastralDxfExporter(wfs_client=object())
@@ -87,7 +107,7 @@ class TemplateFillPerformancePatchTests(unittest.TestCase):
     def test_profile_fill_patch_is_installed_after_pipeline_v7(self) -> None:
         self.assertGreaterEqual(
             int(getattr(CadastralDxfExporter, "_sleufbase_template_fill_performance_version", 0) or 0),
-            1,
+            2,
         )
         self.assertTrue(CadastralDxfExporter.SLEUFBASE_PROFILE_LAYER_CACHE)
         self.assertTrue(CadastralDxfExporter.SLEUFBASE_PROFILE_LEADER_BLOCK_CACHE)
