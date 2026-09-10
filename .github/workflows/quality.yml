@@ -39,7 +39,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install \
             'Pillow>=10.0' \
+            'boto3>=1.34,<2' \
             'numpy>=1.26,<2.3' \
+            'pycryptodome>=3.20,<4' \
             'pyproj>=3.6' \
             'requests>=2.32' \
             'shapely>=2.0,<3' \

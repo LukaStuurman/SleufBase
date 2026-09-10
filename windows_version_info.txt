@@ -17,12 +17,12 @@ VSVersionInfo(
         [
           StringStruct('CompanyName', 'Techbase'),
           StringStruct('FileDescription', 'SleufBase desktop GIS/KLIC viewer'),
-          StringStruct('FileVersion', '0.3.44.0'),
+          StringStruct('FileVersion', '0.3.45.0'),
           StringStruct('InternalName', 'SleufBase'),
           StringStruct('LegalCopyright', 'Copyright Techbase'),
           StringStruct('OriginalFilename', 'SleufBase.exe'),
           StringStruct('ProductName', 'SleufBase'),
-          StringStruct('ProductVersion', '0.3.44')
+          StringStruct('ProductVersion', '0.3.45')
         ]
       )
     ]),
