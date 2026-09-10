@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -151,6 +152,70 @@ class KickTheMapDownloadTests(unittest.TestCase):
                     ["multipart", "form"],
                 )
                 self.assertEqual(KickTheMapClient._load_download_strategy(), "form")
+
+    def test_manual_capture_is_replayed_and_stored_as_a_template(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            target_root = Path(temporary_directory)
+            capture_path = target_root / "capture.json"
+            capture_path.write_text(
+                json.dumps(
+                    {
+                        "status": "captured",
+                        "request": {
+                            "endpoint": "https://www.my.kickthemap.com/jobs/get-file-url",
+                            "method": "POST",
+                            "request_mode": "multipart",
+                            "fields": {
+                                "projectId": "12345",
+                                "folder": "cloud",
+                                "fileName": "test@example.com_2026-01-01_00-00-00.tiff",
+                                "exportName": "Example job.tiff",
+                            },
+                            "response_url_path": "data.url",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            client = KickTheMapClient()
+            client.logged_in_email = "test@example.com"
+            client._csrf_token = "csrf-token"
+            response = Mock(status_code=200)
+            response.json.return_value = {
+                "status": True,
+                "data": {"url": "https://s3.example.test/captured.tiff"},
+            }
+            client.session.post = Mock(return_value=response)
+
+            def write_valid_tiff(_signed_url: str, target_path: Path) -> None:
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_bytes(b"II*\x00" + (b"\x00" * 32))
+
+            with patch.object(KickTheMapClient, "default_download_dir", return_value=target_root):
+                with patch.object(client, "_download_url_to_file", side_effect=write_valid_tiff):
+                    sample_path, request_mode = client.learn_download_strategy_from_capture(
+                        _job(),
+                        capture_path,
+                    )
+
+                self.assertEqual(request_mode, "multipart")
+                self.assertTrue(sample_path.is_file())
+                request = client.session.post.call_args
+                self.assertEqual(
+                    {key: value[1] for key, value in request.kwargs["files"].items()},
+                    {
+                        "projectId": "12345",
+                        "folder": "cloud",
+                        "fileName": "test@example.com_2026-01-01_00-00-00.tiff",
+                        "exportName": "Example job.tiff",
+                    },
+                )
+                strategy = KickTheMapClient._load_download_strategy_record()
+                self.assertIsNotNone(strategy)
+                self.assertEqual(strategy["endpoint_path"], "/jobs/get-file-url")
+                self.assertEqual(strategy["fields"]["projectId"], "{job_id}")
+                self.assertEqual(strategy["fields"]["fileName"], "{storage_prefix}.tiff")
+                self.assertEqual(strategy["fields"]["exportName"], "{export_name}")
 
 
 if __name__ == "__main__":

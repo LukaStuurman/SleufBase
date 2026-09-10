@@ -5,6 +5,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, ttk
@@ -80,10 +81,16 @@ def _job_url(job: KickTheMapJob) -> str:
     return f"{KickTheMapClient.BASE_URL}/viewJob/{owner_id}_{job.project_date}"
 
 
-def _browser_launch_command(url: str, title: str | None = None) -> tuple[str, list[str]]:
+def _browser_launch_command(
+    url: str,
+    title: str | None = None,
+    capture_file: Path | None = None,
+) -> tuple[str, list[str]]:
     arguments = ["--kickthemap-browser-url", url]
     if title:
         arguments.extend(["--kickthemap-browser-title", title])
+    if capture_file is not None:
+        arguments.extend(["--kickthemap-browser-capture-file", str(capture_file)])
     if getattr(sys, "frozen", False):
         return sys.executable, arguments
     main_script = Path(__file__).resolve().parent.parent / "main.py"
@@ -1214,20 +1221,50 @@ class KickTheMapJobsWindow(tk.Tk):
         job = jobs[0]
         if not messagebox.askyesno(
             "KickTheMap download herstellen",
-            f"Gebruik '{job.title}' als proefdownload?\n\n"
-            "SleufBase probeert de bekende KickTheMap-downloadvarianten, "
-            "controleert de GeoTIFF en onthoudt alleen de geslaagde variant.",
+            f"Open '{job.title}' in de KickTheMap-browser voor een handmatige kalibratie?\n\n"
+            "Klik daarna zelf op de GeoTIFF-downloadknop. SleufBase legt de aanvraag vast, "
+            "maakt er een herbruikbaar sjabloon van en controleert daarna een proefdownload.",
         ):
             return
-        self.status_var.set(f"Downloadproces testen met '{job.title}'...")
+        self.status_var.set(f"Handmatige downloadkalibratie starten voor '{job.title}'...")
         self._set_controls_enabled(False)
         threading.Thread(target=self._repair_download_process_worker, args=(job,), daemon=True).start()
 
     def _repair_download_process_worker(self, job: KickTheMapJob) -> None:
+        capture_path: Path | None = None
         try:
             if self.account is not None and not self.client.is_logged_in:
                 self.client.login(self.account.email, self.account.password)
-            sample_path, request_mode = self.client.learn_download_strategy(job)
+            capture_path = self.client.create_download_capture(job)
+            executable, arguments = _browser_launch_command(
+                _job_url(job),
+                job.title,
+                capture_file=capture_path,
+            )
+            subprocess.Popen(
+                [executable] + arguments,
+                cwd=str(Path(__file__).resolve().parent.parent),
+            )
+            self.after(0, lambda: self.status_var.set("Klik in de KickTheMap-browser op GeoTIFF downloaden..."))
+            capture = None
+            for _ in range(600):
+                try:
+                    candidate = self.client.read_download_capture(capture_path)
+                except KickTheMapError:
+                    candidate = None
+                if isinstance(candidate, dict) and candidate.get("status") == "captured":
+                    capture = candidate
+                    break
+                time.sleep(0.5)
+            if capture is None:
+                raise KickTheMapError(
+                    "Geen handmatige GeoTIFF-download vastgelegd binnen vijf minuten."
+                )
+            self.after(0, lambda: self.status_var.set("Handmatige aanvraag vastgelegd; proefdownload controleren..."))
+            sample_path, request_mode = self.client.learn_download_strategy_from_capture(
+                job,
+                capture_path,
+            )
             self.after(
                 0,
                 lambda sample_path=sample_path, request_mode=request_mode: self._finish_repair_download_process(
@@ -1240,10 +1277,10 @@ class KickTheMapJobsWindow(tk.Tk):
 
     def _finish_repair_download_process(self, sample_path: Path, request_mode: str) -> None:
         self._set_controls_enabled(True)
-        self.status_var.set("KickTheMap-downloadproces bijgewerkt.")
+        self.status_var.set("KickTheMap-downloadproces handmatig bijgewerkt.")
         messagebox.showinfo(
             "KickTheMap download hersteld",
-            "De proefdownload is gelukt en de werkwijze is opgeslagen voor volgende downloads.\n\n"
+            "De handmatige aanvraag is vastgelegd, opnieuw uitgevoerd en als werkwijze opgeslagen.\n\n"
             f"Variant: {request_mode}\n"
             f"Proefbestand: {sample_path}",
         )

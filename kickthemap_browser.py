@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import time
+from pathlib import Path
 
 import webview
 from webview.menu import Menu, MenuAction, MenuSeparator
 
-from .kickthemap import KickTheMapClient, kickthemap_browser_session_dir
+from .kickthemap import KickTheMapClient, KickTheMapError, kickthemap_browser_session_dir
 from .settings import (
     KICKTHEMAP_MATERIAL_CHOICES_KEY,
     KickTheMapSavedAccount,
@@ -20,6 +22,66 @@ WINDOW_TITLE = "SleufBase Browser"
 WINDOW_WIDTH = 1440
 WINDOW_HEIGHT = 960
 WINDOW_MIN_SIZE = (980, 640)
+
+
+class DownloadCaptureApi:
+    """Persist one sanitized request observed in the manual calibration browser."""
+
+    def __init__(self, capture_file: str | Path) -> None:
+        self.capture_file = Path(capture_file)
+
+    def record_download_request(self, payload) -> bool:
+        if isinstance(payload, str):
+            try:
+                payload = json.loads(payload)
+            except (TypeError, ValueError, json.JSONDecodeError):
+                return False
+        if not isinstance(payload, dict):
+            return False
+        try:
+            capture = json.loads(self.capture_file.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError, TypeError, ValueError):
+            return False
+        if not isinstance(capture, dict) or capture.get("status") != "waiting":
+            return False
+
+        fields = payload.get("fields")
+        if not isinstance(fields, dict):
+            return False
+        job_id = str(capture.get("job_id", "")).strip()
+        field_values = {str(value) for value in fields.values()}
+        if job_id and job_id not in field_values:
+            return False
+        try:
+            endpoint = KickTheMapClient._safe_capture_endpoint(payload.get("endpoint"))
+        except KickTheMapError:
+            return False
+        request_mode = str(payload.get("request_mode", "")).strip().lower()
+        if request_mode not in {"multipart", "form", "json"}:
+            return False
+
+        sanitized_fields = {
+            str(key): value
+            for key, value in fields.items()
+            if isinstance(key, str) and isinstance(value, (str, int, float, bool))
+        }
+        if not sanitized_fields:
+            return False
+        capture["status"] = "captured"
+        capture["captured_at"] = time.time()
+        capture["request"] = {
+            "endpoint": endpoint,
+            "method": str(payload.get("method", "POST") or "POST").upper(),
+            "request_mode": request_mode,
+            "fields": sanitized_fields,
+            "response_url_path": str(payload.get("response_url_path", "") or "").strip(),
+        }
+        try:
+            self.capture_file.write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
+        except OSError:
+            return False
+        return True
+
 
 def _storage_path_for_account(account: KickTheMapSavedAccount | None) -> str:
     target_dir = kickthemap_browser_session_dir(account.email if account is not None else "")
@@ -64,7 +126,12 @@ def _material_options() -> list[str]:
     )
 
 
-def _injected_script(account: KickTheMapSavedAccount | None, start_url: str | None = None) -> str:
+def _injected_script(
+    account: KickTheMapSavedAccount | None,
+    start_url: str | None = None,
+    *,
+    capture_enabled: bool = False,
+) -> str:
     email = account.email if account is not None else ""
     password = account.password if account is not None else ""
     profile_options = _profile_options()
@@ -76,6 +143,7 @@ def _injected_script(account: KickTheMapSavedAccount | None, start_url: str | No
       const EMAIL = {json.dumps(email)};
       const PASSWORD = {json.dumps(password)};
       const SIGNIN_PATH = {json.dumps(SIGNIN_PATH)};
+      const DOWNLOAD_CAPTURE_ENABLED = {json.dumps(bool(capture_enabled))};
       const PROFILE_OPTIONS = {json.dumps(profile_options)};
       const MATERIAL_OPTIONS = {json.dumps(material_options)};
       const desiredUrlKey = 'sleufbase-kickthemap-desired-url';
@@ -625,6 +693,178 @@ def _injected_script(account: KickTheMapSavedAccount | None, start_url: str | No
         }}, true);
       }}
 
+      const readCaptureFields = async (body) => {{
+        const fields = {{}};
+        if (body instanceof FormData) {{
+          for (const [key, value] of body.entries()) {{
+            if (typeof value === 'string') {{
+              fields[key] = value;
+            }}
+          }}
+          return {{ request_mode: 'multipart', fields }};
+        }}
+        if (body instanceof URLSearchParams) {{
+          body.forEach((value, key) => {{ fields[key] = value; }});
+          return {{ request_mode: 'form', fields }};
+        }}
+        if (typeof body !== 'string' || !body.trim()) {{
+          return null;
+        }}
+        try {{
+          const parsed = JSON.parse(body);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {{
+            Object.entries(parsed).forEach(([key, value]) => {{
+              if (['string', 'number', 'boolean'].includes(typeof value)) {{
+                fields[key] = value;
+              }}
+            }});
+            return {{ request_mode: 'json', fields }};
+          }}
+        }} catch (_error) {{
+        }}
+        const params = new URLSearchParams(body);
+        params.forEach((value, key) => {{ fields[key] = value; }});
+        return Object.keys(fields).length ? {{ request_mode: 'form', fields }} : null;
+      }};
+
+      const findUrlPath = (value, path = []) => {{
+        if (typeof value === 'string' && new RegExp('^https?://', 'i').test(value)) {{
+          return path.join('.');
+        }}
+        if (Array.isArray(value)) {{
+          for (let index = 0; index < value.length; index += 1) {{
+            const found = findUrlPath(value[index], [...path, String(index)]);
+            if (found !== null) {{
+              return found;
+            }}
+          }}
+          return null;
+        }}
+        if (value && typeof value === 'object') {{
+          for (const [key, nested] of Object.entries(value)) {{
+            const found = findUrlPath(nested, [...path, key]);
+            if (found !== null) {{
+              return found;
+            }}
+          }}
+        }}
+        return null;
+      }};
+
+      const deliverCapturedRequest = (payload) => {{
+        const api = window.pywebview?.api;
+        if (!api || typeof api.record_download_request !== 'function') {{
+          window.__sleufbasePendingDownloadCapture = payload;
+          window.setTimeout(() => {{
+            const pending = window.__sleufbasePendingDownloadCapture;
+            if (pending) {{
+              window.__sleufbasePendingDownloadCapture = null;
+              deliverCapturedRequest(pending);
+            }}
+          }}, 250);
+          return;
+        }}
+        try {{
+          api.record_download_request(payload);
+        }} catch (_error) {{
+        }}
+      }};
+
+      const publishCapturedRequest = (details, responsePayload) => {{
+        if (!DOWNLOAD_CAPTURE_ENABLED || !details || !responsePayload) {{
+          return;
+        }}
+        const responseUrlPath = findUrlPath(responsePayload);
+        if (responseUrlPath === null) {{
+          return;
+        }}
+        deliverCapturedRequest({{
+          endpoint: details.endpoint,
+          method: details.method,
+          request_mode: details.request_mode,
+          fields: details.fields,
+          response_url_path: responseUrlPath,
+        }});
+      }};
+
+      const captureFetchDetails = async (input, init) => {{
+        try {{
+          const isRequest = input instanceof Request;
+          const endpoint = isRequest ? input.url : new URL(String(input), window.location.href).href;
+          const method = String(init?.method || (isRequest ? input.method : 'GET') || 'GET').toUpperCase();
+          let body = init?.body;
+          if (body === undefined && isRequest) {{
+            try {{
+              body = await input.clone().formData();
+            }} catch (_error) {{
+              body = await input.clone().text();
+            }}
+          }}
+          const parsed = await readCaptureFields(body);
+          return parsed ? {{ endpoint, method, ...parsed }} : null;
+        }} catch (_error) {{
+          return null;
+        }}
+      }};
+
+      if (DOWNLOAD_CAPTURE_ENABLED && !window.__sleufbaseKickTheMapDownloadCapture) {{
+        window.__sleufbaseKickTheMapDownloadCapture = true;
+        window.addEventListener('pywebviewready', () => {{
+          const pending = window.__sleufbasePendingDownloadCapture;
+          if (pending) {{
+            window.__sleufbasePendingDownloadCapture = null;
+            deliverCapturedRequest(pending);
+          }}
+        }});
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = async (input, init) => {{
+          const details = await captureFetchDetails(input, init);
+          const response = await originalFetch(input, init);
+          if (!details || !response.ok) {{
+            return response;
+          }}
+          try {{
+            const payload = await response.clone().json();
+            publishCapturedRequest(details, payload);
+          }} catch (_error) {{
+          }}
+          return response;
+        }};
+
+        const originalOpen = XMLHttpRequest.prototype.open;
+        const originalSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.open = function(method, url, ...rest) {{
+          this.__sleufbaseCaptureRequest = {{
+            method: String(method || 'GET').toUpperCase(),
+            endpoint: new URL(String(url), window.location.href).href,
+          }};
+          return originalOpen.call(this, method, url, ...rest);
+        }};
+        XMLHttpRequest.prototype.send = function(body) {{
+          const xhr = this;
+          const requestInfo = xhr.__sleufbaseCaptureRequest;
+          if (requestInfo) {{
+            readCaptureFields(body).then((parsed) => {{
+              if (!parsed) {{
+                return;
+              }}
+              xhr.addEventListener('load', () => {{
+                if (xhr.status < 200 || xhr.status >= 300) {{
+                  return;
+                }}
+                let payload = null;
+                try {{
+                  payload = xhr.responseType === 'json' ? xhr.response : JSON.parse(xhr.responseText);
+                }} catch (_error) {{
+                }}
+                publishCapturedRequest({{ ...requestInfo, ...parsed }}, payload);
+              }}, {{ once: true }});
+            }}).catch(() => {{}});
+          }}
+          return originalSend.call(this, body);
+        }};
+      }}
+
       const applyKickTheMapBrowserChrome = () => {{
         normalizeAnchors();
         relabelKickTheMapFields();
@@ -721,9 +961,12 @@ def _inject_browser_script(
     start_url: str | None = None,
     *,
     prelogin: bool = False,
+    capture_enabled: bool = False,
 ) -> None:
     try:
-        result = window.evaluate_js(_injected_script(account, start_url))
+        result = window.evaluate_js(
+            _injected_script(account, start_url, capture_enabled=capture_enabled)
+        )
         if prelogin and result == "patched":
             window.destroy()
     except Exception:
@@ -760,7 +1003,13 @@ def _browser_refresh() -> None:
         pass
 
 
-def main(start_url: str | None = None, window_title: str | None = None, *, prelogin: bool = False) -> None:
+def main(
+    start_url: str | None = None,
+    window_title: str | None = None,
+    *,
+    prelogin: bool = False,
+    capture_file: str | None = None,
+) -> None:
     account = _selected_account()
     storage_path = _storage_path_for_account(account)
     webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
@@ -780,6 +1029,7 @@ def main(start_url: str | None = None, window_title: str | None = None, *, prelo
             ],
         )
     ]
+    capture_api = DownloadCaptureApi(capture_file) if capture_file else None
     window = webview.create_window(
         title,
         url=initial_url,
@@ -790,8 +1040,15 @@ def main(start_url: str | None = None, window_title: str | None = None, *, prelo
         text_select=True,
         background_color="#FFFFFF",
         menu=menu,
+        js_api=capture_api,
     )
-    window.events.loaded += lambda window: _inject_browser_script(window, account, start_url, prelogin=prelogin)
+    window.events.loaded += lambda window: _inject_browser_script(
+        window,
+        account,
+        start_url,
+        prelogin=prelogin,
+        capture_enabled=capture_api is not None,
+    )
     webview.start(
         gui=None,
         debug=False,
