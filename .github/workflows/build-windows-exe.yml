@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.46'
+  SLEUFBASE_RELEASE_VERSION: '0.3.47'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.46
+          name: SleufBase-Windows-v0.3.47
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,16 +293,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.46
+          SleufBase Windows v0.3.47
 
-          KickTheMap:
-          - voegt een herstelknop toe voor GeoTIFF-downloads wanneer de websiteflow opnieuw wijzigt
-          - kan de actuele handmatige KickTheMap-downloadflow vastleggen en opnieuw toepassen
-          - verbetert de browserintegratie en job-downloadafhandeling voor de vernieuwde my.kickthemap.com-flow
-          - bevat regressietests voor de nieuwe kalibratie- en herstelroute
+          KickTheMap en DXF:
+          - voorkomt vastlopen bij exports van grote selecties, waaronder de nieuwste 63 jobs
+          - haalt jobFeatures vooraf op en hergebruikt geldige lokale bestanden in de DXF-dialog
+          - exporteert zowel objectpunten als objectpolylijnen
+          - houdt TIFF-rendering binnen een begrensd geheugenbudget
+          - invalideert de sjabloon-cache wanneer het DXF-document dynamisch wordt uitgebreid
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.46
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.47
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
