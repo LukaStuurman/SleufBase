@@ -115,6 +115,11 @@ class _SlotCacheExporter:
 class _Document:
     def __init__(self, filename: str) -> None:
         self.filename = filename
+        self.modelspace_entity_count = 0
+        self.layouts = []
+
+    def modelspace(self):
+        return [None] * self.modelspace_entity_count
 
 
 class DxfTemplatePipelinePatchTests(unittest.TestCase):
@@ -194,6 +199,21 @@ class DxfTemplatePipelinePatchTests(unittest.TestCase):
         self.assertEqual(first, ["slot-a", "slot-b"])
         self.assertEqual(second, first)
         self.assertEqual(_SlotCacheExporter.calls, 1)
+
+    def test_template_slot_cache_invalidates_when_document_is_extended(self) -> None:
+        pipeline._TEMPLATE_SLOT_CACHE.clear()
+        _SlotCacheExporter.calls = 0
+        pipeline._install_template_slot_cache(_SlotCacheExporter)
+        exporter = _SlotCacheExporter()
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "template.dxf"
+            path.write_text("stub", encoding="utf-8")
+            document = _Document(str(path))
+            exporter._detect_template_slots(document)
+            document.modelspace_entity_count = 100
+            document.layouts.append("Blad2")
+            exporter._detect_template_slots(document)
+        self.assertEqual(_SlotCacheExporter.calls, 2)
 
     def test_map_and_tiff_work_overlap_with_hardware_aware_tiff_parallelism(self) -> None:
         exporter = _FakeExporter()

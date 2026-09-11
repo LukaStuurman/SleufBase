@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import OrderedDict
 from collections.abc import Iterable
 from dataclasses import dataclass
+from pathlib import Path
 import threading
 
 import numpy as np
@@ -10,12 +11,23 @@ from PIL import Image, ImageDraw, ImageFont
 
 from . import native_accel
 from .models import Bounds, CableFeature, DxfOverlay, GeoTiffLayer, MapComment, MapMarker, ViewportTransform
+from .resource_policy import get_resource_policy
+from .virtual_trench import is_virtual_trench_layer
 
 
 _NATIVE_DXF_MIN_FEATURES = 1000
 _NATIVE_DXF_MIN_POINTS = 6000
 _NATIVE_TIFF_MIN_LAYERS = 2
 _NATIVE_TIFF_MIN_DEST_PIXELS = 900_000
+# A native RGBA cache is a full uncompressed copy of every source raster. That
+# is useful while zooming around a handful of TIFFs, but retaining one copy for
+# a large KickTheMap batch can consume hundreds of MiB on top of Pillow's own
+# decoded image storage. Reuse the existing hardware-aware raster budget and
+# switch to one-at-a-time native buffers once a visible batch exceeds it.
+_NATIVE_TIFF_CACHE_PIXEL_BUDGET = max(
+    4_000_000,
+    get_resource_policy().virtual_tiff_pixel_budget,
+)
 _FLAG_INDEX_CACHE_LIMIT = 32
 _flag_index_cache: OrderedDict[
     tuple[int, int], tuple[tuple[str, ...], dict[str, tuple[int, ...]]]
@@ -177,11 +189,8 @@ class MapRenderer:
             canvas = background.convert("RGBA")
         try:
             rgba = _rgba_array(canvas)
-            for layer, source_rect, dest_rect, source_rgba in tiff_jobs:
-                if native_accel.paint_axis_aligned_tiff(
-                    rgba, source_rgba, source_rect, dest_rect, layer.opacity
-                ) is None:
-                    return None
+            if not self._paint_prepared_native_tiff_jobs(rgba, tiff_jobs):
+                return None
 
             selected_ids = set(selected_feature_ids or [])
             highlight_ids = set(highlight_feature_ids or [])
@@ -240,13 +249,18 @@ class MapRenderer:
         if len(raw_jobs) < _NATIVE_TIFF_MIN_LAYERS and total_dest_pixels < _NATIVE_TIFF_MIN_DEST_PIXELS:
             return None
 
-        jobs = []
-        for layer, source_rect, dest_rect in raw_jobs:
-            source_rgba = self._native_tiff_rgba_cache(layer)
-            if source_rgba is None:
-                return None
-            jobs.append((layer, source_rect, dest_rect, source_rgba))
-        return jobs
+        source_pixels = sum(
+            int(layer.image.width) * int(layer.image.height)
+            for layer, _source_rect, _dest_rect in raw_jobs
+        )
+        cache_sources = source_pixels <= _NATIVE_TIFF_CACHE_PIXEL_BUDGET
+        if not cache_sources:
+            for layer, _source_rect, _dest_rect in raw_jobs:
+                layer.invalidate_native_rgba_cache()
+        return [
+            (layer, source_rect, dest_rect, cache_sources)
+            for layer, source_rect, dest_rect in raw_jobs
+        ]
 
     def _prepared_native_dxf_jobs(self, dxf_overlays: list[DxfOverlay]):
         visible = [overlay for overlay in dxf_overlays if overlay.visible and overlay.features]
@@ -442,14 +456,59 @@ class MapRenderer:
         if not jobs:
             return canvas
         rgba = _rgba_array(canvas)
-        for layer, source_rect, dest_rect, source_rgba in jobs:
-            if native_accel.paint_axis_aligned_tiff(
-                rgba, source_rgba, source_rect, dest_rect, layer.opacity
-            ) is None:
-                return None
+        if not self._paint_prepared_native_tiff_jobs(rgba, jobs):
+            return None
         return Image.fromarray(rgba, mode="RGBA")
 
-    def _native_tiff_rgba_cache(self, layer: GeoTiffLayer) -> np.ndarray | None:
+    def _paint_prepared_native_tiff_jobs(self, rgba: np.ndarray, jobs) -> bool:
+        for layer, source_rect, dest_rect, cache_source in jobs:
+            source_rgba = self._native_tiff_rgba_cache(layer, store=cache_source)
+            if source_rgba is None:
+                return False
+            try:
+                painted = native_accel.paint_axis_aligned_tiff(
+                    rgba, source_rgba, source_rect, dest_rect, layer.opacity
+                )
+            finally:
+                if not cache_source:
+                    # In bounded mode the only full RGBA copy is the local
+                    # variable. Drop it before reopening a lazy file-backed PIL
+                    # image so neither full copy survives this paint step.
+                    del source_rgba
+                    self._release_decoded_file_backed_tiff(layer)
+            if painted is None:
+                return False
+        return True
+
+    @staticmethod
+    def _release_decoded_file_backed_tiff(layer: GeoTiffLayer) -> None:
+        if is_virtual_trench_layer(layer):
+            return
+        path = Path(layer.path)
+        if path.suffix.casefold() not in {".tif", ".tiff"} or not path.is_file():
+            return
+
+        previous = layer.image
+        replacement: Image.Image | None = None
+        try:
+            replacement = Image.open(path)
+            if replacement.size != previous.size:
+                replacement.close()
+                return
+            layer.image = replacement
+            layer.invalidate_native_rgba_cache()
+            replacement = None
+            previous.close()
+        except (OSError, ValueError):
+            if replacement is not None:
+                replacement.close()
+
+    def _native_tiff_rgba_cache(
+        self,
+        layer: GeoTiffLayer,
+        *,
+        store: bool = True,
+    ) -> np.ndarray | None:
         image = layer.image
         key = (id(image), int(image.width), int(image.height), str(image.mode))
         cache = layer.native_rgba_cache
@@ -467,6 +526,8 @@ class MapRenderer:
         finally:
             if converted is not None:
                 converted.close()
+        if not store:
+            return rgba
         cache = _NativeTiffImageCache(key=key, rgba=rgba)
         layer.native_rgba_cache = cache
         return cache.rgba

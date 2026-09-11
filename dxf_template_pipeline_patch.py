@@ -985,7 +985,25 @@ def _install_template_slot_cache(exporter_class) -> None:
             stat = path.stat()
         except OSError:
             return original_detect(self, document)
-        key = (str(path.resolve()), int(stat.st_mtime_ns), int(stat.st_size))
+        # The exporter may extend the in-memory template with additional pages
+        # before asking for slots again.  File metadata stays unchanged during
+        # that operation, so include document topology in the key; otherwise
+        # the original slot list is returned forever and extension never ends.
+        try:
+            modelspace_entity_count = len(document.modelspace())
+        except Exception:
+            modelspace_entity_count = -1
+        try:
+            layout_count = len(document.layouts)
+        except Exception:
+            layout_count = -1
+        key = (
+            str(path.resolve()),
+            int(stat.st_mtime_ns),
+            int(stat.st_size),
+            int(modelspace_entity_count),
+            int(layout_count),
+        )
         with _TEMPLATE_SLOT_CACHE_LOCK:
             cached = _TEMPLATE_SLOT_CACHE.get(key)
         if cached is not None:

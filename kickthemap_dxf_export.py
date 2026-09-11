@@ -288,9 +288,11 @@ class KickTheMapDxfExporter:
         if not datasets:
             raise KickTheMapDxfExportError("Selecteer minimaal een KickTheMap job voor de DXF-export.")
 
-        valid_datasets = [dataset for dataset in datasets if dataset.points]
+        valid_datasets = [dataset for dataset in datasets if dataset.points or dataset.polylines]
         if not valid_datasets:
-            raise KickTheMapDxfExportError("Geen handmatig geplaatste objectpunten gevonden voor export.")
+            raise KickTheMapDxfExportError(
+                "Geen handmatig geplaatste objectpunten of objectpolylijnen gevonden voor export."
+            )
 
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -311,14 +313,14 @@ class KickTheMapDxfExporter:
         for dataset in valid_datasets:
             if status_callback is not None:
                 status_callback(f"KickTheMap job verwerken: {dataset.job_title}")
-            job_line_points = self._add_dataset_lines(document, modelspace, dataset)
+            job_line_points = self._add_dataset_features(document, modelspace, dataset)
             all_points.extend(job_line_points)
             bounds = self._bounds_from_points(job_line_points)
             if bounds is not None:
                 dataset_bounds.append((dataset, bounds))
 
         if not all_points:
-            raise KickTheMapDxfExportError("Er konden geen lijnsegmenten uit de KickTheMap objectpunten worden gemaakt.")
+            raise KickTheMapDxfExportError("Er konden geen lijnsegmenten uit de KickTheMap objecten worden gemaakt.")
 
         placed_label_bounds: list[Bounds] = []
         all_job_bounds = [bounds for _dataset, bounds in dataset_bounds]
@@ -378,19 +380,23 @@ class KickTheMapDxfExporter:
         if self.LABEL_STYLE not in document.styles:
             document.styles.add(self.LABEL_STYLE, font="LiberationMono-Regular.ttf")
 
-    def _add_dataset_lines(
+    def _add_dataset_features(
         self,
         document: ezdxf.EzDxfDocument,
         modelspace,
         dataset: KickTheMapObjectDataset,
     ) -> list[tuple[float, float, float]]:
-        perp_angle = self._perpendicular_angle(dataset.points)
         all_points: list[tuple[float, float, float]] = []
-        delta_x = math.cos(perp_angle) * self.point_half_length
-        delta_y = math.sin(perp_angle) * self.point_half_length
+        if dataset.points:
+            perp_angle = self._perpendicular_angle(dataset.points)
+            delta_x = math.cos(perp_angle) * self.point_half_length
+            delta_y = math.sin(perp_angle) * self.point_half_length
+        else:
+            delta_x = 0.0
+            delta_y = 0.0
 
         for point in dataset.points:
-            layer_name, color = self._resolve_point_style(point)
+            layer_name, color = self._resolve_feature_style(point)
             self._ensure_layer(document, layer_name, color)
 
             z_value = point.z if point.z is not None else 0.0
@@ -404,22 +410,48 @@ class KickTheMapDxfExporter:
                     "color": color,
                 },
             )
-            line.set_xdata(
-                APP_ID,
-                [
-                    (1000, f"Job: {dataset.job_title}"),
-                    (1000, f"JobId: {dataset.job_id}"),
-                    (1000, f"Object: {point.object_name}"),
-                    (1000, f"Coding: {point.source_name or '0'}"),
-                    (1000, f"Layer: {layer_name}"),
-                ],
-            )
+            self._set_feature_xdata(line, dataset, point, layer_name)
             all_points.extend((start, end))
+
+        for polyline in dataset.polylines:
+            layer_name, color = self._resolve_feature_style(polyline)
+            self._ensure_layer(document, layer_name, color)
+            vertices = [
+                (vertex.x, vertex.y, vertex.z if vertex.z is not None else 0.0)
+                for vertex in polyline.vertices
+            ]
+            entity = modelspace.add_polyline3d(
+                vertices,
+                dxfattribs={
+                    "layer": layer_name,
+                    "color": color,
+                },
+            )
+            self._set_feature_xdata(entity, dataset, polyline, layer_name)
+            all_points.extend(vertices)
         return all_points
 
-    def _resolve_point_style(self, point: KickTheMapObjectPoint) -> tuple[str, int]:
+    @staticmethod
+    def _set_feature_xdata(
+        entity,
+        dataset: KickTheMapObjectDataset,
+        feature: KickTheMapObjectFeature,
+        layer_name: str,
+    ) -> None:
+        entity.set_xdata(
+            APP_ID,
+            [
+                (1000, f"Job: {dataset.job_title}"),
+                (1000, f"JobId: {dataset.job_id}"),
+                (1000, f"Object: {feature.object_name}"),
+                (1000, f"Coding: {feature.source_name or '0'}"),
+                (1000, f"Layer: {layer_name}"),
+            ],
+        )
+
+    def _resolve_feature_style(self, feature: KickTheMapObjectFeature) -> tuple[str, int]:
         for rule in self.layer_rules:
-            if rule.matches(point.source_name):
+            if rule.matches(feature.source_name):
                 return rule.target_layer, rule.color
         return "0", 256
 

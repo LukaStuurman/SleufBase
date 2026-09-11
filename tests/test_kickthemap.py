@@ -24,6 +24,20 @@ def _job() -> KickTheMapJob:
 
 
 class KickTheMapDownloadTests(unittest.TestCase):
+    def test_single_feature_download_reuses_recent_valid_disk_copy(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            target_root = Path(temporary_directory)
+            target_path = target_root / "Example_job_12345_jobFeatures.json"
+            target_path.write_text(json.dumps({"features": []}), encoding="utf-8")
+            client = KickTheMapClient()
+            client.logged_in_email = "test@example.com"
+
+            with patch.object(client, "_download_project_file") as download_mock:
+                result = client.download_job_features_file(_job(), target_root)
+
+            self.assertEqual(result, target_path)
+            download_mock.assert_not_called()
+
     def test_request_project_file_url_reads_current_nested_url_response(self) -> None:
         client = KickTheMapClient()
         client.logged_in_email = "test@example.com"

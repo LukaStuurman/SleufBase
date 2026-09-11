@@ -108,6 +108,11 @@ class KickTheMapClient:
         # cross-section start points. Reuse only files downloaded successfully
         # by this client and only for this short window.
         self.job_features_reuse_seconds = 120.0
+        # The legacy DXF dialog asks for every selected job one by one on the
+        # Tk main thread. The jobs browser already downloads these immutable
+        # job snapshots beside the TIFF, so reuse a recent, valid disk copy
+        # instead of making up to dozens of blocking network round-trips.
+        self.job_features_disk_reuse_seconds = 24.0 * 60.0 * 60.0
 
     @property
     def is_logged_in(self) -> bool:
@@ -556,6 +561,10 @@ class KickTheMapClient:
         target_root.mkdir(parents=True, exist_ok=True)
         target_path = target_root / f"{job.safe_file_stem}_{job.job_id}_jobFeatures.json"
 
+        if self._valid_recent_job_features_file(target_path):
+            self._remember_job_features_path(job.job_id, target_path)
+            return target_path
+
         file_name = f"{job.safe_file_stem}_jobFeatures.json"
         try:
             self._download_project_file(
@@ -572,6 +581,23 @@ class KickTheMapClient:
             ) from exc
         self._remember_job_features_path(job.job_id, target_path)
         return target_path
+
+    def _valid_recent_job_features_file(self, target_path: Path) -> bool:
+        reuse_seconds = max(
+            0.0,
+            float(getattr(self, "job_features_disk_reuse_seconds", 0.0) or 0.0),
+        )
+        if reuse_seconds <= 0.0:
+            return False
+        try:
+            stat = target_path.stat()
+            age_seconds = max(0.0, time.time() - stat.st_mtime)
+            if stat.st_size <= 2 or age_seconds > reuse_seconds:
+                return False
+            payload = json.loads(target_path.read_text(encoding="utf-8", errors="ignore"))
+        except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            return False
+        return isinstance(payload, dict) and isinstance(payload.get("features"), list)
 
     def download_job_features_files(
         self,

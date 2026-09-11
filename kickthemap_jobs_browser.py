@@ -1294,12 +1294,41 @@ class KickTheMapJobsWindow(tk.Tk):
                 self.after(0, lambda completed=completed, total=total: self.status_var.set(f"GeoTIFFs downloaden... {completed} van {total}"))
 
             path_map, error_map = self.client.download_tiffs(jobs, max_workers=6, progress_callback=progress)
+            downloaded_jobs = [job for job in jobs if job.job_id in path_map]
+
+            # Fetch the small object dataset while this dedicated worker thread
+            # is already authenticated. Previously it was deferred until the
+            # main-window DXF action, where a large selection performed network
+            # I/O synchronously on Tk's UI thread and Windows reported the app
+            # as not responding. Keeping the files beside the TIFFs makes the
+            # subsequent DXF export local and effectively immediate.
+            feature_error_map: dict[int, Exception] = {}
+            if downloaded_jobs:
+                def feature_progress(completed: int, feature_total: int) -> None:
+                    self.after(
+                        0,
+                        lambda completed=completed, feature_total=feature_total: self.status_var.set(
+                            f"Objectpunten voorbereiden... {completed} van {feature_total}"
+                        ),
+                    )
+
+                _feature_paths, feature_error_map = self.client.download_job_features_files(
+                    downloaded_jobs,
+                    self.client.default_download_dir(),
+                    max_workers=min(8, len(downloaded_jobs)),
+                    progress_callback=feature_progress,
+                )
             paths = [str(path_map[job.job_id]) for job in jobs if job.job_id in path_map]
             errors = [
                 f"{job.title}: {error_map[job.job_id]}"
                 for job in jobs
                 if job.job_id in error_map
             ]
+            errors.extend(
+                f"{job.title}: objectpunten konden niet worden voorbereid"
+                for job in downloaded_jobs
+                if job.job_id in feature_error_map
+            )
             loaded_records = {
                 str(job.job_id): {
                     "job_id": str(job.job_id),
