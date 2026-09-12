@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.48'
+  SLEUFBASE_RELEASE_VERSION: '0.3.49'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.48
+          name: SleufBase-Windows-v0.3.49
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,16 +293,20 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.48
+          SleufBase Windows v0.3.49
 
-          DXF-sjabloonexport:
-          - vergroot de kaart- en BGT-context rond de proefsleuven met factor 10
-          - vergroot ook het bijbehorende BGT-fetchgebied zodat de ruimere viewport daadwerkelijk met lijnwerk wordt gevuld
-          - laat de normale niet-sjabloonexport ongewijzigd
-          - bevat regressietests voor de 10x context en de begrensde template-only fetchuitbreiding
+          DXF-sjabloonexport en KickTheMap:
+          - gehard voor 63, 100 en veel grotere aantallen KickTheMap-proefsleuven
+          - haalt voor iedere sjabloonexport verplicht de nieuwste jobFeatures.json met kabels/leidingen opnieuw op
+          - omzeilt daarbij de normale geheugen- en schijfcache; bij een mislukte verse snapshot wordt niet stilletjes oude data gebruikt
+          - gebruikt begrensde rolling netwerkqueues, retries en atomaire validatie zodat grote jobselecties niet vastlopen of goede cachebestanden beschadigen
+          - breidt grote DXF-sjablonen in bulk uit in plaats van ieder nieuw blad opnieuw volledig te scannen
+          - verwerkt kaart-, TIFF- en sjabloontaken in begrensde batches voor voorspelbaar RAM- en CPU-gebruik
+          - behoudt de 10x BGT-context, maar voorkomt dat veel ver uit elkaar liggende proefsleuven tot enkele gigantische fetch-rechthoeken worden samengevoegd
+          - bevat regressietests voor 808 slots / 101 DXF-bladen en 80 ver uit elkaar liggende BGT-gebieden
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.48
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.49
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
