@@ -26,6 +26,11 @@ from .dxf_template_pipeline_v6_patch import install_dxf_template_pipeline_v6_pat
 from .dxf_template_pipeline_v7_patch import install_dxf_template_pipeline_v7_patch
 from .template_fill_performance_patch import install_template_fill_performance_patch
 from .template_wireframe_context_patch import install_template_wireframe_context_patch
+from .kickthemap_scalability_patch import (
+    install_kickthemap_client_scalability_patch,
+    install_kickthemap_template_export_hook,
+)
+from .large_template_export_patch import install_large_template_export_patch
 
 
 install_settings_ui_patch()
@@ -52,3 +57,6 @@ install_dxf_template_pipeline_v6_patch()
 install_dxf_template_pipeline_v7_patch()
 install_template_fill_performance_patch()
 install_template_wireframe_context_patch()
+install_kickthemap_client_scalability_patch()
+install_kickthemap_template_export_hook()
+install_large_template_export_patch()

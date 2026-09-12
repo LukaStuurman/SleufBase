@@ -23,7 +23,7 @@ class TemplateWireframeContextPatchTests(unittest.TestCase):
     def test_local_template_context_margin_is_exactly_ten_times_larger(self) -> None:
         layer = SimpleNamespace(bounds=Bounds(100.0, 200.0, 110.0, 210.0))
 
-        self.assertEqual(PATCH_VERSION, 2)
+        self.assertEqual(PATCH_VERSION, 3)
         self.assertEqual(TEMPLATE_CONTEXT_SCALE, 10.0)
         self.assertAlmostEqual(_base_orientation_padding(layer), 75.0)
         self.assertAlmostEqual(_expanded_orientation_padding(layer), 750.0)
@@ -47,6 +47,21 @@ class TemplateWireframeContextPatchTests(unittest.TestCase):
         self.assertAlmostEqual(expanded.min_y, -550.0)
         self.assertAlmostEqual(expanded.max_x, 860.0)
         self.assertAlmostEqual(expanded.max_y, 960.0)
+
+    def test_far_apart_large_selection_stays_local_instead_of_forced_to_twelve_boxes(self) -> None:
+        exporter = _exporter()
+        layers = [
+            SimpleNamespace(bounds=Bounds(index * 10000.0, 0.0, index * 10000.0 + 1.0, 1.0))
+            for index in range(80)
+        ]
+
+        boxes = exporter._template_orientation_fetch_bounds(
+            layers,
+            Bounds(-1000.0, -1000.0, 1_000_000.0, 1000.0),
+        )
+
+        self.assertEqual(len(boxes), 80)
+        self.assertTrue(all(box.width < 1000.0 for box in boxes))
 
     def test_empty_layer_list_keeps_core_fallback_behavior(self) -> None:
         exporter = _exporter()
