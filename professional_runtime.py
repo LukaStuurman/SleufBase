@@ -15,11 +15,19 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
+from SleufBase.secret_redaction import redact_sensitive_text
 from SleufBase.version import APP_USER_MODEL_ID, COMPANY_NAME, PRODUCT_NAME, __version__
 
 _START_TIME = time.perf_counter()
 _LOGGER = logging.getLogger("SleufBase")
 _LOG_PATH: Path | None = None
+
+
+class _RedactingFormatter(logging.Formatter):
+    """Formatter that removes common credentials after message/traceback formatting."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        return redact_sensitive_text(super().format(record))
 
 
 def app_data_dir() -> Path:
@@ -66,7 +74,7 @@ def configure_logging() -> Path:
             encoding="utf-8",
         )
         handler.setFormatter(
-            logging.Formatter(
+            _RedactingFormatter(
                 "%(asctime)s | %(levelname)s | %(name)s | %(threadName)s | %(message)s"
             )
         )
@@ -143,7 +151,7 @@ def _write_crash_report(exc_type: type[BaseException], exc: BaseException, tb: A
         "Traceback:",
         "".join(traceback.format_exception(exc_type, exc, tb)),
     ]
-    _atomic_write_text(path, "\n".join(lines))
+    _atomic_write_text(path, redact_sensitive_text("\n".join(lines)))
     return path
 
 
