@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.49'
+  SLEUFBASE_RELEASE_VERSION: '0.3.50'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.49
+          name: SleufBase-Windows-v0.3.50
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,20 +293,17 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.49
+          SleufBase Windows v0.3.50
 
-          DXF-sjabloonexport en KickTheMap:
-          - gehard voor 63, 100 en veel grotere aantallen KickTheMap-proefsleuven
-          - haalt voor iedere sjabloonexport verplicht de nieuwste jobFeatures.json met kabels/leidingen opnieuw op
-          - omzeilt daarbij de normale geheugen- en schijfcache; bij een mislukte verse snapshot wordt niet stilletjes oude data gebruikt
-          - gebruikt begrensde rolling netwerkqueues, retries en atomaire validatie zodat grote jobselecties niet vastlopen of goede cachebestanden beschadigen
-          - breidt grote DXF-sjablonen in bulk uit in plaats van ieder nieuw blad opnieuw volledig te scannen
-          - verwerkt kaart-, TIFF- en sjabloontaken in begrensde batches voor voorspelbaar RAM- en CPU-gebruik
-          - behoudt de 10x BGT-context, maar voorkomt dat veel ver uit elkaar liggende proefsleuven tot enkele gigantische fetch-rechthoeken worden samengevoegd
-          - bevat regressietests voor 808 slots / 101 DXF-bladen en 80 ver uit elkaar liggende BGT-gebieden
+          DXF-sjabloonexport:
+          - verhelpt de fout `Reverse rasterbestand ontbreekt` bij normaal/reverse sjabloonexports
+          - maakt gedeelde reverse IMAGEDEF-bronnen veilig wanneer meerdere definities hetzelfde raster gebruiken
+          - materialiseert hergebruikte normale TIFF- en kaartrasters in de tijdelijke reverse assetbundle
+          - behoudt de snelle normal→reverse rasteroptimalisatie via hardlinks met copy-fallback
+          - bevat regressietests voor het ontbrekende `PS1_geotiff.png`-scenario en gedeelde IMAGEDEF-bronnen
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.49
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.50
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
