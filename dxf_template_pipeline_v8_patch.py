@@ -6,12 +6,13 @@ import shutil
 from typing import Any
 
 from . import dxf_template_pipeline_patch as pipeline
+from . import dxf_template_pipeline_v3_patch as pipeline_v3
 from . import dxf_template_pipeline_v4_patch as pipeline_v4
 from . import dxf_template_pipeline_v7_patch as pipeline_v7
 from . import template_reverse_patch as reverse_patch
 
 
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 
 
 def _same_path(left: object, right: object) -> bool:
@@ -69,14 +70,89 @@ def _materialize_reverse_asset(
     return destination.resolve(strict=False)
 
 
-def install_dxf_template_pipeline_v8_patch() -> None:
-    """Keep every reverse TIFF/map raster inside the reverse temporary bundle.
+def _transfer_reverse_image_assets_v8(
+    reverse_document,
+    reverse_source_path: Path,
+    final_output_path: Path,
+) -> Path:
+    """Relocate reverse rasters once even when several IMAGEDEFs share a file.
 
-    This fixes pair exports where V4 reuses a normal TIFF or pre-rendered map and
-    consequently returns a path outside the reverse source asset directory. The
-    reverse DXF merge expects those raster assets to be present in its own bundle;
-    materializing them here makes that invariant explicit without giving up the
-    expensive normal->reverse raster reuse.
+    V3 moves files that live in the temporary reverse asset directory. Its old
+    implementation checked ``source.exists()`` before consulting the per-source
+    transfer cache. If two different IMAGEDEF handles referenced the same PNG, the
+    first IMAGEDEF moved the file and the second one immediately failed with
+    ``Reverse rasterbestand ontbreekt``. Check the cache first so all definitions
+    can safely reuse the already-relocated destination.
+    """
+
+    target_dir = final_output_path.parent / f"{final_output_path.stem}_reverse_assets"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    temporary_root = reverse_patch._source_asset_dir(reverse_source_path).resolve(strict=False)
+    processed_defs: set[str] = set()
+    transferred_by_source: dict[str, Path] = {}
+
+    for block in reverse_document.blocks:
+        block_name = str(getattr(block, "name", "") or "").upper()
+        if not block_name.startswith(reverse_patch.VARIANT_LAYER_PREFIX) or not block_name.endswith(
+            f"_{reverse_patch.REVERSE_MODE}{reverse_patch.VARIANT_BLOCK_SUFFIX}"
+        ):
+            continue
+        for image in block.query("IMAGE"):
+            try:
+                image_def = image.image_def
+            except Exception:
+                image_def = None
+            if image_def is None:
+                continue
+            handle = str(getattr(image_def.dxf, "handle", "") or id(image_def))
+            if handle in processed_defs:
+                continue
+            processed_defs.add(handle)
+
+            filename = str(getattr(image_def.dxf, "filename", "") or "").strip()
+            if not filename:
+                continue
+            source = Path(filename)
+            if not source.is_absolute():
+                source = reverse_source_path.parent / source
+            source = source.resolve(strict=False)
+            source_key = os.path.normcase(str(source))
+
+            # Important: consult the cache before checking the source path. Assets
+            # inside the temporary reverse bundle are moved on their first use, so
+            # their original path is expected to disappear afterwards.
+            destination = transferred_by_source.get(source_key)
+            if destination is None:
+                if not source.exists():
+                    raise FileNotFoundError(f"Reverse rasterbestand ontbreekt: {source}")
+                destination = target_dir / source.name
+                mode = pipeline_v3._relocate_reverse_asset(
+                    source,
+                    destination,
+                    temporary_root,
+                )
+                destination = destination.resolve(strict=False)
+                transferred_by_source[source_key] = destination
+                pipeline_v3._increment(f"reverse_assets_{mode}")
+            else:
+                pipeline_v3._increment("reverse_assets_duplicate_source_reused")
+                if not destination.exists():
+                    raise FileNotFoundError(
+                        f"Verplaatst reverse rasterbestand ontbreekt: {destination}"
+                    )
+
+            image_def.dxf.filename = str(destination)
+    return target_dir
+
+
+def install_dxf_template_pipeline_v8_patch() -> None:
+    """Make the normal/reverse raster pipeline self-contained and dedupe-safe.
+
+    Two failure modes are handled here:
+    * reused normal TIFF/map rasters are materialized inside the temporary reverse
+      asset bundle before the reverse document is merged;
+    * multiple reverse IMAGEDEFs that reference the same temporary PNG reuse the
+      first relocated destination instead of treating the moved source as missing.
     """
 
     from .cadastral_export import CadastralDxfExporter
@@ -165,8 +241,12 @@ def install_dxf_template_pipeline_v8_patch() -> None:
             counter_name="reverse_map_materialized",
         )
 
+    # V7 resolves this module global at merge time, so replacing it here also
+    # protects the in-memory normal/reverse merge path without an extra DXF pass.
+    pipeline_v3._transfer_reverse_image_assets = _transfer_reverse_image_assets_v8
     CadastralDxfExporter._build_template_tiff_raster = _build_template_tiff_raster_v8
     CadastralDxfExporter._build_template_map_raster = _build_template_map_raster_v8
     CadastralDxfExporter._sleufbase_dxf_template_pipeline_v8_version = PATCH_VERSION
     CadastralDxfExporter.SLEUFBASE_REVERSE_ASSET_MATERIALIZATION = True
     CadastralDxfExporter.SLEUFBASE_REVERSE_RASTER_SELF_CONTAINED = True
+    CadastralDxfExporter.SLEUFBASE_REVERSE_DUPLICATE_IMAGEDEF_SAFE = True
