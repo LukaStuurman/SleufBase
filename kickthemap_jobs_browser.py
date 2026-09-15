@@ -13,6 +13,7 @@ from tkinter import messagebox, ttk
 from PIL import ImageDraw, ImageFont, ImageTk
 from pyproj import Transformer
 
+from .atomic_io import atomic_write_text
 from .ipc import send_paths_to_running_instance
 from .kickthemap import KickTheMapClient, KickTheMapError, KickTheMapJob
 from .models import Bounds
@@ -1075,7 +1076,8 @@ class KickTheMapJobsWindow(tk.Tk):
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         current_records = self._read_loaded_jobs_manifest()
         current_records.update(records)
-        manifest_path.write_text(
+        atomic_write_text(
+            manifest_path,
             json.dumps({"jobs": current_records}, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )

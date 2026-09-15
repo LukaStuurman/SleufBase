@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .atomic_io import atomic_write_text
 from .source_migration import load_migrating_module
 
 
@@ -152,7 +153,8 @@ def save_settings(settings: AppSettings) -> Path:
     payload[MARXACT_NAME_MAPPINGS_KEY] = normalize_marxact_name_mappings(
         getattr(settings, MARXACT_NAME_MAPPINGS_KEY, {})
     )
-    settings_path.write_text(
+    atomic_write_text(
+        settings_path,
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
