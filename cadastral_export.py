@@ -5600,7 +5600,11 @@ class CadastralDxfExporter:
         def copy_single(index_layer: tuple[int, GeoTiffLayer]) -> tuple[int, PreparedTiffRaster]:
             index, layer = index_layer
             export_layer = self._prepared_virtual_trench_export_layer(layer)
-            target_path = self._unique_raster_copy_path(asset_dir, self._proefsleuf_raster_name(layer, index))
+            # The slot index is part of the name before any worker starts.  The
+            # old label-only name (for example ``PS2.tiff``) was ambiguous for
+            # sources such as ``nederweert_fase_2_ps_20_66526.tiff`` and also
+            # allowed parallel workers to select the same target path.
+            target_path = asset_dir / self._proefsleuf_raster_name(layer, index)
             if is_virtual_trench_layer(layer) or not Path(layer.path).exists():
                 try:
                     export_layer.image.save(target_path, format="TIFF")
@@ -5706,11 +5710,19 @@ class CadastralDxfExporter:
 
     def _proefsleuf_raster_name(self, layer: GeoTiffLayer, fallback_index: int) -> str:
         suffix = layer.path.suffix or ".tiff"
-        return f"{self._proefsleuf_base_name(layer, fallback_index)}{suffix}"
+        try:
+            slot_index = max(1, int(fallback_index))
+        except (TypeError, ValueError):
+            slot_index = 1
+        return f"{self._proefsleuf_base_name(layer, fallback_index)}__slot{slot_index:03d}{suffix}"
 
     def _proefsleuf_base_name(self, layer: GeoTiffLayer, fallback_index: int) -> str:
         stem = layer.path.stem
-        match = re.search(r"(?i)\bps[\s._-]*(\d+)\b", stem)
+        # An underscore is a word character in Python's regex engine.  A
+        # trailing ``\b`` therefore fails for the common ``ps_21_66587``
+        # filename and the fallback below incorrectly picks the phase number
+        # (``2``) from ``fase_2``.  Match a PS number by its digits instead.
+        match = re.search(r"(?i)(?:^|[^a-z0-9])ps[\s._-]*(\d+)(?!\d)", stem)
         if match:
             return f"PS{int(match.group(1))}"
         digits = re.search(r"(\d+)", stem)

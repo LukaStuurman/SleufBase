@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.51'
+  SLEUFBASE_RELEASE_VERSION: '0.3.52'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.51
+          name: SleufBase-Windows-v0.3.52
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,7 +293,13 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.51
+          SleufBase Windows v0.3.52
+
+          Gewone kadastrale DXF-export:
+          - leest PS-nummers correct uit KickTheMap-bestandsnamen met fase- en underscoredelen, zoals `nederweert_fase_2_ps_21_66587.tiff`
+          - geeft ieder raster vóór parallel kopiëren een deterministische unieke slotnaam, bijvoorbeeld `PS21__slot010.tiff`
+          - koppelt iedere IMAGEDEF één-op-één aan zijn eigen rasterbestand; Nederweert PS20 en PS21 kunnen niet meer hetzelfde raster overschrijven
+          - bevat lokale regressietests voor de volledige raster-/IMAGEDEF-koppeling
 
           DXF-sjabloonexport:
           - voorkomt dat meerdere proefsleuven met hetzelfde label naar hetzelfde kaartbestand schrijven
@@ -303,7 +309,7 @@ jobs:
           - bevat regressietests voor dubbele PS-labels en consistente normal/reverse slotnamen
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.51
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.52
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
