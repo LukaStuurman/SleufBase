@@ -1,0 +1,488 @@
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from typing import Any, Iterable, Mapping, Sequence
+from xml.sax.saxutils import escape
+from zipfile import ZIP_DEFLATED, ZipFile
+
+from .kickthemap_dxf_export import ObjectLayerRule, build_object_layer_rules
+
+
+PATCH_VERSION = 1
+MENU_LABEL = "Discipline-overzicht naar Excel…"
+
+
+@dataclass(frozen=True)
+class DisciplineSummary:
+    proefsleuf: str
+    counts: Mapping[str, int]
+
+    @property
+    def distinct_count(self) -> int:
+        return sum(1 for value in self.counts.values() if int(value) > 0)
+
+
+def _rule_label(rule: ObjectLayerRule) -> str:
+    label = str(getattr(rule, "profile_label", "") or "").strip()
+    if label:
+        return label
+    keywords = tuple(getattr(rule, "keywords", ()) or ())
+    if keywords:
+        first = str(keywords[0] or "").strip()
+        if first:
+            return first
+    target_layer = str(getattr(rule, "target_layer", "") or "").strip()
+    return target_layer or "Onbekend"
+
+
+def normalize_layer_rules(raw_rules: Iterable[Any] | None) -> tuple[ObjectLayerRule, ...]:
+    rows: list[tuple[Any, Any, Any, Any]] = []
+    direct: list[ObjectLayerRule] = []
+
+    for rule in list(raw_rules or ()):
+        if isinstance(rule, ObjectLayerRule):
+            direct.append(rule)
+            continue
+        if all(hasattr(rule, name) for name in ("keywords", "target_layer", "color")):
+            keywords = getattr(rule, "keywords", "")
+            if isinstance(keywords, (list, tuple)):
+                keywords = ",".join(str(value) for value in keywords if str(value).strip())
+            rows.append(
+                (
+                    keywords,
+                    getattr(rule, "target_layer", ""),
+                    getattr(rule, "color", 256),
+                    getattr(rule, "profile_label", ""),
+                )
+            )
+            continue
+        try:
+            values = tuple(rule)
+        except TypeError:
+            continue
+        if len(values) >= 4:
+            rows.append((values[0], values[1], values[2], values[3]))
+        elif len(values) == 3:
+            rows.append((values[0], values[1], values[2], ""))
+
+    if direct and not rows:
+        return tuple(direct)
+    if direct:
+        rows = [
+            (
+                ",".join(str(value) for value in item.keywords),
+                item.target_layer,
+                item.color,
+                item.profile_label,
+            )
+            for item in direct
+        ] + rows
+    return build_object_layer_rules(rows if rows else None)
+
+
+def discipline_columns(rules: Sequence[ObjectLayerRule]) -> tuple[str, ...]:
+    columns: list[str] = []
+    seen: set[str] = set()
+    for rule in rules:
+        label = _rule_label(rule)
+        key = label.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        columns.append(label)
+    return tuple(columns)
+
+
+def summarize_dataset(
+    proefsleuf: str,
+    dataset: Any,
+    rules: Sequence[ObjectLayerRule],
+) -> DisciplineSummary:
+    counts: Counter[str] = Counter()
+    features = [
+        *tuple(getattr(dataset, "points", ()) or ()),
+        *tuple(getattr(dataset, "polylines", ()) or ()),
+    ]
+    for feature in features:
+        source_name = str(getattr(feature, "source_name", "") or "").strip()
+        if not source_name:
+            continue
+        matched = next((rule for rule in rules if rule.matches(source_name)), None)
+        if matched is None:
+            continue
+        counts[_rule_label(matched)] += 1
+    return DisciplineSummary(proefsleuf=str(proefsleuf).strip(), counts=dict(counts))
+
+
+def _column_name(index: int) -> str:
+    if index < 1:
+        raise ValueError("Excel-kolomindex moet minimaal 1 zijn.")
+    letters = ""
+    value = int(index)
+    while value:
+        value, remainder = divmod(value - 1, 26)
+        letters = chr(65 + remainder) + letters
+    return letters
+
+
+def _inline_string_cell(reference: str, value: object, *, style: int = 0) -> str:
+    text = str(value)
+    preserve = ' xml:space="preserve"' if text != text.strip() else ""
+    style_attr = f' s="{style}"' if style else ""
+    return (
+        f'<c r="{reference}" t="inlineStr"{style_attr}><is>'
+        f"<t{preserve}>{escape(text)}</t></is></c>"
+    )
+
+
+def _number_cell(reference: str, value: int) -> str:
+    return f'<c r="{reference}" t="n"><v>{int(value)}</v></c>'
+
+
+def _worksheet_xml(
+    summaries: Sequence[DisciplineSummary],
+    disciplines: Sequence[str],
+) -> str:
+    headers = ["Proefsleuf", "Aantal verschillende disciplines", *disciplines]
+    rows: list[str] = []
+
+    header_cells = [
+        _inline_string_cell(f"{_column_name(column)}1", header, style=1)
+        for column, header in enumerate(headers, start=1)
+    ]
+    rows.append(f'<row r="1" ht="24" customHeight="1">{"".join(header_cells)}</row>')
+
+    for row_index, summary in enumerate(summaries, start=2):
+        cells = [
+            _inline_string_cell(f"A{row_index}", summary.proefsleuf),
+            _number_cell(f"B{row_index}", summary.distinct_count),
+        ]
+        for column_index, discipline in enumerate(disciplines, start=3):
+            cells.append(
+                _number_cell(
+                    f"{_column_name(column_index)}{row_index}",
+                    int(summary.counts.get(discipline, 0)),
+                )
+            )
+        rows.append(f'<row r="{row_index}">{"".join(cells)}</row>')
+
+    last_column = _column_name(len(headers))
+    last_row = max(1, len(summaries) + 1)
+    column_widths = [24.0, 31.0, *[max(12.0, min(28.0, len(name) + 3.0)) for name in disciplines]]
+    cols = "".join(
+        f'<col min="{index}" max="{index}" width="{width:.1f}" customWidth="1"/>'
+        for index, width in enumerate(column_widths, start=1)
+    )
+    return (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        f'<dimension ref="A1:{last_column}{last_row}"/>'
+        '<sheetViews><sheetView workbookViewId="0">'
+        '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>'
+        '</sheetView></sheetViews>'
+        '<sheetFormatPr defaultRowHeight="15"/>'
+        f"<cols>{cols}</cols>"
+        f'<sheetData>{"".join(rows)}</sheetData>'
+        f'<autoFilter ref="A1:{last_column}{last_row}"/>'
+        '</worksheet>'
+    )
+
+
+def write_discipline_workbook(
+    path: str | Path,
+    summaries: Sequence[DisciplineSummary],
+    *,
+    disciplines: Sequence[str] | None = None,
+) -> Path:
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    if disciplines is None:
+        discovered = {
+            str(name)
+            for summary in summaries
+            for name, count in summary.counts.items()
+            if int(count) > 0
+        }
+        discipline_order = tuple(sorted(discovered, key=str.casefold))
+    else:
+        discipline_order = tuple(dict.fromkeys(str(name) for name in disciplines if str(name).strip()))
+
+    content_types = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        '<Override PartName="/xl/workbook.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet1.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        '<Override PartName="/xl/styles.xml" '
+        'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+        '</Types>'
+    )
+    root_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" '
+        'Target="xl/workbook.xml"/>'
+        '</Relationships>'
+    )
+    workbook = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        '<sheets><sheet name="Disciplines" sheetId="1" r:id="rId1"/></sheets>'
+        '</workbook>'
+    )
+    workbook_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
+        'Target="worksheets/sheet1.xml"/>'
+        '<Relationship Id="rId2" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" '
+        'Target="styles.xml"/>'
+        '</Relationships>'
+    )
+    styles = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        '<fonts count="2">'
+        '<font><sz val="11"/><name val="Calibri"/><family val="2"/></font>'
+        '<font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/><family val="2"/></font>'
+        '</fonts>'
+        '<fills count="3">'
+        '<fill><patternFill patternType="none"/></fill>'
+        '<fill><patternFill patternType="gray125"/></fill>'
+        '<fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor rgb="FF1F4E78"/></patternFill></fill>'
+        '</fills>'
+        '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        '<cellXfs count="2">'
+        '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+        '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1">'
+        '<alignment horizontal="center" vertical="center"/>'
+        '</xf>'
+        '</cellXfs>'
+        '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
+        '</styleSheet>'
+    )
+
+    worksheet = _worksheet_xml(summaries, discipline_order)
+    with ZipFile(target, "w", compression=ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types)
+        archive.writestr("_rels/.rels", root_rels)
+        archive.writestr("xl/workbook.xml", workbook)
+        archive.writestr("xl/_rels/workbook.xml.rels", workbook_rels)
+        archive.writestr("xl/styles.xml", styles)
+        archive.writestr("xl/worksheets/sheet1.xml", worksheet)
+    return target
+
+
+def _layer_display_name(app: Any, layer: Any, fallback_index: int) -> str:
+    metadata = getattr(layer, "metadata", {}) or {}
+    for key in ("template_proefsleuf_label", "kickthemap_job_title", "marxact_trench_name"):
+        value = str(metadata.get(key, "") or "").strip()
+        if value:
+            return value
+
+    exporter = getattr(app, "cadastral_exporter", None)
+    for method_name in ("_template_proefsleuf_label", "_proefsleuf_base_name"):
+        method = getattr(exporter, method_name, None)
+        if callable(method):
+            try:
+                value = str(method(layer, fallback_index) or "").strip()
+            except Exception:
+                value = ""
+            if value:
+                return value
+
+    path = getattr(layer, "path", None)
+    if path is not None:
+        stem = str(getattr(path, "stem", "") or "").strip()
+        if stem:
+            return stem
+    return f"Proefsleuf {fallback_index}"
+
+
+def _add_actions_menu_item(app: Any) -> None:
+    try:
+        menu_bar = app.nametowidget(app.cget("menu"))
+        end_index = menu_bar.index("end")
+    except Exception:
+        return
+
+    actions_menu = None
+    if end_index is not None:
+        for index in range(end_index + 1):
+            try:
+                if menu_bar.type(index) != "cascade":
+                    continue
+                if str(menu_bar.entrycget(index, "label")) != "Acties":
+                    continue
+                actions_menu = app.nametowidget(menu_bar.entrycget(index, "menu"))
+                break
+            except Exception:
+                continue
+
+    if actions_menu is None:
+        actions_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label="Acties", menu=actions_menu)
+
+    try:
+        submenu_end = actions_menu.index("end")
+    except Exception:
+        submenu_end = None
+    if submenu_end is not None:
+        for index in range(submenu_end + 1):
+            try:
+                if actions_menu.type(index) == "command" and str(actions_menu.entrycget(index, "label")) == MENU_LABEL:
+                    return
+            except Exception:
+                continue
+
+    actions_menu.add_command(label=MENU_LABEL, command=app.export_discipline_counts_excel)
+
+    try:
+        if hasattr(app, "_capture_modern_menu_specs"):
+            app._modern_menu_specs = app._capture_modern_menu_specs(menu_bar)
+            if getattr(app, "_modern_menu_bar", None) is not None:
+                app.after(0, app._build_modern_menu_bar)
+    except Exception:
+        pass
+
+
+def _patch_viewer_class(viewer_class: Any) -> None:
+    if int(getattr(viewer_class, "_sleufbase_discipline_excel_export_patch_version", 0) or 0) >= PATCH_VERSION:
+        return
+
+    original_build_menu = viewer_class._build_menu
+
+    def export_discipline_counts_excel(self) -> None:
+        layers = list(getattr(self, "tiff_layers", ()) or ())
+        if not layers:
+            messagebox.showinfo(
+                "Discipline-overzicht",
+                "Laad eerst één of meer proefsleuven.",
+                parent=self,
+            )
+            return
+
+        target = filedialog.asksaveasfilename(
+            parent=self,
+            title="Discipline-overzicht exporteren",
+            defaultextension=".xlsx",
+            filetypes=(("Excel-werkmap", "*.xlsx"),),
+            initialfile="SleufBase_disciplines.xlsx",
+        )
+        if not target:
+            return
+
+        try:
+            raw_rules = self._resolved_cross_section_layer_rules()
+            rules = normalize_layer_rules(raw_rules)
+        except Exception as exc:
+            messagebox.showerror(
+                "Discipline-overzicht",
+                f"De kabel/leiding-regels konden niet worden gelezen:\n{exc}",
+                parent=self,
+            )
+            self.set_status("Discipline-overzicht exporteren mislukt.")
+            return
+
+        if not rules:
+            messagebox.showerror(
+                "Discipline-overzicht",
+                "Er zijn geen kabel/leiding-disciplines geconfigureerd.",
+                parent=self,
+            )
+            self.set_status("Discipline-overzicht exporteren mislukt.")
+            return
+
+        summaries: list[DisciplineSummary] = []
+        warnings: list[str] = []
+        total = len(layers)
+        for index, layer in enumerate(layers, start=1):
+            name = _layer_display_name(self, layer, index)
+            self.set_status(f"Disciplines tellen ({index}/{total}): {name}")
+            try:
+                self.update_idletasks()
+            except Exception:
+                pass
+            try:
+                dataset = self._load_maaiveld_dataset_for_layer(layer)
+            except Exception as exc:
+                warnings.append(f"{name}: {exc}")
+                continue
+            if dataset is None:
+                warnings.append(f"{name}: geen kabel/leidinggegevens beschikbaar.")
+                continue
+            summaries.append(summarize_dataset(name, dataset, rules))
+
+        if not summaries:
+            detail = "\n".join(warnings[:10])
+            suffix = f"\n\n{detail}" if detail else ""
+            messagebox.showerror(
+                "Discipline-overzicht",
+                "Geen proefsleuf kon worden uitgelezen." + suffix,
+                parent=self,
+            )
+            self.set_status("Discipline-overzicht exporteren mislukt.")
+            return
+
+        try:
+            output_path = write_discipline_workbook(
+                target,
+                summaries,
+                disciplines=discipline_columns(rules),
+            )
+        except Exception as exc:
+            messagebox.showerror(
+                "Discipline-overzicht",
+                f"Het Excelbestand kon niet worden opgeslagen:\n{exc}",
+                parent=self,
+            )
+            self.set_status("Discipline-overzicht exporteren mislukt.")
+            return
+
+        self.set_status(
+            f"Discipline-overzicht opgeslagen voor {len(summaries)} proefsleuf/proefsleuven."
+        )
+        if warnings:
+            details = "\n".join(warnings[:10])
+            if len(warnings) > 10:
+                details += f"\n… en nog {len(warnings) - 10} proefsleuf/proefsleuven."
+            messagebox.showwarning(
+                "Discipline-overzicht",
+                "Het Excelbestand is gemaakt, maar niet alle proefsleuven konden worden uitgelezen:\n\n"
+                + details
+                + f"\n\nBestand: {output_path}",
+                parent=self,
+            )
+        else:
+            messagebox.showinfo(
+                "Discipline-overzicht",
+                f"Excelbestand opgeslagen:\n{output_path}",
+                parent=self,
+            )
+
+    def _build_menu_with_discipline_excel(self) -> None:
+        original_build_menu(self)
+        _add_actions_menu_item(self)
+
+    viewer_class.export_discipline_counts_excel = export_discipline_counts_excel
+    viewer_class._build_menu = _build_menu_with_discipline_excel
+    viewer_class._sleufbase_discipline_excel_export_patch_version = PATCH_VERSION
+
+
+def install_discipline_excel_export_patch() -> None:
+    from .app import KlicViewerApp
+
+    _patch_viewer_class(KlicViewerApp)
