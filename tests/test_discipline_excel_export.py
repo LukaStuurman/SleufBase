@@ -9,6 +9,8 @@ from zipfile import ZipFile
 
 from SleufBase.discipline_excel_export import (
     DisciplineSummary,
+    TECHBASE_ORANGE_DARK,
+    TECHBASE_ORANGE_LIGHT,
     discipline_columns,
     ordered_nonempty_export_layers,
     summarize_dataset,
@@ -77,6 +79,7 @@ class DisciplineExcelExportTests(unittest.TestCase):
         self.assertEqual(summary.counts["Waterleiding"], 2)
         self.assertEqual(summary.counts["Datakabel"], 1)
         self.assertEqual(summary.counts["Laagspanning"], 1)
+        self.assertEqual(summary.total_cables_and_pipes, 4)
         self.assertNotIn("PUNT", summary.counts)
         self.assertNotIn("niet-ingedeeld", summary.counts)
 
@@ -247,6 +250,7 @@ class DisciplineExcelExportTests(unittest.TestCase):
                 self.assertIn("xl/workbook.xml", archive.namelist())
                 self.assertIn("xl/worksheets/sheet1.xml", archive.namelist())
                 worksheet = ET.fromstring(archive.read("xl/worksheets/sheet1.xml"))
+                styles = ET.fromstring(archive.read("xl/styles.xml"))
 
         cells = {
             cell.attrib["r"]: cell
@@ -263,29 +267,47 @@ class DisciplineExcelExportTests(unittest.TestCase):
 
         self.assertEqual(inline_text("A1"), "Proefsleuf")
         self.assertEqual(inline_text("B1"), "Aantal verschillende disciplines")
-        self.assertEqual(inline_text("C1"), "Waterleiding")
-        self.assertEqual(inline_text("D1"), "Datakabel")
-        self.assertEqual(inline_text("E1"), "Laagspanning")
+        self.assertEqual(inline_text("C1"), "Totaal aantal kabels/leidingen")
+        self.assertEqual(inline_text("D1"), "Waterleiding")
+        self.assertEqual(inline_text("E1"), "Datakabel")
+        self.assertEqual(inline_text("F1"), "Laagspanning")
         self.assertEqual(inline_text("A2"), "PS1")
         self.assertEqual(number("B2"), 2)
-        self.assertEqual(number("C2"), 2)
-        self.assertEqual(number("D2"), 1)
-        self.assertEqual(number("E2"), 0)
+        self.assertEqual(number("C2"), 3)
+        self.assertEqual(number("D2"), 2)
+        self.assertEqual(number("E2"), 1)
+        self.assertEqual(number("F2"), 0)
         self.assertEqual(inline_text("A3"), "PS2")
         self.assertEqual(number("B3"), 2)
-        self.assertEqual(number("C3"), 1)
-        self.assertEqual(number("D3"), 0)
-        self.assertEqual(number("E3"), 4)
+        self.assertEqual(number("C3"), 5)
+        self.assertEqual(number("D3"), 1)
+        self.assertEqual(number("E3"), 0)
+        self.assertEqual(number("F3"), 4)
 
         self.assertEqual(inline_text("A4"), "Totaal")
         self.assertEqual(number("B4"), 3)
-        self.assertEqual(number("C4"), 3)
-        self.assertEqual(number("D4"), 1)
-        self.assertEqual(number("E4"), 4)
+        self.assertEqual(number("C4"), 8)
+        self.assertEqual(number("D4"), 3)
+        self.assertEqual(number("E4"), 1)
+        self.assertEqual(number("F4"), 4)
+
+        self.assertEqual(cells["A1"].attrib.get("s"), "1")
+        self.assertEqual(cells["A2"].attrib.get("s"), "2")
+        self.assertEqual(cells["A4"].attrib.get("s"), "3")
+
+        fills = styles.findall("x:fills/x:fill/x:patternFill/x:fgColor", NS)
+        fill_colors = [fill.attrib.get("rgb") for fill in fills]
+        self.assertIn(TECHBASE_ORANGE_DARK, fill_colors)
+        self.assertIn(TECHBASE_ORANGE_LIGHT, fill_colors)
+
+        cell_xfs = styles.findall("x:cellXfs/x:xf", NS)
+        self.assertEqual(cell_xfs[1].attrib.get("fillId"), "2")
+        self.assertEqual(cell_xfs[2].attrib.get("fillId"), "3")
+        self.assertEqual(cell_xfs[3].attrib.get("fillId"), "3")
 
         auto_filter = worksheet.find("x:autoFilter", NS)
         self.assertIsNotNone(auto_filter)
-        self.assertEqual(auto_filter.attrib.get("ref"), "A1:E3")
+        self.assertEqual(auto_filter.attrib.get("ref"), "A1:F3")
 
 
 if __name__ == "__main__":
