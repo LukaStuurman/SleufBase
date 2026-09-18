@@ -46,6 +46,7 @@ def _install_runtime_patches() -> None:
     _validate_core_legacy_bytecode()
     from SleufBase.autosave_backup_patch import install_autosave_backup_patch
     from SleufBase.cyclomedia_fallback import install_cyclomedia_pdok_fallback
+    from SleufBase.discipline_excel_export import install_discipline_excel_export_patch
     from SleufBase.marxact_import_patch import install_marxact_import_patch
     from SleufBase.start_point_patch import install_manual_start_point_patch
     from SleufBase.template_dynamic_visibility_patch import (
@@ -55,6 +56,7 @@ def _install_runtime_patches() -> None:
     from SleufBase.virtual_trench_template_patch import install_virtual_trench_template_patch
 
     install_cyclomedia_pdok_fallback()
+    install_discipline_excel_export_patch()
     install_manual_start_point_patch()
     install_marxact_import_patch()
     install_virtual_trench_template_patch()
@@ -126,6 +128,10 @@ def _run_smoke_test() -> None:
         raise RuntimeError("MarXact importpatch ontbreekt in frozen build")
     if not callable(getattr(KlicViewerApp, "import_marxact_dxf", None)):
         raise RuntimeError("MarXact importactie ontbreekt in frozen build")
+    if int(getattr(KlicViewerApp, "_sleufbase_discipline_excel_export_patch_version", 0) or 0) < 1:
+        raise RuntimeError("Discipline Excel-exportpatch ontbreekt in frozen build")
+    if not callable(getattr(KlicViewerApp, "export_discipline_counts_excel", None)):
+        raise RuntimeError("Discipline Excel-exportactie ontbreekt in frozen build")
     if int(getattr(KlicViewerApp, "_sleufbase_autosave_patch_version", 0) or 0) < 1:
         raise RuntimeError("Automatische back-uppatch ontbreekt in frozen build")
     autosave_defaults = AutosaveSettings()
