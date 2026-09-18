@@ -1941,7 +1941,7 @@ def _install_template_variant_order_patch() -> None:
 
         ttk.Label(
             frame,
-            text="Kies de volgorde voor het sjabloon",
+            text="Kies de volgorde voor de export",
             font=("Segoe UI", 13, "bold"),
         ).grid(row=0, column=0, sticky="w")
         ttk.Label(
