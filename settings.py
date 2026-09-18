@@ -14,6 +14,8 @@ load_migrating_module("settings", globals(), __file__)
 # achterwaarts compatibel met de nieuwere UI- en exportopties.
 DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN = True
 TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY = "template_auto_fill_bgt_fysiek_voorkomen"
+DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL = True
+TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY = "template_auto_export_discipline_excel"
 KICKTHEMAP_MATERIAL_CHOICES_KEY = "kickthemap_material_choices"
 KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY = "kickthemap_profile_extra_choices"
 MARXACT_NAME_MAPPINGS_KEY = "marxact_name_mappings"
@@ -21,6 +23,11 @@ setattr(
     AppSettings,
     TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
     DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN,
+)
+setattr(
+    AppSettings,
+    TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+    DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
 )
 setattr(AppSettings, KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
 setattr(AppSettings, KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
@@ -90,6 +97,7 @@ def normalize_marxact_name_mappings(value: object) -> dict[str, str]:
 def load_settings() -> AppSettings:
     settings = _load_settings_without_bgt_surface_option()
     option_value: object = DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN
+    discipline_excel_value: object = DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL
     material_choices: object = []
     profile_extra_choices: object = []
     marxact_name_mappings: object = {}
@@ -100,6 +108,10 @@ def load_settings() -> AppSettings:
                 TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
                 DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN,
             )
+            discipline_excel_value = payload.get(
+                TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+                DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
+            )
             material_choices = payload.get(KICKTHEMAP_MATERIAL_CHOICES_KEY, [])
             profile_extra_choices = payload.get(KICKTHEMAP_PROFILE_EXTRA_CHOICES_KEY, [])
             marxact_name_mappings = payload.get(MARXACT_NAME_MAPPINGS_KEY, {})
@@ -109,6 +121,11 @@ def load_settings() -> AppSettings:
         settings,
         TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
         _bgt_surface_option_value(option_value),
+    )
+    setattr(
+        settings,
+        TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+        _bgt_surface_option_value(discipline_excel_value),
     )
     setattr(
         settings,
@@ -141,6 +158,13 @@ def save_settings(settings: AppSettings) -> Path:
             settings,
             TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN_KEY,
             DEFAULT_TEMPLATE_AUTO_FILL_BGT_FYSIEK_VOORKOMEN,
+        )
+    )
+    payload[TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY] = _bgt_surface_option_value(
+        getattr(
+            settings,
+            TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+            DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
         )
     )
     payload[KICKTHEMAP_MATERIAL_CHOICES_KEY] = normalize_kickthemap_material_choices(
