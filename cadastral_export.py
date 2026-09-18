@@ -113,6 +113,7 @@ class TemplateCrossSectionProfile:
 class CadastralDxfExporter:
     TRENCH_MODE_POLYGON = "polygon"
     TRENCH_MODE_CENTERLINE = "centerline"
+    TRENCH_MODE_NONE = "none"
     LABEL_HEIGHT = 6.0
     LABEL_GAP = 6.0
     LABEL_LINE_HEIGHT = 10.0
@@ -4681,7 +4682,9 @@ class CadastralDxfExporter:
             )
             self._draw_rotated_map_text(draw, image, position, text_label.text, text_label.rotation, font)
 
-        if trench_mode == self.TRENCH_MODE_CENTERLINE:
+        if trench_mode == self.TRENCH_MODE_NONE:
+            pass
+        elif trench_mode == self.TRENCH_MODE_CENTERLINE:
             centerline = self._proefsleuf_centerline(layer, linework)
             centerline_points = [
                 self._world_to_image_point(render_bounds, target_width, target_height, x, y) for x, y in centerline
@@ -4905,6 +4908,11 @@ class CadastralDxfExporter:
 
         for text_label in text_labels:
             self._add_cadastral_text_label(modelspace, text_label)
+
+        # 'Geen' onderdrukt alleen de proefsleufweergave. Eventuele GeoTIFFs zijn
+        # hierboven al toegevoegd en blijven dus gewoon onderdeel van de DXF.
+        if trench_mode == self.TRENCH_MODE_NONE:
+            return
 
         proefsleuf_bounds: list[Bounds] = []
         placed_label_bounds: list[Bounds] = []
@@ -5700,6 +5708,11 @@ class CadastralDxfExporter:
         )
 
     def _proefsleuf_label(self, layer: GeoTiffLayer, fallback_index: int) -> str:
+        explicit_label = str(
+            layer.metadata.get(self.TEMPLATE_PROEFSLEUF_LABEL_METADATA_KEY, "") or ""
+        ).strip().upper()
+        if re.fullmatch(r"PS\d+[A-Z]*", explicit_label):
+            return explicit_label
         return self._proefsleuf_base_name(layer, fallback_index)
 
     def _template_proefsleuf_label(self, layer: GeoTiffLayer, fallback_index: int) -> str:
