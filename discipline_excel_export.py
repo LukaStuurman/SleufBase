@@ -4,7 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from typing import Any, Iterable, Mapping, Sequence
 from xml.sax.saxutils import escape
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -12,7 +12,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from .kickthemap_dxf_export import ObjectLayerRule, build_object_layer_rules
 
 
-PATCH_VERSION = 2
+PATCH_VERSION = 3
 MENU_LABEL = "Discipline-overzicht naar Excel…"
 
 
@@ -339,6 +339,63 @@ def _layer_display_name(app: Any, layer: Any, fallback_index: int) -> str:
     return f"Proefsleuf {fallback_index}"
 
 
+def template_discipline_excel_path(dxf_path: str | Path) -> Path:
+    """Return the automatic Excel companion path for a DXF template export."""
+
+    return Path(dxf_path).with_suffix(".xlsx")
+
+
+def template_export_plan(
+    app: Any,
+    ordered_layers: Sequence[Any],
+) -> tuple[tuple[str, Any], ...]:
+    """Capture the exact included DXF-template order and visible PS labels."""
+
+    plan: list[tuple[str, Any]] = []
+    for index, layer in enumerate(ordered_layers, start=1):
+        if layer is None:
+            continue
+        metadata = getattr(layer, "metadata", {}) or {}
+        label = str(metadata.get("template_proefsleuf_label", "") or "").strip()
+        if not label:
+            label = _layer_display_name(app, layer, index)
+        plan.append((label, layer))
+    return tuple(plan)
+
+
+def summarize_template_export_plan(
+    app: Any,
+    plan: Sequence[tuple[str, Any]],
+    rules: Sequence[ObjectLayerRule],
+) -> tuple[list[DisciplineSummary], list[str]]:
+    """Summarize every exported slot without ever shifting the DXF order."""
+
+    summaries: list[DisciplineSummary] = []
+    warnings: list[str] = []
+    total = len(plan)
+    for index, (name, layer) in enumerate(plan, start=1):
+        try:
+            app.set_status(f"Excel-disciplines tellen ({index}/{total}): {name}")
+        except Exception:
+            pass
+        try:
+            app.update_idletasks()
+        except Exception:
+            pass
+        try:
+            dataset = app._load_maaiveld_dataset_for_layer(layer)
+        except Exception as exc:
+            warnings.append(f"{name}: {exc}")
+            summaries.append(DisciplineSummary(name, {}))
+            continue
+        if dataset is None:
+            warnings.append(f"{name}: geen kabel/leidinggegevens beschikbaar.")
+            summaries.append(DisciplineSummary(name, {}))
+            continue
+        summaries.append(summarize_dataset(name, dataset, rules))
+    return summaries, warnings
+
+
 def _add_actions_menu_item(app: Any) -> None:
     try:
         menu_bar = app.nametowidget(app.cget("menu"))
@@ -390,7 +447,209 @@ def _patch_viewer_class(viewer_class: Any) -> None:
     if int(getattr(viewer_class, "_sleufbase_discipline_excel_export_patch_version", 0) or 0) >= PATCH_VERSION:
         return
 
+    from .settings import (
+        DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
+        TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+    )
+
     original_build_menu = viewer_class._build_menu
+    original_open_settings_dialog = viewer_class.open_settings_dialog
+    original_choose_template_order = viewer_class._choose_template_export_order
+    original_export_template = viewer_class.export_cadastral_template_dxf
+
+    def _auto_template_excel_enabled(self) -> bool:
+        return bool(
+            getattr(
+                self.settings,
+                TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+                DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
+            )
+        )
+
+    def _widget_descendants(widget):
+        for child in widget.winfo_children():
+            yield child
+            yield from _widget_descendants(child)
+
+    def _widget_text(widget) -> str:
+        try:
+            return str(widget.cget("text") or "")
+        except (AttributeError, tk.TclError):
+            return ""
+
+    def _open_settings_dialog_with_discipline_excel(self) -> None:
+        existing_dialogs = {
+            str(child)
+            for child in self.winfo_children()
+            if isinstance(child, tk.Toplevel)
+        }
+        original_open_settings_dialog(self)
+        dialog = next(
+            (
+                child
+                for child in self.winfo_children()
+                if isinstance(child, tk.Toplevel)
+                and str(child) not in existing_dialogs
+                and child.title() == "Instellingen"
+            ),
+            None,
+        )
+        if dialog is None:
+            return
+
+        descendants = list(_widget_descendants(dialog))
+        anchor = next(
+            (
+                widget
+                for widget in descendants
+                if _widget_text(widget)
+                in {
+                    "Gebruik kaartpunten voor maaiveldtekst en -kleur in sjabloonexport",
+                    "Vul de drie maaiveldvakken automatisch met BGT fysiek_voorkomen",
+                }
+            ),
+            None,
+        )
+        save_button = next(
+            (widget for widget in descendants if _widget_text(widget) == "Opslaan"),
+            None,
+        )
+        if anchor is None or save_button is None:
+            return
+
+        content = anchor.master
+        while content is not dialog:
+            if any(
+                _widget_text(widget) == "Proefsleuven-sjabloon"
+                for widget in content.winfo_children()
+            ):
+                break
+            content = content.master
+        if content is dialog:
+            return
+
+        occupied_rows: list[int] = []
+        for widget in content.grid_slaves():
+            try:
+                occupied_rows.append(int(widget.grid_info().get("row", 0)))
+            except (TypeError, ValueError, tk.TclError):
+                continue
+        row = (max(occupied_rows) + 1) if occupied_rows else 0
+
+        option_var = tk.BooleanVar(value=_auto_template_excel_enabled(self))
+        ttk.Checkbutton(
+            content,
+            text="Maak bij DXF-sjabloonexport automatisch ook een discipline-Exceloverzicht",
+            variable=option_var,
+        ).grid(row=row, column=0, sticky="w", pady=(12, 0))
+        ttk.Label(
+            content,
+            text=(
+                "Het Excelbestand krijgt dezelfde bestandsnaam als de DXF en gebruikt exact "
+                "dezelfde PS-namen en volgorde als de gekozen sjabloonexport."
+            ),
+            wraplength=430,
+            justify="left",
+        ).grid(row=row + 1, column=0, sticky="w", pady=(0, 12))
+        setattr(dialog, "_discipline_excel_template_export_var", option_var)
+
+        original_save_command = save_button.cget("command")
+        if original_save_command:
+            def save_with_discipline_excel_option():
+                setattr(
+                    self.settings,
+                    TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+                    bool(option_var.get()),
+                )
+                if callable(original_save_command):
+                    return original_save_command()
+                return dialog.tk.call(str(original_save_command))
+
+            save_button.configure(command=save_with_discipline_excel_option)
+
+    def _choose_template_export_order_with_excel_capture(self, *args, **kwargs):
+        ordered_layers = original_choose_template_order(self, *args, **kwargs)
+        if ordered_layers is None:
+            plan = ()
+        else:
+            plan = template_export_plan(self, list(ordered_layers))
+        self._sleufbase_template_discipline_excel_plan = plan
+        return ordered_layers
+
+    def _export_template_with_discipline_excel(self, *args, **kwargs):
+        if not _auto_template_excel_enabled(self):
+            return original_export_template(self, *args, **kwargs)
+
+        chosen_paths: list[str] = []
+        original_asksaveasfilename = filedialog.asksaveasfilename
+
+        def recording_asksaveasfilename(*dialog_args, **dialog_kwargs):
+            selected = original_asksaveasfilename(*dialog_args, **dialog_kwargs)
+            if selected:
+                chosen_paths.append(str(selected))
+            return selected
+
+        filedialog.asksaveasfilename = recording_asksaveasfilename
+        try:
+            result = original_export_template(self, *args, **kwargs)
+        finally:
+            filedialog.asksaveasfilename = original_asksaveasfilename
+
+        dxf_path: Path | None = None
+        candidates: list[object] = []
+        if isinstance(result, (str, Path)):
+            candidates.append(result)
+        candidates.extend(reversed(chosen_paths))
+        for candidate in candidates:
+            try:
+                path = Path(candidate)
+            except (TypeError, ValueError):
+                continue
+            if path.suffix.casefold() == ".dxf" and path.exists():
+                dxf_path = path
+                break
+        if dxf_path is None:
+            return result
+
+        plan = tuple(getattr(self, "_sleufbase_template_discipline_excel_plan", ()) or ())
+        if not plan:
+            return result
+
+        try:
+            rules = normalize_layer_rules(self._resolved_cross_section_layer_rules())
+            if not rules:
+                raise RuntimeError("Er zijn geen kabel/leiding-disciplines geconfigureerd.")
+            summaries, warnings = summarize_template_export_plan(self, plan, rules)
+            output_path = write_discipline_workbook(
+                template_discipline_excel_path(dxf_path),
+                summaries,
+                disciplines=discipline_columns(rules),
+            )
+        except Exception as exc:
+            messagebox.showwarning(
+                "DXF-sjabloonexport",
+                "De DXF is opgeslagen, maar het automatische discipline-Exceloverzicht "
+                f"kon niet worden gemaakt:\n{exc}",
+                parent=self,
+            )
+            return result
+
+        self.set_status(
+            f"DXF-sjabloon en discipline-Excel opgeslagen: {dxf_path.name} / {output_path.name}"
+        )
+        if warnings:
+            details = "\n".join(warnings[:10])
+            if len(warnings) > 10:
+                details += f"\n… en nog {len(warnings) - 10} proefsleuf/proefsleuven."
+            messagebox.showwarning(
+                "Discipline-overzicht",
+                "DXF en Excel zijn opgeslagen. Voor enkele proefsleuven konden de "
+                "disciplinegegevens niet worden uitgelezen; hun Excel-rij is behouden met nullen:\n\n"
+                + details
+                + f"\n\nExcel: {output_path}",
+                parent=self,
+            )
+        return result
 
     def export_discipline_counts_excel(self) -> None:
         layers = list(getattr(self, "tiff_layers", ()) or ())
@@ -504,6 +763,10 @@ def _patch_viewer_class(viewer_class: Any) -> None:
         original_build_menu(self)
         _add_actions_menu_item(self)
 
+    viewer_class._auto_template_discipline_excel_enabled = _auto_template_excel_enabled
+    viewer_class.open_settings_dialog = _open_settings_dialog_with_discipline_excel
+    viewer_class._choose_template_export_order = _choose_template_export_order_with_excel_capture
+    viewer_class.export_cadastral_template_dxf = _export_template_with_discipline_excel
     viewer_class.export_discipline_counts_excel = export_discipline_counts_excel
     viewer_class._build_menu = _build_menu_with_discipline_excel
     viewer_class._sleufbase_discipline_excel_export_patch_version = PATCH_VERSION
