@@ -12,8 +12,10 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from .kickthemap_dxf_export import ObjectLayerRule, build_object_layer_rules
 
 
-PATCH_VERSION = 4
+PATCH_VERSION = 5
 MENU_LABEL = "Discipline-overzicht naar Excel…"
+TECHBASE_ORANGE_DARK = "FFC2410C"
+TECHBASE_ORANGE_LIGHT = "FFFFF7ED"
 
 
 @dataclass(frozen=True)
@@ -24,6 +26,10 @@ class DisciplineSummary:
     @property
     def distinct_count(self) -> int:
         return sum(1 for value in self.counts.values() if int(value) > 0)
+
+    @property
+    def total_cables_and_pipes(self) -> int:
+        return sum(max(0, int(value)) for value in self.counts.values())
 
 
 def _rule_label(rule: ObjectLayerRule) -> str:
@@ -148,7 +154,12 @@ def _worksheet_xml(
     summaries: Sequence[DisciplineSummary],
     disciplines: Sequence[str],
 ) -> str:
-    headers = ["Proefsleuf", "Aantal verschillende disciplines", *disciplines]
+    headers = [
+        "Proefsleuf",
+        "Aantal verschillende disciplines",
+        "Totaal aantal kabels/leidingen",
+        *disciplines,
+    ]
     rows: list[str] = []
 
     header_cells = [
@@ -159,14 +170,16 @@ def _worksheet_xml(
 
     for row_index, summary in enumerate(summaries, start=2):
         cells = [
-            _inline_string_cell(f"A{row_index}", summary.proefsleuf),
-            _number_cell(f"B{row_index}", summary.distinct_count),
+            _inline_string_cell(f"A{row_index}", summary.proefsleuf, style=2),
+            _number_cell(f"B{row_index}", summary.distinct_count, style=2),
+            _number_cell(f"C{row_index}", summary.total_cables_and_pipes, style=2),
         ]
-        for column_index, discipline in enumerate(disciplines, start=3):
+        for column_index, discipline in enumerate(disciplines, start=4):
             cells.append(
                 _number_cell(
                     f"{_column_name(column_index)}{row_index}",
                     int(summary.counts.get(discipline, 0)),
+                    style=2,
                 )
             )
         rows.append(f'<row r="{row_index}">{"".join(cells)}</row>')
@@ -177,19 +190,24 @@ def _worksheet_xml(
         for discipline in disciplines
     }
     total_cells = [
-        _inline_string_cell(f"A{total_row_index}", "Totaal", style=1),
+        _inline_string_cell(f"A{total_row_index}", "Totaal", style=3),
         _number_cell(
             f"B{total_row_index}",
             sum(1 for value in discipline_totals.values() if value > 0),
-            style=1,
+            style=3,
+        ),
+        _number_cell(
+            f"C{total_row_index}",
+            sum(discipline_totals.values()),
+            style=3,
         ),
     ]
-    for column_index, discipline in enumerate(disciplines, start=3):
+    for column_index, discipline in enumerate(disciplines, start=4):
         total_cells.append(
             _number_cell(
                 f"{_column_name(column_index)}{total_row_index}",
                 discipline_totals[discipline],
-                style=1,
+                style=3,
             )
         )
     rows.append(
@@ -199,7 +217,12 @@ def _worksheet_xml(
     last_column = _column_name(len(headers))
     data_last_row = max(1, len(summaries) + 1)
     last_row = total_row_index
-    column_widths = [24.0, 31.0, *[max(12.0, min(28.0, len(name) + 3.0)) for name in disciplines]]
+    column_widths = [
+        24.0,
+        31.0,
+        29.0,
+        *[max(12.0, min(28.0, len(name) + 3.0)) for name in disciplines],
+    ]
     cols = "".join(
         f'<col min="{index}" max="{index}" width="{width:.1f}" customWidth="1"/>'
         for index, width in enumerate(column_widths, start=1)
@@ -281,22 +304,26 @@ def write_discipline_workbook(
     styles = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-        '<fonts count="2">'
+        '<fonts count="3">'
         '<font><sz val="11"/><name val="Calibri"/><family val="2"/></font>'
         '<font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/><family val="2"/></font>'
+        '<font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font>'
         '</fonts>'
-        '<fills count="3">'
+        '<fills count="4">'
         '<fill><patternFill patternType="none"/></fill>'
         '<fill><patternFill patternType="gray125"/></fill>'
-        '<fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor rgb="FF1F4E78"/></patternFill></fill>'
+        f'<fill><patternFill patternType="solid"><fgColor rgb="{TECHBASE_ORANGE_DARK}"/><bgColor rgb="{TECHBASE_ORANGE_DARK}"/></patternFill></fill>'
+        f'<fill><patternFill patternType="solid"><fgColor rgb="{TECHBASE_ORANGE_LIGHT}"/><bgColor rgb="{TECHBASE_ORANGE_LIGHT}"/></patternFill></fill>'
         '</fills>'
         '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
         '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-        '<cellXfs count="2">'
+        '<cellXfs count="4">'
         '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
         '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1">'
         '<alignment horizontal="center" vertical="center"/>'
         '</xf>'
+        '<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/>'
+        '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
         '</cellXfs>'
         '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
         '</styleSheet>'
