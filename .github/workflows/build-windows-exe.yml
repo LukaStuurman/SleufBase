@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.52'
+  SLEUFBASE_RELEASE_VERSION: '0.3.53'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.52
+          name: SleufBase-Windows-v0.3.53
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,23 +293,26 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.52
+          SleufBase Windows v0.3.53
 
-          Gewone kadastrale DXF-export:
-          - leest PS-nummers correct uit KickTheMap-bestandsnamen met fase- en underscoredelen, zoals `nederweert_fase_2_ps_21_66587.tiff`
-          - geeft ieder raster vóór parallel kopiëren een deterministische unieke slotnaam, bijvoorbeeld `PS21__slot010.tiff`
-          - koppelt iedere IMAGEDEF één-op-één aan zijn eigen rasterbestand; Nederweert PS20 en PS21 kunnen niet meer hetzelfde raster overschrijven
-          - bevat lokale regressietests voor de volledige raster-/IMAGEDEF-koppeling
+          Discipline-overzicht naar Excel:
+          - voegt onder Acties een Excel-export toe met één rij per geladen proefsleuf
+          - toont per proefsleuf het aantal verschillende disciplines en aantallen per discipline
+          - gebruikt dezelfde KickTheMap/MarXact discipline-indeling als de dwarsprofielen en telt objectpunten én objectpolylijnen
+          - voegt onderaan een duidelijke Totaal-rij toe met het totale aantal per discipline over alle proefsleuven
+          - toont in de totaalrij hoeveel verschillende disciplines in minstens één proefsleuf voorkomen
+          - houdt de Totaal-rij buiten de Excel-autofilter zodat die niet als gewone proefsleuf wordt gefilterd
 
-          DXF-sjabloonexport:
-          - voorkomt dat meerdere proefsleuven met hetzelfde label naar hetzelfde kaartbestand schrijven
-          - geeft iedere kaart- en GeoTIFF-raster intern een unieke slotnaam, bijvoorbeeld `PS2__slot002_kaart.png`
-          - voorkomt parallelle bestandsnaam-races die gedeeltelijk zwarte of slechts bovenaan gerenderde kaarten konden veroorzaken
-          - houdt de zichtbare proefsleufnaam ongewijzigd; alleen interne rasterbestandsnamen worden uniek gemaakt
-          - bevat regressietests voor dubbele PS-labels en consistente normal/reverse slotnamen
+          Gebruikersinterface:
+          - het instellingenvenster opent standaard gemaximaliseerd
+
+          Kadastrale en DXF-rasterexport:
+          - bevat de v0.3.52 raster-identiteitsfix voor KickTheMap-bestandsnamen met fase- en underscoredelen
+          - houdt kaart- en GeoTIFF-rasterbestanden per proefsleufslot uniek om parallelle bestandsnaam-races te voorkomen
+          - behoudt één-op-één IMAGEDEF-koppelingen zodat verschillende proefsleuven elkaars raster niet kunnen overschrijven
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.52
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.53
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
