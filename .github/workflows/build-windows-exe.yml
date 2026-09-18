@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.53'
+  SLEUFBASE_RELEASE_VERSION: '0.3.54'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.53
+          name: SleufBase-Windows-v0.3.54
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,30 +293,27 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.53
+          SleufBase Windows v0.3.54
 
-          Discipline-overzicht naar Excel:
-          - voegt onder Acties een Excel-export toe met één rij per geladen proefsleuf
-          - toont per proefsleuf het aantal verschillende disciplines en aantallen per discipline
-          - gebruikt dezelfde KickTheMap/MarXact discipline-indeling als de dwarsprofielen en telt objectpunten én objectpolylijnen
-          - voegt onderaan een duidelijke Totaal-rij toe met het totale aantal per discipline over alle proefsleuven
-          - toont in de totaalrij hoeveel verschillende disciplines in minstens één proefsleuf voorkomen
-          - houdt de Totaal-rij buiten de Excel-autofilter zodat die niet als gewone proefsleuf wordt gefilterd
-          - maakt bij DXF-sjabloonexport standaard automatisch ook het discipline-Exceloverzicht
-          - gebruikt daarbij exact dezelfde gekozen PS-namen en volgorde als de DXF-sjabloonexport, inclusief varianten
-          - slaat het Excelbestand naast de DXF op met dezelfde basisbestandsnaam en de extensie .xlsx
-          - deze automatische Excel-export kan in Instellingen worden uitgeschakeld
+          Exportvolgorde en PS-namen:
+          - Discipline-overzicht naar Excel gebruikt nu hetzelfde volgordevenster als de DXF-sjabloonexport
+          - Kadastrale export DXF gebruikt hetzelfde venster voor volgorde, PS-nummers, varianten en wel/niet meenemen
+          - gekozen PS-namen en varianten, bijvoorbeeld PS7B, worden ook in de kadastrale DXF gebruikt
+          - lege sjabloonposities worden bij Excel en kadastrale overzichtsexport overgeslagen zonder de gekozen volgorde te verstoren
+          - ontbrekende disciplinegegevens behouden hun Excel-rij op de gekozen plaats met nullen
 
-          Gebruikersinterface:
-          - het instellingenvenster opent standaard gemaximaliseerd
+          Kadastrale DXF-weergave:
+          - voegt de optie Geen toe aan 'Weergave proefsleuf in kadastrale DXF-export'
+          - Geen onderdrukt alleen proefsleufpolygon/hartlijn en PS-labels
+          - GeoTIFF-rasterexport blijft onafhankelijk: als 'GeoTIFFs ook als raster in DXF-export opnemen' aanstaat, blijft de GeoTIFF ook bij Geen aanwezig
+          - regressietest controleert expliciet Geen + GeoTIFF aan
 
-          Kadastrale en DXF-rasterexport:
-          - bevat de v0.3.52 raster-identiteitsfix voor KickTheMap-bestandsnamen met fase- en underscoredelen
-          - houdt kaart- en GeoTIFF-rasterbestanden per proefsleufslot uniek om parallelle bestandsnaam-races te voorkomen
-          - behoudt één-op-één IMAGEDEF-koppelingen zodat verschillende proefsleuven elkaars raster niet kunnen overschrijven
+          Bestaande releasefixes behouden:
+          - behoudt de v0.3.52/v0.3.53 raster-identiteitsfixes en unieke IMAGEDEF/rasterkoppelingen uit de publieke releasebranch
+          - behoudt automatische discipline-Excel naast DXF-sjabloonexport en de Totaal-rij uit v0.3.53
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.53
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.54
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
