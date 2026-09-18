@@ -10,6 +10,7 @@ from zipfile import ZipFile
 from SleufBase.discipline_excel_export import (
     DisciplineSummary,
     discipline_columns,
+    ordered_nonempty_export_layers,
     summarize_dataset,
     summarize_template_export_plan,
     template_discipline_excel_path,
@@ -18,8 +19,14 @@ from SleufBase.discipline_excel_export import (
 )
 from SleufBase.settings import (
     DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
+    DXF_TRENCH_EXPORT_NONE,
+    DXF_TRENCH_EXPORT_OPTIONS,
     TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+    dxf_trench_export_label,
+    dxf_trench_export_value_from_label,
 )
+from SleufBase.cadastral_export import CadastralDxfExporter
+from SleufBase.models import Bounds
 
 from SleufBase.kickthemap_dxf_export import (
     KickTheMapObjectPoint,
@@ -106,6 +113,73 @@ class DisciplineExcelExportTests(unittest.TestCase):
         self.assertEqual([name for name, _layer in plan], ["PS7B", "PS2"])
         self.assertIs(plan[0][1], first)
         self.assertIs(plan[1][1], second)
+
+    def test_shared_order_filters_only_empty_slots(self) -> None:
+        first = object()
+        second = object()
+
+        ordered = ordered_nonempty_export_layers([second, None, first])
+
+        self.assertEqual(ordered, (second, first))
+
+    def test_none_trench_mode_is_available_in_settings(self) -> None:
+        self.assertEqual(DXF_TRENCH_EXPORT_NONE, "none")
+        self.assertIn(("none", "Geen"), tuple(DXF_TRENCH_EXPORT_OPTIONS))
+        self.assertEqual(dxf_trench_export_label("none"), "Geen")
+        self.assertEqual(dxf_trench_export_value_from_label("Geen"), "none")
+
+    def test_cadastral_label_honors_selected_ps_name_and_variant(self) -> None:
+        exporter = CadastralDxfExporter(wfs_client=object())
+        layer = SimpleNamespace(
+            metadata={"template_proefsleuf_label": "PS7B"},
+            path=Path("origineel_ps1.tif"),
+        )
+
+        self.assertEqual(exporter._proefsleuf_label(layer, 1), "PS7B")
+
+    def test_none_trench_mode_keeps_geotiff_when_raster_export_is_enabled(self) -> None:
+        exporter = CadastralDxfExporter(wfs_client=object())
+        layer = SimpleNamespace(
+            metadata={"template_proefsleuf_label": "PS3C"},
+            path=Path("PS3.tif"),
+            bounds=Bounds(0.0, 0.0, 10.0, 5.0),
+        )
+        prepared = SimpleNamespace(layer=layer, raster_path=Path("PS3.png"))
+        raster_calls: list[tuple[object, object, object, int]] = []
+
+        exporter._prepare_tiff_raster_files = lambda _output, _layers: [prepared]
+        exporter._add_tiff_image = (
+            lambda _document, _modelspace, raster_layer, raster_path, index:
+            raster_calls.append((raster_layer, raster_path, _modelspace, index))
+        )
+        exporter._proefsleuf_polygon = lambda *_args, **_kwargs: (
+            (_ for _ in ()).throw(AssertionError("Geen mag geen proefsleufpolygon tekenen"))
+        )
+        exporter._proefsleuf_centerline = lambda *_args, **_kwargs: (
+            (_ for _ in ()).throw(AssertionError("Geen mag geen proefsleufhartlijn tekenen"))
+        )
+
+        modelspace = object()
+        exporter._populate_overview_modelspace(
+            object(),
+            modelspace,
+            Path("overzicht.dxf"),
+            [layer],
+            [],
+            [],
+            layer.bounds,
+            trench_mode=exporter.TRENCH_MODE_NONE,
+            include_tiff_images=True,
+            label_gap=0.0,
+            centerline_color=(0, 0, 0),
+            label_color=(0, 0, 0),
+        )
+
+        self.assertEqual(len(raster_calls), 1)
+        self.assertIs(raster_calls[0][0], layer)
+        self.assertEqual(raster_calls[0][1], Path("PS3.png"))
+        self.assertIs(raster_calls[0][2], modelspace)
+        self.assertEqual(raster_calls[0][3], 1)
 
     def test_template_summary_preserves_rows_when_dataset_is_missing(self) -> None:
         first = object()
