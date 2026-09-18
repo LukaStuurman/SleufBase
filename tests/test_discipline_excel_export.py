@@ -80,7 +80,15 @@ class DisciplineExcelExportTests(unittest.TestCase):
                     "Datakabel": 1,
                     "Laagspanning": 0,
                 },
-            )
+            ),
+            DisciplineSummary(
+                "PS2",
+                {
+                    "Waterleiding": 1,
+                    "Datakabel": 0,
+                    "Laagspanning": 4,
+                },
+            ),
         ]
         with TemporaryDirectory() as temporary_directory:
             output = Path(temporary_directory) / "disciplines.xlsx"
@@ -120,6 +128,21 @@ class DisciplineExcelExportTests(unittest.TestCase):
         self.assertEqual(number("C2"), 2)
         self.assertEqual(number("D2"), 1)
         self.assertEqual(number("E2"), 0)
+        self.assertEqual(inline_text("A3"), "PS2")
+        self.assertEqual(number("B3"), 2)
+        self.assertEqual(number("C3"), 1)
+        self.assertEqual(number("D3"), 0)
+        self.assertEqual(number("E3"), 4)
+
+        self.assertEqual(inline_text("A4"), "Totaal")
+        self.assertEqual(number("B4"), 3)
+        self.assertEqual(number("C4"), 3)
+        self.assertEqual(number("D4"), 1)
+        self.assertEqual(number("E4"), 4)
+
+        auto_filter = worksheet.find("x:autoFilter", NS)
+        self.assertIsNotNone(auto_filter)
+        self.assertEqual(auto_filter.attrib.get("ref"), "A1:E3")
 
 
 if __name__ == "__main__":
