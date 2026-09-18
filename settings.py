@@ -9,6 +9,37 @@ from .source_migration import load_migrating_module
 load_migrating_module("settings", globals(), __file__)
 
 
+# Extra kadastrale DXF-weergave: helemaal geen proefsleufgeometrie tekenen.
+# De GeoTIFF-rasteroptie blijft hiervan bewust onafhankelijk.
+DXF_TRENCH_EXPORT_NONE = "none"
+_DXF_TRENCH_EXPORT_NONE_LABEL = "Geen"
+_legacy_dxf_trench_export_label = dxf_trench_export_label
+_legacy_dxf_trench_export_value_from_label = dxf_trench_export_value_from_label
+
+if not any(
+    isinstance(option, (list, tuple))
+    and len(option) >= 2
+    and str(option[0]).strip().casefold() == DXF_TRENCH_EXPORT_NONE
+    for option in tuple(DXF_TRENCH_EXPORT_OPTIONS)
+):
+    DXF_TRENCH_EXPORT_OPTIONS = (
+        *tuple(DXF_TRENCH_EXPORT_OPTIONS),
+        (DXF_TRENCH_EXPORT_NONE, _DXF_TRENCH_EXPORT_NONE_LABEL),
+    )
+
+
+def dxf_trench_export_label(value: object) -> str:
+    if str(value or "").strip().casefold() == DXF_TRENCH_EXPORT_NONE:
+        return _DXF_TRENCH_EXPORT_NONE_LABEL
+    return _legacy_dxf_trench_export_label(value)
+
+
+def dxf_trench_export_value_from_label(label: object) -> str:
+    if str(label or "").strip().casefold() == _DXF_TRENCH_EXPORT_NONE_LABEL.casefold():
+        return DXF_TRENCH_EXPORT_NONE
+    return _legacy_dxf_trench_export_value_from_label(label)
+
+
 # Deze instellingen zijn toegevoegd boven op de oudere, gebundelde settings-module.
 # Class-attribuutfallbacks houden ook rechtstreeks gemaakte AppSettings-objecten
 # achterwaarts compatibel met de nieuwere UI- en exportopties.

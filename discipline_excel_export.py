@@ -12,7 +12,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from .kickthemap_dxf_export import ObjectLayerRule, build_object_layer_rules
 
 
-PATCH_VERSION = 3
+PATCH_VERSION = 4
 MENU_LABEL = "Discipline-overzicht naar Excel…"
 
 
@@ -345,6 +345,12 @@ def template_discipline_excel_path(dxf_path: str | Path) -> Path:
     return Path(dxf_path).with_suffix(".xlsx")
 
 
+def ordered_nonempty_export_layers(ordered_layers: Sequence[Any] | None) -> tuple[Any, ...]:
+    """Return the selected non-empty layers in exactly the chosen export order."""
+
+    return tuple(layer for layer in tuple(ordered_layers or ()) if layer is not None)
+
+
 def template_export_plan(
     app: Any,
     ordered_layers: Sequence[Any],
@@ -455,6 +461,7 @@ def _patch_viewer_class(viewer_class: Any) -> None:
     original_build_menu = viewer_class._build_menu
     original_open_settings_dialog = viewer_class.open_settings_dialog
     original_choose_template_order = viewer_class._choose_template_export_order
+    original_export_cadastral = viewer_class.export_cadastral_dxf
     original_export_template = viewer_class.export_cadastral_template_dxf
 
     def _auto_template_excel_enabled(self) -> bool:
@@ -651,6 +658,32 @@ def _patch_viewer_class(viewer_class: Any) -> None:
             )
         return result
 
+    def _export_cadastral_with_template_order(self, *args, **kwargs):
+        layers = list(getattr(self, "tiff_layers", ()) or ())
+        if not layers:
+            return original_export_cadastral(self, *args, **kwargs)
+
+        ordered_layers = self._choose_template_export_order()
+        if ordered_layers is None:
+            self.set_status("Kadastrale DXF-export geannuleerd.")
+            return None
+        selected_layers = list(ordered_nonempty_export_layers(ordered_layers))
+        if not selected_layers:
+            messagebox.showinfo(
+                "Kadastrale export",
+                "Selecteer minimaal één proefsleuf om mee te nemen.",
+                parent=self,
+            )
+            self.set_status("Kadastrale DXF-export geannuleerd.")
+            return None
+
+        original_layers = self.tiff_layers
+        self.tiff_layers = selected_layers
+        try:
+            return original_export_cadastral(self, *args, **kwargs)
+        finally:
+            self.tiff_layers = original_layers
+
     def export_discipline_counts_excel(self) -> None:
         layers = list(getattr(self, "tiff_layers", ()) or ())
         if not layers:
@@ -659,6 +692,20 @@ def _patch_viewer_class(viewer_class: Any) -> None:
                 "Laad eerst één of meer proefsleuven.",
                 parent=self,
             )
+            return
+
+        ordered_layers = self._choose_template_export_order()
+        if ordered_layers is None:
+            self.set_status("Discipline-overzicht exporteren geannuleerd.")
+            return
+        plan = template_export_plan(self, list(ordered_layers))
+        if not plan:
+            messagebox.showinfo(
+                "Discipline-overzicht",
+                "Selecteer minimaal één proefsleuf om mee te nemen.",
+                parent=self,
+            )
+            self.set_status("Discipline-overzicht exporteren geannuleerd.")
             return
 
         target = filedialog.asksaveasfilename(
@@ -692,32 +739,11 @@ def _patch_viewer_class(viewer_class: Any) -> None:
             self.set_status("Discipline-overzicht exporteren mislukt.")
             return
 
-        summaries: list[DisciplineSummary] = []
-        warnings: list[str] = []
-        total = len(layers)
-        for index, layer in enumerate(layers, start=1):
-            name = _layer_display_name(self, layer, index)
-            self.set_status(f"Disciplines tellen ({index}/{total}): {name}")
-            try:
-                self.update_idletasks()
-            except Exception:
-                pass
-            try:
-                dataset = self._load_maaiveld_dataset_for_layer(layer)
-            except Exception as exc:
-                warnings.append(f"{name}: {exc}")
-                continue
-            if dataset is None:
-                warnings.append(f"{name}: geen kabel/leidinggegevens beschikbaar.")
-                continue
-            summaries.append(summarize_dataset(name, dataset, rules))
-
+        summaries, warnings = summarize_template_export_plan(self, plan, rules)
         if not summaries:
-            detail = "\n".join(warnings[:10])
-            suffix = f"\n\n{detail}" if detail else ""
             messagebox.showerror(
                 "Discipline-overzicht",
-                "Geen proefsleuf kon worden uitgelezen." + suffix,
+                "Geen geselecteerde proefsleuf kon worden verwerkt.",
                 parent=self,
             )
             self.set_status("Discipline-overzicht exporteren mislukt.")
@@ -747,7 +773,9 @@ def _patch_viewer_class(viewer_class: Any) -> None:
                 details += f"\n… en nog {len(warnings) - 10} proefsleuf/proefsleuven."
             messagebox.showwarning(
                 "Discipline-overzicht",
-                "Het Excelbestand is gemaakt, maar niet alle proefsleuven konden worden uitgelezen:\n\n"
+                "Het Excelbestand is gemaakt. Voor enkele geselecteerde proefsleuven konden de "
+                "disciplinegegevens niet worden uitgelezen; hun rij blijft op de gekozen plaats staan "
+                "met nullen:\n\n"
                 + details
                 + f"\n\nBestand: {output_path}",
                 parent=self,
@@ -766,8 +794,11 @@ def _patch_viewer_class(viewer_class: Any) -> None:
     viewer_class._auto_template_discipline_excel_enabled = _auto_template_excel_enabled
     viewer_class.open_settings_dialog = _open_settings_dialog_with_discipline_excel
     viewer_class._choose_template_export_order = _choose_template_export_order_with_excel_capture
+    viewer_class.export_cadastral_dxf = _export_cadastral_with_template_order
     viewer_class.export_cadastral_template_dxf = _export_template_with_discipline_excel
     viewer_class.export_discipline_counts_excel = export_discipline_counts_excel
+    viewer_class._sleufbase_cadastral_export_order_dialog = True
+    viewer_class._sleufbase_discipline_export_order_dialog = True
     viewer_class._build_menu = _build_menu_with_discipline_excel
     viewer_class._sleufbase_discipline_excel_export_patch_version = PATCH_VERSION
 
