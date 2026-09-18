@@ -302,6 +302,10 @@ jobs:
           - voegt onderaan een duidelijke Totaal-rij toe met het totale aantal per discipline over alle proefsleuven
           - toont in de totaalrij hoeveel verschillende disciplines in minstens één proefsleuf voorkomen
           - houdt de Totaal-rij buiten de Excel-autofilter zodat die niet als gewone proefsleuf wordt gefilterd
+          - maakt bij DXF-sjabloonexport standaard automatisch ook het discipline-Exceloverzicht
+          - gebruikt daarbij exact dezelfde gekozen PS-namen en volgorde als de DXF-sjabloonexport, inclusief varianten
+          - slaat het Excelbestand naast de DXF op met dezelfde basisbestandsnaam en de extensie .xlsx
+          - deze automatische Excel-export kan in Instellingen worden uitgeschakeld
 
           Gebruikersinterface:
           - het instellingenvenster opent standaard gemaximaliseerd
