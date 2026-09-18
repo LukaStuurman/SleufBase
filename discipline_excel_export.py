@@ -12,7 +12,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from .kickthemap_dxf_export import ObjectLayerRule, build_object_layer_rules
 
 
-PATCH_VERSION = 1
+PATCH_VERSION = 2
 MENU_LABEL = "Discipline-overzicht naar Excel…"
 
 
@@ -139,8 +139,9 @@ def _inline_string_cell(reference: str, value: object, *, style: int = 0) -> str
     )
 
 
-def _number_cell(reference: str, value: int) -> str:
-    return f'<c r="{reference}" t="n"><v>{int(value)}</v></c>'
+def _number_cell(reference: str, value: int, *, style: int = 0) -> str:
+    style_attr = f' s="{style}"' if style else ""
+    return f'<c r="{reference}" t="n"{style_attr}><v>{int(value)}</v></c>'
 
 
 def _worksheet_xml(
@@ -170,8 +171,34 @@ def _worksheet_xml(
             )
         rows.append(f'<row r="{row_index}">{"".join(cells)}</row>')
 
+    total_row_index = len(summaries) + 2
+    discipline_totals = {
+        discipline: sum(int(summary.counts.get(discipline, 0)) for summary in summaries)
+        for discipline in disciplines
+    }
+    total_cells = [
+        _inline_string_cell(f"A{total_row_index}", "Totaal", style=1),
+        _number_cell(
+            f"B{total_row_index}",
+            sum(1 for value in discipline_totals.values() if value > 0),
+            style=1,
+        ),
+    ]
+    for column_index, discipline in enumerate(disciplines, start=3):
+        total_cells.append(
+            _number_cell(
+                f"{_column_name(column_index)}{total_row_index}",
+                discipline_totals[discipline],
+                style=1,
+            )
+        )
+    rows.append(
+        f'<row r="{total_row_index}" ht="22" customHeight="1">{"".join(total_cells)}</row>'
+    )
+
     last_column = _column_name(len(headers))
-    last_row = max(1, len(summaries) + 1)
+    data_last_row = max(1, len(summaries) + 1)
+    last_row = total_row_index
     column_widths = [24.0, 31.0, *[max(12.0, min(28.0, len(name) + 3.0)) for name in disciplines]]
     cols = "".join(
         f'<col min="{index}" max="{index}" width="{width:.1f}" customWidth="1"/>'
@@ -187,7 +214,7 @@ def _worksheet_xml(
         '<sheetFormatPr defaultRowHeight="15"/>'
         f"<cols>{cols}</cols>"
         f'<sheetData>{"".join(rows)}</sheetData>'
-        f'<autoFilter ref="A1:{last_column}{last_row}"/>'
+        f'<autoFilter ref="A1:{last_column}{data_last_row}"/>'
         '</worksheet>'
     )
 
