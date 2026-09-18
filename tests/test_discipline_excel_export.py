@@ -11,8 +11,16 @@ from SleufBase.discipline_excel_export import (
     DisciplineSummary,
     discipline_columns,
     summarize_dataset,
+    summarize_template_export_plan,
+    template_discipline_excel_path,
+    template_export_plan,
     write_discipline_workbook,
 )
+from SleufBase.settings import (
+    DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL,
+    TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+)
+
 from SleufBase.kickthemap_dxf_export import (
     KickTheMapObjectPoint,
     KickTheMapObjectPolyline,
@@ -70,6 +78,67 @@ class DisciplineExcelExportTests(unittest.TestCase):
             discipline_columns(self.rules),
             ("Waterleiding", "Datakabel", "Laagspanning"),
         )
+
+    def test_template_excel_is_enabled_by_default_and_uses_dxf_basename(self) -> None:
+        self.assertTrue(DEFAULT_TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL)
+        self.assertEqual(
+            TEMPLATE_AUTO_EXPORT_DISCIPLINE_EXCEL_KEY,
+            "template_auto_export_discipline_excel",
+        )
+        self.assertEqual(
+            template_discipline_excel_path(Path("C:/export/Project_sjabloon.dxf")),
+            Path("C:/export/Project_sjabloon.xlsx"),
+        )
+
+    def test_template_export_plan_keeps_exact_dxf_names_and_order(self) -> None:
+        first = SimpleNamespace(
+            metadata={"template_proefsleuf_label": "PS7B"},
+            path=Path("later.tiff"),
+        )
+        second = SimpleNamespace(
+            metadata={"template_proefsleuf_label": "PS2"},
+            path=Path("eerder.tiff"),
+        )
+        app = SimpleNamespace(cadastral_exporter=None)
+
+        plan = template_export_plan(app, [first, None, second])
+
+        self.assertEqual([name for name, _layer in plan], ["PS7B", "PS2"])
+        self.assertIs(plan[0][1], first)
+        self.assertIs(plan[1][1], second)
+
+    def test_template_summary_preserves_rows_when_dataset_is_missing(self) -> None:
+        first = object()
+        missing = object()
+        datasets = {
+            first: SimpleNamespace(
+                points=(KickTheMapObjectPoint("Water", "water", 1.0, 0.0, 2.0),),
+                polylines=(),
+            ),
+            missing: None,
+        }
+
+        class FakeApp:
+            def set_status(self, _text: str) -> None:
+                return None
+
+            def update_idletasks(self) -> None:
+                return None
+
+            def _load_maaiveld_dataset_for_layer(self, layer):
+                return datasets[layer]
+
+        summaries, warnings = summarize_template_export_plan(
+            FakeApp(),
+            (("PS4", first), ("PS4B", missing)),
+            self.rules,
+        )
+
+        self.assertEqual([summary.proefsleuf for summary in summaries], ["PS4", "PS4B"])
+        self.assertEqual(summaries[0].counts["Waterleiding"], 1)
+        self.assertEqual(dict(summaries[1].counts), {})
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("PS4B", warnings[0])
 
     def test_writer_creates_real_xlsx_with_expected_table(self) -> None:
         summaries = [
