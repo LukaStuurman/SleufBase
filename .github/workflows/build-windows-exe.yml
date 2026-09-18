@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.54'
+  SLEUFBASE_RELEASE_VERSION: '0.3.55'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.54
+          name: SleufBase-Windows-v0.3.55
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,27 +293,23 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.54
+          SleufBase Windows v0.3.55
 
-          Exportvolgorde en PS-namen:
-          - Discipline-overzicht naar Excel gebruikt nu hetzelfde volgordevenster als de DXF-sjabloonexport
-          - Kadastrale export DXF gebruikt hetzelfde venster voor volgorde, PS-nummers, varianten en wel/niet meenemen
-          - gekozen PS-namen en varianten, bijvoorbeeld PS7B, worden ook in de kadastrale DXF gebruikt
-          - lege sjabloonposities worden bij Excel en kadastrale overzichtsexport overgeslagen zonder de gekozen volgorde te verstoren
-          - ontbrekende disciplinegegevens behouden hun Excel-rij op de gekozen plaats met nullen
+          Discipline-overzicht naar Excel:
+          - voegt naast 'Aantal verschillende disciplines' de kolom 'Totaal aantal kabels/leidingen' toe
+          - telt per proefsleuf alle herkende kabels en leidingen over de disciplinekolommen op
+          - toont in de Totaal-rij ook het totale aantal kabels/leidingen over alle geselecteerde proefsleuven
+          - gebruikt Techbase-oranje opmaak in plaats van blauw: donkeroranje kopregel (#C2410C) en zeer licht oranje tabelvulling (#FFF7ED)
+          - houdt de Totaal-rij vetgedrukt binnen dezelfde lichte oranje stijl
+          - behoudt correcte disciplinevolgorde, geselecteerde PS-namen/varianten en autofilterbereik
 
-          Kadastrale DXF-weergave:
-          - voegt de optie Geen toe aan 'Weergave proefsleuf in kadastrale DXF-export'
-          - Geen onderdrukt alleen proefsleufpolygon/hartlijn en PS-labels
-          - GeoTIFF-rasterexport blijft onafhankelijk: als 'GeoTIFFs ook als raster in DXF-export opnemen' aanstaat, blijft de GeoTIFF ook bij Geen aanwezig
-          - regressietest controleert expliciet Geen + GeoTIFF aan
-
-          Bestaande releasefixes behouden:
-          - behoudt de v0.3.52/v0.3.53 raster-identiteitsfixes en unieke IMAGEDEF/rasterkoppelingen uit de publieke releasebranch
-          - behoudt automatische discipline-Excel naast DXF-sjabloonexport en de Totaal-rij uit v0.3.53
+          Bestaande exportfunctionaliteit behouden:
+          - Discipline Excel en Kadastrale DXF blijven hetzelfde volgordevenster gebruiken
+          - Kadastrale DXF behoudt de optie Geen, waarbij GeoTIFF-rasterexport onafhankelijk blijft werken
+          - de v0.3.52-v0.3.54 raster-identiteitsfixes en unieke IMAGEDEF/rasterkoppelingen blijven behouden
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.54
+          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.55
           - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
