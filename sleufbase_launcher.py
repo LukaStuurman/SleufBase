@@ -128,10 +128,12 @@ def _run_smoke_test() -> None:
         raise RuntimeError("MarXact importpatch ontbreekt in frozen build")
     if not callable(getattr(KlicViewerApp, "import_marxact_dxf", None)):
         raise RuntimeError("MarXact importactie ontbreekt in frozen build")
-    if int(getattr(KlicViewerApp, "_sleufbase_discipline_excel_export_patch_version", 0) or 0) < 1:
-        raise RuntimeError("Discipline Excel-exportpatch ontbreekt in frozen build")
+    if int(getattr(KlicViewerApp, "_sleufbase_discipline_excel_export_patch_version", 0) or 0) < 3:
+        raise RuntimeError("Verouderde discipline Excel-exportpatch in frozen build")
     if not callable(getattr(KlicViewerApp, "export_discipline_counts_excel", None)):
         raise RuntimeError("Discipline Excel-exportactie ontbreekt in frozen build")
+    if not callable(getattr(KlicViewerApp, "_auto_template_discipline_excel_enabled", None)):
+        raise RuntimeError("Automatische discipline-Excel bij DXF-sjabloonexport ontbreekt")
     if int(getattr(KlicViewerApp, "_sleufbase_autosave_patch_version", 0) or 0) < 1:
         raise RuntimeError("Automatische back-uppatch ontbreekt in frozen build")
     autosave_defaults = AutosaveSettings()
