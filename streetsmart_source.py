@@ -9,6 +9,8 @@ import time
 from typing import Any
 from urllib.parse import quote
 
+from .atomic_io import atomic_write_text
+
 
 STREETSMART_WEB_URL = "https://streetsmart.cyclomedia.com/streetsmart"
 STREETSMART_RD_SRS = "EPSG:28992"
@@ -104,7 +106,8 @@ def save_streetsmart_state(selection: dict[str, Any] | None) -> Path:
     state_path = streetsmart_state_path()
     state_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {"version": time.time_ns(), "selection": selection}
-    state_path.write_text(
+    atomic_write_text(
+        state_path,
         json.dumps(payload, ensure_ascii=True, indent=2),
         encoding="utf-8",
     )

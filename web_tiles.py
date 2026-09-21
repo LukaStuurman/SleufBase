@@ -46,6 +46,7 @@ class WebMercatorTileClient:
         max_workers: int = 8,
         memory_cache_limit: int = 768,
         retries: int = 3,
+        disk_cache_limit_bytes: int = 512 * 1024 * 1024,
     ) -> None:
         self.user_agent = user_agent
         self.timeout = timeout
@@ -54,6 +55,9 @@ class WebMercatorTileClient:
         self.max_workers = max(1, int(max_workers))
         self.memory_cache_limit = max(64, int(memory_cache_limit))
         self.retries = max(1, int(retries))
+        self.disk_cache_limit_bytes = max(1, int(disk_cache_limit_bytes))
+        self._disk_cache_prune_target_bytes = max(1, int(self.disk_cache_limit_bytes * 0.90))
+        self._disk_cache_prune_interval_seconds = 300.0
         self.transformer = Transformer.from_crs("EPSG:28992", "EPSG:3857", always_xy=True)
         self._thread_local = threading.local()
         local_appdata = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
@@ -66,6 +70,9 @@ class WebMercatorTileClient:
             tuple[int, int, int], tuple[bytes, datetime]
         ] = OrderedDict()
         self._memory_cache_lock = threading.RLock()
+        self._disk_cache_lock = threading.RLock()
+        self._last_disk_cache_prune = 0.0
+        self._prune_disk_cache(force=True)
 
     def build_tile_url(self, zoom: int, x: int, y: int) -> str:
         raise NotImplementedError
@@ -358,6 +365,40 @@ class WebMercatorTileClient:
                 parent_tile.close()
         return None
 
+    def _prune_disk_cache(self, *, force: bool = False) -> None:
+        now = time.monotonic()
+        with self._disk_cache_lock:
+            if not force and (now - self._last_disk_cache_prune) < self._disk_cache_prune_interval_seconds:
+                return
+            self._last_disk_cache_prune = now
+
+            entries: list[tuple[int, Path, int]] = []
+            total_size = 0
+            try:
+                candidates = list(self.cache_dir.glob("*.png"))
+            except OSError:
+                return
+            for path in candidates:
+                try:
+                    stat = path.stat()
+                except (FileNotFoundError, OSError):
+                    continue
+                size = max(0, int(stat.st_size))
+                total_size += size
+                entries.append((int(stat.st_mtime_ns), path, size))
+
+            if total_size <= self.disk_cache_limit_bytes:
+                return
+
+            for _mtime_ns, path, size in sorted(entries, key=lambda item: item[0]):
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError:
+                    continue
+                total_size = max(0, total_size - size)
+                if total_size <= self._disk_cache_prune_target_bytes:
+                    break
+
     def _write_tile_atomically(self, tile_path: Path, tile: Image.Image) -> None:
         temp_path = tile_path.with_name(
             f".{tile_path.name}.{os.getpid()}.{threading.get_ident()}.{time.time_ns()}.tmp"
@@ -365,6 +406,7 @@ class WebMercatorTileClient:
         try:
             tile.save(temp_path, format="PNG")
             os.replace(temp_path, tile_path)
+            self._prune_disk_cache()
         finally:
             try:
                 temp_path.unlink(missing_ok=True)
