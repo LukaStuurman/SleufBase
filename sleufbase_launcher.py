@@ -231,16 +231,23 @@ def main() -> int:
     session_capture_port_text = _take_option(args, "--kickthemap-browser-session-capture-port")
     session_capture_token = _take_option(args, "--kickthemap-browser-session-capture-token")
     session_capture_email = _take_option(args, "--kickthemap-browser-session-capture-email")
+    jobs_capture_port_text = _take_option(args, "--kickthemap-browser-jobs-capture-port")
+    jobs_capture_token = _take_option(args, "--kickthemap-browser-jobs-capture-token")
     try:
         session_capture_port = int(session_capture_port_text) if session_capture_port_text else None
     except ValueError:
         session_capture_port = None
+    try:
+        jobs_capture_port = int(jobs_capture_port_text) if jobs_capture_port_text else None
+    except ValueError:
+        jobs_capture_port = None
     if (
         prelogin
         or browser_url is not None
         or browser_title is not None
         or browser_capture_file is not None
         or session_capture_port is not None
+        or jobs_capture_port is not None
     ):
         from SleufBase import kickthemap_browser as browser_module
         from SleufBase.kickthemap_profile_choices_patch import (
@@ -256,6 +263,8 @@ def main() -> int:
             session_capture_port=session_capture_port,
             session_capture_token=session_capture_token,
             account_email=session_capture_email,
+            jobs_capture_port=jobs_capture_port,
+            jobs_capture_token=jobs_capture_token,
         )
         return 0
 
