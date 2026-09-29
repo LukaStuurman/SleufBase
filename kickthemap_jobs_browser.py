@@ -821,6 +821,7 @@ class KickTheMapJobsWindow(tk.Tk):
 
         self._build_layout()
         self.after(50, self.refresh_jobs)
+        self.after(750, self._poll_loaded_jobs_state)
 
     def _build_layout(self) -> None:
         self.configure(bg=APP_BG)
@@ -1071,6 +1072,39 @@ class KickTheMapJobsWindow(tk.Tk):
     def _loaded_jobs_manifest_path(self) -> Path:
         return KickTheMapClient.default_download_dir() / "loaded_jobs.json"
 
+    def _active_loaded_jobs_state_path(self) -> Path:
+        return KickTheMapClient.default_download_dir() / "active_loaded_jobs.json"
+
+    def _read_active_loaded_job_ids(self) -> set[str]:
+        state_path = self._active_loaded_jobs_state_path()
+        try:
+            data = json.loads(state_path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError, TypeError, ValueError):
+            return set()
+        if not isinstance(data, dict) or int(data.get("version", 0) or 0) != 1:
+            return set()
+        try:
+            updated_at = float(data.get("updated_at", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            return set()
+        # The main application refreshes this heartbeat every few seconds. A
+        # stale file represents a closed/crashed session and must not make jobs
+        # look loaded.
+        if updated_at <= 0.0 or time.time() - updated_at > 6.0:
+            return set()
+        values = data.get("job_ids")
+        if not isinstance(values, list):
+            return set()
+        result: set[str] = set()
+        for value in values:
+            try:
+                job_id = int(value)
+            except (TypeError, ValueError):
+                continue
+            if job_id > 0:
+                result.add(str(job_id))
+        return result
+
     def _read_loaded_jobs_manifest(self) -> dict[str, dict[str, str]]:
         manifest_path = self._loaded_jobs_manifest_path()
         if not manifest_path.exists():
@@ -1112,13 +1146,25 @@ class KickTheMapJobsWindow(tk.Tk):
                 pass
 
     def _refresh_loaded_job_ids(self) -> None:
-        manifest_records = self._read_loaded_jobs_manifest()
         current_job_ids = {str(job.job_id) for job in self.jobs}
-        self.loaded_job_ids = {
-            job_id
-            for job_id, record in manifest_records.items()
-            if job_id in current_job_ids and Path(str(record.get("path", ""))).exists()
-        }
+        active_job_ids = self._read_active_loaded_job_ids()
+        self.loaded_job_ids = active_job_ids & current_job_ids
+
+    def _poll_loaded_jobs_state(self) -> None:
+        try:
+            if not self.winfo_exists():
+                return
+            if self.show_loaded_jobs_only:
+                previous = set(self.loaded_job_ids)
+                self._refresh_loaded_job_ids()
+                if previous != self.loaded_job_ids:
+                    self._refresh_table()
+        finally:
+            try:
+                if self.winfo_exists():
+                    self.after(750, self._poll_loaded_jobs_state)
+            except tk.TclError:
+                pass
 
     def toggle_loaded_jobs_only(self) -> None:
         if self.show_loaded_jobs_only:
@@ -1129,7 +1175,10 @@ class KickTheMapJobsWindow(tk.Tk):
         self._refresh_loaded_job_ids()
         current_loaded_ids = {str(job.job_id) for job in self.jobs if str(job.job_id) in self.loaded_job_ids}
         if not current_loaded_ids:
-            messagebox.showinfo("SleufBase Jobs", "Er zijn nog geen geladen GeoTIFF-jobs gevonden.")
+            messagebox.showinfo(
+                "SleufBase Jobs",
+                "Er zijn momenteel geen KickTheMap GeoTIFF-jobs geladen in de actieve SleufBase-sessie.",
+            )
             return
         self.show_loaded_jobs_only = True
         self.loaded_jobs_button_var.set("Alle Jobs")
@@ -1365,6 +1414,10 @@ class KickTheMapJobsWindow(tk.Tk):
     def _finish_load_geotiffs(self, paths: list[str], errors: list[str], loaded_records: dict[str, dict[str, str]] | None = None) -> None:
         self._set_controls_enabled(True)
         if paths:
+            records = loaded_records or {}
+            # The main app reads the sidecar while opening the TIFF. It must exist
+            # before IPC/process handoff, otherwise kickthemap_job_id can be lost.
+            self._write_loaded_job_sidecars(records)
             delivered = send_paths_to_running_instance(paths, timeout=2.5)
             if not delivered:
                 try:
@@ -1377,17 +1430,22 @@ class KickTheMapJobsWindow(tk.Tk):
                 except Exception as exc:
                     errors.append(f"GeoTIFFs openen in programma mislukt: {exc}")
             if delivered:
-                records = loaded_records or {}
                 self._write_loaded_jobs_manifest(records)
-                self._write_loaded_job_sidecars(records)
-                self.loaded_job_ids.update(records.keys())
-                self._refresh_table()
                 self.status_var.set(f"{len(paths)} GeoTIFF(s) geladen in het programma.")
+                # Give the main application a moment to load the layers and write
+                # its active-session heartbeat, then synchronize the filter.
+                self.after(900, self._refresh_loaded_filter_after_delivery)
         if errors:
             self.status_var.set(f"{len(paths)} GeoTIFF(s) geladen, {len(errors)} fout(en).")
             messagebox.showwarning("KickTheMap GeoTIFFs", "\n".join(errors[:8]))
         elif not paths:
             self.status_var.set("Geen GeoTIFFs geladen.")
+
+    def _refresh_loaded_filter_after_delivery(self) -> None:
+        previous = set(self.loaded_job_ids)
+        self._refresh_loaded_job_ids()
+        if self.show_loaded_jobs_only or previous != self.loaded_job_ids:
+            self._refresh_table()
 
     def _open_url(self, url: str, title: str | None = None) -> None:
         try:
