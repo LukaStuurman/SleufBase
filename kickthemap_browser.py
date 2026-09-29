@@ -1107,13 +1107,18 @@ def _inject_browser_script(
                     return
             window.destroy()
         elif session_capture_port is not None and result in {
+            "signin-waiting-for-captcha",
             "signin-already-tried",
             "signin-no-credentials",
             "signin-form-missing",
         }:
             window.show()
     except Exception:
-        pass
+        if session_capture_port is not None:
+            try:
+                window.show()
+            except Exception:
+                pass
 
 
 def _browser_go_back() -> None:
