@@ -5,7 +5,11 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import shutil
+import socket
+import subprocess
+import sys
 import threading
 import time
 from urllib.parse import urlsplit
@@ -408,17 +412,20 @@ class KickTheMapClient:
             self._recent_job_feature_paths.clear()
         signin_page = self.session.get(self.SIGNIN_URL, timeout=self.timeout)
         signin_page.raise_for_status()
-        login_token = self._extract_login_token(signin_page.text)
-        self.session.post(
-            self.LOGIN_URL,
-            data={
-                "_token": login_token,
-                "email": email,
-                "password": password,
-                "g-recaptcha-response": "",
-            },
-            timeout=self.timeout,
-        ).raise_for_status()
+        if self._requires_browser_login(signin_page.text):
+            self._import_browser_session_cookies(email)
+        else:
+            login_token = self._extract_login_token(signin_page.text)
+            self.session.post(
+                self.LOGIN_URL,
+                data={
+                    "_token": login_token,
+                    "email": email,
+                    "password": password,
+                    "g-recaptcha-response": "",
+                },
+                timeout=self.timeout,
+            ).raise_for_status()
 
         jobs_page = self.session.get(self.JOBS_URL, timeout=self.timeout)
         jobs_page.raise_for_status()
@@ -429,6 +436,137 @@ class KickTheMapClient:
         self._csrf_token = self._extract_csrf_token(jobs_page.text)
         self._aws_config = None
         return self._parse_jobs_page(jobs_page.text)
+
+    @staticmethod
+    def _requires_browser_login(html: str) -> bool:
+        return bool(
+            re.search(r"recaptcha/api\.js|grecaptcha\.execute\s*\(", html, re.IGNORECASE)
+        )
+
+    def _import_browser_session_cookies(self, email: str) -> None:
+        """Use KickTheMap's own browser login when its CAPTCHA is enabled.
+
+        The browser process keeps the password inside the saved account settings.
+        It sends only KickTheMap cookies back over a one-use loopback socket so
+        the requests client can reuse the authenticated session for the jobs
+        page and file endpoints.
+        """
+
+        from .settings import load_settings
+
+        settings = load_settings()
+        normalized_email = str(email or "").strip().lower()
+        saved_account = next(
+            (
+                account
+                for account in settings.kickthemap_saved_accounts or []
+                if str(account.email or "").strip().lower() == normalized_email
+            ),
+            None,
+        )
+        if saved_account is None:
+            raise KickTheMapError(
+                "KickTheMap vraagt nu om browserbevestiging bij het inloggen. "
+                "Sla dit account op in SleufBase en laad de jobs daarna opnieuw."
+            )
+
+        capture_token = secrets.token_urlsafe(32)
+        process: subprocess.Popen | None = None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen(1)
+            server.settimeout(1.0)
+            port = int(server.getsockname()[1])
+            package_root = Path(__file__).resolve().parent.parent
+            launcher = package_root / "sleufbase_launcher.py"
+            arguments = [
+                "--kickthemap-browser-prelogin",
+                "--kickthemap-browser-session-capture-port",
+                str(port),
+                "--kickthemap-browser-session-capture-token",
+                capture_token,
+                "--kickthemap-browser-session-capture-email",
+                normalized_email,
+            ]
+            command = [sys.executable, *arguments] if getattr(sys, "frozen", False) else [sys.executable, str(launcher), *arguments]
+            try:
+                process = subprocess.Popen(
+                    command,
+                    cwd=str(package_root),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                deadline = time.monotonic() + 180.0
+                payload: dict[str, object] | None = None
+                while time.monotonic() < deadline:
+                    try:
+                        connection, _address = server.accept()
+                    except socket.timeout:
+                        if process.poll() is not None:
+                            break
+                        continue
+                    with connection:
+                        connection.settimeout(10.0)
+                        chunks: list[bytes] = []
+                        received = 0
+                        while True:
+                            chunk = connection.recv(65536)
+                            if not chunk:
+                                break
+                            received += len(chunk)
+                            if received > 1024 * 1024:
+                                raise KickTheMapError("De KickTheMap-browser stuurde te veel sessiegegevens.")
+                            chunks.append(chunk)
+                        connection.sendall(b"OK")
+                    try:
+                        decoded = json.loads(b"".join(chunks).decode("utf-8"))
+                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        raise KickTheMapError("De KickTheMap-browser gaf ongeldige sessiegegevens terug.") from exc
+                    if not isinstance(decoded, dict) or decoded.get("token") != capture_token:
+                        raise KickTheMapError("De KickTheMap-browser gaf geen geldige sessiebevestiging terug.")
+                    payload = decoded
+                    break
+
+                if payload is None:
+                    raise KickTheMapError(
+                        "De KickTheMap-aanmelding is niet bevestigd. Controleer het browservenster en probeer opnieuw."
+                    )
+                raw_cookies = payload.get("cookies")
+                if not isinstance(raw_cookies, list):
+                    raise KickTheMapError("De KickTheMap-browser stuurde geen geldige sessiecookies terug.")
+                browser_user_agent = str(payload.get("user_agent", "") or "").strip()
+                if (
+                    browser_user_agent.startswith("Mozilla/")
+                    and "\r" not in browser_user_agent
+                    and "\n" not in browser_user_agent
+                ):
+                    self.session.headers["User-Agent"] = browser_user_agent[:512]
+
+                host = (urlsplit(self.BASE_URL).hostname or "").lower()
+                imported = 0
+                self.session.cookies.clear()
+                for cookie in raw_cookies:
+                    if not isinstance(cookie, dict):
+                        continue
+                    name = str(cookie.get("name", "")).strip()
+                    value = str(cookie.get("value", ""))
+                    domain = str(cookie.get("domain", "") or host).lstrip(".").lower()
+                    path = str(cookie.get("path", "/") or "/")
+                    if not name or not domain or not (host == domain or host.endswith("." + domain)):
+                        continue
+                    self.session.cookies.set(name, value, domain=domain, path=path)
+                    imported += 1
+                if imported == 0:
+                    raise KickTheMapError("De KickTheMap-browser leverde geen bruikbare sessiecookies op.")
+            finally:
+                if process is not None and process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
 
     def logout(self) -> None:
         self.session.cookies.clear()

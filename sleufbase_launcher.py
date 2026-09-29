@@ -228,7 +228,20 @@ def main() -> int:
     browser_url = _take_option(args, "--kickthemap-browser-url")
     browser_title = _take_option(args, "--kickthemap-browser-title")
     browser_capture_file = _take_option(args, "--kickthemap-browser-capture-file")
-    if prelogin or browser_url is not None or browser_title is not None or browser_capture_file is not None:
+    session_capture_port_text = _take_option(args, "--kickthemap-browser-session-capture-port")
+    session_capture_token = _take_option(args, "--kickthemap-browser-session-capture-token")
+    session_capture_email = _take_option(args, "--kickthemap-browser-session-capture-email")
+    try:
+        session_capture_port = int(session_capture_port_text) if session_capture_port_text else None
+    except ValueError:
+        session_capture_port = None
+    if (
+        prelogin
+        or browser_url is not None
+        or browser_title is not None
+        or browser_capture_file is not None
+        or session_capture_port is not None
+    ):
         from SleufBase import kickthemap_browser as browser_module
         from SleufBase.kickthemap_profile_choices_patch import (
             install_kickthemap_profile_choices_patch,
@@ -240,6 +253,9 @@ def main() -> int:
             window_title=browser_title,
             prelogin=prelogin,
             capture_file=browser_capture_file,
+            session_capture_port=session_capture_port,
+            session_capture_token=session_capture_token,
+            account_email=session_capture_email,
         )
         return 0
 

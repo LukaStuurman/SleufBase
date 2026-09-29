@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import socket
 import time
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import webview
 from webview.menu import Menu, MenuAction, MenuSeparator
@@ -83,15 +85,101 @@ class DownloadCaptureApi:
         return True
 
 
+class BrowserSessionApi:
+    def __init__(self) -> None:
+        self.window: webview.Window | None = None
+
+    def show_login_window(self) -> bool:
+        if self.window is None:
+            return False
+        try:
+            self.window.show()
+            return True
+        except Exception:
+            return False
+
+
+def _window_kickthemap_cookies(window: webview.Window) -> list[dict[str, str]]:
+    try:
+        raw_cookies = window.get_cookies()
+    except Exception as exc:
+        raise KickTheMapError(f"KickTheMap-browsercookies konden niet worden gelezen ({exc}).") from exc
+
+    current_url = str(window.get_current_url() or HOME_URL)
+    current_host = (urlsplit(current_url).hostname or "").lower()
+    if not current_host:
+        raise KickTheMapError("KickTheMap-browser heeft geen geldige sessiepagina geopend.")
+
+    containers = [raw_cookies] if hasattr(raw_cookies, "items") else list(raw_cookies or [])
+    result: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def attribute(cookie: object, name: str) -> str:
+        try:
+            value = cookie[name]  # type: ignore[index]
+        except (KeyError, TypeError, AttributeError):
+            value = ""
+        return str(value or "").strip()
+
+    def add_cookie(name: object, cookie: object) -> None:
+        cookie_name = str(name or "").strip()
+        value = str(getattr(cookie, "value", cookie if isinstance(cookie, (str, int, float)) else ""))
+        domain = attribute(cookie, "domain").lstrip(".").lower() or current_host
+        path = attribute(cookie, "path") or "/"
+        if not cookie_name or not (current_host == domain or current_host.endswith("." + domain)):
+            return
+        identity = (cookie_name, domain, path)
+        if identity in seen:
+            return
+        seen.add(identity)
+        result.append({"name": cookie_name, "value": value, "domain": domain, "path": path})
+
+    for container in containers:
+        if hasattr(container, "key") and hasattr(container, "value"):
+            add_cookie(getattr(container, "key", ""), container)
+            continue
+        items = getattr(container, "items", None)
+        if callable(items):
+            for name, cookie in items():
+                add_cookie(name, cookie)
+            continue
+        if isinstance(container, dict):
+            add_cookie(container.get("name", ""), container)
+
+    if not result:
+        raise KickTheMapError("KickTheMap-browser heeft geen sessiecookies teruggegeven.")
+    return result
+
+
+def _send_browser_session_cookies(
+    window: webview.Window,
+    port: int,
+    token: str,
+) -> None:
+    payload = json.dumps(
+        {
+            "token": token,
+            "cookies": _window_kickthemap_cookies(window),
+            "user_agent": str(window.evaluate_js("navigator.userAgent") or ""),
+        },
+        separators=(",", ":"),
+    ).encode("utf-8")
+    with socket.create_connection(("127.0.0.1", int(port)), timeout=10.0) as connection:
+        connection.sendall(payload)
+        connection.shutdown(socket.SHUT_WR)
+        connection.settimeout(10.0)
+        connection.recv(16)
+
+
 def _storage_path_for_account(account: KickTheMapSavedAccount | None) -> str:
     target_dir = kickthemap_browser_session_dir(account.email if account is not None else "")
     target_dir.mkdir(parents=True, exist_ok=True)
     return str(target_dir)
 
 
-def _selected_account() -> KickTheMapSavedAccount | None:
+def _selected_account(email: str | None = None) -> KickTheMapSavedAccount | None:
     settings = load_settings()
-    selected_email = str(settings.kickthemap_last_email or "").strip().lower()
+    selected_email = str(email or settings.kickthemap_last_email or "").strip().lower()
     if not selected_email:
         return None
     for account in settings.kickthemap_saved_accounts or []:
@@ -131,6 +219,7 @@ def _injected_script(
     start_url: str | None = None,
     *,
     capture_enabled: bool = False,
+    session_capture_enabled: bool = False,
 ) -> str:
     email = account.email if account is not None else ""
     password = account.password if account is not None else ""
@@ -144,6 +233,7 @@ def _injected_script(
       const PASSWORD = {json.dumps(password)};
       const SIGNIN_PATH = {json.dumps(SIGNIN_PATH)};
       const DOWNLOAD_CAPTURE_ENABLED = {json.dumps(bool(capture_enabled))};
+      const SESSION_CAPTURE_ENABLED = {json.dumps(bool(session_capture_enabled))};
       const PROFILE_OPTIONS = {json.dumps(profile_options)};
       const MATERIAL_OPTIONS = {json.dumps(material_options)};
       const desiredUrlKey = 'sleufbase-kickthemap-desired-url';
@@ -918,6 +1008,14 @@ def _injected_script(
         return 'signin-no-credentials';
       }}
 
+      if (SESSION_CAPTURE_ENABLED) {{
+        window.setTimeout(() => {{
+          if ((window.location.pathname || '').includes(SIGNIN_PATH)) {{
+            window.pywebview?.api?.show_login_window?.();
+          }}
+        }}, 12000);
+      }}
+
       const attempts = Number(sessionStorage.getItem(autoLoginCounterKey) || '0');
       if (attempts >= 1) {{
         return 'signin-already-tried';
@@ -940,8 +1038,34 @@ def _injected_script(
 
       const form = emailInput.form || passwordInput.form || document.querySelector('form');
       if (form) {{
-        form.submit();
-        return 'signin-submitted';
+        const captchaInput = document.querySelector('input[name="g-recaptcha-response"]');
+        const submitForm = () => {{
+          if (typeof form.requestSubmit === 'function') {{
+            form.requestSubmit();
+          }} else {{
+            form.submit();
+          }}
+        }};
+        if (!captchaInput) {{
+          submitForm();
+          return 'signin-submitted';
+        }}
+        const captchaWaitStarted = Date.now();
+        const submitWhenCaptchaIsReady = () => {{
+          if (String(captchaInput.value || '').trim()) {{
+            submitForm();
+            return;
+          }}
+          if (Date.now() - captchaWaitStarted >= 20000) {{
+            if (SESSION_CAPTURE_ENABLED) {{
+              window.pywebview?.api?.show_login_window?.();
+            }}
+            return;
+          }}
+          window.setTimeout(submitWhenCaptchaIsReady, 200);
+        }};
+        submitWhenCaptchaIsReady();
+        return captchaInput ? 'signin-waiting-for-captcha' : 'signin-submitted';
       }}
 
       const submitButton = document.querySelector('button[type="submit"], input[type="submit"]');
@@ -962,13 +1086,32 @@ def _inject_browser_script(
     *,
     prelogin: bool = False,
     capture_enabled: bool = False,
+    session_capture_port: int | None = None,
+    session_capture_token: str | None = None,
 ) -> None:
     try:
         result = window.evaluate_js(
-            _injected_script(account, start_url, capture_enabled=capture_enabled)
+            _injected_script(
+                account,
+                start_url,
+                capture_enabled=capture_enabled,
+                session_capture_enabled=session_capture_port is not None,
+            )
         )
         if prelogin and result == "patched":
+            if session_capture_port is not None and session_capture_token:
+                try:
+                    _send_browser_session_cookies(window, session_capture_port, session_capture_token)
+                except Exception:
+                    window.show()
+                    return
             window.destroy()
+        elif session_capture_port is not None and result in {
+            "signin-already-tried",
+            "signin-no-credentials",
+            "signin-form-missing",
+        }:
+            window.show()
     except Exception:
         pass
 
@@ -1009,8 +1152,11 @@ def main(
     *,
     prelogin: bool = False,
     capture_file: str | None = None,
+    session_capture_port: int | None = None,
+    session_capture_token: str | None = None,
+    account_email: str | None = None,
 ) -> None:
-    account = _selected_account()
+    account = _selected_account(account_email)
     storage_path = _storage_path_for_account(account)
     webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
     webview.settings["SHOW_DEFAULT_MENUS"] = False
@@ -1030,6 +1176,7 @@ def main(
         )
     ]
     capture_api = DownloadCaptureApi(capture_file) if capture_file else None
+    session_api = BrowserSessionApi() if session_capture_port is not None else None
     window = webview.create_window(
         title,
         url=initial_url,
@@ -1040,14 +1187,19 @@ def main(
         text_select=True,
         background_color="#FFFFFF",
         menu=menu,
-        js_api=capture_api,
+        js_api=session_api or capture_api,
     )
+    if session_api is not None:
+        session_api.window = window
+
     window.events.loaded += lambda window: _inject_browser_script(
         window,
         account,
         start_url,
         prelogin=prelogin,
         capture_enabled=capture_api is not None,
+        session_capture_port=session_capture_port,
+        session_capture_token=session_capture_token,
     )
     webview.start(
         gui=None,
