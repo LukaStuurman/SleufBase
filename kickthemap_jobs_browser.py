@@ -972,7 +972,27 @@ class KickTheMapJobsWindow(tk.Tk):
     def _set_jobs(self, jobs: list[KickTheMapJob]) -> None:
         self.jobs = jobs
         self._refresh_loaded_job_ids()
-        self.status_var.set("Dubbelklik een job of gebruik Open job.")
+        diagnostics = dict(getattr(self.client, "last_jobs_diagnostics", {}) or {})
+        source = str(diagnostics.get("source", "") or "")
+        stale = bool(diagnostics.get("stale", False))
+        skipped = int(diagnostics.get("skipped_count", 0) or 0)
+        if stale:
+            saved_at = float(diagnostics.get("cache_saved_at", 0.0) or 0.0)
+            age_text = ""
+            if saved_at > 0:
+                age_minutes = max(0, int((time.time() - saved_at) / 60))
+                age_text = f" ({age_minutes} min oud)"
+            self.status_var.set(
+                f"KickTheMap tijdelijk niet bereikbaar — laatst bekende lijst{age_text}: {len(jobs)} jobs."
+            )
+        elif skipped:
+            self.status_var.set(
+                f"{len(jobs)} jobs geladen via {source or 'KickTheMap'}; {skipped} ongeldig/dubbel record overgeslagen."
+            )
+        else:
+            self.status_var.set(
+                f"{len(jobs)} jobs geladen via {source or 'KickTheMap'}. Dubbelklik een job of gebruik Open job."
+            )
         self._set_controls_enabled(True)
         self._refresh_table()
         self._prelogin_kickthemap_browser()
