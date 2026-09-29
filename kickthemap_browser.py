@@ -86,14 +86,46 @@ class DownloadCaptureApi:
 
 
 class BrowserSessionApi:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        jobs_capture_port: int | None = None,
+        jobs_capture_token: str | None = None,
+    ) -> None:
         self.window: webview.Window | None = None
+        self.jobs_capture_port = jobs_capture_port
+        self.jobs_capture_token = str(jobs_capture_token or "")
 
     def show_login_window(self) -> bool:
         if self.window is None:
             return False
         try:
             self.window.show()
+            return True
+        except Exception:
+            return False
+
+    def capture_jobs(self, payload) -> bool:
+        if self.jobs_capture_port is None or not self.jobs_capture_token:
+            return False
+        try:
+            message = json.dumps(
+                {
+                    "token": self.jobs_capture_token,
+                    "payload": payload,
+                },
+                separators=(",", ":"),
+            ).encode("utf-8")
+            with socket.create_connection(
+                ("127.0.0.1", int(self.jobs_capture_port)),
+                timeout=10.0,
+            ) as connection:
+                connection.sendall(message)
+                connection.shutdown(socket.SHUT_WR)
+                connection.settimeout(10.0)
+                connection.recv(16)
+            if self.window is not None:
+                self.window.destroy()
             return True
         except Exception:
             return False
@@ -1088,6 +1120,7 @@ def _inject_browser_script(
     capture_enabled: bool = False,
     session_capture_port: int | None = None,
     session_capture_token: str | None = None,
+    jobs_capture_enabled: bool = False,
 ) -> None:
     try:
         result = window.evaluate_js(
@@ -1099,6 +1132,42 @@ def _inject_browser_script(
             )
         )
         if prelogin and result == "patched":
+            if jobs_capture_enabled:
+                try:
+                    window.evaluate_js(
+                        """
+                        (() => {
+                          const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                          fetch('/jobs/get-user-jobs', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                              'Accept': 'application/json',
+                              'Content-Type': 'application/json',
+                              'X-CSRF-TOKEN': token,
+                            },
+                            body: '{}',
+                          })
+                            .then(async (response) => {
+                              const text = await response.text();
+                              let payload;
+                              try { payload = JSON.parse(text); }
+                              catch (_error) { payload = {status:false, http_status:response.status, raw:text.slice(0, 2000)}; }
+                              payload.__sleufbase_http_status = response.status;
+                              return window.pywebview.api.capture_jobs(payload);
+                            })
+                            .catch((error) => window.pywebview.api.capture_jobs({
+                              status:false,
+                              error:String(error || 'browser fetch failed')
+                            }));
+                          return 'jobs-capture-started';
+                        })()
+                        """
+                    )
+                    return
+                except Exception:
+                    window.show()
+                    return
             if session_capture_port is not None and session_capture_token:
                 try:
                     _send_browser_session_cookies(window, session_capture_port, session_capture_token)
@@ -1155,6 +1224,8 @@ def main(
     session_capture_port: int | None = None,
     session_capture_token: str | None = None,
     account_email: str | None = None,
+    jobs_capture_port: int | None = None,
+    jobs_capture_token: str | None = None,
 ) -> None:
     account = _selected_account(account_email)
     storage_path = _storage_path_for_account(account)
@@ -1176,7 +1247,14 @@ def main(
         )
     ]
     capture_api = DownloadCaptureApi(capture_file) if capture_file else None
-    session_api = BrowserSessionApi() if session_capture_port is not None else None
+    session_api = (
+        BrowserSessionApi(
+            jobs_capture_port=jobs_capture_port,
+            jobs_capture_token=jobs_capture_token,
+        )
+        if session_capture_port is not None or jobs_capture_port is not None
+        else None
+    )
     window = webview.create_window(
         title,
         url=initial_url,
@@ -1200,6 +1278,7 @@ def main(
         capture_enabled=capture_api is not None,
         session_capture_port=session_capture_port,
         session_capture_token=session_capture_token,
+        jobs_capture_enabled=jobs_capture_port is not None,
     )
     webview.start(
         gui=None,
