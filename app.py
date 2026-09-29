@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 import re
 import subprocess
 import sys
@@ -33,6 +35,158 @@ def _load_cached_module() -> None:
     from .source_migration import load_migrating_module
 
     load_migrating_module("app", globals(), __file__)
+
+
+def _install_active_loaded_jobs_state_patch() -> None:
+    viewer_class = globals().get("KlicViewerApp")
+    if viewer_class is None or getattr(viewer_class, "_active_loaded_jobs_state_patch", False):
+        return
+
+    from .kickthemap import KickTheMapClient
+
+    original_init = viewer_class.__init__
+    original_destroy = viewer_class.destroy
+
+    def _state_path() -> Path:
+        return KickTheMapClient.default_download_dir() / "active_loaded_jobs.json"
+
+    def _layer_job_id(self, layer) -> int | None:
+        try:
+            helper = getattr(self, "_kickthemap_job_id_for_layer", None)
+            if callable(helper):
+                candidate = helper(layer)
+                if candidate is not None:
+                    job_id = int(candidate)
+                    if job_id > 0:
+                        return job_id
+        except Exception:
+            pass
+
+        metadata = getattr(layer, "metadata", None)
+        if isinstance(metadata, dict):
+            for key in ("kickthemap_job_id", "job_id"):
+                try:
+                    job_id = int(metadata.get(key, 0) or 0)
+                except (TypeError, ValueError):
+                    continue
+                if job_id > 0:
+                    return job_id
+
+        path = Path(str(getattr(layer, "path", "") or ""))
+        if path:
+            sidecar = path.with_suffix(path.suffix + ".job.json")
+            try:
+                record = json.loads(sidecar.read_text(encoding="utf-8"))
+            except (FileNotFoundError, OSError, TypeError, ValueError, json.JSONDecodeError):
+                record = None
+            if isinstance(record, dict):
+                try:
+                    job_id = int(record.get("job_id", 0) or 0)
+                except (TypeError, ValueError):
+                    job_id = 0
+                if job_id > 0:
+                    if isinstance(metadata, dict):
+                        metadata["kickthemap_job_id"] = job_id
+                        metadata["kickthemap_job_title"] = str(record.get("title", "") or "").strip()
+                    return job_id
+
+            # Last compatibility fallback for older TIFFs that predate sidecars.
+            # Restrict it to SleufBase's KickTheMap cache so unrelated files with
+            # numeric suffixes cannot be mistaken for jobs.
+            try:
+                resolved = path.resolve()
+                root = KickTheMapClient.default_download_dir().resolve()
+                if resolved.is_relative_to(root):
+                    match = re.search(r"_(\d+)\.(?:tif|tiff)$", path.name, re.IGNORECASE)
+                    if match:
+                        job_id = int(match.group(1))
+                        if job_id > 0:
+                            if isinstance(metadata, dict):
+                                metadata["kickthemap_job_id"] = job_id
+                            return job_id
+            except (OSError, TypeError, ValueError):
+                pass
+        return None
+
+    def _write_state(self) -> None:
+        layers = list(getattr(self, "tiff_layers", ()) or ())
+        job_ids: set[int] = set()
+        active_layers: list[dict[str, object]] = []
+        for layer in layers:
+            job_id = _layer_job_id(self, layer)
+            if job_id is None:
+                continue
+            job_ids.add(job_id)
+            active_layers.append(
+                {
+                    "job_id": job_id,
+                    "path": str(getattr(layer, "path", "") or ""),
+                    "name": str(getattr(layer, "name", "") or ""),
+                }
+            )
+
+        state_path = _state_path()
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "version": 1,
+            "pid": os.getpid(),
+            "session_id": str(getattr(self, "_active_loaded_jobs_session_id", "")),
+            "updated_at": time.time(),
+            "job_ids": sorted(job_ids),
+            "layers": active_layers,
+        }
+        temp_path = state_path.with_name(f"{state_path.name}.{os.getpid()}.tmp")
+        try:
+            temp_path.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            temp_path.replace(state_path)
+        except OSError:
+            try:
+                temp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+    def _heartbeat(self) -> None:
+        try:
+            if not self.winfo_exists():
+                return
+            _write_state(self)
+            self.after(1500, lambda: _heartbeat(self))
+        except (tk.TclError, RuntimeError):
+            return
+
+    def _init_with_active_loaded_jobs_state(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        self._active_loaded_jobs_session_id = f"{os.getpid()}-{time.time_ns()}"
+        _write_state(self)
+        try:
+            self.after(750, lambda: _heartbeat(self))
+        except tk.TclError:
+            pass
+
+    def _destroy_with_active_loaded_jobs_state(self, *args, **kwargs):
+        state_path = _state_path()
+        try:
+            data = json.loads(state_path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, TypeError, ValueError, json.JSONDecodeError):
+            data = None
+        if (
+            isinstance(data, dict)
+            and str(data.get("session_id", ""))
+            == str(getattr(self, "_active_loaded_jobs_session_id", ""))
+        ):
+            try:
+                state_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+        return original_destroy(self, *args, **kwargs)
+
+    viewer_class.__init__ = _init_with_active_loaded_jobs_state
+    viewer_class.destroy = _destroy_with_active_loaded_jobs_state
+    viewer_class._write_active_loaded_jobs_state = _write_state
+    viewer_class._active_loaded_jobs_state_patch = True
 
 
 def _install_kickthemap_jobs_browser_patch() -> None:
@@ -3021,6 +3175,7 @@ def _install_fast_kickthemap_start_points_patch() -> None:
 
 
 _load_cached_module()
+_install_active_loaded_jobs_state_patch()
 _install_sleufbase_branding_patch()
 _install_modern_combobox_patch()
 _install_modern_dialog_style_patch()

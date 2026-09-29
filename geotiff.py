@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
@@ -221,14 +222,33 @@ def load_geotiff(path: str | Path) -> GeoTiffLayer:
         image.close()
         raise
 
+    metadata: dict[str, object] = {
+        "breedte_px": width,
+        "hoogte_px": height,
+    }
+    # KickTheMap Jobs writes this sidecar before handing the TIFF to the main
+    # process. Keep the raster loader generic, but import only the stable fields
+    # needed to identify an actively loaded KickTheMap trench.
+    sidecar_path = file_path.with_suffix(file_path.suffix + ".job.json")
+    try:
+        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, TypeError, ValueError, json.JSONDecodeError):
+        sidecar = None
+    if isinstance(sidecar, dict):
+        try:
+            sidecar_job_id = int(sidecar.get("job_id", 0) or 0)
+        except (TypeError, ValueError):
+            sidecar_job_id = 0
+        if sidecar_job_id > 0:
+            metadata["kickthemap_job_id"] = sidecar_job_id
+            metadata["kickthemap_job_title"] = str(sidecar.get("title", "") or "").strip()
+            metadata["kickthemap_job_sidecar"] = str(sidecar_path)
+
     return GeoTiffLayer(
         path=file_path,
         image=image,
         transform=transform,
         bounds=bounds,
         epsg=epsg,
-        metadata={
-            "breedte_px": width,
-            "hoogte_px": height,
-        },
+        metadata=metadata,
     )

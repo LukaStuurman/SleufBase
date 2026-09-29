@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from Crypto.Cipher import AES
+import requests
 
 from SleufBase.kickthemap import KickTheMapClient, KickTheMapJob
 
@@ -117,6 +118,113 @@ class KickTheMapJobsPageTests(unittest.TestCase):
             headers={"Accept": "application/json", "X-CSRF-TOKEN": "csrf-token"},
             timeout=client.timeout,
         )
+
+
+    def test_parser_keeps_job_when_storage_prefix_format_changes(self) -> None:
+        client = KickTheMapClient()
+        client.logged_in_email = "test@example.com"
+        jobs = client._parse_job_projects(
+            [
+                {
+                    "id": 777,
+                    "name": "Changed prefix",
+                    "s3_root_dir": "new-storage-layout/job-777",
+                    "created_at": "2026-09-29T12:34:56.000000Z",
+                    "can_download_cloud": True,
+                }
+            ]
+        )
+
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0].job_id, 777)
+        self.assertEqual(jobs[0].prefix, "new-storage-layout/job-777")
+        self.assertEqual(jobs[0].project_mail, "test@example.com")
+        self.assertEqual(jobs[0].project_date, "2026-09-29_12-34-56")
+        self.assertEqual(client._job_storage_prefix(jobs[0]), "new-storage-layout/job-777")
+        self.assertEqual(client.last_jobs_diagnostics["fallback_identity_count"], 1)
+
+    def test_jobs_api_accepts_nested_paginated_shape(self) -> None:
+        client = KickTheMapClient()
+        client._csrf_token = "csrf-token"
+        response = Mock(status_code=200)
+        response.json.return_value = {
+            "status": True,
+            "data": {
+                "data": [
+                    {
+                        "id": 12345,
+                        "name": "Nested job",
+                        "s3_root_dir": "test@example.com_2026-01-01_00-00-00",
+                    }
+                ],
+                "current_page": 1,
+            },
+        }
+        response.raise_for_status.return_value = None
+        client.session.post = Mock(return_value=response)
+
+        jobs = client._fetch_jobs_api()
+
+        self.assertEqual([job.job_id for job in jobs], [12345])
+
+    def test_jobs_api_retries_temporary_connection_failure(self) -> None:
+        client = KickTheMapClient()
+        client._csrf_token = "csrf-token"
+        good = Mock(status_code=200)
+        good.json.return_value = {
+            "status": True,
+            "data": [
+                {
+                    "id": 12345,
+                    "name": "Recovered job",
+                    "s3_root_dir": "test@example.com_2026-01-01_00-00-00",
+                }
+            ],
+        }
+        good.raise_for_status.return_value = None
+        client.session.post = Mock(side_effect=[requests.ConnectionError("temporary"), good])
+
+        with patch("SleufBase.kickthemap.time.sleep"):
+            jobs = client._fetch_jobs_api()
+
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(client.session.post.call_count, 2)
+
+    def test_fetch_jobs_falls_back_to_last_good_cache(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            client = KickTheMapClient()
+            client.logged_in_email = "test@example.com"
+            cached_job = _job()
+
+            with patch.object(KickTheMapClient, "default_download_dir", return_value=root):
+                client._write_jobs_cache([cached_job])
+                with patch.object(
+                    client,
+                    "_fetch_jobs_with_fallback",
+                    side_effect=KickTheMapClient.__mro__[1]("network failed")
+                    if False
+                    else requests.ConnectionError("network failed"),
+                ):
+                    jobs = client.fetch_jobs()
+
+            self.assertEqual([job.job_id for job in jobs], [cached_job.job_id])
+            self.assertEqual(client.last_jobs_diagnostics["source"], "cache")
+            self.assertTrue(client.last_jobs_diagnostics["stale"])
+
+    def test_nonempty_cache_requires_second_empty_response_before_clearing(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            client = KickTheMapClient()
+            client.logged_in_email = "test@example.com"
+
+            with patch.object(KickTheMapClient, "default_download_dir", return_value=root):
+                client._write_jobs_cache([_job()])
+                with patch.object(client, "_fetch_jobs_with_fallback", side_effect=[[], []]) as fetch:
+                    jobs = client.fetch_jobs()
+
+            self.assertEqual(jobs, [])
+            self.assertEqual(fetch.call_count, 2)
 
 
 class KickTheMapBrowserSessionTests(unittest.TestCase):

@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.59'
+  SLEUFBASE_RELEASE_VERSION: '0.3.60'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.59
+          name: SleufBase-Windows-v0.3.60
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,16 +293,25 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.59
+          SleufBase Windows v0.3.60
 
-          KickTheMap-aanmelding:
-          - hergebruikt de opgeslagen, geldige browseraanmelding voor het laden van de jobs
-          - toont het browservenster zodra handmatige CAPTCHA- of aanmeldbevestiging nodig is
-          - begrenst het wachten op een browserbevestiging tot 90 seconden
-          - behoudt de bijgewerkte jobs-API en downloadroute
+          KickTheMap-joblijst:
+          - gebruikt de actuele jobs-API als primaire bron met retries en tijdelijke-foutafhandeling
+          - vernieuwt CSRF/sessie automatisch en kan terugvallen op HTML, browsersessie en de ingelogde browsercontext
+          - bewaart een last-known-good jobcache zodat een tijdelijke storing de lijst niet leegmaakt
+          - accepteert gewijzigde storage-prefixen en meerdere API-responsevormen zonder geldige jobs stilletjes weg te filteren
+          - bevestigt onverwachte lege joblijsten voordat een bekende niet-lege lijst wordt vervangen
+          - behoudt de opgeslagen browseraanmelding en CAPTCHA-fallback uit v0.3.59
+
+          Geladen Jobs:
+          - filtert nu op KickTheMap-proefsleuven die daadwerkelijk in de actieve SleufBase-sessie geladen zijn
+          - verwijderde lagen verdwijnen automatisch uit het filter
+          - gesloten of gecrashte sessies blijven niet ten onrechte als geladen staan
+          - GeoTIFF-sidecar metadata wordt vóór het openen geschreven en bij het laden ingelezen
+          - de Jobs-browser ververst de geladen-status live zolang het filter actief is
 
           Windows:
-          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.59
+          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.60
           - professionele installer, Fast ZIP en Portable EXE volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
