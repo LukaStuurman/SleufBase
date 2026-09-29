@@ -17,7 +17,7 @@ import time
 from urllib.parse import urlsplit
 from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import boto3
@@ -29,6 +29,10 @@ LOGIN_TOKEN_PATTERN = re.compile(r'name="_token"\s+value="([^"]+)"', re.IGNORECA
 CSRF_META_PATTERN = re.compile(r'<meta\s+name="csrf-token"\s+content="([^"]+)"', re.IGNORECASE)
 PREFIX_PATTERN = re.compile(r"^(?P<email>.+)_(?P<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})$")
 DOWNLOAD_REQUEST_MODES = ("multipart", "form", "json")
+JOBS_RETRY_DELAYS = (0.0, 0.5, 1.5)
+JOBS_AUTH_STATUS_CODES = {401, 403, 419}
+JOBS_TRANSIENT_STATUS_CODES = {408, 425, 429, 500, 502, 503, 504}
+JOBS_CACHE_VERSION = 1
 TIFF_SIGNATURES = (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+")
 CHROMIUM_EPOCH_OFFSET_SECONDS = 11_644_473_600
 BROWSER_SESSION_CAPTURE_TIMEOUT_SECONDS = 90
@@ -113,6 +117,7 @@ class KickTheMapClient:
         self._aws_config: KickTheMapAwsConfig | None = None
         self._recent_job_feature_paths: dict[int, tuple[Path, float]] = {}
         self._recent_job_feature_lock = threading.Lock()
+        self.last_jobs_diagnostics: dict[str, object] = {}
         # A template export is commonly started immediately after loading all
         # cross-section start points. Reuse only files downloaded successfully
         # by this client and only for this short window.
@@ -135,6 +140,62 @@ class KickTheMapClient:
     @classmethod
     def download_strategy_path(cls) -> Path:
         return cls.default_download_dir() / "download_strategy.json"
+
+    @classmethod
+    def jobs_cache_path(cls, email: str) -> Path:
+        return cls.default_download_dir() / "jobs_cache" / f"{_safe_email_slug(email)}.json"
+
+    def _write_jobs_cache(self, jobs: list[KickTheMapJob]) -> None:
+        email = str(self.logged_in_email or "").strip()
+        if not email:
+            return
+        path = self.jobs_cache_path(email)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "version": JOBS_CACHE_VERSION,
+            "saved_at": time.time(),
+            "email": email,
+            "jobs": [asdict(job) for job in jobs],
+        }
+        temp = path.with_name(path.name + ".tmp")
+        temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temp.replace(path)
+
+    def _read_jobs_cache(self) -> tuple[list[KickTheMapJob], float] | None:
+        email = str(self.logged_in_email or "").strip()
+        if not email:
+            return None
+        path = self.jobs_cache_path(email)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if not isinstance(payload, dict) or payload.get("version") != JOBS_CACHE_VERSION:
+            return None
+        raw_jobs = payload.get("jobs")
+        if not isinstance(raw_jobs, list):
+            return None
+        jobs: list[KickTheMapJob] = []
+        for raw in raw_jobs:
+            if not isinstance(raw, dict):
+                continue
+            try:
+                jobs.append(KickTheMapJob(**raw))
+            except (TypeError, ValueError):
+                continue
+        if not jobs and raw_jobs:
+            return None
+        try:
+            saved_at = float(payload.get("saved_at", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            saved_at = 0.0
+        return jobs, saved_at
+
+    def _set_jobs_diagnostics(self, **values: object) -> None:
+        data = dict(self.last_jobs_diagnostics)
+        data.update(values)
+        self.last_jobs_diagnostics = data
+
 
     @classmethod
     def create_download_capture(cls, job: KickTheMapJob) -> Path:
@@ -450,8 +511,13 @@ class KickTheMapClient:
 
         self._csrf_token = self._extract_csrf_token(jobs_page.text)
         self._aws_config = None
-        jobs = self._parse_jobs_page(jobs_page.text)
         self.logged_in_email = email
+        try:
+            jobs = self._fetch_jobs_with_fallback(jobs_page.text)
+        except Exception:
+            self.logged_in_email = None
+            raise
+        self._write_jobs_cache(jobs)
         return jobs
 
     @staticmethod
@@ -742,6 +808,99 @@ class KickTheMapClient:
                     except subprocess.TimeoutExpired:
                         process.kill()
 
+    def _fetch_jobs_browser_context(self) -> list[KickTheMapJob]:
+        """Fetch the jobs JSON inside KickTheMap's own authenticated WebView2 context."""
+        email = str(self.logged_in_email or "").strip().lower()
+        if not email:
+            raise KickTheMapError("Geen KickTheMap-account beschikbaar voor browserfallback.")
+
+        capture_token = secrets.token_urlsafe(32)
+        process: subprocess.Popen | None = None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen(1)
+            server.settimeout(1.0)
+            port = int(server.getsockname()[1])
+            package_root = Path(__file__).resolve().parent.parent
+            launcher = package_root / "sleufbase_launcher.py"
+            arguments = [
+                "--kickthemap-browser-prelogin",
+                "--kickthemap-browser-jobs-capture-port",
+                str(port),
+                "--kickthemap-browser-jobs-capture-token",
+                capture_token,
+                "--kickthemap-browser-session-capture-email",
+                email,
+            ]
+            command = (
+                [sys.executable, *arguments]
+                if getattr(sys, "frozen", False)
+                else [sys.executable, str(launcher), *arguments]
+            )
+            try:
+                process = subprocess.Popen(
+                    command,
+                    cwd=str(package_root),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                deadline = time.monotonic() + 180.0
+                decoded: dict[str, object] | None = None
+                while time.monotonic() < deadline:
+                    try:
+                        connection, _address = server.accept()
+                    except socket.timeout:
+                        if process.poll() is not None:
+                            break
+                        continue
+                    with connection:
+                        connection.settimeout(10.0)
+                        chunks: list[bytes] = []
+                        received = 0
+                        while True:
+                            chunk = connection.recv(65536)
+                            if not chunk:
+                                break
+                            received += len(chunk)
+                            if received > 16 * 1024 * 1024:
+                                raise KickTheMapError("De KickTheMap-browser stuurde een te grote joblijst.")
+                            chunks.append(chunk)
+                        connection.sendall(b"OK")
+                    try:
+                        candidate = json.loads(b"".join(chunks).decode("utf-8"))
+                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        raise KickTheMapError("De KickTheMap-browser gaf ongeldige jobgegevens terug.") from exc
+                    if not isinstance(candidate, dict) or candidate.get("token") != capture_token:
+                        raise KickTheMapError("De KickTheMap-browser gaf geen geldige jobbevestiging terug.")
+                    decoded = candidate
+                    break
+
+                if decoded is None:
+                    raise KickTheMapError("De KickTheMap-browserfallback gaf geen joblijst terug.")
+                payload = decoded.get("payload")
+                if isinstance(payload, dict):
+                    try:
+                        http_status = int(payload.get("__sleufbase_http_status", 200) or 200)
+                    except (TypeError, ValueError):
+                        http_status = 200
+                    if http_status >= 400:
+                        raise KickTheMapError(
+                            f"KickTheMap-browser gaf HTTP {http_status} voor de joblijst."
+                        )
+                    payload.pop("__sleufbase_http_status", None)
+                raw_projects = self._jobs_payload_list(payload)
+                return self._parse_job_projects(raw_projects)
+            finally:
+                if process is not None and process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+
+
     def logout(self) -> None:
         self.session.cookies.clear()
         self.logged_in_email = None
@@ -752,10 +911,86 @@ class KickTheMapClient:
 
     def fetch_jobs(self) -> list[KickTheMapJob]:
         self._ensure_logged_in()
-        jobs_page = self.session.get(self.JOBS_URL, timeout=self.timeout)
-        jobs_page.raise_for_status()
-        self._csrf_token = self._extract_csrf_token(jobs_page.text)
-        return self._parse_jobs_page(jobs_page.text)
+        cached = self._read_jobs_cache()
+        try:
+            jobs = self._fetch_jobs_with_fallback()
+            if not jobs and cached is not None and cached[0]:
+                # A single empty response is too risky: confirm it once more before
+                # replacing a known-good non-empty list.
+                confirmation = self._fetch_jobs_with_fallback()
+                if confirmation:
+                    jobs = confirmation
+                elif not confirmation:
+                    jobs = []
+            self._write_jobs_cache(jobs)
+            self._set_jobs_diagnostics(source=self.last_jobs_diagnostics.get("source", "network"), stale=False)
+            return jobs
+        except Exception as exc:
+            if cached is None:
+                raise
+            jobs, saved_at = cached
+            self._set_jobs_diagnostics(
+                source="cache",
+                stale=True,
+                cache_saved_at=saved_at,
+                warning=str(exc),
+                returned_count=len(jobs),
+            )
+            return jobs
+
+
+    def _fetch_jobs_with_fallback(self, jobs_html: str | None = None) -> list[KickTheMapJob]:
+        errors: list[str] = []
+        try:
+            jobs = self._fetch_jobs_api()
+            self._set_jobs_diagnostics(source="api", returned_count=len(jobs), errors=[])
+            return jobs
+        except Exception as exc:
+            errors.append(f"api: {exc}")
+
+        html = jobs_html
+        if html is None:
+            try:
+                response = self.session.get(self.JOBS_URL, timeout=self.timeout)
+                response.raise_for_status()
+                html = response.text
+                if self._looks_like_login_page(html):
+                    raise KickTheMapError("KickTheMap-sessie is verlopen.")
+                self._csrf_token = self._extract_csrf_token(html)
+            except Exception as exc:
+                errors.append(f"html: {exc}")
+                html = None
+
+        if html:
+            try:
+                jobs = self._parse_jobs_inline(html)
+                self._set_jobs_diagnostics(source="html", returned_count=len(jobs), errors=errors)
+                return jobs
+            except Exception as exc:
+                errors.append(f"html-parser: {exc}")
+
+        # Last network recovery: obtain a fresh authenticated browser session and
+        # retry the API with those browser cookies/user-agent.
+        email = str(self.logged_in_email or "").strip()
+        if email:
+            try:
+                self._csrf_token = None
+                self._import_browser_session_cookies(email)
+                self._refresh_jobs_csrf()
+                jobs = self._fetch_jobs_api(allow_reauth=False)
+                self._set_jobs_diagnostics(source="browser-session", returned_count=len(jobs), errors=errors)
+                return jobs
+            except Exception as exc:
+                errors.append(f"browser-session: {exc}")
+
+            try:
+                jobs = self._fetch_jobs_browser_context()
+                self._set_jobs_diagnostics(source="browser-context", returned_count=len(jobs), errors=errors)
+                return jobs
+            except Exception as exc:
+                errors.append(f"browser-context: {exc}")
+
+        raise KickTheMapError("KickTheMap-joblijst kon niet betrouwbaar worden opgehaald. " + "; ".join(errors[-5:]))
 
     def download_tiff(self, job: KickTheMapJob, target_dir: Path | None = None) -> Path:
         self._ensure_logged_in()
@@ -1264,78 +1499,205 @@ class KickTheMapClient:
 
     def _parse_jobs_page(self, html: str) -> list[KickTheMapJob]:
         try:
-            projects_json = self._extract_js_value(html, "var projects")
+            return self._parse_jobs_inline(html)
         except KickTheMapError as exc:
             if str(exc) != "KickTheMap projectlijst niet gevonden.":
                 raise
             return self._fetch_jobs_api()
 
-        raw_projects = json.loads(projects_json)
+
+    def _parse_jobs_inline(self, html: str) -> list[KickTheMapJob]:
+        projects_json = self._extract_js_value(html, "var projects")
+        try:
+            raw_projects = json.loads(projects_json)
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise KickTheMapError("KickTheMap gaf een ongeldige ingebedde projectlijst terug.") from exc
         return self._parse_job_projects(raw_projects)
 
-    def _fetch_jobs_api(self) -> list[KickTheMapJob]:
-        csrf_token = self._ensure_csrf_token()
-        response = self.session.post(
-            self.JOBS_API_URL,
-            json={},
-            headers={
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": csrf_token,
-            },
-            timeout=self.timeout,
-        )
+
+    def _refresh_jobs_csrf(self) -> str:
+        response = self.session.get(self.JOBS_URL, timeout=self.timeout)
         response.raise_for_status()
+        if self._looks_like_login_page(response.text):
+            raise KickTheMapError("KickTheMap-sessie is verlopen.")
+        self._csrf_token = self._extract_csrf_token(response.text)
+        return self._csrf_token
+
+
+    @staticmethod
+    def _response_status(response: object) -> int:
         try:
-            payload = response.json()
-        except (TypeError, ValueError) as exc:
-            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.") from exc
+            return int(getattr(response, "status_code", 200) or 200)
+        except (TypeError, ValueError):
+            return 200
+
+
+    @staticmethod
+    def _jobs_payload_list(payload: object) -> list[object]:
+        if isinstance(payload, list):
+            return payload
         if not isinstance(payload, dict) or payload.get("status") is False:
             raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
-        raw_projects = payload.get("data")
-        if not isinstance(raw_projects, list):
-            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
-        return self._parse_job_projects(raw_projects)
+        for key in ("data", "projects", "jobs", "results"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                return value
+            if isinstance(value, dict):
+                for nested_key in ("data", "projects", "jobs", "results", "items"):
+                    nested = value.get(nested_key)
+                    if isinstance(nested, list):
+                        return nested
+        raise KickTheMapError("KickTheMap gaf een onbekende projectlijst-structuur terug.")
+
+    def _fetch_jobs_api(self, *, allow_reauth: bool = True) -> list[KickTheMapJob]:
+        last_error: Exception | None = None
+        reauthenticated = False
+        csrf_refreshed = False
+        for attempt, delay in enumerate(JOBS_RETRY_DELAYS):
+            if delay:
+                time.sleep(delay)
+            try:
+                csrf_token = self._ensure_csrf_token()
+                response = self.session.post(
+                    self.JOBS_API_URL,
+                    json={},
+                    headers={
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": csrf_token,
+                    },
+                    timeout=self.timeout,
+                )
+                status = self._response_status(response)
+                if status in JOBS_AUTH_STATUS_CODES:
+                    if not csrf_refreshed:
+                        csrf_refreshed = True
+                        self._csrf_token = None
+                        try:
+                            self._refresh_jobs_csrf()
+                            continue
+                        except Exception as exc:
+                            last_error = exc
+                    if allow_reauth and not reauthenticated and self.logged_in_email:
+                        reauthenticated = True
+                        self._csrf_token = None
+                        self._import_browser_session_cookies(self.logged_in_email)
+                        self._refresh_jobs_csrf()
+                        continue
+                if status in JOBS_TRANSIENT_STATUS_CODES:
+                    retry_after = str(getattr(response, "headers", {}).get("Retry-After", "") or "").strip()
+                    if retry_after and attempt + 1 < len(JOBS_RETRY_DELAYS):
+                        try:
+                            time.sleep(min(float(retry_after), 5.0))
+                        except (TypeError, ValueError):
+                            pass
+                    response.raise_for_status()
+                response.raise_for_status()
+                try:
+                    payload = response.json()
+                except (TypeError, ValueError) as exc:
+                    raise KickTheMapError("KickTheMap gaf geen geldige JSON-projectlijst terug.") from exc
+                raw_projects = self._jobs_payload_list(payload)
+                jobs = self._parse_job_projects(raw_projects)
+                return jobs
+            except (requests.Timeout, requests.ConnectionError, requests.HTTPError, KickTheMapError) as exc:
+                last_error = exc
+                if attempt + 1 >= len(JOBS_RETRY_DELAYS):
+                    break
+                continue
+        if isinstance(last_error, KickTheMapError):
+            raise last_error
+        raise KickTheMapError(f"KickTheMap job-API is tijdelijk niet bereikbaar ({last_error}).") from last_error
 
     def _parse_job_projects(self, raw_projects: object) -> list[KickTheMapJob]:
         if not isinstance(raw_projects, list):
             raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
         jobs: list[KickTheMapJob] = []
+        seen_ids: set[int] = set()
+        skipped = 0
+        fallback_identity = 0
         for project in raw_projects:
             if not isinstance(project, dict):
-                continue
-            prefix = str(project.get("Prefix") or project.get("s3_root_dir") or "").strip()
-            parsed_prefix = self._parse_prefix(prefix)
-            if parsed_prefix is None:
+                skipped += 1
                 continue
             project_id = project.get("Id", project.get("id", 0))
             try:
                 job_id = int(project_id or 0)
             except (TypeError, ValueError):
+                skipped += 1
                 continue
-            title = str(project.get("AboutProject") or project.get("name") or "").strip()
+            if job_id <= 0 or job_id in seen_ids:
+                skipped += 1
+                continue
+            seen_ids.add(job_id)
+
+            prefix = str(project.get("Prefix") or project.get("s3_root_dir") or "").strip()
+            parsed_prefix = self._parse_prefix(prefix)
+            if parsed_prefix is None:
+                fallback_identity += 1
+                project_mail, project_date = self._fallback_project_identity(project, prefix)
+            else:
+                project_mail, project_date = parsed_prefix
+            title = str(project.get("AboutProject") or project.get("name") or project.get("title") or "").strip()
             if "can_download_cloud" in project:
                 download_available = self._parse_bool(project.get("can_download_cloud"))
             else:
                 download_available = self._parse_bool(project.get("Download"))
+            try:
+                status = int(project.get("status", 0) or 0)
+            except (TypeError, ValueError):
+                status = 0
+            try:
+                archived = int(project.get("archived", 0) or 0)
+            except (TypeError, ValueError):
+                archived = 0
             jobs.append(
                 KickTheMapJob(
                     job_id=job_id,
                     title=title or f"Job {project_id}",
                     prefix=prefix,
-                    project_mail=parsed_prefix[0],
-                    project_date=parsed_prefix[1],
+                    project_mail=project_mail,
+                    project_date=project_date,
                     user_id=self._format_user_id(project),
                     address=self._format_address(project),
                     client_date=str(project.get("ClientDate") or project.get("created_at") or ""),
                     delivery_date=str(project.get("delivery_date") or ""),
-                    status=int(project.get("status", 0) or 0),
+                    status=status,
                     download_available=download_available,
-                    archived=int(project.get("archived", 0) or 0),
+                    archived=archived,
                     municipality=self._format_municipality(project),
                     coordinates=self._format_coordinates(project),
                 )
             )
+        self._set_jobs_diagnostics(
+            raw_count=len(raw_projects),
+            parsed_count=len(jobs),
+            skipped_count=skipped,
+            fallback_identity_count=fallback_identity,
+        )
+        if raw_projects and not jobs:
+            raise KickTheMapError(
+                f"KickTheMap gaf {len(raw_projects)} projecten terug, maar geen enkel record kon betrouwbaar worden gelezen."
+            )
         return jobs
+
+
+    def _fallback_project_identity(self, project: dict, prefix: str) -> tuple[str, str]:
+        email = ""
+        for key in ("project_mail", "email", "mail", "user_email", "customer_email"):
+            value = str(project.get(key) or "").strip()
+            if "@" in value:
+                email = value
+                break
+        if not email:
+            email = str(self.logged_in_email or "").strip()
+
+        date_match = re.search(r"(\d{4}-\d{2}-\d{2}[T_ -]\d{2}[:\-]\d{2}[:\-]\d{2})", prefix)
+        date_value = date_match.group(1) if date_match else ""
+        if not date_value:
+            date_value = str(project.get("project_date") or project.get("created_at") or "").strip()
+        if date_value:
+            date_value = date_value.replace("T", "_").replace(" ", "_").replace(":", "-")[:19]
+        return email, date_value
 
     @staticmethod
     def _job_tiff_key(job: KickTheMapJob) -> str:
@@ -1354,7 +1716,7 @@ class KickTheMapClient:
 
     @staticmethod
     def _job_storage_prefix(job: KickTheMapJob) -> str:
-        return f"{job.project_mail}_{job.project_date}"
+        return str(job.prefix or "").strip() or f"{job.project_mail}_{job.project_date}"
 
     @staticmethod
     def _extract_login_token(html: str) -> str:
