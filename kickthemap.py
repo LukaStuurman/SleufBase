@@ -1232,12 +1232,56 @@ class KickTheMapClient:
 
     @staticmethod
     def _extract_js_value(html: str, marker: str) -> str:
-        marker_index = html.find(marker)
-        if marker_index < 0:
+        requested_name = str(marker or "").strip().split()[-1:]
+        if not requested_name:
             raise KickTheMapError("KickTheMap projectlijst niet gevonden.")
-        value_start = html.find("[", marker_index)
-        if value_start < 0:
+
+        # KickTheMap used to emit ``var projects = [...]``. Its page scripts
+        # have since moved toward newer declarations, so also accept let/const,
+        # window assignments and the common project/job list aliases.
+        names = (
+            requested_name[0],
+            "projects",
+            "projectList",
+            "project_list",
+            "projectData",
+            "project_data",
+            "jobs",
+            "jobList",
+            "job_list",
+            "jobData",
+            "job_data",
+        )
+        found_assignment = False
+        for name in dict.fromkeys(names):
+            assignment = re.compile(
+                rf"(?<![\w$])(?:(?:var|let|const)\s+)?"
+                rf"(?:window\s*\.\s*)?{re.escape(name)}\s*=",
+                re.IGNORECASE,
+            )
+            for match in assignment.finditer(html):
+                found_assignment = True
+                value_start = match.end()
+                while value_start < len(html) and html[value_start].isspace():
+                    value_start += 1
+                if value_start >= len(html) or html[value_start] != "[":
+                    continue
+                value_end = KickTheMapClient._find_js_array_end(html, value_start)
+                if value_end is not None:
+                    candidate = html[value_start : value_end + 1]
+                    try:
+                        if isinstance(json.loads(candidate), list):
+                            return candidate
+                    except json.JSONDecodeError:
+                        continue
+
+        if found_assignment:
             raise KickTheMapError("KickTheMap projectlijst heeft geen geldig formaat.")
+        raise KickTheMapError("KickTheMap projectlijst niet gevonden.")
+
+    @staticmethod
+    def _find_js_array_end(html: str, value_start: int) -> int | None:
+        """Return the closing bracket for a JSON-style JavaScript array."""
 
         depth = 0
         in_string = False
@@ -1260,9 +1304,8 @@ class KickTheMapClient:
             elif char == "]":
                 depth -= 1
                 if depth == 0:
-                    return html[value_start : index + 1]
-
-        raise KickTheMapError("KickTheMap projectlijst kon niet worden uitgelezen.")
+                    return index
+        return None
 
     @staticmethod
     def _decrypt_aws_payload(encrypted_payload: str, password: str) -> dict:

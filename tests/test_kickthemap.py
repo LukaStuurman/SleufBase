@@ -23,6 +23,35 @@ def _job() -> KickTheMapJob:
     )
 
 
+class KickTheMapJobsPageTests(unittest.TestCase):
+    def test_jobs_parser_accepts_current_javascript_declaration_styles(self) -> None:
+        payload = [
+            {
+                "Id": 12345,
+                "Prefix": "test@example.com_2026-01-01_00-00-00",
+                "AboutProject": "Example job",
+                "Download": True,
+            }
+        ]
+        declarations = (
+            "var projects",
+            "let projects",
+            "const projects",
+            "window.projects",
+            "const projectList",
+            "let jobs",
+        )
+
+        for declaration in declarations:
+            with self.subTest(declaration=declaration):
+                html = f"<script>{declaration} = {json.dumps(payload)};</script>"
+                jobs = KickTheMapClient()._parse_jobs_page(html)
+
+                self.assertEqual(len(jobs), 1)
+                self.assertEqual(jobs[0].job_id, 12345)
+                self.assertEqual(jobs[0].title, "Example job")
+
+
 class KickTheMapDownloadTests(unittest.TestCase):
     def test_single_feature_download_reuses_recent_valid_disk_copy(self) -> None:
         with TemporaryDirectory() as temporary_directory:
