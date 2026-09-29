@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.57'
+  SLEUFBASE_RELEASE_VERSION: '0.3.58'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.57
+          name: SleufBase-Windows-v0.3.58
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,18 +293,16 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.57
+          SleufBase Windows v0.3.58
 
-          KickTheMap jobs en downloads:
-          - herkent de vernieuwde projectlijstdeclaraties op de KickTheMap-jobs-pagina
-          - verwerkt de Google reCAPTCHA-aanmelding via de ingebouwde KickTheMap-browser
-          - hergebruikt de aangemelde browsersessie voor de jobs-lijst en downloads
-          - draagt KickTheMap-sessiecookies tijdelijk over via een eenmalige lokale verbinding
-          - houdt het wachtwoord in de opgeslagen accountinstellingen en gebruikt de browseridentiteit voor vervolgverzoeken
-          - toont het browservenster als de automatische aanmelding aanvullende invoer nodig heeft
+          KickTheMap-jobs en downloads:
+          - haalt de jobs op via de huidige KickTheMap-jobs-API in plaats van de verouderde inline projectlijst
+          - zet de actuele project-, adres-, status- en downloadvelden om naar het bestaande SleufBase-jobmodel
+          - behoudt ondersteuning voor oudere KickTheMap-pagina's met een inline projectlijst
+          - controleert de bijgewerkte lijst- en downloadroute met regressietests
 
           Windows:
-          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.57
+          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.58
           - professionele installer, Fast ZIP en Portable EXE volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
