@@ -95,6 +95,7 @@ class KickTheMapClient:
     SIGNIN_URL = BASE_URL + "/signin"
     LOGIN_URL = BASE_URL + "/login"
     JOBS_URL = BASE_URL + "/"
+    JOBS_API_URL = BASE_URL + "/jobs/get-user-jobs"
     AWS_DATA_URL = BASE_URL + "/main/adata"
     FILE_URL_URL = BASE_URL + "/jobs/get-file-url"
     COORD_FILE_URL = BASE_URL + "/jobs/getCoordFile"
@@ -432,10 +433,11 @@ class KickTheMapClient:
         if self._looks_like_login_page(jobs_page.text):
             raise KickTheMapError("Inloggen bij KickTheMap is mislukt.")
 
-        self.logged_in_email = email
         self._csrf_token = self._extract_csrf_token(jobs_page.text)
         self._aws_config = None
-        return self._parse_jobs_page(jobs_page.text)
+        jobs = self._parse_jobs_page(jobs_page.text)
+        self.logged_in_email = email
+        return jobs
 
     @staticmethod
     def _requires_browser_login(html: str) -> bool:
@@ -1089,26 +1091,71 @@ class KickTheMapClient:
         return self._csrf_token
 
     def _parse_jobs_page(self, html: str) -> list[KickTheMapJob]:
-        projects_json = self._extract_js_value(html, "var projects")
+        try:
+            projects_json = self._extract_js_value(html, "var projects")
+        except KickTheMapError as exc:
+            if str(exc) != "KickTheMap projectlijst niet gevonden.":
+                raise
+            return self._fetch_jobs_api()
+
         raw_projects = json.loads(projects_json)
+        return self._parse_job_projects(raw_projects)
+
+    def _fetch_jobs_api(self) -> list[KickTheMapJob]:
+        csrf_token = self._ensure_csrf_token()
+        response = self.session.post(
+            self.JOBS_API_URL,
+            json={},
+            headers={
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": csrf_token,
+            },
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        try:
+            payload = response.json()
+        except (TypeError, ValueError) as exc:
+            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.") from exc
+        if not isinstance(payload, dict) or payload.get("status") is False:
+            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
+        raw_projects = payload.get("data")
+        if not isinstance(raw_projects, list):
+            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
+        return self._parse_job_projects(raw_projects)
+
+    def _parse_job_projects(self, raw_projects: object) -> list[KickTheMapJob]:
+        if not isinstance(raw_projects, list):
+            raise KickTheMapError("KickTheMap gaf een ongeldige projectlijst terug.")
         jobs: list[KickTheMapJob] = []
         for project in raw_projects:
-            prefix = str(project.get("Prefix", "")).strip()
+            if not isinstance(project, dict):
+                continue
+            prefix = str(project.get("Prefix") or project.get("s3_root_dir") or "").strip()
             parsed_prefix = self._parse_prefix(prefix)
             if parsed_prefix is None:
                 continue
-            download_available = self._parse_bool(project.get("Download"))
+            project_id = project.get("Id", project.get("id", 0))
+            try:
+                job_id = int(project_id or 0)
+            except (TypeError, ValueError):
+                continue
+            title = str(project.get("AboutProject") or project.get("name") or "").strip()
+            if "can_download_cloud" in project:
+                download_available = self._parse_bool(project.get("can_download_cloud"))
+            else:
+                download_available = self._parse_bool(project.get("Download"))
             jobs.append(
                 KickTheMapJob(
-                    job_id=int(project.get("Id", 0)),
-                    title=str(project.get("AboutProject", "")).strip() or f"Job {project.get('Id', '')}",
+                    job_id=job_id,
+                    title=title or f"Job {project_id}",
                     prefix=prefix,
                     project_mail=parsed_prefix[0],
                     project_date=parsed_prefix[1],
                     user_id=self._format_user_id(project),
                     address=self._format_address(project),
-                    client_date=str(project.get("ClientDate", "")),
-                    delivery_date=str(project.get("delivery_date", "")),
+                    client_date=str(project.get("ClientDate") or project.get("created_at") or ""),
+                    delivery_date=str(project.get("delivery_date") or ""),
                     status=int(project.get("status", 0) or 0),
                     download_available=download_available,
                     archived=int(project.get("archived", 0) or 0),
@@ -1164,13 +1211,15 @@ class KickTheMapClient:
 
     @staticmethod
     def _format_address(project: dict) -> str:
-        street = str(project.get("address_road", "")).strip()
-        number = str(project.get("address_number", "")).strip()
-        postcode = str(project.get("address_postcode", "")).strip()
-        town = str(project.get("address_town", "")).strip()
-        district = str(project.get("address_district", "")).strip()
-        region = str(project.get("address_region", "")).strip()
-        country = str(project.get("address_country", "")).strip()
+        address = project.get("address")
+        nested = address if isinstance(address, dict) else {}
+        street = str(project.get("address_road") or nested.get("road") or "").strip()
+        number = str(project.get("address_number") or nested.get("number") or "").strip()
+        postcode = str(project.get("address_postcode") or nested.get("postcode") or "").strip()
+        town = str(project.get("address_town") or nested.get("town") or "").strip()
+        district = str(project.get("address_district") or nested.get("district") or "").strip()
+        region = str(project.get("address_region") or nested.get("region") or "").strip()
+        country = str(project.get("address_country") or nested.get("country") or "").strip()
 
         first_line = " ".join(part for part in (street, number) if part).strip()
         second_line = " ".join(part for part in (postcode, town) if part).strip()
@@ -1180,7 +1229,8 @@ class KickTheMapClient:
     @staticmethod
     def _format_user_id(project: dict) -> str:
         for key in ("user_id", "userId", "UserId", "userID", "UserID"):
-            value = str(project.get(key, "")).strip()
+            raw_value = project.get(key)
+            value = str(raw_value).strip() if raw_value is not None else ""
             if value:
                 return value
         return ""
@@ -1188,6 +1238,7 @@ class KickTheMapClient:
     @staticmethod
     def _format_municipality(project: dict) -> str:
         for key in (
+            "commune",
             "address_town",
             "address_city",
             "municipality",
@@ -1195,7 +1246,8 @@ class KickTheMapClient:
             "address_municipality",
             "address_district",
         ):
-            value = str(project.get(key, "")).strip()
+            raw_value = project.get(key)
+            value = str(raw_value).strip() if raw_value is not None else ""
             if value:
                 return value
         return "-"
@@ -1212,12 +1264,15 @@ class KickTheMapClient:
             ("Lon", "Lat"),
         )
         for first_key, second_key in coordinate_pairs:
-            first = str(project.get(first_key, "")).strip()
-            second = str(project.get(second_key, "")).strip()
+            first_value = project.get(first_key)
+            second_value = project.get(second_key)
+            first = str(first_value).strip() if first_value is not None else ""
+            second = str(second_value).strip() if second_value is not None else ""
             if first and second:
                 return f"{first}, {second}"
         for key in ("coordinates", "coord", "location", "gps", "latlng"):
-            value = str(project.get(key, "")).strip()
+            raw_value = project.get(key)
+            value = str(raw_value).strip() if raw_value is not None else ""
             if value:
                 return value
         return "-"

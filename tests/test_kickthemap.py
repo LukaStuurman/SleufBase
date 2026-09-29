@@ -51,6 +51,68 @@ class KickTheMapJobsPageTests(unittest.TestCase):
                 self.assertEqual(jobs[0].job_id, 12345)
                 self.assertEqual(jobs[0].title, "Example job")
 
+    def test_jobs_parser_fetches_current_jobs_api_for_spa_page(self) -> None:
+        client = KickTheMapClient()
+        client._csrf_token = "csrf-token"
+        response = Mock()
+        response.json.return_value = {
+            "status": True,
+            "data": [
+                {
+                    "id": 12345,
+                    "name": "Example job",
+                    "s3_root_dir": "test@example.com_2026-01-01_00-00-00",
+                    "user_id": 87,
+                    "address": {
+                        "road": "Example Road",
+                        "number": "4",
+                        "postcode": "1234 AB",
+                        "town": "Exampletown",
+                        "district": "Example district",
+                        "region": "Example region",
+                        "country": "Netherlands",
+                    },
+                    "created_at": "2026-01-02T03:04:05.000000Z",
+                    "delivery_date": "2026-01-03T00:00:00.000000Z",
+                    "status": 3,
+                    "archived": 0,
+                    "can_download_cloud": True,
+                    "commune": "Example commune",
+                    "lat": 52.3,
+                    "lng": 4.9,
+                }
+            ],
+            "cdn_base_url": "https://cdn.example.test",
+        }
+        client.session.post = Mock(return_value=response)
+        html = '<script type="module" src="/build/assets/my-jobs-app-test.js"></script>'
+
+        jobs = client._parse_jobs_page(html)
+
+        self.assertEqual(len(jobs), 1)
+        job = jobs[0]
+        self.assertEqual(job.job_id, 12345)
+        self.assertEqual(job.title, "Example job")
+        self.assertEqual(job.prefix, "test@example.com_2026-01-01_00-00-00")
+        self.assertEqual(job.project_mail, "test@example.com")
+        self.assertEqual(job.project_date, "2026-01-01_00-00-00")
+        self.assertEqual(job.user_id, "87")
+        self.assertEqual(
+            job.address,
+            "Example Road 4, 1234 AB Exampletown, Example district, Example region, Netherlands",
+        )
+        self.assertEqual(job.client_date, "2026-01-02T03:04:05.000000Z")
+        self.assertEqual(job.municipality, "Example commune")
+        self.assertEqual(job.coordinates, "4.9, 52.3")
+        self.assertTrue(job.download_available)
+        response.raise_for_status.assert_called_once_with()
+        client.session.post.assert_called_once_with(
+            "https://www.my.kickthemap.com/jobs/get-user-jobs",
+            json={},
+            headers={"Accept": "application/json", "X-CSRF-TOKEN": "csrf-token"},
+            timeout=client.timeout,
+        )
+
 
 class KickTheMapDownloadTests(unittest.TestCase):
     def test_single_feature_download_reuses_recent_valid_disk_copy(self) -> None:
