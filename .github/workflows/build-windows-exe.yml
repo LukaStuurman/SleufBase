@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.55'
+  SLEUFBASE_RELEASE_VERSION: '0.3.56'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.55
+          name: SleufBase-Windows-v0.3.56
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,24 +293,18 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.55
+          SleufBase Windows v0.3.56
 
-          Discipline-overzicht naar Excel:
-          - voegt naast 'Aantal verschillende disciplines' de kolom 'Totaal aantal kabels/leidingen' toe
-          - telt per proefsleuf alle herkende kabels en leidingen over de disciplinekolommen op
-          - toont in de Totaal-rij ook het totale aantal kabels/leidingen over alle geselecteerde proefsleuven
-          - gebruikt Techbase-oranje opmaak in plaats van blauw: donkeroranje kopregel (#C2410C) en zeer licht oranje tabelvulling (#FFF7ED)
-          - houdt de Totaal-rij vetgedrukt binnen dezelfde lichte oranje stijl
-          - behoudt correcte disciplinevolgorde, geselecteerde PS-namen/varianten en autofilterbereik
-
-          Bestaande exportfunctionaliteit behouden:
-          - Discipline Excel en Kadastrale DXF blijven hetzelfde volgordevenster gebruiken
-          - Kadastrale DXF behoudt de optie Geen, waarbij GeoTIFF-rasterexport onafhankelijk blijft werken
-          - de v0.3.52-v0.3.54 raster-identiteitsfixes en unieke IMAGEDEF/rasterkoppelingen blijven behouden
+          KickTheMap jobs en downloads:
+          - verwerkt de Google reCAPTCHA-aanmelding via de ingebouwde KickTheMap-browser
+          - hergebruikt de aangemelde browsersessie voor de jobs-lijst en downloads
+          - draagt KickTheMap-sessiecookies tijdelijk over via een eenmalige lokale verbinding
+          - houdt het wachtwoord in de opgeslagen accountinstellingen en gebruikt de browseridentiteit voor vervolgverzoeken
+          - toont het browservenster als de automatische aanmelding aanvullende invoer nodig heeft
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.55
-          - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
+          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.56
+          - professionele installer, Fast ZIP en Portable EXE volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
