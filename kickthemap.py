@@ -635,6 +635,98 @@ class KickTheMapClient:
                     except subprocess.TimeoutExpired:
                         process.kill()
 
+    def _fetch_jobs_browser_context(self) -> list[KickTheMapJob]:
+        """Fetch the jobs JSON inside KickTheMap's own authenticated WebView2 context."""
+        email = str(self.logged_in_email or "").strip().lower()
+        if not email:
+            raise KickTheMapError("Geen KickTheMap-account beschikbaar voor browserfallback.")
+
+        capture_token = secrets.token_urlsafe(32)
+        process: subprocess.Popen | None = None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen(1)
+            server.settimeout(1.0)
+            port = int(server.getsockname()[1])
+            package_root = Path(__file__).resolve().parent.parent
+            launcher = package_root / "sleufbase_launcher.py"
+            arguments = [
+                "--kickthemap-browser-prelogin",
+                "--kickthemap-browser-jobs-capture-port",
+                str(port),
+                "--kickthemap-browser-jobs-capture-token",
+                capture_token,
+                "--kickthemap-browser-session-capture-email",
+                email,
+            ]
+            command = (
+                [sys.executable, *arguments]
+                if getattr(sys, "frozen", False)
+                else [sys.executable, str(launcher), *arguments]
+            )
+            try:
+                process = subprocess.Popen(
+                    command,
+                    cwd=str(package_root),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                deadline = time.monotonic() + 180.0
+                decoded: dict[str, object] | None = None
+                while time.monotonic() < deadline:
+                    try:
+                        connection, _address = server.accept()
+                    except socket.timeout:
+                        if process.poll() is not None:
+                            break
+                        continue
+                    with connection:
+                        connection.settimeout(10.0)
+                        chunks: list[bytes] = []
+                        received = 0
+                        while True:
+                            chunk = connection.recv(65536)
+                            if not chunk:
+                                break
+                            received += len(chunk)
+                            if received > 16 * 1024 * 1024:
+                                raise KickTheMapError("De KickTheMap-browser stuurde een te grote joblijst.")
+                            chunks.append(chunk)
+                        connection.sendall(b"OK")
+                    try:
+                        candidate = json.loads(b"".join(chunks).decode("utf-8"))
+                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                        raise KickTheMapError("De KickTheMap-browser gaf ongeldige jobgegevens terug.") from exc
+                    if not isinstance(candidate, dict) or candidate.get("token") != capture_token:
+                        raise KickTheMapError("De KickTheMap-browser gaf geen geldige jobbevestiging terug.")
+                    decoded = candidate
+                    break
+
+                if decoded is None:
+                    raise KickTheMapError("De KickTheMap-browserfallback gaf geen joblijst terug.")
+                payload = decoded.get("payload")
+                if isinstance(payload, dict):
+                    try:
+                        http_status = int(payload.get("__sleufbase_http_status", 200) or 200)
+                    except (TypeError, ValueError):
+                        http_status = 200
+                    if http_status >= 400:
+                        raise KickTheMapError(
+                            f"KickTheMap-browser gaf HTTP {http_status} voor de joblijst."
+                        )
+                    payload.pop("__sleufbase_http_status", None)
+                raw_projects = self._jobs_payload_list(payload)
+                return self._parse_job_projects(raw_projects)
+            finally:
+                if process is not None and process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+
     def logout(self) -> None:
         self.session.cookies.clear()
         self.logged_in_email = None
@@ -716,7 +808,14 @@ class KickTheMapClient:
             except Exception as exc:
                 errors.append(f"browser-session: {exc}")
 
-        raise KickTheMapError("KickTheMap-joblijst kon niet betrouwbaar worden opgehaald. " + "; ".join(errors[-4:]))
+            try:
+                jobs = self._fetch_jobs_browser_context()
+                self._set_jobs_diagnostics(source="browser-context", returned_count=len(jobs), errors=errors)
+                return jobs
+            except Exception as exc:
+                errors.append(f"browser-context: {exc}")
+
+        raise KickTheMapError("KickTheMap-joblijst kon niet betrouwbaar worden opgehaald. " + "; ".join(errors[-5:]))
 
     def download_tiff(self, job: KickTheMapJob, target_dir: Path | None = None) -> Path:
         self._ensure_logged_in()
