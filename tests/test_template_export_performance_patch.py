@@ -111,7 +111,13 @@ for fetch in (perf._parallel_ordered, _parallel_ordered_bounded):
 """
         process = subprocess.run(
             [sys.executable, "-c", script],
-            env={**os.environ, "SLEUFBASE_MAX_WORKERS": "1"},
+            env={
+                **os.environ, "SLEUFBASE_MAX_WORKERS": "1",
+                "PYTHONPATH": os.pathsep.join((
+                    str(Path(__file__).resolve().parents[2]),
+                    os.environ.get("PYTHONPATH", ""),
+                )),
+            },
             capture_output=True, text=True, timeout=30,
         )
         self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
