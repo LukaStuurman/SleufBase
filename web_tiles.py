@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 import math
 import os
 import threading
@@ -66,6 +66,9 @@ class WebMercatorTileClient:
             tuple[int, int, int], tuple[bytes, datetime]
         ] = OrderedDict()
         self._memory_cache_lock = threading.RLock()
+        # Overlapping map/export requests share a tile download, including its
+        # retries. Completed entries are removed; each caller owns its PIL view.
+        self._inflight_tiles: dict[tuple[int, int, int], Future[bytes]] = {}
 
     def build_tile_url(self, zoom: int, x: int, y: int) -> str:
         raise NotImplementedError
@@ -307,6 +310,8 @@ class WebMercatorTileClient:
             return None
         try:
             with Image.open(tile_path) as image:
+                if image.size != _TILE_SIZE:
+                    raise ValueError("Ongeldige tegelgrootte in de cache.")
                 tile = image.convert("RGBA")
                 tile.load()
         except (OSError, UnidentifiedImageError, ValueError):
@@ -377,6 +382,38 @@ class WebMercatorTileClient:
         if cached_tile is not None:
             return cached_tile
 
+        with self._memory_cache_lock:
+            pending = self._inflight_tiles.get(cache_key)
+            owner = pending is None
+            if pending is None:
+                pending = Future()
+                self._inflight_tiles[cache_key] = pending
+        if not owner:
+            return _image_from_cached_rgba(pending.result())
+        try:
+            # Recheck after registration: a prior owner may have completed
+            # between the first cache lookup and taking the registry lock.
+            tile = self._download_tile(zoom, x, y)
+            try:
+                # A concurrent preview may insert an older disk image into the
+                # cache. Share this owner's pixels, independent of cache writes.
+                pending.set_result(tile.tobytes())
+            except BaseException:
+                tile.close()
+                raise
+            return tile
+        except BaseException as exc:
+            pending.set_exception(exc)
+            raise
+        finally:
+            with self._memory_cache_lock:
+                self._inflight_tiles.pop(cache_key, None)
+
+    def _download_tile(self, zoom: int, x: int, y: int) -> Image.Image:
+        cache_key = (zoom, x, y)
+        cached_tile = self._load_cached_tile(zoom, x, y, allow_stale=False)
+        if cached_tile is not None:
+            return cached_tile
         tile_path = self._tile_path(zoom, x, y)
         url = self.build_tile_url(zoom, x, y)
         last_error: Exception | None = None
@@ -388,6 +425,10 @@ class WebMercatorTileClient:
                 if "image" not in content_type.casefold():
                     raise TileClientError(f"Geen afbeelding ontvangen voor tegel {zoom}/{x}/{y}.")
                 with Image.open(BytesIO(response.content)) as source:
+                    if source.size != _TILE_SIZE:
+                        raise TileClientError(
+                            f"Ongeldige tegelgrootte {source.size} voor {zoom}/{x}/{y}; 256x256 verwacht."
+                        )
                     tile = source.convert("RGBA")
                     tile.load()
                 if tile.size != _TILE_SIZE:

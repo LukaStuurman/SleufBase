@@ -169,7 +169,7 @@ def _rolling_download(
 
 
 def install_kickthemap_client_scalability_patch() -> None:
-    from .kickthemap import KickTheMapClient, KickTheMapError
+    from .kickthemap import KickTheMapClient, KickTheMapError, _close_download_worker
 
     if int(getattr(KickTheMapClient, "_sleufbase_scalability_patch_version", 0) or 0) >= PATCH_VERSION:
         return
@@ -215,8 +215,11 @@ def install_kickthemap_client_scalability_patch() -> None:
         def download_one(spec):
             job, target_path, file_name = spec
             worker_client = self._parallel_worker_client()
-            path = _download_fresh_job_features(worker_client, job, target_path, file_name)
-            return int(job.job_id), path
+            try:
+                path = _download_fresh_job_features(worker_client, job, target_path, file_name)
+                return int(job.job_id), path
+            finally:
+                _close_download_worker(worker_client)
 
         downloaded, errors = _rolling_download(
             specs,
@@ -273,8 +276,11 @@ def install_kickthemap_client_scalability_patch() -> None:
         def download_one(spec):
             job, target_path, file_name = spec
             worker_client = self._parallel_worker_client()
-            path = _download_fresh_tiff(worker_client, job, target_path, file_name)
-            return int(job.job_id), path
+            try:
+                path = _download_fresh_tiff(worker_client, job, target_path, file_name)
+                return int(job.job_id), path
+            finally:
+                _close_download_worker(worker_client)
 
         paths, errors = _rolling_download(
             specs,
@@ -378,11 +384,87 @@ def _apply_template_kickthemap_snapshot(app, snapshot: TemplateKickTheMapSnapsho
                 cache.clear()
 
 
-def _schedule_ui(app, callback) -> None:
-    try:
-        app.after(0, callback)
-    except Exception:
-        callback()
+class _TemplateRefreshDispatcher:
+    """Deliver worker results through a poll installed on Tk's main thread."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+        self.cancelled = threading.Event()
+        self._lock = threading.Lock()
+        self._status: str | None = None
+        self._callback = None
+        self._after_id = None
+        self._destroy_binding = None
+
+    def start(self) -> bool:
+        if not self.app.winfo_exists():
+            self.close()
+            return False
+        self._destroy_binding = self.app.bind("<Destroy>", self._on_destroy, add="+")
+        self._after_id = self.app.after(50, self._poll)
+        return True
+
+    def post_status(self, status: str) -> None:
+        with self._lock:
+            if not self.cancelled.is_set():
+                self._status = status
+
+    def post_callback(self, callback) -> None:
+        with self._lock:
+            if not self.cancelled.is_set():
+                self._callback = callback
+
+    def _on_destroy(self, event) -> None:
+        if event.widget is self.app:
+            self.close()
+
+    def close(self) -> None:
+        with self._lock:
+            if self.cancelled.is_set():
+                return
+            self.cancelled.set()
+            self._status = None
+            self._callback = None
+        self.app._sleufbase_kickthemap_template_refresh_active = False
+        if self._after_id is not None:
+            try:
+                self.app.after_cancel(self._after_id)
+            except Exception:
+                pass
+            self._after_id = None
+        if self._destroy_binding is not None:
+            try:
+                self.app.unbind("<Destroy>", self._destroy_binding)
+            except Exception:
+                pass
+            self._destroy_binding = None
+
+    def _poll(self) -> None:
+        self._after_id = None
+        if self.cancelled.is_set():
+            return
+        try:
+            if not self.app.winfo_exists():
+                self.close()
+                return
+            with self._lock:
+                status, callback = self._status, self._callback
+                self._status = None
+                self._callback = None
+            if status is not None:
+                self.app.set_status(status)
+            if self.cancelled.is_set():
+                return
+            if callback is not None:
+                try:
+                    callback()
+                finally:
+                    self.close()
+            else:
+                self._after_id = self.app.after(50, self._poll)
+        except Exception:
+            self.close()
+            raise
 
 
 def _patch_viewer_class(viewer_class) -> None:
@@ -435,12 +517,17 @@ def _patch_viewer_class(viewer_class) -> None:
         except Exception:
             pass
 
+        dispatcher = _TemplateRefreshDispatcher(self)
+        try:
+            if not dispatcher.start():
+                return None
+        except Exception:
+            dispatcher.close()
+            raise
+
         def progress(completed: int, total: int) -> None:
-            _schedule_ui(
-                self,
-                lambda: self.set_status(
-                    f"Nieuwste KickTheMap kabels/leidingen ophalen... {completed}/{total}"
-                ),
+            dispatcher.post_status(
+                f"Nieuwste KickTheMap kabels/leidingen ophalen... {completed}/{total}"
             )
 
         def fail(exc: Exception) -> None:
@@ -479,6 +566,8 @@ def _patch_viewer_class(viewer_class) -> None:
                 self._sleufbase_kickthemap_template_refresh_active = False
 
         def worker() -> None:
+            if dispatcher.cancelled.is_set():
+                return
             try:
                 snapshot = _refresh_template_kickthemap_snapshot(
                     self,
@@ -486,15 +575,19 @@ def _patch_viewer_class(viewer_class) -> None:
                     progress_callback=progress,
                 )
             except Exception as exc:
-                _schedule_ui(self, lambda exc=exc: fail(exc))
+                dispatcher.post_callback(lambda exc=exc: fail(exc))
                 return
-            _schedule_ui(self, lambda snapshot=snapshot: finish(snapshot))
+            dispatcher.post_callback(lambda snapshot=snapshot: finish(snapshot))
 
-        threading.Thread(
-            target=worker,
-            name="kickthemap-template-freshness",
-            daemon=True,
-        ).start()
+        try:
+            threading.Thread(
+                target=worker,
+                name="kickthemap-template-freshness",
+                daemon=True,
+            ).start()
+        except Exception:
+            dispatcher.close()
+            raise
         return None
 
     viewer_class.export_cadastral_template_dxf = export_with_fresh_kickthemap_snapshot

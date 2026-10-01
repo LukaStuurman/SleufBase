@@ -41,11 +41,14 @@ class JobsFeaturePrefetchTests(unittest.TestCase):
         client = _Client()
         finished = []
         errors = []
+        status = _Status()
         window = SimpleNamespace(
             account=None,
             client=client,
-            status_var=_Status(),
-            after=lambda _delay, callback: callback(),
+            status_var=status,
+            _worker_cancelled=lambda: False,
+            _post_worker_callback=lambda callback: callback(),
+            _post_worker_status=status.set,
             _finish_load_geotiffs=lambda paths, warnings, records: finished.append(
                 (paths, warnings, records)
             ),

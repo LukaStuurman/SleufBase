@@ -47,6 +47,16 @@ Voor diagnose, benchmarks en bijzondere werkstations zijn de automatische waarde
 
 Expliciete overrides zijn bedoeld voor benchmarking/troubleshooting. Voor normale gebruikers hoort `auto` de beste combinatie van snelheid, geheugengebruik en UI-responsiviteit te leveren.
 
+## Kaartweergave en achtergrondtaken
+
+- Gelijktijdige aanvragen van dezelfde kaarttegel delen één download inclusief retries. Elke aanvrager krijgt een eigen beeld; onafhankelijke tegels blijven parallel laden.
+- Tegel- en WMS-afmetingen worden vóór beeldconversie gecontroleerd. Een foutief serverbeeld wordt opnieuw geprobeerd en komt niet als geldig kaartbeeld in de cache.
+- TIFF-lagen buiten het zichtbare kaartgebied worden vóór affine beeldbewerking overgeslagen. Hun extra native RGBA-cache wordt vrijgegeven bij het verschuiven van de kaart; zichtbare lagen behouden hun herbruikbare cache.
+- De jobs-browser verwerkt achtergrondresultaten en voortgang op de UI-thread. Voortgang tussen twee UI-polls wordt samengevoegd tot de nieuwste melding; het sluiten van het venster verwijdert wachtende callbacks.
+- KickTheMap-downloadworkers sluiten hun eigen netwerksessies na zowel succesvolle als mislukte downloads.
+
+De regressietests meten het vermeden werk rechtstreeks: twee overlappende tegelverzoeken doen één netwerkdownload, acht affine TIFF-lagen buiten beeld doen nul beeldconversies en het TIFF-cachebudget blijft gelden tijdens het navigeren.
+
 ## Correctheidsgrenzen
 
 Performance-optimalisaties mogen de inhoud van een export niet wijzigen. In het bijzonder blijven normale en reverse dwarsprofielen zelfstandig opgebouwd. De resourcepolicy verandert alleen scheduling, concurrency en cachebudgetten; niet de DXF-geometrie, maaiveldberekening, labels of reverse-semantiek.

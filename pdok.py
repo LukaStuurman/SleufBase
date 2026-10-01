@@ -279,6 +279,10 @@ class PdokWmsClient:
                     snippet = response.text[:300].strip()
                     raise PdokError(f"PDOK gaf geen kaartbeeld terug: {snippet}")
                 with Image.open(BytesIO(response.content)) as source:
+                    if source.size != size:
+                        raise PdokError(
+                            f"PDOK gaf kaartgrootte {source.size} terug; {size} verwacht."
+                        )
                     return source.convert("RGBA")
             except (requests.RequestException, OSError, ValueError, PdokError) as exc:
                 last_error = exc

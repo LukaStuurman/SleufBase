@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import deque
 import re
 import subprocess
 import sys
@@ -63,6 +64,41 @@ STATUS_LABELS = {
     10: "Gereed",
     11: "Wacht op bestanden",
 }
+
+
+class _JobsWorkerUpdates:
+    """A Python-only mailbox; workers never call into Tk to deliver results."""
+
+    def __init__(self) -> None:
+        self.cancelled = threading.Event()
+        self._lock = threading.Lock()
+        self._callbacks = deque()
+        self._status: str | None = None
+
+    def post_callback(self, callback) -> None:
+        with self._lock:
+            if not self.cancelled.is_set():
+                self._callbacks.append(callback)
+
+    def post_status(self, status: str) -> None:
+        with self._lock:
+            if not self.cancelled.is_set():
+                # Large selections can finish hundreds of downloads between
+                # UI polls. Only the latest progress text needs to be shown.
+                self._status = status
+
+    def take_updates(self):
+        with self._lock:
+            status, callbacks = self._status, tuple(self._callbacks)
+            self._status = None
+            self._callbacks.clear()
+        return status, callbacks
+
+    def close(self) -> None:
+        with self._lock:
+            self.cancelled.set()
+            self._status = None
+            self._callbacks.clear()
 
 
 def _selected_account() -> KickTheMapSavedAccount | None:
@@ -799,6 +835,10 @@ class JobGridTable(ttk.Frame):
 class KickTheMapJobsWindow(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
+        self._worker_updates = _JobsWorkerUpdates()
+        self._worker_poll_after = None
+        self._jobs_operation_active = False
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.title(WINDOW_TITLE)
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.minsize(980, 560)
@@ -820,8 +860,47 @@ class KickTheMapJobsWindow(tk.Tk):
         self._browser_prelogin_started = False
 
         self._build_layout()
+        self._worker_poll_after = self.after(50, self._poll_worker_updates)
         self.after(50, self.refresh_jobs)
         self.after(750, self._poll_loaded_jobs_state)
+
+    def _worker_cancelled(self) -> bool:
+        return self._worker_updates.cancelled.is_set()
+
+    def _post_worker_callback(self, callback) -> None:
+        self._worker_updates.post_callback(callback)
+
+    def _post_worker_status(self, status: str) -> None:
+        self._worker_updates.post_status(status)
+
+    def _poll_worker_updates(self) -> None:
+        self._worker_poll_after = None
+        if self._worker_cancelled():
+            return
+        status, callbacks = self._worker_updates.take_updates()
+        if status is not None:
+            self.status_var.set(status)
+        for callback in callbacks:
+            if self._worker_cancelled():
+                return
+            try:
+                callback()
+            except Exception:
+                self.report_callback_exception(*sys.exc_info())
+        if not self._worker_cancelled():
+            self._worker_poll_after = self.after(50, self._poll_worker_updates)
+
+    def destroy(self) -> None:
+        if self._worker_cancelled():
+            return
+        self._worker_updates.close()
+        if self._worker_poll_after is not None:
+            try:
+                self.after_cancel(self._worker_poll_after)
+            except tk.TclError:
+                pass
+            self._worker_poll_after = None
+        super().destroy()
 
     def _build_layout(self) -> None:
         self.configure(bg=APP_BG)
@@ -948,6 +1027,8 @@ class KickTheMapJobsWindow(tk.Tk):
             pass
 
     def refresh_jobs(self) -> None:
+        if self._worker_cancelled() or self._jobs_operation_active:
+            return
         if self.account is None:
             self.status_var.set("Log eerst in bij KickTheMap.")
             messagebox.showinfo(
@@ -962,13 +1043,15 @@ class KickTheMapJobsWindow(tk.Tk):
 
     def _load_jobs_worker(self) -> None:
         try:
+            if self._worker_cancelled():
+                return
             if not self.client.is_logged_in:
                 jobs = self.client.login(self.account.email, self.account.password)
             else:
                 jobs = self.client.fetch_jobs()
-            self.after(0, lambda: self._set_jobs(jobs))
+            self._post_worker_callback(lambda: self._set_jobs(jobs))
         except Exception as exc:
-            self.after(0, lambda exc=exc: self._show_error(exc))
+            self._post_worker_callback(lambda exc=exc: self._show_error(exc))
 
     def _set_jobs(self, jobs: list[KickTheMapJob]) -> None:
         self.jobs = jobs
@@ -1023,6 +1106,7 @@ class KickTheMapJobsWindow(tk.Tk):
         messagebox.showerror(title, message)
 
     def _set_controls_enabled(self, enabled: bool) -> None:
+        self._jobs_operation_active = not enabled
         state = tk.NORMAL if enabled else tk.DISABLED
         for child in self.winfo_children():
             self._set_child_state(child, state)
@@ -1271,6 +1355,8 @@ class KickTheMapJobsWindow(tk.Tk):
         self._open_url(_job_url(job), job.title)
 
     def load_selected_geotiffs(self) -> None:
+        if self._worker_cancelled() or self._jobs_operation_active:
+            return
         jobs = self._selected_jobs()
         if not jobs:
             messagebox.showinfo("KickTheMap Jobs", "Selecteer eerst een of meer jobs.")
@@ -1280,6 +1366,8 @@ class KickTheMapJobsWindow(tk.Tk):
         threading.Thread(target=self._load_selected_geotiffs_worker, args=(jobs,), daemon=True).start()
 
     def repair_download_process(self) -> None:
+        if self._worker_cancelled() or self._jobs_operation_active:
+            return
         jobs = self._selected_jobs()
         if len(jobs) != 1:
             messagebox.showinfo(
@@ -1302,8 +1390,12 @@ class KickTheMapJobsWindow(tk.Tk):
     def _repair_download_process_worker(self, job: KickTheMapJob) -> None:
         capture_path: Path | None = None
         try:
+            if self._worker_cancelled():
+                return
             if self.account is not None and not self.client.is_logged_in:
                 self.client.login(self.account.email, self.account.password)
+            if self._worker_cancelled():
+                return
             capture_path = self.client.create_download_capture(job)
             executable, arguments = _browser_launch_command(
                 _job_url(job),
@@ -1314,9 +1406,11 @@ class KickTheMapJobsWindow(tk.Tk):
                 [executable] + arguments,
                 cwd=str(Path(__file__).resolve().parent.parent),
             )
-            self.after(0, lambda: self.status_var.set("Klik in de KickTheMap-browser op GeoTIFF downloaden..."))
+            self._post_worker_status("Klik in de KickTheMap-browser op GeoTIFF downloaden...")
             capture = None
             for _ in range(600):
+                if self._worker_cancelled():
+                    return
                 try:
                     candidate = self.client.read_download_capture(capture_path)
                 except KickTheMapError:
@@ -1324,25 +1418,27 @@ class KickTheMapJobsWindow(tk.Tk):
                 if isinstance(candidate, dict) and candidate.get("status") == "captured":
                     capture = candidate
                     break
-                time.sleep(0.5)
+                if self._worker_updates.cancelled.wait(0.5):
+                    return
             if capture is None:
                 raise KickTheMapError(
                     "Geen handmatige GeoTIFF-download vastgelegd binnen vijf minuten."
                 )
-            self.after(0, lambda: self.status_var.set("Handmatige aanvraag vastgelegd; proefdownload controleren..."))
+            if self._worker_cancelled():
+                return
+            self._post_worker_status("Handmatige aanvraag vastgelegd; proefdownload controleren...")
             sample_path, request_mode = self.client.learn_download_strategy_from_capture(
                 job,
                 capture_path,
             )
-            self.after(
-                0,
+            self._post_worker_callback(
                 lambda sample_path=sample_path, request_mode=request_mode: self._finish_repair_download_process(
                     sample_path,
                     request_mode,
                 ),
             )
         except Exception as exc:
-            self.after(0, lambda exc=exc: self._show_error(exc))
+            self._post_worker_callback(lambda exc=exc: self._show_error(exc))
 
     def _finish_repair_download_process(self, sample_path: Path, request_mode: str) -> None:
         self._set_controls_enabled(True)
@@ -1357,12 +1453,18 @@ class KickTheMapJobsWindow(tk.Tk):
     def _load_selected_geotiffs_worker(self, jobs: list[KickTheMapJob]) -> None:
         total = len(jobs)
         try:
+            if self._worker_cancelled():
+                return
             if self.account is not None and not self.client.is_logged_in:
                 self.client.login(self.account.email, self.account.password)
+            if self._worker_cancelled():
+                return
             def progress(completed: int, total: int) -> None:
-                self.after(0, lambda completed=completed, total=total: self.status_var.set(f"GeoTIFFs downloaden... {completed} van {total}"))
+                self._post_worker_status(f"GeoTIFFs downloaden... {completed} van {total}")
 
             path_map, error_map = self.client.download_tiffs(jobs, max_workers=6, progress_callback=progress)
+            if self._worker_cancelled():
+                return
             downloaded_jobs = [job for job in jobs if job.job_id in path_map]
 
             # Fetch the small object dataset while this dedicated worker thread
@@ -1374,11 +1476,8 @@ class KickTheMapJobsWindow(tk.Tk):
             feature_error_map: dict[int, Exception] = {}
             if downloaded_jobs:
                 def feature_progress(completed: int, feature_total: int) -> None:
-                    self.after(
-                        0,
-                        lambda completed=completed, feature_total=feature_total: self.status_var.set(
-                            f"Objectpunten voorbereiden... {completed} van {feature_total}"
-                        ),
+                    self._post_worker_status(
+                        f"Objectpunten voorbereiden... {completed} van {feature_total}"
                     )
 
                 _feature_paths, feature_error_map = self.client.download_job_features_files(
@@ -1407,9 +1506,9 @@ class KickTheMapJobsWindow(tk.Tk):
                 for job in jobs
                 if job.job_id in path_map
             }
-            self.after(0, lambda paths=paths, errors=errors, loaded_records=loaded_records: self._finish_load_geotiffs(paths, errors, loaded_records))
+            self._post_worker_callback(lambda paths=paths, errors=errors, loaded_records=loaded_records: self._finish_load_geotiffs(paths, errors, loaded_records))
         except Exception as exc:
-            self.after(0, lambda exc=exc: self._show_error(exc))
+            self._post_worker_callback(lambda exc=exc: self._show_error(exc))
 
     def _finish_load_geotiffs(self, paths: list[str], errors: list[str], loaded_records: dict[str, dict[str, str]] | None = None) -> None:
         self._set_controls_enabled(True)
