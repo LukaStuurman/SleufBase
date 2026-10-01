@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from math import ceil, hypot
 from pathlib import Path
 from typing import Any
@@ -103,6 +104,15 @@ def project_point_onto_virtual_trench(
     y: float,
 ) -> tuple[float, float, float, float]:
     start_point, end_point = virtual_trench_endpoints(layer)
+    return _project_point_from_endpoints(start_point, end_point, x, y)
+
+
+def _project_point_from_endpoints(
+    start_point: dict[str, Any] | None,
+    end_point: dict[str, Any] | None,
+    x: float,
+    y: float,
+) -> tuple[float, float, float, float]:
     if start_point is None or end_point is None:
         return float(x), float(y), 0.0, 0.0
     start_x = _to_float(start_point.get("x"), float(x))
@@ -209,24 +219,16 @@ def build_virtual_trench_dataset(
     )
 
 
-def build_virtual_trench_render(
+def _virtual_trench_render_geometry(
     layer: GeoTiffLayer,
     *,
     quality_multiplier: float = 1.0,
-) -> tuple[Image.Image, Bounds, GeoTransform]:
+) -> tuple[list[dict[str, Any]], list[tuple[float, float]], float, Bounds, int, int] | None:
     if not is_virtual_trench_layer(layer):
-        return (
-            Image.new("RGBA", (1, 1), (0, 0, 0, 0)),
-            Bounds(0.0, 0.0, 1.0, 1.0),
-            GeoTransform(1.0, 0.0, 0.0, 0.0, -1.0, 1.0),
-        )
+        return None
     ordered_points = ordered_virtual_trench_points(layer)
     if len(ordered_points) < 2:
-        return (
-            Image.new("RGBA", (1, 1), (0, 0, 0, 0)),
-            Bounds(0.0, 0.0, 1.0, 1.0),
-            GeoTransform(1.0, 0.0, 0.0, 0.0, -1.0, 1.0),
-        )
+        return None
 
     width_meters = virtual_trench_width(layer)
     polygon = virtual_trench_polygon(layer)
@@ -248,6 +250,40 @@ def build_virtual_trench_render(
     height_px = max(min_px, min(max_px, int(ceil(bounds.height / meters_per_pixel))))
     width_px = max(2, width_px)
     height_px = max(2, height_px)
+    return ordered_points, polygon, width_meters, bounds, width_px, height_px
+
+
+def virtual_trench_render_size(
+    layer: GeoTiffLayer,
+    *,
+    quality_multiplier: float = 1.0,
+) -> tuple[int, int]:
+    """Measure the actual export raster without allocating or changing a layer."""
+    snapshot = copy(layer)
+    snapshot.metadata = dict(layer.metadata)
+    payload = snapshot.metadata.get(VIRTUAL_TRENCH_METADATA_KEY)
+    if isinstance(payload, dict):
+        # Existing metadata readers can repair point lists or promote a legacy
+        # measured boundary. Keep those repairs local to this measurement.
+        snapshot.metadata[VIRTUAL_TRENCH_METADATA_KEY] = dict(payload)
+    geometry = _virtual_trench_render_geometry(snapshot, quality_multiplier=quality_multiplier)
+    return (1, 1) if geometry is None else (geometry[4], geometry[5])
+
+
+def build_virtual_trench_render(
+    layer: GeoTiffLayer,
+    *,
+    quality_multiplier: float = 1.0,
+) -> tuple[Image.Image, Bounds, GeoTransform]:
+    geometry = _virtual_trench_render_geometry(layer, quality_multiplier=quality_multiplier)
+    if geometry is None:
+        return (
+            Image.new("RGBA", (1, 1), (0, 0, 0, 0)),
+            Bounds(0.0, 0.0, 1.0, 1.0),
+            GeoTransform(1.0, 0.0, 0.0, 0.0, -1.0, 1.0),
+        )
+    ordered_points, polygon, width_meters, bounds, width_px, height_px = geometry
+    render_scale = max(0.1, float(quality_multiplier))
 
     image = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image, "RGBA")
@@ -310,13 +346,18 @@ def build_virtual_trench_render(
             width=dekband_line_width,
         )
 
+    # Endpoint lookup scans the point rows. Resolve it once for this raster,
+    # rather than rescanning the whole trench for each object marker.
+    start_point, end_point = virtual_trench_endpoints(layer)
     for point in ordered_points:
         role = str(point.get("role", "")).lower()
         if role in {"start", "end"}:
             continue
         point_x = _to_float(point.get("x"), 0.0)
         point_y = _to_float(point.get("y"), 0.0)
-        projected_x, projected_y, _chainage, _outside_distance = project_point_onto_virtual_trench(layer, point_x, point_y)
+        projected_x, projected_y, _chainage, _outside_distance = _project_point_from_endpoints(
+            start_point, end_point, point_x, point_y
+        )
         start_world = (
             projected_x + (unit_normal_x * point_line_half_length),
             projected_y + (unit_normal_y * point_line_half_length),

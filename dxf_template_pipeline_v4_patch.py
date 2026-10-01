@@ -13,6 +13,7 @@ from . import dxf_template_pipeline_v3_patch as pipeline_v3
 from . import exporting as exporting_module
 from . import template_reverse_patch as reverse_patch
 from .models import ProfileReferenceAnnotation
+from .template_raster_io import save_template_png
 
 
 PATCH_VERSION = 1
@@ -141,7 +142,7 @@ def _copy_or_rotate_reverse_tiff(
     with Image.open(source) as image:
         rotated = image.transpose(Image.Transpose.ROTATE_180)
         try:
-            rotated.save(destination, format="PNG")
+            save_template_png(rotated, destination)
         finally:
             if rotated is not image:
                 rotated.close()
@@ -169,56 +170,54 @@ def _render_normal_and_reverse_map_pair(
     )
     map_bounds = page_exporter._determine_map_bounds(padded_bounds)
     provider = background_provider or page_exporter.default_background_provider
-    background = provider.fetch_map(
-        map_bounds,
-        (page_exporter.map_width_px, page_exporter.map_height_px),
-    )
-    export_tiff = exporting_module._prepare_export_tiff_layer(layer, forced_opacity=1.0)
-    map_image = page_exporter.renderer.render(
-        map_bounds,
-        (page_exporter.map_width_px, page_exporter.map_height_px),
-        [export_tiff],
-        dxf_overlays,
-        background=background,
-        map_comments=None,
-    )
-    reverse_annotation = _reverse_reference_annotation(
-        exporter,
-        layer,
-        profile,
-        reference_annotation,
-    )
-    normal_page = page_exporter._compose_page(
-        map_image,
-        map_bounds,
-        background_attribution=background_attribution,
-        reference_annotation=reference_annotation,
-    )
-    reverse_page = None
-    if reverse_annotation is not None:
-        reverse_page = page_exporter._compose_page(
+    background = export_tiff = map_image = normal_page = reverse_page = None
+    try:
+        background = provider.fetch_map(
+            map_bounds,
+            (page_exporter.map_width_px, page_exporter.map_height_px),
+        )
+        export_tiff = exporting_module._prepare_export_tiff_layer(layer, forced_opacity=1.0)
+        map_image = page_exporter.renderer.render(
+            map_bounds,
+            (page_exporter.map_width_px, page_exporter.map_height_px),
+            [export_tiff],
+            dxf_overlays,
+            background=background,
+            map_comments=None,
+        )
+        reverse_annotation = _reverse_reference_annotation(
+            exporter, layer, profile, reference_annotation,
+        )
+        normal_page = page_exporter._compose_page(
             map_image,
             map_bounds,
             background_attribution=background_attribution,
-            reference_annotation=reverse_annotation,
+            reference_annotation=reference_annotation,
         )
+        if reverse_annotation is not None:
+            reverse_page = page_exporter._compose_page(
+                map_image, map_bounds,
+                background_attribution=background_attribution,
+                reference_annotation=reverse_annotation,
+            )
 
-    normal_path = exporter._unique_raster_copy_path(asset_dir, f"{label}_kaart.png")
-    normal_page.save(normal_path, format="PNG")
-    reverse_path: Path | None = None
-    if reverse_page is not None:
-        reverse_path = Path(asset_dir) / f".sleufbase-reverse-map-{int(index)}-{id(layer)}.png"
-        reverse_page.save(reverse_path, format="PNG")
-        reverse_path = reverse_path.resolve()
-
-    for image in (normal_page, reverse_page, map_image, getattr(export_tiff, "image", None)):
-        if image is None:
-            continue
-        try:
+        normal_path = exporter._unique_raster_copy_path(asset_dir, f"{label}_kaart.png")
+        save_template_png(normal_page, normal_path)
+        reverse_path: Path | None = None
+        if reverse_page is not None:
+            reverse_path = exporter._unique_raster_copy_path(
+                asset_dir, f".sleufbase-reverse-map-{int(index)}-{id(layer)}.png",
+            )
+            save_template_png(reverse_page, reverse_path)
+            reverse_path = Path(reverse_path).resolve()
+        return Path(normal_path).resolve(), reverse_path, reverse_annotation
+    finally:
+        closed = set()
+        for image in (normal_page, reverse_page, map_image, getattr(export_tiff, "image", None), background):
+            if image is None or image is layer.image or id(image) in closed:
+                continue
+            closed.add(id(image))
             image.close()
-        except Exception:
-            pass
-    return Path(normal_path).resolve(), reverse_path, reverse_annotation
 
 
 def _cleanup_session(exporter: Any) -> None:

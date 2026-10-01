@@ -4,6 +4,7 @@ import threading
 import time
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from SleufBase.large_template_export_patch import (
     MAX_TEMPLATE_TASK_BATCH,
@@ -117,6 +118,33 @@ class LargeTemplateExportPatchTests(unittest.TestCase):
 
         self.assertEqual(result, [value * 2 for value in values])
         self.assertLessEqual(peak, 5)
+
+    def test_single_worker_prepares_every_bounds_chunk_in_order(self) -> None:
+        values = list(range(40))
+        called, statuses = [], []
+
+        def worker(value):
+            called.append(value)
+            return (value, value * 2)
+
+        with patch("SleufBase.large_template_export_patch._pump_template_ui") as pump:
+            result = _parallel_ordered_bounded(
+                values, worker, max_workers=1,
+                status_callback=statuses.append, status_label="Serverdata",
+            )
+        self.assertEqual(called, values)
+        self.assertEqual(result, [(value, value * 2) for value in values])
+        self.assertEqual(statuses[-1], "Serverdata... 40/40")
+        self.assertGreater(pump.call_count, 0)
+
+    def test_single_worker_does_not_silently_skip_later_chunk_error(self) -> None:
+        def worker(value):
+            if value == 2:
+                raise RuntimeError("second bounds unavailable")
+            return value
+
+        with self.assertRaisesRegex(RuntimeError, "second bounds unavailable"):
+            _parallel_ordered_bounded([1, 2, 3], worker, max_workers=1)
 
     def test_large_batch_size_is_deliberately_bounded(self) -> None:
         self.assertEqual(PATCH_VERSION, 1)

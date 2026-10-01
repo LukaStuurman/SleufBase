@@ -116,8 +116,12 @@ def _draw_rotated_text(
 
 
 def _prepare_export_tiff_layer(tiff_layer: GeoTiffLayer, forced_opacity: float | None = None) -> GeoTiffLayer:
-    rgba = tiff_layer.image.convert("RGBA")
-    pixels = np.array(rgba)
+    rgba = tiff_layer.image if tiff_layer.image.mode == "RGBA" else tiff_layer.image.convert("RGBA")
+    try:
+        pixels = np.array(rgba)
+    finally:
+        if rgba is not tiff_layer.image:
+            rgba.close()
     white_mask = pixels[:, :, :3].min(axis=2) >= 245
     pixels[white_mask, 3] = 0
     prepared_image = Image.fromarray(pixels, mode="RGBA")
@@ -222,23 +226,31 @@ class MapExporter:
         map_bounds = self._determine_map_bounds(padded_bounds)
 
         provider = background_provider or self.default_background_provider
-        background = provider.fetch_map(map_bounds, (self.map_width_px, self.map_height_px))
-        export_tiff = _prepare_export_tiff_layer(tiff_layer, forced_opacity=force_tiff_opacity)
-        map_image = self.renderer.render(
-            map_bounds,
-            (self.map_width_px, self.map_height_px),
-            [export_tiff],
-            dxf_overlays,
-            background=background,
-            map_comments=map_comments,
-        )
-        page = self._compose_page(
-            map_image,
-            map_bounds,
-            background_attribution=background_attribution,
-            reference_annotation=reference_annotation,
-        )
-        return page
+        background = export_tiff = map_image = page = None
+        try:
+            background = provider.fetch_map(map_bounds, (self.map_width_px, self.map_height_px))
+            export_tiff = _prepare_export_tiff_layer(tiff_layer, forced_opacity=force_tiff_opacity)
+            map_image = self.renderer.render(
+                map_bounds,
+                (self.map_width_px, self.map_height_px),
+                [export_tiff],
+                dxf_overlays,
+                background=background,
+                map_comments=map_comments,
+            )
+            page = self._compose_page(
+                map_image,
+                map_bounds,
+                background_attribution=background_attribution,
+                reference_annotation=reference_annotation,
+            )
+            return page
+        finally:
+            protected = {id(tiff_layer.image), id(page)}
+            for image in (map_image, getattr(export_tiff, "image", None), background):
+                if image is not None and id(image) not in protected:
+                    protected.add(id(image))
+                    image.close()
 
     def _determine_map_bounds(self, required_bounds: Bounds) -> Bounds:
         width_m = max(required_bounds.width, self.fixed_map_width_m)

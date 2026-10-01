@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from math import ceil, hypot
+from math import hypot
 from typing import Any
 
 from PIL import Image, ImageDraw
@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 from .models import Bounds, GeoTransform
 
 
-PATCH_VERSION = 2
+PATCH_VERSION = 3
 _EPSILON = 1e-9
 _INTERSECTION_TOLERANCE = 1e-8
 
@@ -174,49 +174,20 @@ def install_marxact_local_cross_section_patch() -> None:
         *,
         quality_multiplier: float = 1.0,
     ):
-        if not vt.is_virtual_trench_layer(layer):
-            return (
-                Image.new("RGBA", (1, 1), (0, 0, 0, 0)),
-                Bounds(0.0, 0.0, 1.0, 1.0),
-                GeoTransform(1.0, 0.0, 0.0, 0.0, -1.0, 1.0),
-            )
-        ordered_points = vt.ordered_virtual_trench_points(layer)
-        if len(ordered_points) < 2:
+        geometry = vt._virtual_trench_render_geometry(
+            layer, quality_multiplier=quality_multiplier
+        )
+        if geometry is None:
             return (
                 Image.new("RGBA", (1, 1), (0, 0, 0, 0)),
                 Bounds(0.0, 0.0, 1.0, 1.0),
                 GeoTransform(1.0, 0.0, 0.0, 0.0, -1.0, 1.0),
             )
 
-        width_meters = vt.virtual_trench_width(layer)
-        # This is the single source of truth for what may be visible. For a
-        # MarXact layer the boundary patch returns the measured 3D-POLYLINE XY
-        # contour here; for a normal virtual trench it returns the rectangle.
-        polygon = vt.virtual_trench_polygon(layer)
-        world_points = [
-            (vt._to_float(point.get("x"), 0.0), vt._to_float(point.get("y"), 0.0))
-            for point in ordered_points
-        ]
-        all_points = [*polygon, *world_points]
-        min_x = min(point[0] for point in all_points)
-        min_y = min(point[1] for point in all_points)
-        max_x = max(point[0] for point in all_points)
-        max_y = max(point[1] for point in all_points)
-        padding = max(1.5, width_meters * 3.0)
-        bounds = Bounds(min_x, min_y, max_x, max_y).padded(padding)
-        span = max(bounds.width, bounds.height, 1.0)
+        # Rendering and the export pixel budget share exactly the same layout,
+        # including the active measured polygon and any persisted point rows.
+        ordered_points, polygon, width_meters, bounds, width_px, height_px = geometry
         render_scale = max(0.1, float(quality_multiplier))
-        target_px = vt.TARGET_VIRTUAL_TRENCH_IMAGE_PX * render_scale
-        min_px = max(2, int(round(vt.MIN_VIRTUAL_TRENCH_IMAGE_PX * render_scale)))
-        max_px = max(min_px, int(round(vt.MAX_VIRTUAL_TRENCH_IMAGE_PX * render_scale)))
-        meters_per_pixel = max(
-            0.02 / render_scale,
-            min(0.15 / render_scale, span / target_px),
-        )
-        width_px = max(min_px, min(max_px, int(ceil(bounds.width / meters_per_pixel))))
-        height_px = max(min_px, min(max_px, int(ceil(bounds.height / meters_per_pixel))))
-        width_px = max(2, width_px)
-        height_px = max(2, height_px)
 
         image = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image, "RGBA")
@@ -280,6 +251,7 @@ def install_marxact_local_cross_section_patch() -> None:
                 width=dekband_line_width,
             )
 
+        start_point, end_point = vt.virtual_trench_endpoints(layer)
         for point in ordered_points:
             role = str(point.get("role", "")).lower()
             if role in {"start", "end"}:
@@ -287,7 +259,7 @@ def install_marxact_local_cross_section_patch() -> None:
             point_x = vt._to_float(point.get("x"), 0.0)
             point_y = vt._to_float(point.get("y"), 0.0)
             projected_x, projected_y, _chainage, _outside_distance = (
-                vt.project_point_onto_virtual_trench(layer, point_x, point_y)
+                vt._project_point_from_endpoints(start_point, end_point, point_x, point_y)
             )
             preferred_t = (
                 ((point_x - projected_x) * unit_normal_x)

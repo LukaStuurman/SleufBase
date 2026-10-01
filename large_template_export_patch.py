@@ -35,7 +35,7 @@ def _parallel_ordered_bounded(
 
     if not items:
         return []
-    if len(items) == 1 or max_workers <= 1:
+    if len(items) == 1:
         result = [worker(items[0])]
         if status_label:
             _safe_status(status_callback, f"{status_label}...")

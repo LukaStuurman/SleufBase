@@ -224,6 +224,62 @@ class TemplateRefreshLifecycleTests(unittest.TestCase):
         app.poll()
         self.assertEqual(len(app.exports), 1)
 
+    def test_changed_loaded_trenches_require_new_refresh_before_export(self):
+        def add_layer(app):
+            app.tiff_layers.append(SimpleNamespace(metadata={"kickthemap_job_id": 2}))
+
+        def replace_layer(app):
+            app.tiff_layers = [SimpleNamespace(metadata={"kickthemap_job_id": 1})]
+
+        def change_job(app):
+            app.layer.metadata["kickthemap_job_id"] = 2
+
+        for change in (add_layer, replace_layer, change_job, lambda app: app.tiff_layers.clear()):
+            with self.subTest(change=change):
+                app = _app()
+                snapshot = _snapshot(app)
+                threads, thread_patch = self._threads()
+                with (
+                    thread_patch,
+                    patch(f"{_MODULE}._refresh_template_kickthemap_snapshot", return_value=snapshot),
+                    patch(f"{_MODULE}.messagebox.showerror") as showerror,
+                ):
+                    app.export_cadastral_template_dxf()
+                    self._join(threads)
+                    change(app)
+                    app.poll()
+
+                showerror.assert_called_once()
+                self.assertIn("Start de DXF-sjabloonexport opnieuw", showerror.call_args.args[1])
+                self.assertEqual(app.exports, [])
+                self.assertNotIn("fresh_path", app.layer.metadata)
+                self.assertFalse(app._sleufbase_kickthemap_template_refresh_active)
+                self.assertEqual(app.pending, {})
+
+    def test_reordering_same_layers_preserves_fresh_snapshot(self):
+        app = _app()
+        second = SimpleNamespace(metadata={"kickthemap_job_id": 1})
+        app.tiff_layers.append(second)
+        snapshot = _snapshot(app)
+        snapshot = TemplateKickTheMapSnapshot(
+            jobs_by_id=snapshot.jobs_by_id,
+            layers_by_job={1: (app.layer, second)},
+            paths=snapshot.paths,
+            errors={},
+            missing_job_ids=(),
+        )
+        threads, thread_patch = self._threads()
+        with thread_patch, patch(f"{_MODULE}._refresh_template_kickthemap_snapshot", return_value=snapshot):
+            app.export_cadastral_template_dxf()
+            self._join(threads)
+
+        app.tiff_layers.reverse()
+        app.poll()
+
+        self.assertEqual(len(app.exports), 1)
+        self.assertEqual(second.metadata["fresh_path"], "fresh.json")
+        self.assertFalse(app._sleufbase_kickthemap_template_refresh_active)
+
 
 if __name__ == "__main__":
     unittest.main()

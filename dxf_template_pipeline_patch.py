@@ -787,25 +787,26 @@ def _install_dynamic_visibility_merge_optimized() -> None:
 
 
 def _estimate_virtual_tiff_pixels(task_kwargs: dict[str, object]) -> int:
+    from .virtual_trench import is_virtual_trench_layer, virtual_trench_render_size
+
     layer = task_kwargs.get("layer")
     image = getattr(layer, "image", None)
     try:
-        width, height = image.size
+        metadata = getattr(layer, "metadata", None)
+        if isinstance(metadata, dict) and is_virtual_trench_layer(layer):
+            multiplier = float(getattr(
+                task_kwargs.get("exporter"), "VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER", 2.5
+            ))
+            width, height = virtual_trench_render_size(layer, quality_multiplier=multiplier)
+        else:
+            # Real TIFFs in a mixed batch keep their full source dimensions.
+            # The virtual-render side cap does not apply to these images.
+            width, height = image.size
         width = max(1, int(width))
         height = max(1, int(height))
     except Exception:
         return VIRTUAL_TIFF_PIXEL_BUDGET
-    multiplier = float(
-        getattr(
-            task_kwargs.get("exporter"),
-            "VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER",
-            2.5,
-        )
-        or 2.5
-    )
-    estimated_width = min(4000, max(width, int(round(width * multiplier))))
-    estimated_height = min(4000, max(height, int(round(height * multiplier))))
-    return max(1, estimated_width * estimated_height)
+    return width * height
 
 
 class _PixelBudget:

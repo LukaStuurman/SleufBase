@@ -484,6 +484,10 @@ def _patch_viewer_class(viewer_class) -> None:
         layers = _template_kickthemap_layers(self)
         if not layers:
             return original_export(self, *args, **kwargs)
+        captured_layer_jobs = tuple(sorted(
+            (id(layer), int(self._kickthemap_job_id_for_layer(layer)))
+            for layer in layers
+        ))
 
         try:
             logged_in = bool(self.kickthemap_client.is_logged_in)
@@ -544,6 +548,17 @@ def _patch_viewer_class(viewer_class) -> None:
             )
 
         def finish(snapshot: TemplateKickTheMapSnapshot) -> None:
+            current_layer_jobs = tuple(sorted(
+                (id(layer), int(self._kickthemap_job_id_for_layer(layer)))
+                for layer in _template_kickthemap_layers(self)
+            ))
+            if current_layer_jobs != captured_layer_jobs:
+                fail(RuntimeError(
+                    "De geladen KickTheMap-proefsleuven zijn gewijzigd tijdens het ophalen. "
+                    "Start de DXF-sjabloonexport opnieuw zodat alle proefsleuven "
+                    "met de nieuwste objectdata worden geëxporteerd."
+                ))
+                return
             problems: list[str] = []
             for job_id in snapshot.missing_job_ids:
                 problems.append(f"KickTheMap-job {job_id} is niet meer gevonden.")
