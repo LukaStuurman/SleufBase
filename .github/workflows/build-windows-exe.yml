@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.51'
+  SLEUFBASE_RELEASE_VERSION: '0.3.61'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.51
+          name: SleufBase-Windows-v0.3.61
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,18 +293,27 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.51
+          SleufBase Windows v0.3.61
 
-          DXF-sjabloonexport:
-          - voorkomt dat meerdere proefsleuven met hetzelfde label naar hetzelfde kaartbestand schrijven
-          - geeft iedere kaart- en GeoTIFF-raster intern een unieke slotnaam, bijvoorbeeld `PS2__slot002_kaart.png`
-          - voorkomt parallelle bestandsnaam-races die gedeeltelijk zwarte of slechts bovenaan gerenderde kaarten konden veroorzaken
-          - houdt de zichtbare proefsleufnaam ongewijzigd; alleen interne rasterbestandsnamen worden uniek gemaakt
-          - bevat regressietests voor dubbele PS-labels en consistente normal/reverse slotnamen
+          DXF-sjabloonexport voor marXact en KickTheMap:
+          - snellere rasterverwerking door meetpunten eenmaal per afbeelding voor te bereiden
+          - minder volledige geheugenkopieën en betere opruiming bij exportfouten
+          - verliesloze PNG-opslag via tijdelijke bestanden
+          - correcte verwerking van alle kaartdelen bij een limiet van één worker
+          - duidelijke melding bij ontbrekende of ongeldige begin- en eindhoogtes voor dwarsprofielen
+          - controle op gewijzigde KickTheMap-proefsleuven tijdens het ophalen
+          - bestaande DXF-bestanden en gekoppelde rasters blijven intact bij een mislukte herexport
+          - unieke bestemmingen voor gelijktijdige rasters met dezelfde proefsleufnaam
+
+          Kaarten en achtergrondtaken:
+          - gedeelde downloads voor dezelfde kaarttegel en controle van de gevraagde afmetingen
+          - minder werk voor afbeeldingen buiten de zichtbare kaartuitsnede
+          - stabielere Jobs-verversing en achtergrondexport met veilige UI-afhandeling
+          - behoud van de browseraanmelding, CAPTCHA-fallback en joblijstverbeteringen uit v0.3.60
 
           Windows:
-          - product-, Windows resource- en installerversie zijn bijgewerkt naar 0.3.51
-          - professionele installer, Fast ZIP en Portable EXE worden volledig opnieuw gebouwd
+          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.61
+          - professionele installer, Fast ZIP en Portable EXE volledig opnieuw gebouwd
           - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@

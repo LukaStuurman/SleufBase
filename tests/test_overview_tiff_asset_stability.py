@@ -74,7 +74,7 @@ class OverviewTiffAssetStabilityTests(unittest.TestCase):
             asset_dir = root / "overview_tiffs"
             asset_dir.mkdir()
             old_paths = [asset_dir / "PS2.tiff"] + [
-                asset_dir / f"{index:03d}_PS2.tiff" for index in range(1, 5)
+                asset_dir / f"PS2__slot{index:03d}.tiff" for index in range(1, 5)
             ]
             for index, path in enumerate(old_paths):
                 path.write_bytes(f"old-raster-{index}".encode())
@@ -131,7 +131,7 @@ class OverviewTiffAssetStabilityTests(unittest.TestCase):
             self.assertEqual(len(set(linked_files)), 4)
             self.assertEqual([path.read_bytes() for path in linked_files], [layer.path.read_bytes() for layer in layers])
             self.assertEqual(set(document.rootdict.get_required_dict("ACAD_IMAGE_DICT").keys()), {
-                "PS2.tiff", "PS2.tiff (2)", "PS2.tiff (3)", "PS2.tiff (4)",
+                "PS2__slot001.tiff", "PS2__slot002.tiff", "PS2__slot003.tiff", "PS2__slot004.tiff",
             })
             self.assertTrue(all(self.exporter._proefsleuf_label(layer, index) == "PS2"
                                 for index, layer in enumerate(layers, start=1)))

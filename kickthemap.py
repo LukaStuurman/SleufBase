@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import ctypes
 import hashlib
 import json
 import os
@@ -8,6 +9,7 @@ import re
 import secrets
 import shutil
 import socket
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -32,6 +34,8 @@ JOBS_AUTH_STATUS_CODES = {401, 403, 419}
 JOBS_TRANSIENT_STATUS_CODES = {408, 425, 429, 500, 502, 503, 504}
 JOBS_CACHE_VERSION = 1
 TIFF_SIGNATURES = (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+")
+CHROMIUM_EPOCH_OFFSET_SECONDS = 11_644_473_600
+BROWSER_SESSION_CAPTURE_TIMEOUT_SECONDS = 90
 
 
 class KickTheMapError(RuntimeError):
@@ -480,8 +484,11 @@ class KickTheMapClient:
             self._recent_job_feature_paths.clear()
         signin_page = self.session.get(self.SIGNIN_URL, timeout=self.timeout)
         signin_page.raise_for_status()
+        imported_saved_session = False
         if self._requires_browser_login(signin_page.text):
-            self._import_browser_session_cookies(email)
+            imported_saved_session = self._import_saved_browser_profile_cookies(email)
+            if not imported_saved_session:
+                self._import_browser_session_cookies(email)
         else:
             login_token = self._extract_login_token(signin_page.text)
             self.session.post(
@@ -498,7 +505,15 @@ class KickTheMapClient:
         jobs_page = self.session.get(self.JOBS_URL, timeout=self.timeout)
         jobs_page.raise_for_status()
         if self._looks_like_login_page(jobs_page.text):
-            raise KickTheMapError("Inloggen bij KickTheMap is mislukt.")
+            if imported_saved_session:
+                # The saved WebView session may have expired. Fall back to the
+                # interactive browser flow once, then retry the jobs page.
+                self.session.cookies.clear()
+                self._import_browser_session_cookies(email)
+                jobs_page = self.session.get(self.JOBS_URL, timeout=self.timeout)
+                jobs_page.raise_for_status()
+            if self._looks_like_login_page(jobs_page.text):
+                raise KickTheMapError("Inloggen bij KickTheMap is mislukt.")
 
         self._csrf_token = self._extract_csrf_token(jobs_page.text)
         self._aws_config = None
@@ -516,6 +531,163 @@ class KickTheMapClient:
         return bool(
             re.search(r"recaptcha/api\.js|grecaptcha\.execute\s*\(", html, re.IGNORECASE)
         )
+
+    @staticmethod
+    def _unprotect_chromium_data(encrypted_data: bytes) -> bytes:
+        """Decrypt a Chromium value protected with the current Windows user."""
+
+        if os.name != "nt":
+            raise OSError("Windows Data Protection API is unavailable")
+
+        from ctypes import wintypes
+
+        class DataBlob(ctypes.Structure):
+            _fields_ = [
+                ("cbData", wintypes.DWORD),
+                ("pbData", ctypes.POINTER(ctypes.c_ubyte)),
+            ]
+
+        input_buffer = ctypes.create_string_buffer(encrypted_data)
+        input_blob = DataBlob(
+            len(encrypted_data),
+            ctypes.cast(input_buffer, ctypes.POINTER(ctypes.c_ubyte)),
+        )
+        output_blob = DataBlob()
+        crypt32 = ctypes.WinDLL("Crypt32", use_last_error=True)
+        crypt_unprotect = crypt32.CryptUnprotectData
+        crypt_unprotect.argtypes = [
+            ctypes.POINTER(DataBlob),
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+            wintypes.DWORD,
+            ctypes.POINTER(DataBlob),
+        ]
+        crypt_unprotect.restype = wintypes.BOOL
+        if not crypt_unprotect(
+            ctypes.byref(input_blob), None, None, None, None, 0, ctypes.byref(output_blob)
+        ):
+            raise ctypes.WinError(ctypes.get_last_error())
+
+        try:
+            return ctypes.string_at(output_blob.pbData, output_blob.cbData)
+        finally:
+            kernel32 = ctypes.WinDLL("Kernel32", use_last_error=True)
+            local_free = kernel32.LocalFree
+            local_free.argtypes = [ctypes.c_void_p]
+            local_free.restype = ctypes.c_void_p
+            local_free(ctypes.cast(output_blob.pbData, ctypes.c_void_p))
+
+    @classmethod
+    def _decrypt_chromium_cookie(
+        cls,
+        encrypted_value: bytes,
+        master_key: bytes,
+        host_key: str,
+    ) -> str:
+        if not encrypted_value:
+            return ""
+        if encrypted_value.startswith((b"v10", b"v11")):
+            if len(encrypted_value) < 3 + 12 + 16:
+                return ""
+            nonce = encrypted_value[3:15]
+            ciphertext_and_tag = encrypted_value[15:]
+            cipher = AES.new(master_key, AES.MODE_GCM, nonce=nonce)
+            plaintext = cipher.decrypt_and_verify(
+                ciphertext_and_tag[:-16], ciphertext_and_tag[-16:]
+            )
+        elif encrypted_value.startswith(b"v20"):
+            # Chromium's app-bound encryption cannot be unwrapped through
+            # DPAPI. Let the visible WebView flow refresh this session instead.
+            return ""
+        else:
+            plaintext = cls._unprotect_chromium_data(encrypted_value)
+
+        host_digest = hashlib.sha256(host_key.encode("utf-8")).digest()
+        if plaintext.startswith(host_digest):
+            plaintext = plaintext[len(host_digest) :]
+        return plaintext.decode("utf-8", errors="strict")
+
+    def _import_saved_browser_profile_cookies(self, email: str) -> bool:
+        """Reuse cookies from this account's existing KickTheMap WebView profile."""
+
+        profile = kickthemap_browser_session_dir(email) / "EBWebView"
+        state_path = profile / "Local State"
+        cookie_path = profile / "Default" / "Network" / "Cookies"
+        if not state_path.is_file() or not cookie_path.is_file():
+            return False
+
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            encrypted_key = state.get("os_crypt", {}).get("encrypted_key", "")
+            protected_key = base64.b64decode(encrypted_key, validate=True)
+            if not protected_key.startswith(b"DPAPI"):
+                return False
+            master_key = self._unprotect_chromium_data(protected_key[5:])
+
+            source = sqlite3.connect(str(cookie_path), timeout=2.0)
+            try:
+                source.execute("PRAGMA query_only = ON")
+                columns = {
+                    str(row[1])
+                    for row in source.execute("PRAGMA table_info(cookies)").fetchall()
+                }
+                required = {"host_key", "name", "path", "encrypted_value", "expires_utc"}
+                if not required.issubset(columns):
+                    return False
+                value_column = "value" if "value" in columns else "''"
+                secure_column = "is_secure" if "is_secure" in columns else "0"
+                rows = source.execute(
+                    "SELECT host_key, name, path, "
+                    f"{value_column}, encrypted_value, expires_utc, {secure_column} FROM cookies"
+                ).fetchall()
+            finally:
+                source.close()
+        except (
+            OSError,
+            sqlite3.Error,
+            json.JSONDecodeError,
+            KeyError,
+            AttributeError,
+            TypeError,
+            ValueError,
+            UnicodeDecodeError,
+        ):
+            return False
+
+        host = (urlsplit(self.BASE_URL).hostname or "").lower()
+        imported = 0
+        now_chromium = (time.time() + CHROMIUM_EPOCH_OFFSET_SECONDS) * 1_000_000
+        cookies = []
+        for raw_host, raw_name, raw_path, plain_value, encrypted_value, expires_utc, is_secure in rows:
+            domain = str(raw_host or "").lstrip(".").lower()
+            name = str(raw_name or "").strip()
+            if not name or not domain or not (host == domain or host.endswith("." + domain)):
+                continue
+            try:
+                if int(expires_utc or 0) > 0 and int(expires_utc) < now_chromium:
+                    continue
+            except (TypeError, ValueError):
+                continue
+            try:
+                value = str(plain_value or "")
+                if encrypted_value:
+                    value = self._decrypt_chromium_cookie(
+                        bytes(encrypted_value), master_key, str(raw_host or "")
+                    )
+            except (OSError, ValueError, UnicodeDecodeError):
+                continue
+            if value:
+                cookies.append((name, value, domain, str(raw_path or "/"), bool(is_secure)))
+
+        if not cookies:
+            return False
+        self.session.cookies.clear()
+        for name, value, domain, path, secure in cookies:
+            self.session.cookies.set(name, value, domain=domain, path=path, secure=secure)
+            imported += 1
+        return imported > 0
 
     def _import_browser_session_cookies(self, email: str) -> None:
         """Use KickTheMap's own browser login when its CAPTCHA is enabled.
@@ -572,7 +744,7 @@ class KickTheMapClient:
                     stderr=subprocess.DEVNULL,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
-                deadline = time.monotonic() + 180.0
+                deadline = time.monotonic() + BROWSER_SESSION_CAPTURE_TIMEOUT_SECONDS
                 payload: dict[str, object] | None = None
                 while time.monotonic() < deadline:
                     try:

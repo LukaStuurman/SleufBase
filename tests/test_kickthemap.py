@@ -1,10 +1,14 @@
+import base64
+import hashlib
 import json
+import sqlite3
 import unittest
-
-import requests
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
+
+from Crypto.Cipher import AES
+import requests
 
 from SleufBase.kickthemap import KickTheMapClient, KickTheMapJob
 
@@ -221,6 +225,112 @@ class KickTheMapJobsPageTests(unittest.TestCase):
 
             self.assertEqual(jobs, [])
             self.assertEqual(fetch.call_count, 2)
+
+
+class KickTheMapBrowserSessionTests(unittest.TestCase):
+    @staticmethod
+    def _make_profile(download_root: Path, master_key: bytes) -> None:
+        profile = (
+            download_root
+            / "browser_sessions"
+            / "test_example.com"
+            / "EBWebView"
+        )
+        cookie_db = profile / "Default" / "Network" / "Cookies"
+        cookie_db.parent.mkdir(parents=True)
+        (profile / "Local State").write_text(
+            json.dumps(
+                {
+                    "os_crypt": {
+                        "encrypted_key": base64.b64encode(b"DPAPIwrapped-key").decode("ascii")
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        host_key = ".my.kickthemap.com"
+        plaintext = hashlib.sha256(host_key.encode("utf-8")).digest() + b"valid-session"
+        nonce = b"testnonce123"
+        cipher = AES.new(master_key, AES.MODE_GCM, nonce=nonce)
+        ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+        encrypted_cookie = b"v10" + nonce + ciphertext + tag
+
+        connection = sqlite3.connect(cookie_db)
+        try:
+            connection.execute(
+                "CREATE TABLE cookies ("
+                "host_key TEXT, name TEXT, path TEXT, value TEXT, "
+                "encrypted_value BLOB, expires_utc INTEGER, is_secure INTEGER)"
+            )
+            connection.execute(
+                "INSERT INTO cookies VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (host_key, "session", "/", "", encrypted_cookie, 0, 1),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def test_saved_profile_cookies_are_decrypted_and_imported(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            download_root = Path(temporary_directory)
+            master_key = b"k" * 32
+            self._make_profile(download_root, master_key)
+            client = KickTheMapClient()
+
+            with patch.object(KickTheMapClient, "default_download_dir", return_value=download_root):
+                with patch.object(
+                    KickTheMapClient,
+                    "_unprotect_chromium_data",
+                    return_value=master_key,
+                ):
+                    imported = client._import_saved_browser_profile_cookies(
+                        "test@example.com"
+                    )
+
+            self.assertTrue(imported)
+            self.assertEqual(
+                client.session.cookies.get(
+                    "session", domain="my.kickthemap.com", path="/"
+                ),
+                "valid-session",
+            )
+            imported_cookie = next(
+                cookie for cookie in client.session.cookies if cookie.name == "session"
+            )
+            self.assertTrue(imported_cookie.secure)
+
+    def test_login_uses_saved_profile_before_browser_capture(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            download_root = Path(temporary_directory)
+            master_key = b"m" * 32
+            self._make_profile(download_root, master_key)
+            client = KickTheMapClient()
+            signin_response = Mock(status_code=200)
+            signin_response.text = '<script src="https://www.google.com/recaptcha/api.js"></script>'
+            jobs_response = Mock(status_code=200)
+            jobs_response.text = (
+                '<meta name="csrf-token" content="csrf-token">'
+                '<script type="module" src="/build/assets/jobs.js"></script>'
+            )
+            api_response = Mock(status_code=200)
+            api_response.json.return_value = {"status": True, "data": []}
+            client.session.get = Mock(side_effect=[signin_response, jobs_response])
+            client.session.post = Mock(return_value=api_response)
+
+            with patch.object(KickTheMapClient, "default_download_dir", return_value=download_root):
+                with patch.object(
+                    KickTheMapClient,
+                    "_unprotect_chromium_data",
+                    return_value=master_key,
+                ):
+                    with patch.object(client, "_import_browser_session_cookies") as capture:
+                        jobs = client.login("test@example.com", "saved-password")
+
+            self.assertEqual(jobs, [])
+            self.assertEqual(client.logged_in_email, "test@example.com")
+            capture.assert_not_called()
+            client.session.post.assert_called_once()
 
 
 class KickTheMapDownloadTests(unittest.TestCase):
