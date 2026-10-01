@@ -229,11 +229,19 @@ class MapRenderer:
     def _prepared_native_tiff_jobs(self, transform: ViewportTransform, tiff_layers: list[GeoTiffLayer]):
         if not tiff_layers or not native_accel.is_available():
             return None
+        visible_layers = []
+        for layer in tiff_layers:
+            visible_bounds = layer.bounds.intersection(transform.bounds)
+            if visible_bounds is None or visible_bounds.width <= 0 or visible_bounds.height <= 0:
+                # The source budget must also apply while navigating. Otherwise
+                # every newly visited TIFF keeps a full RGBA copy indefinitely,
+                # even though each individual viewport fits within the budget.
+                layer.invalidate_native_rgba_cache()
+                continue
+            visible_layers.append(layer)
         raw_jobs = []
         total_dest_pixels = 0
-        for layer in tiff_layers:
-            if layer.bounds.intersection(transform.bounds) is None:
-                continue
+        for layer in visible_layers:
             if not layer.transform.is_axis_aligned():
                 return None
             job = self._axis_aligned_tiff_paint_job(transform, layer)
@@ -568,6 +576,9 @@ class MapRenderer:
         self, canvas: Image.Image, transform: ViewportTransform, layer: GeoTiffLayer
     ) -> None:
         if layer.bounds.width <= 0 or layer.bounds.height <= 0:
+            return
+        visible_bounds = layer.bounds.intersection(transform.bounds)
+        if visible_bounds is None or visible_bounds.width <= 0 or visible_bounds.height <= 0:
             return
         if layer.transform.is_axis_aligned():
             self._paint_axis_aligned_tiff(canvas, transform, layer)

@@ -12,7 +12,7 @@ from . import dxf_template_pipeline_v7_patch as pipeline_v7
 from . import template_reverse_patch as reverse_patch
 
 
-PATCH_VERSION = 2
+PATCH_VERSION = 3
 
 
 def _same_path(left: object, right: object) -> bool:
@@ -70,6 +70,62 @@ def _materialize_reverse_asset(
     return destination.resolve(strict=False)
 
 
+def _relocate_reverse_asset_preserving_existing(
+    source: Path,
+    target_dir: Path,
+    temporary_root: Path,
+) -> tuple[Path, str]:
+    """Publish a raster without changing assets used by an earlier DXF.
+
+    Different sources can share a filename, and a failed re-export must leave
+    every image linked by the previous successful drawing intact. Creating the
+    link or fallback copy exclusively also makes destination allocation safe
+    when another export is using the same directory.
+    """
+
+    destination = target_dir / source.name
+    if _same_path(source, destination):
+        return destination, "existing"
+    sequence = 1
+    while True:
+        if sequence > 1:
+            destination = target_dir / f"{source.stem} ({sequence}){source.suffix}"
+        try:
+            os.link(source, destination)
+            mode = "linked"
+        except FileExistsError:
+            sequence += 1
+            continue
+        except OSError:
+            try:
+                destination_handle = destination.open("xb")
+            except FileExistsError:
+                sequence += 1
+                continue
+            try:
+                with destination_handle:
+                    with source.open("rb") as source_handle:
+                        shutil.copyfileobj(source_handle, destination_handle, length=1024 * 1024)
+                shutil.copystat(source, destination)
+            except Exception:
+                try:
+                    destination.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                raise
+            mode = "copied"
+        if pipeline_v3._path_is_within(source, temporary_root):
+            try:
+                source.unlink()
+            except OSError:
+                # The regular reverse-source cleanup can retry a locked file.
+                pass
+            else:
+                if mode == "linked":
+                    mode = "moved"
+        return destination, mode
+
+
 def _transfer_reverse_image_assets_v8(
     reverse_document,
     reverse_source_path: Path,
@@ -125,10 +181,9 @@ def _transfer_reverse_image_assets_v8(
             if destination is None:
                 if not source.exists():
                     raise FileNotFoundError(f"Reverse rasterbestand ontbreekt: {source}")
-                destination = target_dir / source.name
-                mode = pipeline_v3._relocate_reverse_asset(
+                destination, mode = _relocate_reverse_asset_preserving_existing(
                     source,
-                    destination,
+                    target_dir,
                     temporary_root,
                 )
                 destination = destination.resolve(strict=False)
@@ -153,6 +208,8 @@ def install_dxf_template_pipeline_v8_patch() -> None:
       asset bundle before the reverse document is merged;
     * multiple reverse IMAGEDEFs that reference the same temporary PNG reuse the
       first relocated destination instead of treating the moved source as missing.
+    * new rasters never overwrite images belonging to an earlier export, even
+      when different sources share a filename or final DXF validation fails.
     """
 
     from .cadastral_export import CadastralDxfExporter
@@ -250,3 +307,4 @@ def install_dxf_template_pipeline_v8_patch() -> None:
     CadastralDxfExporter.SLEUFBASE_REVERSE_ASSET_MATERIALIZATION = True
     CadastralDxfExporter.SLEUFBASE_REVERSE_RASTER_SELF_CONTAINED = True
     CadastralDxfExporter.SLEUFBASE_REVERSE_DUPLICATE_IMAGEDEF_SAFE = True
+    CadastralDxfExporter.SLEUFBASE_REVERSE_ASSET_PRESERVATION = True

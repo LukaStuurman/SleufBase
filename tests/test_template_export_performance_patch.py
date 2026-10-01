@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import subprocess
+import sys
 import threading
 import time
 import unittest
@@ -98,6 +101,27 @@ class _FakeSession:
 
 
 class TemplateExportPerformancePatchTests(unittest.TestCase):
+    def test_one_worker_policy_keeps_all_fetch_results(self) -> None:
+        script = """
+from SleufBase import template_export_performance_patch as perf
+from SleufBase.large_template_export_patch import _parallel_ordered_bounded
+assert perf.MAX_LOCAL_WFS_WORKERS == perf.MAX_LOCAL_BGT_WORKERS == perf.MAX_TEMPLATE_PATH_WORKERS == 1
+for fetch in (perf._parallel_ordered, _parallel_ordered_bounded):
+    assert fetch(list(range(40)), lambda value: value * 2, max_workers=1) == list(range(0, 80, 2))
+"""
+        process = subprocess.run(
+            [sys.executable, "-c", script],
+            env={
+                **os.environ, "SLEUFBASE_MAX_WORKERS": "1",
+                "PYTHONPATH": os.pathsep.join((
+                    str(Path(__file__).resolve().parents[2]),
+                    os.environ.get("PYTHONPATH", ""),
+                )),
+            },
+            capture_output=True, text=True, timeout=30,
+        )
+        self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
+
     @staticmethod
     def _bounds_list() -> list[Bounds]:
         return [
@@ -116,7 +140,8 @@ class TemplateExportPerformancePatchTests(unittest.TestCase):
             int(getattr(CadastralWfsClient, "_sleufbase_parallel_session_version", 0) or 0),
             1,
         )
-        self.assertGreaterEqual(perf_patch.MAX_LOCAL_WFS_WORKERS, 2)
+        self.assertGreaterEqual(perf_patch.MAX_LOCAL_WFS_WORKERS, 1)
+        self.assertLessEqual(perf_patch.MAX_LOCAL_WFS_WORKERS, get_resource_policy().network_workers)
         self.assertGreaterEqual(perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS, 1)
         self.assertEqual(
             perf_patch.MAX_VIRTUAL_TEMPLATE_MAP_WORKERS,

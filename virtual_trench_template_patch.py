@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from functools import wraps
 import inspect
+from math import isfinite
 from typing import Any, Callable
 from tkinter import messagebox
 
@@ -72,6 +73,39 @@ def _point_xy(point: dict[str, Any] | None) -> tuple[float, float] | None:
         return None
 
 
+def _invalid_virtual_profile_endpoint_elevations(layer: Any) -> list[str]:
+    start, end = virtual_trench_endpoints(layer)
+    missing: list[str] = []
+    for label, point in (("beginpunt", start), ("eindpunt", end)):
+        try:
+            elevation = float(point.get("z")) if point is not None else float("nan")
+        except (TypeError, ValueError, OverflowError):
+            elevation = float("nan")
+        if not isfinite(elevation):
+            missing.append(label)
+    return missing
+
+
+def _validate_virtual_profile_endpoint_elevations(layer: Any) -> None:
+    """Do not mistake cable elevations for missing measured ground endpoints."""
+
+    from .cadastral_export import CadastralExportError
+
+    missing = _invalid_virtual_profile_endpoint_elevations(layer)
+    if missing:
+        metadata = getattr(layer, "metadata", {})
+        trench_name = (
+            metadata.get("marxact_trench_name")
+            or metadata.get("template_proefsleuf_label")
+            or str(getattr(layer, "path", "virtuele proefsleuf"))
+        )
+        raise CadastralExportError(
+            f"Dwarsprofiel voor '{trench_name}' kan niet worden opgebouwd: "
+            f"hoogte van {' en '.join(missing)} ontbreekt of is ongeldig. "
+            "Vul de gemeten begin- en eindpunthoogte in en start de export opnieuw."
+        )
+
+
 def _augment_virtual_template_datasets(
     exporter: Any,
     tiff_layers: list[Any],
@@ -79,6 +113,7 @@ def _augment_virtual_template_datasets(
     original_job_id: Callable[[Any, Any], int | None],
     *,
     reverse_cross_sections: bool = False,
+    include_cross_sections: bool = False,
 ) -> tuple[dict[int, Any], list[tuple[Any, bool, object]]]:
     """Add datasets for virtual trenches that do not have a usable KTK dataset.
 
@@ -96,6 +131,7 @@ def _augment_virtual_template_datasets(
 
     datasets = dict(cross_section_datasets or {})
     restore_entries: list[tuple[Any, bool, object]] = []
+    marker_updates: list[tuple[dict[str, Any], int]] = []
     seen_layers: set[int] = set()
     next_dataset_id = SYNTHETIC_DATASET_ID_START
 
@@ -106,6 +142,14 @@ def _augment_virtual_template_datasets(
         if identity in seen_layers:
             continue
         seen_layers.add(identity)
+
+        if _invalid_virtual_profile_endpoint_elevations(layer):
+            if include_cross_sections:
+                _validate_virtual_profile_endpoint_elevations(layer)
+            else:
+                # The overview still has the exact measured XY axis without a
+                # profile. Do not fabricate ground heights from cable points.
+                continue
 
         try:
             current_job_id = original_job_id(exporter, layer)
@@ -137,8 +181,13 @@ def _augment_virtual_template_datasets(
         had_marker = VIRTUAL_TEMPLATE_DATASET_ID_KEY in metadata
         old_marker = metadata.get(VIRTUAL_TEMPLATE_DATASET_ID_KEY)
         restore_entries.append((layer, had_marker, old_marker))
-        metadata[VIRTUAL_TEMPLATE_DATASET_ID_KEY] = synthetic_id
         datasets[synthetic_id] = replace(dataset, job_id=synthetic_id)
+        marker_updates.append((metadata, synthetic_id))
+
+    # Build every dataset before touching live layers. If a later layer fails,
+    # an earlier layer must not retain a private id and poison the next export.
+    for metadata, synthetic_id in marker_updates:
+        metadata[VIRTUAL_TEMPLATE_DATASET_ID_KEY] = synthetic_id
 
     return datasets, restore_entries
 
@@ -214,6 +263,7 @@ def install_virtual_trench_template_patch() -> None:
             bound.arguments.get("cross_section_datasets"),
             original_job_id,
             reverse_cross_sections=bool(bound.arguments.get("reverse_cross_sections", False)),
+            include_cross_sections=bool(bound.arguments.get("include_cross_sections", False)),
         )
         bound.arguments["cross_section_datasets"] = datasets
         try:

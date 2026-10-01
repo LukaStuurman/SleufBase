@@ -38,6 +38,13 @@ class KickTheMapError(RuntimeError):
     pass
 
 
+def _close_download_worker(worker_client) -> None:
+    """Release an owned worker session, including lightweight sessionless workers."""
+    session = getattr(worker_client, "session", None)
+    if session is not None:
+        session.close()
+
+
 def _safe_email_slug(email: str) -> str:
     sanitized = re.sub(r"[^A-Za-z0-9._-]+", "_", str(email or "").strip().lower())
     return sanitized.strip("._-") or "default"
@@ -1005,14 +1012,17 @@ class KickTheMapClient:
         def download_one(spec: tuple[KickTheMapJob, Path, str]) -> tuple[int, Path]:
             job, target_path, file_name = spec
             worker_client = self._parallel_worker_client()
-            signed_url = worker_client._request_project_file_url(
-                job,
-                folder="cloud",
-                remote_file_name="jobFeatures.json",
-                export_name=file_name,
-            )
-            worker_client._download_url_to_file(signed_url, target_path)
-            return job.job_id, target_path
+            try:
+                signed_url = worker_client._request_project_file_url(
+                    job,
+                    folder="cloud",
+                    remote_file_name="jobFeatures.json",
+                    export_name=file_name,
+                )
+                worker_client._download_url_to_file(signed_url, target_path)
+                return job.job_id, target_path
+            finally:
+                _close_download_worker(worker_client)
 
         workers = max(1, min(max_workers, len(specs)))
         with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="kickthemap-features") as executor:
@@ -1033,13 +1043,17 @@ class KickTheMapClient:
     def _parallel_worker_client(self) -> "KickTheMapClient":
         """Create an authenticated client with an independent requests session."""
         worker = type(self)(timeout=self.timeout)
-        worker.logged_in_email = self.logged_in_email
-        worker._csrf_token = self._csrf_token
-        worker._aws_config = self._aws_config
-        worker.session.headers.update(dict(self.session.headers))
-        worker.session.cookies.update(self.session.cookies)
-        worker.job_features_reuse_seconds = 0.0
-        return worker
+        try:
+            worker.logged_in_email = self.logged_in_email
+            worker._csrf_token = self._csrf_token
+            worker._aws_config = self._aws_config
+            worker.session.headers.update(dict(self.session.headers))
+            worker.session.cookies.update(self.session.cookies)
+            worker.job_features_reuse_seconds = 0.0
+            return worker
+        except Exception:
+            _close_download_worker(worker)
+            raise
 
     def _remember_job_features_path(self, job_id: int, target_path: Path) -> None:
         with self._recent_job_feature_lock:
@@ -1231,8 +1245,8 @@ class KickTheMapClient:
     def _download_url_to_file(self, signed_url: str, target_path: Path) -> None:
         temp_path = target_path.with_name(f"{target_path.name}.tmp")
         session = requests.Session()
-        session.headers.update({"User-Agent": "SleufBase/1.5"})
         try:
+            session.headers.update({"User-Agent": "SleufBase/1.5"})
             with session.get(signed_url, stream=True, timeout=self.timeout) as response:
                 response.raise_for_status()
                 with temp_path.open("wb") as handle:
@@ -1246,6 +1260,8 @@ class KickTheMapClient:
             except OSError:
                 pass
             raise
+        finally:
+            session.close()
 
     def _load_aws_config(self) -> KickTheMapAwsConfig:
         if self._aws_config is not None:

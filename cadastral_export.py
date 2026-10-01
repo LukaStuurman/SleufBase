@@ -4216,9 +4216,13 @@ class CadastralDxfExporter:
                 label_color=label_color,
             )
         try:
-            rendered.save(image_path, format="PNG")
+            from .template_raster_io import save_template_png
+
+            save_template_png(rendered, image_path)
         except OSError as exc:
             raise CadastralExportError(f"Kaartafbeelding kon niet worden opgeslagen voor {label}: {exc}") from exc
+        finally:
+            rendered.close()
         return image_path.resolve()
 
     @staticmethod
@@ -5605,10 +5609,23 @@ class CadastralDxfExporter:
         asset_dir = output_path.parent / f"{output_path.stem}_tiffs"
         asset_dir.mkdir(parents=True, exist_ok=True)
 
-        def copy_single(index_layer: tuple[int, GeoTiffLayer]) -> tuple[int, PreparedTiffRaster]:
-            index, layer = index_layer
+        # Give every worker its own indexed filename before starting any copy.
+        # Duplicate visible PS labels are valid, and existence checks inside
+        # parallel workers could otherwise select the same unwritten target.
+        copy_specs = [
+            (
+                index,
+                layer,
+                self._unique_raster_copy_path(
+                    asset_dir, f"{index:03d}_{self._proefsleuf_raster_name(layer, index)}"
+                ),
+            )
+            for index, layer in enumerate(tiff_layers, start=1)
+        ]
+
+        def copy_single(spec: tuple[int, GeoTiffLayer, Path]) -> tuple[int, PreparedTiffRaster]:
+            index, layer, target_path = spec
             export_layer = self._prepared_virtual_trench_export_layer(layer)
-            target_path = self._unique_raster_copy_path(asset_dir, self._proefsleuf_raster_name(layer, index))
             if is_virtual_trench_layer(layer) or not Path(layer.path).exists():
                 try:
                     export_layer.image.save(target_path, format="TIFF")
@@ -5629,8 +5646,8 @@ class CadastralDxfExporter:
         max_copy_workers = max(1, min(4, len(tiff_layers)))
         with ThreadPoolExecutor(max_workers=max_copy_workers, thread_name_prefix="tiff-copy") as executor:
             future_map = {
-                executor.submit(copy_single, (index, layer)): index - 1
-                for index, layer in enumerate(tiff_layers, start=1)
+                executor.submit(copy_single, spec): spec[0] - 1
+                for spec in copy_specs
             }
             for future in as_completed(future_map):
                 result_index, prepared_raster = future.result()

@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 import threading
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -170,6 +171,37 @@ class DxfTemplatePipelinePatchTests(unittest.TestCase):
 
         self.assertEqual(run_pair(6), 1)
         self.assertEqual(run_pair(4), 2)
+
+    def test_pixel_estimate_counts_full_real_image_in_a_mixed_batch(self) -> None:
+        layer = _Layer((8000, 6000))
+        self.assertEqual(pipeline._estimate_virtual_tiff_pixels({"layer": layer}), 48_000_000)
+
+    def test_pixel_estimate_uses_virtual_payload_dimensions_without_rendering(self) -> None:
+        from SleufBase import virtual_trench as vt
+        from SleufBase.models import Bounds
+        from PIL import Image
+
+        for source in ("marxact", "kickthemap"):
+            with self.subTest(source=source):
+                layer = SimpleNamespace(
+                    image=Image.new("RGBA", (1, 1)), path=Path("sample.virtual.tif"),
+                    bounds=Bounds(0.0, -0.3, 10.0, 0.3),
+                    metadata={vt.VIRTUAL_TRENCH_METADATA_KEY: {
+                        "source": source, "width_meters": 0.6,
+                        "points": [
+                            {"role": "start", "x": 0.0, "y": 0.0},
+                            {"role": "end", "x": 10.0, "y": 0.0},
+                        ],
+                    }},
+                )
+                try:
+                    width, height = vt.virtual_trench_render_size(layer, quality_multiplier=2.5)
+                    with patch.object(Image, "new", side_effect=AssertionError("must not render")):
+                        pixels = pipeline._estimate_virtual_tiff_pixels({"layer": layer})
+                    self.assertEqual(pixels, width * height)
+                    self.assertGreater(pixels, 1)
+                finally:
+                    layer.image.close()
 
     def test_record_inspection_handles_multiple_dynamic_blocks_in_one_context(self) -> None:
         records = [

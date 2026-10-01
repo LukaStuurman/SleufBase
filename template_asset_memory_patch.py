@@ -7,10 +7,11 @@ import threading
 import numpy as np
 from PIL import Image
 
+from .template_raster_io import TEMPLATE_PNG_COMPRESS_LEVEL, save_template_png
 from .virtual_trench import is_virtual_trench_layer
 
 
-PATCH_VERSION = 5
+PATCH_VERSION = 6
 # The left-hand trench image in the DXF template is vector-like line art. 1.25x
 # was intentionally conservative after the old memory spike, but that left
 # visibly stepped/pixelated edges. 2.5x keeps the source raster at at most
@@ -18,7 +19,6 @@ PATCH_VERSION = 5
 # peak memory bounded.
 SAFE_VIRTUAL_TRENCH_EXPORT_QUALITY_MULTIPLIER = 2.5
 MAX_VIRTUAL_TEMPLATE_ASSET_WORKERS = 1
-TEMPLATE_PNG_COMPRESS_LEVEL = 1
 TEMPLATE_UI_PUMP_INTERVAL_SECONDS = 0.08
 VIRTUAL_TEMPLATE_ROTATION_RESAMPLE = Image.Resampling.BICUBIC
 
@@ -124,22 +124,31 @@ def install_template_asset_memory_patch() -> None:
         image_path = self._unique_raster_copy_path(asset_dir, f"{label}_geotiff.png")
         virtual_layer = is_virtual_trench_layer(layer)
         export_layer = self._prepared_virtual_trench_export_layer(layer)
-
-        orientation_vector = self._template_tiff_orientation_pixel_vector(
-            export_layer,
-            road_orientation_paths,
-            terrain_boundary_paths,
-            profile=profile,
+        owned_source = (
+            export_layer.image
+            if virtual_layer and export_layer.image is not layer.image
+            else None
         )
-
-        image = export_layer.image.convert("RGBA")
-        if virtual_layer and export_layer.image is not layer.image:
-            try:
-                export_layer.image.close()
-            except Exception:
-                pass
-
+        image: Image.Image | None = None
         try:
+            orientation_vector = self._template_tiff_orientation_pixel_vector(
+                export_layer,
+                road_orientation_paths,
+                terrain_boundary_paths,
+                profile=profile,
+            )
+
+            if owned_source is not None and owned_source.mode == "RGBA":
+                # This fresh export raster belongs to this task. Transfer it
+                # instead of duplicating up to 4000x4000 pixels before cropping.
+                image = owned_source
+                owned_source = None
+            else:
+                image = export_layer.image.convert("RGBA")
+                if owned_source is not None:
+                    owned_source.close()
+                    owned_source = None
+
             # Virtual trenches are born with a transparent background. Cropping
             # before rotation avoids rotating a large empty canvas, and unlike
             # normal GeoTIFFs they do not need the expensive white-background
@@ -191,22 +200,19 @@ def install_template_asset_memory_patch() -> None:
                 # compression avoids spending CPU on file size that has no product
                 # value. Applying it here removes the former global Pillow save
                 # monkey-patch and keeps the optimization local to this code path.
-                image.save(
-                    image_path,
-                    format="PNG",
-                    compress_level=TEMPLATE_PNG_COMPRESS_LEVEL,
-                    optimize=False,
-                )
+                save_template_png(image, image_path)
             except OSError as exc:
                 raise CadastralExportError(
                     f"GeoTIFF-afbeelding kon niet worden opgeslagen voor {label}: {exc}"
                 ) from exc
             return image_path.resolve()
         finally:
-            try:
-                image.close()
-            except Exception:
-                pass
+            for temporary in (image, owned_source):
+                if temporary is not None:
+                    try:
+                        temporary.close()
+                    except Exception:
+                        pass
 
     def _prepare_template_slot_assets_batch_memory_safe(
         self,

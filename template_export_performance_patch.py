@@ -21,9 +21,9 @@ from .template_bgt_fetch_patch import (
 
 PATCH_VERSION = 2
 RESOURCE_POLICY = get_resource_policy()
-MAX_LOCAL_WFS_WORKERS = max(2, min(12, RESOURCE_POLICY.network_workers))
-MAX_LOCAL_BGT_WORKERS = max(2, min(10, RESOURCE_POLICY.network_workers))
-MAX_TEMPLATE_PATH_WORKERS = max(2, min(12, RESOURCE_POLICY.local_geometry_workers))
+MAX_LOCAL_WFS_WORKERS = max(1, min(12, RESOURCE_POLICY.network_workers))
+MAX_LOCAL_BGT_WORKERS = max(1, min(10, RESOURCE_POLICY.network_workers))
+MAX_TEMPLATE_PATH_WORKERS = max(1, min(12, RESOURCE_POLICY.local_geometry_workers))
 MAX_VIRTUAL_TEMPLATE_MAP_WORKERS = max(1, RESOURCE_POLICY.light_map_workers)
 MAX_HEAVY_TEMPLATE_RASTER_WORKERS = max(1, RESOURCE_POLICY.heavy_raster_workers)
 
@@ -48,10 +48,15 @@ def _parallel_ordered(
     if not items:
         return []
     if len(items) == 1 or max_workers <= 1:
-        result = [worker(items[0])]
-        if status_label:
-            _safe_status(status_callback, f"{status_label}...")
-        return result
+        results = []
+        for index, item in enumerate(items, start=1):
+            results.append(worker(item))
+            if status_label:
+                message = f"{status_label}..."
+                if len(items) > 1:
+                    message += f" {index}/{len(items)}"
+                _safe_status(status_callback, message)
+        return results
 
     results: list[Any] = [None] * len(items)
     worker_count = max(1, min(int(max_workers), len(items)))
