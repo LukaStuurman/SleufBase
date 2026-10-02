@@ -2610,6 +2610,8 @@ def _install_bgt_surface_autofill_patch() -> None:
 
     def _widget_text(widget) -> str:
         try:
+            if hasattr(widget, "_settings_original_text"):
+                return str(widget._settings_original_text)
             return str(widget.cget("text") or "")
         except (AttributeError, tk.TclError):
             return ""
@@ -2735,6 +2737,8 @@ def _install_kickthemap_material_choices_patch() -> None:
 
     def _widget_text(widget) -> str:
         try:
+            if hasattr(widget, "_settings_original_text"):
+                return str(widget._settings_original_text)
             return str(widget.cget("text") or "")
         except (AttributeError, tk.TclError):
             return ""
@@ -3174,6 +3178,37 @@ def _install_fast_kickthemap_start_points_patch() -> None:
     viewer_class._fast_kickthemap_start_points_patch = True
 
 
+def _install_pdok_viewer_default_patch() -> None:
+    from . import settings as settings_module
+    from .pdok_default_background_patch import DEFAULT_BACKGROUND_LABEL
+
+    viewer_class = KlicViewerApp
+    if getattr(viewer_class, "_sleufbase_pdok_viewer_default", False):
+        return
+    viewer_class.PDOK_LABEL = DEFAULT_BACKGROUND_LABEL
+    options = tuple(
+        (key, DEFAULT_BACKGROUND_LABEL if key == "pdok" else label)
+        for key, label in settings_module.MAP_EXPORT_BACKGROUND_OPTIONS
+    )
+    options = tuple(item for item in options if item[0] == "pdok") + tuple(
+        item for item in options if item[0] != "pdok"
+    )
+    settings_module.MAP_EXPORT_BACKGROUND_OPTIONS = options
+    globals()["MAP_EXPORT_BACKGROUND_OPTIONS"] = options
+    original_build_layout = viewer_class._build_layout
+
+    def build_layout_with_pdok_default(self, *args, **kwargs):
+        # The legacy initializer picks Cyclomedia when credentials exist.
+        # Set the public aerial source before building the map controls.
+        self.background_source_var.set(self.PDOK_LABEL)
+        result = original_build_layout(self, *args, **kwargs)
+        self._refresh_dashboard_metrics()
+        return result
+
+    viewer_class._build_layout = build_layout_with_pdok_default
+    viewer_class._sleufbase_pdok_viewer_default = True
+
+
 _load_cached_module()
 _install_active_loaded_jobs_state_patch()
 _install_sleufbase_branding_patch()
@@ -3187,3 +3222,4 @@ _install_inline_location_search_patch()
 _install_kickthemap_jobs_browser_patch()
 _install_modern_dropdown_menu_patch()
 _install_ai_maaiveld_patch()
+_install_pdok_viewer_default_patch()

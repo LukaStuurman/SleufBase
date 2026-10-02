@@ -21,6 +21,15 @@ _SECTION_TITLES = {
 }
 
 _TEXT_REWRITES = {
+    "Achtergrondkaart tonen in viewer": "Achtergrondkaart tonen op het kaartscherm",
+    "Achtergrondkaart voor kaartexport": "Achtergrond voor kaartuitvoer en sjabloonkaarten",
+    "GeoTIFFs ook als raster in DXF-export opnemen": "GeoTIFF-afbeeldingen meenemen in DXF-export",
+    "Afstand van PS-tekst tot proefsleuf (meter)": "Afstand van proefsleufnaam tot hartlijn (meter)",
+    "Maak KickTheMap dwarsprofielen automatisch in sjabloonexport": "Dwarsprofielen automatisch maken vanuit KickTheMap",
+    "Maak ook een reverse sjabloonversie met omgekeerde TIFF- en dwarsprofielrichting": "Ook een omgekeerde versie van het sjabloon exporteren",
+    "Houd dwarsprofiel-multileaders weg van zijkanten en van elkaar": "Leidingverwijzingen binnen het profiel houden en overlap beperken",
+    "Knip dwarsprofiel-cirkels af op de proefsleufgrenzen": "Verwijzingscirkels afknippen op de profielgrenzen",
+    "Opdrachtgeverlogo voor Blad1": "Opdrachtgeverlogo op Blad1",
     "Gebruik kaartpunten voor maaiveldtekst en -kleur in sjabloonexport": (
         "Kaartpunten gebruiken voor maaiveldtekst en kleur"
     ),
@@ -49,6 +58,8 @@ def _widget_text(widget: tk.Misc) -> str:
 
 def _set_widget_text(widget: tk.Misc, text: str) -> None:
     try:
+        if not hasattr(widget, "_settings_original_text"):
+            widget._settings_original_text = _widget_text(widget)
         widget.configure(text=text)
     except (AttributeError, tk.TclError):
         pass
@@ -118,6 +129,14 @@ def _configure_styles(dialog: tk.Misc) -> None:
     try:
         style = ttk.Style(dialog)
         style.configure(
+            "Settings.Tab.TRadiobutton",
+            font=("Segoe UI", 10, "bold"),
+            background=_SETTINGS_BG,
+            foreground="#374151",
+            padding=(8, 6),
+        )
+        style.map("Settings.Tab.TRadiobutton", foreground=[("selected", "#c2410c")])
+        style.configure(
             "Settings.Content.TFrame",
             borderwidth=0,
             relief="flat",
@@ -138,7 +157,7 @@ def _configure_styles(dialog: tk.Misc) -> None:
         )
         style.configure(
             "Settings.Help.TLabel",
-            font=("Segoe UI", 8),
+            font=("Segoe UI", 9),
             foreground="#6b7280",
             background=_SETTINGS_BG,
         )
@@ -307,13 +326,17 @@ def _style_checkbutton(widget: tk.Misc) -> None:
 
 
 def _style_label(widget: tk.Misc) -> None:
+    try:
+        widget.configure(background=_SETTINGS_BG)
+    except (AttributeError, tk.TclError):
+        pass
     text = _widget_text(widget)
     rewritten = _TEXT_REWRITES.get(text)
     if rewritten:
         _set_widget_text(widget, rewritten)
         text = rewritten
 
-    if text == "Materiaalkeuzes":
+    if text in {"Materiaalkeuzes", "Proefsleuven-sjabloon"}:
         try:
             widget.configure(style="Settings.Subtitle.TLabel")
         except (AttributeError, tk.TclError):
@@ -324,9 +347,8 @@ def _style_label(widget: tk.Misc) -> None:
     if not _is_help_label(widget, text):
         return
 
-    compact_text = _compact_help_text(text)
-    if compact_text != text:
-        _set_widget_text(widget, compact_text)
+    # Wrap the complete explanation. Automatic clipping used to hide conditions
+    # such as which TIFFs qualify or which files an export creates.
     try:
         widget.configure(
             style="Settings.Help.TLabel",
