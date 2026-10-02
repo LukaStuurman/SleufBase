@@ -36,7 +36,7 @@ on:
       - '.github/workflows/build-windows-exe.yml'
 
 env:
-  SLEUFBASE_RELEASE_VERSION: '0.3.61'
+  SLEUFBASE_RELEASE_VERSION: '0.3.62'
 
 permissions:
   contents: write
@@ -274,7 +274,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SleufBase-Windows-v0.3.61
+          name: SleufBase-Windows-v0.3.62
           path: |
             dist-installer/SleufBase-Setup.exe
             dist/SleufBase-Windows-Fast.zip
@@ -293,28 +293,24 @@ jobs:
           $tag = "v${env:SLEUFBASE_RELEASE_VERSION}-windows"
           $title = "SleufBase Windows v${env:SLEUFBASE_RELEASE_VERSION}"
           $notes = @'
-          SleufBase Windows v0.3.61
+          SleufBase Windows v0.3.62
 
-          DXF-sjabloonexport voor marXact en KickTheMap:
-          - snellere rasterverwerking door meetpunten eenmaal per afbeelding voor te bereiden
-          - minder volledige geheugenkopieën en betere opruiming bij exportfouten
-          - verliesloze PNG-opslag via tijdelijke bestanden
-          - correcte verwerking van alle kaartdelen bij een limiet van één worker
-          - duidelijke melding bij ontbrekende of ongeldige begin- en eindhoogtes voor dwarsprofielen
-          - controle op gewijzigde KickTheMap-proefsleuven tijdens het ophalen
-          - bestaande DXF-bestanden en gekoppelde rasters blijven intact bij een mislukte herexport
-          - unieke bestemmingen voor gelijktijdige rasters met dezelfde proefsleufnaam
+          Kaarten en instellingen:
+          - PDOK-luchtfoto is de standaardachtergrond, ook wanneer StreetSmart-aanmeldgegevens zijn opgeslagen
+          - duidelijker instellingenscherm met navigatie naar Kaarten, DXF-export, Proefsleuven, KickTheMap en Back-ups
+          - kaartbronnen, luchtfoto-opties en exportinstellingen overzichtelijk gegroepeerd met uitleg
 
-          Kaarten en achtergrondtaken:
-          - gedeelde downloads voor dezelfde kaarttegel en controle van de gevraagde afmetingen
-          - minder werk voor afbeeldingen buiten de zichtbare kaartuitsnede
-          - stabielere Jobs-verversing en achtergrondexport met veilige UI-afhandeling
-          - behoud van de browseraanmelding, CAPTCHA-fallback en joblijstverbeteringen uit v0.3.60
+          DXF-sjabloonexport:
+          - minder herhaald rekenwerk bij het plaatsen van profielteksten, met dezelfde posities en kandidaatkeuze
+          - circa 21% kortere exporttijd gemeten op 13 Sevenum-jobs (mediaan 17,46 naar 13,73 seconden bij gelijke opgeslagen netwerkgegevens)
+          - normale en reverse dwarsprofielen blijven afzonderlijk berekend
+          - overzichtslijnen, PS-labels, bladindelingen en gekoppelde afbeeldingen gelijk gebleven in de vergelijkingen
+          - iedere export krijgt een eigen assetbundel; de vorige DXF en afbeeldingen blijven behouden bij een mislukte export
+          - de uiteindelijke DXF wordt pas vervangen na een volledige export en structurele controle
 
           Windows:
-          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.61
-          - professionele installer, Fast ZIP en Portable EXE volledig opnieuw gebouwd
-          - release-integriteit, installer-contract, packaged runtime checks en runtime-smoketests zijn blokkerend
+          - product-, Windows resource- en installerversie bijgewerkt naar 0.3.62
+          - professionele installer, Fast ZIP en Portable EXE opnieuw gebouwd en getest
           - SHA-256-checksums, dependency snapshot en CycloneDX-SBOM inbegrepen
           '@
           $assets = @(

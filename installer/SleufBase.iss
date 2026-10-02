@@ -1,5 +1,5 @@
 #define MyAppName "SleufBase"
-#define MyAppVersion "0.3.61"
+#define MyAppVersion "0.3.62"
 #define MyAppPublisher "Techbase"
 #define MyAppExeName "SleufBase.exe"
 
@@ -26,7 +26,7 @@ WizardResizable=no
 CloseApplications=yes
 RestartApplications=yes
 UsePreviousAppDir=yes
-VersionInfoVersion=0.3.61.0
+VersionInfoVersion=0.3.62.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription=SleufBase Windows installer
 VersionInfoProductName={#MyAppName}
