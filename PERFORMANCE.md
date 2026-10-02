@@ -64,3 +64,11 @@ Performance-optimalisaties mogen de inhoud van een export niet wijzigen. In het 
 ## Ontwikkelregels
 
 Nieuwe zware taken horen geen losse hard-coded `max_workers` te introduceren als hun optimale parallelisme hardware-afhankelijk is. Gebruik de centrale `resource_policy.py` en kies de workloadcategorie die het dichtst bij de nieuwe taak ligt. Voor geheugenintensieve rasteroperaties moet naast een workercap ook een geheugen/pixelbudget worden toegepast waar de tijdelijke buffers groot kunnen worden.
+
+## DXF-sjabloon: profielteksten en veilig opslaan
+
+De plaatsing van profielteksten verwerpt niet-overlappende rechthoeken voordat overlapoppervlaktes worden berekend. De tweede zoekronde hergebruikt de exact berekende score van harde obstakels uit de eerste ronde. Kandidaten, hun volgorde, gewichten, afronding en de keuze bij gelijke scores blijven gelijk. Synthetische referentiegevallen uit v0.3.61 bewaken drukke profielen, zachte/harde obstakels, uitgeschakelde botsingspreventie en de grens van 80 labels.
+
+Een normale/reverse export wordt volledig opgebouwd en gecontroleerd in een eigen bundel onder `<naam>_assets/export-.../`. Pas na een geslaagde export vervangt één bestandsoperatie de uiteindelijke DXF. Bij fouten tijdens rasterbewerking, reverse-opbouw, dynamische blokken of publicatie blijven de vorige DXF en zijn afbeeldingen intact. Gelijktijdige pogingen gebruiken verschillende bundels. De bestaande structurele DXF-validatie blijft actief; deze beveiliging voegt geen extra DXF-parsestap of rasterkopie toe.
+
+Oudere succesvolle bundels blijven bewaard, omdat open tekeningen of opgeslagen kopieën hun afbeeldingen nog kunnen gebruiken. Deel de DXF samen met de volledige bijbehorende assetmap. Verwijder oude bundels alleen wanneer geen tekening er meer naar verwijst.
