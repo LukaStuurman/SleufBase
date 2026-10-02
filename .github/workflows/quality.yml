@@ -111,3 +111,9 @@ jobs:
           SLEUFBASE_MIGRATION_APP: legacy
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Run settings UI regression tests with a display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          xvfb-run -a python -m unittest tests.test_settings_navigation -v

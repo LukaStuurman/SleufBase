@@ -31,7 +31,7 @@ class PdokDefaultBackgroundPatchTests(unittest.TestCase):
 
     def test_default_background_contract_is_exposed(self) -> None:
         self.assertEqual(DEFAULT_BACKGROUND_LAYER, "Actueel_orthoHR")
-        self.assertEqual(DEFAULT_BACKGROUND_LABEL, "Luchtfoto NL actueel (8 cm, deels 5 cm)")
+        self.assertEqual(DEFAULT_BACKGROUND_LABEL, "PDOK Luchtfoto NL actueel (8 cm, deels 5 cm)")
         self.assertEqual(MapExporter.SLEUFBASE_DEFAULT_BACKGROUND_LAYER, DEFAULT_BACKGROUND_LAYER)
         self.assertEqual(MapExporter.SLEUFBASE_DEFAULT_BACKGROUND_LABEL, DEFAULT_BACKGROUND_LABEL)
         self.assertGreaterEqual(

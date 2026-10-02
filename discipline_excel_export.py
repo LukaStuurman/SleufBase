@@ -507,6 +507,8 @@ def _patch_viewer_class(viewer_class: Any) -> None:
 
     def _widget_text(widget) -> str:
         try:
+            if hasattr(widget, "_settings_original_text"):
+                return str(widget._settings_original_text)
             return str(widget.cget("text") or "")
         except (AttributeError, tk.TclError):
             return ""

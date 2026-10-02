@@ -7,7 +7,7 @@ from .pdok import PdokWmtsTileClient
 
 PATCH_VERSION = 2
 DEFAULT_BACKGROUND_LAYER = "Actueel_orthoHR"
-DEFAULT_BACKGROUND_LABEL = "Luchtfoto NL actueel (8 cm, deels 5 cm)"
+DEFAULT_BACKGROUND_LABEL = "PDOK Luchtfoto NL actueel (8 cm, deels 5 cm)"
 DEFAULT_BACKGROUND_TILE_WORKERS = 8
 
 
