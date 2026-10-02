@@ -3497,6 +3497,13 @@ class CadastralDxfExporter:
             first: tuple[float, float, float, float],
             second: tuple[float, float, float, float],
         ) -> float:
+            # Most candidate/obstacle pairs are disjoint. Reject them before
+            # computing areas; intersecting pairs keep the exact old arithmetic.
+            if (
+                first[2] <= second[0] or second[2] <= first[0]
+                or first[3] <= second[1] or second[3] <= first[1]
+            ):
+                return 0.0
             overlap_width = min(first[2], second[2]) - max(first[0], second[0])
             overlap_height = min(first[3], second[3]) - max(first[1], second[1])
             if overlap_width <= 0.0 or overlap_height <= 0.0:
@@ -3580,6 +3587,9 @@ class CadastralDxfExporter:
 
             selected: tuple[float, float, tuple[float, float, float, float]] | None = None
             best_candidate: tuple[float, float, tuple[float, float, float, float], float] | None = None
+            # Obstacles do not change during this entry's search. The second
+            # pass only drops soft obstacles, so reuse the identical hard score.
+            hard_penalties: dict[tuple[float, float], float] = {}
             for allow_soft_overlap in (False, True):
                 for y_shift in y_shift_candidates:
                     for x_shift in x_shift_candidates:
@@ -3607,38 +3617,43 @@ class CadastralDxfExporter:
                                 candidate_y,
                             ),
                         ]
-                        candidate_penalty = boundary_penalty(candidate_box)
-                        candidate_penalty += sum(
-                            overlap_area(candidate_box, existing_box) * 25000.0
-                            for existing_box in placed_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_box, existing_box) * 25000.0
-                            for existing_box in hard_text_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_box, existing_box) * 20000.0
-                            for existing_box in hard_line_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_line_box, existing_box) * 20000.0
-                            for candidate_line_box in candidate_line_boxes
-                            for existing_box in hard_text_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_line_box, existing_box) * 18000.0
-                            for candidate_line_box in candidate_line_boxes
-                            for existing_box in hard_line_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_box, existing_box) * 22000.0
-                            for existing_box in other_entry_line_boxes
-                        )
-                        candidate_penalty += sum(
-                            overlap_area(candidate_line_box, existing_box) * 22000.0
-                            for candidate_line_box in candidate_line_boxes
-                            for existing_box in other_entry_line_boxes
-                        )
+                        candidate_key = (y_shift, x_shift)
+                        if allow_soft_overlap:
+                            candidate_penalty = hard_penalties[candidate_key]
+                        else:
+                            candidate_penalty = boundary_penalty(candidate_box)
+                            candidate_penalty += sum(
+                                overlap_area(candidate_box, existing_box) * 25000.0
+                                for existing_box in placed_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_box, existing_box) * 25000.0
+                                for existing_box in hard_text_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_box, existing_box) * 20000.0
+                                for existing_box in hard_line_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_line_box, existing_box) * 20000.0
+                                for candidate_line_box in candidate_line_boxes
+                                for existing_box in hard_text_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_line_box, existing_box) * 18000.0
+                                for candidate_line_box in candidate_line_boxes
+                                for existing_box in hard_line_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_box, existing_box) * 22000.0
+                                for existing_box in other_entry_line_boxes
+                            )
+                            candidate_penalty += sum(
+                                overlap_area(candidate_line_box, existing_box) * 22000.0
+                                for candidate_line_box in candidate_line_boxes
+                                for existing_box in other_entry_line_boxes
+                            )
+                            hard_penalties[candidate_key] = candidate_penalty
                         if not allow_soft_overlap:
                             candidate_penalty += sum(
                                 overlap_area(candidate_box, existing_box) * 8000.0

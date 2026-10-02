@@ -390,7 +390,21 @@ def install_template_reverse_export_patch() -> None:
         return result
 
     def _export_template_sheet_with_reverse_pair(self, *args, **kwargs):
+        from .template_export_transaction import staged_template_output
+
         call_arguments = _resolved_export_call(original_export, self, args, kwargs)
+        final_output_path = Path(call_arguments["output_path"])
+        try:
+            with staged_template_output(final_output_path) as staged_output_path:
+                call_arguments["output_path"] = staged_output_path
+                _export_template_pair(self, call_arguments)
+        except OSError as exc:
+            raise CadastralExportError(
+                f"DXF-sjabloon kon niet worden opgeslagen; de vorige export is behouden: {exc}"
+            ) from exc
+        return final_output_path
+
+    def _export_template_pair(self, call_arguments):
         final_output_path = Path(call_arguments["output_path"])
         reverse_source_path = _reverse_source_path(final_output_path)
         callback = call_arguments.get("status_callback")
