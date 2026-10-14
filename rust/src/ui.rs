@@ -14,7 +14,7 @@ use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
 use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
 use sleufbase_rust::project::{
-    self, AutosaveSettings, NativeProject, read_project, save_project
+    self, AutosaveSettings, NativeProject, Comment, read_project, save_project
 };
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -23,6 +23,10 @@ const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
 const INK: Color32 = Color32::from_rgb(17, 24, 39);
 
+#[derive(Default)]
+struct CommentForm {
+    x:f64,y:f64,text:String,
+}
 struct TrenchForm {
     label:String, start_x:f64, start_y:f64, end_x:f64, end_y:f64, width:f64,
 }
@@ -56,6 +60,9 @@ pub struct SleufBaseApp {
     pdok_busy:bool,
     jobs_cache:Option<JobsCache>,
     jobs_query:String,
+    comments:Vec<Comment>,
+    show_comment_dialog:bool,
+    comment_form:CommentForm,
     only_active_cached:bool,
     active_only: bool,
     selected: Option<usize>,
@@ -86,6 +93,9 @@ impl Default for SleufBaseApp {
             pdok_busy:false,
             jobs_cache:None,
             jobs_query:String::new(),
+            comments:Vec::new(),
+            show_comment_dialog:false,
+            comment_form:CommentForm::default(),
             only_active_cached:false,
             active_only:false,
             selected:None,
@@ -111,6 +121,7 @@ impl SleufBaseApp {
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
             virtual_trenches:self.virtual_trenches.clone(),
+            comments:self.comments.clone(),
             ..NativeProject::default()
         }
     }
@@ -121,6 +132,7 @@ impl SleufBaseApp {
         self.raster_textures.clear();
         self.overlays.clear();
         self.virtual_trenches.clear();
+        self.comments.clear();
         self.pdok_texture=None;
         self.pdok_bounds=None;
         self.pdok_rx=None;
@@ -143,6 +155,7 @@ impl SleufBaseApp {
                 self.raster_textures=textures;
                 self.overlays=doc.overlays;
                 self.virtual_trenches=doc.virtual_trenches;
+                self.comments=doc.comments;
                 self.pdok_texture=None;
                 self.pdok_bounds=None;
                 self.pdok_rx=None;
@@ -422,6 +435,7 @@ fn canvas(
     textures:&[Option<egui::TextureHandle>],
     overlays:&[DxfOverlay],
     virtual_trenches:&[VirtualTrench],
+    comments:&[Comment],
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
     zoom:&mut f64,
@@ -438,6 +452,12 @@ fn canvas(
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
         bounds=union_bounds(bounds,overlay.bounds());
+    }
+    for note in comments {
+        bounds=union_bounds(bounds,Some(Bounds {
+            min_x:note.x-0.1,min_y:note.y-0.1,
+            max_x:note.x+0.1,max_y:note.y+0.1
+        }));
     }
     for t in virtual_trenches {
         bounds=union_bounds(bounds,Some(Bounds {
@@ -510,6 +530,12 @@ fn canvas(
             mesh.indices.extend_from_slice(&[0,1,2,0,2,3]);
             painter.add(egui::Shape::mesh(mesh));
         }
+    }
+    for note in comments {
+        let pos=project(note.x,note.y);
+        painter.circle_filled(pos,5.0,DARK);
+        painter.text(pos+egui::vec2(6.0,-6.0),egui::Align2::LEFT_BOTTOM,
+            &note.text,egui::FontId::proportional(13.0),INK);
     }
     for trench in virtual_trenches {
         let vertices=trench.polygon();
@@ -601,6 +627,7 @@ impl eframe::App for SleufBaseApp {
                     {self.load_geotiffs(files,ctx);}
                 }
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
+                if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.button("Open DXF").clicked() {
@@ -677,6 +704,16 @@ impl eframe::App for SleufBaseApp {
                 ui.label(format!("{} ({:.2} m)",trench.label,trench.length()));
             }
             ui.separator();
+            ui.heading("Kaartopmerkingen");
+            let mut remove_comment=None;
+            for (i,note) in self.comments.iter().enumerate() {
+                ui.horizontal(|ui|{
+                    ui.label(format!("{} ({:.1}, {:.1})",note.text,note.x,note.y));
+                    if ui.small_button("×").clicked(){remove_comment=Some(i);}
+                });
+            }
+            if let Some(i)=remove_comment {self.comments.remove(i);self.dirty=true;}
+            ui.separator();
             ui.heading("DXF-lagen");
             egui::ScrollArea::vertical().max_height(150.0).show(ui,|ui|{
                 for overlay in &mut self.overlays {
@@ -704,7 +741,7 @@ impl eframe::App for SleufBaseApp {
             let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&self.virtual_trenches,
+                &self.overlays,&self.virtual_trenches,&self.comments,
                 self.pdok_texture.as_ref(),self.pdok_bounds,
                 &mut self.zoom,&mut self.pan);
         });
@@ -740,6 +777,38 @@ impl eframe::App for SleufBaseApp {
                     }
                     Err(err)=>self.message=format!("Virtuele proefsleuf ongeldig: {err}"),
                 }
+            }
+        }
+
+
+        if self.show_comment_dialog {
+            let mut opened=self.show_comment_dialog;
+            let mut submit=false;
+            egui::Window::new("Kaartopmerking").open(&mut opened)
+                .resizable(false).show(ctx,|ui|{
+                ui.horizontal(|ui|{
+                    ui.label("RD X");
+                    ui.add(egui::DragValue::new(&mut self.comment_form.x).speed(0.1));
+                    ui.label("RD Y");
+                    ui.add(egui::DragValue::new(&mut self.comment_form.y).speed(0.1));
+                });
+                ui.label("Opmerking");
+                ui.text_edit_singleline(&mut self.comment_form.text);
+                if ui.button("Toevoegen").clicked(){submit=true;}
+            });
+            self.show_comment_dialog=opened;
+            if submit {
+                if self.comment_form.x.is_finite()&&self.comment_form.y.is_finite()&&
+                    !self.comment_form.text.trim().is_empty()
+                {
+                    self.comments.push(Comment {
+                        x:self.comment_form.x,y:self.comment_form.y,
+                        text:self.comment_form.text.trim().to_owned()
+                    });
+                    self.dirty=true;
+                    self.show_comment_dialog=false;
+                    self.comment_form.text.clear();
+                } else {self.message="Geef geldige RD-coördinaten en tekst op".into();}
             }
         }
 

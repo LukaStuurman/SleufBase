@@ -68,6 +68,12 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Zoek en filter met de betrouwbare actief-geladen-job heartbeat (Python-live status maximaal 6 sec).
 - De cachestand is expliciet **niet live**; de online KickTheMap login, jobs API en downloaden moeten nog native worden overgezet.
 
+## Kaartopmerkingen
+
+- Plaats opmerkingen met RD X/Y en tekst, geef ze op de kaart weer en verwijder ze in de zijbalk.
+- Opmerkingen worden opgenomen in het eigen Rust-project en herstellen bij openen van dat project.
+- ASCII DXF POLYLINE-geometrie respecteert gesloten polyline-bit uit de POLYLINE-header.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

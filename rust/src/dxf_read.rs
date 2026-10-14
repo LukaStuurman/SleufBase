@@ -154,10 +154,13 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     let mut current_kind=String::new();
     let mut current_groups: Vec<Group>=Vec::new();
     let mut polyline:Option<DxfFeature>=None;
+    let mut polyline_closed=false;
 
-    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>| {
+    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool| {
         if kind=="POLYLINE" {
             let new_polyline=common(current,kind);
+            *polyline_closed=field(current,70).and_then(|v|v.parse::<u32>().ok())
+                .is_some_and(|flags|flags & 1 != 0);
             *polyline=Some(new_polyline);
             return;
         }
@@ -170,11 +173,11 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
         if kind=="SEQEND" {
             if let Some(mut old)=polyline.take() {
                 if old.points.len()>=2 {
-                    let closed=field(current,70).and_then(|v|v.parse::<u32>().ok()).is_some_and(|flags|flags&1!=0);
-                    if closed { old.points.push(old.points[0]); }
+                    if *polyline_closed { old.points.push(old.points[0]); }
                     result.push(old);
                 }
             }
+            *polyline_closed=false;
             return;
         }
         let mut feature=common(current,kind);
@@ -203,7 +206,7 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     for entry in &records {
         if entry.code==0 {
             if in_entities && !current_kind.is_empty() {
-                flush(&current_kind,&current_groups,&mut features,&mut polyline);
+                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed);
                 current_groups.clear();
             }
             if features.len()>MAX_ENTITIES {return Err("DXF heeft te veel entiteiten".into());}
@@ -217,7 +220,11 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
                     in_entities=false;
                     current_kind.clear();
                     if let Some(parent)=polyline.take() {
-                        if parent.points.len()>=2 { features.push(parent); }
+                        if parent.points.len()>=2 {
+                            let mut parent=parent;
+                            if polyline_closed {parent.points.push(parent.points[0]);}
+                            features.push(parent);
+                        }
                     }
                 }
                 other => current_kind=if in_entities {other.to_owned()} else {String::new()},
@@ -274,6 +281,14 @@ mod tests {
         assert_eq!(overlay.features.len(),1);
         assert_eq!(overlay.features[0].color_aci,5);
         assert_eq!(overlay.features[0].points[1].z,Some(4.0));
+    }
+    #[test]
+    fn polyline_uses_header_closed_flag() {
+        let dxf="0\nSECTION\n2\nENTITIES\n                 0\nPOLYLINE\n8\nWATER\n70\n1\n                 0\nVERTEX\n10\n1\n20\n2\n                 0\nVERTEX\n10\n3\n20\n4\n                 0\nSEQEND\n0\nENDSEC\n0\nEOF\n";
+        let result=parse_dxf(dxf,Path::new("test.dxf")).unwrap();
+        assert_eq!(result.features.len(),1);
+        assert_eq!(result.features[0].points.len(),3);
+        assert_eq!(result.features[0].points[0],result.features[0].points[2]);
     }
     #[test]
     fn corrupt_and_binary_are_errors() {

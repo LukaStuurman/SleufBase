@@ -6,7 +6,7 @@
 
 | Onderdeel | Bestaande Python-bron | Rust status | Acceptatie-eis voor volwaardige vervanging |
 |---|---|---|---|
-| Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
+| Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Basis kaartinteractie en opmerkingen, rest deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
 | Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Eigen Rust-projectopslag; Python-compatibiliteit ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
 | Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Automatische roterende Rust-backup; restore-dialoog ontbreekt | Onderbreking en restore-tests |
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
