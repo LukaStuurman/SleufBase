@@ -1,0 +1,14 @@
+{
+  "features": [
+    {"geometry": {"type": "Point", "coordinates": [168000, 401000, 2.2]},
+     "properties": {"groupType": "objects", "idName": "Water PVC", "properties1": "110 mm"}},
+    {"geometry": {"type": "Point", "coordinates": [168001, 401001, 2.1]},
+     "properties": {"groupType": "objects", "name": "waterleiding"}},
+    {"geometry": {"type": "LineString", "coordinates": [[168002, 401002, 1.5], [168003, 401003, 1.5]]},
+     "properties": {"groupType": "objects", "idName": "LS"}},
+    {"geometry": {"type": "Point", "coordinates": [168004, 401004]},
+     "properties": {"groupType": "objects", "name": "data"}},
+    {"geometry": {"type": "Point", "coordinates": [0, 0]},
+     "properties": {"groupType": "proefsleuf", "name": "niet meetellen"}}
+  ]
+}

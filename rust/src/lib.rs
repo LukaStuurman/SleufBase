@@ -1,0 +1,12 @@
+//! SleufBase Rust port — local KickTheMap data model and exports.
+//! The historical Python application remains unchanged until parity is reached.
+
+pub mod disciplines;
+pub mod export;
+pub mod model;
+pub mod parse;
+
+pub use disciplines::{summarize, matching_rule, Rule, Summary, RULES};
+pub use export::{write_dxf, write_xlsx};
+pub use model::{Bounds, Dataset, Feature, Geometry, Vertex};
+pub use parse::{load_job_features, parse_job_features};
