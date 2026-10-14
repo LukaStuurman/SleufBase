@@ -7,6 +7,7 @@ use sleufbase_rust::{
     Vertex, RULES
 };
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
+use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
 use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
 use sleufbase_rust::project::{
@@ -19,11 +20,33 @@ const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
 const INK: Color32 = Color32::from_rgb(17, 24, 39);
 
+struct TrenchForm {
+    label:String, start_x:f64, start_y:f64, end_x:f64, end_y:f64, width:f64,
+}
+impl Default for TrenchForm {
+    fn default()->Self {
+        Self {label:"Virtuele proefsleuf".into(),start_x:0.0,start_y:0.0,
+            end_x:10.0,end_y:0.0,width:0.6}
+    }
+}
+impl TrenchForm {
+    fn make(&self)->Result<VirtualTrench,String> {
+        if self.label.trim().is_empty() {return Err("Geef de proefsleuf een naam".into());}
+        VirtualTrench::new(self.label.trim().into(),
+            Vertex{x:self.start_x,y:self.start_y,z:None},
+            Vertex{x:self.end_x,y:self.end_y,z:None},self.width)
+    }
+}
+
+
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
     raster_textures: Vec<Option<egui::TextureHandle>>,
     overlays: Vec<DxfOverlay>,
+    virtual_trenches: Vec<VirtualTrench>,
+    show_trench_dialog: bool,
+    trench_form:TrenchForm,
     active_only: bool,
     selected: Option<usize>,
     query: String,
@@ -44,6 +67,9 @@ impl Default for SleufBaseApp {
             geotiffs:Vec::new(),
             raster_textures:Vec::new(),
             overlays:Vec::new(),
+            virtual_trenches:Vec::new(),
+            show_trench_dialog:false,
+            trench_form:TrenchForm::default(),
             active_only:false,
             selected:None,
             query:String::new(),
@@ -67,6 +93,7 @@ impl SleufBaseApp {
             datasets:self.datasets.clone(),
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
+            virtual_trenches:self.virtual_trenches.clone(),
             ..NativeProject::default()
         }
     }
@@ -76,6 +103,7 @@ impl SleufBaseApp {
         self.geotiffs.clear();
         self.raster_textures.clear();
         self.overlays.clear();
+        self.virtual_trenches.clear();
         self.selected=None;
         self.project_path=None;
         self.project_name="Naamloos project".into();
@@ -93,6 +121,7 @@ impl SleufBaseApp {
                 self.geotiffs=doc.rasters;
                 self.raster_textures=textures;
                 self.overlays=doc.overlays;
+                self.virtual_trenches=doc.virtual_trenches;
                 self.project_name=doc.name;
                 self.selected=(!self.datasets.is_empty()).then_some(0);
                 self.project_path=Some(path.clone());
@@ -208,16 +237,22 @@ impl SleufBaseApp {
         )
     }
 
+    fn export_datasets(&self)->Vec<Dataset> {
+        let mut all=self.datasets.clone();
+        all.extend(self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)));
+        all
+    }
+
     fn save_excel(&mut self) {
-        if self.datasets.is_empty() {
-            self.message="Laad eerst jobFeatures.json".into();
+        if self.datasets.is_empty() && self.virtual_trenches.is_empty() {
+            self.message="Laad eerst jobFeatures.json of maak een virtuele proefsleuf".into();
             return;
         }
         if let Some(path)=rfd::FileDialog::new()
             .add_filter("Excel",&["xlsx"])
             .set_file_name("SleufBase-Disciplines-Rust.xlsx").save_file()
         {
-            self.message=match write_xlsx(&path,&self.datasets,RULES) {
+            self.message=match write_xlsx(&path,&self.export_datasets(),RULES) {
                 Ok(())=>format!("Excel opgeslagen: {}",path.display()),
                 Err(err)=>format!("Excel-export mislukt: {err}"),
             };
@@ -225,15 +260,15 @@ impl SleufBaseApp {
     }
 
     fn save_dxf(&mut self) {
-        if self.datasets.is_empty() {
-            self.message="Laad eerst jobFeatures.json".into();
+        if self.datasets.is_empty() && self.virtual_trenches.is_empty() {
+            self.message="Laad eerst jobFeatures.json of maak een virtuele proefsleuf".into();
             return;
         }
         if let Some(path)=rfd::FileDialog::new()
             .add_filter("DXF",&["dxf"])
             .set_file_name("SleufBase-Objecten-Rust.dxf").save_file()
         {
-            self.message=match write_dxf(&path,&self.datasets,RULES) {
+            self.message=match write_dxf(&path,&self.export_datasets(),RULES) {
                 Ok(())=>format!("DXF opgeslagen: {}",path.display()),
                 Err(err)=>format!("DXF-export mislukt: {err}"),
             };
@@ -278,6 +313,7 @@ fn canvas(
     rasters:&[GeoTiffInfo],
     textures:&[Option<egui::TextureHandle>],
     overlays:&[DxfOverlay],
+    virtual_trenches:&[VirtualTrench],
     zoom:&mut f64,
     pan:&mut egui::Vec2
 ) {
@@ -292,6 +328,14 @@ fn canvas(
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
         bounds=union_bounds(bounds,overlay.bounds());
+    }
+    for t in virtual_trenches {
+        bounds=union_bounds(bounds,Some(Bounds {
+            min_x:t.start.x.min(t.end.x)-t.width_meters,
+            min_y:t.start.y.min(t.end.y)-t.width_meters,
+            max_x:t.start.x.max(t.end.x)+t.width_meters,
+            max_y:t.start.y.max(t.end.y)+t.width_meters,
+        }));
     }
     let Some(bounds)=bounds else {
         painter.text(rect.center(),egui::Align2::CENTER_CENTER,
@@ -339,6 +383,13 @@ fn canvas(
             }
             mesh.indices.extend_from_slice(&[0,1,2,0,2,3]);
             painter.add(egui::Shape::mesh(mesh));
+        }
+    }
+    for trench in virtual_trenches {
+        let vertices=trench.polygon();
+        for i in 0..4 {
+            let a=vertices[i]; let b=vertices[(i+1)%4];
+            painter.line_segment([project(a.0,a.1),project(b.0,b.1)],Stroke::new(1.5,ORANGE));
         }
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
@@ -422,6 +473,7 @@ impl eframe::App for SleufBaseApp {
                         .add_filter("GeoTIFF",&["tif","tiff"]).pick_files()
                     {self.load_geotiffs(files,ctx);}
                 }
+                if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
                         .add_filter("AutoCAD DXF",&["dxf"]).pick_files()
@@ -472,6 +524,11 @@ impl eframe::App for SleufBaseApp {
                 }
             });
             ui.separator();
+            ui.heading("Virtuele proefsleuven");
+            for trench in &self.virtual_trenches {
+                ui.label(format!("{} ({:.2} m)",trench.label,trench.length()));
+            }
+            ui.separator();
             ui.heading("DXF-lagen");
             egui::ScrollArea::vertical().max_height(150.0).show(ui,|ui|{
                 for overlay in &mut self.overlays {
@@ -499,7 +556,42 @@ impl eframe::App for SleufBaseApp {
             let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&mut self.zoom,&mut self.pan);
+                &self.overlays,&self.virtual_trenches,&mut self.zoom,&mut self.pan);
         });
+
+        if self.show_trench_dialog {
+            let mut open=self.show_trench_dialog;
+            let mut create=false;
+            egui::Window::new("Nieuwe virtuele proefsleuf")
+                .open(&mut open).resizable(false).show(ctx,|ui|{
+                ui.label("Naam");
+                ui.text_edit_singleline(&mut self.trench_form.label);
+                ui.horizontal(|ui|{
+                    ui.label("Start X");ui.add(egui::DragValue::new(&mut self.trench_form.start_x).speed(0.1));
+                    ui.label("Start Y");ui.add(egui::DragValue::new(&mut self.trench_form.start_y).speed(0.1));
+                });
+                ui.horizontal(|ui|{
+                    ui.label("Eind X");ui.add(egui::DragValue::new(&mut self.trench_form.end_x).speed(0.1));
+                    ui.label("Eind Y");ui.add(egui::DragValue::new(&mut self.trench_form.end_y).speed(0.1));
+                });
+                ui.horizontal(|ui|{
+                    ui.label("Breedte (m)");ui.add(egui::DragValue::new(&mut self.trench_form.width).speed(0.05));
+                });
+                if ui.button("Proefsleuf toevoegen").clicked(){create=true;}
+            });
+            self.show_trench_dialog=open;
+            if create {
+                match self.trench_form.make() {
+                    Ok(t)=>{
+                        self.virtual_trenches.push(t);
+                        self.dirty=true;
+                        self.show_trench_dialog=false;
+                        self.message="Virtuele proefsleuf opgeslagen in Rust-project".into();
+                    }
+                    Err(err)=>self.message=format!("Virtuele proefsleuf ongeldig: {err}"),
+                }
+            }
+        }
+
     }
 }

@@ -5,6 +5,7 @@
 use crate::dxf_read::DxfOverlay;
 use crate::geotiff::GeoTiffInfo;
 use crate::model::Dataset;
+use crate::virtual_trench::VirtualTrench;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::{Read, Write};
@@ -30,6 +31,8 @@ pub struct NativeProject {
     pub datasets: Vec<Dataset>,
     pub rasters: Vec<GeoTiffInfo>,
     pub overlays: Vec<DxfOverlay>,
+    #[serde(default)]
+    pub virtual_trenches: Vec<VirtualTrench>,
     pub comments: Vec<Comment>,
 }
 
@@ -42,6 +45,7 @@ impl Default for NativeProject {
             datasets:Vec::new(),
             rasters:Vec::new(),
             overlays:Vec::new(),
+            virtual_trenches:Vec::new(),
             comments:Vec::new(),
         }
     }
@@ -55,6 +59,7 @@ impl NativeProject {
         if self.version!=FORMAT_VERSION {
             return Err(format!("Niet ondersteunde projectversie {}", self.version));
         }
+        for trench in &self.virtual_trenches {trench.validate()?;}
         for ds in &self.datasets {
             if ds.features.len()>2_000_000 {
                 return Err("Te veel objecten in project".into());

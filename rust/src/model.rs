@@ -21,7 +21,7 @@ pub struct Feature {
     pub attributes: [String; 3],
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Dataset {
     pub job_id: u64,
     pub title: String,

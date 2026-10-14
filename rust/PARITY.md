@@ -26,7 +26,7 @@
 | KickTheMap objecten/parsing | kickthemap_dxf_export.py | Deels | Punt/polyline, hoogte, attributen, groepsfilters op echte exports |
 | Filter alleen actief geladen jobs | app.py, kickthemap_jobs_browser.py | Python-heartbeat read-only | Zelfstandige Rust-app schrijft/evalueert state betrouwbaar |
 | Discipline-overzicht + Excel-formaat | discipline_excel_export.py | Deels | Identieke regels, ordering, categorisering, totalen, sjablonen en styling |
-| Virtuele proefsleuven/profielen | virtual_trench.py, virtual_trench_template_patch.py | Ontbreekt | Plaatsen, maatvoering, kettingmaat, export |
+| Virtuele proefsleuven/profielen | virtual_trench.py, virtual_trench_template_patch.py | Basisgeometrie en aanmaak, profielen nog niet | Plaatsen, maatvoering, kettingmaat, export |
 | MarXact import, snapping, metingen | marxact_*.py | Ontbreekt | Identieke CSV/point mapping, modeltransformaties, grenzen |
 | Cyclomedia/StreetSmart | cyclomedia.py, streetsmart*.py | Ontbreekt | Browser, selectie, overdracht/extern auth |
 | Instellingen en oude voorkeuren | settings.py, settings_ui.py, settings_* | Ontbreekt | Migratie van bestaande settings zonder wachtwoordverlies |

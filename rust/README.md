@@ -47,12 +47,19 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Automatische roterende back-ups in een **aparte** Rust-map. Het bestaande Python-projectformaat wordt niet overschreven.
 - Instellingen voor deze back-ups lezen, met dezelfde defaults 10 minuten en maximaal 20 back-ups.
 
+## Uitbreiding: virtuele proefsleuven
+
+- Rust-datamodel voor virtuele proefsleuven met startpunt, eindpunt, breedte en optionele objecten.
+- Zelfstandig aanmaken in de desktopinterface met RD X/Y-velden; render als contour en sla op met het Rust-project.
+- Chainage, projectie van punten, dwarsprofielfragmenten en basis-DXF/Excel in dezelfde bronset.
+- Uitvoer blijft **niet gelijk** aan Python-sjabloonprofielen, foto's en AutoCAD-blokdefinities.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
 2. Volledige GeoTIFF-rasterweergave (grote bestanden/andere bits/kleurtypes), PDOK, BGT, WFS, AHN, StreetSmart, caching en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonexport inclusief profielen, raster, foto's en blokken.
-4. Virtuele proefsleuven, MarXact, **compatibiliteit met Python-projectopslag**, migratie van bestaande instellingen en volledig back-upherstel.
+4. Volledig uitgewerkte virtuele proefsleufprofielen (de geometriebasis is aanwezig), MarXact, **compatibiliteit met Python-projectopslag**, migratie van bestaande instellingen en volledig back-upherstel.
 5. Gebruikersinstelbare discipline-regels, installatiepakket en volledige migratietests.
 
 ## Aanpak voor vervolgmigratie

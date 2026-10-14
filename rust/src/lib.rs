@@ -8,6 +8,7 @@ pub mod loaded_jobs;
 pub mod raster;
 pub mod dxf_read;
 pub mod project;
+pub mod virtual_trench;
 pub mod export;
 pub mod model;
 pub mod parse;
