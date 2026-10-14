@@ -54,10 +54,18 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Chainage, projectie van punten, dwarsprofielfragmenten en basis-DXF/Excel in dezelfde bronset.
 - Uitvoer blijft **niet gelijk** aan Python-sjabloonprofielen, foto's en AutoCAD-blokdefinities.
 
+## PDOK direct in Rust
+
+- WMS 1.1.1 luchtfoto op vaste PDOK service URL, EPSG:28992, inclusief correcte BBOX/afmetingen.
+- Verzoek in een aparte achtergrondthread: de UI blijft reageren tijdens ophalen.
+- Veiligheidslimieten: maximaal 2048x2048 PNG, 24 MiB antwoord, 30 seconden netwerktimeout.
+- De ingebouwde luchtfotolaag wordt op juiste geografische locatie als kaartondergrond getoond.
+- **Nog geen** volledig tegelsysteem, WMTS, BGT, offline cache of schaalafhankelijke WMS-tiling.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
-2. Volledige GeoTIFF-rasterweergave (grote bestanden/andere bits/kleurtypes), PDOK, BGT, WFS, AHN, StreetSmart, caching en kaartreprojectie.
+2. Volledige GeoTIFF-rasterweergave (grote bestanden/andere bits/kleurtypes), PDOK WMTS/offline-cache, BGT, WFS, AHN, StreetSmart en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonexport inclusief profielen, raster, foto's en blokken.
 4. Volledig uitgewerkte virtuele proefsleufprofielen (de geometriebasis is aanwezig), MarXact, **compatibiliteit met Python-projectopslag**, migratie van bestaande instellingen en volledig back-upherstel.
 5. Gebruikersinstelbare discipline-regels, installatiepakket en volledige migratietests.

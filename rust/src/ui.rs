@@ -8,6 +8,8 @@ use sleufbase_rust::{
 };
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
+use sleufbase_rust::pdok_wms::{self, PdokRaster};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
 use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
 use sleufbase_rust::project::{
@@ -47,6 +49,10 @@ pub struct SleufBaseApp {
     virtual_trenches: Vec<VirtualTrench>,
     show_trench_dialog: bool,
     trench_form:TrenchForm,
+    pdok_texture:Option<egui::TextureHandle>,
+    pdok_bounds:Option<Bounds>,
+    pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
+    pdok_busy:bool,
     active_only: bool,
     selected: Option<usize>,
     query: String,
@@ -70,6 +76,10 @@ impl Default for SleufBaseApp {
             virtual_trenches:Vec::new(),
             show_trench_dialog:false,
             trench_form:TrenchForm::default(),
+            pdok_texture:None,
+            pdok_bounds:None,
+            pdok_rx:None,
+            pdok_busy:false,
             active_only:false,
             selected:None,
             query:String::new(),
@@ -104,6 +114,10 @@ impl SleufBaseApp {
         self.raster_textures.clear();
         self.overlays.clear();
         self.virtual_trenches.clear();
+        self.pdok_texture=None;
+        self.pdok_bounds=None;
+        self.pdok_rx=None;
+        self.pdok_busy=false;
         self.selected=None;
         self.project_path=None;
         self.project_name="Naamloos project".into();
@@ -122,6 +136,10 @@ impl SleufBaseApp {
                 self.raster_textures=textures;
                 self.overlays=doc.overlays;
                 self.virtual_trenches=doc.virtual_trenches;
+                self.pdok_texture=None;
+                self.pdok_bounds=None;
+                self.pdok_rx=None;
+                self.pdok_busy=false;
                 self.project_name=doc.name;
                 self.selected=(!self.datasets.is_empty()).then_some(0);
                 self.project_path=Some(path.clone());
@@ -229,6 +247,72 @@ impl SleufBaseApp {
         self.message=format!("{added} DXF-overlays geladen. {}",failures.join("; "));
     }
 
+
+    fn current_bounds(&self)->Option<Bounds> {
+        let mut bounds=Bounds::from_datasets(&self.datasets);
+        for raster in &self.geotiffs {bounds=union_bounds(bounds,Some(raster.bounds));}
+        for overlay in self.overlays.iter().filter(|o|o.visible) {
+            bounds=union_bounds(bounds,overlay.bounds());
+        }
+        for t in &self.virtual_trenches {
+            bounds=union_bounds(bounds,Some(Bounds{
+                min_x:t.start.x.min(t.end.x)-t.width_meters,
+                min_y:t.start.y.min(t.end.y)-t.width_meters,
+                max_x:t.start.x.max(t.end.x)+t.width_meters,
+                max_y:t.start.y.max(t.end.y)+t.width_meters
+            }));
+        }
+        bounds
+    }
+
+    fn start_pdok(&mut self) {
+        if self.pdok_busy {return;}
+        if self.geotiffs.iter().any(|i|i.epsg.is_some_and(|epsg|epsg!=28992)) {
+            self.message="PDOK luchtfoto is RD (EPSG:28992). Transformeer afwijkende GeoTIFF eerst.".into();
+            return;
+        }
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad eerst een RD-kaartlaag om de PDOK-luchtfoto op te halen".into();
+            return;
+        };
+        let (sender,receiver)=mpsc::channel();
+        self.pdok_rx=Some(receiver);
+        self.pdok_busy=true;
+        self.message="PDOK-luchtfoto wordt rechtstreeks vanuit Rust geladen".into();
+        std::thread::spawn(move||{
+            let result=pdok_wms::request_map(bounds,1200,900);
+            let _=sender.send(result);
+        });
+    }
+
+    fn poll_pdok(&mut self,ctx:&egui::Context) {
+        let state=self.pdok_rx.as_ref().map(|rx|rx.try_recv());
+        match state {
+            Some(Ok(Ok(raster)))=>{
+                let image=egui::ColorImage::from_rgba_unmultiplied(
+                    [raster.width as usize,raster.height as usize],&raster.rgba
+                );
+                self.pdok_texture=Some(ctx.load_texture(
+                    "PDOK Actueel_orthoHR",image,egui::TextureOptions::LINEAR));
+                self.pdok_bounds=Some(raster.bounds);
+                self.pdok_busy=false;
+                self.pdok_rx=None;
+                self.message="PDOK-luchtfoto geladen".into();
+            }
+            Some(Ok(Err(err)))=>{
+                self.pdok_busy=false;
+                self.pdok_rx=None;
+                self.message=format!("PDOK-luchtfoto mislukt: {err}");
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.pdok_busy=false;
+                self.pdok_rx=None;
+                self.message="PDOK-verzoek onverwacht afgebroken".into();
+            }
+            _=>{}
+        }
+    }
+
     fn active_job_ids(&self) -> std::collections::BTreeSet<u64> {
         let now=SystemTime::now().duration_since(UNIX_EPOCH)
             .map(|d|d.as_secs_f64()).unwrap_or(0.0);
@@ -314,6 +398,8 @@ fn canvas(
     textures:&[Option<egui::TextureHandle>],
     overlays:&[DxfOverlay],
     virtual_trenches:&[VirtualTrench],
+    pdok_texture:Option<&egui::TextureHandle>,
+    pdok_bounds:Option<Bounds>,
     zoom:&mut f64,
     pan:&mut egui::Vec2
 ) {
@@ -322,7 +408,7 @@ fn canvas(
     let painter=ui.painter_at(rect);
     painter.rect_filled(rect,5.0,Color32::from_rgb(250,251,253));
 
-    let mut bounds=Bounds::from_datasets(datasets);
+    let mut bounds=union_bounds(Bounds::from_datasets(datasets),pdok_bounds);
     for raster in rasters {
         bounds=union_bounds(bounds,Some(raster.bounds));
     }
@@ -366,6 +452,22 @@ fn canvas(
         center.y-((y-cy)*scale) as f32
     );
     painter.add(egui::Shape::rect_filled(rect,0.0,Color32::TRANSPARENT));
+
+    if let (Some(texture),Some(b))=(pdok_texture,pdok_bounds) {
+        let mut mesh=egui::Mesh::with_texture(texture.id());
+        for (x,y,u,v) in [
+            (b.min_x,b.max_y,0.0f32,0.0f32),
+            (b.max_x,b.max_y,1.0,0.0),
+            (b.max_x,b.min_y,1.0,1.0),
+            (b.min_x,b.min_y,0.0,1.0)
+        ] {
+            mesh.vertices.push(egui::epaint::Vertex {
+                pos:project(x,y),uv:Pos2::new(u,v),color:Color32::WHITE
+            });
+        }
+        mesh.indices.extend_from_slice(&[0,1,2,0,2,3]);
+        painter.add(egui::Shape::mesh(mesh));
+    }
     for (raster,texture) in rasters.iter().zip(textures.iter()) {
         if let Some(texture)=texture {
             let corners=[
@@ -443,6 +545,7 @@ impl eframe::App for SleufBaseApp {
     fn update(&mut self,ctx:&egui::Context,_frame:&mut eframe::Frame) {
         ctx.set_visuals(egui::Visuals::light());
         self.try_autosave();
+        self.poll_pdok(ctx);
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -474,6 +577,7 @@ impl eframe::App for SleufBaseApp {
                     {self.load_geotiffs(files,ctx);}
                 }
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
+                if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
                         .add_filter("AutoCAD DXF",&["dxf"]).pick_files()
@@ -556,7 +660,9 @@ impl eframe::App for SleufBaseApp {
             let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&self.virtual_trenches,&mut self.zoom,&mut self.pan);
+                &self.overlays,&self.virtual_trenches,
+                self.pdok_texture.as_ref(),self.pdok_bounds,
+                &mut self.zoom,&mut self.pan);
         });
 
         if self.show_trench_dialog {
