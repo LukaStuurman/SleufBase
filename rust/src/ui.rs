@@ -13,6 +13,7 @@ const INK: Color32 = Color32::from_rgb(17, 24, 39);
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
+    raster_textures: Vec<Option<egui::TextureHandle>>,
     active_only: bool,
     selected: Option<usize>,
     query: String,
@@ -41,13 +42,35 @@ impl SleufBaseApp {
         };
     }
 
-    fn load_geotiffs(&mut self, paths: Vec<PathBuf>) {
+    fn load_geotiffs(&mut self, paths: Vec<PathBuf>, ctx: &egui::Context) {
         let mut failures = Vec::new();
         let mut added = 0;
         for path in paths {
             if self.geotiffs.iter().any(|info| info.path == path) { continue; }
             match read_geotiff_metadata(&path) {
-                Ok(info) => { self.geotiffs.push(info); added += 1; }
+                Ok(info) => {
+                    let texture = match sleufbase_rust::raster::decode_tiff_preview(&path) {
+                        Ok((w, h, rgba)) => {
+                            let image=egui::ColorImage::from_rgba_unmultiplied(
+                                [w as usize, h as usize], &rgba
+                            );
+                            Some(ctx.load_texture(
+                                path.to_string_lossy(), image,
+                                egui::TextureOptions::LINEAR
+                            ))
+                        }
+                        Err(err) => {
+                            failures.push(format!(
+                                "{}: metadata geladen maar geen rasterpreview: {err}",
+                                path.display()
+                            ));
+                            None
+                        }
+                    };
+                    self.geotiffs.push(info);
+                    self.raster_textures.push(texture);
+                    added += 1;
+                }
                 Err(e) => failures.push(format!("{}: {e}", path.display())),
             }
         }
@@ -95,12 +118,24 @@ impl SleufBaseApp {
     }
 }
 
-fn canvas(ui: &mut egui::Ui, datasets: &[Dataset]) {
+fn canvas(ui: &mut egui::Ui, datasets: &[Dataset], geotiffs: &[GeoTiffInfo], textures: &[Option<egui::TextureHandle>]) {
     let desired = ui.available_size();
     let (rect, _) = ui.allocate_exact_size(desired, egui::Sense::hover());
     let painter = ui.painter_at(rect);
     painter.rect_filled(rect, 5.0, Color32::from_rgb(250, 251, 253));
-    let Some(bounds) = Bounds::from_datasets(datasets) else {
+    let mut total = Bounds::from_datasets(datasets);
+    for raster in geotiffs {
+        total = Some(match total {
+            Some(b) => Bounds {
+                min_x:b.min_x.min(raster.bounds.min_x),
+                min_y:b.min_y.min(raster.bounds.min_y),
+                max_x:b.max_x.max(raster.bounds.max_x),
+                max_y:b.max_y.max(raster.bounds.max_y),
+            },
+            None => raster.bounds,
+        });
+    }
+    let Some(bounds) = total else {
         painter.text(rect.center(), egui::Align2::CENTER_CENTER,
             "Open een jobFeatures.json om objecten te bekijken",
             egui::FontId::proportional(17.0), INK);
@@ -117,6 +152,28 @@ fn canvas(ui: &mut egui::Ui, datasets: &[Dataset]) {
     let project = |v: &Vertex| -> Pos2 {
         Pos2::new((offset_x + v.x * scale) as f32, (offset_y - v.y * scale) as f32)
     };
+    for (raster, texture) in geotiffs.iter().zip(textures.iter()) {
+        if let Some(texture) = texture {
+            let tr = raster.transform;
+            let corners = [
+                (0.0, 0.0, 0.0, 0.0),
+                (f64::from(raster.width), 0.0, 1.0, 0.0),
+                (f64::from(raster.width), f64::from(raster.height), 1.0, 1.0),
+                (0.0, f64::from(raster.height), 0.0, 1.0)
+            ];
+            let mut mesh=egui::Mesh::with_texture(texture.id());
+            for (col,row,u,v) in corners {
+                let (x,y)=tr.pixel_to_world(col,row);
+                mesh.vertices.push(egui::epaint::Vertex {
+                    pos: Pos2::new((offset_x+x*scale) as f32, (offset_y-y*scale) as f32),
+                    uv: Pos2::new(u as f32,v as f32),
+                    color:Color32::WHITE,
+                });
+            }
+            mesh.indices.extend_from_slice(&[0,1,2,0,2,3]);
+            painter.add(egui::Shape::mesh(mesh));
+        }
+    }
     for dataset in datasets {
         for feature in &dataset.features {
             let color = match sleufbase_rust::matching_rule(&feature.source_name, RULES) {
@@ -166,7 +223,7 @@ impl eframe::App for SleufBaseApp {
                 if ui.button("Open GeoTIFF").clicked() {
                     if let Some(files) = rfd::FileDialog::new()
                         .add_filter("GeoTIFF", &["tif", "tiff"])
-                        .pick_files() { self.load_geotiffs(files); }
+                        .pick_files() { self.load_geotiffs(files, ctx); }
                 }
                 if ui.button("Excel disciplines").clicked() { self.save_excel(); }
                 if ui.button("DXF objecten").clicked() { self.save_dxf(); }
@@ -234,10 +291,10 @@ impl eframe::App for SleufBaseApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Kaartvoorbeeld van lokale objectgegevens");
-            ui.label("Objectenweergave zonder raster-ondergrond. GeoTIFF-tags worden ingelezen, afbeeldingsrendering volgt.");
+            ui.label("GeoTIFF-preview toont 8-bit raster tot 16 miljoen pixels; overige rasterformaten en kaartbronnen volgen.");
             let selected: Vec<Dataset> = self.selected.and_then(|i| self.datasets.get(i))
                 .into_iter().cloned().collect();
-            canvas(ui, &selected);
+            canvas(ui, &selected, &self.geotiffs, &self.raster_textures);
         });
     }
 }

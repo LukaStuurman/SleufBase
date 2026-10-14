@@ -9,7 +9,7 @@
 | Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
 | Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
 | Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Ontbreekt | Onderbreking en restore-tests |
-| GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata deels | Werkelijke pixels/kleuren, GeoTIFF-piramides, alpha, huge files |
+| GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
 | GeoTIFF RD-referentie, rotatie en transformaties | models.py, geotiff.py | Affine kern gereed, niet UI-getest | RD coördinaten en overlay-match op fixtures |
 | PDOK luchtfoto en kwaliteitsopties | pdok.py, pdok_default_background_patch.py | Ontbreekt | Source-switch/cache/retry en standaardgedrag |
 | BGT kaart en alle API-bronnen | bgt_roadpart.py, bgt_terrain_boundary.py, bgt_vector_tiles.py, cadastral_wfs.py | Ontbreekt | Geometrie, caching, stijlen, WFS/foutgevallen |
