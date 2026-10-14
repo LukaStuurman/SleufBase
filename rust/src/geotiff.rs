@@ -12,7 +12,7 @@ use tiff::tags::Tag;
 
 pub const MAX_GEOTIFF_PIXELS: u64 = 150_000_000;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct GeoTiffInfo {
     pub path: PathBuf,
     pub width: u32,

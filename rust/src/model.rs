@@ -1,19 +1,19 @@
 use std::path::PathBuf;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Vertex {
     pub x: f64,
     pub y: f64,
     pub z: Option<f64>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Geometry {
     Point(Vertex),
     Polyline(Vec<Vertex>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Feature {
     pub object_name: String,
     pub source_name: String,
@@ -29,7 +29,7 @@ pub struct Dataset {
     pub features: Vec<Feature>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct Bounds {
     pub min_x: f64,
     pub min_y: f64,

@@ -7,15 +7,15 @@
 | Onderdeel | Bestaande Python-bron | Rust status | Acceptatie-eis voor volwaardige vervanging |
 |---|---|---|---|
 | Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
-| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
-| Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Ontbreekt | Onderbreking en restore-tests |
+| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Eigen Rust-projectopslag; Python-compatibiliteit ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
+| Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Automatische roterende Rust-backup; restore-dialoog ontbreekt | Onderbreking en restore-tests |
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
 | GeoTIFF RD-referentie, rotatie en transformaties | models.py, geotiff.py | Affine kern gereed, niet UI-getest | RD coördinaten en overlay-match op fixtures |
 | PDOK luchtfoto en kwaliteitsopties | pdok.py, pdok_default_background_patch.py | Ontbreekt | Source-switch/cache/retry en standaardgedrag |
 | BGT kaart en alle API-bronnen | bgt_roadpart.py, bgt_terrain_boundary.py, bgt_vector_tiles.py, cadastral_wfs.py | Ontbreekt | Geometrie, caching, stijlen, WFS/foutgevallen |
 | Kaarttegels, OpenStreetMap, lokale cache | web_tiles.py, osm.py | Ontbreekt | Identieke rendering, limieten en offline-fallback |
 | AHN, maaiveld en AI-assistent | ahn.py, ai_maaiveld.py, vllm_runtime.py | Ontbreekt | Geldige meetwaarden, foutafhandeling en AI-fallback |
-| DXF import, bestaande blokken, metadata | dxf.py | Ontbreekt | Kleur, laag, attributen, geometrie, XDATA |
+| DXF import, bestaande blokken, metadata | dxf.py | ASCII basis deels | Kleur, laag, attributen, geometrie, XDATA |
 | DXF objectexport (basis) | kickthemap_dxf_export.py | Deels | Volledige layer rules/XDATA/labels/polyline/tekstpariteit |
 | Volledige kadastrale/template DXF export | cadastral_export.py, dxf_template_pipeline_* | Ontbreekt | Identieke output op regressie-fixtures, inclusief fonts en block/visibility |
 | Dwarsprofielen, omgekeerde profielen en labels | template_reverse_patch.py, template_dynamic_profile_leader_patch.py | Ontbreekt | Gelijkwaardige geometrie, labelplaatsing en snapshots |
@@ -43,3 +43,5 @@
 6. Geen productie-release of merge naar main enkel omdat Rust-tests groen zijn.
 
 De bestaande Windows-versie v0.3.62 blijft leidend totdat al deze voorwaarden aantoonbaar gehaald zijn.
+
+**Let op:** De Rust-projectbestanden zijn niet uitwisselbaar met de bestaande Python-projectbestanden. Geen conversie of overschrijving zonder expliciete verificatie.

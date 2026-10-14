@@ -2,7 +2,7 @@
 
 use crate::model::Bounds;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct GeoTransform {
     pub a: f64,
     pub b: f64,
