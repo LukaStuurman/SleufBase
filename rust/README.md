@@ -14,6 +14,8 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Basis DXF R12 export met kruizen voor punten en LINE-segmenten voor polylijnen per discipline.
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
+- GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen (raster-weergave ontbreekt).
+- Actieve KickTheMap-job-ID's read-only herkennen vanuit de Python-SleufBase heartbeat van maximaal 6 seconden oud.
 
 ## Bouwen en starten op Windows
 
@@ -35,10 +37,12 @@ Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
 Nieuwe uitvoerbestandsnaam verplicht. De GUI exporteert alle lokaal geladen JSON-bestanden.
 Selectie van een job wijzigt alleen het kaartvoorbeeld en de details, niet de export.
 
+Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releasecriteria.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
-2. GeoTIFF, PDOK, BGT, WFS, AHN, StreetSmart, caching en kaartreprojectie.
+2. GeoTIFF-rasterweergave, PDOK, BGT, WFS, AHN, StreetSmart, caching en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonexport inclusief profielen, raster, foto's en blokken.
 4. Virtuele proefsleuven, MarXact, projectopslag, backups en bestaande instellingen.
 5. Gebruikersinstelbare discipline-regels, installatiepakket en volledige migratietests.

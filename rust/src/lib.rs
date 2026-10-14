@@ -2,6 +2,9 @@
 //! The historical Python application remains unchanged until parity is reached.
 
 pub mod disciplines;
+pub mod geo;
+pub mod geotiff;
+pub mod loaded_jobs;
 pub mod export;
 pub mod model;
 pub mod parse;

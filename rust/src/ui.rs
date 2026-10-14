@@ -1,6 +1,9 @@
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use sleufbase_rust::{load_job_features, write_dxf, write_xlsx, Bounds, Dataset, Geometry, Vertex, RULES};
 use std::path::PathBuf;
+use sleufbase_rust::geotiff::{GeoTiffInfo, read_geotiff_metadata};
+use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -9,6 +12,8 @@ const INK: Color32 = Color32::from_rgb(17, 24, 39);
 #[derive(Default)]
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
+    geotiffs: Vec<GeoTiffInfo>,
+    active_only: bool,
     selected: Option<usize>,
     query: String,
     message: String,
@@ -34,6 +39,31 @@ impl SleufBaseApp {
         } else {
             format!("{added} geladen, {} fouten: {}", failures.len(), failures.join("; "))
         };
+    }
+
+    fn load_geotiffs(&mut self, paths: Vec<PathBuf>) {
+        let mut failures = Vec::new();
+        let mut added = 0;
+        for path in paths {
+            if self.geotiffs.iter().any(|info| info.path == path) { continue; }
+            match read_geotiff_metadata(&path) {
+                Ok(info) => { self.geotiffs.push(info); added += 1; }
+                Err(e) => failures.push(format!("{}: {e}", path.display())),
+            }
+        }
+        self.message = if failures.is_empty() {
+            format!("{added} geogerefereerde TIFF-bestand(en) herkend")
+        } else {
+            format!("{added} herkend, fouten: {}", failures.join("; "))
+        };
+    }
+
+    fn active_job_ids(&self) -> std::collections::BTreeSet<u64> {
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs_f64()).unwrap_or(0.0);
+        read_active_loaded_job_ids(
+            &kickthemap_cache_dir().join("active_loaded_jobs.json"), now
+        )
     }
 
     fn save_excel(&mut self) {
@@ -133,6 +163,11 @@ impl eframe::App for SleufBaseApp {
                         .add_filter("KickTheMap JSON", &["json"])
                         .pick_files() { self.load_files(files); }
                 }
+                if ui.button("Open GeoTIFF").clicked() {
+                    if let Some(files) = rfd::FileDialog::new()
+                        .add_filter("GeoTIFF", &["tif", "tiff"])
+                        .pick_files() { self.load_geotiffs(files); }
+                }
                 if ui.button("Excel disciplines").clicked() { self.save_excel(); }
                 if ui.button("DXF objecten").clicked() { self.save_dxf(); }
             });
@@ -144,6 +179,11 @@ impl eframe::App for SleufBaseApp {
 
         egui::SidePanel::left("jobs").default_width(300.0).min_width(230.0).show(ctx, |ui| {
             ui.heading("Ingeladen proefsleuven");
+            ui.checkbox(&mut self.active_only, "Alleen in actieve Python-SleufBase");
+            if self.active_only {
+                ui.label("Leest de actuele KickTheMap-heartbeat, max. 6 seconden oud.");
+            }
+            let active_ids = self.active_job_ids();
             ui.label("Alleen lokaal geladen jobs worden getoond.");
             ui.add_space(6.0);
             ui.text_edit_singleline(&mut self.query);
@@ -151,6 +191,9 @@ impl eframe::App for SleufBaseApp {
             ui.separator();
             egui::ScrollArea::vertical().show(ui, |ui| {
                 for (index, dataset) in self.datasets.iter().enumerate() {
+                    if self.active_only && !active_ids.contains(&dataset.job_id) {
+                        continue;
+                    }
                     let search = self.query.trim().to_lowercase();
                     if !search.is_empty()
                         && !dataset.title.to_lowercase().contains(&search)
@@ -159,6 +202,18 @@ impl eframe::App for SleufBaseApp {
                     if ui.selectable_label(self.selected == Some(index), label).clicked() {
                         self.selected = Some(index);
                     }
+                }
+            });
+            ui.separator();
+            ui.heading("GeoTIFF-bestanden");
+            egui::ScrollArea::vertical().max_height(140.0).show(ui, |ui| {
+                for info in &self.geotiffs {
+                    ui.label(info.path.file_name().and_then(|x| x.to_str()).unwrap_or("TIFF"));
+                    ui.small(format!("{} x {} px, EPSG {}, job {}",
+                        info.width, info.height,
+                        info.epsg.map(|i| i.to_string()).unwrap_or_else(|| "?".into()),
+                        info.kickthemap_job_id.map(|i| i.to_string()).unwrap_or_else(|| "?".into())
+                    ));
                 }
             });
             ui.separator();
@@ -179,7 +234,7 @@ impl eframe::App for SleufBaseApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Kaartvoorbeeld van lokale objectgegevens");
-            ui.label("Schematische weergave zonder ondergrond. RD-/GPS-projectie wordt nog niet geconverteerd.");
+            ui.label("Objectenweergave zonder raster-ondergrond. GeoTIFF-tags worden ingelezen, afbeeldingsrendering volgt.");
             let selected: Vec<Dataset> = self.selected.and_then(|i| self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui, &selected);
