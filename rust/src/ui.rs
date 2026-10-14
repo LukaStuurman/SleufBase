@@ -9,6 +9,7 @@ use sleufbase_rust::{
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
+use sleufbase_rust::jobs_cache::{read_cache,JobsCache};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
 use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
@@ -53,6 +54,9 @@ pub struct SleufBaseApp {
     pdok_bounds:Option<Bounds>,
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
     pdok_busy:bool,
+    jobs_cache:Option<JobsCache>,
+    jobs_query:String,
+    only_active_cached:bool,
     active_only: bool,
     selected: Option<usize>,
     query: String,
@@ -80,6 +84,9 @@ impl Default for SleufBaseApp {
             pdok_bounds:None,
             pdok_rx:None,
             pdok_busy:false,
+            jobs_cache:None,
+            jobs_query:String::new(),
+            only_active_cached:false,
             active_only:false,
             selected:None,
             query:String::new(),
@@ -310,6 +317,23 @@ impl SleufBaseApp {
                 self.message="PDOK-verzoek onverwacht afgebroken".into();
             }
             _=>{}
+        }
+    }
+
+
+    fn open_cached_jobs(&mut self) {
+        let dir=kickthemap_cache_dir().join("jobs_cache");
+        if let Some(path)=rfd::FileDialog::new().set_directory(&dir)
+            .add_filter("KickTheMap jobcache",&["json"]).pick_file()
+        {
+            match read_cache(&path) {
+                Ok(cache)=>{
+                    self.message=format!("Offline KickTheMap-cache: {} jobs, {} overgeslagen. Niet live.",
+                        cache.jobs.len(),cache.skipped);
+                    self.jobs_cache=Some(cache);
+                }
+                Err(err)=>self.message=format!("Jobcache ongeldig: {err}")
+            }
         }
     }
 
@@ -577,6 +601,7 @@ impl eframe::App for SleufBaseApp {
                     {self.load_geotiffs(files,ctx);}
                 }
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
+                if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
@@ -627,6 +652,25 @@ impl eframe::App for SleufBaseApp {
                         info.kickthemap_job_id.map(|v|v.to_string()).unwrap_or_else(||"?".into())));
                 }
             });
+            ui.separator();
+
+            if let Some(cache)=&self.jobs_cache {
+                ui.separator();
+                ui.heading("KickTheMap jobs (offline cache)");
+                ui.small(format!("{} jobs, opgeslagen op {:.0} (Unix)",cache.jobs.len(),cache.saved_at));
+                ui.checkbox(&mut self.only_active_cached,"Alleen actief geladen");
+                ui.text_edit_singleline(&mut self.jobs_query);
+                let needle=self.jobs_query.trim().to_lowercase();
+                egui::ScrollArea::vertical().max_height(130.0).show(ui,|ui|{
+                    for job in cache.jobs.iter().filter(|j|{
+                        (!self.only_active_cached||active_ids.contains(&j.job_id)) &&
+                        (needle.is_empty()||j.title.to_lowercase().contains(&needle)||
+                            j.job_id.to_string().contains(&needle))
+                    }) {
+                        ui.label(format!("{}: {} ({})",job.job_id,job.title,job.municipality));
+                    }
+                });
+            }
             ui.separator();
             ui.heading("Virtuele proefsleuven");
             for trench in &self.virtual_trenches {

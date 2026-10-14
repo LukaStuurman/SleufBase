@@ -62,6 +62,12 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - De ingebouwde luchtfotolaag wordt op juiste geografische locatie als kaartondergrond getoond.
 - **Nog geen** volledig tegelsysteem, WMTS, BGT, offline cache of schaalafhankelijke WMS-tiling.
 
+## Offline KickTheMap jobcache
+
+- Rust leest bestaande lokale Python-SleufBase `jobs_cache/<email>.json` bestanden zonder wachtwoorden/cookies te lezen.
+- Zoek en filter met de betrouwbare actief-geladen-job heartbeat (Python-live status maximaal 6 sec).
+- De cachestand is expliciet **niet live**; de online KickTheMap login, jobs API en downloaden moeten nog native worden overgezet.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
