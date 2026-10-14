@@ -74,6 +74,13 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Opmerkingen worden opgenomen in het eigen Rust-project en herstellen bij openen van dat project.
 - ASCII DXF POLYLINE-geometrie respecteert gesloten polyline-bit uit de POLYLINE-header.
 
+## Instellingen veilig overzetten
+
+- Via **Import oude voorkeuren** kan een lokaal oud SleufBase instellingen-JSON gekozen worden.
+- Alleen expliciet ondersteunde niet-gevoelige sleutels (BGT-/Excelopties, materiaal- en profielenlijst, MarXact-mappings) worden gelezen en opgeslagen.
+- KickTheMap-wachtwoorden, sessiegegevens en tokens worden bewust NIET gekopieerd.
+- In de Rust-instellingen kun je automatische back-ups instellen (1–1440 minuten, 1–200 bestanden). De opties voor volledige DXF-sjablonen zijn voorbereid maar pas functioneel wanneer die uitvoer ook naar Rust is overgezet.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

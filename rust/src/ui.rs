@@ -10,6 +10,7 @@ use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::jobs_cache::{read_cache,JobsCache};
+use sleufbase_rust::settings_compat::{self,MigratedSettings};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
 use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
@@ -62,6 +63,8 @@ pub struct SleufBaseApp {
     jobs_query:String,
     comments:Vec<Comment>,
     show_comment_dialog:bool,
+    show_settings_dialog:bool,
+    migrated_settings:MigratedSettings,
     comment_form:CommentForm,
     only_active_cached:bool,
     active_only: bool,
@@ -95,6 +98,9 @@ impl Default for SleufBaseApp {
             jobs_query:String::new(),
             comments:Vec::new(),
             show_comment_dialog:false,
+            show_settings_dialog:false,
+            migrated_settings:settings_compat::load_rust_settings(
+                &project::app_data_directory().join("settings.json")),
             comment_form:CommentForm::default(),
             only_active_cached:false,
             active_only:false,
@@ -333,6 +339,27 @@ impl SleufBaseApp {
         }
     }
 
+
+
+    fn import_old_settings(&mut self) {
+        if let Some(path)=rfd::FileDialog::new()
+            .add_filter("Instellingen JSON",&["json"]).pick_file()
+        {
+            match settings_compat::import_legacy_file(&path) {
+                Ok(config)=>{
+                    let output=project::app_data_directory().join("settings.json");
+                    match settings_compat::save_rust_settings(&output,&config) {
+                        Ok(())=>{
+                            self.migrated_settings=config;
+                            self.message="Instellingenopties overgenomen. Wachtwoorden/tokens zijn NIET geïmporteerd.".into();
+                        }
+                        Err(err)=>self.message=format!("Rust-instellingen niet opgeslagen: {err}")
+                    }
+                }
+                Err(err)=>self.message=format!("Instellingen-import mislukt: {err}")
+            }
+        }
+    }
 
     fn open_cached_jobs(&mut self) {
         let dir=kickthemap_cache_dir().join("jobs_cache");
@@ -614,6 +641,8 @@ impl eframe::App for SleufBaseApp {
                 }
                 if ui.button("Opslaan").clicked() {self.save_project_file(false);}
                 if ui.button("Opslaan als...").clicked() {self.save_project_file(true);}
+                if ui.button("Instellingen").clicked() {self.show_settings_dialog=true;}
+                if ui.button("Import oude voorkeuren").clicked() {self.import_old_settings();}
             });
             ui.horizontal(|ui|{
                 if ui.button("Open jobFeatures.json").clicked() {
@@ -809,6 +838,49 @@ impl eframe::App for SleufBaseApp {
                     self.show_comment_dialog=false;
                     self.comment_form.text.clear();
                 } else {self.message="Geef geldige RD-coördinaten en tekst op".into();}
+            }
+        }
+
+
+        if self.show_settings_dialog {
+            let mut show=self.show_settings_dialog;
+            let mut save=false;
+            egui::Window::new("SleufBase Rust-instellingen")
+                .open(&mut show).resizable(false).show(ctx,|ui|{
+                ui.strong("Veilige, eigen Rust-instellingen");
+                ui.checkbox(&mut self.migrated_settings.template_auto_fill_bgt_fysiek_voorkomen,
+                    "BGT fysiek voorkomen automatisch aanvullen (voorbereid)");
+                ui.checkbox(&mut self.migrated_settings.template_auto_export_discipline_excel,
+                    "Excel automatisch bij template-DXF (voorbereid)");
+                ui.separator();
+                ui.checkbox(&mut self.backup_settings.enabled,"Automatische projectback-ups");
+                ui.horizontal(|ui|{
+                    ui.label("Interval (minuten)");
+                    ui.add(egui::DragValue::new(&mut self.backup_settings.interval_minutes)
+                        .range(1..=1440));
+                });
+                ui.horizontal(|ui|{
+                    ui.label("Maximaal aantal back-ups");
+                    ui.add(egui::DragValue::new(&mut self.backup_settings.max_backups)
+                        .range(1..=200));
+                });
+                ui.label(format!("{} extra materiaalkeuzes",self.migrated_settings.kickthemap_material_choices.len()));
+                if ui.button("Instellingen opslaan").clicked() {save=true;}
+            });
+            self.show_settings_dialog=show;
+            if save {
+                let a=settings_compat::save_rust_settings(
+                    &project::app_data_directory().join("settings.json"),
+                    &self.migrated_settings);
+                let b=project::write_autosave_settings(
+                    &project::app_data_directory().join("autosave-settings.json"),
+                    &self.backup_settings);
+                self.message=if a.is_ok()&&b.is_ok() {
+                    "Rust-instellingen opgeslagen".into()
+                } else {
+                    format!("Instellingen niet volledig opgeslagen: {a:?}; {b:?}")
+                };
+                self.show_settings_dialog=false;
             }
         }
 

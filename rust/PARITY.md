@@ -29,7 +29,7 @@
 | Virtuele proefsleuven/profielen | virtual_trench.py, virtual_trench_template_patch.py | Basisgeometrie en aanmaak, profielen nog niet | Plaatsen, maatvoering, kettingmaat, export |
 | MarXact import, snapping, metingen | marxact_*.py | Ontbreekt | Identieke CSV/point mapping, modeltransformaties, grenzen |
 | Cyclomedia/StreetSmart | cyclomedia.py, streetsmart*.py | Ontbreekt | Browser, selectie, overdracht/extern auth |
-| Instellingen en oude voorkeuren | settings.py, settings_ui.py, settings_* | Ontbreekt | Migratie van bestaande settings zonder wachtwoordverlies |
+| Instellingen en oude voorkeuren | settings.py, settings_ui.py, settings_* | Niet-gevoelige instellingenimport en autosave-config, volledige opties ontbreken | Migratie van bestaande settings zonder wachtwoordverlies |
 | Performance voor grote jobs / lage hardware | resource_policy.py, kickthemap_scalability_patch.py, renderer.py | Niet gemeten | Zelfde of betere stabiliteit op benchmark datasets |
 | Portable EXE, Windows installer, updates, signing | installer/, .github/workflows/build-windows-exe.yml | Alleen CI preview EXE | Installer, portable, upgrade/rollback en release integriteit |
 
