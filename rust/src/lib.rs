@@ -14,6 +14,7 @@ pub mod jobs_cache;
 pub mod kickthemap_live;
 pub mod bgt;
 pub mod ahn;
+pub mod marxact;
 pub mod settings_compat;
 pub mod export;
 pub mod model;

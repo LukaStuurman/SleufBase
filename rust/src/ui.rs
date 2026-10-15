@@ -8,6 +8,7 @@ use sleufbase_rust::{
 };
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
+use sleufbase_rust::marxact;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
 use sleufbase_rust::ahn;
@@ -336,6 +337,33 @@ impl SleufBaseApp {
         self.message=format!("{added} GeoTIFF-bestanden geladen. {}",warnings.join("; "));
     }
 
+    fn import_marxact(&mut self, paths:Vec<PathBuf>) {
+        let mut total=0usize;
+        let mut assigned=0usize;
+        let mut errors=Vec::new();
+        for path in paths {
+            if self.virtual_trenches.iter().any(|t|
+                t.source_path.as_deref()==Some(path.as_path())
+                && !t.boundary_3d.is_empty()) {
+                errors.push(format!("{}: dit MarXact-bestand is al geïmporteerd",path.display()));
+                continue;
+            }
+            match marxact::import_dxf(&path,&self.migrated_settings.marxact_name_mappings) {
+                Ok(result) => {
+                    total+=result.trenches.len();
+                    assigned+=result.assigned_insert_count;
+                    self.virtual_trenches.extend(result.trenches);
+                },
+                Err(err)=>errors.push(format!("{}: {err}",path.display()))
+            }
+        }
+        if total>0 {self.dirty=true;self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
+        self.message=format!(
+            "MarXact: {total} proefsleuven, {assigned} objecten ingelezen. {}",
+            errors.join("; ")
+        );
+    }
+
     fn load_overlays(&mut self, paths:Vec<PathBuf>) {
         let mut added=0;
         let mut failures=Vec::new();
@@ -358,12 +386,11 @@ impl SleufBaseApp {
             bounds=union_bounds(bounds,overlay.bounds());
         }
         for t in &self.virtual_trenches {
-            bounds=union_bounds(bounds,Some(Bounds{
-                min_x:t.start.x.min(t.end.x)-t.width_meters,
-                min_y:t.start.y.min(t.end.y)-t.width_meters,
-                max_x:t.start.x.max(t.end.x)+t.width_meters,
-                max_y:t.start.y.max(t.end.y)+t.width_meters
-            }));
+            for (x,y) in t.measured_boundary() {
+                bounds=union_bounds(bounds,Some(Bounds{
+                    min_x:x-0.01,min_y:y-0.01,max_x:x+0.01,max_y:y+0.01
+                }));
+            }
         }
         bounds
     }
@@ -786,12 +813,11 @@ fn canvas(
         }));
     }
     for t in virtual_trenches {
-        bounds=union_bounds(bounds,Some(Bounds {
-            min_x:t.start.x.min(t.end.x)-t.width_meters,
-            min_y:t.start.y.min(t.end.y)-t.width_meters,
-            max_x:t.start.x.max(t.end.x)+t.width_meters,
-            max_y:t.start.y.max(t.end.y)+t.width_meters,
-        }));
+        for (x,y) in t.measured_boundary() {
+            bounds=union_bounds(bounds,Some(Bounds{
+                min_x:x-0.01,min_y:y-0.01,max_x:x+0.01,max_y:y+0.01
+            }));
+        }
     }
     let Some(bounds)=bounds else {
         painter.text(rect.center(),egui::Align2::CENTER_CENTER,
@@ -864,10 +890,12 @@ fn canvas(
             &note.text,egui::FontId::proportional(13.0),INK);
     }
     for trench in virtual_trenches {
-        let vertices=trench.polygon();
-        for i in 0..4 {
-            let a=vertices[i]; let b=vertices[(i+1)%4];
-            painter.line_segment([project(a.0,a.1),project(b.0,b.1)],Stroke::new(1.5,ORANGE));
+        let vertices=trench.measured_boundary();
+        for pair in vertices.windows(2) {
+            painter.line_segment([
+                project(pair[0].0,pair[0].1),
+                project(pair[1].0,pair[1].1)
+            ],Stroke::new(1.5,ORANGE));
         }
     }
     for layer in bgt_layers.iter().filter(|l|l.visible) {
@@ -985,6 +1013,11 @@ impl eframe::App for SleufBaseApp {
                 }
                 if ui.add_enabled(!self.ahn_busy,egui::Button::new("AHN hoogte")).clicked() {
                     self.request_ahn();
+                }
+                if ui.button("MarXact importeren").clicked() {
+                    if let Some(files)=rfd::FileDialog::new()
+                        .add_filter("MarXact DXF",&["dxf"]).pick_files()
+                    {self.import_marxact(files);}
                 }
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
@@ -1106,7 +1139,10 @@ impl eframe::App for SleufBaseApp {
             ui.separator();
             ui.heading("Virtuele proefsleuven");
             for trench in &self.virtual_trenches {
-                ui.label(format!("{} ({:.2} m)",trench.label,trench.length()));
+                ui.label(format!("{} ({:.2} m, {} objecten{})",
+                    trench.label,trench.length(),trench.objects.len(),
+                    if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
+                ));
             }
             ui.separator();
             ui.heading("Kaartopmerkingen");

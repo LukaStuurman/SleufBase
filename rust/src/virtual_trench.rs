@@ -27,13 +27,16 @@ pub struct VirtualTrench {
     pub objects:Vec<TrenchPoint>,
     #[serde(default)]
     pub source_path:Option<PathBuf>,
+    /// Original measured 3D MarXact boundary; empty for manually drawn trenches.
+    #[serde(default)]
+    pub boundary_3d:Vec<Vertex>,
 }
 
 impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
             label,width_meters:width,start,end,
-            objects:Vec::new(),source_path:None
+            objects:Vec::new(),source_path:None,boundary_3d:Vec::new()
         };
         result.validate()?;
         Ok(result)
@@ -52,6 +55,9 @@ impl VirtualTrench {
             {
                 return Err("Virtuele proefsleuf bevat ongeldige coördinaten".into());
             }
+        }
+        if self.boundary_3d.iter().any(|p|!p.x.is_finite() || !p.y.is_finite() || p.z.is_some_and(|z|!z.is_finite())) {
+            return Err("MarXact-grens heeft ongeldige 3D-coördinaten".into());
         }
         if self.length()<=1e-9 {
             return Err("Begin- en eindpunt van proefsleuf vallen samen".into());
@@ -99,6 +105,14 @@ impl VirtualTrench {
             (self.end.x-nx,self.end.y-ny),
             (self.end.x+nx,self.end.y+ny)
         ]
+    }
+
+    pub fn measured_boundary(&self)->Vec<(f64,f64)> {
+        let mut points=if self.boundary_3d.len()>=3 {
+            self.boundary_3d.iter().map(|p|(p.x,p.y)).collect::<Vec<_>>()
+        }else{self.polygon().to_vec()};
+        if points.len()>=3 && points.first()!=points.last() {points.push(points[0]);}
+        points
     }
 
     pub fn add_object(&mut self,object:TrenchPoint) -> Result<(),String> {

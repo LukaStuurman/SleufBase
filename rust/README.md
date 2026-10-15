@@ -107,6 +107,14 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Asynchrone HTTP-download en TIFF-decoder in Rust; geen Python/numpy.
 - Nog geen AHN op klikpositie of volledige hoogteprofielen.
 
+## MarXact: eerste native 3D DXF-import
+
+- Via **MarXact importeren** kan een ASCII DXF met `MULTILEADER` labels, gesloten `POLYLINE` grenzen en `INSERT` meetpunten rechtstreeks worden geladen.
+- Controleert het `Name` op iedere grensvertex, koppelt punten op maximaal 8 cm aan labels en wijst overlappende punten toe aan de kleinste gemeten grens.
+- Bepaalt middenlijn en maaiveld-Z van de gemeten 3D-grens (met voorkeur voor meetpunt-richting), neemt laag-naar-discipline mapping over en bewaart de oorspronkelijke 3D-omtrek.
+- Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
+- **Nog niet volledig:** echte MarXact DXF kan alternatieve geneste `MULTILEADER` opslag gebruiken. Daardoor zijn nog representatieve exportbestanden en vervolgtests nodig. Volledige snapping/draaiing/maatvoering en alle MarXact-patches zijn nog niet overgezet.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

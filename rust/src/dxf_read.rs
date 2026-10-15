@@ -17,6 +17,10 @@ pub struct DxfFeature {
     pub layer: String,
     pub color_aci: i32,
     pub points: Vec<Vertex>,
+    #[serde(default)]
+    pub raw_text: String,
+    #[serde(default)]
+    pub block_name: String,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -86,6 +90,8 @@ fn common(groups: &[Group], kind: &str) -> DxfFeature {
         layer:field(groups,8).unwrap_or("0").into(),
         color_aci:field(groups,62).and_then(|v|v.parse::<i32>().ok()).unwrap_or(256),
         points:Vec::new(),
+        raw_text:String::new(),
+        block_name:String::new(),
     }
 }
 
@@ -190,6 +196,18 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
             "LWPOLYLINE"=>lwpolyline(current,&mut feature.points),
             "CIRCLE" | "ARC"=>circle_or_arc(current,kind,&mut feature.points),
             "INSERT" => {
+                feature.block_name=field(current,2).unwrap_or("").to_owned();
+                if let Some(a)=vertex(current,10,20,30) {
+                    feature.points.extend_from_slice(&[a,a]);
+                }
+            }
+            "MULTILEADER" | "MLEADER" => {
+                // Common MarXact exports put the MTEXT content into group 304
+                // and the first leader line's tip into the first 10/20 pair.
+                // Not all CAD vendors serialize these groups identically:
+                // strict geometry validation in the importer prevents guessing.
+                feature.raw_text=current.iter().filter(|v|v.code==304)
+                    .map(|v|v.value.as_str()).collect::<Vec<_>>().join("");
                 if let Some(a)=vertex(current,10,20,30) {
                     feature.points.extend_from_slice(&[a,a]);
                 }
@@ -289,6 +307,14 @@ mod tests {
         assert_eq!(result.features.len(),1);
         assert_eq!(result.features[0].points.len(),3);
         assert_eq!(result.features[0].points[0],result.features[0].points[2]);
+    }
+    #[test]
+    fn marxact_mleader_text_and_insert_block_name() {
+        let dxf="0\nSECTION\n2\nENTITIES\n                 0\nMULTILEADER\n8\nLABEL\n304\nName=ps1^JHeight=3,14\n                 10\n1.0\n20\n2.0\n30\n3.0\n                 0\nINSERT\n8\nWATER\n2\nmarxact_point\n10\n1.0\n20\n2.0\n                 0\nENDSEC\n0\nEOF\n";
+        let result=parse_dxf(dxf,Path::new("marxact.dxf")).unwrap();
+        assert_eq!(result.features.len(),2);
+        assert!(result.features[0].raw_text.contains("Name=ps1"));
+        assert_eq!(result.features[1].block_name,"marxact_point");
     }
     #[test]
     fn corrupt_and_binary_are_errors() {
