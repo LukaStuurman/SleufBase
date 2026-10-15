@@ -81,3 +81,37 @@ fn dxf_to_native_project_roundtrip_preserves_measured_geometry() {
     assert_eq!(trench.objects.len(),1);
     assert_eq!(trench.to_dataset(0,false).features.len(),1);
 }
+
+
+#[test]
+fn native_cli_import_and_export_roundtrip() {
+    let temp=tempfile::tempdir().unwrap();
+    let input=temp.path().join("PS7.dxf");
+    let project=temp.path().join("output.sleufbase-rust.json");
+    let drawing=temp.path().join("converted.dxf");
+    std::fs::write(&input,fixture()).unwrap();
+    let exe=env!("CARGO_BIN_EXE_sleufbase-rust");
+    let output=std::process::Command::new(exe)
+        .arg("--marxact").arg(&project).arg(&input)
+        .output().unwrap();
+    assert!(output.status.success(),
+        "MarXact project CLI failed: {}",String::from_utf8_lossy(&output.stderr));
+    let data=read_project(&project).unwrap();
+    assert_eq!(data.virtual_trenches.len(),1);
+    assert_eq!(data.virtual_trenches[0].boundary_3d.len(),4);
+    // No destructive overwrite when the same command is run twice.
+    let duplicate=std::process::Command::new(exe)
+        .arg("--marxact").arg(&project).arg(&input)
+        .output().unwrap();
+    assert!(!duplicate.status.success());
+
+    let exported=std::process::Command::new(exe)
+        .arg("--marxact-dxf").arg(&drawing).arg(&input)
+        .output().unwrap();
+    assert!(exported.status.success(),
+        "MarXact DXF CLI failed: {}",String::from_utf8_lossy(&exported.stderr));
+    let contents=std::fs::read_to_string(&drawing).unwrap();
+    assert!(contents.contains("VIRTUAL_TRENCH_3D"));
+    assert!(contents.contains("0\nPOLYLINE\n"));
+    assert!(contents.contains("0\nSEQEND\n"));
+}
