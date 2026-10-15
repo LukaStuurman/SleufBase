@@ -353,6 +353,12 @@ impl RemoteFileKind {
         match self {Self::GeoTiff=>"cloud",Self::JobFeatures=>"cloud"}
     }
 }
+fn job_sidecar_path(path:&std::path::Path)->Result<std::path::PathBuf,String>{
+    let ext=path.extension().and_then(|v|v.to_str())
+        .ok_or("Downloadbestand mist extensie")?;
+    Ok(path.with_extension(format!("{ext}.job.json")))
+}
+
 fn safe_file_stem(title:&str,id:u64)->String {
     let mut stem=title.trim().chars().map(|c|
         if c.is_ascii_alphanumeric() || "._-".contains(c) {c} else {'_'}
@@ -508,14 +514,46 @@ impl KickTheMapLiveClient {
         temporary.as_file_mut().flush().map_err(|e|e.to_string())?;
         temporary.as_file_mut().sync_all().map_err(|e|e.to_string())?;
         verify_download(temporary.path(),kind)?;
+        // Every downloaded JSON/TIFF file gets a sidecar so the independently
+        // running Rust app can identify its original job even when multiple
+        // jobs are downloaded in a single directory. Both files are staged,
+        // and an incomplete newly created main file is rolled back on error.
+        let sidecar_path=job_sidecar_path(&destination)?;
+        if sidecar_path.exists() {
+            return Err("KickTheMap job metadata bestaat al; niets overschreven".into());
+        }
+        let mut metadata=tempfile::NamedTempFile::new_in(root)
+            .map_err(|e|format!("Job metadata aanmaken mislukt: {e}"))?;
+        serde_json::to_writer_pretty(metadata.as_file_mut(),
+            &serde_json::json!({
+                "version":1,
+                "job_id":job.job_id,
+                "title":job.title,
+                "source":"kickthemap-rust",
+            })).map_err(|e|e.to_string())?;
+        metadata.as_file_mut().write_all(b"\n").map_err(|e|e.to_string())?;
+        metadata.as_file_mut().sync_all().map_err(|e|e.to_string())?;
         temporary.persist_noclobber(&destination)
             .map_err(|e|format!("Downloadbestand niet opgeslagen: {}",e.error))?;
+        if let Err(e)=metadata.persist_noclobber(&sidecar_path) {
+            let _=std::fs::remove_file(&destination);
+            return Err(format!("KickTheMap sidecar kon niet worden opgeslagen: {}",e.error));
+        }
         Ok(destination)
     }
 }
 #[cfg(test)]
 mod download_tests {
     use super::*;
+    #[test]
+    fn sidecar_suffix_matches_geotiff_and_job_features() {
+        let tiff=std::path::Path::new("Sleuf_42.tiff");
+        let json=std::path::Path::new("Sleuf_42_jobFeatures.json");
+        assert_eq!(job_sidecar_path(tiff).unwrap(),
+            std::path::PathBuf::from("Sleuf_42.tiff.job.json"));
+        assert_eq!(job_sidecar_path(json).unwrap(),
+            std::path::PathBuf::from("Sleuf_42_jobFeatures.json.job.json"));
+    }
     #[test]
     fn validates_download_domains() {
         assert!(validate_signed_url("https://my-bucket.s3.eu-central-1.amazonaws.com/abc?signature=x").is_ok());

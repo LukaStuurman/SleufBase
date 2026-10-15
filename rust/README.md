@@ -134,6 +134,13 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Export gebruikt het eigen basale R12-model, niet de uitgebreide SleufBase-sjabloon-DXF of speciale dynamische blokken.
 - Alleen de zichtbare WFS/BGT-lagen worden meegenomen; grote datasetlimieten en daadwerkelijke CAD-validatie blijven nodig.
 
+## KickTheMap-downloads: bronidentiteit behouden
+
+- Bij een gesigneerde GeoTIFF- of objecten-JSON-download schrijft Rust nu een eigen `*.tiff.job.json` / `*.json.job.json` sidecar met job-ID en titel.
+- De downloader maakt beide bestanden eerst tijdelijk aan en rolt een onvolledig nieuw bestand terug als de sidecar niet kan worden opgeslagen.
+- Lokale objecten-JSON haalt de job-ID eerst uit de sidecar of bestandsnaam (`Naam_123_jobFeatures.json`) en gebruikt de oude mapnaam alleen als fallback.
+- Daardoor werkt de 'alleen geladen jobs'-filter ook voor lokaal in één gedeelde Rust-map gedownloade jobs.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

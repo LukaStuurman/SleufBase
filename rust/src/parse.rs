@@ -92,13 +92,25 @@ pub fn load_job_features(path: &Path) -> Result<Dataset, String> {
         return Err("JSON-bestand is groter dan 256 MiB".into());
     }
     let content = fs::read_to_string(path).map_err(|e| format!("JSON lezen mislukt: {e}"))?;
-    let title = path.parent().and_then(Path::file_name).and_then(|s| s.to_str())
-        .filter(|s| !s.is_empty())
-        .or_else(|| path.file_stem().and_then(|s| s.to_str()))
+    // Signed-URL downloads and existing Python TIFF/jobFeatures bundles can
+    // carry a safe job sidecar. Do not derive job identity only from a folder:
+    // Rust stores all downloaded jobs together in a /Rust directory.
+    let sidecar=crate::geotiff::job_sidecar(path);
+    let filename_id=path.file_stem().and_then(|v|v.to_str())
+        .and_then(|v|v.strip_suffix("_jobFeatures"))
+        .and_then(|v|v.split('_').next_back())
+        .and_then(|v|v.parse::<u64>().ok())
+        .filter(|v|*v>0);
+    let folder_id=path.parent().and_then(Path::file_name).and_then(|s| s.to_str())
+        .and_then(|s| s.split('_').next_back())
+        .and_then(|s| s.parse::<u64>().ok())
+        .filter(|v|*v>0);
+    let job_id=sidecar.as_ref().map(|v|v.0).or(filename_id).or(folder_id).unwrap_or(0);
+    let title=sidecar.as_ref().map(|v|v.1.as_str()).filter(|v|!v.is_empty())
+        .or_else(||path.parent().and_then(Path::file_name).and_then(|s|s.to_str()))
+        .or_else(||path.file_stem().and_then(|s|s.to_str()))
         .unwrap_or("Onbekende job");
-    let sidecar_id = path.parent().and_then(Path::file_name).and_then(|s| s.to_str())
-        .and_then(|s| s.split('_').next_back()).and_then(|s| s.parse::<u64>().ok());
-    let mut dataset = parse_job_features(&content, sidecar_id.unwrap_or(0), title)?;
+    let mut dataset = parse_job_features(&content, job_id, title)?;
     dataset.source_path = path.to_owned();
     Ok(dataset)
 }
@@ -120,6 +132,21 @@ mod tests {
         assert_eq!(result.features[0].attributes, ["", "", ""]);
         assert!(matches!(result.features[1].geometry, Geometry::Polyline(_)));
         assert_eq!(result.job_id, 42);
+    }
+    #[test]
+    fn downloaded_job_id_and_sidecar_are_not_lost() {
+        let dir=tempfile::tempdir().unwrap();
+        let json=dir.path().join("Breda_123_jobFeatures.json");
+        let content=r#"{"features":[{"geometry":{"type":"Point","coordinates":[1,2]},
+            "properties":{"idName":"water"}}]}"#;
+        fs::write(&json,content).unwrap();
+        let first=load_job_features(&json).unwrap();
+        assert_eq!(first.job_id,123);
+        let sidecar=dir.path().join("Breda_123_jobFeatures.json.job.json");
+        fs::write(&sidecar,r#"{"job_id":456,"title":"PS456"}"#).unwrap();
+        let second=load_job_features(&json).unwrap();
+        assert_eq!(second.job_id,456);
+        assert_eq!(second.title,"PS456");
     }
     #[test]
     fn invalid_and_empty_json() {
