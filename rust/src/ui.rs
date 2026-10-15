@@ -677,13 +677,7 @@ impl SleufBaseApp {
         // An active Rust job is one actually loaded in this desktop app.
         // Never confuse a historical download or another Python instance's
         // heartbeat with a currently loaded Rust raster/dataset.
-        let mut ids=self.datasets.iter()
-            .map(|d|d.job_id)
-            .filter(|id|*id>0)
-            .collect::<std::collections::BTreeSet<_>>();
-        ids.extend(self.geotiffs.iter().filter_map(|t|t.kickthemap_job_id)
-            .filter(|id|*id>0));
-        ids
+        sleufbase_rust::loaded_jobs::active_rust_job_ids(&self.datasets,&self.geotiffs)
     }
 
     fn export_datasets(&self)->Vec<Dataset> {

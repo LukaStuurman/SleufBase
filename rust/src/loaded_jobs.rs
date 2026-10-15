@@ -8,6 +8,17 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 pub const ACTIVE_STATE_MAX_AGE_SECONDS: f64 = 6.0;
+pub fn active_rust_job_ids(
+    datasets:&[crate::model::Dataset],
+    rasters:&[crate::geotiff::GeoTiffInfo]
+)->std::collections::BTreeSet<u64>{
+    let mut ids=datasets.iter().map(|d|d.job_id)
+        .filter(|id|*id>0).collect::<std::collections::BTreeSet<_>>();
+    ids.extend(rasters.iter().filter_map(|r|r.kickthemap_job_id)
+        .filter(|id|*id>0));
+    ids
+}
+
 
 pub fn kickthemap_cache_dir() -> PathBuf {
     let base = std::env::var_os("LOCALAPPDATA").map(PathBuf::from)
@@ -67,6 +78,26 @@ pub fn only_active<'a, T>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn native_loaded_jobs_only_current_data_not_cache_or_other_sessions() {
+        use crate::model::{Dataset,Vertex,Bounds};
+        use crate::geo::GeoTransform;
+        use crate::geotiff::GeoTiffInfo;
+        use std::path::PathBuf;
+        let dataset=Dataset{
+            job_id:42,title:"PS42".into(),source_path:PathBuf::new(),features:vec![]
+        };
+        let raster=GeoTiffInfo{
+            path:PathBuf::new(),width:1,height:1,
+            transform:GeoTransform{a:1.,b:0.,c:0.,d:0.,e:-1.,f:0.},
+            bounds:Bounds{min_x:0.,min_y:-1.,max_x:1.,max_y:0.},
+            epsg:Some(28992),kickthemap_job_id:Some(99),
+            kickthemap_job_title:"PS99".into(),kickthemap_job_sidecar:None
+        };
+        assert_eq!(active_rust_job_ids(&[dataset],&[raster])
+            .into_iter().collect::<Vec<_>>(),vec![42,99]);
+        assert!(active_rust_job_ids(&[],&[]).is_empty());
+    }
     #[test]
     fn fresh_and_expired_behaviour() {
         let body = r#"{"version":1,"updated_at":100.0,"job_ids":[12,"34",0,-1,"bad",12]}"#;
