@@ -14,7 +14,7 @@
 | PDOK luchtfoto en kwaliteitsopties | pdok.py, pdok_default_background_patch.py | Asynchrone WMS-kaartlaag, overige bron-/kwaliteitsopties ontbreken | Source-switch/cache/retry en standaardgedrag |
 | BGT kaart en alle API-bronnen | bgt_roadpart.py, bgt_terrain_boundary.py, bgt_vector_tiles.py, cadastral_wfs.py | Native OGC wegdeel/terreinranden kaartoverlay, rest ontbreekt | Geometrie, caching, stijlen, WFS/foutgevallen |
 | Kaarttegels, OpenStreetMap, lokale cache | web_tiles.py, osm.py | Ontbreekt | Identieke rendering, limieten en offline-fallback |
-| AHN, maaiveld en AI-assistent | ahn.py, ai_maaiveld.py, vllm_runtime.py | Ontbreekt | Geldige meetwaarden, foutafhandeling en AI-fallback |
+| AHN, maaiveld en AI-assistent | ahn.py, ai_maaiveld.py, vllm_runtime.py | Native WCS hoogteproef rond kaartmidden; profielen/AI ontbreken | Geldige meetwaarden, foutafhandeling en AI-fallback |
 | DXF import, bestaande blokken, metadata | dxf.py | ASCII basis deels | Kleur, laag, attributen, geometrie, XDATA |
 | DXF objectexport (basis) | kickthemap_dxf_export.py | Deels | Volledige layer rules/XDATA/labels/polyline/tekstpariteit |
 | Volledige kadastrale/template DXF export | cadastral_export.py, dxf_template_pipeline_* | Ontbreekt | Identieke output op regressie-fixtures, inclusief fonts en block/visibility |

@@ -10,6 +10,7 @@ use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
+use sleufbase_rust::ahn;
 use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
 use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
@@ -64,6 +65,8 @@ pub struct SleufBaseApp {
     bgt_layers:Vec<BgtLayer>,
     bgt_rx:Option<Receiver<Result<BgtLayer,String>>>,
     bgt_busy:bool,
+    ahn_rx:Option<Receiver<Result<Option<f64>,String>>>,
+    ahn_busy:bool,
     jobs_cache:Option<JobsCache>,
     live_email:String,
     live_password:String,
@@ -109,6 +112,8 @@ impl Default for SleufBaseApp {
             bgt_layers:Vec::new(),
             bgt_rx:None,
             bgt_busy:false,
+            ahn_rx:None,
+            ahn_busy:false,
             jobs_cache:None,
             live_email:String::new(),
             live_password:String::new(),
@@ -203,6 +208,51 @@ impl SleufBaseApp {
                 self.message=format!("Rust-project geopend: {}",path.display());
             }
             Err(err) => self.message=format!("Project niet geladen (origineel ongewijzigd): {err}"),
+        }
+    }
+
+
+    fn restore_backup(&mut self,ctx:&egui::Context) {
+        if self.dirty {
+            self.message="Sla eerst je onopgeslagen projectwijzigingen op voordat je een back-up herstelt".into();
+            return;
+        }
+        let dir=project::backup_directory();
+        if !dir.is_dir() {
+            self.message="Geen SleufBase Rust-back-ups gevonden".into();return;
+        }
+        if let Some(path)=rfd::FileDialog::new()
+            .set_directory(&dir).add_filter("SleufBase backups",&["json"]).pick_file()
+        {
+            let allowed=path.canonicalize().ok().zip(dir.canonicalize().ok())
+                .is_some_and(|(file,dir)| file.starts_with(dir));
+            if !allowed {
+                self.message="Back-up ligt niet in de beveiligde Rust-back-upmap".into();
+                return;
+            }
+            match read_project(&path) {
+                Ok(project_data)=>{
+                    let rasters=project_data.rasters.iter()
+                        .map(|r|load_texture(&r.path,ctx)).collect();
+                    self.datasets=project_data.datasets;
+                    self.geotiffs=project_data.rasters;
+                    self.overlays=project_data.overlays;
+                    self.bgt_layers=project_data.bgt_layers;
+                    self.virtual_trenches=project_data.virtual_trenches;
+                    self.comments=project_data.comments;
+                    self.project_name=project_data.name;
+                    self.raster_textures=rasters;
+                    self.selected=(!self.datasets.is_empty()).then_some(0);
+                    // Never overwrite the source backup when pressing Save.
+                    self.project_path=None;
+                    self.dirty=true;
+                    self.last_backup=Instant::now();
+                    self.message=format!(
+                        "Back-up hersteld uit {}. Kies Opslaan als om het als nieuw project te bewaren.",
+                        path.display());
+                }
+                Err(err)=>self.message=format!("Back-up ongeldig: {err}")
+            }
         }
     }
 
@@ -318,6 +368,54 @@ impl SleufBaseApp {
         bounds
     }
 
+
+
+    fn request_ahn(&mut self) {
+        if self.ahn_busy {return;}
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad eerst een RD-kaartgebied om AHN te raadplegen".into();
+            return;
+        };
+        let x=(bounds.min_x+bounds.max_x)*0.5;
+        let y=(bounds.min_y+bounds.max_y)*0.5;
+        if self.geotiffs.iter().any(|r|r.epsg.is_some_and(|e|e!=28992)) {
+            self.message="AHN ondersteunt hier alleen RD EPSG:28992".into();
+            return;
+        }
+        let (tx,rx)=mpsc::channel();
+        self.ahn_rx=Some(rx);
+        self.ahn_busy=true;
+        self.message=format!("AHN maaiveldhoogte rond RD {:.2} / {:.2} ophalen...",x,y);
+        std::thread::spawn(move||{
+            let _=tx.send(ahn::ground_level(x,y));
+        });
+    }
+    fn poll_ahn(&mut self) {
+        let event=self.ahn_rx.as_ref().map(|rx|rx.try_recv());
+        match event {
+            Some(Ok(Ok(Some(value))))=>{
+                self.message=format!("AHN maaiveldhoogte rond midden kaart: {value:.3} m NAP");
+                self.ahn_busy=false;
+                self.ahn_rx=None;
+            }
+            Some(Ok(Ok(None)))=>{
+                self.message="Geen geldige AHN-hoogte op deze locatie".into();
+                self.ahn_busy=false;
+                self.ahn_rx=None;
+            }
+            Some(Ok(Err(err)))=>{
+                self.message=format!("AHN-service: {err}");
+                self.ahn_busy=false;
+                self.ahn_rx=None;
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.message="AHN-verzoek afgebroken".into();
+                self.ahn_busy=false;
+                self.ahn_rx=None;
+            }
+            _=>{}
+        }
+    }
 
     fn start_bgt(&mut self,kind:BgtKind) {
         if self.bgt_busy {return;}
@@ -842,6 +940,7 @@ impl eframe::App for SleufBaseApp {
         self.poll_live_jobs();
         self.poll_live_download(ctx);
         self.poll_bgt();
+        self.poll_ahn();
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -862,6 +961,7 @@ impl eframe::App for SleufBaseApp {
                 if ui.button("Opslaan als...").clicked() {self.save_project_file(true);}
                 if ui.button("Instellingen").clicked() {self.show_settings_dialog=true;}
                 if ui.button("Import oude voorkeuren").clicked() {self.import_old_settings();}
+                if ui.button("Herstel back-up").clicked() {self.restore_backup(ctx);}
             });
             ui.horizontal(|ui|{
                 if ui.button("Open jobFeatures.json").clicked() {
@@ -883,6 +983,9 @@ impl eframe::App for SleufBaseApp {
                 }
                 if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT terrein")).clicked() {
                     self.start_bgt(BgtKind::OnbegroeidTerreindeel);
+                }
+                if ui.add_enabled(!self.ahn_busy,egui::Button::new("AHN hoogte")).clicked() {
+                    self.request_ahn();
                 }
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()

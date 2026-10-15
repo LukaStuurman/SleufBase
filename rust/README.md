@@ -100,6 +100,13 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Achtergrondladen, aparte zichtbare BGT-lagen en bewaren in het eigen Rust-project.
 - Kleine RD-uitsnedes tot 2×2 km; uitgebreide caches, vector tiles en alle BGT themalagen staan nog open.
 
+## AHN 0,5m maaiveldhoogte (basis)
+
+- Native PDOK AHN WCS 2.0.1 `dtm_05m` in RD EPSG:28992, met 2 m / 5 px, 8 m / 9 px en 24 m / 13 px fallback-vensters.
+- Dichtstbijzijnde geldige rastercel rond het midden van het kaartgebied, teruggegeven in m NAP op millimeterniveau.
+- Asynchrone HTTP-download en TIFF-decoder in Rust; geen Python/numpy.
+- Nog geen AHN op klikpositie of volledige hoogteprofielen.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
