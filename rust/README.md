@@ -15,7 +15,7 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
 - GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; kleine 8-bit TIFF rasters als gedraaide/gegeorefereerde kaartlaag tonen.
-- Actieve KickTheMap-job-ID's read-only herkennen vanuit de Python-SleufBase heartbeat van maximaal 6 seconden oud.
+- Rust filtert actieve jobs rechtstreeks uit de in de Rust-UI ingeladen objectgegevens en GeoTIFF-sidecars; een compatibiliteitsparser voor de Python-heartbeat blijft apart beschikbaar.
 
 ## Bouwen en starten op Windows
 
@@ -65,7 +65,7 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 ## Offline KickTheMap jobcache
 
 - Rust leest bestaande lokale Python-SleufBase `jobs_cache/<email>.json` bestanden zonder wachtwoorden/cookies te lezen.
-- Zoek en filter met de betrouwbare actief-geladen-job heartbeat (Python-live status maximaal 6 sec).
+- Zoek en filter op jobs die in de Rust-app zelf zijn geladen (lokaal ingeladen objectbestanden en TIFF-sidecars).
 - De cachestand is expliciet **niet live**; de online KickTheMap login, jobs API en downloaden moeten nog native worden overgezet.
 
 ## Kaartopmerkingen

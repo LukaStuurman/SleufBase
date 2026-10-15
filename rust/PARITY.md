@@ -24,7 +24,7 @@
 | KickTheMap live jobs-lijst, retry, caching | kickthemap.py, kickthemap_jobs_browser.py | Live API-kern, in-memory sessie en offline cache; browserfallback en betrouwbare cache ontbreekt | API- en browserfallback, sort/search/selected |
 | KickTheMap GeoTIFF/jobs downloads + sidecars | kickthemap.py, geotiff.py | Geautoriseerde signed-URL GeoTIFF/objecten download met veilige opslag; fallback/coords/sidecars niet klaar | Checksums, retries, TIFF-validatie, metadata en jobs |
 | KickTheMap objecten/parsing | kickthemap_dxf_export.py | Deels | Punt/polyline, hoogte, attributen, groepsfilters op echte exports |
-| Filter alleen actief geladen jobs | app.py, kickthemap_jobs_browser.py | Python-heartbeat read-only | Zelfstandige Rust-app schrijft/evalueert state betrouwbaar |
+| Filter alleen actief geladen jobs | app.py, kickthemap_jobs_browser.py | Native Rust geladen-object/TIFF-intersectie, Python-state lezer als aparte compatibiliteit | Zelfstandige Rust-app schrijft/evalueert state betrouwbaar |
 | Discipline-overzicht + Excel-formaat | discipline_excel_export.py | Deels | Identieke regels, ordering, categorisering, totalen, sjablonen en styling |
 | Virtuele proefsleuven/profielen | virtual_trench.py, virtual_trench_template_patch.py | Basisgeometrie en aanmaak, profielen nog niet | Plaatsen, maatvoering, kettingmaat, export |
 | MarXact import, snapping, metingen | marxact_*.py | Ontbreekt | Identieke CSV/point mapping, modeltransformaties, grenzen |

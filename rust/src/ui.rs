@@ -16,12 +16,12 @@ use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
-use sleufbase_rust::loaded_jobs::{kickthemap_cache_dir, read_active_loaded_job_ids};
+use sleufbase_rust::loaded_jobs::kickthemap_cache_dir;
 use sleufbase_rust::project::{
     self, AutosaveSettings, NativeProject, Comment, read_project, save_project
 };
 use std::path::PathBuf;
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant};
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -674,11 +674,16 @@ impl SleufBaseApp {
     }
 
     fn active_job_ids(&self) -> std::collections::BTreeSet<u64> {
-        let now=SystemTime::now().duration_since(UNIX_EPOCH)
-            .map(|d|d.as_secs_f64()).unwrap_or(0.0);
-        read_active_loaded_job_ids(
-            &kickthemap_cache_dir().join("active_loaded_jobs.json"),now
-        )
+        // An active Rust job is one actually loaded in this desktop app.
+        // Never confuse a historical download or another Python instance's
+        // heartbeat with a currently loaded Rust raster/dataset.
+        let mut ids=self.datasets.iter()
+            .map(|d|d.job_id)
+            .filter(|id|*id>0)
+            .collect::<std::collections::BTreeSet<_>>();
+        ids.extend(self.geotiffs.iter().filter_map(|t|t.kickthemap_job_id)
+            .filter(|id|*id>0));
+        ids
     }
 
     fn export_datasets(&self)->Vec<Dataset> {
@@ -1054,9 +1059,9 @@ impl eframe::App for SleufBaseApp {
             }
             ui.separator();
             ui.heading("Ingeladen proefsleuven");
-            ui.checkbox(&mut self.active_only,"Alleen actief in Python-SleufBase");
+            ui.checkbox(&mut self.active_only,"Alleen ingeladen in Rust");
             if self.active_only {
-                ui.small("Leest oude KickTheMap-state, maximaal 6 seconden oud.");
+                ui.small("Filtert uitsluitend objecten en GeoTIFFs die nu in Rust zijn geladen.");
             }
             let active_ids=self.active_job_ids();
             ui.text_edit_singleline(&mut self.query);
