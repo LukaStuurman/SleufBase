@@ -80,7 +80,7 @@ mod tests {
     use super::*;
     #[test]
     fn native_loaded_jobs_only_current_data_not_cache_or_other_sessions() {
-        use crate::model::{Dataset,Vertex,Bounds};
+        use crate::model::{Dataset,Bounds};
         use crate::geo::GeoTransform;
         use crate::geotiff::GeoTiffInfo;
         use std::path::PathBuf;

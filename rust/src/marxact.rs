@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 
-use crate::dxf_read::{DxfFeature, DxfOverlay, load_dxf};
+use crate::dxf_read::{DxfOverlay, load_dxf};
 use crate::model::Vertex;
 use crate::virtual_trench::{TrenchPoint, VirtualTrench};
 
@@ -46,7 +46,7 @@ pub fn parse_leader_content(value:&str)->(String,Option<f64>) {
         if key.trim().eq_ignore_ascii_case("Name") {
             name=raw.trim().to_owned();
         }else if key.trim().eq_ignore_ascii_case("Height"){
-            let v=raw.trim().replace(',','.');
+            let v=raw.trim().replace(',',".");
             height=v.parse::<f64>().ok().filter(|n|n.is_finite());
         }
     }
@@ -293,6 +293,7 @@ pub fn import_dxf(path:&Path,mappings:&std::collections::BTreeMap<String,String>
 #[cfg(test)]
 mod tests{
     use super::*;
+    use crate::dxf_read::DxfFeature;
     use std::path::PathBuf;
     fn p(x:f64,y:f64,z:f64)->Vertex{Vertex{x,y,z:Some(z)}}
     fn feature(kind:&str,points:Vec<Vertex>,text:&str,layer:&str)->DxfFeature{
