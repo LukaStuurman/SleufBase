@@ -3,6 +3,7 @@
 //! until a separately verified lossless converter is implemented.
 
 use crate::dxf_read::DxfOverlay;
+use crate::bgt::BgtLayer;
 use crate::geotiff::GeoTiffInfo;
 use crate::model::Dataset;
 use crate::virtual_trench::VirtualTrench;
@@ -32,6 +33,8 @@ pub struct NativeProject {
     pub rasters: Vec<GeoTiffInfo>,
     pub overlays: Vec<DxfOverlay>,
     #[serde(default)]
+    pub bgt_layers: Vec<BgtLayer>,
+    #[serde(default)]
     pub virtual_trenches: Vec<VirtualTrench>,
     pub comments: Vec<Comment>,
 }
@@ -45,6 +48,7 @@ impl Default for NativeProject {
             datasets:Vec::new(),
             rasters:Vec::new(),
             overlays:Vec::new(),
+            bgt_layers:Vec::new(),
             virtual_trenches:Vec::new(),
             comments:Vec::new(),
         }

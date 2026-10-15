@@ -12,6 +12,7 @@ pub mod virtual_trench;
 pub mod pdok_wms;
 pub mod jobs_cache;
 pub mod kickthemap_live;
+pub mod bgt;
 pub mod settings_compat;
 pub mod export;
 pub mod model;

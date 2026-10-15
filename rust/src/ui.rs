@@ -9,6 +9,7 @@ use sleufbase_rust::{
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
+use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
 use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
 use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
@@ -60,6 +61,9 @@ pub struct SleufBaseApp {
     pdok_bounds:Option<Bounds>,
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
     pdok_busy:bool,
+    bgt_layers:Vec<BgtLayer>,
+    bgt_rx:Option<Receiver<Result<BgtLayer,String>>>,
+    bgt_busy:bool,
     jobs_cache:Option<JobsCache>,
     live_email:String,
     live_password:String,
@@ -102,6 +106,9 @@ impl Default for SleufBaseApp {
             pdok_bounds:None,
             pdok_rx:None,
             pdok_busy:false,
+            bgt_layers:Vec::new(),
+            bgt_rx:None,
+            bgt_busy:false,
             jobs_cache:None,
             live_email:String::new(),
             live_password:String::new(),
@@ -141,6 +148,7 @@ impl SleufBaseApp {
             datasets:self.datasets.clone(),
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
+            bgt_layers:self.bgt_layers.clone(),
             virtual_trenches:self.virtual_trenches.clone(),
             comments:self.comments.clone(),
             ..NativeProject::default()
@@ -152,6 +160,9 @@ impl SleufBaseApp {
         self.geotiffs.clear();
         self.raster_textures.clear();
         self.overlays.clear();
+        self.bgt_layers.clear();
+        self.bgt_rx=None;
+        self.bgt_busy=false;
         self.virtual_trenches.clear();
         self.comments.clear();
         self.pdok_texture=None;
@@ -175,6 +186,7 @@ impl SleufBaseApp {
                 self.geotiffs=doc.rasters;
                 self.raster_textures=textures;
                 self.overlays=doc.overlays;
+                self.bgt_layers=doc.bgt_layers;
                 self.virtual_trenches=doc.virtual_trenches;
                 self.comments=doc.comments;
                 self.pdok_texture=None;
@@ -304,6 +316,56 @@ impl SleufBaseApp {
             }));
         }
         bounds
+    }
+
+
+    fn start_bgt(&mut self,kind:BgtKind) {
+        if self.bgt_busy {return;}
+        if self.geotiffs.iter().any(|r|r.epsg.is_some_and(|epsg|epsg!=28992)) {
+            self.message="BGT vereist RD EPSG:28992, transformeer andere projecties eerst".into();
+            return;
+        }
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad eerst een RD-kaartlaag".into();
+            return;
+        };
+        if let Err(err)=bgt::build_url(kind,bounds) {
+            self.message=format!("BGT: {err}");
+            return;
+        }
+        let (tx,rx)=mpsc::channel();
+        self.bgt_rx=Some(rx);
+        self.bgt_busy=true;
+        self.message=format!("{} worden geladen...",kind.label());
+        std::thread::spawn(move||{
+            let result=bgt::request_bgt(kind,bounds);
+            let _=tx.send(result);
+        });
+    }
+
+    fn poll_bgt(&mut self) {
+        let event=self.bgt_rx.as_ref().map(|rx|rx.try_recv());
+        match event {
+            Some(Ok(Ok(layer)))=>{
+                self.bgt_layers.retain(|l|l.kind!=layer.kind);
+                self.message=format!("{}: {} paden geladen",layer.kind.label(),layer.paths.len());
+                self.bgt_layers.push(layer);
+                self.bgt_rx=None;
+                self.bgt_busy=false;
+                self.dirty=true;
+            }
+            Some(Ok(Err(err)))=>{
+                self.message=format!("BGT ophalen mislukt: {err}");
+                self.bgt_rx=None;
+                self.bgt_busy=false;
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.message="BGT-verzoek afgebroken".into();
+                self.bgt_rx=None;
+                self.bgt_busy=false;
+            }
+            _=>{}
+        }
     }
 
     fn start_pdok(&mut self) {
@@ -598,6 +660,7 @@ fn canvas(
     textures:&[Option<egui::TextureHandle>],
     overlays:&[DxfOverlay],
     virtual_trenches:&[VirtualTrench],
+    bgt_layers:&[BgtLayer],
     comments:&[Comment],
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
@@ -612,6 +675,9 @@ fn canvas(
     let mut bounds=union_bounds(Bounds::from_datasets(datasets),pdok_bounds);
     for raster in rasters {
         bounds=union_bounds(bounds,Some(raster.bounds));
+    }
+    for layer in bgt_layers.iter().filter(|l|l.visible) {
+        bounds=union_bounds(bounds,Some(layer.bounds));
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
         bounds=union_bounds(bounds,overlay.bounds());
@@ -707,6 +773,20 @@ fn canvas(
             painter.line_segment([project(a.0,a.1),project(b.0,b.1)],Stroke::new(1.5,ORANGE));
         }
     }
+    for layer in bgt_layers.iter().filter(|l|l.visible) {
+        let color=match layer.kind {
+            BgtKind::Wegdeel=>Color32::from_rgb(110,117,126),
+            BgtKind::OnbegroeidTerreindeel=>Color32::from_rgb(104,139,89)
+        };
+        for path in &layer.paths {
+            for pair in path.windows(2) {
+                painter.line_segment([
+                    project(pair[0].0,pair[0].1),
+                    project(pair[1].0,pair[1].1)
+                ],Stroke::new(1.0,color));
+            }
+        }
+    }
     for overlay in overlays.iter().filter(|o|o.visible) {
         for feature in &overlay.features {
             let stroke=Stroke::new(1.6,aci_color(feature.color_aci));
@@ -761,6 +841,7 @@ impl eframe::App for SleufBaseApp {
         self.poll_pdok(ctx);
         self.poll_live_jobs();
         self.poll_live_download(ctx);
+        self.poll_bgt();
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -797,6 +878,12 @@ impl eframe::App for SleufBaseApp {
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
+                if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT wegdelen")).clicked() {
+                    self.start_bgt(BgtKind::Wegdeel);
+                }
+                if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT terrein")).clicked() {
+                    self.start_bgt(BgtKind::OnbegroeidTerreindeel);
+                }
                 if ui.button("Open DXF").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
                         .add_filter("AutoCAD DXF",&["dxf"]).pick_files()
@@ -930,6 +1017,13 @@ impl eframe::App for SleufBaseApp {
             }
             if let Some(i)=remove_comment {self.comments.remove(i);self.dirty=true;}
             ui.separator();
+            ui.heading("PDOK BGT-lagen");
+            for layer in &mut self.bgt_layers {
+                if ui.checkbox(&mut layer.visible,
+                    format!("{} ({} paden)",layer.kind.label(),layer.paths.len())
+                ).changed(){self.dirty=true;}
+            }
+            ui.separator();
             ui.heading("DXF-lagen");
             egui::ScrollArea::vertical().max_height(150.0).show(ui,|ui|{
                 for overlay in &mut self.overlays {
@@ -957,7 +1051,7 @@ impl eframe::App for SleufBaseApp {
             let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&self.virtual_trenches,&self.comments,
+                &self.overlays,&self.virtual_trenches,&self.bgt_layers,&self.comments,
                 self.pdok_texture.as_ref(),self.pdok_bounds,
                 &mut self.zoom,&mut self.pan);
         });
