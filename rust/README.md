@@ -81,6 +81,16 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - KickTheMap-wachtwoorden, sessiegegevens en tokens worden bewust NIET gekopieerd.
 - In de Rust-instellingen kun je automatische back-ups instellen (1–1440 minuten, 1–200 bestanden). De opties voor volledige DXF-sjablonen zijn voorbereid maar pas functioneel wanneer die uitvoer ook naar Rust is overgezet.
 
+## Native KickTheMap-login en live jobs (eerste werkende koppeling)
+
+- Rust HTTPS-client met uitsluitend vaste KickTheMap-endpoints, cookiejar **in geheugen**, eigen CSRF-login en maximaal 3 API-pogingen.
+- Live jobs-payload kan rechtstreeks worden gelezen; toont actieve jobtitel, ID, adres, gemeente, datum en status.
+- De login en jobs-opvraag draaien op een achtergrondthread; geen wachtwoorden, cookies of tokens in het projectbestand.
+- Uitloggen verwijdert de sessie uit geheugen. De inlogvelden wissen het wachtwoord zodra verbinding wordt gestart.
+- De bestaande KickTheMap-authenticatie gebruikt soms interactieve reCAPTCHA/WebView2: dit pad geeft nu een expliciete foutmelding; de browserlogin is nog NIET gemigreerd.
+- De live endpointcode heeft unit-tests voor HTML tokens en API JSON, maar is nog NIET getest tegen een echt ingelogd account; er zijn geen gebruikersinloggegevens opgehaald of opgeslagen.
+- Live downloads, TIFF-bestanden en coord/jobFeatures-bestanden zijn nog NIET aangesloten.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

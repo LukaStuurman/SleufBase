@@ -9,7 +9,8 @@ use sleufbase_rust::{
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
-use sleufbase_rust::jobs_cache::{read_cache,JobsCache};
+use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
+use sleufbase_rust::kickthemap_live::KickTheMapLiveClient;
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
@@ -60,6 +61,12 @@ pub struct SleufBaseApp {
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
     pdok_busy:bool,
     jobs_cache:Option<JobsCache>,
+    live_email:String,
+    live_password:String,
+    live_session:Option<KickTheMapLiveClient>,
+    live_jobs:Vec<Job>,
+    live_rx:Option<Receiver<Result<(KickTheMapLiveClient,Vec<Job>),String>>>,
+    live_busy:bool,
     jobs_query:String,
     comments:Vec<Comment>,
     show_comment_dialog:bool,
@@ -95,6 +102,12 @@ impl Default for SleufBaseApp {
             pdok_rx:None,
             pdok_busy:false,
             jobs_cache:None,
+            live_email:String::new(),
+            live_password:String::new(),
+            live_session:None,
+            live_jobs:Vec::new(),
+            live_rx:None,
+            live_busy:false,
             jobs_query:String::new(),
             comments:Vec::new(),
             show_comment_dialog:false,
@@ -361,6 +374,79 @@ impl SleufBaseApp {
         }
     }
 
+
+    fn login_kickthemap(&mut self) {
+        if self.live_busy {return;}
+        let email=self.live_email.trim().to_owned();
+        let password=std::mem::take(&mut self.live_password);
+        if email.is_empty() || password.is_empty() {
+            self.message="Vul KickTheMap e-mailadres en wachtwoord in".into();
+            return;
+        }
+        // Never log, serialize, or retain credentials in the application state.
+        let (tx,rx)=mpsc::channel();
+        self.live_rx=Some(rx);
+        self.live_busy=true;
+        self.message="KickTheMap-login en live jobs ophalen...".into();
+        std::thread::spawn(move || {
+            let result=KickTheMapLiveClient::login(&email,&password)
+                .and_then(|mut session|session.fetch_jobs().map(|jobs|(session,jobs)));
+            let _=tx.send(result);
+        });
+    }
+
+    fn refresh_live_jobs(&mut self) {
+        if self.live_busy {return;}
+        let Some(mut session)=self.live_session.take() else {
+            self.message="Log eerst in bij KickTheMap".into();return;
+        };
+        let (tx,rx)=mpsc::channel();
+        self.live_rx=Some(rx);
+        self.live_busy=true;
+        self.message="KickTheMap jobs vernieuwen...".into();
+        std::thread::spawn(move || {
+            let result=session.fetch_jobs();
+            let _=tx.send(result.map(|jobs|(session,jobs)));
+        });
+    }
+
+    fn poll_live_jobs(&mut self) {
+        let event=self.live_rx.as_ref().map(|rx|rx.try_recv());
+        match event {
+            Some(Ok(Ok((session,jobs))))=>{
+                self.live_session=Some(session);
+                self.live_jobs=jobs;
+                self.live_busy=false;
+                self.live_rx=None;
+                self.message=format!("{} KickTheMap jobs live opgehaald",self.live_jobs.len());
+            }
+            Some(Ok(Err(err)))=>{
+                self.live_busy=false;
+                self.live_rx=None;
+                self.live_session=None;
+                self.message=format!("KickTheMap live: {err}");
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.live_busy=false;
+                self.live_rx=None;
+                self.live_session=None;
+                self.message="KickTheMap-verbinding afgebroken".into();
+            }
+            _=>{}
+        }
+    }
+
+    fn logout_live_jobs(&mut self) {
+        if self.live_busy {
+            self.message="Rond het lopende verzoek af voordat je uitlogt".into();
+            return;
+        }
+        self.live_session=None;
+        self.live_jobs.clear();
+        self.live_password.clear();
+        self.message="KickTheMap-sessie uit het geheugen verwijderd".into();
+    }
+
     fn open_cached_jobs(&mut self) {
         let dir=kickthemap_cache_dir().join("jobs_cache");
         if let Some(path)=rfd::FileDialog::new().set_directory(&dir)
@@ -623,6 +709,7 @@ impl eframe::App for SleufBaseApp {
         ctx.set_visuals(egui::Visuals::light());
         self.try_autosave();
         self.poll_pdok(ctx);
+        self.poll_live_jobs();
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -676,6 +763,41 @@ impl eframe::App for SleufBaseApp {
 
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
+
+            ui.heading("KickTheMap online");
+            ui.horizontal(|ui|{
+                ui.label("E-mail");
+                ui.add(egui::TextEdit::singleline(&mut self.live_email)
+                    .desired_width(170.0).hint_text("e-mailadres"));
+            });
+            ui.horizontal(|ui|{
+                ui.label("Wachtwoord");
+                ui.add(egui::TextEdit::singleline(&mut self.live_password)
+                    .password(true).desired_width(150.0));
+            });
+            ui.horizontal(|ui|{
+                if ui.add_enabled(!self.live_busy,egui::Button::new("Inloggen")).clicked() {
+                    self.login_kickthemap();
+                }
+                if ui.add_enabled(!self.live_busy && self.live_session.is_some(),
+                    egui::Button::new("Vernieuwen")).clicked() {
+                    self.refresh_live_jobs();
+                }
+                if ui.button("Uitloggen").clicked() {
+                    self.logout_live_jobs();
+                }
+            });
+            if self.live_busy {ui.spinner();}
+            if self.live_session.is_some() {
+                ui.small(format!("{} live jobs (niet opgeslagen)",self.live_jobs.len()));
+                egui::ScrollArea::vertical().max_height(140.0).show(ui,|ui|{
+                    for job in &self.live_jobs {
+                        ui.label(format!("{} — {} ({})",
+                            job.job_id,job.title,job.municipality));
+                    }
+                });
+            }
+            ui.separator();
             ui.heading("Ingeladen proefsleuven");
             ui.checkbox(&mut self.active_only,"Alleen actief in Python-SleufBase");
             if self.active_only {
