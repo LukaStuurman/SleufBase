@@ -22,7 +22,7 @@
 | Foto's/raster asset-bundels, veilige exports | template_raster_io.py, template_export_transaction.py | Ontbreekt | Geen verloren vorige DXF of assets bij exportfouten |
 | KickTheMap online login/account en veilig sessiebeheer | kickthemap.py, kickthemap_browser.py | HTTPS form-login/CSRF/cookies in geheugen; reCAPTCHA/WebView2 ontbreekt | Login/logout, token/cookies, verval/herstel zonder lekken |
 | KickTheMap live jobs-lijst, retry, caching | kickthemap.py, kickthemap_jobs_browser.py | Live API-kern, in-memory sessie en offline cache; browserfallback en betrouwbare cache ontbreekt | API- en browserfallback, sort/search/selected |
-| KickTheMap GeoTIFF/jobs downloads + sidecars | kickthemap.py, geotiff.py | Sidecar read-only, verder ontbreekt | Checksums, retries, TIFF-validatie, metadata en jobs |
+| KickTheMap GeoTIFF/jobs downloads + sidecars | kickthemap.py, geotiff.py | Geautoriseerde signed-URL GeoTIFF/objecten download met veilige opslag; fallback/coords/sidecars niet klaar | Checksums, retries, TIFF-validatie, metadata en jobs |
 | KickTheMap objecten/parsing | kickthemap_dxf_export.py | Deels | Punt/polyline, hoogte, attributen, groepsfilters op echte exports |
 | Filter alleen actief geladen jobs | app.py, kickthemap_jobs_browser.py | Python-heartbeat read-only | Zelfstandige Rust-app schrijft/evalueert state betrouwbaar |
 | Discipline-overzicht + Excel-formaat | discipline_excel_export.py | Deels | Identieke regels, ordering, categorisering, totalen, sjablonen en styling |

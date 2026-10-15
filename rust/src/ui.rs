@@ -10,7 +10,7 @@ use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
-use sleufbase_rust::kickthemap_live::KickTheMapLiveClient;
+use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
@@ -66,6 +66,7 @@ pub struct SleufBaseApp {
     live_session:Option<KickTheMapLiveClient>,
     live_jobs:Vec<Job>,
     live_rx:Option<Receiver<Result<(KickTheMapLiveClient,Vec<Job>),String>>>,
+    live_download_rx:Option<Receiver<(KickTheMapLiveClient,Result<(RemoteFileKind,PathBuf),String>)>>,
     live_busy:bool,
     jobs_query:String,
     comments:Vec<Comment>,
@@ -107,6 +108,7 @@ impl Default for SleufBaseApp {
             live_session:None,
             live_jobs:Vec::new(),
             live_rx:None,
+            live_download_rx:None,
             live_busy:false,
             jobs_query:String::new(),
             comments:Vec::new(),
@@ -410,6 +412,54 @@ impl SleufBaseApp {
         });
     }
 
+
+    fn download_live_job(&mut self,id:u64,kind:RemoteFileKind) {
+        if self.live_busy {return;}
+        let Some(job)=self.live_jobs.iter().find(|j|j.job_id==id).cloned() else {
+            self.message="De KickTheMap-job is niet meer beschikbaar".into();
+            return;
+        };
+        let Some(mut client)=self.live_session.take() else {
+            self.message="Log opnieuw in voor het downloaden".into();
+            return;
+        };
+        self.live_busy=true;
+        self.message=format!("KickTheMap-job {} ophalen...",job.job_id);
+        let (tx,rx)=mpsc::channel();
+        self.live_download_rx=Some(rx);
+        std::thread::spawn(move || {
+            let root=kickthemap_cache_dir().join("Rust");
+            let result=client.download_job(&job,kind,&root).map(|p|(kind,p));
+            let _=tx.send((client,result));
+        });
+    }
+
+    fn poll_live_download(&mut self,ctx:&egui::Context) {
+        let event=self.live_download_rx.as_ref().map(|rx|rx.try_recv());
+        match event {
+            Some(Ok((client,result)))=>{
+                self.live_session=Some(client);
+                self.live_download_rx=None;
+                self.live_busy=false;
+                match result {
+                    Ok((RemoteFileKind::GeoTiff,path))=>{
+                        self.load_geotiffs(vec![path],ctx);
+                    }
+                    Ok((RemoteFileKind::JobFeatures,path))=>{
+                        self.load_files(vec![path]);
+                    }
+                    Err(err)=>self.message=format!("KickTheMap-download: {err}")
+                }
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.live_busy=false;
+                self.live_download_rx=None;
+                self.message="KickTheMap-download afgebroken; log opnieuw in".into();
+            }
+            _=>{}
+        }
+    }
+
     fn poll_live_jobs(&mut self) {
         let event=self.live_rx.as_ref().map(|rx|rx.try_recv());
         match event {
@@ -710,6 +760,7 @@ impl eframe::App for SleufBaseApp {
         self.try_autosave();
         self.poll_pdok(ctx);
         self.poll_live_jobs();
+        self.poll_live_download(ctx);
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -790,12 +841,26 @@ impl eframe::App for SleufBaseApp {
             if self.live_busy {ui.spinner();}
             if self.live_session.is_some() {
                 ui.small(format!("{} live jobs (niet opgeslagen)",self.live_jobs.len()));
-                egui::ScrollArea::vertical().max_height(140.0).show(ui,|ui|{
+                let mut request_download=None;
+                egui::ScrollArea::vertical().max_height(175.0).show(ui,|ui|{
                     for job in &self.live_jobs {
                         ui.label(format!("{} — {} ({})",
                             job.job_id,job.title,job.municipality));
+                        ui.horizontal(|ui|{
+                            if ui.add_enabled(!self.live_busy,
+                                egui::Button::new("GeoTIFF")).clicked() {
+                                request_download=Some((job.job_id,RemoteFileKind::GeoTiff));
+                            }
+                            if ui.add_enabled(!self.live_busy,
+                                egui::Button::new("Objecten")).clicked() {
+                                request_download=Some((job.job_id,RemoteFileKind::JobFeatures));
+                            }
+                        });
                     }
                 });
+                if let Some((id,kind))=request_download {
+                    self.download_live_job(id,kind);
+                }
             }
             ui.separator();
             ui.heading("Ingeladen proefsleuven");

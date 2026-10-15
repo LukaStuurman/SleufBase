@@ -330,3 +330,205 @@ mod tests {
         assert!(parse_live_jobs(r#"{"status":false,"data":[]}"#).is_err());
     }
 }
+
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RemoteFileKind {
+    GeoTiff,
+    JobFeatures,
+}
+impl RemoteFileKind {
+    fn remote_name(self,job:&Job)->Result<String,String> {
+        match self {
+            Self::GeoTiff if !job.prefix.trim().is_empty() =>
+                Ok(format!("{}.tiff", job.prefix.trim())),
+            Self::GeoTiff => Err("KickTheMap-job heeft geen bestands-prefix".into()),
+            Self::JobFeatures => Ok("jobFeatures.json".into())
+        }
+    }
+    fn extension(self)->&'static str {
+        match self {Self::GeoTiff=>"tiff",Self::JobFeatures=>"json"}
+    }
+    fn folder(self)->&'static str {
+        match self {Self::GeoTiff=>"cloud",Self::JobFeatures=>"cloud"}
+    }
+}
+fn safe_file_stem(title:&str,id:u64)->String {
+    let mut stem=title.trim().chars().map(|c|
+        if c.is_ascii_alphanumeric() || "._-".contains(c) {c} else {'_'}
+    ).collect::<String>();
+    stem=stem.trim_matches(|c| c=='.'||c=='-'||c=='_').to_owned();
+    if stem.is_empty(){format!("kickthemap_job_{id}")}else{stem}
+}
+/// Signed URL must be HTTPS, public cloud storage or KickTheMap origin,
+/// without embedded user credentials. Never send session cookies to this URL.
+pub fn validate_signed_url(raw:&str)->Result<reqwest::Url,String> {
+    let url=reqwest::Url::parse(raw)
+        .map_err(|_|"KickTheMap gaf een ongeldige downloadlink".to_owned())?;
+    if url.scheme()!="https" || !url.username().is_empty() || url.password().is_some() {
+        return Err("Onveilige KickTheMap-downloadlink".into());
+    }
+    let host=url.host_str().ok_or("Downloadlink heeft geen host")?
+        .to_ascii_lowercase();
+    let allowed=[
+        "amazonaws.com","cloudfront.net","my.kickthemap.com","storage.googleapis.com",
+        "r2.cloudflarestorage.com"
+    ];
+    if !allowed.iter().any(|d|host==*d || host.ends_with(&format!(".{d}"))) {
+        return Err("Downloadlink gebruikt een niet-toegestaan domein".into());
+    }
+    if url.port_or_known_default()!=Some(443) {
+        return Err("Downloadlink vereist HTTPS op poort 443".into());
+    }
+    Ok(url)
+}
+
+fn extract_signed_url(content:&str)->Result<reqwest::Url,String> {
+    let payload:Value=serde_json::from_str(content)
+        .map_err(|_|"KickTheMap gaf geen downloadlink-JSON terug".to_owned())?;
+    if payload.get("status")!=Some(&Value::Bool(true)) {
+        return Err("KickTheMap meldt dat het bestand niet beschikbaar is".into());
+    }
+    let data=payload.get("data");
+    let candidate=data.and_then(Value::as_str)
+        .or_else(||data.and_then(|x|x.get("url")).and_then(Value::as_str))
+        .or_else(||data.and_then(|x|x.get("downloadUrl")).and_then(Value::as_str))
+        .or_else(||data.and_then(|x|x.get("download_url")).and_then(Value::as_str))
+        .or_else(||payload.get("url").and_then(Value::as_str))
+        .ok_or("KickTheMap-downloadantwoord bevat geen URL")?;
+    validate_signed_url(candidate)
+}
+
+fn verify_download(path:&std::path::Path,kind:RemoteFileKind)->Result<(),String>{
+    use std::io::Read;
+    let mut file=std::fs::File::open(path).map_err(|e|e.to_string())?;
+    match kind {
+        RemoteFileKind::GeoTiff=>{
+            let mut magic=[0u8;4];
+            file.read_exact(&mut magic).map_err(|_|"GeoTIFF-download te klein".to_owned())?;
+            if !matches!(magic,[b'I',b'I',42,0] | [b'M',b'M',0,42] |
+                [b'I',b'I',43,0] | [b'M',b'M',0,43]) {
+                return Err("Download is geen TIFF/GeoTIFF-bestand".into());
+            }
+        }
+        RemoteFileKind::JobFeatures=>{
+            let mut bytes=Vec::new();
+            file.take(64*1024*1024+1).read_to_end(&mut bytes).map_err(|e|e.to_string())?;
+            if bytes.len()>64*1024*1024 {return Err("Objectbestand is te groot".into());}
+            let payload:Value=serde_json::from_slice(&bytes)
+                .map_err(|e|format!("Ongeldig jobFeatures.json: {e}"))?;
+            if !payload.get("features").is_some_and(Value::is_array) {
+                return Err("JobFeatures bevat geen features-lijst".into());
+            }
+        }
+    }
+    Ok(())
+}
+impl KickTheMapLiveClient {
+    /// Download only via the established account session and signed HTTPS URL.
+    /// Writes atomically with no overwrite of existing Python/Rust source files.
+    pub fn download_job(
+        &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path
+    )->Result<std::path::PathBuf,String> {
+        use std::io::Write;
+        let remote=kind.remote_name(job)?;
+        let name=safe_file_stem(&job.title,job.job_id);
+        let export_name=match kind {
+            RemoteFileKind::GeoTiff=>format!("{name}.tiff"),
+            RemoteFileKind::JobFeatures=>format!("{name}_jobFeatures.json")
+        };
+        let filename=match kind {
+            RemoteFileKind::GeoTiff=>
+                format!("{name}_{}.tiff",job.job_id),
+            RemoteFileKind::JobFeatures=>
+                format!("{name}_{}_jobFeatures.json",job.job_id)
+        };
+        let destination=root.join(filename);
+        if destination.exists() {return Err("Bestand bestaat al; overschrijven is uitgeschakeld".into());}
+        std::fs::create_dir_all(root).map_err(|e|e.to_string())?;
+        let fields=[
+            ("projectId",job.job_id.to_string()),
+            ("folder",kind.folder().to_string()),
+            ("fileName",remote),
+            ("exportName",export_name)
+        ];
+        let mut signed=None;
+        for mode in ["multipart","form","json"] {
+            let mut request=self.client.post(format!("{ORIGIN}/jobs/get-file-url"))
+                .header("X-CSRF-TOKEN",self.csrf.as_str());
+            request=match mode {
+                "multipart"=>{
+                    let mut form=reqwest::blocking::multipart::Form::new();
+                    for (key,value) in &fields {form=form.text((*key).to_owned(),value.clone());}
+                    request.multipart(form)
+                }
+                "form"=>request.form(&fields),
+                _=>request.json(&fields.iter().map(|(k,v)|((*k).to_owned(),v.clone()))
+                    .collect::<std::collections::BTreeMap<_,_>>())
+            };
+            let response=match request.send() {
+                Ok(response)=>response,
+                Err(_)=>continue
+            };
+            if [401,403,419].contains(&response.status().as_u16()) {
+                return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());
+            }
+            if !response.status().is_success() {continue;}
+            if let Ok(text)=response_text(response,512*1024) {
+                if let Ok(url)=extract_signed_url(&text) {
+                    signed=Some(url);break;
+                }
+            }
+        }
+        let signed=signed.ok_or("KickTheMap gaf geen bruikbare downloadlink terug")?;
+        let download_client=Client::builder()
+            .redirect(redirect::Policy::custom(|attempt|{
+                match validate_signed_url(attempt.url().as_str()) {
+                    Ok(_) if attempt.previous().len()<4=>attempt.follow(),
+                    _=>attempt.stop(),
+                }
+            }))
+            .timeout(Duration::from_secs(180))
+            .user_agent("SleufBase-Rust/0.1")
+            .build().map_err(|e|e.to_string())?;
+        let mut response=download_client.get(signed).send()
+            .map_err(|e|format!("KickTheMap-download mislukt: {e}"))?
+            .error_for_status().map_err(|e|format!("KickTheMap-download HTTP-fout: {e}"))?;
+        let max_bytes=match kind{
+            RemoteFileKind::GeoTiff=>2_000_000_000u64,
+            RemoteFileKind::JobFeatures=>64*1024*1024u64
+        };
+        if response.content_length().is_some_and(|len|len>max_bytes) {
+            return Err("Downloadbestand is groter dan de toegestane limiet".into());
+        }
+        let mut temporary=tempfile::NamedTempFile::new_in(root).map_err(|e|e.to_string())?;
+        let downloaded=std::io::copy(&mut response.take(max_bytes+1),temporary.as_file_mut())
+            .map_err(|e|format!("Download schrijven mislukt: {e}"))?;
+        if downloaded>max_bytes {return Err("Download is te groot".into());}
+        temporary.as_file_mut().flush().map_err(|e|e.to_string())?;
+        temporary.as_file_mut().sync_all().map_err(|e|e.to_string())?;
+        verify_download(temporary.path(),kind)?;
+        temporary.persist_noclobber(&destination)
+            .map_err(|e|format!("Downloadbestand niet opgeslagen: {}",e.error))?;
+        Ok(destination)
+    }
+}
+#[cfg(test)]
+mod download_tests {
+    use super::*;
+    #[test]
+    fn validates_download_domains() {
+        assert!(validate_signed_url("https://my-bucket.s3.eu-central-1.amazonaws.com/abc?signature=x").is_ok());
+        assert!(validate_signed_url("http://localhost:80/").is_err());
+        assert!(validate_signed_url("https://169.254.169.254/").is_err());
+        assert!(validate_signed_url("https://amazonaws.com.evil.test/").is_err());
+        assert!(validate_signed_url("https://person:pass@s3.amazonaws.com/key").is_err());
+    }
+    #[test]
+    fn signed_response_and_name_sanitize() {
+        let response=r#"{"status":true,"data":{"url":"https://s3.amazonaws.com/test/file"}}"#;
+        assert!(extract_signed_url(response).is_ok());
+        assert!(extract_signed_url(r#"{"status":false,"data":null}"#).is_err());
+        assert_eq!(safe_file_stem("../../PS 1",12),"PS_1");
+    }
+}
