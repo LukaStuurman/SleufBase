@@ -11,6 +11,7 @@ use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::marxact;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
+use sleufbase_rust::cadastral::{self,CadastralLayer};
 use sleufbase_rust::ahn;
 use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
 use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
@@ -66,6 +67,9 @@ pub struct SleufBaseApp {
     bgt_layers:Vec<BgtLayer>,
     bgt_rx:Option<Receiver<Result<BgtLayer,String>>>,
     bgt_busy:bool,
+    cadastral:Option<CadastralLayer>,
+    cadastral_rx:Option<Receiver<Result<CadastralLayer,String>>>,
+    cadastral_busy:bool,
     ahn_rx:Option<Receiver<Result<Option<f64>,String>>>,
     ahn_busy:bool,
     jobs_cache:Option<JobsCache>,
@@ -113,6 +117,9 @@ impl Default for SleufBaseApp {
             bgt_layers:Vec::new(),
             bgt_rx:None,
             bgt_busy:false,
+            cadastral:None,
+            cadastral_rx:None,
+            cadastral_busy:false,
             ahn_rx:None,
             ahn_busy:false,
             jobs_cache:None,
@@ -155,6 +162,7 @@ impl SleufBaseApp {
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
             bgt_layers:self.bgt_layers.clone(),
+            cadastral:self.cadastral.clone(),
             virtual_trenches:self.virtual_trenches.clone(),
             comments:self.comments.clone(),
             ..NativeProject::default()
@@ -167,6 +175,9 @@ impl SleufBaseApp {
         self.raster_textures.clear();
         self.overlays.clear();
         self.bgt_layers.clear();
+        self.cadastral=None;
+        self.cadastral_rx=None;
+        self.cadastral_busy=false;
         self.bgt_rx=None;
         self.bgt_busy=false;
         self.virtual_trenches.clear();
@@ -193,6 +204,7 @@ impl SleufBaseApp {
                 self.raster_textures=textures;
                 self.overlays=doc.overlays;
                 self.bgt_layers=doc.bgt_layers;
+                self.cadastral=doc.cadastral;
                 self.virtual_trenches=doc.virtual_trenches;
                 self.comments=doc.comments;
                 self.pdok_texture=None;
@@ -239,6 +251,7 @@ impl SleufBaseApp {
                     self.geotiffs=project_data.rasters;
                     self.overlays=project_data.overlays;
                     self.bgt_layers=project_data.bgt_layers;
+                    self.cadastral=project_data.cadastral;
                     self.virtual_trenches=project_data.virtual_trenches;
                     self.comments=project_data.comments;
                     self.project_name=project_data.name;
@@ -439,6 +452,53 @@ impl SleufBaseApp {
                 self.message="AHN-verzoek afgebroken".into();
                 self.ahn_busy=false;
                 self.ahn_rx=None;
+            }
+            _=>{}
+        }
+    }
+
+
+    fn start_cadastral(&mut self) {
+        if self.cadastral_busy {return;}
+        if self.geotiffs.iter().any(|r|r.epsg.is_some_and(|epsg|epsg!=28992)) {
+            self.message="Kadaster WFS vereist RD-coördinaten EPSG:28992".into();
+            return;
+        }
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad een RD-gebied om kadastrale gegevens op te halen".into();
+            return;
+        };
+        if let Err(err)=cadastral::tiles(bounds) {
+            self.message=format!("Kadaster WFS: {err}");return;
+        }
+        let (tx,rx)=mpsc::channel();
+        self.cadastral_rx=Some(rx);
+        self.cadastral_busy=true;
+        self.message="Kadastrale PDOK-lijnen en labels ophalen...".into();
+        std::thread::spawn(move||{
+            let _=tx.send(cadastral::fetch_cadastral(bounds));
+        });
+    }
+    fn poll_cadastral(&mut self){
+        let event=self.cadastral_rx.as_ref().map(|rx|rx.try_recv());
+        match event{
+            Some(Ok(Ok(data)))=>{
+                let count=data.linework.iter().map(|g|g.paths.len()).sum::<usize>();
+                self.message=format!("Kadastrale gegevens: {count} lijnen en {} labels",data.labels.len());
+                self.cadastral=Some(data);
+                self.cadastral_busy=false;
+                self.cadastral_rx=None;
+                self.dirty=true;
+            }
+            Some(Ok(Err(err)))=>{
+                self.message=format!("Kadaster WFS: {err}");
+                self.cadastral_busy=false;
+                self.cadastral_rx=None;
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.message="Kadaster WFS-verzoek onderbroken".into();
+                self.cadastral_busy=false;
+                self.cadastral_rx=None;
             }
             _=>{}
         }
@@ -785,6 +845,7 @@ fn canvas(
     overlays:&[DxfOverlay],
     virtual_trenches:&[VirtualTrench],
     bgt_layers:&[BgtLayer],
+    cadastral:Option<&CadastralLayer>,
     comments:&[Comment],
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
@@ -801,6 +862,9 @@ fn canvas(
         bounds=union_bounds(bounds,Some(raster.bounds));
     }
     for layer in bgt_layers.iter().filter(|l|l.visible) {
+        bounds=union_bounds(bounds,Some(layer.bounds));
+    }
+    if let Some(layer)=cadastral.filter(|l|l.visible) {
         bounds=union_bounds(bounds,Some(layer.bounds));
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
@@ -898,6 +962,30 @@ fn canvas(
             ],Stroke::new(1.5,ORANGE));
         }
     }
+    if let Some(kad)=cadastral.filter(|l|l.visible) {
+        for layer in &kad.linework {
+            let color=match layer.layer_name.as_str() {
+                "KAD_GRENS"=>Color32::from_rgb(65,74,84),
+                "KAD_BEBOUWING"=>Color32::from_rgb(150,75,54),
+                _=>Color32::from_rgb(123,124,126)
+            };
+            for path in &layer.paths {
+                for pair in path.windows(2) {
+                    painter.line_segment([
+                        project(pair[0].0,pair[0].1),
+                        project(pair[1].0,pair[1].1)
+                    ],Stroke::new(1.25,color));
+                }
+            }
+        }
+        // The rotation is preserved in the model, but egui text rendering
+        // here is not rotation-aware yet.
+        for label in &kad.labels {
+            painter.text(project(label.position.0,label.position.1),
+                egui::Align2::CENTER_CENTER,&label.text,
+                egui::FontId::proportional(11.0),INK);
+        }
+    }
     for layer in bgt_layers.iter().filter(|l|l.visible) {
         let color=match layer.kind {
             BgtKind::Wegdeel=>Color32::from_rgb(110,117,126),
@@ -967,6 +1055,7 @@ impl eframe::App for SleufBaseApp {
         self.poll_live_jobs();
         self.poll_live_download(ctx);
         self.poll_bgt();
+        self.poll_cadastral();
         self.poll_ahn();
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
@@ -1010,6 +1099,9 @@ impl eframe::App for SleufBaseApp {
                 }
                 if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT terrein")).clicked() {
                     self.start_bgt(BgtKind::OnbegroeidTerreindeel);
+                }
+                if ui.add_enabled(!self.cadastral_busy,egui::Button::new("Kadaster WFS")).clicked() {
+                    self.start_cadastral();
                 }
                 if ui.add_enabled(!self.ahn_busy,egui::Button::new("AHN hoogte")).clicked() {
                     self.request_ahn();
@@ -1155,6 +1247,14 @@ impl eframe::App for SleufBaseApp {
             }
             if let Some(i)=remove_comment {self.comments.remove(i);self.dirty=true;}
             ui.separator();
+            ui.heading("Kadaster WFS");
+            if let Some(layer)=&mut self.cadastral {
+                let path_count=layer.linework.iter().map(|l|l.paths.len()).sum::<usize>();
+                if ui.checkbox(&mut layer.visible,
+                    format!("{path_count} lijnen, {} labels",layer.labels.len())
+                ).changed(){self.dirty=true;}
+            }
+            ui.separator();
             ui.heading("PDOK BGT-lagen");
             for layer in &mut self.bgt_layers {
                 if ui.checkbox(&mut layer.visible,
@@ -1185,11 +1285,11 @@ impl eframe::App for SleufBaseApp {
 
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.heading("Kaart");
-            ui.label("Zoom met scrollwiel, sleep om te verschuiven. Basis GeoTIFF en DXF zonder PDOK ondergrond.");
+            ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, BGT en Kadaster (preview).");
             let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
                 .into_iter().cloned().collect();
             canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&self.virtual_trenches,&self.bgt_layers,&self.comments,
+                &self.overlays,&self.virtual_trenches,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 self.pdok_texture.as_ref(),self.pdok_bounds,
                 &mut self.zoom,&mut self.pan);
         });

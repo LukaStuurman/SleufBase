@@ -4,6 +4,7 @@
 
 use crate::dxf_read::DxfOverlay;
 use crate::bgt::BgtLayer;
+use crate::cadastral::CadastralLayer;
 use crate::geotiff::GeoTiffInfo;
 use crate::model::Dataset;
 use crate::virtual_trench::VirtualTrench;
@@ -35,6 +36,8 @@ pub struct NativeProject {
     #[serde(default)]
     pub bgt_layers: Vec<BgtLayer>,
     #[serde(default)]
+    pub cadastral: Option<CadastralLayer>,
+    #[serde(default)]
     pub virtual_trenches: Vec<VirtualTrench>,
     pub comments: Vec<Comment>,
 }
@@ -49,6 +52,7 @@ impl Default for NativeProject {
             rasters:Vec::new(),
             overlays:Vec::new(),
             bgt_layers:Vec::new(),
+            cadastral:None,
             virtual_trenches:Vec::new(),
             comments:Vec::new(),
         }

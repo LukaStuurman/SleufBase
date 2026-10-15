@@ -15,6 +15,7 @@ pub mod kickthemap_live;
 pub mod bgt;
 pub mod ahn;
 pub mod marxact;
+pub mod cadastral;
 pub mod settings_compat;
 pub mod export;
 pub mod model;

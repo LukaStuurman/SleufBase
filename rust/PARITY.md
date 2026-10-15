@@ -12,7 +12,7 @@
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
 | GeoTIFF RD-referentie, rotatie en transformaties | models.py, geotiff.py | Affine kern gereed, niet UI-getest | RD coördinaten en overlay-match op fixtures |
 | PDOK luchtfoto en kwaliteitsopties | pdok.py, pdok_default_background_patch.py | Asynchrone WMS-kaartlaag, overige bron-/kwaliteitsopties ontbreken | Source-switch/cache/retry en standaardgedrag |
-| BGT kaart en alle API-bronnen | bgt_roadpart.py, bgt_terrain_boundary.py, bgt_vector_tiles.py, cadastral_wfs.py | Native OGC wegdeel/terreinranden kaartoverlay, rest ontbreekt | Geometrie, caching, stijlen, WFS/foutgevallen |
+| BGT kaart en alle API-bronnen | bgt_roadpart.py, bgt_terrain_boundary.py, bgt_vector_tiles.py, cadastral_wfs.py | BGT OGC wegdeel/terrein en Kadaster WFS 5 types met labels, maar vector tiles/caches/templates ontbreken | Geometrie, caching, stijlen, WFS/foutgevallen |
 | Kaarttegels, OpenStreetMap, lokale cache | web_tiles.py, osm.py | Ontbreekt | Identieke rendering, limieten en offline-fallback |
 | AHN, maaiveld en AI-assistent | ahn.py, ai_maaiveld.py, vllm_runtime.py | Native WCS hoogteproef rond kaartmidden; profielen/AI ontbreken | Geldige meetwaarden, foutafhandeling en AI-fallback |
 | DXF import, bestaande blokken, metadata | dxf.py | ASCII basis deels | Kleur, laag, attributen, geometrie, XDATA |
