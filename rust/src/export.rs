@@ -1,6 +1,8 @@
 use crate::disciplines::{matching_rule, summarize, Rule};
 use crate::model::{Dataset, Geometry, Vertex};
 use crate::virtual_trench::VirtualTrench;
+use crate::cadastral::CadastralLayer;
+use crate::bgt::{BgtKind,BgtLayer};
 use rust_xlsxwriter::{Color, Format, Workbook};
 use std::fmt::Write as _;
 use std::fs;
@@ -85,8 +87,19 @@ pub fn write_dxf(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<()
 /// The DXF template/AutoCAD dynamic blocks are still separate future parity work.
 pub fn write_dxf_with_trenches(path: &Path, datasets: &[Dataset],
     trenches: &[VirtualTrench],rules: &[Rule]) -> Result<(), String> {
-    if datasets.is_empty() && trenches.is_empty() {
-        return Err("Geen ingeladen jobs of virtuele proefsleuven".into());
+    write_dxf_with_layers(path,datasets,trenches,None,&[],rules)
+}
+/// Base CAD export (not a template): object lines, 3D measured trench
+/// boundaries, PDOK cadastral boundaries and text with measured rotation,
+/// and selected BGT linework, each on separate named AutoCAD layers.
+pub fn write_dxf_with_layers(path:&Path,datasets:&[Dataset],
+    trenches:&[VirtualTrench],cadastral:Option<&CadastralLayer>,
+    bgt:&[BgtLayer],rules:&[Rule]) -> Result<(),String> {
+    if datasets.is_empty() && trenches.is_empty() &&
+        cadastral.is_none_or(|c|!c.visible) &&
+        bgt.iter().all(|l|!l.visible)
+    {
+        return Err("Geen objecten, proefsleuven of kaartlagen om te exporteren".into());
     }
     prepare_output(path)?;
     let mut out = String::from(
@@ -135,6 +148,55 @@ pub fn write_dxf_with_trenches(path: &Path, datasets: &[Dataset],
                 trench.start.x,trench.start.y,label);
         }
     }
+    if let Some(cad)=cadastral.filter(|c|c.visible) {
+        for collection in &cad.linework {
+            let layer=collection.layer_name.chars()
+                .filter(|c|c.is_ascii_alphanumeric()||*c=='_')
+                .take(30).collect::<String>();
+            if layer.is_empty(){continue;}
+            for line in &collection.paths {
+                for pair in line.windows(2) {
+                    let (x0,y0)=pair[0];
+                    let (x1,y1)=pair[1];
+                    if [x0,y0,x1,y1].iter().any(|v|!v.is_finite()){continue;}
+                    write_line(&mut out,&layer,7,
+                        &Vertex{x:x0,y:y0,z:None},
+                        &Vertex{x:x1,y:y1,z:None});
+                    segment_count+=1;
+                }
+            }
+        }
+        for label in &cad.labels {
+            let layer=label.layer_name.chars()
+                .filter(|c|c.is_ascii_alphanumeric()||*c=='_')
+                .take(30).collect::<String>();
+            let value=label.text.chars()
+                .filter(|c|!c.is_control() && *c!='\\')
+                .take(200).collect::<String>();
+            if layer.is_empty() || value.is_empty() ||
+                !label.position.0.is_finite() || !label.position.1.is_finite() ||
+                !label.rotation.is_finite(){continue;}
+            let _=write!(out,"0\nTEXT\n8\n{}\n10\n{:.8}\n20\n{:.8}\n30\n0\n40\n0.6\n50\n{:.6}\n1\n{}\n",
+                layer,label.position.0,label.position.1,label.rotation,value);
+            segment_count+=1;
+        }
+    }
+    for collection in bgt.iter().filter(|c|c.visible) {
+        let (layer,color)=match collection.kind {
+            BgtKind::Wegdeel=>("BGT_WEGDEEL",8u16),
+            BgtKind::OnbegroeidTerreindeel=>("BGT_TERREIN",3u16)
+        };
+        for path in &collection.paths{
+            for pair in path.windows(2){
+                let (x0,y0)=pair[0];let(x1,y1)=pair[1];
+                if [x0,y0,x1,y1].iter().any(|v|!v.is_finite()){continue;}
+                write_line(&mut out,layer,color,
+                    &Vertex{x:x0,y:y0,z:None},
+                    &Vertex{x:x1,y:y1,z:None});
+                segment_count+=1;
+            }
+        }
+    }
     if segment_count == 0 { return Err("Geen lijnen om te exporteren".into()); }
     out.push_str("0\nENDSEC\n0\nEOF\n");
     let temporary = path.with_extension("dxf.partial");
@@ -154,6 +216,36 @@ mod tests {
     use crate::disciplines::RULES;
     use std::path::PathBuf;
 
+    #[test]
+    fn exports_pdok_cadastral_text_and_bgt_layers() {
+        let dir=tempfile::tempdir().unwrap();
+        let path=dir.path().join("cadastral.dxf");
+        let bounds=crate::model::Bounds{
+            min_x:168000.,min_y:401000.,max_x:168200.,max_y:401200.
+        };
+        let cadastral=CadastralLayer{
+            visible:true,bounds,
+            linework:vec![crate::cadastral::CadLinework{
+                layer_name:"KAD_PERCEEL".into(),
+                paths:vec![vec![(168000.,401000.),(168001.,401000.)]]
+            }],
+            labels:vec![crate::cadastral::CadLabel{
+                layer_name:"KAD_STRAATNAAM".into(),
+                text:"Nieuwe straat".into(),
+                position:(168000.5,401000.2),rotation:30.0
+            }]
+        };
+        let bgt=BgtLayer{
+            kind:BgtKind::Wegdeel,visible:true,bounds,
+            paths:vec![vec![(168000.,401000.),(168002.,401002.)]]
+        };
+        write_dxf_with_layers(&path,&[],&[],Some(&cadastral),&[bgt],RULES).unwrap();
+        let text=fs::read_to_string(path).unwrap();
+        assert!(text.contains("8\nKAD_PERCEEL\n"));
+        assert!(text.contains("8\nBGT_WEGDEEL\n"));
+        assert!(text.contains("1\nNieuwe straat\n"));
+        assert!(text.contains("50\n30.000000\n"));
+    }
     #[test]
     fn exports_measured_marxact_3d_polygon() {
         let dir=tempfile::tempdir().unwrap();
