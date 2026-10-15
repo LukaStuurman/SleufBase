@@ -3,7 +3,7 @@
 
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use sleufbase_rust::{
-    load_job_features, write_dxf, write_xlsx, Bounds, Dataset, Geometry,
+    load_job_features, write_dxf_with_trenches, write_xlsx, Bounds, Dataset, Geometry,
     Vertex, RULES
 };
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
@@ -738,7 +738,7 @@ impl SleufBaseApp {
             .add_filter("DXF",&["dxf"])
             .set_file_name("SleufBase-Objecten-Rust.dxf").save_file()
         {
-            self.message=match write_dxf(&path,&self.export_datasets(),RULES) {
+            self.message=match write_dxf_with_trenches(&path,&self.export_datasets(),&self.virtual_trenches,RULES) {
                 Ok(())=>format!("DXF opgeslagen: {}",path.display()),
                 Err(err)=>format!("DXF-export mislukt: {err}"),
             };

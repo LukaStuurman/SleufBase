@@ -1,5 +1,6 @@
 use crate::disciplines::{matching_rule, summarize, Rule};
 use crate::model::{Dataset, Geometry, Vertex};
+use crate::virtual_trench::VirtualTrench;
 use rust_xlsxwriter::{Color, Format, Workbook};
 use std::fmt::Write as _;
 use std::fs;
@@ -76,7 +77,17 @@ fn write_line(out: &mut String, layer: &str, color: u16, start: &Vertex, end: &V
 }
 
 pub fn write_dxf(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(), String> {
-    if datasets.is_empty() { return Err("Geen ingeladen jobs".into()); }
+    write_dxf_with_trenches(path,datasets,&[],rules)
+}
+
+/// Exports a standards-compatible R12 3D POLYLINE for each measured MarXact
+/// boundary or manually created virtual trench, preserving measured elevations.
+/// The DXF template/AutoCAD dynamic blocks are still separate future parity work.
+pub fn write_dxf_with_trenches(path: &Path, datasets: &[Dataset],
+    trenches: &[VirtualTrench],rules: &[Rule]) -> Result<(), String> {
+    if datasets.is_empty() && trenches.is_empty() {
+        return Err("Geen ingeladen jobs of virtuele proefsleuven".into());
+    }
     prepare_output(path)?;
     let mut out = String::from(
         "0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n"
@@ -104,6 +115,26 @@ pub fn write_dxf(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<()
             }
         }
     }
+    for trench in trenches {
+        let boundary=trench.measured_boundary();
+        if boundary.len()<4 { continue; }
+        let _=write!(out,"0\nPOLYLINE\n8\nVIRTUAL_TRENCH_3D\n62\n7\n66\n1\n70\n9\n");
+        for (index,(x,y)) in boundary.iter().enumerate().take(boundary.len()-1) {
+            let z=trench.boundary_3d.get(index).and_then(|v|v.z).unwrap_or(0.0);
+            let _=write!(out,
+                "0\nVERTEX\n8\nVIRTUAL_TRENCH_3D\n10\n{:.8}\n20\n{:.8}\n30\n{:.8}\n70\n32\n",
+                x,y,z);
+        }
+        out.push_str("0\nSEQEND\n8\nVIRTUAL_TRENCH_3D\n");
+        segment_count += boundary.len();
+        let label=trench.label.chars().filter(|c|
+            c.is_alphanumeric()||" _.-".contains(*c)).take(100).collect::<String>();
+        if !label.is_empty(){
+            let _=write!(out,
+                "0\nTEXT\n8\nVIRTUAL_TRENCH_LABEL\n10\n{:.8}\n20\n{:.8}\n30\n0.0\n40\n0.3\n1\n{}\n",
+                trench.start.x,trench.start.y,label);
+        }
+    }
     if segment_count == 0 { return Err("Geen lijnen om te exporteren".into()); }
     out.push_str("0\nENDSEC\n0\nEOF\n");
     let temporary = path.with_extension("dxf.partial");
@@ -123,6 +154,33 @@ mod tests {
     use crate::disciplines::RULES;
     use std::path::PathBuf;
 
+    #[test]
+    fn exports_measured_marxact_3d_polygon() {
+        let dir=tempfile::tempdir().unwrap();
+        let path=dir.path().join("boundary.dxf");
+        let mut trench=VirtualTrench::new(
+            "PS_123".to_owned(),
+            Vertex{x:0.,y:0.5,z:Some(10.)},
+            Vertex{x:4.,y:0.5,z:Some(11.)},
+            1.0
+        ).unwrap();
+        trench.boundary_3d=vec![
+            Vertex{x:0.,y:0.,z:Some(10.)},
+            Vertex{x:4.,y:0.,z:Some(11.)},
+            Vertex{x:4.,y:1.,z:Some(12.)},
+            Vertex{x:0.,y:1.,z:Some(13.)}
+        ];
+        write_dxf_with_trenches(&path,&[],&[trench],RULES).unwrap();
+        let text=fs::read_to_string(&path).unwrap();
+        assert!(text.contains("VIRTUAL_TRENCH_3D"));
+        assert!(text.contains("70\n9\n"));
+        let parsed=crate::dxf_read::parse_dxf(&text,&path).unwrap();
+        let boundary=parsed.features.iter().find(|f|f.entity_type=="POLYLINE").unwrap();
+        assert_eq!(boundary.points.len(),5);
+        assert_eq!(boundary.points[3].z,Some(13.0));
+        assert_eq!(boundary.points[0].x,boundary.points[4].x);
+        assert!(write_dxf_with_trenches(&path,&[],&[],RULES).is_err());
+    }
     #[test]
     fn exports_dxf_line_entities_and_rejects_overwrite() {
         let dir = std::env::temp_dir().join(format!("sleufbase-rust-{}", std::process::id()));

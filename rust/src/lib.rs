@@ -21,6 +21,6 @@ pub mod model;
 pub mod parse;
 
 pub use disciplines::{summarize, matching_rule, Rule, Summary, RULES};
-pub use export::{write_dxf, write_xlsx};
+pub use export::{write_dxf, write_dxf_with_trenches, write_xlsx};
 pub use model::{Bounds, Dataset, Feature, Geometry, Vertex};
 pub use parse::{load_job_features, parse_job_features};

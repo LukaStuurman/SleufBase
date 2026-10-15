@@ -115,6 +115,12 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
 - **Nog niet volledig:** echte MarXact DXF kan alternatieve geneste `MULTILEADER` opslag gebruiken. Daardoor zijn nog representatieve exportbestanden en vervolgtests nodig. Volledige snapping/draaiing/maatvoering en alle MarXact-patches zijn nog niet overgezet.
 
+## MarXact- en virtuele-proefsleufgrenzen in DXF
+
+- De basis-DXF-export schrijft nu ook gesloten **3D POLYLINE**-grenzen (R12) met de oorspronkelijke gemeten MarXact-Z per vertex, of de rechthoekige grens bij handmatige proefsleuven.
+- De polylines krijgen de laag `VIRTUAL_TRENCH_3D` en een eenvoudig `TEXT`-label; origineel blijft in het Rust-project beschikbaar.
+- Dit is nog **niet** de volledige AutoCAD-sjabloon/DXF-pariteit, maar voorkomt dat de gemeten MarXact-grens volledig uit de basisexport verdwijnt.
+
 ## Wat nog ontbreekt
 
 1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.

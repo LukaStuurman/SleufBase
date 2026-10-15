@@ -16,7 +16,7 @@
 | Kaarttegels, OpenStreetMap, lokale cache | web_tiles.py, osm.py | Ontbreekt | Identieke rendering, limieten en offline-fallback |
 | AHN, maaiveld en AI-assistent | ahn.py, ai_maaiveld.py, vllm_runtime.py | Native WCS hoogteproef rond kaartmidden; profielen/AI ontbreken | Geldige meetwaarden, foutafhandeling en AI-fallback |
 | DXF import, bestaande blokken, metadata | dxf.py | ASCII basis deels | Kleur, laag, attributen, geometrie, XDATA |
-| DXF objectexport (basis) | kickthemap_dxf_export.py | Deels | Volledige layer rules/XDATA/labels/polyline/tekstpariteit |
+| DXF objectexport (basis) | kickthemap_dxf_export.py | Basis R12 met punten, lijnen en virtuele/MarXact gemeten 3D-grenzen; template ontbreekt | Volledige layer rules/XDATA/labels/polyline/tekstpariteit |
 | Volledige kadastrale/template DXF export | cadastral_export.py, dxf_template_pipeline_* | Ontbreekt | Identieke output op regressie-fixtures, inclusief fonts en block/visibility |
 | Dwarsprofielen, omgekeerde profielen en labels | template_reverse_patch.py, template_dynamic_profile_leader_patch.py | Ontbreekt | Gelijkwaardige geometrie, labelplaatsing en snapshots |
 | Foto's/raster asset-bundels, veilige exports | template_raster_io.py, template_export_transaction.py | Ontbreekt | Geen verloren vorige DXF of assets bij exportfouten |
