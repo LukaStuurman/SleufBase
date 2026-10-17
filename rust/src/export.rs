@@ -6,6 +6,8 @@ use crate::bgt::{BgtKind,BgtLayer};
 use rust_xlsxwriter::{Color, Format, Workbook};
 use std::fmt::Write as _;
 use std::fs;
+use std::io::Write as _;
+use crate::storage::atomic_write;
 use std::path::Path;
 
 /// Do not silently overwrite a production drawing/report.
@@ -60,14 +62,7 @@ pub fn write_xlsx(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(
                 .map_err(|e| e.to_string())?;
         }
     }
-    let temporary = path.with_extension("xlsx.partial");
-    if temporary.exists() { return Err("Tijdelijk exportbestand bestaat al".into()); }
-    workbook.save(&temporary).map_err(|e| e.to_string())?;
-    if let Err(err) = fs::rename(&temporary, path) {
-        let _ = fs::remove_file(&temporary);
-        return Err(format!("Excel-export verplaatsen mislukt: {err}"));
-    }
-    Ok(())
+    atomic_write(path,false,|file|workbook.save_to_writer(file).map_err(|e|e.to_string()))
 }
 
 fn write_line(out: &mut String, layer: &str, color: u16, start: &Vertex, end: &Vertex) {
@@ -201,14 +196,7 @@ pub fn write_dxf_with_layers(path:&Path,datasets:&[Dataset],
     }
     if segment_count == 0 { return Err("Geen lijnen om te exporteren".into()); }
     out.push_str("0\nENDSEC\n0\nEOF\n");
-    let temporary = path.with_extension("dxf.partial");
-    if temporary.exists() { return Err("Tijdelijk exportbestand bestaat al".into()); }
-    fs::write(&temporary, out).map_err(|e| format!("DXF-export schrijven mislukt: {e}"))?;
-    if let Err(err) = fs::rename(&temporary, path) {
-        let _ = fs::remove_file(&temporary);
-        return Err(format!("DXF-export verplaatsen mislukt: {err}"));
-    }
-    Ok(())
+    atomic_write(path,false,|file|file.write_all(out.as_bytes()).map_err(|e|e.to_string()))
 }
 
 #[cfg(test)]

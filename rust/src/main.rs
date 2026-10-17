@@ -2,7 +2,7 @@ mod ui;
 
 use sleufbase_rust::{
     load_job_features, write_dxf, write_xlsx, write_dxf_with_trenches, RULES,
-    marxact, project::{NativeProject,save_project},
+    marxact, project::{NativeProject,save_project_new},
     settings_compat,
 };
 use std::path::PathBuf;
@@ -42,7 +42,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
                 virtual_trenches:trenches,
                 ..NativeProject::default()
             };
-            save_project(&output,&project)?;
+            save_project_new(&output,&project)?;
         } else {
             write_dxf_with_trenches(&output,&[],&trenches,RULES)?;
         }

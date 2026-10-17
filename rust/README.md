@@ -47,6 +47,14 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Automatische roterende back-ups in een **aparte** Rust-map. Het bestaande Python-projectformaat wordt niet overschreven.
 - Instellingen voor deze back-ups lezen, met dezelfde defaults 10 minuten en maximaal 20 back-ups.
 
+## Projectgegevens behouden
+
+- Nieuw/openen/herstellen/sluiten vraagt bij onopgeslagen werk om opslaan, doorgaan zonder opslaan of annuleren. Een mislukte of geannuleerde opslag voert de projectwissel niet uit.
+- Projectwissels koppelen oude PDOK/BGT/Kadaster/AHN-resultaten los. Een eerder gestarte KickTheMap-download blijft op schijf beschikbaar, maar wordt niet aan een inmiddels ander project toegevoegd.
+- Projecten, back-ups, Excel en DXF worden eerst volledig naar een uniek tijdelijk bestand in dezelfde map geschreven. Export en CLI-conversie publiceren zonder overschrijven, ook als een ander proces tegelijkertijd dezelfde uitvoernaam kiest.
+- Projectopslag controleert alle kaartgeometrie, labels, opmerkingen en rastertransformaties. Ongeldige gegevens vervangen geen bestaand bestand. Lezen én opslaan respecteren de projectlimiet van 128 MiB.
+- Onbekende projectvelden worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. Dit is nog geen converter voor het oude Python-formaat.
+
 ## Uitbreiding: virtuele proefsleuven
 
 - Rust-datamodel voor virtuele proefsleuven met startpunt, eindpunt, breedte en optionele objecten.

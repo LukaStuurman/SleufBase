@@ -7,8 +7,8 @@
 | Onderdeel | Bestaande Python-bron | Rust status | Acceptatie-eis voor volwaardige vervanging |
 |---|---|---|---|
 | Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Basis kaartinteractie en opmerkingen, rest deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
-| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Eigen Rust-projectopslag; Python-compatibiliteit ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
-| Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Automatische roterende Rust-backup; restore-dialoog ontbreekt | Onderbreking en restore-tests |
+| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Atomaire eigen opslag met volledige geometrievalidatie; onopgeslagen werk en projectwissels beschermd; Python-compatibiliteit ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
+| Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Roterende Rust-backup en bestandskeuze voor herstel; herstel opent als nieuw project, regressies voor fout/annuleren/projectwissel | Onderbreking en restore-tests; hersteloverzicht en werkelijke crashacceptatie nog open |
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
 | GeoTIFF RD-referentie, rotatie en transformaties | models.py, geotiff.py | Affine kern gereed, niet UI-getest | RD coördinaten en overlay-match op fixtures |
 | PDOK luchtfoto en kwaliteitsopties | pdok.py, pdok_default_background_patch.py | Asynchrone WMS-kaartlaag, overige bron-/kwaliteitsopties ontbreken | Source-switch/cache/retry en standaardgedrag |

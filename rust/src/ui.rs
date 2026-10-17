@@ -53,6 +53,9 @@ impl TrenchForm {
 }
 
 
+#[derive(Clone,Debug,PartialEq)]
+enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), Close }
+
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
@@ -95,6 +98,10 @@ pub struct SleufBaseApp {
     project_path: Option<PathBuf>,
     project_name: String,
     dirty: bool,
+    pending_project_action:Option<ProjectAction>,
+    close_confirmed:bool,
+    project_generation:u64,
+    live_download_generation:u64,
     backup_settings: AutosaveSettings,
     last_backup: Instant,
     zoom: f64,
@@ -146,6 +153,10 @@ impl Default for SleufBaseApp {
             project_path:None,
             project_name:"Naamloos project".into(),
             dirty:false,
+            pending_project_action:None,
+            close_confirmed:false,
+            project_generation:0,
+            live_download_generation:0,
             backup_settings:project::read_autosave_settings(
                 &project::app_data_directory().join("autosave-settings.json")),
             last_backup:Instant::now(),
@@ -170,108 +181,107 @@ impl SleufBaseApp {
         }
     }
 
-    fn new_project(&mut self) {
-        self.datasets.clear();
-        self.geotiffs.clear();
-        self.raster_textures.clear();
-        self.overlays.clear();
-        self.bgt_layers.clear();
-        self.cadastral=None;
-        self.cadastral_rx=None;
-        self.cadastral_busy=false;
-        self.bgt_rx=None;
-        self.bgt_busy=false;
-        self.virtual_trenches.clear();
-        self.comments.clear();
-        self.pdok_texture=None;
-        self.pdok_bounds=None;
-        self.pdok_rx=None;
-        self.pdok_busy=false;
-        self.selected=None;
-        self.project_path=None;
-        self.project_name="Naamloos project".into();
-        self.dirty=false;
-        self.zoom=1.0;
-        self.pan=egui::Vec2::ZERO;
-        self.message="Nieuw leeg Rust-project. De vorige gegevens zijn uit het huidige venster verwijderd.".into();
+    fn clear_project_requests(&mut self) {
+        self.project_generation=self.project_generation.wrapping_add(1);
+        self.pdok_rx=None; self.pdok_busy=false;
+        self.bgt_rx=None; self.bgt_busy=false;
+        self.cadastral_rx=None; self.cadastral_busy=false;
+        self.ahn_rx=None; self.ahn_busy=false;
+        self.pdok_texture=None; self.pdok_bounds=None;
+        self.show_trench_dialog=false; self.show_comment_dialog=false;
+        self.zoom=1.0; self.pan=egui::Vec2::ZERO;
+        self.last_backup=Instant::now();
+        // Keep an in-flight download receiver so its in-memory login session
+        // can return. Its generation prevents importing into a different project.
     }
 
-    fn load_project_file(&mut self, path: PathBuf, ctx: &egui::Context) {
-        match read_project(&path) {
-            Ok(doc) => {
-                let textures=doc.rasters.iter().map(|r|load_texture(&r.path,ctx)).collect();
-                self.datasets=doc.datasets;
-                self.geotiffs=doc.rasters;
-                self.raster_textures=textures;
-                self.overlays=doc.overlays;
-                self.bgt_layers=doc.bgt_layers;
-                self.cadastral=doc.cadastral;
-                self.virtual_trenches=doc.virtual_trenches;
-                self.comments=doc.comments;
-                self.pdok_texture=None;
-                self.pdok_bounds=None;
-                self.pdok_rx=None;
-                self.pdok_busy=false;
-                self.project_name=doc.name;
-                self.selected=(!self.datasets.is_empty()).then_some(0);
-                self.project_path=Some(path.clone());
-                self.zoom=1.0;
-                self.pan=egui::Vec2::ZERO;
-                self.last_backup=Instant::now();
-                self.dirty=false;
-                self.message=format!("Rust-project geopend: {}",path.display());
-            }
-            Err(err) => self.message=format!("Project niet geladen (origineel ongewijzigd): {err}"),
+    fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,ctx:&egui::Context) -> usize {
+        let textures:Vec<_>=doc.rasters.iter().map(|r|load_texture(&r.path,ctx)).collect();
+        let missing=textures.iter().filter(|t|t.is_none()).count();
+        self.clear_project_requests();
+        self.datasets=doc.datasets; self.geotiffs=doc.rasters;
+        self.raster_textures=textures; self.overlays=doc.overlays;
+        self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
+        self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
+        self.project_name=doc.name; self.project_path=path;
+        self.selected=(!self.datasets.is_empty()).then_some(0);
+        self.dirty=restored;
+        missing
+    }
+
+    fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        if self.pending_project_action.is_some() {return;}
+        if self.dirty {self.pending_project_action=Some(action);}
+        else {self.execute_project_action(action,ctx);}
+    }
+
+    fn finish_project_action(&mut self,proceed:bool,ctx:&egui::Context) {
+        if let Some(action)=self.pending_project_action.take() {
+            if proceed {self.execute_project_action(action,ctx);}
         }
     }
 
+    fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        let restore=matches!(&action,ProjectAction::Restore(_));
+        match action {
+            ProjectAction::New=>{
+                self.apply_project(NativeProject::default(),None,false,ctx);
+                self.message="Nieuw leeg Rust-project".into();
+            }
+            ProjectAction::Open(path)|ProjectAction::Restore(path)=>{
+                match read_project(&path) {
+                    Ok(doc)=>{
+                        let missing=self.apply_project(doc,(!restore).then_some(path.clone()),restore,ctx);
+                        self.message=if restore {
+                            format!("Back-up hersteld uit {}. Sla op als nieuw project.",path.display())
+                        } else {format!("Rust-project geopend: {}",path.display())};
+                        if missing>0 {self.message.push_str(&format!(" {missing} raster(s) ontbreken of konden niet worden weergegeven."));}
+                    }
+                    Err(err)=>self.message=format!("Project niet geladen; huidige gegevens behouden: {err}"),
+                }
+            }
+            ProjectAction::Close=>{
+                self.close_confirmed=true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+        }
+    }
 
     fn restore_backup(&mut self,ctx:&egui::Context) {
-        if self.dirty {
-            self.message="Sla eerst je onopgeslagen projectwijzigingen op voordat je een back-up herstelt".into();
-            return;
-        }
         let dir=project::backup_directory();
-        if !dir.is_dir() {
-            self.message="Geen SleufBase Rust-back-ups gevonden".into();return;
-        }
+        if !dir.is_dir() {self.message="Geen SleufBase Rust-back-ups gevonden".into();return;}
         if let Some(path)=rfd::FileDialog::new()
             .set_directory(&dir).add_filter("SleufBase backups",&["json"]).pick_file()
         {
             let allowed=path.canonicalize().ok().zip(dir.canonicalize().ok())
                 .is_some_and(|(file,dir)| file.starts_with(dir));
-            if !allowed {
-                self.message="Back-up ligt niet in de beveiligde Rust-back-upmap".into();
-                return;
-            }
-            match read_project(&path) {
-                Ok(project_data)=>{
-                    let rasters=project_data.rasters.iter()
-                        .map(|r|load_texture(&r.path,ctx)).collect();
-                    self.datasets=project_data.datasets;
-                    self.geotiffs=project_data.rasters;
-                    self.overlays=project_data.overlays;
-                    self.bgt_layers=project_data.bgt_layers;
-                    self.cadastral=project_data.cadastral;
-                    self.virtual_trenches=project_data.virtual_trenches;
-                    self.comments=project_data.comments;
-                    self.project_name=project_data.name;
-                    self.raster_textures=rasters;
-                    self.selected=(!self.datasets.is_empty()).then_some(0);
-                    // Never overwrite the source backup when pressing Save.
-                    self.project_path=None;
-                    self.dirty=true;
-                    self.last_backup=Instant::now();
-                    self.message=format!(
-                        "Back-up hersteld uit {}. Kies Opslaan als om het als nieuw project te bewaren.",
-                        path.display());
-                }
-                Err(err)=>self.message=format!("Back-up ongeldig: {err}")
-            }
+            if !allowed {self.message="Back-up ligt niet in de Rust-back-upmap".into();return;}
+            self.request_project_action(ProjectAction::Restore(path),ctx);
         }
     }
 
-    fn save_project_file(&mut self, save_as: bool) {
+    fn show_unsaved_project_dialog(&mut self,ctx:&egui::Context) {
+        if self.pending_project_action.is_none() {return;}
+        let mut choice=None;
+        let response=egui::Modal::new(egui::Id::new("unsaved_project")).show(ctx,|ui|{
+            ui.heading("Projectwijzigingen opslaan?");
+            ui.label("Dit project bevat onopgeslagen wijzigingen.");
+            ui.horizontal(|ui|{
+                if ui.button("Opslaan en doorgaan").clicked() {choice=Some(0);}
+                if ui.button("Zonder opslaan").clicked() {choice=Some(1);}
+                if ui.button("Annuleren").clicked() {choice=Some(2);}
+            });
+            if !self.message.is_empty() {ui.label(&self.message);}
+        });
+        match choice {
+            Some(0)=>{if self.save_project_file(false) {self.finish_project_action(true,ctx);}},
+            Some(1)=>self.finish_project_action(true,ctx),
+            Some(2)=>self.finish_project_action(false,ctx),
+            _=>{if response.should_close() {self.finish_project_action(false,ctx);}},
+        }
+    }
+
+    fn save_project_file(&mut self, save_as: bool) -> bool {
         let path = if !save_as {
             self.project_path.clone()
         } else { None };
@@ -279,15 +289,17 @@ impl SleufBaseApp {
             .add_filter("SleufBase Rust Project", &["json"])
             .set_file_name("Project.sleufbase-rust.json")
             .save_file());
-        if let Some(path)=path {
-            match save_project(&path,&self.snapshot()) {
-                Ok(())=>{
-                    self.project_path=Some(path.clone());
-                    self.dirty=false;
-                    self.message=format!("Rust-project opgeslagen: {}",path.display());
-                }
-                Err(err)=>self.message=format!("Project opslaan mislukt: {err}"),
+        path.is_some_and(|path|self.save_project_to_path(path))
+    }
+
+    fn save_project_to_path(&mut self,path:PathBuf) -> bool {
+        match save_project(&path,&self.snapshot()) {
+            Ok(())=>{
+                self.project_path=Some(path.clone()); self.dirty=false;
+                self.message=format!("Rust-project opgeslagen: {}",path.display());
+                true
             }
+            Err(err)=>{self.message=format!("Project opslaan mislukt: {err}");false}
         }
     }
 
@@ -674,6 +686,7 @@ impl SleufBaseApp {
         self.live_busy=true;
         self.message=format!("KickTheMap-job {} ophalen...",job.job_id);
         let (tx,rx)=mpsc::channel();
+        self.live_download_generation=self.project_generation;
         self.live_download_rx=Some(rx);
         std::thread::spawn(move || {
             let root=kickthemap_cache_dir().join("Rust");
@@ -682,13 +695,14 @@ impl SleufBaseApp {
         });
     }
 
-    fn poll_live_download(&mut self,ctx:&egui::Context) {
-        let event=self.live_download_rx.as_ref().map(|rx|rx.try_recv());
-        match event {
-            Some(Ok((client,result)))=>{
-                self.live_session=Some(client);
-                self.live_download_rx=None;
-                self.live_busy=false;
+    fn apply_live_download_result(&mut self,result:Result<(RemoteFileKind,PathBuf),String>,ctx:&egui::Context) {
+                if self.live_download_generation!=self.project_generation {
+                    self.message=match result {
+                        Ok((_,path))=>format!("Download opgeslagen: {}. Open het bestand om het aan dit project toe te voegen.",path.display()),
+                        Err(err)=>format!("Download voor vorig project mislukt: {err}"),
+                    };
+                    return;
+                }
                 match result {
                     Ok((RemoteFileKind::GeoTiff,path))=>{
                         self.load_geotiffs(vec![path],ctx);
@@ -698,6 +712,16 @@ impl SleufBaseApp {
                     }
                     Err(err)=>self.message=format!("KickTheMap-download: {err}")
                 }
+    }
+
+    fn poll_live_download(&mut self,ctx:&egui::Context) {
+        let event=self.live_download_rx.as_ref().map(|rx|rx.try_recv());
+        match event {
+            Some(Ok((client,result)))=>{
+                self.live_session=Some(client);
+                self.live_download_rx=None;
+                self.live_busy=false;
+                self.apply_live_download_result(result,ctx);
             }
             Some(Err(TryRecvError::Disconnected))=>{
                 self.live_busy=false;
@@ -1059,6 +1083,10 @@ fn canvas(
 
 impl eframe::App for SleufBaseApp {
     fn update(&mut self,ctx:&egui::Context,_frame:&mut eframe::Frame) {
+        if ctx.input(|i|i.viewport().close_requested()) && !self.close_confirmed && self.dirty {
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            self.request_project_action(ProjectAction::Close,ctx);
+        }
         ctx.set_visuals(egui::Visuals::light());
         self.try_autosave();
         self.poll_pdok(ctx);
@@ -1077,11 +1105,11 @@ impl eframe::App for SleufBaseApp {
                 ui.label(egui::RichText::new("Migratie-preview").color(Color32::GRAY));
                 if self.dirty {ui.colored_label(DARK,"● Niet opgeslagen");}
                 ui.separator();
-                if ui.button("Nieuw project").clicked() {self.new_project();}
+                if ui.button("Nieuw project").clicked() {self.request_project_action(ProjectAction::New,ctx);}
                 if ui.button("Open Rust-project").clicked() {
                     if let Some(path)=rfd::FileDialog::new()
                         .add_filter("Rust-project JSON",&["json"]).pick_file()
-                    {self.load_project_file(path,ctx);}
+                    {self.request_project_action(ProjectAction::Open(path),ctx);}
                 }
                 if ui.button("Opslaan").clicked() {self.save_project_file(false);}
                 if ui.button("Opslaan als...").clicked() {self.save_project_file(true);}
@@ -1434,5 +1462,98 @@ impl eframe::App for SleufBaseApp {
             }
         }
 
+        self.show_unsaved_project_dialog(ctx);
+
     }
+}
+
+#[cfg(test)]
+mod project_lifecycle_tests {
+    use super::*;
+    fn edited_app()->SleufBaseApp {
+        let mut app=SleufBaseApp::default();
+        app.comments.push(Comment{x:168000.0,y:401000.0,text:"unsaved".into()});
+        app.dirty=true;
+        app
+    }
+
+    #[test]
+    fn new_and_close_require_a_decision_and_cancel_keeps_work() {
+        let ctx=egui::Context::default(); let mut app=edited_app();
+        for action in [ProjectAction::New,ProjectAction::Close] {
+            app.request_project_action(action.clone(),&ctx);
+            assert_eq!(app.pending_project_action,Some(action));
+            assert_eq!(app.comments.len(),1); assert!(app.dirty);
+            app.finish_project_action(false,&ctx);
+            assert!(app.pending_project_action.is_none());
+            assert_eq!(app.comments[0].text,"unsaved"); assert!(!app.close_confirmed);
+        }
+        app.request_project_action(ProjectAction::New,&ctx);
+        app.finish_project_action(true,&ctx);
+        assert!(app.comments.is_empty()); assert!(!app.dirty);
+    }
+
+    #[test]
+    fn failed_open_or_save_keeps_current_work_and_pending_action() {
+        let ctx=egui::Context::default(); let mut app=edited_app();
+        let dir=tempfile::tempdir().unwrap();
+        app.request_project_action(ProjectAction::Open(dir.path().join("missing.json")),&ctx);
+        assert!(!app.save_project_to_path(dir.path().to_owned()));
+        assert!(app.pending_project_action.is_some()); assert!(app.dirty);
+        assert_eq!(app.comments[0].text,"unsaved");
+        app.finish_project_action(true,&ctx);
+        assert_eq!(app.comments[0].text,"unsaved"); assert!(app.dirty);
+        assert!(app.project_path.is_none());
+    }
+
+    #[test]
+    fn save_then_switch_and_restore_as_new_never_retargets_the_backup() {
+        let ctx=egui::Context::default(); let mut app=edited_app();
+        let dir=tempfile::tempdir().unwrap();let saved=dir.path().join("original.json");
+        app.request_project_action(ProjectAction::New,&ctx);
+        assert!(app.save_project_to_path(saved.clone()));
+        app.finish_project_action(true,&ctx);
+        assert!(app.comments.is_empty());
+        app.request_project_action(ProjectAction::Restore(saved.clone()),&ctx);
+        assert_eq!(app.comments[0].text,"unsaved"); assert!(app.dirty);
+        assert!(app.project_path.is_none());
+        let original=std::fs::read(&saved).unwrap();
+        let copy=dir.path().join("recovered.json");
+        assert!(app.save_project_to_path(copy.clone()));
+        assert_eq!(app.project_path,Some(copy));
+        assert_eq!(std::fs::read(saved).unwrap(),original);
+    }
+
+    #[test]
+    fn project_switch_detaches_all_old_map_requests() {
+        let ctx=egui::Context::default(); let mut app=SleufBaseApp::default();
+        let (btx,brx)=mpsc::channel(); app.bgt_rx=Some(brx);app.bgt_busy=true;
+        let (ctx_send,crx)=mpsc::channel();app.cadastral_rx=Some(crx);app.cadastral_busy=true;
+        let (atx,arx)=mpsc::channel();app.ahn_rx=Some(arx);app.ahn_busy=true;
+        let (ptx,prx)=mpsc::channel();app.pdok_rx=Some(prx);app.pdok_busy=true;
+        let old_generation=app.project_generation;
+        app.execute_project_action(ProjectAction::New,&ctx);
+        assert_ne!(app.project_generation,old_generation);
+        assert!(!app.bgt_busy&&!app.cadastral_busy&&!app.ahn_busy&&!app.pdok_busy);
+        assert!(btx.send(Err("late".into())).is_err());
+        assert!(ctx_send.send(Err("late".into())).is_err());
+        assert!(atx.send(Err("late".into())).is_err());
+        assert!(ptx.send(Err("late".into())).is_err());
+        app.poll_bgt();app.poll_cadastral();app.poll_ahn();app.poll_pdok(&ctx);
+        assert!(app.bgt_layers.is_empty()); assert!(app.cadastral.is_none()); assert!(!app.dirty);
+    }
+    #[test]
+    fn late_download_stays_on_disk_without_entering_a_new_project() {
+        let ctx=egui::Context::default(); let mut app=SleufBaseApp::default();
+        let dir=tempfile::tempdir().unwrap();let path=dir.path().join("PS1_123_jobFeatures.json");
+        std::fs::write(&path,include_str!("../tests/fixtures/jobFeatures.json")).unwrap();
+        app.live_download_generation=app.project_generation;
+        app.execute_project_action(ProjectAction::New,&ctx);
+        app.apply_live_download_result(Ok((RemoteFileKind::JobFeatures,path.clone())),&ctx);
+        assert!(app.datasets.is_empty());assert!(!app.dirty);assert!(path.exists());
+        app.live_download_generation=app.project_generation;
+        app.apply_live_download_result(Ok((RemoteFileKind::JobFeatures,path)),&ctx);
+        assert_eq!(app.datasets.len(),1); assert!(app.dirty);
+    }
+
 }
