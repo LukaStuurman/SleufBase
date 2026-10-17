@@ -1,0 +1,56 @@
+name: Rust preview - Windows
+
+on:
+  push:
+    branches:
+      - 'migration/rust-*'
+  pull_request:
+    paths:
+      - 'rust/**'
+      - '.github/workflows/rust-preview-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-rust:
+    name: Test and build Rust app
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Format source for preview build
+        shell: pwsh
+        run: cargo fmt --manifest-path rust/Cargo.toml --all
+      - name: Tests
+        shell: pwsh
+        run: cargo test --manifest-path rust/Cargo.toml --all-targets
+      - name: Clippy report
+        shell: pwsh
+        run: cargo clippy --manifest-path rust/Cargo.toml --all-targets
+      - name: Build release
+        shell: pwsh
+        run: cargo build --release --manifest-path rust/Cargo.toml
+      - name: Benchmark core allocations and time
+        shell: pwsh
+        run: |
+          cargo run --release --manifest-path rust/Cargo.toml --example benchmark_core > rust/benchmarks-core.csv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload core benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-core-benchmarks
+          path: rust/benchmarks-core.csv
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-Windows-preview
+          path: rust/target/release/sleufbase-rust.exe
+          if-no-files-found: error

@@ -1,0 +1,24 @@
+[package]
+name = "sleufbase-rust"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Native Rust migration of SleufBase (early preview)"
+
+[dependencies]
+eframe = "0.31"
+rfd = "0.15"
+serde_json = "1"
+serde = { version = "1", features = ["derive", "rc"] }
+tempfile = "3"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "json", "cookies", "multipart"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+rust_xlsxwriter = "0.90"
+tiff = "0.11.3"
+regex = "1"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+
