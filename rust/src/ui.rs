@@ -60,6 +60,8 @@ pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
     raster_textures: Vec<Option<egui::TextureHandle>>,
+    raster_loader:Option<sleufbase_rust::raster_loader::RasterLoader>,
+    raster_errors:Vec<Option<String>>,
     overlays: Vec<DxfOverlay>,
     virtual_trenches: Vec<VirtualTrench>,
     trench_markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,
@@ -116,6 +118,8 @@ impl Default for SleufBaseApp {
             datasets:Vec::new(),
             geotiffs:Vec::new(),
             raster_textures:Vec::new(),
+            raster_loader:None,
+            raster_errors:Vec::new(),
             overlays:Vec::new(),
             virtual_trenches:Vec::new(),
             trench_markers:Vec::new(),
@@ -189,6 +193,7 @@ impl SleufBaseApp {
     fn clear_project_requests(&mut self) {
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
+        if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
         self.bgt_rx=None; self.bgt_busy=false;
         self.cadastral_rx=None; self.cadastral_busy=false;
         self.ahn_rx=None; self.ahn_busy=false;
@@ -200,12 +205,10 @@ impl SleufBaseApp {
         // can return. Its generation prevents importing into a different project.
     }
 
-    fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,ctx:&egui::Context) -> usize {
-        let textures:Vec<_>=doc.rasters.iter().map(|r|load_texture(&r.path,ctx)).collect();
-        let missing=textures.iter().filter(|t|t.is_none()).count();
+    fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,_ctx:&egui::Context) {
         self.clear_project_requests();
         self.datasets=doc.datasets; self.geotiffs=doc.rasters;
-        self.raster_textures=textures; self.overlays=doc.overlays;
+        self.raster_textures=vec![None;self.geotiffs.len()]; self.overlays=doc.overlays;
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
         self.trench_markers.clear();
@@ -213,7 +216,7 @@ impl SleufBaseApp {
         self.legacy_archive=doc.legacy_archive;
         self.selected=(!self.datasets.is_empty()).then_some(0);
         self.dirty=restored;
-        missing
+        self.schedule_raster_previews();
     }
 
     fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
@@ -238,11 +241,10 @@ impl SleufBaseApp {
             ProjectAction::Open(path)|ProjectAction::Restore(path)=>{
                 match read_project(&path) {
                     Ok(doc)=>{
-                        let missing=self.apply_project(doc,(!restore).then_some(path.clone()),restore,ctx);
+                        self.apply_project(doc,(!restore).then_some(path.clone()),restore,ctx);
                         self.message=if restore {
                             format!("Back-up hersteld uit {}. Sla op als nieuw project.",path.display())
                         } else {format!("Rust-project geopend: {}",path.display())};
-                        if missing>0 {self.message.push_str(&format!(" {missing} raster(s) ontbreken of konden niet worden weergegeven."));}
                     }
                     Err(err)=>self.message=format!("Project niet geladen; huidige gegevens behouden: {err}"),
                 }
@@ -357,26 +359,54 @@ impl SleufBaseApp {
         self.message = format!("{added} KickTheMap-job(s) geladen. {}",failures.join("; "));
     }
 
-    fn load_geotiffs(&mut self, paths:Vec<PathBuf>, ctx:&egui::Context) {
+    fn load_geotiffs(&mut self, paths:Vec<PathBuf>, _ctx:&egui::Context) {
         let mut added=0;
         let mut warnings=Vec::new();
         for path in paths {
             if self.geotiffs.iter().any(|info|info.path==path) {continue;}
             match read_geotiff_metadata(&path) {
                 Ok(info)=>{
-                    let texture=load_texture(&path,ctx);
-                    if texture.is_none() {
-                        warnings.push(format!("{}: geen 8-bit rasterpreview",path.display()));
-                    }
                     self.geotiffs.push(info);
-                    self.raster_textures.push(texture);
+                    self.raster_textures.push(None);
                     added+=1;
                 }
                 Err(err)=>warnings.push(format!("{}: {err}",path.display()))
             }
         }
-        if added>0 {self.dirty=true;}
+        if added>0 {self.dirty=true;self.schedule_raster_previews();}
         self.message=format!("{added} GeoTIFF-bestanden geladen. {}",warnings.join("; "));
+    }
+
+    fn schedule_raster_previews(&mut self) {
+        self.raster_errors=vec![None;self.geotiffs.len()];
+        if self.geotiffs.is_empty(){return;}
+        if self.raster_loader.is_none() {
+            match sleufbase_rust::raster_loader::RasterLoader::new() {
+                Ok(loader)=>self.raster_loader=Some(loader),
+                Err(err)=>{self.raster_errors.fill(Some(err.clone()));self.message=err;return;}
+            }
+        }
+        let paths=self.geotiffs.iter().enumerate().map(|(id,r)|(id,r.path.clone())).collect();
+        self.raster_loader.as_mut().unwrap().replace(paths,
+            sleufbase_rust::raster_loader::preview_options_for_layers(self.geotiffs.len()));
+    }
+
+    fn poll_raster_previews(&mut self,ctx:&egui::Context) {
+        let Some(loader)=&mut self.raster_loader else{return;};
+        for ready in loader.poll() {
+            if self.geotiffs.get(ready.id).is_none_or(|r|r.path!=ready.path){continue;}
+            match ready.result {
+                Ok(preview)=>{
+                    let image=egui::ColorImage::from_rgba_unmultiplied(
+                        [preview.width as usize,preview.height as usize],&preview.rgba);
+                    self.raster_textures[ready.id]=Some(ctx.load_texture(
+                        ready.path.to_string_lossy(),image,egui::TextureOptions::LINEAR));
+                    self.raster_errors[ready.id]=None;
+                }
+                Err(err)=>{self.raster_textures[ready.id]=None;self.raster_errors[ready.id]=Some(err);}
+            }
+        }
+        if loader.remaining()>0 {ctx.request_repaint_after(Duration::from_millis(50));}
     }
 
     fn import_marxact(&mut self, paths:Vec<PathBuf>) {
@@ -849,13 +879,6 @@ impl SleufBaseApp {
     }
 }
 
-fn load_texture(path:&std::path::Path,ctx:&egui::Context) -> Option<egui::TextureHandle> {
-    let Ok((w,h,rgba))=sleufbase_rust::raster::decode_tiff_preview(path) else{return None;};
-    let image=egui::ColorImage::from_rgba_unmultiplied([w as usize,h as usize],&rgba);
-    Some(ctx.load_texture(
-        path.to_string_lossy(),image,egui::TextureOptions::LINEAR
-    ))
-}
 
 fn union_bounds(a:Option<Bounds>,b:Option<Bounds>)->Option<Bounds> {
     match (a,b) {
@@ -1113,6 +1136,7 @@ impl eframe::App for SleufBaseApp {
         }
         ctx.set_visuals(egui::Visuals::light());
         self.try_autosave();
+        self.poll_raster_previews(ctx);
         self.poll_pdok(ctx);
         self.poll_live_jobs();
         self.poll_live_download(ctx);
@@ -1274,12 +1298,17 @@ impl eframe::App for SleufBaseApp {
             ui.separator();
             ui.heading("GeoTIFF-bestanden");
             egui::ScrollArea::vertical().max_height(130.0).show(ui,|ui|{
-                for info in &self.geotiffs {
+                for (index,info) in self.geotiffs.iter().enumerate() {
                     ui.label(info.path.file_name().and_then(|s|s.to_str()).unwrap_or("TIFF"));
                     ui.small(format!("{}x{}, EPSG {}, job {}",
                         info.width,info.height,
                         info.epsg.map(|v|v.to_string()).unwrap_or_else(||"?".into()),
                         info.kickthemap_job_id.map(|v|v.to_string()).unwrap_or_else(||"?".into())));
+                    if let Some(error)=self.raster_errors.get(index).and_then(|e|e.as_ref()) {
+                        ui.colored_label(DARK,error);
+                    } else if self.raster_textures.get(index).is_none_or(|t|t.is_none()) {
+                        ui.horizontal(|ui|{ui.spinner();ui.small("Raster laden...");});
+                    }
                 }
             });
             ui.separator();
@@ -1614,6 +1643,25 @@ mod project_lifecycle_tests {
     fn signed_dxf_colour_indices_never_overflow() {
         for colour in 1..=255 {assert_eq!(aci_color(colour),aci_color(-colour));}
         let _=aci_color(i32::MIN);
+    }
+
+    #[test]
+    fn raster_pixels_load_asynchronously_and_stay_out_of_new_projects() {
+        let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");
+        app.load_geotiffs(vec![root.join("gray16.tiff")],&ctx);
+        assert_eq!(app.geotiffs.len(),1);assert!(app.raster_textures[0].is_none());
+        let deadline=Instant::now()+Duration::from_secs(10);
+        while app.raster_textures[0].is_none() {
+            app.poll_raster_previews(&ctx);
+            assert!(app.raster_errors[0].is_none(),"{:?}",app.raster_errors[0]);
+            assert!(Instant::now()<deadline);std::thread::sleep(Duration::from_millis(2));
+        }
+        assert_eq!(app.raster_textures[0].as_ref().unwrap().size(),[7,1]);
+        app.load_geotiffs(vec![root.join("large-striped.tiff")],&ctx);
+        app.execute_project_action(ProjectAction::New,&ctx);
+        app.poll_raster_previews(&ctx);
+        assert!(app.geotiffs.is_empty());assert!(app.raster_textures.is_empty());assert!(app.raster_errors.is_empty());
     }
 
 }

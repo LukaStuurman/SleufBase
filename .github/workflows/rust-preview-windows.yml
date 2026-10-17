@@ -48,6 +48,17 @@ jobs:
         with:
           name: SleufBase-Rust-core-benchmarks
           path: rust/benchmarks-core.csv
+      - name: Benchmark bounded raster preview
+        shell: pwsh
+        run: |
+          cargo run --release --manifest-path rust/Cargo.toml --example benchmark_raster -- rust/tests/fixtures/rasters/large-striped.tiff > rust/benchmarks-raster.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload raster benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-raster-benchmark
+          path: rust/benchmarks-raster.json
+          if-no-files-found: error
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:

@@ -43,7 +43,14 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
 - Reproduceerbare release-kernbenchmark met 100.000 objecten en CI-artifact:
   twintig kaartinvoerupdates vermijden 10.000.080 allocaties; validatie vermijdt
   2.000.000 tijdelijke allocaties (zie `benchmarks/README.md` voor grenzen).
-- Volgende stappen: verdere CAD-/renderpariteit, grote rasters en volledige
+- Rasterdecoder verwerkt strips/tegels naar begrensde previews op één achtergrondthread,
+  ondersteunt meer samples/kleurtypen en verdeelt een geschat textuurbudget over lagen.
+  47 rasterfixtures (Pillow + numerieke verwachtingen) en 93 Rust-tests groen.
+  Planar RGB16 corrigeert een aangetoonde Pillow-bytefout; NoData/nonfinite transparant.
+  Releasebenchmark op 16,8 miljoen RGB8-pixels: circa 2,3× sneller en 86% lagere
+  procespiek dan volledige Pillow-conversie, bij gelijke previewpixels. Overviews,
+  viewportresolutie en volledige raster-/gebruikersacceptatie blijven open.
+- Volgende stappen: verdere CAD-/renderpariteit en volledige
   projectworkflows. Overige mijlpalen en representatieve acceptatie nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.

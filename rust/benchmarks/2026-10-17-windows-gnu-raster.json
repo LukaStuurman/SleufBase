@@ -1,0 +1,103 @@
+{
+  "scope": "synthetic decoder/preview only; excludes GUI/GPU and process startup; OS file cache not cleared",
+  "rounds": [
+    {
+      "native": {
+        "build_mode": "release",
+        "crc32": 1178218325,
+        "decoded_chunks": 256,
+        "elapsed_ms": 53.1958,
+        "file": "large-striped.tiff",
+        "height": 2048,
+        "mode": "native-strip-preview",
+        "peak_chunk_bytes": 196656,
+        "peak_working_set_bytes": 29585408,
+        "skipped_chunks": 1,
+        "source_pixels": 16785409,
+        "width": 2048
+      },
+      "pillow": {
+        "mode": "Pillow-full-RGBA-preview",
+        "pillow_version": "11.3.0",
+        "python_version": "3.11.9",
+        "file": "large-striped.tiff",
+        "width": 2048,
+        "height": 2048,
+        "crc32": 1178218325,
+        "elapsed_ms": 115.73120002867654,
+        "peak_working_set_bytes": 217088000
+      }
+    },
+    {
+      "pillow": {
+        "mode": "Pillow-full-RGBA-preview",
+        "pillow_version": "11.3.0",
+        "python_version": "3.11.9",
+        "file": "large-striped.tiff",
+        "width": 2048,
+        "height": 2048,
+        "crc32": 1178218325,
+        "elapsed_ms": 113.11400000704452,
+        "peak_working_set_bytes": 217124864
+      },
+      "native": {
+        "build_mode": "release",
+        "crc32": 1178218325,
+        "decoded_chunks": 256,
+        "elapsed_ms": 48.652800000000006,
+        "file": "large-striped.tiff",
+        "height": 2048,
+        "mode": "native-strip-preview",
+        "peak_chunk_bytes": 196656,
+        "peak_working_set_bytes": 29560832,
+        "skipped_chunks": 1,
+        "source_pixels": 16785409,
+        "width": 2048
+      }
+    },
+    {
+      "native": {
+        "build_mode": "release",
+        "crc32": 1178218325,
+        "decoded_chunks": 256,
+        "elapsed_ms": 48.313500000000005,
+        "file": "large-striped.tiff",
+        "height": 2048,
+        "mode": "native-strip-preview",
+        "peak_chunk_bytes": 196656,
+        "peak_working_set_bytes": 29614080,
+        "skipped_chunks": 1,
+        "source_pixels": 16785409,
+        "width": 2048
+      },
+      "pillow": {
+        "mode": "Pillow-full-RGBA-preview",
+        "pillow_version": "11.3.0",
+        "python_version": "3.11.9",
+        "file": "large-striped.tiff",
+        "width": 2048,
+        "height": 2048,
+        "crc32": 1178218325,
+        "elapsed_ms": 111.77239997778088,
+        "peak_working_set_bytes": 217309184
+      }
+    }
+  ],
+  "summary": {
+    "native": {
+      "median_elapsed_ms": 48.652800000000006,
+      "peak_working_set_bytes": 29614080
+    },
+    "pillow": {
+      "median_elapsed_ms": 113.11400000704452,
+      "peak_working_set_bytes": 217309184
+    }
+  },
+  "environment": {
+    "os": "Windows x86_64",
+    "cpu": "Intel Core i9-12900K",
+    "rust": "1.99.1",
+    "toolchain": "x86_64-pc-windows-gnu",
+    "build": "release, thin LTO, codegen-units=1"
+  }
+}

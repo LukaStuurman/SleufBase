@@ -8,14 +8,25 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
 - Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
-- Schematisch kaartvoorbeeld (nog zonder PDOK/GeoTIFF en projectietransformatie).
+- Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
 - Disciplinetellingen per proefsleuf gebaseerd op Python standaardregels (inclusief aantallen per discipline).
 - Excel (.xlsx) export met oranje kopregel, proefsleuf, aantal disciplines en totaal kabels/leidingen.
 - Basis DXF R12 export met kruizen voor punten en LINE-segmenten voor polylijnen per discipline.
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
-- GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; kleine 8-bit TIFF rasters als gedraaide/gegeorefereerde kaartlaag tonen.
+- GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; TIFF-preview via begrensde strips/tegels als gedraaide/gegeorefereerde kaartlaag tonen.
 - Rust filtert actieve jobs rechtstreeks uit de in de Rust-UI ingeladen objectgegevens en GeoTIFF-sidecars; een compatibiliteitsparser voor de Python-heartbeat blijft apart beschikbaar.
+
+## GeoTIFF-preview zonder volledige bronkopie
+
+- Een aparte decoder verwerkt strips/tegels achtereenvolgens naar een aspectgetrouwe preview (standaard maximaal 2048 × 2048). De bestaande bronlimiet is 150 miljoen pixels; bestanden boven de oude native limiet van 16 miljoen kunnen nu worden weergegeven.
+- RGB(A), grijswaarden, paletten, CMYK en niet-gesubsamplede YCbCr zijn afgedekt met 47 synthetische fixtures, inclusief packed 1/2/4 bits, 16-bit, signed/float, planar, BigTIFF, oriëntaties en LZW/DEFLATE/PackBits/JPEG. JPEG heeft maximaal twee bytewaarden tolerantie; de andere ondersteunde referentiegevallen vergelijken exacte pixels.
+- De referentie gebruikt Pillow 11.3.0, aangevuld met expliciete numerieke verwachtingen voor formaten die Pillow niet opent of verkeerd uitleest. Bij planar RGB16 gebruikt Rust de juiste samples waar Pillow bytes als pixels leest. Niet-eindige/NoData-pixels worden transparant.
+- Het gedecodeerde chunkbudget is standaard 32 MiB. Een te grote afzonderlijke strip/tegel geeft een foutmelding. Dit budget begrenst geen totale proces- of GPU-geheugenpiek.
+- Rasterpixels laden op één achtergrondthread. Projectwissels annuleren oude taken; late resultaten komen niet in een ander project. Fouten blijven per bestand zichtbaar en houden andere bestanden niet tegen.
+- Bij veel rasters verdeelt de app een geschat RGBA-textuurbudget van 256 MiB over de previews. Dit is geen harde totale geheugenlimiet: decoderbuffers, tijdelijke uploads en drivergeheugen komen erbij.
+- De lokale releasebenchmark op een RGB8-bron van 16,8 miljoen pixels levert dezelfde preview met circa 2,3× hogere snelheid en 86% lagere procespiek dan volledige Pillow-conversie. Methode en alle meetrondes staan in [benchmarks/README.md](benchmarks/README.md).
+- Volledige resolutie bij inzoomen, overviews/pyramides, gesubsamplede YCbCr, overige kleurmodi en acceptatie op grote echte GeoTIFFs blijven open.
 
 ## Bouwen en starten op Windows
 
@@ -83,7 +94,7 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 
 - Rust leest bestaande lokale Python-SleufBase `jobs_cache/<email>.json` bestanden zonder wachtwoorden/cookies te lezen.
 - Zoek en filter op jobs die in de Rust-app zelf zijn geladen (lokaal ingeladen objectbestanden en TIFF-sidecars).
-- De cachestand is expliciet **niet live**; de online KickTheMap login, jobs API en downloaden moeten nog native worden overgezet.
+- De cachestand is expliciet **niet live**. De eerste native online koppeling staat hieronder beschreven; browserlogin en volledig sessieherstel blijven open.
 
 ## Kaartopmerkingen
 
@@ -194,10 +205,10 @@ of een vergelijking met de complete Python-app op echte projecten.
 
 ## Wat nog ontbreekt
 
-1. Online KickTheMap-login, live jobs-lijst, accountbeheer, downloads en sessieherstel.
-2. Volledige GeoTIFF-rasterweergave (grote bestanden/andere bits/kleurtypes), PDOK WMTS/offline-cache, BGT, WFS, AHN, StreetSmart en kaartreprojectie.
+1. Interactieve KickTheMap-browserlogin, accountbeheer, volledige downloadfallbacks en sessieherstel; de eerste API-koppeling is aanwezig.
+2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows, StreetSmart en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonexport inclusief profielen, raster, foto's en blokken.
-4. Volledig uitgewerkte virtuele proefsleufprofielen (de geometriebasis is aanwezig), MarXact, **compatibiliteit met Python-projectopslag**, migratie van bestaande instellingen en volledig back-upherstel.
+4. Volledig uitgewerkte virtuele proefsleufprofielen (de geometriebasis is aanwezig), MarXact, volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
 5. Gebruikersinstelbare discipline-regels, installatiepakket en volledige migratietests.
 
 ## Aanpak voor vervolgmigratie
@@ -209,3 +220,4 @@ of een vergelijking met de complete Python-app op echte projecten.
 5. Projectformaat, instellingen, credential handling, installer en gebruikerstests.
 
 De bestaande Python-app, build en releases worden in deze PR niet gewijzigd.
+

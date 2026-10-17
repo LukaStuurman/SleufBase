@@ -92,6 +92,8 @@ pub fn read_geotiff_metadata(path: &Path) -> Result<GeoTiffInfo, String> {
     let mut decoder=Decoder::new(BufReader::new(file))
         .map_err(|e|format!("TIFF ongeldig: {e}"))?;
     let (width,height)=decoder.dimensions().map_err(|e|e.to_string())?;
+    let orientation=decoder.find_tag_unsigned::<u32>(Tag::Orientation).map_err(|e|e.to_string())?.unwrap_or(1);
+    let (width,height)=crate::raster::oriented_dimensions(width,height,orientation)?;
     let pixels = u64::from(width)*u64::from(height);
     if pixels==0 || pixels>MAX_GEOTIFF_PIXELS {
         return Err(format!("TIFF te groot of leeg ({pixels} pixels)"));
