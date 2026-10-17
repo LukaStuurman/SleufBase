@@ -14,6 +14,7 @@ pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;
 pub mod cad_scene;
+pub mod spline;
 mod dxf_tags;
 mod dxf_entities;
 pub mod project;

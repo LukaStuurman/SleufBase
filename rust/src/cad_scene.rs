@@ -46,6 +46,7 @@ struct Instance {
 pub struct RenderFeature {
     source: Source,
     pub points: Vec<crate::model::Vertex>,
+    path_breaks: Box<[usize]>,
     layer: Arc<str>,
     rgb: [u8; 3],
     instance: Option<usize>,
@@ -58,9 +59,24 @@ pub struct Scene {
 pub struct DrawRef<'a> {
     pub source: &'a DxfFeature,
     pub points: &'a [crate::model::Vertex],
+    pub path_breaks: &'a [usize],
     pub layer: &'a str,
     pub rgb: [u8; 3],
     pub visible: bool,
+}
+impl<'a> DrawRef<'a> {
+    pub fn paths(&self) -> impl Iterator<Item = &'a [crate::model::Vertex]> + '_ {
+        let mut start = 0;
+        self.path_breaks
+            .iter()
+            .copied()
+            .chain(std::iter::once(self.points.len()))
+            .map(move |end| {
+                let path = self.points.get(start..end).unwrap_or_default();
+                start = end;
+                path
+            })
+    }
 }
 struct Builder<'a> {
     overlay: &'a DxfOverlay,
@@ -126,19 +142,32 @@ impl Builder<'_> {
         let layer = self.layer(effective);
         let rgb = self.rgb(source, &layer, parent_rgb);
         if source.entity_type != "INSERT" {
-            let points = if let Some(curve) = source.cad.as_deref().and_then(|p| p.curve.as_deref())
-            {
-                curve.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?
-            } else {
-                source
-                    .points
-                    .iter()
-                    .map(|p| parent.checked_point(g::xyz(*p)).map(g::vertex))
-                    .collect::<Result<Vec<_>, _>>()?
-            };
+            let (points, path_breaks) =
+                if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref()) {
+                    let output =
+                        spline.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?;
+                    (output.points, output.breaks.into_boxed_slice())
+                } else if let Some(curve) = source.cad.as_deref().and_then(|p| p.curve.as_deref()) {
+                    (
+                        curve.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?,
+                        Box::default(),
+                    )
+                } else {
+                    (
+                        source
+                            .points
+                            .iter()
+                            .map(|p| parent.checked_point(g::xyz(*p)).map(g::vertex))
+                            .collect::<Result<Vec<_>, _>>()?,
+                        source.cad.as_ref().map_or_else(Box::default, |p| {
+                            p.path_breaks.clone().into_boxed_slice()
+                        }),
+                    )
+                };
             return self.append(RenderFeature {
                 source: reference,
                 points,
+                path_breaks,
                 layer,
                 rgb,
                 instance,
@@ -259,6 +288,7 @@ impl DxfOverlay {
                 builder.append(RenderFeature {
                     source: Source::Model(index),
                     points: source.points.clone(),
+                    path_breaks: Box::default(),
                     layer,
                     rgb,
                     instance: None,
@@ -301,6 +331,7 @@ impl DxfOverlay {
         DrawRef {
             source,
             points: &feature.points,
+            path_breaks: &feature.path_breaks,
             layer: &feature.layer,
             rgb: feature.rgb,
             visible,
@@ -313,6 +344,10 @@ impl DxfOverlay {
             .map(|source| DrawRef {
                 source,
                 points: &source.points,
+                path_breaks: source
+                    .cad
+                    .as_ref()
+                    .map_or(&[], |p| p.path_breaks.as_slice()),
                 layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),
@@ -325,6 +360,10 @@ impl DxfOverlay {
             Some(DrawRef {
                 source,
                 points: &source.points,
+                path_breaks: source
+                    .cad
+                    .as_ref()
+                    .map_or(&[], |p| p.path_breaks.as_slice()),
                 layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),

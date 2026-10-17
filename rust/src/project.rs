@@ -115,12 +115,12 @@ impl NativeProject {
                 crate::cad_geometry::finite(block.base)?;
                 for feature in &block.features {
                     vertices(&feature.points)?;
-                    if let Some(cad)=feature.cad.as_deref(){cad.validate()?;}
+                    if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
                 }
             }
             for feature in &overlay.features {
                 vertices(&feature.points)?;
-                if let Some(cad)=feature.cad.as_deref(){cad.validate()?;}
+                if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
             }
         }
         for raster in &self.rasters {

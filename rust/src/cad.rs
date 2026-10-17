@@ -61,6 +61,10 @@ pub struct Properties {
     pub placement: Option<Box<crate::cad_geometry::Placement>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub curve: Option<Box<crate::cad_geometry::CurvePath>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spline: Option<Box<crate::spline::Spline>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub path_breaks: Vec<usize>,
     #[serde(default)]
     pub true_color: Option<u32>,
     #[serde(default)]
@@ -81,6 +85,18 @@ impl Properties {
         }
         if let Some(curve) = &self.curve {
             curve.validate()?;
+        }
+        if let Some(spline) = &self.spline {
+            spline.validate()?;
+        }
+        if self.spline.is_some() && self.curve.is_some() {
+            return Err("CAD-object bevat meerdere curvebeschrijvingen".into());
+        }
+        if self.path_breaks.len() > 1_000_000
+            || self.path_breaks.first() == Some(&0)
+            || self.path_breaks.windows(2).any(|p| p[0] >= p[1])
+        {
+            return Err("Ongeldige CAD-padonderbrekingen".into());
         }
         if self.true_color.is_some_and(|v| v > 0xffffff) {
             return Err("Ongeldige CAD-objectkleur".into());
@@ -111,12 +127,25 @@ impl Properties {
     pub fn is_empty(&self) -> bool {
         self.placement.is_none()
             && self.curve.is_none()
+            && self.spline.is_none()
+            && self.path_breaks.is_empty()
             && self.true_color.is_none()
             && self.line_type.is_none()
             && self.line_weight.is_none()
             && !self.invisible
             && self.attributes.is_empty()
             && self.xdata.is_empty()
+    }
+    pub fn validate_geometry(&self, points: usize) -> Result<(), String> {
+        self.validate()?;
+        if self
+            .path_breaks
+            .last()
+            .is_some_and(|&index| index >= points)
+        {
+            return Err("CAD-padonderbreking buiten de geometrie".into());
+        }
+        Ok(())
     }
 }
 

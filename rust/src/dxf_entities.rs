@@ -35,6 +35,105 @@ fn flags(groups: &[Group]) -> i32 {
         .unwrap_or(0)
 }
 
+fn spline(groups: &[Group], feature: &mut DxfFeature, budget: usize) -> Result<(), String> {
+    fn points(groups: &[Group], base: i32) -> Result<Vec<V3>, String> {
+        let mut output = Vec::new();
+        let mut current: Option<(V3, bool)> = None;
+        for tag in groups {
+            if tag.code == base {
+                if let Some((p, has_y)) = current.take() {
+                    if !has_y {
+                        return Err("SPLINE-punt mist Y".into());
+                    }
+                    output.push(p);
+                }
+                current = Some((
+                    [
+                        tag.value
+                            .trim()
+                            .parse()
+                            .map_err(|_| "Ongeldig SPLINE-punt")?,
+                        0.,
+                        0.,
+                    ],
+                    false,
+                ));
+            } else if tag.code == base + 10 || tag.code == base + 20 {
+                let (p, has_y) = current.as_mut().ok_or("SPLINE-punt mist X")?;
+                let index = if tag.code == base + 10 {
+                    *has_y = true;
+                    1
+                } else {
+                    2
+                };
+                p[index] = tag
+                    .value
+                    .trim()
+                    .parse()
+                    .map_err(|_| "Ongeldig SPLINE-punt")?;
+            }
+        }
+        if let Some((p, has_y)) = current {
+            if !has_y {
+                return Err("SPLINE-punt mist Y".into());
+            }
+            output.push(p);
+        }
+        Ok(output)
+    }
+    fn values(groups: &[Group], code: i32) -> Result<Vec<f64>, String> {
+        groups
+            .iter()
+            .filter(|g| g.code == code)
+            .map(|g| {
+                g.value
+                    .trim()
+                    .parse()
+                    .map_err(|_| "Ongeldige SPLINE-waarde".to_owned())
+            })
+            .collect()
+    }
+    let spline = crate::spline::Spline {
+        degree: integer(groups, 71, 3)?,
+        flags: integer(groups, 70, 0)?,
+        controls: points(groups, 10)?,
+        fit_points: points(groups, 11)?,
+        knots: values(groups, 40)?,
+        weights: values(groups, 41)?,
+        start_tangent: field(groups, 12).map(|_| point(groups, 12)).transpose()?,
+        end_tangent: field(groups, 13).map(|_| point(groups, 13)).transpose()?,
+        normal: groups
+            .iter()
+            .any(|g| matches!(g.code, 210 | 220 | 230))
+            .then(|| {
+                [
+                    number(groups, 210).unwrap_or(0.),
+                    number(groups, 220).unwrap_or(0.),
+                    number(groups, 230).unwrap_or(1.),
+                ]
+            }),
+        knot_tolerance: number(groups, 42).unwrap_or(1e-7),
+        control_tolerance: number(groups, 43).unwrap_or(1e-7),
+        fit_tolerance: number(groups, 44).unwrap_or(1e-10),
+    };
+    for (code, count) in [
+        (72, spline.knots.len()),
+        (73, spline.controls.len()),
+        (74, spline.fit_points.len()),
+    ] {
+        if field(groups, code).is_some() && integer(groups, code, 0)? as usize != count {
+            return Err("SPLINE-aantallen komen niet overeen met de bronvelden".into());
+        }
+    }
+    let output = spline.flatten(Affine::IDENTITY, TOLERANCE, budget)?;
+    feature.points = output.points;
+    feature.closed = Some(spline.flags & 1 != 0);
+    let cad = feature.cad.get_or_insert_with(Default::default);
+    cad.path_breaks = output.breaks;
+    cad.spline = Some(Box::new(spline));
+    Ok(())
+}
+
 fn path(
     points: &[(V3, f64)],
     closed: bool,
@@ -231,6 +330,9 @@ impl Entities {
         self.polyline.is_some() || self.insert.is_some()
     }
     fn append(&mut self, feature: DxfFeature) -> Result<(), String> {
+        if let Some(cad) = &feature.cad {
+            cad.validate_geometry(feature.points.len())?;
+        }
         self.points = self
             .points
             .checked_add(feature.points.len())
@@ -344,6 +446,7 @@ impl Entities {
                 | "CIRCLE"
                 | "ARC"
                 | "ELLIPSE"
+                | "SPLINE"
                 | "POINT"
                 | "INSERT"
                 | "MULTILEADER"
@@ -364,6 +467,7 @@ impl Entities {
             "LWPOLYLINE" => lwpolyline(groups, &mut feature)?,
             "CIRCLE" | "ARC" => arc(groups, kind, &mut feature)?,
             "ELLIPSE" => ellipse(groups, &mut feature)?,
+            "SPLINE" => spline(groups, &mut feature, MAX_POINTS.saturating_sub(self.points))?,
             "INSERT" => {
                 feature.block_name = field(groups, 2).ok_or("INSERT mist bloknaam")?.to_owned();
                 let placement = Placement {

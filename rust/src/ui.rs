@@ -410,7 +410,7 @@ impl SleufBaseApp {
                 let choices=previous.layers.iter().map(|(name,layer)|(name.to_lowercase(),layer.visible)).collect::<std::collections::BTreeMap<_,_>>();
                 for (name,layer) in &mut loaded.layers {
                     if let Some(old)=previous.layers.get(name){layer.visible=old.visible;}
-                    else if let Some(visible)=choices.get(&name.to_lowercase()){layer.visible=*visible;}
+                    else if let Some(visible)=choices.get(&name.to_lowercase()){layer.visible = *visible;}
                 }
                 loaded.refresh_block_visibility();
                 self.overlays[index]=loaded;self.dirty=true;
@@ -1116,12 +1116,12 @@ fn canvas(
             if matches!(feature.source.entity_type.as_str(),"POINT"|"INSERT") {
                 if let Some(point)=feature.points.first(){painter.circle_filled(project(point.x,point.y),2.5,stroke.color);}
             }
-            for pair in feature.points.windows(2) {
+            for path in feature.paths() { for pair in path.windows(2) {
                 painter.line_segment([
                     project(pair[0].x,pair[0].y),
                     project(pair[1].x,pair[1].y)
                 ],stroke);
-            }
+            }}
         }
     }
     for dataset in datasets {
@@ -1781,6 +1781,28 @@ mod project_lifecycle_tests {
         overlay.layers.get_mut("True").unwrap().visible=false;
         overlay.refresh_block_visibility();
         assert!(!has_color(render(&overlay)));
+    }
+
+    #[test]
+    fn canvas_never_paints_a_bridge_between_disconnected_spline_paths() {
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/splines/splines-binary.dxf");
+        let mut overlay=load_dxf(&path).unwrap();
+        overlay.features.retain(|f|f.cad.as_ref().is_some_and(|p|p.xdata.get("SOURCE_ID").is_some_and(|tags|tags[0].value=="disconnected")));
+        overlay.blocks.clear();overlay.rebuild_block_cache().unwrap();
+        assert_eq!(overlay.features.len(),1);
+        let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
+            egui::CentralPanel::default().show(ctx,|ui|{
+                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);
+            });
+        });
+        let edges:Vec<_>=output.shapes.iter().filter_map(|s|match &s.shape {
+            egui::Shape::LineSegment{points,stroke}if stroke.color==Color32::from_rgb(220,20,60)=>Some(points),_=>None
+        }).collect();
+        assert_eq!(edges.len(),overlay.features[0].points.len()-2);
+        // The actual gap spans over half the fitted viewport. Every real
+        // curve edge is short; the renderer must never paint that long bridge.
+        assert!(edges.iter().all(|edge|(edge[1].x-edge[0].x).abs()<400.));
     }
 
     #[test]

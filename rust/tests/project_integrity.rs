@@ -47,8 +47,14 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
         path: "overlay.dxf".into(),
         visible: true,
         layers: Default::default(),
-        layer_aliases:Default::default(),
-        blocks:Default::default(),warnings:Vec::new(),expanded:Default::default(),block_visibility:Default::default(),block_warnings:Vec::new(),cached_bounds:None,bounds_ready:false,
+        layer_aliases: Default::default(),
+        blocks: Default::default(),
+        warnings: Vec::new(),
+        expanded: Default::default(),
+        block_visibility: Default::default(),
+        block_warnings: Vec::new(),
+        cached_bounds: None,
+        bounds_ready: false,
         features: vec![DxfFeature {
             entity_type: "LINE".into(),
             handle: "1".into(),
@@ -129,4 +135,66 @@ fn unknown_project_fields_and_oversized_files_are_rejected() {
     file.set_len(MAX_PROJECT_BYTES + 1).unwrap();
     drop(file);
     assert!(read_project(&path).unwrap_err().contains("te groot"));
+}
+
+#[test]
+fn saved_measurements_preserve_f64_bits_and_archive_large_json_numbers() {
+    use sleufbase_rust::{legacy_project::LegacyArchive, project::Comment};
+    use std::sync::Arc;
+    let mut values = vec![
+        -0.42838541666666685,
+        -0.0,
+        0.0,
+        f64::MAX,
+        f64::MIN_POSITIVE,
+        f64::from_bits(1),
+    ];
+    let mut bits = 0x83a9_d285_176f_b42du64;
+    for _ in 0..4096 {
+        bits ^= bits << 13;
+        bits ^= bits >> 7;
+        bits ^= bits << 17;
+        let value = f64::from_bits(bits);
+        if value.is_finite() {
+            values.push(value);
+        }
+    }
+    let original: serde_json::Value = serde_json::from_str(r#"{"version":1,"positive":1234567890123456789012345678901234567890,"negative":-1234567890123456789012345678901234567890,"decimal":0.123456789012345678901234567890123456789,"large_exponent":1e10000}"#).unwrap();
+    let archive_text = serde_json::to_string(&original).unwrap();
+    assert!(archive_text.contains("1234567890123456789012345678901234567890"));
+    assert!(archive_text.contains("0.123456789012345678901234567890123456789"));
+    assert_eq!(
+        original["large_exponent"].to_string().replace("e+", "e"),
+        "1e10000"
+    );
+    let project = NativeProject {
+        comments: values
+            .iter()
+            .map(|&v| Comment {
+                x: v,
+                y: -v,
+                text: String::new(),
+            })
+            .collect(),
+        legacy_archive: Some(LegacyArchive {
+            source_path: "synthetic.klicproject".into(),
+            original: Arc::new(original.clone()),
+            notices: vec![],
+        }),
+        ..Default::default()
+    };
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("numbers.json");
+    save_project(&path, &project).unwrap();
+    let loaded = read_project(&path).unwrap();
+    assert_eq!(loaded.comments.len(), values.len());
+    for (actual, expected) in loaded.comments.iter().zip(&values) {
+        assert_eq!(
+            actual.x.to_bits(),
+            expected.to_bits(),
+            "measurement {expected}"
+        );
+        assert_eq!(actual.y.to_bits(), (-expected).to_bits());
+    }
+    assert_eq!(*loaded.legacy_archive.unwrap().original, original);
 }

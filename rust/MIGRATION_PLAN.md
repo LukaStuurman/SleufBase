@@ -25,7 +25,7 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
-## Stand 17 oktober 2026
+## Voortgang 17–18 oktober 2026
 
 - MarXact-richting, automatische grensmiddens en absolute rotatie/reset geport.
   Tien Python-referentiegevallen, zeventig rotaties, project- en DXF-regressies.
@@ -88,7 +88,16 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   zichtbaarheid en blokovererving zonder bronnaamverlies of normalisatie per frame.
   Elf ezdxf-referenties in ASCII/binary; opslag, cache/snapshot, oude conflicterende
   varianten en bronherladen bij gewijzigde schrijfwijze getest. 132 Rust-tests groen.
-- Volgende stappen: tekst/ATTRIB-weergave, SPLINE, meshes, HATCH, dynamische
+- SPLINE/NURBS met controlepunten, positieve gewichten en CAD-fitpunten geport,
+  inclusief natuurlijke/clamped eindvoorwaarden, ongeklemde/periodieke curves,
+  bronparameters en gescheiden paden. Bézier-hullafvlakking na WCS-transformatie,
+  hergebruikte spanbuffer en lineaire tridiagonale fitoplossing.
+  Twintig ezdxf-bronnen, 60 wereldcurves/63 paden, graad 1/3/5/11, opslag,
+  numerieke fouten, budgetten en 20.000 fitpunten vergeleken/getest.
+  Exacte JSON-floatrondgangen herstellen een aangetoonde precisiefout bij openen;
+  grote getallen/decimalen in het Python-archief worden niet naar f64 afgerond.
+  139 Rust-tests groen; negatieve/nulgewichten en volledige CAD-acceptatie open.
+- Volgende stappen: tekst/ATTRIB-weergave, meshes, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   achtergrondladen van grote DXF/projecten en echte acceptatie nog open.
 

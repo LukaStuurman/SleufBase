@@ -134,6 +134,20 @@ fn every_native_project_object_rejects_unknown_fields() {
         base: [0.; 3],
         features: vec![],
     });
+    unknown(sleufbase_rust::spline::Spline {
+        degree: 1,
+        flags: 0,
+        knots: vec![],
+        controls: vec![[0.; 3], [1.; 3]],
+        weights: vec![],
+        fit_points: vec![],
+        start_tangent: None,
+        end_tangent: None,
+        normal: None,
+        knot_tolerance: 1e-7,
+        control_tolerance: 1e-7,
+        fit_tolerance: 1e-10,
+    });
 }
 
 #[test]

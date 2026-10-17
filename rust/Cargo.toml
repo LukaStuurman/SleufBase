@@ -8,7 +8,7 @@ description = "Native Rust migration of SleufBase (early preview)"
 [dependencies]
 eframe = "0.31"
 rfd = "0.15"
-serde_json = "1"
+serde_json = { version = "1", features = ["float_roundtrip", "arbitrary_precision"] }
 serde = { version = "1", features = ["derive", "rc"] }
 tempfile = "3"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "json", "cookies", "multipart"] }
