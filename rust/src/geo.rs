@@ -3,6 +3,7 @@
 use crate::model::Bounds;
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct GeoTransform {
     pub a: f64,
     pub b: f64,

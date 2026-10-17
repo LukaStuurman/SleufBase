@@ -7,12 +7,14 @@ use crate::dxf_tags::{self,Group};
 use std::path::{Path, PathBuf};
 
 use crate::model::{Bounds, Vertex};
+use std::collections::BTreeMap;
 
 const MAX_DXF_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_ENTITIES: usize = 2_000_000;
 const MAX_POINTS: usize = 10_000_000;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DxfFeature {
     pub entity_type: String,
     pub handle: String,
@@ -26,19 +28,32 @@ pub struct DxfFeature {
     /// None only for older saved overlays that did not retain this header flag.
     #[serde(default)]
     pub closed: Option<bool>,
+    #[serde(default)]
+    pub cad:Option<Box<crate::cad::Properties>>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DxfOverlay {
     pub path: PathBuf,
     pub visible: bool,
     pub features: Vec<DxfFeature>,
+    #[serde(default)]
+    pub layers:BTreeMap<String,crate::cad::Layer>,
 }
 
 impl DxfOverlay {
+    pub fn feature_visible(&self,feature:&DxfFeature)->bool {
+        feature.color_aci>=0&&!feature.cad.as_deref().is_some_and(|p|p.invisible)
+            &&self.layers.get(&feature.layer).is_none_or(|layer|layer.visible)
+    }
+    pub fn feature_rgb(&self,feature:&DxfFeature)->[u8;3] {
+        crate::cad::display_rgb(feature.color_aci,feature.cad.as_deref(),self.layers.get(&feature.layer))
+    }
     pub fn bounds(&self) -> Option<Bounds> {
         let mut bounds: Option<Bounds> = None;
         for feature in &self.features {
+            if !self.feature_visible(feature){continue;}
             for vertex in &feature.points {
                 if let Some(b) = bounds.as_mut() {
                     b.min_x = b.min_x.min(vertex.x);
@@ -51,6 +66,23 @@ impl DxfOverlay {
             }
         }
         bounds
+    }
+}
+
+impl DxfFeature {
+    pub fn details(&self,path:&Path)->BTreeMap<String,String> {
+        let mut result=BTreeMap::from([
+            ("Bestand".into(),path.file_name().unwrap_or_default().to_string_lossy().into_owned()),
+            ("Type".into(),self.entity_type.clone()),("Handle".into(),self.handle.clone()),
+            ("Laag".into(),self.layer.clone()),("Punten".into(),self.points.len().to_string()),
+        ]);
+        if let Some(cad)=self.cad.as_deref() {
+            if let Some(value)=&cad.line_type {result.insert("Lijntype".into(),value.clone());}
+            if let Some(value)=cad.line_weight {result.insert("Lijndikte".into(),value.to_string());}
+            for (name,value) in &cad.attributes {result.insert(format!("Attribuut {name}"),value.clone());}
+            for (name,tags) in &cad.xdata {if !tags.is_empty(){result.insert(format!("XDATA {name}"),crate::cad::xdata_text(tags));}}
+        }
+        result
     }
 }
 
@@ -73,8 +105,8 @@ fn vertex(groups: &[Group], xcode: i32, ycode: i32, zcode: i32) -> Option<Vertex
         z:number(groups,zcode),
     })
 }
-fn common(groups: &[Group], kind: &str) -> DxfFeature {
-    DxfFeature {
+fn common(groups: &[Group], kind: &str) -> Result<DxfFeature,String> {
+    Ok(DxfFeature {
         entity_type:kind.to_owned(),
         handle:field(groups,5).unwrap_or("").into(),
         layer:field(groups,8).unwrap_or("0").into(),
@@ -83,7 +115,8 @@ fn common(groups: &[Group], kind: &str) -> DxfFeature {
         raw_text:String::new(),
         block_name:String::new(),
         closed:None,
-    }
+        cad:crate::cad::properties(groups)?,
+    })
 }
 
 
@@ -202,18 +235,29 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
 fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path) -> Result<DxfOverlay,String> {
     let mut features=Vec::new();
     let mut in_entities=false;
+    let mut in_tables=false;
+    let mut layers=BTreeMap::new();
     let mut current_kind=String::new();
     let mut current_groups: Vec<Group>=Vec::new();
     let mut polyline:Option<DxfFeature>=None;
     let mut polyline_closed=false;
     let mut point_count=0;
+    let mut active_insert=None;
 
-    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool,point_count:&mut usize| -> Result<(),String> {
+    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool,point_count:&mut usize,active_insert:&mut Option<usize>| -> Result<(),String> {
         if polyline.is_some() && kind!="VERTEX" && kind!="SEQEND" {
             return Err("DXF-polyline is onderbroken zonder SEQEND".into());
         }
+        if active_insert.is_some() && kind!="ATTRIB" && kind!="SEQEND" {return Err("DXF-attributen missen SEQEND".into());}
+        if kind=="ATTRIB" {
+            let index=active_insert.ok_or("DXF ATTRIB zonder INSERT-sequentie")?;
+            let name=field(current,2).ok_or("DXF ATTRIB mist tagnaam")?;
+            let value=field(current,1).unwrap_or("");
+            result[index].cad.get_or_insert_with(Default::default).attributes.insert(name.to_owned(),value.to_owned());
+            return Ok(());
+        }
         if kind=="POLYLINE" {
-            let mut new_polyline=common(current,kind);
+            let mut new_polyline=common(current,kind)?;
             *polyline_closed=field(current,70).and_then(|v|v.trim().parse::<i32>().ok())
                 .is_some_and(|flags|flags & 1 != 0);
             new_polyline.closed=Some(*polyline_closed);
@@ -230,6 +274,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
             return Ok(());
         }
         if kind=="SEQEND" {
+            *active_insert=None;
             if let Some(mut old)=polyline.take() {
                 if old.points.len()>=2 {
                     if *polyline_closed { old.points.push(old.points[0]); }
@@ -239,7 +284,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
             *polyline_closed=false;
             return Ok(());
         }
-        let mut feature=common(current,kind);
+        let mut feature=common(current,kind)?;
         match kind {
             "LINE" => {
                 if let (Some(a),Some(b))=(vertex(current,10,20,30),vertex(current,11,21,31)) {
@@ -263,6 +308,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
         }
         if feature.points.len()>=2 {
             append_feature(result,feature,point_count)?;
+            if kind=="INSERT"&&field(current,66).is_some_and(|v|v.trim()=="1") {*active_insert=Some(result.len()-1);}
         }
         Ok(())
     };
@@ -276,8 +322,20 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
         if saw_eof && entry.code!=999 {return Err("DXF bevat gegevens na EOF".into());}
         if index>=MAX_ENTITIES*40 {return Err("DXF bevat te veel velden".into());}
         if entry.code==0 {
-            if in_entities && !current_kind.is_empty() {
-                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed,&mut point_count)?;
+            if !current_kind.is_empty() {
+                if in_entities {
+                    flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed,&mut point_count,&mut active_insert)?;
+                }else if in_tables&&current_kind=="LAYER" {
+                    let name=field(&current_groups,2).ok_or("DXF LAYER mist naam")?.to_owned();
+                    let color=field(&current_groups,62).map(|v|v.trim().parse::<i32>().map_err(|_|"Ongeldige DXF-laagkleur")).transpose()?.unwrap_or(7);
+                    let flags=field(&current_groups,70).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(0);
+                    let layer=crate::cad::Layer {
+                        color_aci:color.unsigned_abs().min(i32::MAX as u32)as i32,
+                        true_color:field(&current_groups,420).map(|v|v.trim().parse::<u32>().map_err(|_|"Ongeldige DXF-laag true-color")).transpose()?,
+                        visible:color>=0&&flags&1==0,
+                    };
+                    layer.validate()?;layers.insert(name,layer);
+                }
                 current_groups.clear();
             }
             if features.len()>MAX_ENTITIES {return Err("DXF heeft te veel entiteiten".into());}
@@ -286,6 +344,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
                     if section_open {return Err("DXF heeft geneste SECTION zonder ENDSEC".into());}
                     section_open=true;
                     in_entities=false;
+                    in_tables=false;
                     expect_section_name=true;
                     current_kind.clear();
                 }
@@ -298,27 +357,31 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
                         section_open=false;
                     }
                     in_entities=false;
+                    in_tables=false;
                     current_kind.clear();
                     if polyline.is_some(){return Err("DXF-polyline mist SEQEND".into());}
+                    if active_insert.is_some(){return Err("DXF-attributen missen SEQEND".into());}
                 }
-                other => current_kind=if in_entities {other.to_owned()} else {String::new()},
+                other => current_kind=if in_entities||in_tables {other.to_owned()} else {String::new()},
             }
             continue;
         }
         if expect_section_name && entry.code==2 {
             section_name=Some(entry.value.to_string());
             in_entities=entry.value.eq_ignore_ascii_case("ENTITIES");
+            in_tables=entry.value.eq_ignore_ascii_case("TABLES");
             expect_section_name=false;
             continue;
         }
-        if in_entities && !current_kind.is_empty() {
+        if (in_entities||in_tables) && !current_kind.is_empty() {
             if current_groups.len()>=1_000_000 {return Err("DXF-entiteit heeft meer dan 1 miljoen velden".into());}
             current_groups.push(entry);
         }
     }
     if section_name.is_none() {return Err("DXF bevat geen SECTION/ENTITIES".into());}
     if !saw_eof||section_open||expect_section_name {return Err("DXF afgebroken: ENDSEC/EOF ontbreekt".into());}
-    Ok(DxfOverlay{path:path.to_owned(),visible:true,features})
+    for feature in &features {layers.entry(feature.layer.clone()).or_default();}
+    Ok(DxfOverlay{path:path.to_owned(),visible:true,features,layers})
 }
 
 /// ASCII and binary DXF share the same entity interpretation and limits.

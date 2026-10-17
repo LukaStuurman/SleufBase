@@ -52,11 +52,13 @@ impl CadastralKind {
     }
 }
 #[derive(Clone,Debug,Serialize,Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CadLinework {
     pub layer_name:String,
     pub paths:Vec<Vec<(f64,f64)>>
 }
 #[derive(Clone,Debug,Serialize,Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CadLabel {
     pub layer_name:String,
     pub text:String,
@@ -64,6 +66,7 @@ pub struct CadLabel {
     pub rotation:f64,
 }
 #[derive(Clone,Debug,Serialize,Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CadastralLayer {
     pub visible:bool,
     pub bounds:Bounds,

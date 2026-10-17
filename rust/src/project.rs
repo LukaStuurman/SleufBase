@@ -15,10 +15,11 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub const FORMAT_VERSION: u32 = 1;
+pub const FORMAT_VERSION: u32 = 2;
 pub const MAX_PROJECT_BYTES: u64 = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Comment {
     pub x: f64,
     pub y: f64,
@@ -108,8 +109,10 @@ impl NativeProject {
             }
         }
         for overlay in &self.overlays {
+            for layer in overlay.layers.values(){layer.validate()?;}
             for feature in &overlay.features {
                 vertices(&feature.points)?;
+                if let Some(cad)=feature.cad.as_deref(){cad.validate()?;}
             }
         }
         for raster in &self.rasters {
@@ -189,8 +192,12 @@ pub fn read_project(path: &Path) -> Result<NativeProject, String> {
     if bytes.len() as u64 > MAX_PROJECT_BYTES {
         return Err("Projectbestand is te groot".into());
     }
-    let project: NativeProject =
+    let mut project: NativeProject =
         serde_json::from_slice(&bytes).map_err(|e| format!("Projectbestand ongeldig: {e}"))?;
+    // V2 adds durable CAD properties/layer controls. Older V1 apps reject V2
+    // rather than silently dropping these fields when saving. V1 inputs remain
+    // readable; opening alone never rewrites their original bytes.
+    if project.version==1 {project.version=FORMAT_VERSION;}
     project.validate()?;
     Ok(project)
 }

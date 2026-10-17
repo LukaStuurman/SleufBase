@@ -64,7 +64,7 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Projectwissels koppelen oude PDOK/BGT/Kadaster/AHN-resultaten los. Een eerder gestarte KickTheMap-download blijft op schijf beschikbaar, maar wordt niet aan een inmiddels ander project toegevoegd.
 - Projecten, back-ups, Excel en DXF worden eerst volledig naar een uniek tijdelijk bestand in dezelfde map geschreven. Export en CLI-conversie publiceren zonder overschrijven, ook als een ander proces tegelijkertijd dezelfde uitvoernaam kiest.
 - Projectopslag controleert alle kaartgeometrie, labels, opmerkingen en rastertransformaties. Ongeldige gegevens vervangen geen bestaand bestand. Lezen én opslaan respecteren de projectlimiet van 128 MiB.
-- Onbekende velden in het native projectformaat worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. De aparte Python-import bewaart het bron-JSON integraal.
+- Onbekende velden in de objectstructuren van het native projectformaat worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. De aparte Python-import bewaart het bron-JSON integraal.
 
 ## Bestaande Python-projecten importeren
 
@@ -159,8 +159,19 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - ASCII-waarden verwijzen tijdens het lezen naar de bronbuffer. Alleen de huidige entiteit houdt haar groepvelden vast; er wordt geen extra vector met alle tags en kopieën daarvan opgebouwd. De bronbytes en uiteindelijke geometrie staan nog wel in geheugen.
 - Invoer is begrensd op 256 MiB, 1 MiB per waarde, 1 miljoen velden per entiteit, 2 miljoen weergegeven entiteiten en 10 miljoen weergegeven vertices. Deze grenzen zijn geen totale procesgeheugenlimiet.
 - Afgebroken scalars/strings, niet-eindige getallen, ontbrekende ENDSEC/EOF en onderbroken POLYLINE-sequenties worden geweigerd, zodat een beschadigd prefix geen ogenschijnlijk complete tekening oplevert.
-- XDATA/binaire chunks worden correct gepasseerd, maar attributen/XDATA blijven nog niet als volledige objectmetadata beschikbaar. Bloktransformaties, OCS/bulges, SPLINE/ELLIPSE en volledige CAD-sjablonen blijven open.
+- INSERT-attributen, XDATA/binaire chunks, kleur, lijntype en lijndikte zijn beschikbaar als bronmetadata en blijven in native projecten bewaard. Volledige attribuutgeometrie, bloktransformaties, OCS/bulges, SPLINE/ELLIPSE en CAD-sjablonen blijven open.
 - Fixturegenerator: `python tools/generate_dxf_encoding_fixtures.py`. De scalarindeling volgt de [Autodesk-groepcodereferentie](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-2553CF98-44F6-4828-82DD-FE3BC7448113.htm) en [binaire DXF-beschrijving](https://help.autodesk.com/cloudhelp/2019/ENU/AutoCAD-DXF/files/GUID-FC1C3C69-DBC2-49E4-893A-000D6538C0FE.htm).
+
+## CAD-kleuren, lagen en objectgegevens
+
+- De kaart gebruikt het volledige ACI-palet van de bestaande Python/ezdxf-versie, inclusief de kleurregels voor BYLAYER/BYBLOCK op modelspace-niveau. Expliciete true-color heeft voorrang. Net als Python krijgt wit uit ACI een contrasterende kaartkleur; expliciete RGB-kleuren blijven ongewijzigd.
+- Rust corrigeert twee Python-leesfouten: expliciet RGB-zwart wordt behouden en true-color op een laag wordt toegepast. Uitgeschakelde/bevroren lagen en onzichtbare objecten worden verborgen. Zichtbare objecten bepalen de DXF-kaartgrenzen.
+- Onder **DXF-lagen → CAD-lagen** kun je afzonderlijke lagen tonen/verbergen. De keuze blijft in het project bewaard. Onder **Objecten bekijken** staan handles en lagen; de lijst verwerkt alleen zichtbare rijen.
+- **CAD-objectgegevens** toont bestand, type, handle, laag, aantal punten, lijntype/lijndikte, INSERT-attributen en XDATA. Dubbele attribuutnamen volgen de oorspronkelijke laatste-waarde-regel. Lange waarden worden herkenbaar verkort getoond en kunnen volledig worden gekopieerd. De details worden alleen bij selectie opgebouwd.
+- Een door ezdxf geschreven ASCII/binary-fixture vergelijkt 266 gevallen met de oorspronkelijke Python-functies: alle 255 ACI-kleuren, laagregels, true-color, verborgen objecten, attributen en XDATA. Bewuste correcties hebben een afzonderlijke verwachte uitkomst. Een egui-renderproef controleert werkelijk getekende kleuren en het verbergen van een laag.
+- Native opslag schrijft nu formaat **2**, inclusief CAD-metadata en laagkeuzes. Native formaat 1 wordt bij lezen in geheugen omgezet; het bronbestand blijft bij alleen openen ongewijzigd. Oudere Rust-builds weigeren formaat 2, zodat ze deze nieuwe gegevens niet stilzwijgend verwijderen. Dit betreft het Rust-formaat; Python `.klicproject` v1-import blijft beschikbaar.
+- Onbekende velden in native objectstructuren worden geweigerd. Het volledige oorspronkelijke Python-JSON blijft als open bronarchief behouden, inclusief onbekende Python-metadata.
+- Fixturegenerator: `python tools/generate_cad_properties_fixture.py` met ezdxf 1.4.4. Geometrie van blokken/attributen, volledige lijnstijlen/-gewichten en CAD-sjabloonexport blijven open. True-color en laagstatus volgen de [Autodesk-groepcodes](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-3F0380A5-1C15-464D-BC66-2C5F094BCFB9.htm) en [LAYER-definitie](https://help.autodesk.com/cloudhelp/2018/ENU/AutoCAD-DXF/files/GUID-D94802B0-8BE8-4AC9-8054-17197688AFDB.htm).
 
 ## MarXact-richting en uitlijning
 

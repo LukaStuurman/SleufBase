@@ -11,6 +11,7 @@ const EPSILON: f64 = 1e-10;
 const INTERSECTION_TOLERANCE: f64 = 1e-8;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MarXactAlignment {
     pub auto_start: Vertex,
     pub auto_end: Vertex,

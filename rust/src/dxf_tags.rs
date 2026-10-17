@@ -32,6 +32,26 @@ pub(crate) fn ascii(text: &str) -> impl Iterator<Item = Result<Group<'_>, String
             {
                 return Err("DXF bevat ongeldig of niet-eindig getal".into());
             }
+            let integer_range = match code {
+                60..=79 | 170..=179 | 270..=289 | 370..=389 | 400..=409 | 1060..=1070 => {
+                    Some((i64::from(i16::MIN), i64::from(u16::MAX)))
+                }
+                90..=99 | 420..=429 | 440..=459 | 1071 => {
+                    Some((i64::from(i32::MIN), i64::from(u32::MAX)))
+                }
+                160..=169 => Some((i64::MIN, i64::MAX)),
+                290..=299 => Some((0, 1)),
+                _ => None,
+            };
+            if let Some((min, max)) = integer_range {
+                if !value
+                    .trim()
+                    .parse::<i64>()
+                    .is_ok_and(|v| (min..=max).contains(&v))
+                {
+                    return Err("DXF bevat ongeldige integer of booleaanse waarde".into());
+                }
+            }
             Ok(Group {
                 code,
                 value: Cow::Borrowed(value),
@@ -284,6 +304,27 @@ impl<'a> Iterator for Binary<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ascii_integers_and_boolean_flags_are_validated_before_entity_interpretation() {
+        for (code, value, valid) in [
+            (70, "NaN", false),
+            (70, "65535", true),
+            (70, "65536", false),
+            (90, "4294967295", true),
+            (90, "4294967296", false),
+            (160, "-9223372036854775808", true),
+            (160, "9223372036854775808", false),
+            (290, "2", false),
+            (290, "01", true),
+        ] {
+            let text = format!("{code}\n{value}\n");
+            assert_eq!(
+                ascii(&text).next().unwrap().is_ok(),
+                valid,
+                "{code}: {value}"
+            );
+        }
+    }
     #[test]
     fn modern_utf8_overrides_header_codepage_regardless_of_tag_order() {
         let mut bytes = SIGNATURE.to_vec();

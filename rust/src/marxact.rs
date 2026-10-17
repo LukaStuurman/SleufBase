@@ -238,7 +238,7 @@ mod tests{
     fn feature(kind:&str,points:Vec<Vertex>,text:&str,layer:&str)->DxfFeature{
         DxfFeature{
             entity_type:kind.into(),handle:String::new(),layer:layer.into(),
-            color_aci:256,points,raw_text:text.into(),block_name:"marxact_point".into(),closed:None
+            color_aci:256,points,raw_text:text.into(),block_name:"marxact_point".into(),closed:None,cad:None
         }
     }
     fn rectangle()->Vec<Vertex>{vec![
@@ -285,7 +285,7 @@ mod tests{
             "Name=ls kabel^JHeight=3,1","TEXT"));
         items.push(feature("INSERT",vec![insert,insert],"","Laagspanning"));
         items.push(feature("INSERT",vec![p(100.,100.,0.),p(100.,100.,0.)],"","0"));
-        let overlay=DxfOverlay{path:PathBuf::from("file.dxf"),visible:true,features:items};
+        let overlay=DxfOverlay{path:PathBuf::from("file.dxf"),visible:true,features:items,layers:Default::default()};
         let mut maps=std::collections::BTreeMap::new();
         maps.insert("Laagspanning".to_owned(),"ls".to_owned());
         let result=parse_overlay(&overlay,&maps).unwrap();
@@ -300,7 +300,7 @@ mod tests{
     }
     #[test]
     fn rejects_unlabelled_or_collinear_boundaries(){
-        let overlay=DxfOverlay{path:PathBuf::new(),visible:true,
+        let overlay=DxfOverlay{path:PathBuf::new(),visible:true,layers:Default::default(),
             features:vec![feature("POLYLINE",vec![p(0.,0.,0.),p(1.,0.,0.),p(1.,1.,0.),p(0.,0.,0.)],"","0")]};
         assert!(parse_overlay(&overlay,&Default::default()).is_err());
         assert_eq!(signed_area(&[p(0.,0.,0.),p(1.,0.,0.),p(2.,0.,0.)]),0.);

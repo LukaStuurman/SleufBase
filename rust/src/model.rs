@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Vertex {
     pub x: f64,
     pub y: f64,
@@ -14,6 +15,7 @@ pub enum Geometry {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Feature {
     pub object_name: String,
     pub source_name: String,
@@ -22,6 +24,7 @@ pub struct Feature {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Dataset {
     pub job_id: u64,
     pub title: String,
@@ -30,6 +33,7 @@ pub struct Dataset {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Bounds {
     pub min_x: f64,
     pub min_y: f64,

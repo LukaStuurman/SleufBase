@@ -46,6 +46,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
     p.overlays.push(DxfOverlay {
         path: "overlay.dxf".into(),
         visible: true,
+        layers: Default::default(),
         features: vec![DxfFeature {
             entity_type: "LINE".into(),
             handle: "1".into(),
@@ -59,6 +60,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
             raw_text: String::new(),
             block_name: String::new(),
             closed: None,
+            cad: None,
         }],
     });
     invalid.push(p);

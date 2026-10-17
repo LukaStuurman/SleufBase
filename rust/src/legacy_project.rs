@@ -20,6 +20,7 @@ use std::{
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct LegacyArchive {
     pub source_path: PathBuf,
     pub original: Arc<Value>,

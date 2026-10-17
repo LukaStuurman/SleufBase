@@ -56,6 +56,8 @@ impl TrenchForm {
 #[derive(Clone,Debug,PartialEq)]
 enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf), Close }
 
+struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
+
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
@@ -63,6 +65,7 @@ pub struct SleufBaseApp {
     raster_loader:Option<sleufbase_rust::raster_loader::RasterLoader>,
     raster_errors:Vec<Option<String>>,
     overlays: Vec<DxfOverlay>,
+    dxf_selection:Option<DxfSelection>,
     virtual_trenches: Vec<VirtualTrench>,
     trench_markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,
     show_trench_dialog: bool,
@@ -121,6 +124,7 @@ impl Default for SleufBaseApp {
             raster_loader:None,
             raster_errors:Vec::new(),
             overlays:Vec::new(),
+            dxf_selection:None,
             virtual_trenches:Vec::new(),
             trench_markers:Vec::new(),
             show_trench_dialog:false,
@@ -209,6 +213,7 @@ impl SleufBaseApp {
         self.clear_project_requests();
         self.datasets=doc.datasets; self.geotiffs=doc.rasters;
         self.raster_textures=vec![None;self.geotiffs.len()]; self.overlays=doc.overlays;
+        self.dxf_selection=None;
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
         self.trench_markers.clear();
@@ -389,6 +394,12 @@ impl SleufBaseApp {
         let paths=self.geotiffs.iter().enumerate().map(|(id,r)|(id,r.path.clone())).collect();
         self.raster_loader.as_mut().unwrap().replace(paths,
             sleufbase_rust::raster_loader::preview_options_for_layers(self.geotiffs.len()));
+    }
+
+    fn select_dxf(&mut self,overlay:usize,feature:usize) {
+        self.dxf_selection=self.overlays.get(overlay).and_then(|o|o.features.get(feature).map(|f|
+            DxfSelection{overlay,feature,details:f.details(&o.path).into_iter().collect()}
+        ));
     }
 
     fn poll_raster_previews(&mut self,ctx:&egui::Context) {
@@ -891,16 +902,13 @@ fn union_bounds(a:Option<Bounds>,b:Option<Bounds>)->Option<Bounds> {
 }
 
 fn aci_color(color:i32)->Color32 {
-    match color.unsigned_abs() {
-        1=>Color32::from_rgb(220,45,45),
-        2=>Color32::from_rgb(225,190,20),
-        3=>Color32::from_rgb(40,150,40),
-        4=>Color32::from_rgb(40,190,195),
-        5=>Color32::from_rgb(45,100,220),
-        6=>Color32::from_rgb(190,70,200),
-        7=>Color32::from_rgb(45,45,45),
-        _=>Color32::from_rgb(175,70,40),
-    }
+    let [r,g,b]=sleufbase_rust::cad::display_rgb(color.unsigned_abs().min(i32::MAX as u32)as i32,None,None);
+    Color32::from_rgb(r,g,b)
+}
+
+fn cad_preview(value:&str)->&str {
+    let end=value.char_indices().nth(600).map_or(value.len(),|(index,_)|index);
+    &value[..end]
 }
 
 fn canvas(
@@ -1083,7 +1091,9 @@ fn canvas(
     }
     for overlay in overlays.iter().filter(|o|o.visible) {
         for feature in &overlay.features {
-            let stroke=Stroke::new(1.6,aci_color(feature.color_aci));
+            if !overlay.feature_visible(feature){continue;}
+            let [r,g,b]=overlay.feature_rgb(feature);
+            let stroke=Stroke::new(1.6_f32,Color32::from_rgb(r,g,b));
             for pair in feature.points.windows(2) {
                 painter.line_segment([
                     project(pair[0].x,pair[0].y),
@@ -1385,14 +1395,51 @@ impl eframe::App for SleufBaseApp {
             }
             ui.separator();
             ui.heading("DXF-lagen");
+            let mut choose_dxf=None;
+            let selected_dxf=self.dxf_selection.as_ref().map(|s|(s.overlay,s.feature));
             egui::ScrollArea::vertical().max_height(150.0).show(ui,|ui|{
-                for overlay in &mut self.overlays {
+                for (overlay_index,overlay) in self.overlays.iter_mut().enumerate() {
                     let label=overlay.path.file_name().and_then(|s|s.to_str()).unwrap_or("DXF");
                     let changed=ui.checkbox(&mut overlay.visible,label).changed();
                     if changed {self.dirty=true;}
                     ui.small(format!("{} entiteiten",overlay.features.len()));
+                    ui.push_id(overlay_index,|ui|{
+                        ui.collapsing("CAD-lagen",|ui|{
+                            for (name,layer) in &mut overlay.layers {
+                                if ui.checkbox(&mut layer.visible,cad_preview(name)).changed(){self.dirty=true;}
+                            }
+                        });
+                        ui.collapsing("Objecten bekijken",|ui|{
+                            egui::ScrollArea::vertical().id_salt("objects").max_height(140.0)
+                                .show_rows(ui,20.0,overlay.features.len(),|ui,rows|{
+                                    for index in rows {
+                                        let feature=&overlay.features[index];
+                                        let label=format!("{} {} [{}]",feature.entity_type,cad_preview(&feature.handle),cad_preview(&feature.layer));
+                                        if ui.selectable_label(selected_dxf==Some((overlay_index,index)),label).clicked(){choose_dxf=Some((overlay_index,index));}
+                                    }
+                                });
+                        });
+                    });
                 }
             });
+            if let Some((overlay,feature))=choose_dxf {self.select_dxf(overlay,feature);}
+            if let Some(selection)=&self.dxf_selection {
+                ui.collapsing("CAD-objectgegevens",|ui|{
+                    egui::Grid::new("cad-details").striped(true).show(ui,|ui|{
+                        for (key,value) in &selection.details {
+                            ui.label(key);
+                            ui.vertical(|ui|{
+                                ui.label(cad_preview(value));
+                                if cad_preview(value).len()<value.len() {
+                                    ui.small(format!("Verkort getoond, {} bytes",value.len()));
+                                }
+                                if ui.small_button("Kopiëren").clicked(){ui.ctx().copy_text(value.clone());}
+                            });
+                            ui.end_row();
+                        }
+                    });
+                });
+            }
             ui.separator();
             if let Some(ds)=self.selected.and_then(|i|self.datasets.get(i)) {
                 ui.strong(&ds.title);
@@ -1643,6 +1690,44 @@ mod project_lifecycle_tests {
     fn signed_dxf_colour_indices_never_overflow() {
         for colour in 1..=255 {assert_eq!(aci_color(colour),aci_color(-colour));}
         let _=aci_color(i32::MIN);
+    }
+
+    #[test]
+    fn cad_inspector_preserves_attributes_and_resets_on_project_switch() {
+        let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
+        let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cad-properties/properties-binary.dxf");
+        app.overlays.push(load_dxf(&path).unwrap());
+        app.select_dxf(0,app.overlays[0].features.len()-1);
+        let details=&app.dxf_selection.as_ref().unwrap().details;
+        assert!(details.iter().any(|(key,value)|key=="Attribuut Code"&&value=="PS 42"));
+        assert!(details.iter().any(|(key,value)|key=="XDATA MEASUREMENTS"&&value.contains("ID-42")));
+        assert!(!app.dirty);
+        app.execute_project_action(ProjectAction::New,&ctx);
+        assert!(app.dxf_selection.is_none());
+    }
+
+    #[test]
+    fn canvas_uses_true_color_and_honors_cad_layer_visibility() {
+        let ctx=egui::Context::default();let mut zoom=1.0;let mut pan=egui::Vec2::ZERO;
+        let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cad-properties/properties-binary.dxf");
+        let mut overlay=load_dxf(&path).unwrap();
+        // One entity in true-color layer True, so toggling that layer must
+        // remove its actual painted stroke. Other appearance cases are covered
+        // by the Python-oracle integration tests.
+        overlay.features.retain(|f|f.layer=="True");
+        let mut render=|overlay:&DxfOverlay| {
+            ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.0,600.0))),..Default::default()},|ctx|{
+                egui::CentralPanel::default().show(ctx,|ui|{
+                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);
+                });
+            })
+        };
+        let has_color=|output:egui::FullOutput|output.shapes.iter().any(|clipped|
+            matches!(&clipped.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0x34,0x56))
+        );
+        assert!(has_color(render(&overlay)));
+        overlay.layers.get_mut("True").unwrap().visible=false;
+        assert!(!has_color(render(&overlay)));
     }
 
     #[test]

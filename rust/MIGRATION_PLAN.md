@@ -62,8 +62,15 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   vergeleken; scalaire/XDATA-chunk- en afbreekregressies toegevoegd.
   105 Rust-tests groen. Geen volledige attributen/XDATA, OCS/bulges,
   bloktransformaties of sjablonen; bronbuffer en uitvoergeometrie blijven in RAM.
-- Volgende stappen: verdere CAD-/renderpariteit en volledige
-  projectworkflows. Overige mijlpalen en representatieve acceptatie nog open.
+- CAD-palet/true-color/laagstatus en INSERT-attributen/XDATA geïmplementeerd,
+  met laagkeuzes en een gecachte objectinspectie in de UI. 266 Python-orakels
+  (alle ACI's), ASCII/binary-vergelijking en egui-paintregressie.
+  Expliciet zwart en true-color op lagen corrigeren aangetoonde Python-fouten.
+  Native formaat v2 voorkomt verlies van nieuwe CAD-data in oudere builds;
+  v1 blijft leesbaar, onbekende native objectvelden geven een fout, het originele
+  Python-bronarchief blijft open/verliesvrij. 115 Rust-tests groen.
+- Volgende stappen: bloktransformaties, OCS/bulges, curves en volledige
+  CAD-/profiel-/projectworkflows. Overige mijlpalen en echte acceptatie nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.
 PR #116 blijft concept totdat **alle** releasevoorwaarden aantoonbaar gehaald zijn.

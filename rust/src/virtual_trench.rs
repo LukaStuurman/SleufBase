@@ -8,6 +8,7 @@ use crate::model::{Dataset, Feature, Geometry, Vertex};
 pub const DEFAULT_WIDTH_METERS:f64=0.6;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct TrenchPoint {
     pub role:String,
     pub object_name:String,
@@ -18,6 +19,7 @@ pub struct TrenchPoint {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct VirtualTrench {
     pub label:String,
     pub width_meters:f64,
