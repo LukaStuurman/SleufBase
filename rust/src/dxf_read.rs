@@ -1,14 +1,16 @@
-//! Pure-Rust ASCII DXF overlay reader.
+//! Pure-Rust ASCII/binary DXF overlay reader.
 //! Supports common entity families from existing SleufBase files without Python/ezdxf.
-//! Does not yet cover binary DXF, SPLINE, ELLIPSE or block transforms.
+//! Does not yet cover SPLINE, ELLIPSE or block transforms.
 
-use std::fs;
+use std::{fs::File,io::Read};
+use crate::dxf_tags::{self,Group};
 use std::path::{Path, PathBuf};
 
 use crate::model::{Bounds, Vertex};
 
 const MAX_DXF_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_ENTITIES: usize = 2_000_000;
+const MAX_POINTS: usize = 10_000_000;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct DxfFeature {
@@ -52,33 +54,18 @@ impl DxfOverlay {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-struct Group {
-    code: i32,
-    value: String,
-}
 
-fn groups(text: &str) -> Result<Vec<Group>, String> {
-    let mut lines = text.lines().map(|line| line.trim_end_matches('\r'));
-    let mut result = Vec::new();
-    loop {
-        let Some(code_text) = lines.next() else { break };
-        let Some(value) = lines.next() else { return Err("DXF mist een waarde bij de laatste groepcode".into()) };
-        let code = code_text.trim().parse::<i32>()
-            .map_err(|_| format!("Ongeldige DXF-groepcode: {code_text}"))?;
-        result.push(Group {code,value:value.trim().to_owned()});
-        if result.len() > MAX_ENTITIES * 40 {
-            return Err("DXF bevat te veel velden".into());
-        }
-    }
-    Ok(result)
+fn append_feature(result:&mut Vec<DxfFeature>,feature:DxfFeature,point_count:&mut usize)->Result<(),String> {
+    *point_count=point_count.checked_add(feature.points.len()).ok_or("DXF heeft te veel punten")?;
+    if *point_count>MAX_POINTS || result.len()>=MAX_ENTITIES {return Err("DXF heeft te veel punten/entiteiten".into());}
+    result.push(feature);Ok(())
 }
 
 fn field<'a>(groups: &'a [Group], code: i32) -> Option<&'a str> {
-    groups.iter().find(|g| g.code == code).map(|g| g.value.as_str())
+    groups.iter().find(|g| g.code == code).map(|g| g.value.as_ref())
 }
 fn number(groups: &[Group], code: i32) -> Option<f64> {
-    field(groups, code)?.parse::<f64>().ok().filter(|x| x.is_finite())
+    field(groups, code)?.trim().parse::<f64>().ok().filter(|x| x.is_finite())
 }
 fn vertex(groups: &[Group], xcode: i32, ycode: i32, zcode: i32) -> Option<Vertex> {
     Some(Vertex {
@@ -91,7 +78,7 @@ fn common(groups: &[Group], kind: &str) -> DxfFeature {
         entity_type:kind.to_owned(),
         handle:field(groups,5).unwrap_or("").into(),
         layer:field(groups,8).unwrap_or("0").into(),
-        color_aci:field(groups,62).and_then(|v|v.parse::<i32>().ok()).unwrap_or(256),
+        color_aci:field(groups,62).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(256),
         points:Vec::new(),
         raw_text:String::new(),
         block_name:String::new(),
@@ -106,7 +93,7 @@ fn common(groups: &[Group], kind: &str) -> DxfFeature {
 fn mleader(groups: &[Group]) -> Result<(String, Option<Vertex>), String> {
     if !groups.iter().any(|g| g.code == 300 && g.value == "CONTEXT_DATA{") {
         // Keep compatibility with simple flat vendor exports and older projects.
-        let content=groups.iter().filter(|g|g.code==304).map(|g|g.value.as_str()).collect::<Vec<_>>().join("");
+        let content=groups.iter().filter(|g|g.code==304).map(|g|g.value.as_ref()).collect::<Vec<_>>().join("");
         return Ok((content,vertex(groups,10,20,30)));
     }
     let invalid=||"Ongeldige geneste MULTILEADER-context".to_owned();
@@ -115,7 +102,7 @@ fn mleader(groups: &[Group]) -> Result<(String, Option<Vertex>), String> {
     let mut tip=None;
     let mut line_start=0;
     for (index,g) in groups.iter().enumerate() {
-        match (g.code,g.value.as_str()) {
+        match (g.code,g.value.as_ref()) {
             (300,"CONTEXT_DATA{") => {
                 if !scope.is_empty(){return Err(invalid());}
                 scope.push(300);
@@ -159,17 +146,17 @@ fn lwpolyline(groups: &[Group], points: &mut Vec<Vertex>) {
                 if let (Some(px),Some(py))=(x,y) {
                     points.push(Vertex{x:px,y:py,z:elevation});
                 }
-                x=g.value.parse::<f64>().ok().filter(|v|v.is_finite());
+                x=g.value.trim().parse::<f64>().ok().filter(|v|v.is_finite());
                 y=None;
             }
-            20 => y=g.value.parse::<f64>().ok().filter(|v|v.is_finite()),
+            20 => y=g.value.trim().parse::<f64>().ok().filter(|v|v.is_finite()),
             _=>{}
         }
     }
     if let (Some(px),Some(py))=(x,y) {
         points.push(Vertex{x:px,y:py,z:elevation});
     }
-    let closed=field(groups,70).and_then(|v|v.parse::<u32>().ok())
+    let closed=field(groups,70).and_then(|v|v.trim().parse::<i32>().ok())
         .is_some_and(|v|v & 1 != 0);
     if closed && points.len()>1 {
         points.push(points[0]);
@@ -208,18 +195,26 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     if text.starts_with("AutoCAD Binary DXF") {
         return Err("Binaire DXF vereist een aparte decoder".into());
     }
-    let records=groups(text)?;
+    if text.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
+    parse_groups(dxf_tags::ascii(text),path)
+}
+
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path) -> Result<DxfOverlay,String> {
     let mut features=Vec::new();
     let mut in_entities=false;
     let mut current_kind=String::new();
     let mut current_groups: Vec<Group>=Vec::new();
     let mut polyline:Option<DxfFeature>=None;
     let mut polyline_closed=false;
+    let mut point_count=0;
 
-    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool| -> Result<(),String> {
+    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool,point_count:&mut usize| -> Result<(),String> {
+        if polyline.is_some() && kind!="VERTEX" && kind!="SEQEND" {
+            return Err("DXF-polyline is onderbroken zonder SEQEND".into());
+        }
         if kind=="POLYLINE" {
             let mut new_polyline=common(current,kind);
-            *polyline_closed=field(current,70).and_then(|v|v.parse::<u32>().ok())
+            *polyline_closed=field(current,70).and_then(|v|v.trim().parse::<i32>().ok())
                 .is_some_and(|flags|flags & 1 != 0);
             new_polyline.closed=Some(*polyline_closed);
             *polyline=Some(new_polyline);
@@ -227,7 +222,10 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
         }
         if kind=="VERTEX" {
             if let Some(parent)=polyline {
-                if let Some(p)=vertex(current,10,20,30) { parent.points.push(p); }
+                if let Some(p)=vertex(current,10,20,30) {
+                    if parent.points.len()>=MAX_POINTS {return Err("DXF-polyline heeft te veel punten".into());}
+                    parent.points.push(p);
+                }
             }
             return Ok(());
         }
@@ -235,7 +233,7 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
             if let Some(mut old)=polyline.take() {
                 if old.points.len()>=2 {
                     if *polyline_closed { old.points.push(old.points[0]); }
-                    result.push(old);
+                    append_feature(result,old,point_count)?;
                 }
             }
             *polyline_closed=false;
@@ -264,63 +262,84 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
             _ => {}
         }
         if feature.points.len()>=2 {
-            result.push(feature);
+            append_feature(result,feature,point_count)?;
         }
         Ok(())
     };
 
     let mut section_name: Option<String> = None;
     let mut expect_section_name=false;
-    for entry in &records {
+    let mut section_open=false;
+    let mut saw_eof=false;
+    for (index,entry) in records.enumerate() {
+        let entry=entry?;
+        if saw_eof && entry.code!=999 {return Err("DXF bevat gegevens na EOF".into());}
+        if index>=MAX_ENTITIES*40 {return Err("DXF bevat te veel velden".into());}
         if entry.code==0 {
             if in_entities && !current_kind.is_empty() {
-                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed)?;
+                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed,&mut point_count)?;
                 current_groups.clear();
             }
             if features.len()>MAX_ENTITIES {return Err("DXF heeft te veel entiteiten".into());}
-            match entry.value.as_str() {
+            match entry.value.as_ref() {
                 "SECTION" => {
+                    if section_open {return Err("DXF heeft geneste SECTION zonder ENDSEC".into());}
+                    section_open=true;
                     in_entities=false;
                     expect_section_name=true;
                     current_kind.clear();
                 }
                 "ENDSEC" | "EOF" => {
+                    if entry.value=="EOF" {
+                        if section_open {return Err("DXF mist ENDSEC voor EOF".into());}
+                        saw_eof=true;
+                    }else{
+                        if !section_open||expect_section_name {return Err("Ongeldige DXF ENDSEC".into());}
+                        section_open=false;
+                    }
                     in_entities=false;
                     current_kind.clear();
-                    if let Some(parent)=polyline.take() {
-                        if parent.points.len()>=2 {
-                            let mut parent=parent;
-                            if polyline_closed {parent.points.push(parent.points[0]);}
-                            features.push(parent);
-                        }
-                    }
+                    if polyline.is_some(){return Err("DXF-polyline mist SEQEND".into());}
                 }
                 other => current_kind=if in_entities {other.to_owned()} else {String::new()},
             }
             continue;
         }
         if expect_section_name && entry.code==2 {
-            section_name=Some(entry.value.clone());
+            section_name=Some(entry.value.to_string());
             in_entities=entry.value.eq_ignore_ascii_case("ENTITIES");
             expect_section_name=false;
             continue;
         }
-        if in_entities && !current_kind.is_empty() {current_groups.push(entry.clone());}
+        if in_entities && !current_kind.is_empty() {
+            if current_groups.len()>=1_000_000 {return Err("DXF-entiteit heeft meer dan 1 miljoen velden".into());}
+            current_groups.push(entry);
+        }
     }
     if section_name.is_none() {return Err("DXF bevat geen SECTION/ENTITIES".into());}
+    if !saw_eof||section_open||expect_section_name {return Err("DXF afgebroken: ENDSEC/EOF ontbreekt".into());}
     Ok(DxfOverlay{path:path.to_owned(),visible:true,features})
 }
 
+/// ASCII and binary DXF share the same entity interpretation and limits.
+pub fn parse_dxf_bytes(bytes:&[u8],path:&Path)->Result<DxfOverlay,String> {
+    if bytes.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
+    if bytes.starts_with(b"AutoCAD Binary DXF") {
+        parse_groups(dxf_tags::Binary::new(bytes)?,path)
+    } else {
+        let text=dxf_tags::text(bytes)?;
+        parse_dxf(&text,path)
+    }
+}
+
 pub fn load_dxf(path: &Path) -> Result<DxfOverlay, String> {
-    if fs::metadata(path).map_err(|e|e.to_string())?.len()>MAX_DXF_BYTES {
+    let file=File::open(path).map_err(|e|format!("DXF lezen mislukt: {e}"))?;
+    if file.metadata().map_err(|e|e.to_string())?.len()>MAX_DXF_BYTES {
         return Err("DXF bestand groter dan 256 MiB".into());
     }
-    let bytes=fs::read(path).map_err(|e|format!("DXF lezen mislukt: {e}"))?;
-    if bytes.starts_with(b"AutoCAD Binary DXF") {
-        return Err("Binaire DXF wordt nog niet ondersteund".into());
-    }
-    let text=String::from_utf8_lossy(&bytes);
-    parse_dxf(&text,path)
+    let mut bytes=Vec::new();
+    file.take(MAX_DXF_BYTES+1).read_to_end(&mut bytes).map_err(|e|format!("DXF lezen mislukt: {e}"))?;
+    parse_dxf_bytes(&bytes,path)
 }
 
 #[cfg(test)]

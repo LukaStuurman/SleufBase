@@ -2,7 +2,7 @@
 //! INSERT ownership, block-layer mapping, chainage and measured heights.
 //!
 //! Compatibility target: marxact_import.py and marxact_direction_patch.py.
-//! ASCII MULTILEADER contexts isolate MTEXT and the first actual leader-line
+//! ASCII/binary MULTILEADER contexts isolate MTEXT and the first actual leader-line
 //! arrow, compared with the Python/ezdxf importer on synthetic CAD fixtures.
 
 use std::collections::HashMap;

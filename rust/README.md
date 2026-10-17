@@ -52,7 +52,7 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 
 ## Nieuw in deze migratiestap
 
-- ASCII-DXF als aparte kaartlaag openen (LINE, LWPOLYLINE, POLYLINE, ARC, CIRCLE en INSERT-marker); binary DXF en veel advanced entiteiten nog niet.
+- ASCII- en binaire DXF als aparte kaartlaag openen (LINE, LWPOLYLINE, POLYLINE, ARC, CIRCLE en INSERT-marker); volledige blokken en overige entiteiten nog niet.
 - Kaart verschuiven met slepen en zoomen met muiswiel.
 - Eigen Rust-project opslaan/openen als `*.sleufbase-rust.json`, met brondata, GeoTIFF-metadata en DXF-lagen.
 - Automatische roterende back-ups in een **aparte** Rust-map. Het bestaande Python-projectformaat wordt niet overschreven.
@@ -137,19 +137,30 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 
 ## MarXact: eerste native 3D DXF-import
 
-- Via **MarXact importeren** kan een ASCII DXF met `MULTILEADER` labels, gesloten `POLYLINE` grenzen en `INSERT` meetpunten rechtstreeks worden geladen.
+- Via **MarXact importeren** kan een ASCII- of binaire DXF met `MULTILEADER` labels, gesloten `POLYLINE` grenzen en `INSERT` meetpunten rechtstreeks worden geladen.
 - Controleert het `Name` op iedere grensvertex, koppelt punten op maximaal 8 cm aan labels en wijst overlappende punten toe aan de kleinste gemeten grens.
 - Bepaalt middenlijn en maaiveld-Z van de gemeten 3D-grens (met voorkeur voor meetpunt-richting), neemt laag-naar-discipline mapping over en bewaart de oorspronkelijke 3D-omtrek.
 - Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
-- **Nog niet volledig:** binaire DXF en overige vendorvarianten ontbreken nog. Geneste `MULTILEADER`-contexten zijn nu vergeleken met de oorspronkelijke Python-import op een synthetisch ezdxf-bestand; representatieve exportbestanden blijven vereist. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
+- **Nog niet volledig:** overige vendorvarianten en volledige blok-/CAD-pariteit ontbreken nog. Geneste `MULTILEADER`-contexten zijn nu vergeleken met de oorspronkelijke Python-import op een synthetisch ezdxf-bestand; representatieve exportbestanden blijven vereist. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
 
 ## MarXact-labels uit geneste CAD-contexten
 
-- De ASCII-lezer onderscheidt `CONTEXT_DATA`, `LEADER` en `LEADER_LINE`. Het eerste werkelijke pijlpunt wordt gebruikt; tekst-/landingspunten en scope-markeringen worden niet als meetpunten of labeltekst gelezen.
+- De DXF-lezer onderscheidt `CONTEXT_DATA`, `LEADER` en `LEADER_LINE`. Het eerste werkelijke pijlpunt wordt gebruikt; tekst-/landingspunten en scope-markeringen worden niet als meetpunten of labeltekst gelezen.
 - Een synthetische R2018-DXF met elf echte geneste labels, meerdere pijllijnen, gemeten 3D-grens en INSERT-objecten wordt vergeleken met de oorspronkelijke Python-parser en ezdxf 1.4.4. De test controleert objecttoewijzing, originele coördinaten, tekst en hoogten.
 - Open POLYLINEs worden overgeslagen als sleufgrens, ook bij labels op alle hoekpunten. Het oorspronkelijke gesloten-vlaggetje blijft in nieuwe Rust-projecten behouden; oudere opgeslagen overlays blijven leesbaar.
 - Labeltekst volgt de oorspronkelijke eerste-matchregel en numerieke hoogteprefix, inclusief decimale komma, `\P`, nieuwe regels en een achtervoegsel zoals `m NAP`. Beschadigde geneste scopes geven een leesfout; een ontbrekende pijl gebruikt geen tekstpositie als vervanging.
-- Fixture opnieuw maken: `python tools/generate_marxact_cad_fixture.py` met ezdxf 1.4.4. Binary DXF, bloktransformaties en volledige CAD-sjablonen blijven open.
+- Fixture opnieuw maken: `python tools/generate_marxact_cad_fixture.py` met ezdxf 1.4.4. Bloktransformaties en volledige CAD-sjablonen blijven open.
+
+## ASCII- en binaire DXF-invoer
+
+- Native binaire tagdecoder voor oude éénbyte-groepcodes met XDATA-escape en moderne tweebyte-groepcodes. Beide formaten gebruiken dezelfde geometrie- en MarXact-parser; er is geen Python-runtime nodig.
+- Vier door ezdxf 1.4.4 geschreven ASCII/binary-paren controleren R12, R2000 en R2018, Windows-1252, Windows-1251, Shift-JIS en UTF-8. Dezelfde punten, lagen, handles en kleuren worden gelezen. Een binaire geneste MarXact-fixture geeft dezelfde objecten en hoogten als ASCII.
+- Codepagina's komen uit HEADER; moderne UTF-8 heeft voorrang ongeacht de volgorde van de headerwaarden. Ongeldige tekst en nog niet ondersteunde codepagina's geven een foutmelding. Letterlijke DXF Unicode-escapes blijven in de bronvelden behouden, zoals bij de oorspronkelijke Python-laagnamen.
+- ASCII-waarden verwijzen tijdens het lezen naar de bronbuffer. Alleen de huidige entiteit houdt haar groepvelden vast; er wordt geen extra vector met alle tags en kopieën daarvan opgebouwd. De bronbytes en uiteindelijke geometrie staan nog wel in geheugen.
+- Invoer is begrensd op 256 MiB, 1 MiB per waarde, 1 miljoen velden per entiteit, 2 miljoen weergegeven entiteiten en 10 miljoen weergegeven vertices. Deze grenzen zijn geen totale procesgeheugenlimiet.
+- Afgebroken scalars/strings, niet-eindige getallen, ontbrekende ENDSEC/EOF en onderbroken POLYLINE-sequenties worden geweigerd, zodat een beschadigd prefix geen ogenschijnlijk complete tekening oplevert.
+- XDATA/binaire chunks worden correct gepasseerd, maar attributen/XDATA blijven nog niet als volledige objectmetadata beschikbaar. Bloktransformaties, OCS/bulges, SPLINE/ELLIPSE en volledige CAD-sjablonen blijven open.
+- Fixturegenerator: `python tools/generate_dxf_encoding_fixtures.py`. De scalarindeling volgt de [Autodesk-groepcodereferentie](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-2553CF98-44F6-4828-82DD-FE3BC7448113.htm) en [binaire DXF-beschrijving](https://help.autodesk.com/cloudhelp/2019/ENU/AutoCAD-DXF/files/GUID-FC1C3C69-DBC2-49E4-893A-000D6538C0FE.htm).
 
 ## MarXact-richting en uitlijning
 

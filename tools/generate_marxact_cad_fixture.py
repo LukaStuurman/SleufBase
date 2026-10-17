@@ -72,6 +72,7 @@ def main():
     doc.classes.add_required_classes(doc.dxfversion)
     doc.classes.classes=dict(sorted(doc.classes.classes.items()))
     doc.saveas(path)
+    doc.saveas(OUT/"nested-leaders-binary.dxf",fmt="bin")
     ref=reference()
     parsed=ref.parse_marxact_dxf(path)
     loaded=ezdxf.readfile(path)

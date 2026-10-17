@@ -10,6 +10,7 @@ pub mod raster_loader;
 mod raster_color;
 mod tiff_view;
 pub mod dxf_read;
+mod dxf_tags;
 pub mod project;
 pub mod legacy_project;
 pub mod storage;

@@ -55,7 +55,13 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Python-parser vergeleken (11 labels, 3 inserts, 1 gesloten en 1 open contour).
   Open contouren worden terecht overgeslagen; labeltekst volgt eerste match en
   numerieke hoogteprefix. Oudere overlays zonder gesloten-vlag blijven leesbaar.
-  97 Rust-tests groen; binary DXF, bloktransformaties en sjablonen blijven open.
+  97 Rust-tests groen; bloktransformaties en sjablonen blijven open.
+- ASCII/binary DXF-invoer deelt nu één geometriepad, leest tags incrementeel,
+  gebruikt HEADER-codepagina/UTF-8 en weigert beschadigde/afgebroken bestanden.
+  Vier ezdxf ASCII/binary-paren (R12/R2000/R2018) en binaire geneste MarXact
+  vergeleken; scalaire/XDATA-chunk- en afbreekregressies toegevoegd.
+  105 Rust-tests groen. Geen volledige attributen/XDATA, OCS/bulges,
+  bloktransformaties of sjablonen; bronbuffer en uitvoergeometrie blijven in RAM.
 - Volgende stappen: verdere CAD-/renderpariteit en volledige
   projectworkflows. Overige mijlpalen en representatieve acceptatie nog open.
 

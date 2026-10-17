@@ -1,0 +1,66 @@
+[
+  {
+    "ascii": "r12-cp1252-ascii.dxf",
+    "binary": "r12-cp1252-binary.dxf",
+    "layer": "Réseau_ë_\\U+6c34",
+    "start": [
+      168000.123,
+      401000.456,
+      -12.75
+    ],
+    "end": [
+      168004.5,
+      401002.25,
+      0.0
+    ],
+    "features": 3
+  },
+  {
+    "ascii": "r2000-cp1251-ascii.dxf",
+    "binary": "r2000-cp1251-binary.dxf",
+    "layer": "Вода_\\U+6c34",
+    "start": [
+      168000.123,
+      401000.456,
+      -12.75
+    ],
+    "end": [
+      168004.5,
+      401002.25,
+      0.0
+    ],
+    "features": 3
+  },
+  {
+    "ascii": "r2000-cp932-ascii.dxf",
+    "binary": "r2000-cp932-binary.dxf",
+    "layer": "水道_\\xeb",
+    "start": [
+      168000.123,
+      401000.456,
+      -12.75
+    ],
+    "end": [
+      168004.5,
+      401002.25,
+      0.0
+    ],
+    "features": 3
+  },
+  {
+    "ascii": "r2018-utf8-ascii.dxf",
+    "binary": "r2018-utf8-binary.dxf",
+    "layer": "水_Δ_ë",
+    "start": [
+      168000.123,
+      401000.456,
+      -12.75
+    ],
+    "end": [
+      168004.5,
+      401002.25,
+      0.0
+    ],
+    "features": 3
+  }
+]

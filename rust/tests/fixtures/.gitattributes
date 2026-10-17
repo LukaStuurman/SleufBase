@@ -1,0 +1,3 @@
+# Preserve fixture encodings and binary bytes independently of checkout settings.
+*.dxf -text
+*.tiff -text
