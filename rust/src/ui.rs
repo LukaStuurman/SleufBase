@@ -407,8 +407,10 @@ impl SleufBaseApp {
         match load_dxf(&path) {
             Ok(mut loaded)=>{
                 loaded.visible=previous.visible;
+                let choices=previous.layers.iter().map(|(name,layer)|(name.to_lowercase(),layer.visible)).collect::<std::collections::BTreeMap<_,_>>();
                 for (name,layer) in &mut loaded.layers {
                     if let Some(old)=previous.layers.get(name){layer.visible=old.visible;}
+                    else if let Some(visible)=choices.get(&name.to_lowercase()){layer.visible=*visible;}
                 }
                 loaded.refresh_block_visibility();
                 self.overlays[index]=loaded;self.dirty=true;
@@ -1742,7 +1744,7 @@ mod project_lifecycle_tests {
         let mut app=SleufBaseApp::default();
         let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cad-scene/scene-ascii.dxf");
         let mut old=load_dxf(&path).unwrap();old.blocks.clear();old.expanded=Default::default();old.visible=false;
-        old.layers.get_mut("ROOT").unwrap().visible=false;
+        let mut root=old.layers.remove("ROOT").unwrap();root.visible=false;old.layers.insert("rOoT".into(),root);
         app.overlays.push(old);app.select_dxf(0,0);
         app.replace_dxf_source(0,path);
         assert!(!app.overlays[0].blocks.is_empty());assert_eq!(app.overlays[0].expanded.features.len(),82);

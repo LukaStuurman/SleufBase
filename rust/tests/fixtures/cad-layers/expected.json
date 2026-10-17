@@ -1,0 +1,123 @@
+[
+  {
+    "handle": "30",
+    "raw": "wATER",
+    "layer": "Water",
+    "rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true
+  },
+  {
+    "handle": "32",
+    "raw": "oFF",
+    "layer": "Off",
+    "rgb": [
+      0,
+      255,
+      255
+    ],
+    "visible": false
+  },
+  {
+    "handle": "34",
+    "raw": "éLECTRICITÉ",
+    "layer": "Électricité",
+    "rgb": [
+      255,
+      255,
+      0
+    ],
+    "visible": true
+  },
+  {
+    "handle": "36",
+    "raw": "дАННЫЕ",
+    "layer": "Данные",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "visible": true
+  },
+  {
+    "handle": "38",
+    "raw": "ος",
+    "layer": "ΟΣ",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "visible": true
+  },
+  {
+    "handle": "3A",
+    "raw": "i̇NFRA",
+    "layer": "İnfra",
+    "rgb": [
+      255,
+      0,
+      0
+    ],
+    "visible": true
+  },
+  {
+    "handle": "3C",
+    "raw": "sTRAßE",
+    "layer": "Straße",
+    "rgb": [
+      255,
+      127,
+      0
+    ],
+    "visible": true
+  },
+  {
+    "handle": "3E",
+    "raw": "strasse",
+    "layer": "STRASSE",
+    "rgb": [
+      0,
+      127,
+      255
+    ],
+    "visible": true
+  },
+  {
+    "handle": "43",
+    "raw": "wATER",
+    "layer": "Water",
+    "rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true
+  },
+  {
+    "handle": "44",
+    "raw": "0",
+    "layer": "Root",
+    "rgb": [
+      18,
+      52,
+      86
+    ],
+    "visible": true
+  },
+  {
+    "handle": "45",
+    "raw": "oFF",
+    "layer": "Off",
+    "rgb": [
+      0,
+      255,
+      255
+    ],
+    "visible": false
+  }
+]

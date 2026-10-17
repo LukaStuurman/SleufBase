@@ -40,6 +40,8 @@ pub struct DxfOverlay {
     pub features: Vec<DxfFeature>,
     #[serde(default)]
     pub layers:BTreeMap<String,crate::cad::Layer>,
+    #[serde(skip)]
+    pub layer_aliases:Arc<BTreeMap<String,Arc<str>>>,
     #[serde(default,skip_serializing_if="BTreeMap::is_empty")]
     pub blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
     #[serde(default,skip_serializing_if="Vec::is_empty")]
@@ -59,10 +61,10 @@ pub struct DxfOverlay {
 impl DxfOverlay {
     pub fn feature_visible(&self,feature:&DxfFeature)->bool {
         feature.color_aci>=0&&!feature.cad.as_deref().is_some_and(|p|p.invisible)
-            &&self.layers.get(&feature.layer).is_none_or(|layer|layer.visible)
+            &&self.resolve_layer(&feature.layer).is_none_or(|layer|layer.visible)
     }
     pub fn feature_rgb(&self,feature:&DxfFeature)->[u8;3] {
-        crate::cad::display_rgb(feature.color_aci,feature.cad.as_deref(),self.layers.get(&feature.layer))
+        crate::cad::display_rgb(feature.color_aci,feature.cad.as_deref(),self.resolve_layer(&feature.layer))
     }
     pub fn bounds(&self)->Option<Bounds>{
         if self.bounds_ready {self.cached_bounds}else{self.calculate_bounds()}
@@ -117,6 +119,7 @@ struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize}
 struct Parser {
     entities:crate::dxf_entities::Entities,
     layers:BTreeMap<String,crate::cad::Layer>,
+    layer_keys:std::collections::BTreeSet<String>,
     blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
     block:Option<BlockStart>,
 }
@@ -127,6 +130,7 @@ impl Parser {
             "ENTITIES"=>self.entities.push(kind,groups)?,
             "TABLES" if kind=="LAYER"=>{
                 let name=field(groups,2).ok_or("DXF LAYER mist naam")?.to_owned();
+                if !self.layer_keys.insert(name.to_lowercase()){return Err("DXF bevat dubbele laagnamen (hoofdletterongevoelig)".into());}
                 let color=field(groups,62).map(|v|v.trim().parse::<i32>().map_err(|_|"Ongeldige DXF-laagkleur")).transpose()?.unwrap_or(7);
                 let flags=field(groups,70).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(0);
                 let layer=crate::cad::Layer{color_aci:color.unsigned_abs().min(i32::MAX as u32)as i32,
@@ -161,7 +165,7 @@ impl Parser {
 }
 
 fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path)->Result<DxfOverlay,String>{
-    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),blocks:BTreeMap::new(),block:None};
+    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None};
     let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
     let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;
     for (index,entry) in records.enumerate(){
@@ -192,9 +196,6 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
         }
     }
     if !saw_section||!eof||open||expect_section{return Err("DXF afgebroken: SECTION/ENDSEC/EOF ontbreekt".into());}
-    for feature in parser.entities.features.iter().chain(parser.blocks.values().flat_map(|b|b.features.iter())){
-        parser.layers.entry(feature.layer.clone()).or_default();
-    }
     let warnings=parser.entities.unsupported.iter().map(|(kind,count)|format!("{kind}: {count} entiteit(en) nog niet volledig weergegeven")).collect();
     let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,features:parser.entities.features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};

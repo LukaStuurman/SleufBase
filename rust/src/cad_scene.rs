@@ -72,6 +72,7 @@ struct Builder<'a> {
 }
 impl Builder<'_> {
     fn layer(&mut self, name: &str) -> Arc<str> {
+        let name = self.overlay.canonical_layer_name(name);
         if let Some(layer) = self.layers.get(name) {
             return layer.clone();
         }
@@ -217,6 +218,7 @@ impl Builder<'_> {
 }
 impl DxfOverlay {
     pub fn rebuild_block_cache(&mut self) -> Result<(), String> {
+        let layer_warnings = self.rebuild_layer_aliases();
         for block in self.blocks.values() {
             g::finite(block.base)?;
         }
@@ -234,7 +236,7 @@ impl DxfOverlay {
             stack: Vec::new(),
             layers: BTreeMap::new(),
         };
-        let mut warnings = BTreeSet::new();
+        let mut warnings: BTreeSet<_> = layer_warnings.into_iter().collect();
         for (index, source) in self.features.iter().enumerate() {
             if source.entity_type != "INSERT" {
                 continue;
@@ -311,7 +313,7 @@ impl DxfOverlay {
             .map(|source| DrawRef {
                 source,
                 points: &source.points,
-                layer: &source.layer,
+                layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),
             })
@@ -323,7 +325,7 @@ impl DxfOverlay {
             Some(DrawRef {
                 source,
                 points: &source.points,
-                layer: &source.layer,
+                layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),
             })

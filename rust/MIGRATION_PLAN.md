@@ -84,6 +84,10 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   100.000 dubbele labels en zeer grote coördinaten getest. 128 Rust-tests groen.
   Releasekernmeting: indexopbouw plus 20.000 vragen circa 63× sneller dan de oude
   native lineaire scan op 20.000 verspreide labels; geen volledige importmeting.
+- Hoofdletterongevoelige Unicode-laagverwijzingen behouden nu de juiste kleur,
+  zichtbaarheid en blokovererving zonder bronnaamverlies of normalisatie per frame.
+  Elf ezdxf-referenties in ASCII/binary; opslag, cache/snapshot, oude conflicterende
+  varianten en bronherladen bij gewijzigde schrijfwijze getest. 132 Rust-tests groen.
 - Volgende stappen: tekst/ATTRIB-weergave, SPLINE, meshes, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   achtergrondladen van grote DXF/projecten en echte acceptatie nog open.

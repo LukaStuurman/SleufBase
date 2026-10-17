@@ -47,6 +47,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
         path: "overlay.dxf".into(),
         visible: true,
         layers: Default::default(),
+        layer_aliases:Default::default(),
         blocks:Default::default(),warnings:Vec::new(),expanded:Default::default(),block_visibility:Default::default(),block_warnings:Vec::new(),cached_bounds:None,bounds_ready:false,
         features: vec![DxfFeature {
             entity_type: "LINE".into(),

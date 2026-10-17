@@ -11,6 +11,7 @@ mod raster_color;
 mod tiff_view;
 pub mod dxf_read;
 pub mod cad;
+mod cad_layers;
 pub mod cad_geometry;
 pub mod cad_scene;
 mod dxf_tags;
