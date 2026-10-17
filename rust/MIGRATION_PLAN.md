@@ -77,6 +77,13 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Native v3 bewaart blokken/curveparameters, leest v1/v2 zonder bronwijziging en
   bouwt afgeleide caches opnieuw. 125 Rust-tests groen, inclusief polyface-indexen,
   recursie/budgetfouten, 10.000 metadata-delende instanties en mislukte herkoppeling.
+- MarXact-labels worden ruimtelijk geïndexeerd met gedeelde bronnen en deduplicatie
+  van gelijke XY-posities. De Python-tievolgorde corrigeert een native afwijking;
+  extra buurcellen herstellen Python-missers op ties-to-even-celgrenzen.
+  10.018 onafhankelijke referentievragen, 36 expliciete afrondingscorrecties,
+  100.000 dubbele labels en zeer grote coördinaten getest. 128 Rust-tests groen.
+  Releasekernmeting: indexopbouw plus 20.000 vragen circa 63× sneller dan de oude
+  native lineaire scan op 20.000 verspreide labels; geen volledige importmeting.
 - Volgende stappen: tekst/ATTRIB-weergave, SPLINE, meshes, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   achtergrondladen van grote DXF/projecten en echte acceptatie nog open.

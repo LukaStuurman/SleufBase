@@ -38,6 +38,23 @@ het opvragen tijdens gewone frames; opbouw, laagwijzigingen, CAD-rendering en
 projectladen zijn uitgesloten. De meetresolutie rechtvaardigt geen
 snelheidsfactor of FPS-claim. CI neemt beide CAD-rijen in het kernartifact op.
 
+## MarXact-labelzoekactie
+
+`2026-10-17-windows-gnu-leader-core.csv` voegt 20.000 verspreide labels en
+20.000 exacte meetvragen toe op dezelfde machine. Drie rondes oude lineaire
+zoekacties uit `84c74ad` kosten samen 2.448,102 ms. Drie rondes indexopbouw plus
+alle zoekvragen kosten 38,655 ms: circa 63× sneller voor deze bewerking.
+De index deelt labels, dedupliceert gelijke XY-posities en gebruikt één
+aaneengesloten kandidaatarray; opbouw vergt in deze meting drie allocaties per
+ronde. De oude scan alloceert niet, maar vergelijkt per vraag alle labels.
+
+Een checksum bewaakt dezelfde labeluitkomsten op deze ondubbelzinnige dataset.
+Afzonderlijke Python-/exhaustieve fixtures dekken ties en gecorrigeerde
+afrondingsmissers. De benchmark gebruikt geen echte DXF en meet geen volledige
+importtijd, procespiek of vergelijking met de Python-index. Zeer dichte cellen
+met veel verschillende posities kunnen nog steeds duur zijn. CI publiceert
+dezelfde twee extra rijen als onderdeel van het kernartifact.
+
 ## TIFF-preview tegenover Python/Pillow
 
 `2026-10-17-windows-gnu-raster.json` bevat drie metingen in aparte processen op

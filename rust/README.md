@@ -151,6 +151,14 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Labeltekst volgt de oorspronkelijke eerste-matchregel en numerieke hoogteprefix, inclusief decimale komma, `\P`, nieuwe regels en een achtervoegsel zoals `m NAP`. Beschadigde geneste scopes geven een leesfout; een ontbrekende pijl gebruikt geen tekstpositie als vervanging.
 - Fixture opnieuw maken: `python tools/generate_marxact_cad_fixture.py` met ezdxf 1.4.4. Volledige CAD-sjablonen en acceptatie met echte MarXact-bestanden blijven open.
 
+## Ruimtelijke MarXact-labelkoppeling
+
+- Meetpunten en grensvertices gebruiken een gedeelde ruimtelijke index in plaats van per punt alle labels te doorzoeken. De index verwijst naar de oorspronkelijke labels; gelijke XY-posities bewaren alleen de laatste kandidaat, inclusief +0/-0.
+- Bij gelijke afstanden blijft de Python-volgorde per cel en bronpositie bepalend. Dit herstelt een afwijkende label-/hoogtekeuze van de eerdere native lineaire scan.
+- Een extra celrand corrigeert een Python-fout: ties-to-even-afronding kan labels binnen 8 cm twee cellen uiteen plaatsen (bijvoorbeeld 0,04 en 0,12). Rust zoekt ook die cellen en controleert steeds de werkelijke afstand. Dit is een bewuste correctie, geen byte-identieke reproductie van die fout.
+- 10.018 vragen in 207 fixtures vergelijken de oorspronkelijke Python-functie met een onafhankelijke volledige afstandszoekactie in dezelfde tievolgorde. De referentie legt 36 afrondingscorrecties vast. Ook 100.000 gelijke labels, negatieve nul en zeer grote coördinaten hebben regressies. Generator: `python tools/generate_leader_lookup_fixture.py`.
+- Dit versnelt deze zoekbewerking bij verspreide labels; veel verschillende punten in één cel kunnen nog steeds een dure zoekactie geven. Volledige importtijd, grens-/objecttoewijzing en geheugen op echte projecten moeten nog worden gemeten.
+
 ## ASCII- en binaire DXF-invoer
 
 - Native binaire tagdecoder voor oude éénbyte-groepcodes met XDATA-escape en moderne tweebyte-groepcodes. Beide formaten gebruiken dezelfde geometrie- en MarXact-parser; er is geen Python-runtime nodig.

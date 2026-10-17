@@ -13,7 +13,7 @@ use crate::dxf_read::{DxfOverlay, load_dxf};
 use crate::model::Vertex;
 use crate::virtual_trench::{TrenchPoint, VirtualTrench};
 
-const LEADER_MATCH_TOLERANCE:f64=0.08;
+pub(crate) const LEADER_MATCH_TOLERANCE:f64=0.08;
 const MIN_AREA:f64=0.02;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -121,18 +121,6 @@ struct Boundary {
     area:f64,
     objects:Vec<TrenchPoint>
 }
-fn nearest_leader<'a>(x:f64,y:f64,leaders:&'a [MarXactLeader])->Option<&'a MarXactLeader> {
-    let max2=LEADER_MATCH_TOLERANCE.powi(2);
-    let mut best=None;let mut best2=max2;
-    for leader in leaders {
-        let distance=(leader.x-x).powi(2)+(leader.y-y).powi(2);
-        if distance<=best2 {
-            best=Some(leader);
-            best2=distance;
-        }
-    }
-    best
-}
 pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<String,String>)
     ->Result<MarXactResult,String>
 {
@@ -145,6 +133,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
         Some(MarXactLeader{x:tip.x,y:tip.y,name,height})
     }).collect::<Vec<_>>();
     if leaders.is_empty(){return Err("Geen MarXact MULTILEADER-labels met Name en pijlpunten gevonden".into());}
+    let leader_index=crate::leader_index::LeaderIndex::new(&leaders);
     let mut boundaries=Vec::new();
     let mut skipped=0usize;
     for f in &overlay.features {
@@ -158,7 +147,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
         }){vertices.pop();}
         if vertices.len()<3 || signed_area(&vertices).abs()<MIN_AREA{skipped+=1;continue;}
         let names=vertices.iter().map(|v|
-            nearest_leader(v.x,v.y,&leaders).map(|l|l.name.clone()).unwrap_or_default()
+            leader_index.nearest(v.x,v.y).map(|l|l.name.clone()).unwrap_or_default()
         ).collect::<Vec<_>>();
         let Some(first)=names.first() else{continue};
         let normalized=normalize_name(first);
@@ -183,7 +172,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
             point_inside_polygon(point.x,point.y,&b.points)
         ).min_by(|a,b|a.1.area.total_cmp(&b.1.area)).map(|(idx,_)|idx);
         let Some(index)=candidate else{continue};
-        let leader=nearest_leader(point.x,point.y,&leaders);
+        let leader=leader_index.nearest(point.x,point.y);
         let name=leader.map(|l|l.name.clone()).unwrap_or_default();
         let layer=feature.layer.trim();
         let mapping_name=if layer.is_empty()||layer=="0"{name.as_str()}else{layer};

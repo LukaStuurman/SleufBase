@@ -1,4 +1,4 @@
-//! Focused microbenchmarks against retired preview paths (1de19f4/2f14723).
+//! Focused microbenchmarks against retired paths (1de19f4/2f14723/84c74ad).
 //! Run `cargo run --release --example benchmark_core`; no external files/accounts.
 //! These do not establish end-to-end Python parity or total application memory.
 use sleufbase_rust::{project::NativeProject, Dataset, Feature, Geometry, Vertex};
@@ -176,4 +176,41 @@ fn main() {
         black_box(black_box(&overlay).bounds());
     });
     assert_eq!(cached, 0, "cached CAD bounds queries allocate");
+
+    use sleufbase_rust::{leader_index::LeaderIndex, marxact::MarXactLeader};
+    // Sparse survey-like labels with unambiguous exact-point queries. Include
+    // index construction in the new path; this is not a worst-case density test.
+    let leaders = (0..20_000)
+        .map(|i| MarXactLeader {
+            x: 168000. + (i % 200) as f64,
+            y: 401000. + (i / 200) as f64,
+            name: i.to_string(),
+            height: Some(i as f64),
+        })
+        .collect::<Vec<_>>();
+    let expected = (0..20_000u64).sum::<u64>();
+    measure("leader_lookup_retired_linear_20k", 3, || {
+        let mut checksum = 0;
+        for query in black_box(&leaders) {
+            let mut nearest = None;
+            let mut distance = 0.08_f64.powi(2);
+            for candidate in black_box(&leaders) {
+                let d = (candidate.x - query.x).powi(2) + (candidate.y - query.y).powi(2);
+                if d <= distance {
+                    nearest = Some(candidate);
+                    distance = d;
+                }
+            }
+            checksum += nearest.unwrap().height.unwrap() as u64;
+        }
+        assert_eq!(black_box(checksum), expected);
+    });
+    measure("leader_lookup_build_and_query_20k", 3, || {
+        let index = LeaderIndex::new(black_box(&leaders));
+        let checksum = black_box(&leaders)
+            .iter()
+            .map(|query| index.nearest(query.x, query.y).unwrap().height.unwrap() as u64)
+            .sum::<u64>();
+        assert_eq!(black_box(checksum), expected);
+    });
 }
