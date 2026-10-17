@@ -50,6 +50,12 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Releasebenchmark op 16,8 miljoen RGB8-pixels: circa 2,3× sneller en 86% lagere
   procespiek dan volledige Pillow-conversie, bij gelijke previewpixels. Overviews,
   viewportresolutie en volledige raster-/gebruikersacceptatie blijven open.
+- Geneste MULTILEADER-labels lezen echte pijllijnen en MTEXT afzonderlijk.
+  Een echte synthetische ezdxf R2018-serialisatie is met de oorspronkelijke
+  Python-parser vergeleken (11 labels, 3 inserts, 1 gesloten en 1 open contour).
+  Open contouren worden terecht overgeslagen; labeltekst volgt eerste match en
+  numerieke hoogteprefix. Oudere overlays zonder gesloten-vlag blijven leesbaar.
+  97 Rust-tests groen; binary DXF, bloktransformaties en sjablonen blijven open.
 - Volgende stappen: verdere CAD-/renderpariteit en volledige
   projectworkflows. Overige mijlpalen en representatieve acceptatie nog open.
 

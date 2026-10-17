@@ -21,6 +21,9 @@ pub struct DxfFeature {
     pub raw_text: String,
     #[serde(default)]
     pub block_name: String,
+    /// None only for older saved overlays that did not retain this header flag.
+    #[serde(default)]
+    pub closed: Option<bool>,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -92,7 +95,58 @@ fn common(groups: &[Group], kind: &str) -> DxfFeature {
         points:Vec::new(),
         raw_text:String::new(),
         block_name:String::new(),
+        closed:None,
     }
+}
+
+
+/// Read MULTILEADER scopes instead of confusing the text/landing base point
+/// with a measured arrow. The same group codes have different meanings inside
+/// CONTEXT_DATA, LEADER and LEADER_LINE; 304 is both MTEXT and a scope marker.
+fn mleader(groups: &[Group]) -> Result<(String, Option<Vertex>), String> {
+    if !groups.iter().any(|g| g.code == 300 && g.value == "CONTEXT_DATA{") {
+        // Keep compatibility with simple flat vendor exports and older projects.
+        let content=groups.iter().filter(|g|g.code==304).map(|g|g.value.as_str()).collect::<Vec<_>>().join("");
+        return Ok((content,vertex(groups,10,20,30)));
+    }
+    let invalid=||"Ongeldige geneste MULTILEADER-context".to_owned();
+    let mut scope=Vec::new();
+    let mut content=String::new();
+    let mut tip=None;
+    let mut line_start=0;
+    for (index,g) in groups.iter().enumerate() {
+        match (g.code,g.value.as_str()) {
+            (300,"CONTEXT_DATA{") => {
+                if !scope.is_empty(){return Err(invalid());}
+                scope.push(300);
+            }
+            (302,"LEADER{") => {
+                if scope.as_slice()!=[300]{return Err(invalid());}
+                scope.push(302);
+            }
+            (304,"LEADER_LINE{") => {
+                if scope.as_slice()!=[300,302]{return Err(invalid());}
+                scope.push(304);line_start=index+1;
+            }
+            (305,"}") => {
+                if scope.pop()!=Some(304){return Err(invalid());}
+                if tip.is_none() {
+                    let line=&groups[line_start..index];
+                    if let Some(first)=line.iter().position(|g|g.code==10) {
+                        let end=line[first+1..].iter().position(|g|g.code==10)
+                            .map_or(line.len(),|next|first+1+next);
+                        tip=Some(vertex(&line[first..end],10,20,30).ok_or_else(invalid)?);
+                    }
+                }
+            }
+            (303,"}") => {if scope.pop()!=Some(302){return Err(invalid());}}
+            (301,"}") => {if scope.pop()!=Some(300){return Err(invalid());}}
+            (304,text) if scope.as_slice()==[300] => content.push_str(text),
+            _=>{}
+        }
+    }
+    if !scope.is_empty(){return Err(invalid());}
+    Ok((content,tip))
 }
 
 fn lwpolyline(groups: &[Group], points: &mut Vec<Vertex>) {
@@ -162,19 +216,20 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     let mut polyline:Option<DxfFeature>=None;
     let mut polyline_closed=false;
 
-    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool| {
+    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool| -> Result<(),String> {
         if kind=="POLYLINE" {
-            let new_polyline=common(current,kind);
+            let mut new_polyline=common(current,kind);
             *polyline_closed=field(current,70).and_then(|v|v.parse::<u32>().ok())
                 .is_some_and(|flags|flags & 1 != 0);
+            new_polyline.closed=Some(*polyline_closed);
             *polyline=Some(new_polyline);
-            return;
+            return Ok(());
         }
         if kind=="VERTEX" {
             if let Some(parent)=polyline {
                 if let Some(p)=vertex(current,10,20,30) { parent.points.push(p); }
             }
-            return;
+            return Ok(());
         }
         if kind=="SEQEND" {
             if let Some(mut old)=polyline.take() {
@@ -184,7 +239,7 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
                 }
             }
             *polyline_closed=false;
-            return;
+            return Ok(());
         }
         let mut feature=common(current,kind);
         match kind {
@@ -202,21 +257,16 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
                 }
             }
             "MULTILEADER" | "MLEADER" => {
-                // Common MarXact exports put the MTEXT content into group 304
-                // and the first leader line's tip into the first 10/20 pair.
-                // Not all CAD vendors serialize these groups identically:
-                // strict geometry validation in the importer prevents guessing.
-                feature.raw_text=current.iter().filter(|v|v.code==304)
-                    .map(|v|v.value.as_str()).collect::<Vec<_>>().join("");
-                if let Some(a)=vertex(current,10,20,30) {
-                    feature.points.extend_from_slice(&[a,a]);
-                }
+                let (content,tip)=mleader(current)?;
+                feature.raw_text=content;
+                if let Some(a)=tip {feature.points.extend_from_slice(&[a,a]);}
             }
             _ => {}
         }
         if feature.points.len()>=2 {
             result.push(feature);
         }
+        Ok(())
     };
 
     let mut section_name: Option<String> = None;
@@ -224,7 +274,7 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     for entry in &records {
         if entry.code==0 {
             if in_entities && !current_kind.is_empty() {
-                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed);
+                flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed)?;
                 current_groups.clear();
             }
             if features.len()>MAX_ENTITIES {return Err("DXF heeft te veel entiteiten".into());}

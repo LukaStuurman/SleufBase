@@ -2,8 +2,8 @@
 //! INSERT ownership, block-layer mapping, chainage and measured heights.
 //!
 //! Compatibility target: marxact_import.py and marxact_direction_patch.py.
-//! DXF read currently supports ASCII MULTILEADER group 304 and first 10/20
-//! leader-line tip; vendor-specific nested leader contexts still need fixtures.
+//! ASCII MULTILEADER contexts isolate MTEXT and the first actual leader-line
+//! arrow, compared with the Python/ezdxf importer on synthetic CAD fixtures.
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -38,18 +38,16 @@ pub fn normalize_name(value:&str)->String {
 }
 
 pub fn parse_leader_content(value:&str)->(String,Option<f64>) {
-    let normalized=value.replace("\\P","^J").replace("\r\n","^J").replace('\n',"^J");
-    let mut name=String::new();
-    let mut height=None;
-    for part in normalized.split("^J") {
-        let Some((key,raw))=part.split_once('=') else{continue;};
-        if key.trim().eq_ignore_ascii_case("Name") {
-            name=raw.trim().to_owned();
-        }else if key.trim().eq_ignore_ascii_case("Height"){
-            let v=raw.trim().replace(',',".");
-            height=v.parse::<f64>().ok().filter(|n|n.is_finite());
-        }
-    }
+    use std::sync::LazyLock;
+    static NAME:LazyLock<regex::Regex>=LazyLock::new(||regex::Regex::new(
+        r"(?i)(?:^|\^J|\r?\n)\s*Name\s*=\s*([^\^\r\n]+)"
+    ).unwrap());
+    static HEIGHT:LazyLock<regex::Regex>=LazyLock::new(||regex::Regex::new(
+        r"(?i)(?:^|\^J|\r?\n)\s*Height\s*=\s*([-+]?\d+(?:[.,]\d+)?)"
+    ).unwrap());
+    let text=value.replace("\\P","^J");
+    let name=NAME.captures(&text).map_or_else(String::new,|c|c[1].trim().to_owned());
+    let height=HEIGHT.captures(&text).and_then(|c|c[1].replace(',',".").parse::<f64>().ok()).filter(|n|n.is_finite());
     (name,height)
 }
 
@@ -151,6 +149,9 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
     let mut skipped=0usize;
     for f in &overlay.features {
         if f.entity_type!="POLYLINE"{continue;}
+        let endpoints_match=f.points.len()>1 && f.points.first().zip(f.points.last())
+            .is_some_and(|(a,b)|a.x==b.x&&a.y==b.y);
+        if !f.closed.unwrap_or(endpoints_match){skipped+=1;continue;}
         let mut vertices=f.points.clone();
         if vertices.len()>1 && vertices.first().is_some_and(|v| {
             vertices.last().is_some_and(|last|last.x==v.x&&last.y==v.y)
@@ -237,7 +238,7 @@ mod tests{
     fn feature(kind:&str,points:Vec<Vertex>,text:&str,layer:&str)->DxfFeature{
         DxfFeature{
             entity_type:kind.into(),handle:String::new(),layer:layer.into(),
-            color_aci:256,points,raw_text:text.into(),block_name:"marxact_point".into()
+            color_aci:256,points,raw_text:text.into(),block_name:"marxact_point".into(),closed:None
         }
     }
     fn rectangle()->Vec<Vertex>{vec![

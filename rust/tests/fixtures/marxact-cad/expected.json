@@ -1,0 +1,181 @@
+{
+  "oracle": "original marxact_import.py / ezdxf 1.4.4",
+  "file": "nested-leaders.dxf",
+  "leader_count": 11,
+  "insert_count": 3,
+  "assigned_insert_count": 2,
+  "leaders": [
+    {
+      "x": 168000.0,
+      "y": 401000.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168004.0,
+      "y": 401000.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168004.0,
+      "y": 401002.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168000.0,
+      "y": 401002.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168010.0,
+      "y": 401000.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168014.0,
+      "y": 401000.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168014.0,
+      "y": 401002.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168010.0,
+      "y": 401002.0,
+      "name": "PS nested",
+      "height": 12.25,
+      "raw_content": "Id=28^JName=PS nested^JHeight=12,25^J",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168001.0,
+      "y": 401001.0,
+      "name": "water detail",
+      "height": 9.3,
+      "raw_content": "Name=water detail^JHeight=9,3 m NAP",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168003.0,
+      "y": 401001.0,
+      "name": "ls kabel",
+      "height": null,
+      "raw_content": "Name=ls kabel^JHeight=ongeldig",
+      "layer_name": "LABEL"
+    },
+    {
+      "x": 168020.0,
+      "y": 401020.0,
+      "name": "buiten",
+      "height": 8.0,
+      "raw_content": "Name=buiten^JHeight=8",
+      "layer_name": "LABEL"
+    }
+  ],
+  "trenches": [
+    {
+      "name": "PS nested",
+      "polygon": [
+        [
+          168000.0,
+          401000.0,
+          10.0
+        ],
+        [
+          168004.0,
+          401000.0,
+          14.0
+        ],
+        [
+          168004.0,
+          401002.0,
+          18.0
+        ],
+        [
+          168000.0,
+          401002.0,
+          12.0
+        ]
+      ],
+      "objects": [
+        {
+          "x": 168001.0,
+          "y": 401001.0,
+          "z": 9.3,
+          "layer_name": "Water",
+          "name": "water detail",
+          "height": 9.3,
+          "block_name": "marxact_point"
+        },
+        {
+          "x": 168003.0,
+          "y": 401001.0,
+          "z": 7.5,
+          "layer_name": "Laagspanning",
+          "name": "ls kabel",
+          "height": null,
+          "block_name": "marxact_point"
+        }
+      ]
+    }
+  ],
+  "text_cases": [
+    {
+      "content": "Name=first^JName=second^JHeight=3,14",
+      "name": "first",
+      "height": 3.14
+    },
+    {
+      "content": "Name=water^format^JHeight=-2.25 metres",
+      "name": "water",
+      "height": -2.25
+    },
+    {
+      "content": "Height=+12.3e2^JName= spaced name  ",
+      "name": "spaced name",
+      "height": 12.3
+    },
+    {
+      "content": "NAME=glasvezel\\PHeight = 3,1441",
+      "name": "glasvezel",
+      "height": 3.1441
+    },
+    {
+      "content": "Name=water\r\nHeight=4.5",
+      "name": "water",
+      "height": 4.5
+    },
+    {
+      "content": "Name=datum^JHeight=NaN",
+      "name": "datum",
+      "height": null
+    },
+    {
+      "content": "Name=ld^JHeight=.5",
+      "name": "ld",
+      "height": null
+    }
+  ]
+}

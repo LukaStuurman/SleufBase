@@ -58,6 +58,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
             }],
             raw_text: String::new(),
             block_name: String::new(),
+            closed: None,
         }],
     });
     invalid.push(p);

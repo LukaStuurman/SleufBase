@@ -141,7 +141,15 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Controleert het `Name` op iedere grensvertex, koppelt punten op maximaal 8 cm aan labels en wijst overlappende punten toe aan de kleinste gemeten grens.
 - Bepaalt middenlijn en maaiveld-Z van de gemeten 3D-grens (met voorkeur voor meetpunt-richting), neemt laag-naar-discipline mapping over en bewaart de oorspronkelijke 3D-omtrek.
 - Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
-- **Nog niet volledig:** echte MarXact DXF kan alternatieve geneste `MULTILEADER` opslag gebruiken. Daardoor zijn nog representatieve exportbestanden en vervolgtests nodig. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
+- **Nog niet volledig:** binaire DXF en overige vendorvarianten ontbreken nog. Geneste `MULTILEADER`-contexten zijn nu vergeleken met de oorspronkelijke Python-import op een synthetisch ezdxf-bestand; representatieve exportbestanden blijven vereist. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
+
+## MarXact-labels uit geneste CAD-contexten
+
+- De ASCII-lezer onderscheidt `CONTEXT_DATA`, `LEADER` en `LEADER_LINE`. Het eerste werkelijke pijlpunt wordt gebruikt; tekst-/landingspunten en scope-markeringen worden niet als meetpunten of labeltekst gelezen.
+- Een synthetische R2018-DXF met elf echte geneste labels, meerdere pijllijnen, gemeten 3D-grens en INSERT-objecten wordt vergeleken met de oorspronkelijke Python-parser en ezdxf 1.4.4. De test controleert objecttoewijzing, originele coördinaten, tekst en hoogten.
+- Open POLYLINEs worden overgeslagen als sleufgrens, ook bij labels op alle hoekpunten. Het oorspronkelijke gesloten-vlaggetje blijft in nieuwe Rust-projecten behouden; oudere opgeslagen overlays blijven leesbaar.
+- Labeltekst volgt de oorspronkelijke eerste-matchregel en numerieke hoogteprefix, inclusief decimale komma, `\P`, nieuwe regels en een achtervoegsel zoals `m NAP`. Beschadigde geneste scopes geven een leesfout; een ontbrekende pijl gebruikt geen tekstpositie als vervanging.
+- Fixture opnieuw maken: `python tools/generate_marxact_cad_fixture.py` met ezdxf 1.4.4. Binary DXF, bloktransformaties en volledige CAD-sjablonen blijven open.
 
 ## MarXact-richting en uitlijning
 
@@ -220,4 +228,3 @@ of een vergelijking met de complete Python-app op echte projecten.
 5. Projectformaat, instellingen, credential handling, installer en gebruikerstests.
 
 De bestaande Python-app, build en releases worden in deze PR niet gewijzigd.
-
