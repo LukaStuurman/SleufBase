@@ -33,8 +33,12 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
 - Gegevensintegriteit: atomaire no-clobber exports, validatie alle kaartgeometrie,
   begrensd lezen/schrijven, onopgeslagen werk beschermen en netwerkresultaten per project isoleren.
   76 Rust-tests groen; echte crash-/herstelacceptatie en hersteloverzicht blijven open.
-- Actief: Python-projectcontract vastleggen en veilige native import/conversie.
-  Overige mijlpalen nog open.
+- Python v1-projectcontract vastgelegd met de oorspronkelijke gevalideerde serializer.
+  Native import/conversie, volledig bronarchief, assetmeldingen en metadata-/CLI-regressies
+  toegevoegd; 81 Rust-tests groen. UI-/sjablooninstellingen nog niet functioneel overgenomen,
+  geen Python-formaatexport of volledige acceptatie met echte projecten.
+- Volgende stappen: lokale MarXact-dwarsprofielen/rendering en meetbare kernbenchmarks;
+  verdere projectworkflow-pariteit. Overige mijlpalen nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.
 PR #116 blijft concept totdat **alle** releasevoorwaarden aantoonbaar gehaald zijn.

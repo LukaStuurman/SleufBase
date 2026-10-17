@@ -54,7 +54,7 @@ impl TrenchForm {
 
 
 #[derive(Clone,Debug,PartialEq)]
-enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), Close }
+enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf), Close }
 
 pub struct SleufBaseApp {
     datasets: Vec<Dataset>,
@@ -96,6 +96,7 @@ pub struct SleufBaseApp {
     query: String,
     message: String,
     project_path: Option<PathBuf>,
+    legacy_archive:Option<sleufbase_rust::legacy_project::LegacyArchive>,
     project_name: String,
     dirty: bool,
     pending_project_action:Option<ProjectAction>,
@@ -151,6 +152,7 @@ impl Default for SleufBaseApp {
             query:String::new(),
             message:String::new(),
             project_path:None,
+            legacy_archive:None,
             project_name:"Naamloos project".into(),
             dirty:false,
             pending_project_action:None,
@@ -170,6 +172,7 @@ impl SleufBaseApp {
     fn snapshot(&self) -> NativeProject {
         NativeProject {
             name:self.project_name.clone(),
+            legacy_archive:self.legacy_archive.clone(),
             datasets:self.datasets.clone(),
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
@@ -204,6 +207,7 @@ impl SleufBaseApp {
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
         self.project_name=doc.name; self.project_path=path;
+        self.legacy_archive=doc.legacy_archive;
         self.selected=(!self.datasets.is_empty()).then_some(0);
         self.dirty=restored;
         missing
@@ -238,6 +242,15 @@ impl SleufBaseApp {
                         if missing>0 {self.message.push_str(&format!(" {missing} raster(s) ontbreken of konden niet worden weergegeven."));}
                     }
                     Err(err)=>self.message=format!("Project niet geladen; huidige gegevens behouden: {err}"),
+                }
+            }
+            ProjectAction::ImportPython(path)=>{
+                match sleufbase_rust::legacy_project::read_legacy_project(&path) {
+                    Ok(doc)=>{
+                        self.apply_project(doc,None,true,ctx);
+                        self.message="Python-project geïmporteerd. Sla op als Rust-project; bekijk de importmeldingen in de zijbalk.".into();
+                    }
+                    Err(err)=>self.message=format!("Python-project niet geïmporteerd; huidige gegevens behouden: {err}"),
                 }
             }
             ProjectAction::Close=>{
@@ -789,7 +802,9 @@ impl SleufBaseApp {
         // An active Rust job is one actually loaded in this desktop app.
         // Never confuse a historical download or another Python instance's
         // heartbeat with a currently loaded Rust raster/dataset.
-        sleufbase_rust::loaded_jobs::active_rust_job_ids(&self.datasets,&self.geotiffs)
+        let mut ids=sleufbase_rust::loaded_jobs::active_rust_job_ids(&self.datasets,&self.geotiffs);
+        ids.extend(self.virtual_trenches.iter().map(|t|t.job_id).filter(|id|*id>0));
+        ids
     }
 
     fn export_datasets(&self)->Vec<Dataset> {
@@ -1116,6 +1131,11 @@ impl eframe::App for SleufBaseApp {
                 if ui.button("Instellingen").clicked() {self.show_settings_dialog=true;}
                 if ui.button("Import oude voorkeuren").clicked() {self.import_old_settings();}
                 if ui.button("Herstel back-up").clicked() {self.restore_backup(ctx);}
+                if ui.button("Import Python-project").clicked() {
+                    if let Some(path)=rfd::FileDialog::new().add_filter("Python-project",&["klicproject","json"]).pick_file() {
+                        self.request_project_action(ProjectAction::ImportPython(path),ctx);
+                    }
+                }
             });
             ui.horizontal(|ui|{
                 if ui.button("Open jobFeatures.json").clicked() {
@@ -1167,6 +1187,12 @@ impl eframe::App for SleufBaseApp {
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
             egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
+            if let Some(archive)=&self.legacy_archive {
+                egui::CollapsingHeader::new("Python-project: importmeldingen").default_open(true).show(ui,|ui|{
+                    for notice in &archive.notices {ui.label(notice);}
+                });
+                ui.separator();
+            }
             ui.heading("KickTheMap online");
             ui.horizontal(|ui|{
                 ui.label("E-mail");
@@ -1554,6 +1580,22 @@ mod project_lifecycle_tests {
         app.live_download_generation=app.project_generation;
         app.apply_live_download_result(Ok((RemoteFileKind::JobFeatures,path)),&ctx);
         assert_eq!(app.datasets.len(),1); assert!(app.dirty);
+    }
+
+    #[test]
+    fn python_import_is_guarded_and_snapshot_retains_original_document() {
+        let ctx=egui::Context::default();let mut app=edited_app();
+        let dir=tempfile::tempdir().unwrap();let source=dir.path().join("PS42.klicproject");
+        std::fs::write(&source,include_str!("../tests/fixtures/python-v1.klicproject")).unwrap();
+        app.request_project_action(ProjectAction::ImportPython(source.clone()),&ctx);
+        assert!(app.legacy_archive.is_none());assert_eq!(app.comments[0].text,"unsaved");
+        app.finish_project_action(true,&ctx);
+        assert!(app.dirty);assert!(app.project_path.is_none());
+        let doc=app.snapshot();
+        assert_eq!(doc.legacy_archive.unwrap().original["project_name"],"PS42");
+        assert!(app.active_job_ids().contains(&123));
+        app.finish_project_action(false,&ctx);
+        assert_eq!(std::fs::read_to_string(source).unwrap(),include_str!("../tests/fixtures/python-v1.klicproject"));
     }
 
 }

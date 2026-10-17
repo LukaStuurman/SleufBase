@@ -14,6 +14,7 @@ fn print_help() {
     println!("sleufbase-rust.exe --dxf uitvoer.dxf jobFeatures.json [extra.json ...]");
     println!("sleufbase-rust.exe --marxact uitvoer.json meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting.dxf [extra.dxf ...]");
+    println!("sleufbase-rust.exe --import-python uitvoer.json project.klicproject");
     println!("Bestaande uitvoerbestanden worden niet overschreven.");
     println!("De volledige Python-sjabloonexport en interactieve KickTheMap-WebView2 zijn nog niet gemigreerd.");
 }
@@ -23,6 +24,14 @@ fn run_cli(args: &[String]) -> Result<(), String> {
         return Err("Gebruik --xlsx/--dxf met jobFeatures.json of --marxact/--marxact-dxf met MarXact-DXF".into());
     }
     let output = PathBuf::from(&args[1]);
+    if args[0]=="--import-python" {
+        if args.len()!=3 {return Err("Gebruik --import-python uitvoer.json project.klicproject".into());}
+        let project=sleufbase_rust::legacy_project::read_legacy_project(&PathBuf::from(&args[2]))?;
+        save_project_new(&output,&project)?;
+        println!("Python-project geïmporteerd naar {}",output.display());
+        for notice in &project.legacy_archive.as_ref().unwrap().notices {println!("Melding: {notice}");}
+        return Ok(());
+    }
     if matches!(args[0].as_str(),"--marxact"|"--marxact-dxf") {
         if output.exists(){
             return Err("Uitvoerbestand bestaat al; overschrijven is niet toegestaan".into());

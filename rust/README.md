@@ -53,7 +53,16 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Projectwissels koppelen oude PDOK/BGT/Kadaster/AHN-resultaten los. Een eerder gestarte KickTheMap-download blijft op schijf beschikbaar, maar wordt niet aan een inmiddels ander project toegevoegd.
 - Projecten, back-ups, Excel en DXF worden eerst volledig naar een uniek tijdelijk bestand in dezelfde map geschreven. Export en CLI-conversie publiceren zonder overschrijven, ook als een ander proces tegelijkertijd dezelfde uitvoernaam kiest.
 - Projectopslag controleert alle kaartgeometrie, labels, opmerkingen en rastertransformaties. Ongeldige gegevens vervangen geen bestaand bestand. Lezen én opslaan respecteren de projectlimiet van 128 MiB.
-- Onbekende projectvelden worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. Dit is nog geen converter voor het oude Python-formaat.
+- Onbekende velden in het native projectformaat worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. De aparte Python-import bewaart het bron-JSON integraal.
+
+## Bestaande Python-projecten importeren
+
+- **Import Python-project** leest `.klicproject` versie 1 rechtstreeks in Rust, zonder Python-runtime. De import opent als onopgeslagen nieuw project; de bron blijft behouden.
+- Virtuele en MarXact-proefsleuven, objectattributen, gemeten 3D-grenzen, automatische uitlijningsbasis, rotatie en job-ID's worden overgenomen. Ook opmerkingen, beschikbare GeoTIFFs met rasterrotatie en DXF-zichtbaarheid worden gelezen. Relatieve bronpaden worden vanaf de projectmap opgelost.
+- Het **volledige oorspronkelijke JSON** blijft bewaard in het native project en de back-ups, inclusief onbekende metadata, sjablooninstellingen en slotvolgorde. Grote bronarchieven worden bij het maken van een snapshot gedeeld in geheugen.
+- De zijbalk toont blijvende importmeldingen voor ontbrekende/niet leesbare assets en nog niet toegepaste UI-/sjablooninstellingen. Dit is **nog geen volledige Python-projectpariteit** en er is nog geen export terug naar het Python-formaat.
+- De synthetische regressie-fixture is gemaakt met de gevalideerde oorspronkelijke Python-serializer, niet handmatig als vervangend schema. Opnieuw genereren: `py -3.11 tools/generate_legacy_project_fixture.py`.
+- Batchconversie: `sleufbase-rust.exe --import-python nieuw-project.json oud-project.klicproject`. Bestaande uitvoer wordt ook bij gelijktijdige conversies niet overschreven.
 
 ## Uitbreiding: virtuele proefsleuven
 

@@ -1,4 +1,4 @@
-//! Durable writes in the destination directory with explicit overwrite semantics.
+//! Atomic file publication after flushing data, with explicit overwrite semantics.
 use std::{
     fs::{self, File},
     path::Path,
@@ -55,7 +55,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("export.dxf");
         let barrier = Arc::new(Barrier::new(2));
-        let threads: Vec<_> = [b'1', b'2']
+        let threads: Vec<_> = (*b"12")
             .into_iter()
             .map(|byte| {
                 let path = path.clone();

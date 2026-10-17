@@ -7,7 +7,7 @@
 | Onderdeel | Bestaande Python-bron | Rust status | Acceptatie-eis voor volwaardige vervanging |
 |---|---|---|---|
 | Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Basis kaartinteractie en opmerkingen, rest deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
-| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Atomaire eigen opslag met volledige geometrievalidatie; onopgeslagen werk en projectwissels beschermd; Python-compatibiliteit ontbreekt | Oud project laden/bewerken/opslaan zonder verlies |
+| Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Atomaire eigen opslag; native Python v1-import van proefsleuven, raster/DXF en opmerkingen met compleet JSON-bronarchief; oorspronkelijke UI/sjablooninstellingen nog niet toegepast, geen Python-formaatexport | Oud project laden/bewerken/opslaan zonder verlies; echte projecten en volledige workflows nog te testen |
 | Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Roterende Rust-backup en bestandskeuze voor herstel; herstel opent als nieuw project, regressies voor fout/annuleren/projectwissel | Onderbreking en restore-tests; hersteloverzicht en werkelijke crashacceptatie nog open |
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Metadata en begrensde 8-bit kaartpreview deels | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |
 | GeoTIFF RD-referentie, rotatie en transformaties | models.py, geotiff.py | Affine kern gereed, niet UI-getest | RD coördinaten en overlay-match op fixtures |
@@ -44,4 +44,4 @@
 
 De bestaande Windows-versie v0.3.62 blijft leidend totdat al deze voorwaarden aantoonbaar gehaald zijn.
 
-**Let op:** De Rust-projectbestanden zijn niet uitwisselbaar met de bestaande Python-projectbestanden. Geen conversie of overschrijving zonder expliciete verificatie.
+**Let op:** Native Rust-projectbestanden zijn niet rechtstreeks door Python te openen. De expliciete v1-import/conversie schrijft naar een nieuw Rust-bestand en behoudt het volledige bron-JSON, inclusief onbekende metadata. Nog niet ondersteunde workflows en ontbrekende bestanden worden gemeld; dit bewijst geen volledige projectpariteit. Het oorspronkelijke `.klicproject` wordt niet overschreven.

@@ -33,13 +33,15 @@ pub struct VirtualTrench {
     /// Automatic axis baseline and absolute manual correction. Absent in older previews.
     #[serde(default)]
     pub alignment:Option<crate::marxact_alignment::MarXactAlignment>,
+    #[serde(default)]
+    pub job_id:u64,
 }
 
 impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
             label,width_meters:width,start,end,
-            objects:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None
+            objects:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0
         };
         result.validate()?;
         Ok(result)
@@ -156,7 +158,7 @@ impl VirtualTrench {
             });
         }
         Dataset {
-            job_id,title:self.label.clone(),
+            job_id:if job_id==0 {self.job_id} else {job_id},title:self.label.clone(),
             source_path:self.source_path.clone().unwrap_or_default(),
             features
         }

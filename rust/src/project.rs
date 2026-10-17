@@ -41,6 +41,8 @@ pub struct NativeProject {
     #[serde(default)]
     pub virtual_trenches: Vec<VirtualTrench>,
     pub comments: Vec<Comment>,
+    #[serde(default,skip_serializing_if="Option::is_none")]
+    pub legacy_archive:Option<crate::legacy_project::LegacyArchive>,
 }
 
 impl Default for NativeProject {
@@ -56,6 +58,7 @@ impl Default for NativeProject {
             cadastral: None,
             virtual_trenches: Vec::new(),
             comments: Vec::new(),
+            legacy_archive:None,
         }
     }
 }
@@ -68,6 +71,7 @@ impl NativeProject {
         if self.version != FORMAT_VERSION {
             return Err(format!("Niet ondersteunde projectversie {}", self.version));
         }
+        if let Some(archive)=&self.legacy_archive {archive.validate()?;}
         let mut count = 0usize;
         let mut vertices = |points: &[Vertex]| -> Result<(), String> {
             count = count
