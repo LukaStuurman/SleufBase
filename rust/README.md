@@ -113,7 +113,17 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Controleert het `Name` op iedere grensvertex, koppelt punten op maximaal 8 cm aan labels en wijst overlappende punten toe aan de kleinste gemeten grens.
 - Bepaalt middenlijn en maaiveld-Z van de gemeten 3D-grens (met voorkeur voor meetpunt-richting), neemt laag-naar-discipline mapping over en bewaart de oorspronkelijke 3D-omtrek.
 - Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
-- **Nog niet volledig:** echte MarXact DXF kan alternatieve geneste `MULTILEADER` opslag gebruiken. Daardoor zijn nog representatieve exportbestanden en vervolgtests nodig. Volledige snapping/draaiing/maatvoering en alle MarXact-patches zijn nog niet overgezet.
+- **Nog niet volledig:** echte MarXact DXF kan alternatieve geneste `MULTILEADER` opslag gebruiken. Daardoor zijn nog representatieve exportbestanden en vervolgtests nodig. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
+
+## MarXact-richting en uitlijning
+
+- Import en **Automatisch uitlijnen** gebruiken de Python-regels: unieke objectposities, robuuste PCA met mediaan/MAD, stabilisatie op gemeten grensranden binnen 12,5° en snijpunten rond de objecten bij holle grenzen.
+- De automatische begin-/eindpunten komen op de middens van de geraakte randen, met geïnterpoleerde Z uit de oorspronkelijke 3D-grens.
+- Onder iedere MarXact-proefsleuf staat een **Rotatie °**-regelaar (-90° tot +90°). De correctie is absoluut ten opzichte van de automatische as; herhaald bijdraaien stapelt geen afrondingen op. Handmatige eindpunten liggen op de exacte snijpunten met de grens.
+- **Automatisch uitlijnen** berekent de middenlijn opnieuw en wist de correctie. Een handmatige correctie van 0° behoudt de automatische richting, maar gebruikt zoals Python de objectgemiddelde positie en exacte snijpunten; gebruik de knop om ook de grensmiddens terug te zetten.
+- De kaart toont de actuele as met een pijl en de gemeten objectpunten. De basis-DXF schrijft de 3D-as op `VIRTUAL_TRENCH_AXIS`; de gemeten contour en objectcoördinaten blijven behouden.
+- Projecten en back-ups bewaren de automatische basis en de correctie. Oudere Rust-projecten zonder deze velden blijven leesbaar; de bestaande as wordt bij de eerste handmatige correctie de basis, of kies **Automatisch uitlijnen** om de nieuwe regels toe te passen.
+- Regressietests vergelijken tien synthetische gevallen en zeventig handmatige correcties rechtstreeks met bevroren uitvoer van de Python-geometriefuncties. Fixturegenerator: `python tools/generate_marxact_alignment_fixtures.py` vanuit de repository. Dit bewijst geen volledige MarXact- of DXF-sjabloonpariteit op productiedata.
 
 ## MarXact- en virtuele-proefsleufgrenzen in DXF
 

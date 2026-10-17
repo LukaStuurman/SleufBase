@@ -9,6 +9,7 @@ use sleufbase_rust::{
 use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::marxact;
+use sleufbase_rust::marxact_alignment;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
 use sleufbase_rust::cadastral::{self,CadastralLayer};
@@ -961,6 +962,15 @@ fn canvas(
                 project(pair[1].0,pair[1].1)
             ],Stroke::new(1.5,ORANGE));
         }
+        let start=project(trench.start.x,trench.start.y);
+        let end=project(trench.end.x,trench.end.y);
+        painter.arrow(start,end-start,Stroke::new(2.0,DARK));
+        painter.circle_filled(start,3.5,DARK);
+        painter.text(start+egui::vec2(5.0,-5.0),egui::Align2::LEFT_BOTTOM,
+            &trench.label,egui::FontId::proportional(12.0),INK);
+        for object in &trench.objects {
+            painter.circle_filled(project(object.position.x,object.position.y),3.5,INK);
+        }
     }
     if let Some(kad)=cadastral.filter(|l|l.visible) {
         for layer in &kad.linework {
@@ -1128,7 +1138,7 @@ impl eframe::App for SleufBaseApp {
 
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
-
+            egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
             ui.heading("KickTheMap online");
             ui.horizontal(|ui|{
                 ui.label("E-mail");
@@ -1230,11 +1240,31 @@ impl eframe::App for SleufBaseApp {
             }
             ui.separator();
             ui.heading("Virtuele proefsleuven");
-            for trench in &self.virtual_trenches {
+            for (index,trench) in self.virtual_trenches.iter_mut().enumerate() {
                 ui.label(format!("{} ({:.2} m, {} objecten{})",
                     trench.label,trench.length(),trench.objects.len(),
                     if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
                 ));
+                if !trench.boundary_3d.is_empty() {
+                    ui.push_id(index,|ui|{
+                        let mut rotation=trench.alignment.as_ref()
+                            .map_or(0.0,|a|a.rotation_degrees);
+                        if ui.add(egui::Slider::new(&mut rotation,-90.0..=90.0)
+                            .text("Rotatie °")).changed()
+                        {
+                            match marxact_alignment::apply_rotation(trench,rotation) {
+                                Ok(())=>{self.dirty=true;},
+                                Err(err)=>self.message=format!("Uitlijning mislukt: {err}"),
+                            }
+                        }
+                        if ui.small_button("Automatisch uitlijnen").clicked() {
+                            match marxact_alignment::recalculate(trench) {
+                                Ok(())=>{self.dirty=true;},
+                                Err(err)=>self.message=format!("Uitlijning mislukt: {err}"),
+                            }
+                        }
+                    });
+                }
             }
             ui.separator();
             ui.heading("Kaartopmerkingen");
@@ -1281,6 +1311,7 @@ impl eframe::App for SleufBaseApp {
                     if *count>0 {ui.label(format!("{}: {}",rule.label,count));}
                 }
             }
+            });
         });
 
         egui::CentralPanel::default().show(ctx,|ui|{

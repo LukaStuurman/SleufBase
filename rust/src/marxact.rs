@@ -90,7 +90,7 @@ pub fn point_inside_polygon(x:f64,y:f64,points:&[Vertex])->bool{
     inside
 }
 
-fn nearest_boundary_z(x:f64,y:f64,points:&[Vertex])->Option<f64>{
+pub(crate) fn nearest_boundary_z(x:f64,y:f64,points:&[Vertex])->Option<f64>{
     let mut distance=f64::INFINITY;
     let mut best=None;
     for i in 0..points.len(){
@@ -111,72 +111,9 @@ fn nearest_boundary_z(x:f64,y:f64,points:&[Vertex])->Option<f64>{
     best
 }
 
-#[derive(Clone,Copy,Debug)]
-struct Axis {cx:f64,cy:f64,ux:f64,uy:f64}
-fn pca(points:&[(f64,f64)])->Option<Axis>{
-    if points.len()<2{return None;}
-    let len=points.len() as f64;
-    let cx=points.iter().map(|p|p.0).sum::<f64>()/len;
-    let cy=points.iter().map(|p|p.1).sum::<f64>()/len;
-    let xx=points.iter().map(|p|(p.0-cx).powi(2)).sum::<f64>()/len;
-    let xy=points.iter().map(|p|(p.0-cx)*(p.1-cy)).sum::<f64>()/len;
-    let yy=points.iter().map(|p|(p.1-cy).powi(2)).sum::<f64>()/len;
-    if xx+yy<1e-10{return None;}
-    let theta=0.5*(2.0*xy).atan2(xx-yy);
-    Some(Axis{cx,cy,ux:theta.cos(),uy:theta.sin()})
-}
-/// Infer the trench's longitudinal direction from actual measured INSERT
-/// positions when they form a line; otherwise use the boundary's long PCA axis.
-/// Clip the centerline to measured polygon edges (not its bounding box).
+/// Automatic MarXact direction including the Python direction/midpoint patches.
 pub fn centerline(points:&[Vertex],objects:&[Vertex])->Result<(Vertex,Vertex,f64),String>{
-    if points.len()<3 || signed_area(points).abs()<MIN_AREA{
-        return Err("MarXact-grens moet een gesloten vlak met meetbare oppervlakte zijn".into());
-    }
-    let coords=points.iter().map(|p|(p.x,p.y)).collect::<Vec<_>>();
-    let boundary_axis=pca(&coords).ok_or("Geen richting uit grens af te leiden")?;
-    let positions=objects.iter().map(|p|(p.x,p.y)).collect::<Vec<_>>();
-    let axis=pca(&positions).unwrap_or(boundary_axis);
-
-    let normal=(-axis.uy,axis.ux);
-    let centroid=(axis.cx,axis.cy);
-    let mut projections=Vec::with_capacity(points.len());
-    let mut normals=Vec::with_capacity(points.len());
-    for p in points {
-        let dx=p.x-centroid.0;let dy=p.y-centroid.1;
-        projections.push(dx*axis.ux+dy*axis.uy);
-        normals.push(dx*normal.0+dy*normal.1);
-    }
-    let tmin=projections.iter().copied().fold(f64::INFINITY,f64::min);
-    let tmax=projections.iter().copied().fold(f64::NEG_INFINITY,f64::max);
-    let nmin=normals.iter().copied().fold(f64::INFINITY,f64::min);
-    let nmax=normals.iter().copied().fold(f64::NEG_INFINITY,f64::max);
-    let middle=(nmin+nmax)*0.5;
-    let base=(centroid.0+normal.0*middle,centroid.1+normal.1*middle);
-    let cross=|a:(f64,f64),b:(f64,f64)|a.0*b.1-a.1*b.0;
-    let direction=(axis.ux,axis.uy);
-    let mut intersections=Vec::new();
-    for i in 0..points.len(){
-        let a=points[i];let b=points[(i+1)%points.len()];
-        let edge=(b.x-a.x,b.y-a.y);
-        let denom=cross(direction,edge);
-        if denom.abs()<=1e-12{continue;}
-        let distance=(a.x-base.0,a.y-base.1);
-        let t=cross(distance,edge)/denom;
-        let segment=cross(distance,direction)/denom;
-        if (-1e-9..=1.0+1e-9).contains(&segment) {
-            intersections.push(t);
-        }
-    }
-    let (min_t,max_t)=if intersections.len()>=2{
-        (intersections.iter().copied().fold(f64::INFINITY,f64::min),
-         intersections.iter().copied().fold(f64::NEG_INFINITY,f64::max))
-    }else{(tmin,tmax)};
-    if max_t-min_t<=1e-9{return Err("De afgeleide middenlijn heeft geen lengte".into());}
-    let point=|t:f64|{
-        let x=base.0+axis.ux*t;let y=base.1+axis.uy*t;
-        Vertex{x,y,z:nearest_boundary_z(x,y,points)}
-    };
-    Ok((point(min_t),point(max_t),(nmax-nmin).max(0.1)))
+    crate::marxact_alignment::automatic_centerline(points,objects)
 }
 
 #[derive(Clone)]
@@ -275,6 +212,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
         };
         let mut trench=VirtualTrench::new(label,start,end,width)?;
         trench.boundary_3d=boundary.points;
+        trench.alignment=Some(crate::marxact_alignment::MarXactAlignment::new(start,end,width));
         trench.source_path=Some(overlay.path.clone());
         for object in boundary.objects{trench.add_object(object)?;}
         trenches.push(trench);

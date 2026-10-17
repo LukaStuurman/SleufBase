@@ -27,7 +27,7 @@
 | Filter alleen actief geladen jobs | app.py, kickthemap_jobs_browser.py | Native Rust geladen-object/TIFF-intersectie, Python-state lezer als aparte compatibiliteit | Zelfstandige Rust-app schrijft/evalueert state betrouwbaar |
 | Discipline-overzicht + Excel-formaat | discipline_excel_export.py | Deels | Identieke regels, ordering, categorisering, totalen, sjablonen en styling |
 | Virtuele proefsleuven/profielen | virtual_trench.py, virtual_trench_template_patch.py | Basisgeometrie en aanmaak, profielen nog niet | Plaatsen, maatvoering, kettingmaat, export |
-| MarXact import, snapping, metingen | marxact_*.py | ASCII 3D DXF basisimport, labels, objecten, gemeten omtrek en middenlijn; richtingscorrecties en complete toolset ontbreken | Identieke CSV/point mapping, modeltransformaties, grenzen |
+| MarXact import, snapping, metingen | marxact_*.py | ASCII 3D DXF basisimport; robuuste richting, grensmiddens, absolute rotatie/reset met projectopslag en kaart-/basis-DXF-as; lokale dwarsprofielen/live-render en complete toolset ontbreken | Identieke CSV/point mapping, modeltransformaties, grenzen; tien synthetische Python-referentiegevallen getest, echte exports nog vereist |
 | Cyclomedia/StreetSmart | cyclomedia.py, streetsmart*.py | Ontbreekt | Browser, selectie, overdracht/extern auth |
 | Instellingen en oude voorkeuren | settings.py, settings_ui.py, settings_* | Niet-gevoelige instellingenimport en autosave-config, volledige opties ontbreken | Migratie van bestaande settings zonder wachtwoordverlies |
 | Performance voor grote jobs / lage hardware | resource_policy.py, kickthemap_scalability_patch.py, renderer.py | Niet gemeten | Zelfde of betere stabiliteit op benchmark datasets |

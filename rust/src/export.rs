@@ -140,6 +140,8 @@ pub fn write_dxf_with_layers(path:&Path,datasets:&[Dataset],
         }
         out.push_str("0\nSEQEND\n8\nVIRTUAL_TRENCH_3D\n");
         segment_count += boundary.len();
+        write_line(&mut out,"VIRTUAL_TRENCH_AXIS",30,&trench.start,&trench.end);
+        segment_count += 1;
         let label=trench.label.chars().filter(|c|
             c.is_alphanumeric()||" _.-".contains(*c)).take(100).collect::<String>();
         if !label.is_empty(){

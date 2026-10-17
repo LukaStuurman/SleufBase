@@ -30,19 +30,23 @@ pub struct VirtualTrench {
     /// Original measured 3D MarXact boundary; empty for manually drawn trenches.
     #[serde(default)]
     pub boundary_3d:Vec<Vertex>,
+    /// Automatic axis baseline and absolute manual correction. Absent in older previews.
+    #[serde(default)]
+    pub alignment:Option<crate::marxact_alignment::MarXactAlignment>,
 }
 
 impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
             label,width_meters:width,start,end,
-            objects:Vec::new(),source_path:None,boundary_3d:Vec::new()
+            objects:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None
         };
         result.validate()?;
         Ok(result)
     }
 
     pub fn validate(&self) -> Result<(),String> {
+        if let Some(alignment)=&self.alignment {alignment.validate()?;}
         if !self.width_meters.is_finite() || self.width_meters<0.1 {
             return Err("Een virtuele proefsleuf moet minstens 0,1 m breed zijn".into());
         }
