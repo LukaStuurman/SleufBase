@@ -25,6 +25,19 @@ microseconden. Er wordt geen uitspraak gedaan over FPS, piekgeheugen, laden van
 echte grote projecten, externe diensten of de volledige Python-app. Daarvoor
 blijven representatieve datasets en aanvullende metingen nodig.
 
+## Gecachte CAD-grenzen
+
+`2026-10-17-windows-gnu-cad-core.csv` herhaalt de kernmeting op dezelfde machine
+en voegt een overlay met 100.000 LINE-entiteiten (200.000 vertices) toe. Dataset
+en cache worden vóór de meting opgebouwd. De oude grensscan uit `2f14723` en de
+nieuwe cache geven dezelfde grenzen. Twintig scans kosten 11,961 ms; twintig
+cache-opvragen rapporteren minder dan 1 µs. Beide paden alloceren nul keer.
+
+De grenscache wordt bij bron-/laagwijziging ververst. De benchmark meet alleen
+het opvragen tijdens gewone frames; opbouw, laagwijzigingen, CAD-rendering en
+projectladen zijn uitgesloten. De meetresolutie rechtvaardigt geen
+snelheidsfactor of FPS-claim. CI neemt beide CAD-rijen in het kernartifact op.
+
 ## TIFF-preview tegenover Python/Pillow
 
 `2026-10-17-windows-gnu-raster.json` bevat drie metingen in aparte processen op

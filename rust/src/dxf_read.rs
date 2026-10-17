@@ -1,6 +1,6 @@
 //! Pure-Rust ASCII/binary DXF overlay reader.
 //! Supports common entity families from existing SleufBase files without Python/ezdxf.
-//! Does not yet cover SPLINE, ELLIPSE or block transforms.
+//! Source entities and block definitions stay separate from derived WCS caches.
 
 use std::{fs::File,io::Read};
 use crate::dxf_tags::{self,Group};
@@ -8,10 +8,10 @@ use std::path::{Path, PathBuf};
 
 use crate::model::{Bounds, Vertex};
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 const MAX_DXF_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_ENTITIES: usize = 2_000_000;
-const MAX_POINTS: usize = 10_000_000;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -32,7 +32,7 @@ pub struct DxfFeature {
     pub cad:Option<Box<crate::cad::Properties>>,
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DxfOverlay {
     pub path: PathBuf,
@@ -40,6 +40,20 @@ pub struct DxfOverlay {
     pub features: Vec<DxfFeature>,
     #[serde(default)]
     pub layers:BTreeMap<String,crate::cad::Layer>,
+    #[serde(default,skip_serializing_if="BTreeMap::is_empty")]
+    pub blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
+    #[serde(default,skip_serializing_if="Vec::is_empty")]
+    pub warnings:Vec<String>,
+    #[serde(skip)]
+    pub expanded:Arc<crate::cad_scene::Scene>,
+    #[serde(skip)]
+    pub block_visibility:Arc<Vec<bool>>,
+    #[serde(skip)]
+    pub block_warnings:Vec<String>,
+    #[serde(skip)]
+    pub cached_bounds:Option<Bounds>,
+    #[serde(skip)]
+    pub bounds_ready:bool,
 }
 
 impl DxfOverlay {
@@ -50,11 +64,14 @@ impl DxfOverlay {
     pub fn feature_rgb(&self,feature:&DxfFeature)->[u8;3] {
         crate::cad::display_rgb(feature.color_aci,feature.cad.as_deref(),self.layers.get(&feature.layer))
     }
-    pub fn bounds(&self) -> Option<Bounds> {
+    pub fn bounds(&self)->Option<Bounds>{
+        if self.bounds_ready {self.cached_bounds}else{self.calculate_bounds()}
+    }
+    pub(crate) fn calculate_bounds(&self)->Option<Bounds>{
         let mut bounds: Option<Bounds> = None;
-        for feature in &self.features {
-            if !self.feature_visible(feature){continue;}
-            for vertex in &feature.points {
+        for feature in self.rendered_features() {
+            if !feature.visible{continue;}
+            for vertex in feature.points {
                 if let Some(b) = bounds.as_mut() {
                     b.min_x = b.min_x.min(vertex.x);
                     b.min_y = b.min_y.min(vertex.y);
@@ -86,144 +103,8 @@ impl DxfFeature {
     }
 }
 
-
-fn append_feature(result:&mut Vec<DxfFeature>,feature:DxfFeature,point_count:&mut usize)->Result<(),String> {
-    *point_count=point_count.checked_add(feature.points.len()).ok_or("DXF heeft te veel punten")?;
-    if *point_count>MAX_POINTS || result.len()>=MAX_ENTITIES {return Err("DXF heeft te veel punten/entiteiten".into());}
-    result.push(feature);Ok(())
-}
-
-fn field<'a>(groups: &'a [Group], code: i32) -> Option<&'a str> {
-    groups.iter().find(|g| g.code == code).map(|g| g.value.as_ref())
-}
-fn number(groups: &[Group], code: i32) -> Option<f64> {
-    field(groups, code)?.trim().parse::<f64>().ok().filter(|x| x.is_finite())
-}
-fn vertex(groups: &[Group], xcode: i32, ycode: i32, zcode: i32) -> Option<Vertex> {
-    Some(Vertex {
-        x:number(groups,xcode)?, y:number(groups,ycode)?,
-        z:number(groups,zcode),
-    })
-}
-fn common(groups: &[Group], kind: &str) -> Result<DxfFeature,String> {
-    Ok(DxfFeature {
-        entity_type:kind.to_owned(),
-        handle:field(groups,5).unwrap_or("").into(),
-        layer:field(groups,8).unwrap_or("0").into(),
-        color_aci:field(groups,62).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(256),
-        points:Vec::new(),
-        raw_text:String::new(),
-        block_name:String::new(),
-        closed:None,
-        cad:crate::cad::properties(groups)?,
-    })
-}
-
-
-/// Read MULTILEADER scopes instead of confusing the text/landing base point
-/// with a measured arrow. The same group codes have different meanings inside
-/// CONTEXT_DATA, LEADER and LEADER_LINE; 304 is both MTEXT and a scope marker.
-fn mleader(groups: &[Group]) -> Result<(String, Option<Vertex>), String> {
-    if !groups.iter().any(|g| g.code == 300 && g.value == "CONTEXT_DATA{") {
-        // Keep compatibility with simple flat vendor exports and older projects.
-        let content=groups.iter().filter(|g|g.code==304).map(|g|g.value.as_ref()).collect::<Vec<_>>().join("");
-        return Ok((content,vertex(groups,10,20,30)));
-    }
-    let invalid=||"Ongeldige geneste MULTILEADER-context".to_owned();
-    let mut scope=Vec::new();
-    let mut content=String::new();
-    let mut tip=None;
-    let mut line_start=0;
-    for (index,g) in groups.iter().enumerate() {
-        match (g.code,g.value.as_ref()) {
-            (300,"CONTEXT_DATA{") => {
-                if !scope.is_empty(){return Err(invalid());}
-                scope.push(300);
-            }
-            (302,"LEADER{") => {
-                if scope.as_slice()!=[300]{return Err(invalid());}
-                scope.push(302);
-            }
-            (304,"LEADER_LINE{") => {
-                if scope.as_slice()!=[300,302]{return Err(invalid());}
-                scope.push(304);line_start=index+1;
-            }
-            (305,"}") => {
-                if scope.pop()!=Some(304){return Err(invalid());}
-                if tip.is_none() {
-                    let line=&groups[line_start..index];
-                    if let Some(first)=line.iter().position(|g|g.code==10) {
-                        let end=line[first+1..].iter().position(|g|g.code==10)
-                            .map_or(line.len(),|next|first+1+next);
-                        tip=Some(vertex(&line[first..end],10,20,30).ok_or_else(invalid)?);
-                    }
-                }
-            }
-            (303,"}") => {if scope.pop()!=Some(302){return Err(invalid());}}
-            (301,"}") => {if scope.pop()!=Some(300){return Err(invalid());}}
-            (304,text) if scope.as_slice()==[300] => content.push_str(text),
-            _=>{}
-        }
-    }
-    if !scope.is_empty(){return Err(invalid());}
-    Ok((content,tip))
-}
-
-fn lwpolyline(groups: &[Group], points: &mut Vec<Vertex>) {
-    let mut x: Option<f64> = None;
-    let mut y: Option<f64> = None;
-    let elevation=number(groups, 38);
-    for g in groups {
-        match g.code {
-            10 => {
-                if let (Some(px),Some(py))=(x,y) {
-                    points.push(Vertex{x:px,y:py,z:elevation});
-                }
-                x=g.value.trim().parse::<f64>().ok().filter(|v|v.is_finite());
-                y=None;
-            }
-            20 => y=g.value.trim().parse::<f64>().ok().filter(|v|v.is_finite()),
-            _=>{}
-        }
-    }
-    if let (Some(px),Some(py))=(x,y) {
-        points.push(Vertex{x:px,y:py,z:elevation});
-    }
-    let closed=field(groups,70).and_then(|v|v.trim().parse::<i32>().ok())
-        .is_some_and(|v|v & 1 != 0);
-    if closed && points.len()>1 {
-        points.push(points[0]);
-    }
-}
-
-/// Approximate curves to polyline coordinates in the DXF's world XY plane.
-/// The approximation tolerance controls maximum chord length.
-fn circle_or_arc(groups: &[Group], kind: &str, output: &mut Vec<Vertex>) {
-    let Some(center)=vertex(groups,10,20,30) else { return };
-    let Some(radius)=number(groups,40) else { return };
-    if radius<=0.0 { return; }
-    let (start,end) = if kind=="CIRCLE" {
-        (0.0,std::f64::consts::TAU)
-    } else {
-        let Some(start)=number(groups,50) else {return};
-        let Some(end)=number(groups,51) else {return};
-        let mut sweep=(end-start).rem_euclid(360.0);
-        if sweep.abs() < 1e-9 { sweep=360.0; }
-        (start.to_radians(),(start+sweep).to_radians())
-    };
-    let subdivisions=(((end-start).abs()*radius/0.25).ceil() as usize).clamp(12,2048);
-    for i in 0..=subdivisions {
-        let angle=start+(end-start)*i as f64/subdivisions as f64;
-        output.push(Vertex {
-            x:center.x+angle.cos()*radius,
-            y:center.y+angle.sin()*radius,
-            z:center.z
-        });
-    }
-}
-
-/// ASCII text reader with entity group isolation. Block INSERT is represented
-/// by a point marker (matching the old Python dxf.py behavior).
+/// ASCII text reader with entity group isolation and cached block geometry.
+/// Raw INSERT markers remain available to the MarXact measurement importer.
 pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     if text.starts_with("AutoCAD Binary DXF") {
         return Err("Binaire DXF vereist een aparte decoder".into());
@@ -232,156 +113,92 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
     parse_groups(dxf_tags::ascii(text),path)
 }
 
-fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path) -> Result<DxfOverlay,String> {
-    let mut features=Vec::new();
-    let mut in_entities=false;
-    let mut in_tables=false;
-    let mut layers=BTreeMap::new();
-    let mut current_kind=String::new();
-    let mut current_groups: Vec<Group>=Vec::new();
-    let mut polyline:Option<DxfFeature>=None;
-    let mut polyline_closed=false;
-    let mut point_count=0;
-    let mut active_insert=None;
-
-    let flush = |kind: &str, current: &[Group], result: &mut Vec<DxfFeature>, polyline: &mut Option<DxfFeature>, polyline_closed: &mut bool,point_count:&mut usize,active_insert:&mut Option<usize>| -> Result<(),String> {
-        if polyline.is_some() && kind!="VERTEX" && kind!="SEQEND" {
-            return Err("DXF-polyline is onderbroken zonder SEQEND".into());
-        }
-        if active_insert.is_some() && kind!="ATTRIB" && kind!="SEQEND" {return Err("DXF-attributen missen SEQEND".into());}
-        if kind=="ATTRIB" {
-            let index=active_insert.ok_or("DXF ATTRIB zonder INSERT-sequentie")?;
-            let name=field(current,2).ok_or("DXF ATTRIB mist tagnaam")?;
-            let value=field(current,1).unwrap_or("");
-            result[index].cad.get_or_insert_with(Default::default).attributes.insert(name.to_owned(),value.to_owned());
-            return Ok(());
-        }
-        if kind=="POLYLINE" {
-            let mut new_polyline=common(current,kind)?;
-            *polyline_closed=field(current,70).and_then(|v|v.trim().parse::<i32>().ok())
-                .is_some_and(|flags|flags & 1 != 0);
-            new_polyline.closed=Some(*polyline_closed);
-            *polyline=Some(new_polyline);
-            return Ok(());
-        }
-        if kind=="VERTEX" {
-            if let Some(parent)=polyline {
-                if let Some(p)=vertex(current,10,20,30) {
-                    if parent.points.len()>=MAX_POINTS {return Err("DXF-polyline heeft te veel punten".into());}
-                    parent.points.push(p);
+struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize}
+struct Parser {
+    entities:crate::dxf_entities::Entities,
+    layers:BTreeMap<String,crate::cad::Layer>,
+    blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
+    block:Option<BlockStart>,
+}
+impl Parser {
+    fn flush(&mut self,section:&str,kind:&str,groups:&[Group])->Result<(),String>{
+        use crate::dxf_entities::{field,vertex};
+        match section {
+            "ENTITIES"=>self.entities.push(kind,groups)?,
+            "TABLES" if kind=="LAYER"=>{
+                let name=field(groups,2).ok_or("DXF LAYER mist naam")?.to_owned();
+                let color=field(groups,62).map(|v|v.trim().parse::<i32>().map_err(|_|"Ongeldige DXF-laagkleur")).transpose()?.unwrap_or(7);
+                let flags=field(groups,70).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(0);
+                let layer=crate::cad::Layer{color_aci:color.unsigned_abs().min(i32::MAX as u32)as i32,
+                    true_color:field(groups,420).map(|v|v.trim().parse::<u32>().map_err(|_|"Ongeldige DXF-laag true-color")).transpose()?,visible:color>=0&&flags&1==0};
+                layer.validate()?;self.layers.insert(name,layer);
+            }
+            "BLOCKS"=>match kind {
+                "BLOCK"=>{
+                    if self.block.is_some()||self.entities.pending(){return Err("DXF-blok mist ENDBLK/SEQEND".into());}
+                    let name=field(groups,2).ok_or("DXF BLOCK mist naam")?.to_owned();
+                    let base=vertex(groups,10,20,30).map(crate::cad_geometry::xyz).unwrap_or([0.;3]);
+                    crate::cad_geometry::finite(base)?;
+                    self.block=Some(BlockStart{name,base,start:self.entities.features.len()});
                 }
-            }
-            return Ok(());
-        }
-        if kind=="SEQEND" {
-            *active_insert=None;
-            if let Some(mut old)=polyline.take() {
-                if old.points.len()>=2 {
-                    if *polyline_closed { old.points.push(old.points[0]); }
-                    append_feature(result,old,point_count)?;
+                "ENDBLK"=>{
+                    if self.entities.pending(){return Err("DXF-blok mist SEQEND".into());}
+                    let block=self.block.take().ok_or("DXF ENDBLK zonder BLOCK")?;
+                    let key=block.name.to_lowercase();
+                    if self.blocks.contains_key(&key){return Err("DXF bevat dubbele bloknamen".into());}
+                    let features=self.entities.features.split_off(block.start);
+                    self.blocks.insert(key,Arc::new(crate::cad_scene::Block{name:block.name,base:block.base,features}));
                 }
-            }
-            *polyline_closed=false;
-            return Ok(());
-        }
-        let mut feature=common(current,kind)?;
-        match kind {
-            "LINE" => {
-                if let (Some(a),Some(b))=(vertex(current,10,20,30),vertex(current,11,21,31)) {
-                    feature.points.extend_from_slice(&[a,b]);
+                _=>{
+                    if self.block.is_none(){return Err("DXF-blokentiteit buiten BLOCK/ENDBLK".into());}
+                    self.entities.push(kind,groups)?;
                 }
-            }
-            "LWPOLYLINE"=>lwpolyline(current,&mut feature.points),
-            "CIRCLE" | "ARC"=>circle_or_arc(current,kind,&mut feature.points),
-            "INSERT" => {
-                feature.block_name=field(current,2).unwrap_or("").to_owned();
-                if let Some(a)=vertex(current,10,20,30) {
-                    feature.points.extend_from_slice(&[a,a]);
-                }
-            }
-            "MULTILEADER" | "MLEADER" => {
-                let (content,tip)=mleader(current)?;
-                feature.raw_text=content;
-                if let Some(a)=tip {feature.points.extend_from_slice(&[a,a]);}
-            }
-            _ => {}
-        }
-        if feature.points.len()>=2 {
-            append_feature(result,feature,point_count)?;
-            if kind=="INSERT"&&field(current,66).is_some_and(|v|v.trim()=="1") {*active_insert=Some(result.len()-1);}
+            },
+            _=>{}
         }
         Ok(())
-    };
+    }
+}
 
-    let mut section_name: Option<String> = None;
-    let mut expect_section_name=false;
-    let mut section_open=false;
-    let mut saw_eof=false;
-    for (index,entry) in records.enumerate() {
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path)->Result<DxfOverlay,String>{
+    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),blocks:BTreeMap::new(),block:None};
+    let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
+    let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;
+    for (index,entry) in records.enumerate(){
         let entry=entry?;
-        if saw_eof && entry.code!=999 {return Err("DXF bevat gegevens na EOF".into());}
-        if index>=MAX_ENTITIES*40 {return Err("DXF bevat te veel velden".into());}
-        if entry.code==0 {
-            if !current_kind.is_empty() {
-                if in_entities {
-                    flush(&current_kind,&current_groups,&mut features,&mut polyline,&mut polyline_closed,&mut point_count,&mut active_insert)?;
-                }else if in_tables&&current_kind=="LAYER" {
-                    let name=field(&current_groups,2).ok_or("DXF LAYER mist naam")?.to_owned();
-                    let color=field(&current_groups,62).map(|v|v.trim().parse::<i32>().map_err(|_|"Ongeldige DXF-laagkleur")).transpose()?.unwrap_or(7);
-                    let flags=field(&current_groups,70).and_then(|v|v.trim().parse::<i32>().ok()).unwrap_or(0);
-                    let layer=crate::cad::Layer {
-                        color_aci:color.unsigned_abs().min(i32::MAX as u32)as i32,
-                        true_color:field(&current_groups,420).map(|v|v.trim().parse::<u32>().map_err(|_|"Ongeldige DXF-laag true-color")).transpose()?,
-                        visible:color>=0&&flags&1==0,
-                    };
-                    layer.validate()?;layers.insert(name,layer);
+        if index>=MAX_ENTITIES*40{return Err("DXF bevat te veel velden".into());}
+        if eof&&entry.code!=999{return Err("DXF bevat gegevens na EOF".into());}
+        if entry.code==0{
+            if !kind.is_empty(){parser.flush(&section,&kind,&groups)?;groups.clear();}
+            match entry.value.as_ref(){
+                "SECTION"=>{
+                    if open{return Err("DXF heeft geneste SECTION zonder ENDSEC".into());}
+                    open=true;expect_section=true;section.clear();kind.clear();
                 }
-                current_groups.clear();
+                "ENDSEC"|"EOF"=>{
+                    if entry.value=="EOF"{if open{return Err("DXF mist ENDSEC voor EOF".into());}eof=true;}
+                    else{if !open||expect_section{return Err("Ongeldige DXF ENDSEC".into());}open=false;}
+                    if parser.entities.pending(){return Err("DXF-entiteit mist SEQEND".into());}
+                    if parser.block.is_some(){return Err("DXF-blok mist ENDBLK".into());}
+                    kind.clear();section.clear();
+                }
+                other=>kind=if matches!(section.as_str(),"ENTITIES"|"BLOCKS"|"TABLES"){other.to_owned()}else{String::new()},
             }
-            if features.len()>MAX_ENTITIES {return Err("DXF heeft te veel entiteiten".into());}
-            match entry.value.as_ref() {
-                "SECTION" => {
-                    if section_open {return Err("DXF heeft geneste SECTION zonder ENDSEC".into());}
-                    section_open=true;
-                    in_entities=false;
-                    in_tables=false;
-                    expect_section_name=true;
-                    current_kind.clear();
-                }
-                "ENDSEC" | "EOF" => {
-                    if entry.value=="EOF" {
-                        if section_open {return Err("DXF mist ENDSEC voor EOF".into());}
-                        saw_eof=true;
-                    }else{
-                        if !section_open||expect_section_name {return Err("Ongeldige DXF ENDSEC".into());}
-                        section_open=false;
-                    }
-                    in_entities=false;
-                    in_tables=false;
-                    current_kind.clear();
-                    if polyline.is_some(){return Err("DXF-polyline mist SEQEND".into());}
-                    if active_insert.is_some(){return Err("DXF-attributen missen SEQEND".into());}
-                }
-                other => current_kind=if in_entities||in_tables {other.to_owned()} else {String::new()},
-            }
-            continue;
-        }
-        if expect_section_name && entry.code==2 {
-            section_name=Some(entry.value.to_string());
-            in_entities=entry.value.eq_ignore_ascii_case("ENTITIES");
-            in_tables=entry.value.eq_ignore_ascii_case("TABLES");
-            expect_section_name=false;
-            continue;
-        }
-        if (in_entities||in_tables) && !current_kind.is_empty() {
-            if current_groups.len()>=1_000_000 {return Err("DXF-entiteit heeft meer dan 1 miljoen velden".into());}
-            current_groups.push(entry);
+        }else if expect_section&&entry.code==2{
+            section=entry.value.to_ascii_uppercase();expect_section=false;saw_section=true;
+        }else if !kind.is_empty(){
+            if groups.len()>=1_000_000{return Err("DXF-entiteit heeft meer dan 1 miljoen velden".into());}
+            groups.push(entry);
         }
     }
-    if section_name.is_none() {return Err("DXF bevat geen SECTION/ENTITIES".into());}
-    if !saw_eof||section_open||expect_section_name {return Err("DXF afgebroken: ENDSEC/EOF ontbreekt".into());}
-    for feature in &features {layers.entry(feature.layer.clone()).or_default();}
-    Ok(DxfOverlay{path:path.to_owned(),visible:true,features,layers})
+    if !saw_section||!eof||open||expect_section{return Err("DXF afgebroken: SECTION/ENDSEC/EOF ontbreekt".into());}
+    for feature in parser.entities.features.iter().chain(parser.blocks.values().flat_map(|b|b.features.iter())){
+        parser.layers.entry(feature.layer.clone()).or_default();
+    }
+    let warnings=parser.entities.unsupported.iter().map(|(kind,count)|format!("{kind}: {count} entiteit(en) nog niet volledig weergegeven")).collect();
+    let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,features:parser.entities.features,layers:parser.layers,blocks:parser.blocks,
+        warnings,..Default::default()};
+    overlay.rebuild_block_cache()?;Ok(overlay)
 }
 
 /// ASCII and binary DXF share the same entity interpretation and limits.
@@ -420,7 +237,11 @@ mod tests {
         assert_eq!(overlay.features[0].points[0].x,1.0);
         assert_eq!(overlay.features[1].points.len(),4);
         assert_eq!(overlay.features[1].points.first(),overlay.features[1].points.last());
-        assert!(overlay.features[2].points.len()>12);
+        for edge in overlay.features[2].points.windows(2) {
+            for point in edge {let radius=(point.x-5.).hypot(point.y-5.);assert!((radius-2.).abs()<1e-9);}
+            let midpoint=((edge[0].x+edge[1].x)/2.,(edge[0].y+edge[1].y)/2.);
+            assert!(2.-(midpoint.0-5.).hypot(midpoint.1-5.)<=0.25+1e-10);
+        }
         let b=overlay.bounds().unwrap();
         assert!(b.max_x>=10.0);
     }

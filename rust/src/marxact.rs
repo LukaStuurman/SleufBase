@@ -285,7 +285,7 @@ mod tests{
             "Name=ls kabel^JHeight=3,1","TEXT"));
         items.push(feature("INSERT",vec![insert,insert],"","Laagspanning"));
         items.push(feature("INSERT",vec![p(100.,100.,0.),p(100.,100.,0.)],"","0"));
-        let overlay=DxfOverlay{path:PathBuf::from("file.dxf"),visible:true,features:items,layers:Default::default()};
+        let overlay=DxfOverlay{path:PathBuf::from("file.dxf"),visible:true,features:items,layers:Default::default(),blocks:Default::default(),warnings:Vec::new(),expanded:Default::default(),block_visibility:Default::default(),block_warnings:Vec::new(),cached_bounds:None,bounds_ready:false};
         let mut maps=std::collections::BTreeMap::new();
         maps.insert("Laagspanning".to_owned(),"ls".to_owned());
         let result=parse_overlay(&overlay,&maps).unwrap();
@@ -300,7 +300,7 @@ mod tests{
     }
     #[test]
     fn rejects_unlabelled_or_collinear_boundaries(){
-        let overlay=DxfOverlay{path:PathBuf::new(),visible:true,layers:Default::default(),
+        let overlay=DxfOverlay{path:PathBuf::new(),visible:true,layers:Default::default(),blocks:Default::default(),warnings:Vec::new(),expanded:Default::default(),block_visibility:Default::default(),block_warnings:Vec::new(),cached_bounds:None,bounds_ready:false,
             features:vec![feature("POLYLINE",vec![p(0.,0.,0.),p(1.,0.,0.),p(1.,1.,0.),p(0.,0.,0.)],"","0")]};
         assert!(parse_overlay(&overlay,&Default::default()).is_err());
         assert_eq!(signed_area(&[p(0.,0.,0.),p(1.,0.,0.),p(2.,0.,0.)]),0.);

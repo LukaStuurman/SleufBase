@@ -111,6 +111,29 @@ fn every_native_project_object_rejects_unknown_fields() {
         notices: vec![],
     });
     unknown(NativeProject::default());
+    use sleufbase_rust::cad_geometry::{ArcCurve, CurvePath, Placement};
+    unknown(Placement {
+        insert: [0.; 3],
+        scale: [1.; 3],
+        rotation: 0.,
+        normal: [0., 0., 1.],
+        rows: 1,
+        columns: 1,
+        row_spacing: 0.,
+        column_spacing: 0.,
+    });
+    unknown(CurvePath { segments: vec![] });
+    unknown(ArcCurve {
+        origin: [0.; 3],
+        u: [1., 0., 0.],
+        v: [0., 1., 0.],
+        sweep: 1.,
+    });
+    unknown(sleufbase_rust::cad_scene::Block {
+        name: "B".into(),
+        base: [0.; 3],
+        features: vec![],
+    });
 }
 
 #[test]

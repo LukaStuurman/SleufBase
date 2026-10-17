@@ -57,6 +57,10 @@ pub struct Tag {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Properties {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub placement: Option<Box<crate::cad_geometry::Placement>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub curve: Option<Box<crate::cad_geometry::CurvePath>>,
     #[serde(default)]
     pub true_color: Option<u32>,
     #[serde(default)]
@@ -72,6 +76,12 @@ pub struct Properties {
 }
 impl Properties {
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(placement) = &self.placement {
+            placement.validate()?;
+        }
+        if let Some(curve) = &self.curve {
+            curve.validate()?;
+        }
         if self.true_color.is_some_and(|v| v > 0xffffff) {
             return Err("Ongeldige CAD-objectkleur".into());
         }
@@ -99,7 +109,9 @@ impl Properties {
         Ok(())
     }
     pub fn is_empty(&self) -> bool {
-        self.true_color.is_none()
+        self.placement.is_none()
+            && self.curve.is_none()
+            && self.true_color.is_none()
             && self.line_type.is_none()
             && self.line_weight.is_none()
             && !self.invisible

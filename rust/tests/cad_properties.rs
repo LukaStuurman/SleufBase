@@ -185,12 +185,12 @@ fn attribute_sequence_errors_are_explicit_and_older_overlays_default_safely() {
 }
 
 #[test]
-fn native_v1_upgrades_without_rewriting_source_and_v2_rejects_unknown_cad_fields() {
+fn native_v1_v2_upgrade_without_rewriting_source_and_v3_rejects_unknown_cad_fields() {
     let project = NativeProject {
         overlays: vec![load_dxf(&root().join("properties-ascii.dxf")).unwrap()],
         ..Default::default()
     };
-    assert_eq!(project.version, 2);
+    assert_eq!(project.version, 3);
     let mut old = serde_json::to_value(&project).unwrap();
     old["version"] = 1.into();
     old["overlays"][0].as_object_mut().unwrap().remove("layers");
@@ -202,17 +202,23 @@ fn native_v1_upgrades_without_rewriting_source_and_v2_rejects_unknown_cad_fields
     let bytes = serde_json::to_vec(&old).unwrap();
     std::fs::write(&path, &bytes).unwrap();
     let loaded = read_project(&path).unwrap();
-    assert_eq!(loaded.version, 2);
+    assert_eq!(loaded.version, 3);
     assert_eq!(std::fs::read(&path).unwrap(), bytes);
     assert_eq!(
         loaded.overlays[0].features.len(),
         project.overlays[0].features.len()
     );
-    let current = temp.path().join("v2.json");
+    old["version"] = 2.into();
+    let v2_bytes = serde_json::to_vec(&old).unwrap();
+    std::fs::write(&path, &v2_bytes).unwrap();
+    let v2 = read_project(&path).unwrap();
+    assert_eq!(v2.version, 3);
+    assert_eq!(std::fs::read(&path).unwrap(), v2_bytes);
+    let current = temp.path().join("v3.json");
     save_project(&current, &loaded).unwrap();
     let serialized: serde_json::Value =
         serde_json::from_slice(&std::fs::read(current).unwrap()).unwrap();
-    assert_eq!(serialized["version"], 2);
+    assert_eq!(serialized["version"], 3);
     for location in ["overlay", "feature", "properties", "layer"] {
         let mut value = serde_json::to_value(&project).unwrap();
         let object = match location {

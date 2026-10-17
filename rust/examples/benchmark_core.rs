@@ -1,4 +1,4 @@
-//! Focused microbenchmarks against the retired preview implementation (1de19f4).
+//! Focused microbenchmarks against retired preview paths (1de19f4/2f14723).
 //! Run `cargo run --release --example benchmark_core`; no external files/accounts.
 //! These do not establish end-to-end Python parity or total application memory.
 use sleufbase_rust::{project::NativeProject, Dataset, Feature, Geometry, Vertex};
@@ -57,6 +57,36 @@ fn measure(name: &str, rounds: u32, mut action: impl FnMut()) -> u64 {
     allocations
 }
 
+// CAD bounds scan from 2f14723, compared on plain LINE entities so both paths
+// have identical geometry/visibility semantics. Setup/cache building is outside
+// the measured camera-query loop; this does not measure complete frame time.
+fn scanned_cad_bounds(
+    overlay: &sleufbase_rust::dxf_read::DxfOverlay,
+) -> Option<sleufbase_rust::Bounds> {
+    let mut bounds: Option<sleufbase_rust::Bounds> = None;
+    for feature in &overlay.features {
+        if !overlay.feature_visible(feature) {
+            continue;
+        }
+        for point in &feature.points {
+            if let Some(b) = &mut bounds {
+                b.min_x = b.min_x.min(point.x);
+                b.min_y = b.min_y.min(point.y);
+                b.max_x = b.max_x.max(point.x);
+                b.max_y = b.max_y.max(point.y);
+            } else {
+                bounds = Some(sleufbase_rust::Bounds {
+                    min_x: point.x,
+                    min_y: point.y,
+                    max_x: point.x,
+                    max_y: point.y,
+                });
+            }
+        }
+    }
+    bounds
+}
+
 fn main() {
     let mut project = NativeProject::default();
     let features = (0..100_000)
@@ -107,4 +137,43 @@ fn main() {
         validated, 0,
         "successful validation allocated per-feature buffers"
     );
+    use sleufbase_rust::dxf_read::{DxfFeature, DxfOverlay};
+    let mut overlay = DxfOverlay {
+        path: "synthetic.dxf".into(),
+        visible: true,
+        features: (0..100_000)
+            .map(|i| DxfFeature {
+                entity_type: "LINE".into(),
+                handle: format!("{i:X}"),
+                layer: "CAD".into(),
+                color_aci: 5,
+                points: vec![
+                    Vertex {
+                        x: 168000. + (i % 1000) as f64 * 0.01,
+                        y: 401000. + (i / 1000) as f64 * 0.01,
+                        z: Some(0.),
+                    },
+                    Vertex {
+                        x: 168001. + (i % 1000) as f64 * 0.01,
+                        y: 401001. + (i / 1000) as f64 * 0.01,
+                        z: Some(0.),
+                    },
+                ],
+                raw_text: String::new(),
+                block_name: String::new(),
+                closed: None,
+                cad: None,
+            })
+            .collect(),
+        ..Default::default()
+    };
+    overlay.rebuild_block_cache().unwrap();
+    assert_eq!(scanned_cad_bounds(&overlay), overlay.bounds());
+    measure("cad_bounds_retired_scan", 20, || {
+        black_box(scanned_cad_bounds(black_box(&overlay)));
+    });
+    let cached = measure("cad_bounds_cached", 20, || {
+        black_box(black_box(&overlay).bounds());
+    });
+    assert_eq!(cached, 0, "cached CAD bounds queries allocate");
 }

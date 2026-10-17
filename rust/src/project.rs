@@ -15,7 +15,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub const FORMAT_VERSION: u32 = 2;
+pub const FORMAT_VERSION: u32 = 3;
 pub const MAX_PROJECT_BYTES: u64 = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -110,6 +110,14 @@ impl NativeProject {
         }
         for overlay in &self.overlays {
             for layer in overlay.layers.values(){layer.validate()?;}
+            for (key,block) in &overlay.blocks {
+                if *key!=block.name.to_lowercase(){return Err("Ongeldige opgeslagen CAD-bloknaam".into());}
+                crate::cad_geometry::finite(block.base)?;
+                for feature in &block.features {
+                    vertices(&feature.points)?;
+                    if let Some(cad)=feature.cad.as_deref(){cad.validate()?;}
+                }
+            }
             for feature in &overlay.features {
                 vertices(&feature.points)?;
                 if let Some(cad)=feature.cad.as_deref(){cad.validate()?;}
@@ -194,11 +202,11 @@ pub fn read_project(path: &Path) -> Result<NativeProject, String> {
     }
     let mut project: NativeProject =
         serde_json::from_slice(&bytes).map_err(|e| format!("Projectbestand ongeldig: {e}"))?;
-    // V2 adds durable CAD properties/layer controls. Older V1 apps reject V2
-    // rather than silently dropping these fields when saving. V1 inputs remain
-    // readable; opening alone never rewrites their original bytes.
-    if project.version==1 {project.version=FORMAT_VERSION;}
+    // V3 stores source block/curve definitions separately from derived WCS
+    // caches. V1/V2 remain readable; opening never rewrites their source bytes.
+    if matches!(project.version,1|2) {project.version=FORMAT_VERSION;}
     project.validate()?;
+    for overlay in &mut project.overlays {overlay.rebuild_block_cache()?;}
     Ok(project)
 }
 

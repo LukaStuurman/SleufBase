@@ -69,8 +69,17 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Native formaat v2 voorkomt verlies van nieuwe CAD-data in oudere builds;
   v1 blijft leesbaar, onbekende native objectvelden geven een fout, het originele
   Python-bronarchief blijft open/verliesvrij. 115 Rust-tests groen.
-- Volgende stappen: bloktransformaties, OCS/bulges, curves en volledige
-  CAD-/profiel-/projectworkflows. Overige mijlpalen en echte acceptatie nog open.
+- Geneste BLOCK/INSERT/MINSERT, OCS, bulges, CIRCLE/ARC en ELLIPSE ondersteunen
+  nu schaal/spiegeling/rotatie en WCS-koordtolerantie na de volledige transformatie.
+  72 ezdxf-plaatsingen en 84 dichte WCS-primitieven vergeleken in ASCII/binary;
+  fixtures regenereren byte voor byte. Gedeelde bronmetadata/geometrycache,
+  gecachte zichtbare grenzen en expliciet herladen/herkoppelen van een DXF-bron.
+  Native v3 bewaart blokken/curveparameters, leest v1/v2 zonder bronwijziging en
+  bouwt afgeleide caches opnieuw. 125 Rust-tests groen, inclusief polyface-indexen,
+  recursie/budgetfouten, 10.000 metadata-delende instanties en mislukte herkoppeling.
+- Volgende stappen: tekst/ATTRIB-weergave, SPLINE, meshes, HATCH, dynamische
+  blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
+  achtergrondladen van grote DXF/projecten en echte acceptatie nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.
 PR #116 blijft concept totdat **alle** releasevoorwaarden aantoonbaar gehaald zijn.
