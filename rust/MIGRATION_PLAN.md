@@ -37,8 +37,14 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Native import/conversie, volledig bronarchief, assetmeldingen en metadata-/CLI-regressies
   toegevoegd; 81 Rust-tests groen. UI-/sjablooninstellingen nog niet functioneel overgenomen,
   geen Python-formaatexport of volledige acceptatie met echte projecten.
-- Volgende stappen: lokale MarXact-dwarsprofielen/rendering en meetbare kernbenchmarks;
-  verdere projectworkflow-pariteit. Overige mijlpalen nog open.
+- Lokale MarXact-dwarsmarkeringen geport: 240 Python-referentiegevallen,
+  kaartcache en dezelfde geometrie in basis-DXF. Volledige profielen, pixelmaskers
+  en kleureninstellingen blijven open. 85 Rust-tests groen.
+- Reproduceerbare release-kernbenchmark met 100.000 objecten en CI-artifact:
+  twintig kaartinvoerupdates vermijden 10.000.080 allocaties; validatie vermijdt
+  2.000.000 tijdelijke allocaties (zie `benchmarks/README.md` voor grenzen).
+- Volgende stappen: verdere CAD-/renderpariteit, grote rasters en volledige
+  projectworkflows. Overige mijlpalen en representatieve acceptatie nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.
 PR #116 blijft concept totdat **alle** releasevoorwaarden aantoonbaar gehaald zijn.

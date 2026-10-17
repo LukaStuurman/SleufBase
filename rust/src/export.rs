@@ -137,6 +137,12 @@ pub fn write_dxf_with_layers(path:&Path,datasets:&[Dataset],
         segment_count += boundary.len();
         write_line(&mut out,"VIRTUAL_TRENCH_AXIS",30,&trench.start,&trench.end);
         segment_count += 1;
+        for marker in crate::cross_section::markers(trench) {
+            let object=&trench.objects[marker.object_index];
+            let color=matching_rule(&object.source_name,rules).map_or(7,|r|r.color_aci);
+            write_line(&mut out,"VIRTUAL_TRENCH_MARKER",color,&marker.start,&marker.end);
+            segment_count+=1;
+        }
         let label=trench.label.chars().filter(|c|
             c.is_alphanumeric()||" _.-".contains(*c)).take(100).collect::<String>();
         if !label.is_empty(){

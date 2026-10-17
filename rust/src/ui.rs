@@ -62,6 +62,7 @@ pub struct SleufBaseApp {
     raster_textures: Vec<Option<egui::TextureHandle>>,
     overlays: Vec<DxfOverlay>,
     virtual_trenches: Vec<VirtualTrench>,
+    trench_markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,
     show_trench_dialog: bool,
     trench_form:TrenchForm,
     pdok_texture:Option<egui::TextureHandle>,
@@ -117,6 +118,7 @@ impl Default for SleufBaseApp {
             raster_textures:Vec::new(),
             overlays:Vec::new(),
             virtual_trenches:Vec::new(),
+            trench_markers:Vec::new(),
             show_trench_dialog:false,
             trench_form:TrenchForm::default(),
             pdok_texture:None,
@@ -206,6 +208,7 @@ impl SleufBaseApp {
         self.raster_textures=textures; self.overlays=doc.overlays;
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
+        self.trench_markers.clear();
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
         self.selected=(!self.datasets.is_empty()).then_some(0);
@@ -865,7 +868,7 @@ fn union_bounds(a:Option<Bounds>,b:Option<Bounds>)->Option<Bounds> {
 }
 
 fn aci_color(color:i32)->Color32 {
-    match color.abs() {
+    match color.unsigned_abs() {
         1=>Color32::from_rgb(220,45,45),
         2=>Color32::from_rgb(225,190,20),
         3=>Color32::from_rgb(40,150,40),
@@ -884,6 +887,7 @@ fn canvas(
     textures:&[Option<egui::TextureHandle>],
     overlays:&[DxfOverlay],
     virtual_trenches:&[VirtualTrench],
+    trench_markers:&[Vec<sleufbase_rust::cross_section::Marker>],
     bgt_layers:&[BgtLayer],
     cadastral:Option<&CadastralLayer>,
     comments:&[Comment],
@@ -993,7 +997,7 @@ fn canvas(
         painter.text(pos+egui::vec2(6.0,-6.0),egui::Align2::LEFT_BOTTOM,
             &note.text,egui::FontId::proportional(13.0),INK);
     }
-    for trench in virtual_trenches {
+    for (index,trench) in virtual_trenches.iter().enumerate() {
         let vertices=trench.measured_boundary();
         for pair in vertices.windows(2) {
             painter.line_segment([
@@ -1007,8 +1011,13 @@ fn canvas(
         painter.circle_filled(start,3.5,DARK);
         painter.text(start+egui::vec2(5.0,-5.0),egui::Align2::LEFT_BOTTOM,
             &trench.label,egui::FontId::proportional(12.0),INK);
-        for object in &trench.objects {
-            painter.circle_filled(project(object.position.x,object.position.y),3.5,INK);
+        if let Some(markers)=trench_markers.get(index) {
+            for marker in markers {
+                let object=&trench.objects[marker.object_index];
+                let color=sleufbase_rust::matching_rule(&object.source_name,RULES)
+                    .map_or(Color32::from_rgb(37,99,235),|r|aci_color(i32::from(r.color_aci)));
+                painter.line_segment([project(marker.start.x,marker.start.y),project(marker.end.x,marker.end.y)],Stroke::new(2.5,color));
+            }
         }
     }
     if let Some(kad)=cadastral.filter(|l|l.visible) {
@@ -1307,13 +1316,13 @@ impl eframe::App for SleufBaseApp {
                             .text("Rotatie °")).changed()
                         {
                             match marxact_alignment::apply_rotation(trench,rotation) {
-                                Ok(())=>{self.dirty=true;},
+                                Ok(())=>{self.dirty=true;self.trench_markers.clear();},
                                 Err(err)=>self.message=format!("Uitlijning mislukt: {err}"),
                             }
                         }
                         if ui.small_button("Automatisch uitlijnen").clicked() {
                             match marxact_alignment::recalculate(trench) {
-                                Ok(())=>{self.dirty=true;},
+                                Ok(())=>{self.dirty=true;self.trench_markers.clear();},
                                 Err(err)=>self.message=format!("Uitlijning mislukt: {err}"),
                             }
                         }
@@ -1368,13 +1377,16 @@ impl eframe::App for SleufBaseApp {
             });
         });
 
+        if self.trench_markers.len()!=self.virtual_trenches.len() {
+            self.trench_markers=self.virtual_trenches.iter().map(sleufbase_rust::cross_section::markers).collect();
+        }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.heading("Kaart");
             ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, BGT en Kadaster (preview).");
-            let selected:Vec<Dataset>=self.selected.and_then(|i|self.datasets.get(i))
-                .into_iter().cloned().collect();
-            canvas(ui,&selected,&self.geotiffs,&self.raster_textures,
-                &self.overlays,&self.virtual_trenches,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
+            let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
+                .map(std::slice::from_ref).unwrap_or(&[]);
+            canvas(ui,selected,&self.geotiffs,&self.raster_textures,
+                &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 self.pdok_texture.as_ref(),self.pdok_bounds,
                 &mut self.zoom,&mut self.pan);
         });
@@ -1596,6 +1608,12 @@ mod project_lifecycle_tests {
         assert!(app.active_job_ids().contains(&123));
         app.finish_project_action(false,&ctx);
         assert_eq!(std::fs::read_to_string(source).unwrap(),include_str!("../tests/fixtures/python-v1.klicproject"));
+    }
+
+    #[test]
+    fn signed_dxf_colour_indices_never_overflow() {
+        for colour in 1..=255 {assert_eq!(aci_color(colour),aci_color(-colour));}
+        let _=aci_color(i32::MIN);
     }
 
 }

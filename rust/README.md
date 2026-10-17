@@ -142,6 +142,23 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Projecten en back-ups bewaren de automatische basis en de correctie. Oudere Rust-projecten zonder deze velden blijven leesbaar; de bestaande as wordt bij de eerste handmatige correctie de basis, of kies **Automatisch uitlijnen** om de nieuwe regels toe te passen.
 - Regressietests vergelijken tien synthetische gevallen en zeventig handmatige correcties rechtstreeks met bevroren uitvoer van de Python-geometriefuncties. Fixturegenerator: `python tools/generate_marxact_alignment_fixtures.py` vanuit de repository. Dit bewijst geen volledige MarXact- of DXF-sjabloonpariteit op productiedata.
 
+## Lokale kabel-/leidingmarkeringen
+
+- De kaart en basis-DXF gebruiken dezelfde snijpuntberekening om per object de lokale sleufbreedte te bepalen. Bij holle grenzen kiest de gemeten zijwaartse objectpositie het juiste deel van de sleuf.
+- Markeringen verbinden geen losse delen van een holle grens. Als er geen geldige doorsnede bestaat, wordt geen onbegrensde markering getekend. In DXF blijven de gemeten object-Z's behouden op `VIRTUAL_TRENCH_MARKER`.
+- De kaart herberekent deze geometrie na import of uitlijningswijzigingen; zoomen en verschuiven hergebruiken de uitkomst. Ook de geselecteerde job wordt tijdens kaartverversing als referentie gebruikt in plaats van alle objecten te kopiëren.
+- 240 gevallen worden vergeleken met de oorspronkelijke Python-functie. Volledige profieltekeningen, pixelmaskers, kleureninstellingen en sjabloonpariteit blijven open.
+
+## Kernbenchmarks
+
+`cargo run --release --manifest-path rust/Cargo.toml --example benchmark_core` meet
+de oude en nieuwe camerainvoer/validatie op dezelfde synthetische job met 100.000
+objecten, gedurende twintig herhalingen. CSV bevat tijd, allocatieaanroepen en
+buildmodus. De Windows-CI publiceert het CSV als apart artifact en controleert
+dat de nieuwe gemeten paden geen tijdelijke objectkopieën/puntvectors alloceren.
+Dit is een gerichte microbenchmark, geen bewijs van volledige renderperformance
+of een vergelijking met de complete Python-app op echte projecten.
+
 ## MarXact- en virtuele-proefsleufgrenzen in DXF
 
 - De basis-DXF-export schrijft nu ook gesloten **3D POLYLINE**-grenzen (R12) met de oorspronkelijke gemeten MarXact-Z per vertex, of de rechthoekige grens bij handmatige proefsleuven.
