@@ -218,6 +218,19 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   blijft behouden en vergt nog exportopschoning. 196 Rust-tests groen. Binaire/oude
   sjabloonbewerking, pagina-/handlevermenigvuldiging, volledige geometrie/assets,
   dynamische varianten en UI-export ontbreken; dit is geen volledige sjabloonexport.
+- Native rasterinvoeging maakt IMAGE/IMAGEDEF/reactors, dictionary/layer/classes,
+  tellers en HANDSEED; beeldverhouding/stretch/insets volgen de oorspronkelijke
+  box-exporter. Eén verzamelde batch verwerkt alle pagina-/kaart-/logorasterpaden
+  zonder een tweede bronkopie. Inactieve papierlayouts gebruiken hun eigen BLOCK;
+  de onafhankelijke eigenaarcontrole ving en corrigeerde onjuiste actieve-bladplaatsing.
+  Permanente, unieke exportbundles worden na alle fileflushes en een annuleerpoort
+  gepubliceerd via vervanging; oude assets voor kopieën blijven bestaan. Fouten,
+  unwinding, incomplete assets, echt vergrendelde Windows-uitvoer, overlappende
+  pogingen en annuleren na sync getest. 91 originele plaatsingen op drie bronnen
+  zijn met ezdxf vergeleken; beide exportrondes en alle native RGBA-PNG-pixels
+  zijn onafhankelijk teruggelezen, inclusief bronbehoud, koppelingen en tellers.
+  Rastervoorbereiding/achtergronden/foto's, oude externe assetverplaatsing,
+  volledige profiel-/pagina-/dynamische export en de UI-workflow blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

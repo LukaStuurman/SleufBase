@@ -46,8 +46,10 @@ UTF-8. Binary and older codepage templates are explicitly rejected; the separate
 overlay importer supports more input formats. This layer is not a full CAD
 semantic validator, and input ownership/indexing are not a total memory cap.
 
-Page duplication, entity insertion/handle remapping, active layouts/viewports,
-profile bands/leaders, marker clipping, images and asset bundles, generated
+Native raster insertion/publication is now separately covered by
+[the template-image references](../template-images/README.md).
+Page duplication, general entity insertion/handle remapping, active layouts/viewports,
+profile bands/leaders, marker clipping, complete raster preparation, generated
 deckbands, photos, dynamic normal/reverse variants, cleanup of the known source
 proxy and the native UI export workflow remain to be implemented. CI regenerates
 the independent sources, checks for identical diffs and audits native edits.

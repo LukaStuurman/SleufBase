@@ -14,6 +14,7 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - R2018-object-DXF met gerichte puntlijnen, echte 3D-polylijnen, joblabels, discipline-lagen en oorspronkelijke XDATA.
 - Profielrekenkern met 224 oorspronkelijke Python-referenties voor richting, hoogtes, kettingmaat, markerbreedtes en disciplinebeschrijvingen; de volledige profieltekening en sjabloonworkflow zijn nog niet aangesloten. Zie [de vergelijkingsgevallen](tests/fixtures/profiles/README.md).
 - Sjabloonbouwstenen bewaren het originele moderne ASCII-DXF-document, herkennen dezelfde 32 proefsleufvakken en bewerken alleen bedoelde teksttags. Alle overige tags worden onafhankelijk vergeleken; pagina-/profiel-/assetexport en UI-koppeling ontbreken. Zie [de sjablooncontroles](tests/fixtures/templates/README.md).
+- Native sjabloonrasters met correcte IMAGE-definities/reactors en permanente assetbundles; 91 oorspronkelijke plaatsingen inclusief papierlogo's en alle PNG-pixels onafhankelijk gecontroleerd. Oude bundels blijven bereikbaar na vervanging; fouten/annulering beschermen eerdere uitvoer. Rastervoorbereiding en volledige sjabloon-/UI-export blijven open. Zie [de raster-/bundelcontroles](tests/fixtures/template-images/README.md).
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
 - GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; TIFF-preview via begrensde strips/tegels als gedraaide/gegeorefereerde kaartlaag tonen.

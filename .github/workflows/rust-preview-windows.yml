@@ -84,6 +84,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template raster bundles and replacement
+        shell: pwsh
+        env:
+          TEMPLATE_IMAGES_DIR: ${{ runner.temp }}/SleufBase-template-images
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_image_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-images
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_template_images -- "$env:TEMPLATE_IMAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_images.py "$env:TEMPLATE_IMAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently compare configured CLI reports and DXF colors
         shell: pwsh
         env:

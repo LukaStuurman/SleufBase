@@ -18,6 +18,7 @@ struct Span {
     whole: Range<usize>,
     value: Range<usize>,
 }
+
 fn spans(text: &str, base: usize) -> impl Iterator<Item = Span> + '_ {
     let text_without_bom = text.trim_start_matches('\u{feff}');
     let mut offset = base + text.len() - text_without_bom.len();
@@ -47,6 +48,11 @@ struct Edit {
     end: usize,
     replacement: String,
 }
+pub(crate) struct Change {
+    pub start: usize,
+    pub end: usize,
+    pub text: String,
+}
 
 pub struct Document {
     source: String,
@@ -56,6 +62,7 @@ pub struct Document {
     edits: BTreeMap<usize, Edit>,
     newline: &'static str,
     output_len: usize,
+    pub(crate) image_batch_added: bool,
 }
 #[derive(Clone, Copy)]
 pub struct RecordView<'a> {
@@ -63,6 +70,9 @@ pub struct RecordView<'a> {
     index: usize,
 }
 impl<'a> RecordView<'a> {
+    pub(crate) fn index(self) -> usize {
+        self.index
+    }
     pub fn kind(self) -> &'a str {
         self.document.source[self.document.records[self.index].kind.clone()].trim()
     }
@@ -95,6 +105,155 @@ fn handle(value: &str) -> Result<u64, String> {
     u64::from_str_radix(value, 16).map_err(|_| "Ongeldige DXF-handle".into())
 }
 impl Document {
+    pub(crate) fn record_start(&self, index: usize) -> usize {
+        self.records[index].range.start
+    }
+    pub(crate) fn before_xdata(&self, index: usize) -> usize {
+        let r = &self.records[index];
+        spans(&self.source[r.range.clone()], r.range.start)
+            .find(|s| s.code >= 1000)
+            .map_or(r.range.end, |s| s.whole.start)
+    }
+    pub(crate) fn tag_change(
+        &self,
+        index: usize,
+        code: i32,
+        value: &str,
+    ) -> Result<Change, String> {
+        if value.len() > MAX_TEXT || value.chars().any(char::is_control) {
+            return Err("Ongeldige DXF-tagwaarde".into());
+        }
+        let record = &self.records[index];
+        let s = spans(&self.source[record.range.clone()], record.range.start)
+            .find(|s| s.code == code)
+            .ok_or("DXF-tag ontbreekt")?;
+        Ok(Change {
+            start: s.value.start,
+            end: s.value.end,
+            text: value.into(),
+        })
+    }
+    pub(crate) fn seed(&self) -> Result<(u64, Change), String> {
+        for record in &self.records {
+            if record.section == NO_SECTION
+                || self.source[self.sections[record.section].clone()].trim() != "HEADER"
+            {
+                continue;
+            }
+            let mut found = false;
+            for s in spans(&self.source[record.range.clone()], record.range.start) {
+                if s.code == 9 {
+                    found = self.source[s.value.clone()].trim() == "$HANDSEED";
+                } else if found && s.code == 5 {
+                    let id = self.edits.get(&s.value.start).map_or_else(
+                        || handle(&self.source[s.value.clone()]),
+                        |e| handle(&e.replacement),
+                    )?;
+                    let next = self
+                        .handles
+                        .keys()
+                        .copied()
+                        .max()
+                        .unwrap_or(0)
+                        .checked_add(1)
+                        .ok_or("Geen vrije DXF-handles")?
+                        .max(id)
+                        .max(1);
+                    return Ok((
+                        next,
+                        Change {
+                            start: s.value.start,
+                            end: s.value.end,
+                            text: String::new(),
+                        },
+                    ));
+                }
+            }
+        }
+        Err("DXF-sjabloon mist $HANDSEED".into())
+    }
+    pub(crate) fn section_end(&self, name: &str) -> Result<usize, String> {
+        self.records()
+            .find(|r| r.kind() == "ENDSEC" && r.section() == Some(name))
+            .map(|r| self.records[r.index].range.start)
+            .ok_or_else(|| format!("DXF mist sectie {name}"))
+    }
+    /// Apply a prepared edit batch without copying the original drawing. Equal
+    /// insertion offsets concatenate; replacement ranges must be disjoint.
+    pub(crate) fn apply(&mut self, changes: Vec<Change>) -> Result<(), String> {
+        let mut planned: BTreeMap<usize, Edit> = BTreeMap::new();
+        for c in changes {
+            if c.start > c.end
+                || c.end > self.source.len()
+                || !self.source.is_char_boundary(c.start)
+                || !self.source.is_char_boundary(c.end)
+            {
+                return Err("Ongeldig DXF-bewerkingsbereik".into());
+            }
+            if let Some(old) = planned.get_mut(&c.start) {
+                if c.start != c.end || old.end != c.start {
+                    return Err("Overlappende DXF-bewerkingen".into());
+                }
+                old.replacement.push_str(&c.text);
+            } else {
+                planned.insert(
+                    c.start,
+                    Edit {
+                        end: c.end,
+                        replacement: c.text,
+                    },
+                );
+            }
+        }
+        let mut previous_end = 0;
+        let mut total = self.output_len as i64;
+        for (&start, e) in &planned {
+            if start < previous_end {
+                return Err("Overlappende DXF-bewerkingen".into());
+            }
+            previous_end = e.end;
+            if self
+                .edits
+                .range(..start)
+                .next_back()
+                .is_some_and(|(_, p)| p.end > start)
+                || self
+                    .edits
+                    .range((std::ops::Bound::Excluded(start), std::ops::Bound::Unbounded))
+                    .next()
+                    .is_some_and(|(&n, _)| n < e.end)
+            {
+                return Err("Overlappende DXF-bewerkingen".into());
+            }
+            if let Some(old) = self.edits.get(&start) {
+                if old.end != e.end {
+                    return Err("Overlappende DXF-bewerkingen".into());
+                }
+                total += e.replacement.len() as i64
+                    - if start == e.end {
+                        0
+                    } else {
+                        old.replacement.len() as i64
+                    };
+            } else {
+                total += e.replacement.len() as i64 - (e.end - start) as i64;
+            }
+        }
+        if !(0..=MAX_BYTES as i64).contains(&total) {
+            return Err("Bewerkt DXF-sjabloon is te groot".into());
+        }
+        for (start, e) in planned {
+            if start == e.end {
+                if let Some(old) = self.edits.get_mut(&start) {
+                    old.replacement.push_str(&e.replacement);
+                    continue;
+                }
+            }
+            self.edits.insert(start, e);
+        }
+        self.output_len = total as usize;
+        Ok(())
+    }
     pub fn load(path: &Path, cancel: &AtomicBool) -> Result<Self, String> {
         let bytes = crate::input::read(path, MAX_BYTES as u64, "DXF-sjabloon", cancel)?;
         Self::from_bytes(bytes, cancel)
@@ -233,6 +392,7 @@ impl Document {
             edits: BTreeMap::new(),
             newline,
             output_len,
+            image_batch_added: false,
         })
     }
     pub fn records(&self) -> impl Iterator<Item = RecordView<'_>> {
@@ -346,5 +506,42 @@ impl Document {
         }
         write(out, &self.source.as_bytes()[position..])?;
         crate::input::check(cancel)
+    }
+}
+
+#[cfg(test)]
+mod batch_tests {
+    use super::*;
+    fn encoded(doc: &Document) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        doc.write_to(&mut bytes, &AtomicBool::new(false)).unwrap();
+        bytes
+    }
+    #[test]
+    fn overlapping_or_invalid_batches_are_rejected_before_any_mutation() {
+        let source = include_bytes!("../tests/fixtures/templates/standard.dxf").to_vec();
+        let mut doc = Document::from_bytes(source.clone(), &AtomicBool::new(false)).unwrap();
+        let (_, mut seed) = doc.seed().unwrap();
+        let start = seed.start;
+        seed.text = "FFFFFF".into();
+        assert!(doc
+            .apply(vec![
+                seed,
+                Change {
+                    start: start + 1,
+                    end: start + 2,
+                    text: "bad".into()
+                }
+            ])
+            .is_err());
+        assert_eq!(encoded(&doc), source);
+        assert!(doc
+            .apply(vec![Change {
+                start: source.len() + 1,
+                end: source.len() + 1,
+                text: "bad".into()
+            }])
+            .is_err());
+        assert_eq!(encoded(&doc), source);
     }
 }
