@@ -10,6 +10,17 @@ use std::{
     sync::atomic::AtomicBool,
 };
 pub type XY = [f64; 2];
+#[derive(Clone, Copy, Debug, serde::Deserialize)]
+pub struct TextPlacement {
+    pub insert: XY,
+    pub height: f64,
+    pub rotation: f64,
+}
+#[derive(Clone, Copy, Debug)]
+pub struct AttributeMetrics {
+    pub offset: XY,
+    pub height: f64,
+}
 #[derive(Clone, Debug, serde::Deserialize)]
 pub struct Layer {
     pub name: String,
@@ -46,6 +57,8 @@ pub enum Shape {
         insert: XY,
         scale: f64,
         attributes: BTreeMap<String, String>,
+        #[serde(default)]
+        attribute_placements: BTreeMap<String, TextPlacement>,
     },
 }
 #[derive(Clone, Debug, serde::Deserialize)]
@@ -178,6 +191,84 @@ struct Space {
     at: usize,
     paper: bool,
 }
+/// Read a scaled attribute once when preparing a set of profile sheets.
+pub fn block_attribute_metrics(
+    document: &Document,
+    name: &str,
+    tag: &str,
+    scale: f64,
+    cancel: &AtomicBool,
+) -> Result<Option<AttributeMetrics>, String> {
+    crate::input::check(cancel)?;
+    finite(&[scale])?;
+    if scale <= 0. {
+        return Err("Blokschaal moet positief zijn".into());
+    }
+    let name = casefold(name);
+    let tag = crate::python_values::uppercase(crate::python_values::trim(tag));
+    let mut active = false;
+    let mut found = false;
+    let mut base = [0.; 2];
+    for r in document.records().filter(|r| r.section() == Some("BLOCKS")) {
+        if r.index().is_multiple_of(1024) {
+            crate::input::check(cancel)?;
+        }
+        if r.kind() == "BLOCK" {
+            active = r.first(2).is_some_and(|v| casefold(v) == name);
+            if active {
+                found = true;
+                for (i, code) in [10, 20].into_iter().enumerate() {
+                    base[i] = r
+                        .first(code)
+                        .unwrap_or("0")
+                        .trim()
+                        .parse()
+                        .map_err(|_| "Ongeldige blokbasis")?;
+                }
+                finite(&base)?;
+            }
+        } else if r.kind() == "ENDBLK" {
+            active = false;
+        } else if active
+            && r.kind() == "ATTDEF"
+            && r.first(2).is_some_and(|v| {
+                crate::python_values::uppercase(crate::python_values::trim(v)) == tag
+            })
+        {
+            let attr = Attribute::parse(r)?;
+            if [
+                number(&attr.text, 210, 0.)?,
+                number(&attr.text, 220, 0.)?,
+                number(&attr.text, 230, 1.)?,
+            ] != [0., 0., 1.]
+            {
+                return Err("Gekantelde blokattributen zijn nog niet ondersteund".into());
+            }
+            let offset = [
+                (number(&attr.text, 10, 0.)? - base[0]) * scale,
+                (number(&attr.text, 20, 0.)? - base[1]) * scale,
+            ];
+            let height = number(&attr.text, 40, 2.5)? * scale;
+            finite(&[offset[0], offset[1], height])?;
+            if height <= 0. {
+                return Err("Ongeldige attribuuthoogte".into());
+            }
+            return Ok(Some(AttributeMetrics { offset, height }));
+        }
+    }
+    crate::input::check(cancel)?;
+    if found {
+        Ok(None)
+    } else {
+        Err("Sjabloonblok ontbreekt".into())
+    }
+}
+struct BlockPlacement<'a> {
+    insert: XY,
+    scale: f64,
+    values: &'a BTreeMap<String, String>,
+    attributes: &'a BTreeMap<String, TextPlacement>,
+}
 fn insertion_spaces(
     document: &Document,
     cancel: &AtomicBool,
@@ -242,15 +333,15 @@ fn attribute(
     id: u64,
     space: &Space,
     block: &Block<'_>,
-    placement: (XY, f64),
-    values: &BTreeMap<String, String>,
+    placement: &BlockPlacement<'_>,
 ) -> Result<(), String> {
-    let (insert, scale) = placement;
+    let (insert, scale) = (placement.insert, placement.scale);
     let entity = &attribute.entity;
     let t = &attribute.text;
     let a = &attribute.fields;
     let tag = *a.get(&2).ok_or("Blokattribuut mist tag")?;
-    let value = values
+    let value = placement
+        .values
         .get(tag)
         .map_or_else(|| t.get(&1).copied().unwrap_or(""), String::as_str);
     text(tag)?;
@@ -277,10 +368,22 @@ fn attribute(
         finite(&result)?;
         Ok(result)
     };
-    let p = transform(10, [0.; 3])?;
+    let mut p = transform(10, [0.; 3])?;
     let raw = [number(t, 10, 0.)?, number(t, 20, 0.)?, number(t, 30, 0.)?];
-    let align = transform(11, raw)?;
-    let height = number(t, 40, 2.5)? * scale;
+    let mut align = transform(11, raw)?;
+    let mut height = number(t, 40, 2.5)? * scale;
+    let changed = if placement.attributes.is_empty() {
+        None
+    } else {
+        placement.attributes.get(&crate::python_values::uppercase(
+            crate::python_values::trim(tag),
+        ))
+    };
+    if let Some(value) = changed {
+        p = [value.insert[0], value.insert[1], 0.];
+        align = p;
+        height = value.height;
+    }
     finite(&[height])?;
     if height <= 0. {
         return Err("Ongeldige attribuuthoogte".into());
@@ -300,8 +403,11 @@ fn attribute(
     out.tag(1, value);
     for (code, default) in [(39, 0.), (50, 0.), (41, 1.), (51, 0.), (71, 0.), (72, 0.)] {
         if t.contains_key(&code) || matches!(code, 50 | 41) {
-            let value = number(t, code, default)?;
-            let value = if code == 50 {
+            let value = match (code, changed) {
+                (50, Some(p)) => p.rotation,
+                _ => number(t, code, default)?,
+            };
+            let value = if code == 50 && changed.is_none() {
                 let radians = value.to_radians();
                 radians.sin().atan2(radians.cos()).to_degrees()
             } else {
@@ -534,6 +640,7 @@ pub fn add(
                 insert,
                 scale,
                 attributes,
+                attribute_placements,
             } => {
                 text(name)?;
                 finite(insert)?;
@@ -544,6 +651,18 @@ pub fn add(
                 for (k, v) in attributes {
                     text(k)?;
                     text(v)?;
+                }
+                let mut placements = BTreeMap::new();
+                for (tag, p) in attribute_placements {
+                    text(tag)?;
+                    finite(&[p.insert[0], p.insert[1], p.height, p.rotation])?;
+                    if p.height <= 0. {
+                        return Err("Ongeldige attribuuthoogte".into());
+                    }
+                    let key = crate::python_values::uppercase(crate::python_values::trim(tag));
+                    if placements.insert(key, *p).is_some() {
+                        return Err("Dubbele attribuutplaatsing".into());
+                    }
                 }
                 let block = blocks
                     .get(&casefold(name))
@@ -576,8 +695,12 @@ pub fn add(
                             allocate()?,
                             space,
                             block,
-                            (*insert, *scale),
-                            attributes,
+                            &BlockPlacement {
+                                insert: *insert,
+                                scale: *scale,
+                                values: attributes,
+                                attributes: &placements,
+                            },
                         )?;
                         if bytes + out.0.len() > 128 * 1024 * 1024 {
                             return Err("Te veel sjabloongeometrie".into());

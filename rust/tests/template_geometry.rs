@@ -34,6 +34,7 @@ fn block() -> Entity {
         insert: [10., 20.],
         scale: 0.02,
         attributes: BTreeMap::from([("NAME".into(), "Nieuw Ø 漢😀".into())]),
+        attribute_placements: BTreeMap::new(),
     })
 }
 fn layer() -> Layer {
@@ -41,6 +42,93 @@ fn layer() -> Layer {
         name: "Native geometry".into(),
         color: 3,
         true_color: Some(0x123456),
+    }
+}
+#[test]
+fn scaled_metrics_and_explicit_band_attribute_positions_match_original_setter() {
+    let cancel = AtomicBool::new(false);
+    let mut doc = doc();
+    let metrics =
+        template_geometry::block_attribute_metrics(&doc, "Titel Ø", " centered ", 0.02, &cancel)
+            .unwrap()
+            .unwrap();
+    assert!((metrics.offset[0] - 0.08).abs() < 1e-10);
+    assert!((metrics.offset[1] - 0.1).abs() < 1e-10);
+    assert!((metrics.height - 0.11).abs() < 1e-10);
+    assert!(
+        template_geometry::block_attribute_metrics(&doc, "Titel Ø", "missing", 0.02, &cancel)
+            .unwrap()
+            .is_none()
+    );
+    assert!(template_geometry::block_attribute_metrics(
+        &doc,
+        "Titel Ø",
+        "NAME",
+        0.02,
+        &AtomicBool::new(true)
+    )
+    .is_err());
+    let mut request = block();
+    if let Shape::Block {
+        attribute_placements,
+        ..
+    } = &mut request.shape
+    {
+        attribute_placements.insert(
+            "  nAme  ".into(),
+            template_geometry::TextPlacement {
+                insert: [8., 9.],
+                height: 0.03,
+                rotation: 90.,
+            },
+        );
+    }
+    template_geometry::add(&mut doc, &[], &[request], &cancel).unwrap();
+    let written = Document::from_bytes(encoded(&doc), &cancel).unwrap();
+    let attr = written
+        .records()
+        .find(|r| r.kind() == "ATTRIB" && r.first(2) == Some("NAME"))
+        .unwrap();
+    for (code, wanted) in [
+        (10, 8.),
+        (20, 9.),
+        (30, 0.),
+        (11, 8.),
+        (21, 9.),
+        (31, 0.),
+        (40, 0.03),
+        (50, 90.),
+    ] {
+        assert!((attr.first(code).unwrap().parse::<f64>().unwrap() - wanted).abs() < 1e-10);
+    }
+    assert_eq!(attr.first(1), Some("Nieuw Ø 漢😀"));
+}
+#[test]
+fn bad_or_ambiguous_attribute_overrides_preserve_the_entire_previous_drawing() {
+    let cancel = AtomicBool::new(false);
+    let mut doc = doc();
+    let before = encoded(&doc);
+    for (height, rotation, duplicate) in
+        [(0., 90., false), (0.03, f64::NAN, false), (0.03, 90., true)]
+    {
+        let mut request = block();
+        if let Shape::Block {
+            attribute_placements,
+            ..
+        } = &mut request.shape
+        {
+            let placement = template_geometry::TextPlacement {
+                insert: [8., 9.],
+                height,
+                rotation,
+            };
+            attribute_placements.insert("NAME".into(), placement);
+            if duplicate {
+                attribute_placements.insert(" name ".into(), placement);
+            }
+        }
+        assert!(template_geometry::add(&mut doc, &[layer()], &[line(), request], &cancel).is_err());
+        assert_eq!(encoded(&doc), before);
     }
 }
 #[test]
@@ -101,12 +189,14 @@ fn invalid_geometry_batch_keeps_previous_text_and_resource_state() {
             insert: [0., 0.],
             scale: 1.,
             attributes: BTreeMap::new(),
+            attribute_placements: BTreeMap::new(),
         }),
         entity(Shape::Block {
             name: "Titel Ø".into(),
             insert: [0., 0.],
             scale: -1.,
             attributes: BTreeMap::new(),
+            attribute_placements: BTreeMap::new(),
         }),
         entity(Shape::Text {
             text: "x\n0\nEOF".into(),

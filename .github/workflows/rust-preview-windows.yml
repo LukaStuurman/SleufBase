@@ -84,6 +84,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native profile frames and bands
+        shell: pwsh
+        env:
+          PROFILE_DRAWINGS_DIR: ${{ runner.temp }}/SleufBase-profile-drawings
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_profile_drawing_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profile-drawing
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_profile_drawings -- "$env:PROFILE_DRAWINGS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "$env:PROFILE_DRAWINGS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native template drawing primitives
         shell: pwsh
         env:

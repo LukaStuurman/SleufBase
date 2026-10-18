@@ -266,6 +266,26 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   controles voor alle 89 tekenobjecten, 91 rasterplaatsingen en 78 titelvelden
   slagen ook na de gedeelde document-/laagwijzigingen. De vijf GitHub-controles
   van de voorafgaande projectnaam-/datumstap (`e1bd5c7`) zijn groen.
+- Native profielkaders en gekoppelde afstands-/hoogtebanden schrijven nu echte
+  tekeninggeometrie: automatische schaal uit asbreedte en maximale polylinehoogte,
+  handmatige schaalbegrenzing, profiel-/referentietitels, profielverticalen per
+  markerinstantie en stabiel verdeelde bandwaarden met verbindingslijnen.
+  Positie/hoogte/rotatie van bandattributen kan na brontransformatie expliciet
+  worden gezet; genormaliseerde attribuuttags volgen de oorspronkelijke getter.
+  Templates worden eenmaal voorbereid, meetvertices worden geleend en dezelfde
+  sorteervolgorde dient voor plaatsing en connectoren. 24 aanroepen van de volledige
+  oorspronkelijke V9-tekenmethode leveren 928 vergeleken kader-/bandobjecten,
+  inclusief alle attributen, normale/omgekeerde profielen, referentieafstanden en
+  RD-omschrijvingen. Nog 100 oorspronkelijke bandverdelingen dekken gelijke/
+  ongesorteerde ankers, vastgezette eindpunten en krappe/overvolle banden; nummers
+  met Unicode-cijfers/suffixen en afronding/negatieve nul zijn apart gecontroleerd.
+  De generator controleert de herbouwde invoerprofielen ook tegen het bestaande
+  profielorakel. 220 Rust-tests en Clippy geslaagd. Maaiveld/oppervlakteksten,
+  profielmarkeringen, referentie-indicatoren, dynamische leaders en volledige
+  sjabloon-/pagina-/UI-koppeling blijven open.
+  Releasebuild en alle vier onafhankelijke release-audits slagen: 928 kader-/
+  bandobjecten, 89 generieke tekenobjecten, 91 rasterplaatsingen en 78 titelvelden.
+  De vijf GitHub-controles van de voorafgaande tekenlaagstap (`3a8d6ea`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

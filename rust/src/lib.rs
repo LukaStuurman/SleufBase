@@ -37,6 +37,7 @@ pub mod storage;
 pub mod virtual_trench;
 pub mod cross_section;
 pub mod profile;
+pub mod profile_drawing;
 pub mod pdok_wms;
 pub mod jobs_cache;
 pub mod kickthemap_live;
