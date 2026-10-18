@@ -9,8 +9,8 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
 - Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
-- Disciplinetellingen per proefsleuf gebaseerd op Python standaardregels (inclusief aantallen per discipline).
-- Excel (.xlsx) export met oranje kopregel, proefsleuf, aantal disciplines en totaal kabels/leidingen.
+- Instelbare objectregels voor kaartkleuren, disciplineoverzicht, Excel en DXF; standaardvolgorde en kleuren uit Python.
+- Excel (.xlsx) export met oranje opmaak, vaste koprij, filter en totaalregel; gedeelde disciplinenamen tellen samen.
 - R2018-object-DXF met gerichte puntlijnen, echte 3D-polylijnen, joblabels, discipline-lagen en oorspronkelijke XDATA.
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
@@ -67,7 +67,17 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Niet-eindige coördinaten, ongeldige laagnamen, besturingstekens/injectie en te lange XDATA geven een fout. XDATA-strings blijven binnen 255 UTF-8-bytes; de uitvoer is maximaal 256 MiB, met punt-/entiteitenbudgetten. Coördinaten worden niet naar acht decimalen afgerond. Dit is geen harde totale RAM-limiet.
 - Veertien volledige Python-exportscenario’s, 87 labelgevallen, f64-rondgangen, fout-/opslagregressies en een onafhankelijke ezdxf-audit testen de uitvoer. CI controleert ook de echte native CLI en aanvullende proefsleuf-/Kadaster-/BGT-lagen zonder DXF-reparaties. Zie de [referenties](tests/fixtures/object-export/README.md).
 - Een releasebenchmark met 100.000 objecten produceert exact gelijke DXF-bytes via buffering en streaming: de extra getraceerde Rust-heap daalt van circa 64 MiB naar 65 KiB. Metingen en precieze grenzen staan in [benchmarks/README.md](benchmarks/README.md). Dit meet de encoder, geen volledige GUI-/schijf- of Python-workflow.
-- De standaard objectexport is verder geport. Gebruikersinstelbare regel-/exportopties in de UI, volledige bron-/groepsfilteracceptatie, interactieve exportvoortgang/annuleren, sjabloon-/profieltekeningen en raster-/fotobundels blijven open. De genoemde fontstijl verwijst naar de fontnaam; dit voegt geen fontinstallatie toe.
+- De standaard objectexport is verder geport. Overige exportopties in de UI, volledige bron-/groepsfilteracceptatie, interactieve exportvoortgang/annuleren, sjabloon-/profieltekeningen en raster-/fotobundels blijven open. De genoemde fontstijl verwijst naar de fontnaam; dit voegt geen fontinstallatie toe.
+
+## Objectregels en disciplineoverzicht
+
+- Open **Instellingen → Objectregels en disciplinekleuren** om coderingen, CAD-laag, ACI-kleur en disciplinenaam te bewerken, regels te verplaatsen/verwijderen of standaardregels te herstellen. De eerste passende regel wint. Een lege lijst schakelt regeltoewijzing uit. Lege disciplinenamen gebruiken de eerste codering als label.
+- Wijzigingen blijven een concept tot **Opslaan en toepassen** slaagt. Een ongeldige regel of opslagfout vervangt de actieve regels niet. Dezelfde opgeslagen regels sturen de kaart (ook MarXact-markeringen), het overzicht en de losse Excel-/DXF-export.
+- **Import oude voorkeuren** neemt `kickthemap_object_layer_rules` over. Oudere Rust-instellingen zonder dit veld behouden de standaardregels. Instellingen zijn begrensd op 2 MiB; maximaal 256 regels en 32 KiB coderingen/label per regel. Ongeldige laag-/kleurnamen worden gemeld. De CLI meldt ongeldige instellingen als fout; de GUI toont een laadmelding en gebruikt dan tijdelijke standaardwaarden.
+- De CLI gebruikt dezelfde eigen Rust-instellingen. Een afzonderlijk bestand is optioneel: `sleufbase-rust.exe --settings instellingen.json --xlsx overzicht.xlsx jobFeatures.json`. Dit bestand gebruikt het native Rust-instellingenschema; import van oude voorkeuren loopt via de importactie.
+- Excel behoudt de oorspronkelijke disciplinevolgorde, kolombreedtes, rijhoogtes, kleuren, letteropmaak, vaste koprij, filter en totaalregel. Labels die volgens Python `casefold` gelijk zijn krijgen één kolom; alle aantallen worden daarin samengevoegd. Dit herstelt een Python-fout waarbij latere schrijfwijzen uit de totalen verdwenen. Tekst zoals `=1+1` blijft letterlijk.
+- De Excel-export leent geladen jobs en berekent kolomgroepen eenmaal per export. Alleen virtuele jobs worden afzonderlijk opgebouwd. Unicode-hoofdletters en kolomgroepering volgen vaste Python 3.11/Unicode 14-tabellen.
+- Negen onafhankelijke oorspronkelijke rapporten worden via de echte Rust-CLI vergeleken op cellen, opmaak, breedtes, filter en totalen; aangepaste DXF-lagen/-kleuren krijgen tevens een onafhankelijke CAD-audit. Zie de [disciplinereferenties](tests/fixtures/disciplines/README.md). Automatische Excel tijdens template-export, alle overige instellingen en volledige project-/Excel-renderacceptatie blijven open.
 
 ## Projectgegevens behouden
 
@@ -300,7 +310,7 @@ of een vergelijking met de complete Python-app op echte projecten.
 2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows, StreetSmart en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonexport inclusief profielen, raster, foto's en blokken.
 4. Volledig uitgewerkte virtuele proefsleufprofielen (de geometriebasis is aanwezig), MarXact, volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
-5. Gebruikersinstelbare discipline-regels, installatiepakket en volledige migratietests.
+5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.
 
 ## Aanpak voor vervolgmigratie
 

@@ -2,7 +2,9 @@
 //! The historical Python application remains unchanged until parity is reached.
 
 pub mod disciplines;
+pub mod discipline_xlsx;
 mod rule_glob;
+pub mod rule_settings;
 pub mod geo;
 pub mod geotiff;
 pub mod loaded_jobs;

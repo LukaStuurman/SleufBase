@@ -307,10 +307,10 @@ fn limits_nonfinite_values_invalid_symbols_and_injected_tags_never_publish_parti
     assert!(!path.exists());
     let case = cases().remove(0);
     static INVALID: &[sleufbase_rust::Rule] = &[sleufbase_rust::Rule {
-        keywords: &["water"],
-        target_layer: "BAD\nLAYER",
+        keywords: std::borrow::Cow::Borrowed(&[std::borrow::Cow::Borrowed("water")]),
+        target_layer: std::borrow::Cow::Borrowed("BAD\nLAYER"),
         color_aci: 5,
-        label: "Water",
+        label: std::borrow::Cow::Borrowed("Water"),
     }];
     assert!(object_dxf::write(&path, &case.datasets, INVALID, Default::default()).is_err());
     assert!(!path.exists());

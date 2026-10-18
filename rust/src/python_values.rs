@@ -2,6 +2,31 @@
 use serde_json::Value;
 mod unicode {
     include!("python_repr_unicode.rs");
+    include!("python_case_unicode.rs");
+}
+fn mapped_case(value: &str, table: &[(char, &str)]) -> String {
+    let mut out = String::with_capacity(value.len());
+    for ch in value.chars() {
+        match table.binary_search_by_key(&ch, |(c, _)| *c) {
+            Ok(i) => out.push_str(table[i].1),
+            Err(_) => out.push(ch),
+        }
+    }
+    out
+}
+pub(crate) fn uppercase(value: &str) -> String {
+    if value.is_ascii() {
+        value.to_ascii_uppercase()
+    } else {
+        mapped_case(value, unicode::UPPER)
+    }
+}
+pub(crate) fn casefold(value: &str) -> String {
+    if value.is_ascii() {
+        value.to_ascii_lowercase()
+    } else {
+        mapped_case(value, unicode::CASEFOLD)
+    }
 }
 const MAX_PROPERTY: usize = 1024 * 1024;
 pub(crate) fn trim(value: &str) -> &str {

@@ -1,7 +1,8 @@
 mod ui;
+mod rule_editor;
 
 use sleufbase_rust::{
-    load_job_features, write_dxf, write_xlsx, write_dxf_with_trenches, RULES,
+    load_job_features, write_dxf, write_xlsx, write_dxf_with_trenches,
     marxact, project::{NativeProject,save_project_new},
     settings_compat,
 };
@@ -15,11 +16,16 @@ fn print_help() {
     println!("sleufbase-rust.exe --marxact uitvoer.json meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --import-python uitvoer.json project.klicproject");
+    println!("Optioneel vóór de opdracht: --settings Rust-instellingen.json");
     println!("Bestaande uitvoerbestanden worden niet overschreven.");
     println!("De volledige Python-sjabloonexport en interactieve KickTheMap-WebView2 zijn nog niet gemigreerd.");
 }
 
 fn run_cli(args: &[String]) -> Result<(), String> {
+    let (settings_path,args)=if args.first().is_some_and(|s|s=="--settings") {
+        if args.len()<5 {return Err("Gebruik --settings instellingen.json --dxf/--xlsx uitvoer invoer".into());}
+        (PathBuf::from(&args[1]),&args[2..])
+    } else {(sleufbase_rust::project::app_data_directory().join("settings.json"),args)};
     if args.len() < 3 {
         return Err("Gebruik --xlsx/--dxf met jobFeatures.json of --marxact/--marxact-dxf met MarXact-DXF".into());
     }
@@ -36,8 +42,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
         if output.exists(){
             return Err("Uitvoerbestand bestaat al; overschrijven is niet toegestaan".into());
         }
-        let settings=settings_compat::load_rust_settings(
-            &sleufbase_rust::project::app_data_directory().join("settings.json"));
+        let settings=settings_compat::read_rust_settings(&settings_path)?;
         let mut trenches=Vec::new();
         for source in &args[2..] {
             let result=marxact::import_dxf(
@@ -53,18 +58,19 @@ fn run_cli(args: &[String]) -> Result<(), String> {
             };
             save_project_new(&output,&project)?;
         } else {
-            write_dxf_with_trenches(&output,&[],&trenches,RULES)?;
+            write_dxf_with_trenches(&output,&[],&trenches,&settings.object_rules)?;
         }
         println!("MarXact-conversie opgeslagen naar {}",output.display());
         return Ok(());
     }
     let mut datasets = Vec::new();
+    let settings=settings_compat::read_rust_settings(&settings_path)?;
     for input in &args[2..] {
         datasets.push(load_job_features(&PathBuf::from(input))?);
     }
     match args[0].as_str() {
-        "--xlsx" => write_xlsx(&output, &datasets, RULES)?,
-        "--dxf" => write_dxf(&output, &datasets, RULES)?,
+        "--xlsx" => write_xlsx(&output, &datasets, &settings.object_rules)?,
+        "--dxf" => write_dxf(&output, &datasets, &settings.object_rules)?,
         _ => return Err(format!("Onbekende opdracht: {}", args[0]))
     }
     println!("{} job(s) geëxporteerd naar {}", datasets.len(), output.display());

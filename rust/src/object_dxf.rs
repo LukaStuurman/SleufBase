@@ -60,7 +60,7 @@ fn text(value: &str, limit: usize, description: &str) -> Result<(), String> {
     }
     Ok(())
 }
-fn layer_name(name: &str) -> Result<(), String> {
+pub(crate) fn layer_name(name: &str) -> Result<(), String> {
     text(name, 255, "DXF-laagnaam")?;
     if name.is_empty() || name.chars().any(|c| "<>/\\\":;?*|=".contains(c)) {
         return Err("Ongeldige DXF-laagnaam".into());

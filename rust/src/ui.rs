@@ -3,9 +3,11 @@
 
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use sleufbase_rust::{
-    write_xlsx, Bounds, Dataset, Geometry,
-    Vertex, RULES
+    Bounds, Dataset, Geometry,
+    Vertex
 };
+#[cfg(test)]
+use sleufbase_rust::RULES;
 use sleufbase_rust::dxf_read::DxfOverlay;
 #[cfg(test)]
 use sleufbase_rust::dxf_read::load_dxf;
@@ -100,6 +102,7 @@ pub struct SleufBaseApp {
     comments:Vec<Comment>,
     show_comment_dialog:bool,
     show_settings_dialog:bool,
+    rule_editor:Option<crate::rule_editor::Editor>,
     migrated_settings:MigratedSettings,
     comment_form:CommentForm,
     only_active_cached:bool,
@@ -123,6 +126,10 @@ pub struct SleufBaseApp {
 
 impl Default for SleufBaseApp {
     fn default() -> Self {
+        let (migrated_settings,message)=match settings_compat::read_rust_settings(&project::app_data_directory().join("settings.json")) {
+            Ok(settings)=>(settings,String::new()),
+            Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
+        };
         Self {
             file_loader:None,
             file_intent:None,
@@ -161,14 +168,14 @@ impl Default for SleufBaseApp {
             comments:Vec::new(),
             show_comment_dialog:false,
             show_settings_dialog:false,
-            migrated_settings:settings_compat::load_rust_settings(
-                &project::app_data_directory().join("settings.json")),
+            rule_editor:None,
+            migrated_settings,
             comment_form:CommentForm::default(),
             only_active_cached:false,
             active_only:false,
             selected:None,
             query:String::new(),
-            message:String::new(),
+            message,
             project_path:None,
             legacy_archive:None,
             project_name:"Naamloos project".into(),
@@ -596,6 +603,7 @@ impl SleufBaseApp {
                     match settings_compat::save_rust_settings(&output,&config) {
                         Ok(())=>{
                             self.migrated_settings=config;
+                            self.rule_editor=None;
                             self.message="Instellingenopties overgenomen. Wachtwoorden/tokens zijn NIET geïmporteerd.".into();
                         }
                         Err(err)=>self.message=format!("Rust-instellingen niet opgeslagen: {err}")
@@ -764,12 +772,6 @@ impl SleufBaseApp {
         ids
     }
 
-    fn export_datasets(&self)->Vec<Dataset> {
-        let mut all=self.datasets.clone();
-        all.extend(self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)));
-        all
-    }
-
     fn save_excel(&mut self) {
         if self.datasets.is_empty() && self.virtual_trenches.is_empty() {
             self.message="Laad eerst jobFeatures.json of maak een virtuele proefsleuf".into();
@@ -779,7 +781,8 @@ impl SleufBaseApp {
             .add_filter("Excel",&["xlsx"])
             .set_file_name("SleufBase-Disciplines-Rust.xlsx").save_file()
         {
-            self.message=match write_xlsx(&path,&self.export_datasets(),RULES) {
+            let virtual_jobs:Vec<_>=self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)).collect();
+            self.message=match sleufbase_rust::discipline_xlsx::write(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.migrated_settings.object_rules) {
                 Ok(())=>format!("Excel opgeslagen: {}",path.display()),
                 Err(err)=>format!("Excel-export mislukt: {err}"),
             };
@@ -796,7 +799,7 @@ impl SleufBaseApp {
             .set_file_name("SleufBase-Objecten-Rust.dxf").save_file()
         {
             let virtual_jobs:Vec<_>=self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)).collect();
-            self.message=match sleufbase_rust::object_dxf::write_with_layers_iter(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.virtual_trenches,self.cadastral.as_ref(),&self.bgt_layers,RULES,Default::default()) {
+            self.message=match sleufbase_rust::object_dxf::write_with_layers_iter(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.virtual_trenches,self.cadastral.as_ref(),&self.bgt_layers,&self.migrated_settings.object_rules,Default::default()) {
                 Ok(())=>format!("DXF opgeslagen: {}",path.display()),
                 Err(err)=>format!("DXF-export mislukt: {err}"),
             };
@@ -839,7 +842,8 @@ fn canvas(
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
     zoom:&mut f64,
-    pan:&mut egui::Vec2
+    pan:&mut egui::Vec2,
+    rules:&[sleufbase_rust::Rule]
 ) {
     let desired=ui.available_size();
     let (rect,response)=ui.allocate_exact_size(desired,egui::Sense::click_and_drag());
@@ -959,7 +963,7 @@ fn canvas(
         if let Some(markers)=trench_markers.get(index) {
             for marker in markers {
                 let object=&trench.objects[marker.object_index];
-                let color=sleufbase_rust::matching_rule(&object.source_name,RULES)
+                let color=sleufbase_rust::matching_rule(&object.source_name,rules)
                     .map_or(Color32::from_rgb(37,99,235),|r|aci_color(i32::from(r.color_aci)));
                 painter.line_segment([project(marker.start.x,marker.start.y),project(marker.end.x,marker.end.y)],Stroke::new(2.5_f32,color));
             }
@@ -1021,13 +1025,8 @@ fn canvas(
     }
     for dataset in datasets {
         for feature in &dataset.features {
-            let color=match sleufbase_rust::matching_rule(&feature.source_name,RULES) {
-                Some(rule) if rule.label=="Waterleiding"=>Color32::from_rgb(40,105,235),
-                Some(rule) if rule.label=="Laagspanning"=>Color32::from_rgb(236,174,20),
-                Some(rule) if rule.label=="Middenspanning"=>Color32::from_rgb(235,40,45),
-                Some(_)=>ORANGE,
-                None=>Color32::GRAY,
-            };
+            let color=sleufbase_rust::matching_rule(&feature.source_name,rules)
+                .map_or(Color32::GRAY,|r|aci_color(i32::from(r.color_aci)));
             match &feature.geometry {
                 Geometry::Point(p)=>{painter.circle_filled(project(p.x,p.y),3.5,color);}
                 Geometry::Polyline(vertices)=>{
@@ -1377,11 +1376,11 @@ impl eframe::App for SleufBaseApp {
             ui.separator();
             if let Some(ds)=self.selected.and_then(|i|self.datasets.get(i)) {
                 ui.strong(&ds.title);
-                let summary=sleufbase_rust::summarize(ds,RULES);
+                let summary=sleufbase_rust::summarize(ds,&self.migrated_settings.object_rules);
                 ui.label(format!("Job-ID {}, {} objecten, {} disciplines",
                     ds.job_id,ds.features.len(),summary.distinct_count()));
-                for (rule,count) in RULES.iter().zip(summary.counts.iter()) {
-                    if *count>0 {ui.label(format!("{}: {}",rule.label,count));}
+                for (rule,count) in self.migrated_settings.object_rules.iter().zip(summary.counts.iter()) {
+                    if *count>0 {ui.label(format!("{}: {}",rule.display_label(),count));}
                 }
             }
             });
@@ -1399,7 +1398,7 @@ impl eframe::App for SleufBaseApp {
             canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 self.pdok_texture.as_ref(),self.pdok_bounds,
-                &mut self.zoom,&mut self.pan);
+                &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules);
         });
 
         if self.show_trench_dialog {
@@ -1474,7 +1473,10 @@ impl eframe::App for SleufBaseApp {
             let mut save=false;
             egui::Window::new("SleufBase Rust-instellingen")
                 .open(&mut show).resizable(false).show(ctx,|ui|{
-                ui.strong("Veilige, eigen Rust-instellingen");
+                ui.strong("SleufBase-instellingen");
+                if ui.button("Objectregels en disciplinekleuren").clicked() {
+                    self.rule_editor=Some(crate::rule_editor::Editor::new(&self.migrated_settings.object_rules));
+                }
                 ui.checkbox(&mut self.migrated_settings.template_auto_fill_bgt_fysiek_voorkomen,
                     "BGT fysiek voorkomen automatisch aanvullen (voorbereid)");
                 ui.checkbox(&mut self.migrated_settings.template_auto_export_discipline_excel,
@@ -1511,6 +1513,18 @@ impl eframe::App for SleufBaseApp {
             }
         }
 
+        if let Some(rules)=crate::rule_editor::show(ctx,&mut self.rule_editor) {
+            let mut config=self.migrated_settings.clone();
+            config.object_rules=rules;
+            match settings_compat::save_rust_settings(&project::app_data_directory().join("settings.json"),&config) {
+                Ok(())=>{
+                    self.migrated_settings=config;
+                    self.rule_editor=None;
+                    self.message="Objectregels opgeslagen en toegepast op kaart, tellingen en exports".into();
+                },
+                Err(error)=>{if let Some(editor)=self.rule_editor.as_mut(){editor.error=error;}}
+            }
+        }
         self.show_unsaved_project_dialog(ctx);
 
     }
@@ -1642,6 +1656,20 @@ mod project_lifecycle_tests {
     }
 
     #[test]
+    fn canvas_uses_configured_rule_colors_instead_of_default_discipline_labels() {
+        let dataset=sleufbase_rust::parse_job_features(r#"{"features":[{"geometry":{"type":"Point","coordinates":[1,2]},"properties":{"idName":"water"}}]}"#,1,"PS1").unwrap();
+        let custom=[sleufbase_rust::Rule::new(vec!["water".into()],"CUSTOM".into(),6,"Andere naam".into())];
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let mut render=|rules:&[sleufbase_rust::Rule]|ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,rules);});
+        });
+        let has_magenta=|output:egui::FullOutput|output.shapes.iter().any(|s|matches!(&s.shape,egui::Shape::Circle(c)if c.fill==aci_color(6)));
+        assert!(has_magenta(render(&custom)));
+        assert!(!has_magenta(render(RULES)));
+        assert!(!has_magenta(render(&[])));
+    }
+
+    #[test]
     fn cad_inspector_preserves_attributes_and_resets_on_project_switch() {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cad-properties/properties-binary.dxf");
@@ -1688,7 +1716,7 @@ mod project_lifecycle_tests {
         let mut render=|overlay:&DxfOverlay| {
             ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.0,600.0))),..Default::default()},|ctx|{
                 egui::CentralPanel::default().show(ctx,|ui|{
-                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);
+                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
                 });
             })
         };
@@ -1711,7 +1739,7 @@ mod project_lifecycle_tests {
         assert_eq!(overlay.features.len(),1);
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
             egui::CentralPanel::default().show(ctx,|ui|{
-                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);
+                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
             });
         });
         let edges:Vec<_>=output.shapes.iter().filter_map(|s|match &s.shape {
@@ -1733,7 +1761,7 @@ mod project_lifecycle_tests {
         overlay.rebuild_block_cache().unwrap();
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);});
         });
         let edges=output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count();
         assert_eq!(edges,2,"hidden edges and gaps must not be painted");

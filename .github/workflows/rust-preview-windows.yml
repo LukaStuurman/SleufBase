@@ -55,6 +55,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_object_exports.py "$env:OBJECT_EXPORT_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently compare configured CLI reports and DXF colors
+        shell: pwsh
+        env:
+          DISCIPLINE_AUDIT_DIR: ${{ runner.temp }}/SleufBase-discipline-audit
+          PYTHONUTF8: '1'
+        run: |
+          cargo run --manifest-path rust/Cargo.toml --example export_discipline_fixtures -- "$env:DISCIPLINE_AUDIT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_discipline_exports.py "$env:DISCIPLINE_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Benchmark core allocations and time
         shell: pwsh
         run: |

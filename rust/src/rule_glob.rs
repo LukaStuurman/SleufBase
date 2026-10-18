@@ -31,7 +31,7 @@ struct Glob {
 }
 impl Glob {
     fn compile(pattern: &str) -> Self {
-        let chars: Vec<_> = pattern.to_uppercase().chars().collect();
+        let chars: Vec<_> = crate::python_values::uppercase(pattern).chars().collect();
         let mut tokens = Vec::new();
         let mut i = 0;
         while i < chars.len() {

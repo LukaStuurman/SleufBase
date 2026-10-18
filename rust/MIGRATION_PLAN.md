@@ -145,8 +145,24 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   bron-/keywordnormalisatie. 107 oorspronkelijke parserdocumenten met 1.024
   float-eigenschappen, 149.112 regelbeslissingen en limietregressies; 168 Rust-tests
   groen. Synthetische referenties vervangen geen volledige praktijkacceptatie.
-- Volgende stappen: volledige instelbare regels en
-  Excel-/exportworkflows verder met Python toetsen en porten; tekst/ATTRIB-weergave,
+- Instelbare objectregels in GUI en CLI gekoppeld aan kaart/MarXact-kleuren,
+  tellingen en standalone Excel/DXF. Bewerkbare volgorde, coderingen, lagen,
+  ACI-kleuren, labels en standaardherstel; conceptwijzigingen worden pas na
+  geslaagde validatie/opslag actief. Oude voorkeuren nemen regels over en oudere
+  native instellingen houden defaults; een expliciet lege lijst blijft leeg.
+  Begrensd instellingenlezen/-schrijven en geen vervanging bij ongeldige regels.
+  Unicode-hoofdletters/casefold volgen vaste Python 3.11/Unicode 14-tabellen.
+  Excel heeft de oorspronkelijke totaalregel, vaste koprij, filter, breedtes,
+  rijhoogtes, fonts, kleuren en uitlijning. Gelijke disciplinenamen delen een
+  kolom; samenvoegen van verschillende schrijfwijzen corrigeert verdwenen
+  Python-aantallen. Geladen jobs worden geleend, kolomgroepen eenmaal voorbereid.
+  Negen Python-rapportorakels met kleurconversies, lege/aangepaste regels,
+  labelvarianten en formuleachtige tekst, allemaal via de echte native CLI;
+  onafhankelijke ZIP/XML-vergelijking en aangepaste DXF-kleur-/laagaudit.
+  Instellingenmigratie/opslagfouten, echte egui-kleuren en conceptisolatie getest.
+  174 Rust-tests groen. Automatische rapportage bij template-export, overige
+  instellingen en praktijkacceptatie blijven open.
+- Volgende stappen: overige exportopties en interactieve export, tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   fijnmaziger afbreken van zware parserfasen en echte acceptatie nog open.

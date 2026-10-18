@@ -1,66 +1,15 @@
-use crate::disciplines::{summarize, Rule};
+use crate::disciplines::Rule;
 use crate::model::Dataset;
 use crate::virtual_trench::VirtualTrench;
 use crate::cadastral::CadastralLayer;
 use crate::bgt::BgtLayer;
-use rust_xlsxwriter::{Color, Format, Workbook};
+#[cfg(test)]
 use std::fs;
-use crate::storage::atomic_write;
 use std::path::Path;
 
-/// Do not silently overwrite a production drawing/report.
-fn prepare_output(path: &Path) -> Result<(), String> {
-    if path.exists() {
-        return Err(format!("Bestand bestaat al: {}. Kies een nieuwe naam.", path.display()));
-    }
-    if let Some(parent) = path.parent() {
-        if !parent.as_os_str().is_empty() {
-            fs::create_dir_all(parent).map_err(|e| format!("Map maken mislukt: {e}"))?;
-        }
-    }
-    Ok(())
-}
-
-/// The first migration milestone: disciplinary summary of locally loaded
-/// jobFeatures.json files. Uses the same labels and counts as the Python code.
+/// Discipline report with original ordering, totals, layout and styling.
 pub fn write_xlsx(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(), String> {
-    if datasets.is_empty() { return Err("Geen ingeladen jobs".into()); }
-    prepare_output(path)?;
-    let header = Format::new()
-        .set_bold().set_font_color(Color::White)
-        .set_background_color(Color::RGB(0xC2410C));
-    let body = Format::new().set_background_color(Color::RGB(0xFFF7ED));
-    let mut workbook = Workbook::new();
-    let sheet = workbook.add_worksheet();
-    sheet.set_name("Disciplines").map_err(|e| e.to_string())?;
-    sheet.set_column_width(0, 28).map_err(|e| e.to_string())?;
-    sheet.set_column_width(1, 24).map_err(|e| e.to_string())?;
-    sheet.set_column_width(2, 28).map_err(|e| e.to_string())?;
-    for (col, width) in (3..(3 + rules.len())).map(|col| (col, 22.0)) {
-        sheet.set_column_width(col as u16, width).map_err(|e| e.to_string())?;
-    }
-    let headings: Vec<&str> = std::iter::once("Proefsleuf")
-        .chain(["Aantal verschillende disciplines", "Totaal aantal kabels/leidingen"])
-        .chain(rules.iter().map(|r| r.label)).collect();
-    for (col, name) in headings.iter().enumerate() {
-        sheet.write_string_with_format(0, col as u16, *name, &header)
-            .map_err(|e| e.to_string())?;
-    }
-    for (index, dataset) in datasets.iter().enumerate() {
-        let row = (index + 1) as u32;
-        let summary = summarize(dataset, rules);
-        sheet.write_string_with_format(row, 0, &summary.proefsleuf, &body)
-            .map_err(|e| e.to_string())?;
-        sheet.write_number_with_format(row, 1, summary.distinct_count() as f64, &body)
-            .map_err(|e| e.to_string())?;
-        sheet.write_number_with_format(row, 2, summary.total_count() as f64, &body)
-            .map_err(|e| e.to_string())?;
-        for (col, count) in summary.counts.iter().enumerate() {
-            sheet.write_number_with_format(row, (col + 3) as u16, *count as f64, &body)
-                .map_err(|e| e.to_string())?;
-        }
-    }
-    atomic_write(path,false,|file|workbook.save_to_writer(file).map_err(|e|e.to_string()))
+    crate::discipline_xlsx::write(path,datasets.iter(),rules)
 }
 
 pub fn write_dxf(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(), String> {
