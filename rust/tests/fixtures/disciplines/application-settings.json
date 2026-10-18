@@ -1,0 +1,196 @@
+{
+  "label_gap": 3.5,
+  "rules": [
+    {
+      "keywords": [
+        "water"
+      ],
+      "target_layer": "N-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G",
+      "color_aci": 5,
+      "label": "Waterleiding"
+    },
+    {
+      "keywords": [
+        "data"
+      ],
+      "target_layer": "N-OI-KL-DATA-G",
+      "color_aci": 3,
+      "label": "Datakabel"
+    },
+    {
+      "keywords": [
+        "glasvezel",
+        "gv"
+      ],
+      "target_layer": "N-OI-KL-DATA_GLASVEZEL-G",
+      "color_aci": 100,
+      "label": "Glasvezel"
+    },
+    {
+      "keywords": [
+        "ld"
+      ],
+      "target_layer": "N-OI-KL-GAS_LD-G",
+      "color_aci": 50,
+      "label": "Gasleiding LD"
+    },
+    {
+      "keywords": [
+        "hd"
+      ],
+      "target_layer": "N-OI-KL-GAS_HD-G",
+      "color_aci": 30,
+      "label": "Gasleiding HD"
+    },
+    {
+      "keywords": [
+        "ls"
+      ],
+      "target_layer": "N-OI-KL-ET_LS-G",
+      "color_aci": 190,
+      "label": "Laagspanning"
+    },
+    {
+      "keywords": [
+        "ms"
+      ],
+      "target_layer": "N-OI-KL-ET_MS-G",
+      "color_aci": 4,
+      "label": "Middenspanning"
+    },
+    {
+      "keywords": [
+        "monitoring",
+        "x"
+      ],
+      "target_layer": "N-OI-KL-MONITORING_KABEL-G",
+      "color_aci": 1,
+      "label": "ONBEKEND"
+    },
+    {
+      "keywords": [
+        "rio",
+        "druk"
+      ],
+      "target_layer": "N-OI-RI-DRUK-G",
+      "color_aci": 210,
+      "label": "Riool druk"
+    },
+    {
+      "keywords": [
+        "verval",
+        "vrijverval"
+      ],
+      "target_layer": "N-OI-RI-VRIJVERVAL-G",
+      "color_aci": 210,
+      "label": "Riool vrijverval"
+    },
+    {
+      "keywords": [
+        "gevaarlijke inhoud",
+        "gs"
+      ],
+      "target_layer": "N-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD-G",
+      "color_aci": 20,
+      "label": "Buisleiding GS"
+    },
+    {
+      "keywords": [
+        "warm"
+      ],
+      "target_layer": "B-WE-KL-WARMTENET-G",
+      "color_aci": 80,
+      "label": "Warmtenet"
+    },
+    {
+      "keywords": [
+        "hs"
+      ],
+      "target_layer": "B-WE-KL-ET_HS-G",
+      "color_aci": 1,
+      "label": "Hoogspanning"
+    }
+  ],
+  "gap_cases": [
+    {
+      "value": null,
+      "expected": 3.5
+    },
+    {
+      "value": false,
+      "expected": 0.0
+    },
+    {
+      "value": true,
+      "expected": 1.0
+    },
+    {
+      "value": -2,
+      "expected": 0.0
+    },
+    {
+      "value": 0,
+      "expected": 0.0
+    },
+    {
+      "value": 3.5,
+      "expected": 3.5
+    },
+    {
+      "value": 100,
+      "expected": 100.0
+    },
+    {
+      "value": 1000,
+      "expected": 100.0
+    },
+    {
+      "value": "3.5",
+      "expected": 3.5
+    },
+    {
+      "value": "3,5",
+      "expected": 3.5
+    },
+    {
+      "value": "٣.٥",
+      "expected": 3.5
+    },
+    {
+      "value": "1_0",
+      "expected": 10.0
+    },
+    {
+      "value": "nan",
+      "expected": 3.5
+    },
+    {
+      "value": "inf",
+      "expected": 100.0
+    },
+    {
+      "value": "-inf",
+      "expected": 0.0
+    },
+    {
+      "value": "1e999",
+      "expected": 100.0
+    },
+    {
+      "value": "",
+      "expected": 3.5
+    },
+    {
+      "value": [],
+      "expected": 3.5
+    },
+    {
+      "value": {},
+      "expected": 3.5
+    },
+    {
+      "value": "\u001c1",
+      "expected": 3.5
+    }
+  ]
+}

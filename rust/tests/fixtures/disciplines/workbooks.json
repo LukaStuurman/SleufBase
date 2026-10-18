@@ -1,7 +1,74 @@
 [
   {
     "name": "defaults",
-    "rows": null,
+    "rows": [
+      [
+        "water",
+        "N-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G",
+        5,
+        "Waterleiding"
+      ],
+      [
+        "data",
+        "N-OI-KL-DATA-G",
+        3,
+        "Datakabel"
+      ],
+      [
+        "glasvezel,gv",
+        "N-OI-KL-DATA_GLASVEZEL-G",
+        100,
+        "Glasvezel"
+      ],
+      [
+        "ld",
+        "N-OI-KL-GAS_LD-G",
+        50,
+        "Gasleiding LD"
+      ],
+      [
+        "hd",
+        "N-OI-KL-GAS_HD-G",
+        30,
+        "Gasleiding HD"
+      ],
+      [
+        "ls",
+        "N-OI-KL-ET_LS-G",
+        190,
+        "Laagspanning"
+      ],
+      [
+        "ms",
+        "N-OI-KL-ET_MS-G",
+        4,
+        "Middenspanning"
+      ],
+      [
+        "monitoring,x",
+        "N-OI-KL-MONITORING_KABEL-G",
+        1,
+        "Monitoring"
+      ],
+      [
+        "rio,druk",
+        "N-OI-RI-DRUK-G",
+        210,
+        "Riool druk"
+      ],
+      [
+        "verval,vrijverval",
+        "N-OI-RI-VRIJVERVAL-G",
+        210,
+        "Riool vrijverval"
+      ],
+      [
+        "gevaarlijke inhoud,gs",
+        "N-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD-G",
+        20,
+        "Buisleiding GS"
+      ]
+    ],
     "rules": [
       {
         "keywords": [
@@ -96,6 +163,19 @@
         "color_aci": 20,
         "label": "Buisleiding GS"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        2.5,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -1061,6 +1141,1160 @@
     "correction": null
   },
   {
+    "name": "application-defaults",
+    "rows": null,
+    "rules": [
+      {
+        "keywords": [
+          "water"
+        ],
+        "target_layer": "N-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G",
+        "color_aci": 5,
+        "label": "Waterleiding"
+      },
+      {
+        "keywords": [
+          "data"
+        ],
+        "target_layer": "N-OI-KL-DATA-G",
+        "color_aci": 3,
+        "label": "Datakabel"
+      },
+      {
+        "keywords": [
+          "glasvezel",
+          "gv"
+        ],
+        "target_layer": "N-OI-KL-DATA_GLASVEZEL-G",
+        "color_aci": 100,
+        "label": "Glasvezel"
+      },
+      {
+        "keywords": [
+          "ld"
+        ],
+        "target_layer": "N-OI-KL-GAS_LD-G",
+        "color_aci": 50,
+        "label": "Gasleiding LD"
+      },
+      {
+        "keywords": [
+          "hd"
+        ],
+        "target_layer": "N-OI-KL-GAS_HD-G",
+        "color_aci": 30,
+        "label": "Gasleiding HD"
+      },
+      {
+        "keywords": [
+          "ls"
+        ],
+        "target_layer": "N-OI-KL-ET_LS-G",
+        "color_aci": 190,
+        "label": "Laagspanning"
+      },
+      {
+        "keywords": [
+          "ms"
+        ],
+        "target_layer": "N-OI-KL-ET_MS-G",
+        "color_aci": 4,
+        "label": "Middenspanning"
+      },
+      {
+        "keywords": [
+          "monitoring",
+          "x"
+        ],
+        "target_layer": "N-OI-KL-MONITORING_KABEL-G",
+        "color_aci": 1,
+        "label": "ONBEKEND"
+      },
+      {
+        "keywords": [
+          "rio",
+          "druk"
+        ],
+        "target_layer": "N-OI-RI-DRUK-G",
+        "color_aci": 210,
+        "label": "Riool druk"
+      },
+      {
+        "keywords": [
+          "verval",
+          "vrijverval"
+        ],
+        "target_layer": "N-OI-RI-VRIJVERVAL-G",
+        "color_aci": 210,
+        "label": "Riool vrijverval"
+      },
+      {
+        "keywords": [
+          "gevaarlijke inhoud",
+          "gs"
+        ],
+        "target_layer": "N-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD-G",
+        "color_aci": 20,
+        "label": "Buisleiding GS"
+      },
+      {
+        "keywords": [
+          "warm"
+        ],
+        "target_layer": "B-WE-KL-WARMTENET-G",
+        "color_aci": 80,
+        "label": "Warmtenet"
+      },
+      {
+        "keywords": [
+          "hs"
+        ],
+        "target_layer": "B-WE-KL-ET_HS-G",
+        "color_aci": 1,
+        "label": "Hoogspanning"
+      }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        1.5,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
+    ],
+    "datasets": [
+      {
+        "job_id": 1,
+        "title": " PS1 ",
+        "source_path": "fixture.json",
+        "features": [
+          {
+            "object_name": "warm",
+            "source_name": "warm",
+            "geometry": {
+              "Point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "hs",
+            "source_name": "hs",
+            "geometry": {
+              "Point": {
+                "x": 1.0,
+                "y": 0.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "monitoring",
+            "source_name": "monitoring",
+            "geometry": {
+              "Point": {
+                "x": 2.0,
+                "y": 0.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "water",
+            "source_name": "water",
+            "geometry": {
+              "Point": {
+                "x": 3.0,
+                "y": 0.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      },
+      {
+        "job_id": 2,
+        "title": " PS2 ",
+        "source_path": "fixture.json",
+        "features": [
+          {
+            "object_name": "monitoring",
+            "source_name": "monitoring",
+            "geometry": {
+              "Point": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "hs",
+            "source_name": "hs",
+            "geometry": {
+              "Point": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "warm",
+            "source_name": "warm",
+            "geometry": {
+              "Point": {
+                "x": 2.0,
+                "y": 1.0,
+                "z": null
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "name": "Disciplines",
+      "dimension": "A1:P4",
+      "pane": {
+        "ySplit": "1",
+        "topLeftCell": "A2",
+        "activePane": "bottomLeft",
+        "state": "frozen"
+      },
+      "filter": "A1:P3",
+      "widths": [
+        24.0,
+        31.0,
+        29.0,
+        15.0,
+        12.0,
+        12.0,
+        16.0,
+        16.0,
+        15.0,
+        17.0,
+        12.0,
+        13.0,
+        19.0,
+        17.0,
+        12.0,
+        15.0
+      ],
+      "rows": [
+        {
+          "height": 24.0,
+          "cells": [
+            {
+              "ref": "A1",
+              "value": "Proefsleuf",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "B1",
+              "value": "Aantal verschillende disciplines",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "C1",
+              "value": "Totaal aantal kabels/leidingen",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "D1",
+              "value": "Waterleiding",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "E1",
+              "value": "Datakabel",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "F1",
+              "value": "Glasvezel",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "G1",
+              "value": "Gasleiding LD",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "H1",
+              "value": "Gasleiding HD",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "I1",
+              "value": "Laagspanning",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "J1",
+              "value": "Middenspanning",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "K1",
+              "value": "ONBEKEND",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "L1",
+              "value": "Riool druk",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "M1",
+              "value": "Riool vrijverval",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "N1",
+              "value": "Buisleiding GS",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "O1",
+              "value": "Warmtenet",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            },
+            {
+              "ref": "P1",
+              "value": "Hoogspanning",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": "FFFFFFFF",
+                "fill_rgb": "FFC2410C",
+                "align": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "height": 15.0,
+          "cells": [
+            {
+              "ref": "A2",
+              "value": "PS1",
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "B2",
+              "value": 4,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "C2",
+              "value": 4,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "D2",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "E2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "F2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "G2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "H2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "I2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "J2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "K2",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "L2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "M2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "N2",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "O2",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "P2",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            }
+          ]
+        },
+        {
+          "height": 15.0,
+          "cells": [
+            {
+              "ref": "A3",
+              "value": "PS2",
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "B3",
+              "value": 3,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "C3",
+              "value": 3,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "D3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "E3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "F3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "G3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "H3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "I3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "J3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "K3",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "L3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "M3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "N3",
+              "value": 0,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "O3",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "P3",
+              "value": 1,
+              "style": {
+                "bold": false,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            }
+          ]
+        },
+        {
+          "height": 22.0,
+          "cells": [
+            {
+              "ref": "A4",
+              "value": "Totaal",
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "B4",
+              "value": 4,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "C4",
+              "value": 7,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "D4",
+              "value": 1,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "E4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "F4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "G4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "H4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "I4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "J4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "K4",
+              "value": 2,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "L4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "M4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "N4",
+              "value": 0,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "O4",
+              "value": 2,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            },
+            {
+              "ref": "P4",
+              "value": 2,
+              "style": {
+                "bold": true,
+                "font": "Calibri",
+                "size": 11.0,
+                "font_rgb": null,
+                "fill_rgb": "FFFFF7ED",
+                "align": {}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "object_styles": [
+      {
+        "layer": "B-WE-KL-WARMTENET-G",
+        "color": 80
+      },
+      {
+        "layer": "B-WE-KL-ET_HS-G",
+        "color": 1
+      },
+      {
+        "layer": "N-OI-KL-MONITORING_KABEL-G",
+        "color": 1
+      },
+      {
+        "layer": "N-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G",
+        "color": 5
+      },
+      {
+        "layer": "N-OI-KL-MONITORING_KABEL-G",
+        "color": 1
+      },
+      {
+        "layer": "B-WE-KL-ET_HS-G",
+        "color": 1
+      },
+      {
+        "layer": "B-WE-KL-WARMTENET-G",
+        "color": 80
+      }
+    ],
+    "correction": null
+  },
+  {
     "name": "configured",
     "rows": [
       [
@@ -1109,6 +2343,19 @@
         "color_aci": 256,
         "label": "Overig"
       }
+    ],
+    "label_gap": 0.0,
+    "label_positions": [
+      [
+        1.5,
+        -5.5,
+        0.0
+      ],
+      [
+        1.0,
+        6.5,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -1621,6 +2868,19 @@
     "name": "empty-rules",
     "rows": [],
     "rules": [],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        0.5,
+        9.0,
+        0.0
+      ],
+      [
+        0.5,
+        -8.0,
+        0.0
+      ]
+    ],
     "datasets": [
       {
         "job_id": 1,
@@ -1945,6 +3205,19 @@
         "color_aci": 30,
         "label": "Leiding"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        1.0,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -2390,6 +3663,19 @@
         "color_aci": 3,
         "label": "I"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        1.5,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -2931,6 +4217,19 @@
         "label": ""
       }
     ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        0.5,
+        9.0,
+        0.0
+      ],
+      [
+        0.5,
+        -8.0,
+        0.0
+      ]
+    ],
     "datasets": [
       {
         "job_id": 1,
@@ -3359,6 +4658,19 @@
         "color_aci": 30,
         "label": "<gas>&"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        0.5,
+        9.0,
+        0.0
+      ],
+      [
+        0.5,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -4133,6 +5445,19 @@
         "color_aci": 256,
         "label": "Kleur 21"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        12.5,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {
@@ -6324,6 +7649,19 @@
         "color_aci": 6,
         "label": "Unassigned in Unicode 14"
       }
+    ],
+    "label_gap": 3.5,
+    "label_positions": [
+      [
+        1.5,
+        9.0,
+        0.0
+      ],
+      [
+        1.0,
+        -8.0,
+        0.0
+      ]
     ],
     "datasets": [
       {

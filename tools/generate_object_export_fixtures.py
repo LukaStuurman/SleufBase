@@ -51,6 +51,10 @@ def envelope(ref):
     doc.appids.add(ref.APP_ID)
     ref.KickTheMapDxfExporter()._setup_text_style(doc)
     doc.layers.remove("Defpoints")
+    # ezdxf discovers entity classes through a set; pin the structural envelope
+    # across Python hash seeds without changing any class definitions/handles.
+    doc.classes.add_required_classes(doc.dxfversion)
+    doc.classes.classes = type(doc.classes.classes)(sorted(doc.classes.classes.items()))
     stream = io.StringIO()
     doc.write(stream)
     lines = stream.getvalue().splitlines()
@@ -139,7 +143,7 @@ def main():
     for feature in [*points,*polys]:
         geometry={"Point":{"x":feature.x,"y":feature.y,"z":feature.z}} if isinstance(feature,ref.KickTheMapObjectPoint) else {"Polyline":[{"x":v.x,"y":v.y,"z":v.z} for v in feature.vertices]}
         features.append({"object_name":feature.object_name,"source_name":feature.source_name,"geometry":geometry,"attributes":[feature.attribute_1,feature.attribute_2,feature.attribute_3]})
-    definitions.append(("cli",[dataset("fixtures",features,path="rust/tests/fixtures/jobFeatures.json",job_id=0)],{}))
+    definitions.append(("cli",[dataset("fixtures",features,path="rust/tests/fixtures/jobFeatures.json",job_id=0)],{"label_gap":3.5}))
     tie=[
         {"object_name":"Beginpunt","source_name":"PUNT","geometry":{"Point":{"x":0,"y":0,"z":None}},"attributes":["","",""]},
         point(0.0,0.0,1,"water positive zero"),point(-0.0,-0.0,1,"water negative zero"),

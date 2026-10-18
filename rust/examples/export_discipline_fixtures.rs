@@ -9,6 +9,7 @@ use std::{path::PathBuf, process::Command};
 struct Case {
     name: String,
     rules: Vec<Rule>,
+    label_gap: f64,
     datasets: Vec<Dataset>,
 }
 fn main() {
@@ -26,6 +27,7 @@ fn main() {
             &settings,
             &MigratedSettings {
                 object_rules: case.rules,
+                dxf_label_gap: case.label_gap,
                 ..Default::default()
             },
         )

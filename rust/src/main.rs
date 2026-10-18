@@ -1,8 +1,9 @@
 mod ui;
 mod rule_editor;
+mod export_dialog;
 
 use sleufbase_rust::{
-    load_job_features, write_dxf, write_xlsx, write_dxf_with_trenches,
+    load_job_features, write_xlsx,
     marxact, project::{NativeProject,save_project_new},
     settings_compat,
 };
@@ -58,7 +59,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
             };
             save_project_new(&output,&project)?;
         } else {
-            write_dxf_with_trenches(&output,&[],&trenches,&settings.object_rules)?;
+            sleufbase_rust::object_dxf::write_with_layers(&output,&[],&trenches,None,&[],&settings.object_rules,settings.object_dxf_options())?;
         }
         println!("MarXact-conversie opgeslagen naar {}",output.display());
         return Ok(());
@@ -70,7 +71,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
     }
     match args[0].as_str() {
         "--xlsx" => write_xlsx(&output, &datasets, &settings.object_rules)?,
-        "--dxf" => write_dxf(&output, &datasets, &settings.object_rules)?,
+        "--dxf" => sleufbase_rust::object_dxf::write_with_layers(&output,&datasets,&[],None,&[],&settings.object_rules,settings.object_dxf_options())?,
         _ => return Err(format!("Onbekende opdracht: {}", args[0]))
     }
     println!("{} job(s) geëxporteerd naar {}", datasets.len(), output.display());

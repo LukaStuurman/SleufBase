@@ -1,6 +1,6 @@
 # Configured rules and discipline workbook parity
 
-`workbooks.json` contains nine independent references produced by the original
+`workbooks.json` contains ten independent references produced by the original
 Python `build_object_layer_rules`, `summarize_dataset`, `discipline_columns` and
 `write_discipline_workbook` functions. The original application is not started.
 Default/custom rules, separator parsing, color conversion, empty rules,
@@ -14,7 +14,7 @@ first column spelling before calling the original workbook writer. Other
 values, ordering and formatting come directly from the original writer.
 
 `export_discipline_fixtures` saves native settings and JSON/sidecars, then invokes
-the **actual native CLI** for all nine XLSX reports and nine DXF drawings. The
+the **actual native CLI** for all ten XLSX reports and ten DXF drawings. The
 independent Python verifier reads ZIP/XML directly and checks literal cell
 types/values, resolved fonts/fills/alignment, row heights, raw column widths,
 sheet dimensions, freeze panes, autofilter and totals. It also checks configured
@@ -42,3 +42,11 @@ This verifies the standalone report/configuration path. It does not implement
 automatic Excel generation during the still-unported template workflow, all
 other old preferences, template-specific source ordering, external account
 acceptance or a native Excel application's rendering/print layout.
+
+`application-settings.json` comes from the original validated AppSettings class,
+without calling load_settings or reading user files. It records all thirteen app
+rules (including heat/high voltage and the monitoring profile label) and twenty
+label-gap conversions. The app defaults to 3.5 metres; the bare exporter defaults
+to 6 metres. Existing explicit native rules stay unchanged. The independent DXF
+checks also compare actual CLI label positions for both default and custom gap.
+Regenerate this contract with `python tools/generate_application_settings_fixture.py`.

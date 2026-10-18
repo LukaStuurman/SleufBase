@@ -162,7 +162,23 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Instellingenmigratie/opslagfouten, echte egui-kleuren en conceptisolatie getest.
   174 Rust-tests groen. Automatische rapportage bij template-export, overige
   instellingen en praktijkacceptatie blijven open.
-- Volgende stappen: overige exportopties en interactieve export, tekst/ATTRIB-weergave,
+- Lokale objectexport heeft bronselectie/zoeken, expliciete eindpunt-/extra-laagkeuzes,
+  instelbare puntlijnlengte/labelafstand en export-als-overlay via de bestaande
+  achtergrondlader. Geselecteerde gewone jobs worden geleend; virtuele jobs volgen
+  de oorspronkelijke padvolgorde. Projectwissels verwerpen oude selecties en
+  annulering van overlayladen laat het gepubliceerde bestand staan.
+  Een primaire AppSettings-vergelijking herstelt ontbrekende warmtenet-/HS-regels,
+  het monitoringlabel en 3,5 meter labelafstand (de losse exporter gebruikt 6).
+  Bestaande expliciete regels blijven behouden. Tien rapport-/kleurreferenties,
+  originele app-defaults en twintig afstandconversies; echte CLI-labelposities
+  worden met Python vergeleken, inclusief een aangepaste nulafstand.
+  De R2018-referentiegenerator sorteert CLASS-records om hash-afhankelijke volgorde
+  te voorkomen; alle vijf objectassets regenereren gelijk met twee hash seeds.
+  181 Rust-tests, Clippy, releasebuild en beide onafhankelijke exportaudits
+  geslaagd. Schrijven is nog synchroon; online bronkeuze/downloads vanuit de exportdialog,
+  volledige templates/profielen en echte GUI-/praktijkacceptatie blijven open.
+- Volgende stappen: exportvoortgang/annuleren, volledige templates/profielen en
+  overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   fijnmaziger afbreken van zware parserfasen en echte acceptatie nog open.

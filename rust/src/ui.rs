@@ -103,6 +103,7 @@ pub struct SleufBaseApp {
     show_comment_dialog:bool,
     show_settings_dialog:bool,
     rule_editor:Option<crate::rule_editor::Editor>,
+    export_dialog:Option<crate::export_dialog::Dialog>,
     migrated_settings:MigratedSettings,
     comment_form:CommentForm,
     only_active_cached:bool,
@@ -169,6 +170,7 @@ impl Default for SleufBaseApp {
             show_comment_dialog:false,
             show_settings_dialog:false,
             rule_editor:None,
+            export_dialog:None,
             migrated_settings,
             comment_form:CommentForm::default(),
             only_active_cached:false,
@@ -211,6 +213,7 @@ impl SleufBaseApp {
 
     fn clear_project_requests(&mut self) {
         self.cancel_file_load();
+        self.export_dialog=None;
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
         if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
@@ -790,21 +793,34 @@ impl SleufBaseApp {
     }
 
     fn save_dxf(&mut self) {
-        if self.datasets.is_empty() && self.virtual_trenches.is_empty() && self.cadastral.as_ref().is_none_or(|c|!c.visible) && self.bgt_layers.iter().all(|l|!l.visible) {
-            self.message="Laad eerst objecten, een proefsleuf of zichtbare kaartlagen".into();
-            return;
-        }
-        if let Some(path)=rfd::FileDialog::new()
-            .add_filter("DXF",&["dxf"])
-            .set_file_name("SleufBase-Objecten-Rust.dxf").save_file()
-        {
-            let virtual_jobs:Vec<_>=self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)).collect();
-            self.message=match sleufbase_rust::object_dxf::write_with_layers_iter(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.virtual_trenches,self.cadastral.as_ref(),&self.bgt_layers,&self.migrated_settings.object_rules,Default::default()) {
-                Ok(())=>format!("DXF opgeslagen: {}",path.display()),
-                Err(err)=>format!("DXF-export mislukt: {err}"),
-            };
+        self.export_dialog=Some(crate::export_dialog::Dialog::new(self.datasets.len(),self.virtual_trenches.len(),self.migrated_settings.dxf_label_gap,self.project_generation));
+    }
+    fn finish_dxf_export(&mut self,path:PathBuf,action:crate::export_dialog::Action) {
+        let Some(dialog)=self.export_dialog.as_ref() else {return;};
+        let result=(|| {
+            let prepared=dialog.selection.prepare(&self.datasets,&self.virtual_trenches)?;
+            if prepared.is_empty() && !dialog.extra_layers {
+                return Err("Geen bruikbare objecten geselecteerd. Kies een job of neem virtuele eindpunten mee.".into());
+            }
+            let trenches=if dialog.extra_layers{self.virtual_trenches.as_slice()}else{&[]};
+            let cadastral=if dialog.extra_layers{self.cadastral.as_ref()}else{None};
+            let bgt=if dialog.extra_layers{self.bgt_layers.as_slice()}else{&[]};
+            sleufbase_rust::object_dxf::write_with_layers_iter(&path,prepared.datasets(),trenches,cadastral,bgt,&self.migrated_settings.object_rules,dialog.options())?;
+            Ok(prepared.skipped)
+        })();
+        match result {
+            Ok(skipped)=>{
+                self.export_dialog=None;
+                if action.overlay {self.load_exported_overlay(path.clone());}
+                self.message=format!("DXF opgeslagen: {}{}",path.display(),if skipped.is_empty(){String::new()}else{format!(". Zonder objecten overgeslagen: {}",skipped.join(", "))});
+            },
+            Err(error)=>{
+                self.message=format!("DXF-export mislukt: {error}");
+                if let Some(dialog)=self.export_dialog.as_mut(){dialog.error=error;}
+            }
         }
     }
+
 }
 
 
@@ -1477,6 +1493,10 @@ impl eframe::App for SleufBaseApp {
                 if ui.button("Objectregels en disciplinekleuren").clicked() {
                     self.rule_editor=Some(crate::rule_editor::Editor::new(&self.migrated_settings.object_rules));
                 }
+                ui.horizontal(|ui|{
+                    ui.label("DXF-labelafstand (m)");
+                    ui.add(egui::DragValue::new(&mut self.migrated_settings.dxf_label_gap).range(0.0..=100.).speed(0.1));
+                });
                 ui.checkbox(&mut self.migrated_settings.template_auto_fill_bgt_fysiek_voorkomen,
                     "BGT fysiek voorkomen automatisch aanvullen (voorbereid)");
                 ui.checkbox(&mut self.migrated_settings.template_auto_export_discipline_excel,
@@ -1523,6 +1543,11 @@ impl eframe::App for SleufBaseApp {
                     self.message="Objectregels opgeslagen en toegepast op kaart, tellingen en exports".into();
                 },
                 Err(error)=>{if let Some(editor)=self.rule_editor.as_mut(){editor.error=error;}}
+            }
+        }
+        if let Some(action)=crate::export_dialog::show(ctx,&mut self.export_dialog,&self.datasets,&self.virtual_trenches,self.project_generation) {
+            if let Some(path)=rfd::FileDialog::new().add_filter("DXF",&["dxf"]).set_file_name("SleufBase-Objecten-Rust.dxf").save_file() {
+                self.finish_dxf_export(path,action);
             }
         }
         self.show_unsaved_project_dialog(ctx);
@@ -1653,6 +1678,27 @@ mod project_lifecycle_tests {
     fn signed_dxf_colour_indices_never_overflow() {
         for colour in 1..=255 {assert_eq!(aci_color(colour),aci_color(-colour));}
         let _=aci_color(i32::MIN);
+    }
+
+    #[test]
+    fn selected_export_preserves_inputs_and_loads_the_actual_published_drawing_as_an_overlay() {
+        let mut app=SleufBaseApp::default();
+        let json=r#"{"features":[{"geometry":{"type":"Point","coordinates":[1,2]},"properties":{"idName":"water"}}]}"#;
+        app.datasets=vec![sleufbase_rust::parse_job_features(json,1,"PS1").unwrap(),sleufbase_rust::parse_job_features(json,2,"PS2").unwrap()];
+        let before=serde_json::to_value(&app.datasets).unwrap();
+        app.save_dxf();app.export_dialog.as_mut().unwrap().selection.datasets[0]=false;
+        let dir=tempfile::tempdir().unwrap();let output=dir.path().join("selected.dxf");
+        app.finish_dxf_export(output.clone(),crate::export_dialog::Action{overlay:true});
+        assert!(app.export_dialog.is_none());assert!(output.exists());
+        finish_loading(&mut app,&egui::Context::default());
+        assert_eq!(app.overlays.len(),1);assert_eq!(app.overlays[0].path,output);
+        let text=std::fs::read_to_string(&output).unwrap();
+        assert!(text.contains("JobId: 2"));assert!(!text.contains("JobId: 1"));
+        assert_eq!(serde_json::to_value(&app.datasets).unwrap(),before);
+        let bytes=std::fs::read(&output).unwrap();
+        app.save_dxf();app.finish_dxf_export(output.clone(),crate::export_dialog::Action{overlay:false});
+        assert!(app.export_dialog.as_ref().unwrap().error.contains("bestaat al"));
+        assert_eq!(std::fs::read(output).unwrap(),bytes);
     }
 
     #[test]

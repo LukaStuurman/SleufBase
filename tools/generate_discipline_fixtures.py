@@ -3,6 +3,7 @@ from pathlib import Path
 import importlib
 import json
 import tempfile
+import ezdxf
 from generate_object_export_fixtures import reference
 from verify_native_discipline_exports import signature
 
@@ -12,8 +13,10 @@ OUT=ROOT/"rust/tests/fixtures/disciplines"
 def main():
     ref=reference()
     report=importlib.import_module(ref.__package__+".discipline_excel_export")
+    settings=importlib.import_module(ref.__package__+".settings")
     variants=[
-        ("defaults",None,["water","LS","water","MS","nothing","data"]),
+        ("defaults",list(ref.DEFAULT_OBJECT_LAYER_RULES),["water","LS","water","MS","nothing","data"]),
+        ("application-defaults",None,["warm","hs","monitoring","water"]),
         ("configured",[["*wat?r*; leiding\npipe","DRINKWATER",5,"Drinkwater"],["d[ae]ta?","DATANET",3,"Data & glas"],["*","REST",256,"Overig"]],["WATER","leiding","data1","unknown"]),
         ("empty-rules",[],["water","LS"]),
         ("same-label",[["water","W",5,"Leiding"],["gas","G",30,"Leiding"]],["water","gas","water"]),
@@ -30,12 +33,13 @@ def main():
             for index,color in enumerate(colors):
                 code=f"=C{index:03}="
                 rows.append([code,f"COLOR_{index}",color,f"Kleur {index}"]);names.append(code)
-        rules=ref.build_object_layer_rules(rows)
-        datasets=[]; summaries=[]; object_styles=[]
+        rules=ref.build_object_layer_rules(list(settings.DEFAULT_KICKTHEMAP_OBJECT_LAYER_RULES) if rows is None else rows)
+        datasets=[]; summaries=[]; object_styles=[]; source_datasets=[]
         for i,source_names in enumerate([names,list(reversed(names[:3]))]):
             title=" =1+1 " if name=="literal-formulas" else f" PS{i+1} "
             points=tuple(ref.KickTheMapObjectPoint(source,source,float(j),float(i),None) for j,source in enumerate(source_names))
             dataset=ref.KickTheMapObjectDataset(i+1,title,Path("fixture.json"),points)
+            source_datasets.append(dataset)
             summaries.append(report.summarize_dataset(title,dataset,rules))
             for point in points:
                 matched=next((rule for rule in rules if rule.matches(point.source_name)),None)
@@ -57,7 +61,11 @@ def main():
             file=Path(tmp)/"reference.xlsx"
             report.write_discipline_workbook(file,summaries,disciplines=columns)
             expected=signature(file)
-        cases.append({"name":name,"rows":rows,"rules":[{"keywords":list(r.keywords),"target_layer":r.target_layer,"color_aci":r.color,"label":r.profile_label} for r in rules],"datasets":datasets,"expected":expected,"object_styles":object_styles,"correction":correction})
+            gap=0.0 if name=="configured" else settings.DEFAULT_DXF_LABEL_GAP
+            dxf=Path(tmp)/"reference.dxf"
+            ref.KickTheMapDxfExporter(layer_rules=[(",".join(r.keywords),r.target_layer,r.color,r.profile_label) for r in rules],label_gap=gap).export(dxf,source_datasets)
+            label_positions=[list(e.dxf.insert) for e in ezdxf.readfile(dxf).modelspace() if e.dxftype()=="TEXT"]
+        cases.append({"name":name,"rows":rows,"rules":[{"keywords":list(r.keywords),"target_layer":r.target_layer,"color_aci":r.color,"label":r.profile_label} for r in rules],"label_gap":gap,"label_positions":label_positions,"datasets":datasets,"expected":expected,"object_styles":object_styles,"correction":correction})
     OUT.mkdir(parents=True,exist_ok=True)
     (OUT/"workbooks.json").write_text(json.dumps(cases,ensure_ascii=False,indent=2)+"\n",encoding="utf-8",newline="\n")
     print(f"Generated {len(cases)} original discipline workbook references")

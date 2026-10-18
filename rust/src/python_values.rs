@@ -197,8 +197,11 @@ pub(crate) fn string(value: Option<&Value>) -> Result<String, String> {
     }
 }
 pub(crate) fn coordinate(value: Option<&Value>) -> Option<f64> {
+    number(value).filter(|n| n.is_finite())
+}
+pub(crate) fn number(value: Option<&Value>) -> Option<f64> {
     let number = match value? {
-        Value::Number(n) => n.as_f64()?,
+        Value::Number(n) => n.as_f64().or_else(|| n.to_string().parse().ok())?,
         Value::Bool(v) => {
             if *v {
                 1.
@@ -234,5 +237,5 @@ pub(crate) fn coordinate(value: Option<&Value>) -> Option<f64> {
         }
         _ => return None,
     };
-    number.is_finite().then_some(number)
+    Some(number)
 }

@@ -12,6 +12,8 @@ use tempfile::NamedTempFile;
 
 #[derive(Clone,Debug,Serialize,Deserialize,PartialEq)]
 pub struct MigratedSettings {
+    #[serde(default="default_label_gap")]
+    pub dxf_label_gap:f64,
     #[serde(default="crate::rule_settings::defaults")]
     pub object_rules:Vec<crate::disciplines::Rule>,
     pub template_auto_fill_bgt_fysiek_voorkomen:bool,
@@ -23,6 +25,7 @@ pub struct MigratedSettings {
 impl Default for MigratedSettings {
     fn default()->Self {
         Self {
+            dxf_label_gap:default_label_gap(),
             object_rules:crate::rule_settings::defaults(),
             template_auto_fill_bgt_fysiek_voorkomen:true,
             template_auto_export_discipline_excel:true,
@@ -30,6 +33,22 @@ impl Default for MigratedSettings {
             kickthemap_profile_extra_choices:Vec::new(),
             marxact_name_mappings:BTreeMap::new()
         }
+    }
+}
+pub fn default_label_gap()->f64 {3.5}
+fn label_gap(value:Option<&Value>)->f64 {
+    crate::python_values::number(value).filter(|v|!v.is_nan()).map_or_else(default_label_gap,|v|v.clamp(0.,100.))
+}
+impl MigratedSettings {
+    pub fn object_dxf_options(&self)->crate::object_dxf::Options {
+        crate::object_dxf::Options{label_gap:self.dxf_label_gap,..Default::default()}
+    }
+    fn validate(&self)->Result<(),String> {
+        crate::rule_settings::validate(&self.object_rules)?;
+        if !self.dxf_label_gap.is_finite() || !(0.0..=100.).contains(&self.dxf_label_gap) {
+            return Err("DXF-labelafstand moet tussen 0 en 100 meter liggen".into());
+        }
+        Ok(())
     }
 }
 fn boolean(value:Option<&Value>,default:bool)->bool {
@@ -78,6 +97,7 @@ pub fn from_legacy_json(content:&str)->Result<MigratedSettings,String> {
         .map_err(|e|format!("Instellingen JSON ongeldig: {e}"))?;
     let obj=value.as_object().ok_or("Instellingen moeten een JSON-object zijn")?;
     Ok(MigratedSettings{
+        dxf_label_gap:label_gap(obj.get("dxf_label_gap")),
         object_rules:crate::rule_settings::from_legacy(obj.get("kickthemap_object_layer_rules"))?,
         template_auto_fill_bgt_fysiek_voorkomen:boolean(
             obj.get("template_auto_fill_bgt_fysiek_voorkomen"),true),
@@ -99,11 +119,11 @@ pub fn read_rust_settings(path:&Path)->Result<MigratedSettings,String> {
     if !path.exists() { return Ok(MigratedSettings::default()); }
     let body=crate::input::read(path,2*1024*1024,"Instellingenbestand",&crate::input::NEVER_CANCEL)?;
     let settings: MigratedSettings=serde_json::from_slice(&body).map_err(|e|format!("Rust-instellingen ongeldig: {e}"))?;
-    crate::rule_settings::validate(&settings.object_rules)?;
+    settings.validate()?;
     Ok(settings)
 }
 pub fn save_rust_settings(path:&Path,config:&MigratedSettings)->Result<(),String> {
-    crate::rule_settings::validate(&config.object_rules)?;
+    config.validate()?;
     let body=serde_json::to_vec_pretty(config).map_err(|e|e.to_string())?;
     if body.len()+1>2*1024*1024 {return Err("Instellingenbestand is groter dan 2 MiB".into());}
     let dir=path.parent().filter(|p|!p.as_os_str().is_empty())

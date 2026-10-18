@@ -41,6 +41,7 @@ pub mod cadastral;
 pub mod settings_compat;
 pub mod export;
 pub mod object_dxf;
+pub mod object_selection;
 mod object_layout;
 pub mod model;
 pub mod parse;

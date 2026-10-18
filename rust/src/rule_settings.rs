@@ -2,7 +2,23 @@
 use crate::disciplines::{Rule, RULES};
 use serde_json::Value;
 pub fn defaults() -> Vec<Rule> {
-    RULES.to_vec()
+    // AppSettings differs from the bare exporter: 13 rules and an ONBEKEND
+    // profile label for monitoring. Keep the library exporter defaults intact.
+    let mut rules = RULES.to_vec();
+    rules[7].label = "ONBEKEND".into();
+    rules.push(Rule::new(
+        vec!["warm".into()],
+        "B-WE-KL-WARMTENET-G".into(),
+        80,
+        "Warmtenet".into(),
+    ));
+    rules.push(Rule::new(
+        vec!["hs".into()],
+        "B-WE-KL-ET_HS-G".into(),
+        1,
+        "Hoogspanning".into(),
+    ));
+    rules
 }
 pub fn validate(rules: &[Rule]) -> Result<(), String> {
     if rules.len() > 256 {

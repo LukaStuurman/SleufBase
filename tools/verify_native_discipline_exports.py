@@ -55,5 +55,8 @@ def main(directory):
         objects=[entity for entity in drawing.modelspace() if entity.dxftype()=="LINE"]
         assert [{"layer":e.dxf.layer,"color":e.dxf.color} for e in objects]==case["object_styles"],case["name"]
         assert all(len(e.get_xdata("KTM_DXF_EXPORT"))==5 for e in objects)
+        labels=[list(e.dxf.insert) for e in drawing.modelspace() if e.dxftype()=="TEXT"]
+        assert len(labels)==len(case["label_positions"]),case["name"]
+        assert all(abs(a-b)<1e-9 for actual,expected in zip(labels,case["label_positions"]) for a,b in zip(actual,expected)),case["name"]
     print(f"All {len(cases)} native CLI workbooks match original values, styles, dimensions, widths, panes, filters and totals (with recorded count correction); custom-rule DXF layers/colors and repair-free audits pass.")
 if __name__=="__main__":main(sys.argv[1])

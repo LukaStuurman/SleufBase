@@ -33,7 +33,7 @@ The writer also preserves f64 precision instead of rounding to eight decimals.
 The frozen `object_dxf_base.txt` is an empty structural R2018 envelope generated
 by the same script. It provides registered application/style tables and model/
 paper-space ownership/dictionaries; Rust fills only reviewed layer/entity slots
-and header extents/counts. Volatile header metadata is omitted. New handles start
+and header extents/counts. Volatile header metadata is omitted. CLASS records are explicitly sorted so Python hash seeds do not change the envelope. The CLI case uses the original app's configured 3.5-metre gap, while bare-encoder cases retain their explicit/default options. New handles start
 at `0x1000`, above every envelope handle. This is not a user template reader and
 does not prove profile/template, raster bundle or arbitrary CAD-entity parity.
 

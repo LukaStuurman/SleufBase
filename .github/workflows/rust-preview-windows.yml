@@ -51,7 +51,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo run --manifest-path rust/Cargo.toml --example export_object_fixtures -- "$env:OBJECT_EXPORT_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & rust/target/release/sleufbase-rust.exe --dxf "$env:OBJECT_EXPORT_AUDIT_DIR/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
+          & rust/target/release/sleufbase-rust.exe --settings "$env:OBJECT_EXPORT_AUDIT_DIR/cli-settings.json" --dxf "$env:OBJECT_EXPORT_AUDIT_DIR/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_object_exports.py "$env:OBJECT_EXPORT_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

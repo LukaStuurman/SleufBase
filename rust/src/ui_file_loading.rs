@@ -6,6 +6,7 @@ use std::{collections::BTreeSet, sync::Arc};
 pub(super) enum LoadPurpose {
     Project(ProjectAction),
     Dxf,
+    ExportedDxf(PathBuf),
     Reload { index: usize, original: PathBuf },
     MarXact,
     Datasets,
@@ -76,6 +77,9 @@ impl SleufBaseApp {
     pub(super) fn load_overlays(&mut self, paths: Vec<PathBuf>) {
         let paths = self.new_paths(paths, |path| self.overlays.iter().any(|d| d.path == *path));
         self.start_file_load(LoadPurpose::Dxf, FileKind::Dxf, paths);
+    }
+    pub(super) fn load_exported_overlay(&mut self,path:PathBuf) {
+        self.start_file_load(LoadPurpose::ExportedDxf(path.clone()),FileKind::Dxf,vec![path]);
     }
     pub(super) fn import_marxact(&mut self, paths: Vec<PathBuf>) {
         let paths = self.new_paths(paths, |path| {
@@ -218,7 +222,7 @@ impl SleufBaseApp {
         let mut errors = Vec::new();
         for outcome in outcomes {
             match (outcome.result, &purpose) {
-                (Ok(FileContent::Dxf(overlay)), LoadPurpose::Dxf) => {
+                (Ok(FileContent::Dxf(overlay)), LoadPurpose::Dxf | LoadPurpose::ExportedDxf(_)) => {
                     if !self.overlays.iter().any(|o| o.path == overlay.path) {
                         self.overlays.push(*overlay);
                         added += 1;
@@ -274,6 +278,7 @@ impl SleufBaseApp {
         }
         let summary = match purpose {
             LoadPurpose::Dxf => format!("{added} DXF-overlays geladen."),
+            LoadPurpose::ExportedDxf(path) => format!("DXF opgeslagen: {}. {added} overlay(s) geladen.",path.display()),
             LoadPurpose::Datasets => format!("{added} KickTheMap-job(s) geladen."),
             LoadPurpose::GeoTiffs => format!("{added} GeoTIFF-bestanden geladen."),
             LoadPurpose::MarXact => {
@@ -310,8 +315,11 @@ impl SleufBaseApp {
             if ui.button("Annuleren").clicked(){cancel=true;}
         });
         if cancel {
+            let exported=self.file_intent.as_ref().and_then(|intent|match &intent.purpose {
+                LoadPurpose::ExportedDxf(path)=>Some(path.display().to_string()),_=>None
+            });
             self.cancel_file_load();
-            self.message = "Laden geannuleerd; huidige gegevens behouden.".into();
+            self.message = exported.map_or_else(||"Laden geannuleerd; huidige gegevens behouden.".into(),|path|format!("Overlay laden geannuleerd. DXF blijft opgeslagen: {path}"));
         } else {
             self.poll_file_jobs(ctx);
         }
@@ -332,6 +340,29 @@ mod tests {
         });
         app.dirty = true;
         app
+    }
+    #[test]
+    fn cancelling_overlay_loading_keeps_the_already_published_drawing() {
+        let (started_tx,started_rx)=mpsc::sync_channel(1);
+        let (gate_tx,gate_rx)=mpsc::sync_channel(1);
+        let (done_tx,done_rx)=mpsc::sync_channel(1);
+        let mut app=edited();
+        app.file_loader=Some(FileLoader::with_processor(move |_,path,_|{
+            started_tx.send(()).unwrap();gate_rx.recv_timeout(Duration::from_secs(10)).unwrap();
+            let result=load_dxf(path).map(|v|FileContent::Dxf(Box::new(v)));
+            done_tx.send(()).unwrap();result
+        }).unwrap());
+        let dir=tempfile::tempdir().unwrap();let path=dir.path().join("published.dxf");
+        let dataset=sleufbase_rust::parse_job_features(r#"{"features":[{"geometry":{"type":"Point","coordinates":[1,2]}}]}"#,1,"PS1").unwrap();
+        sleufbase_rust::write_dxf(&path,&[dataset],RULES).unwrap();
+        let before=std::fs::read(&path).unwrap();
+        app.load_exported_overlay(path.clone());started_rx.recv_timeout(Duration::from_secs(10)).unwrap();
+        let ctx=egui::Context::default();
+        let _=ctx.run(egui::RawInput{events:vec![egui::Event::Key{key:egui::Key::Escape,physical_key:None,pressed:true,repeat:false,modifiers:Default::default()}],..Default::default()},|ctx|app.show_file_loading(ctx));
+        assert!(app.file_intent.is_none());assert!(app.message.contains("DXF blijft opgeslagen"));
+        assert_eq!(std::fs::read(&path).unwrap(),before);
+        gate_tx.send(()).unwrap();done_rx.recv_timeout(Duration::from_secs(10)).unwrap();
+        app.poll_file_jobs(&ctx);assert!(app.overlays.is_empty());
     }
     fn drain(app: &mut SleufBaseApp, ctx: &egui::Context) {
         let deadline = Instant::now() + Duration::from_secs(15);

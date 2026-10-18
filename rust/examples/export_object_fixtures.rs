@@ -12,6 +12,10 @@ fn main() -> Result<(), String> {
         .ok_or("Usage: export_object_fixtures output-directory")?;
     let dir = std::path::Path::new(&dir);
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    sleufbase_rust::settings_compat::save_rust_settings(
+        &dir.join("cli-settings.json"),
+        &Default::default(),
+    )?;
     let cases: Vec<Case> =
         serde_json::from_str(include_str!("../tests/fixtures/object-export/cases.json"))
             .map_err(|e| e.to_string())?;

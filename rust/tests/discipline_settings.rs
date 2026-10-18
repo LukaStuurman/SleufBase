@@ -17,7 +17,7 @@ struct Case {
 fn original_rule_normalization_and_report_counts_match_including_corrected_casefold_groups() {
     let cases: Vec<Case> =
         serde_json::from_str(include_str!("fixtures/disciplines/workbooks.json")).unwrap();
-    assert_eq!(cases.len(), 9);
+    assert_eq!(cases.len(), 10);
     for case in cases {
         let rules = rule_settings::from_legacy(case.rows.as_ref()).unwrap();
         assert_eq!(rules, case.rules, "{}", case.name);
@@ -119,5 +119,56 @@ fn cli_rejects_invalid_custom_settings_without_publishing_a_report_or_drawing() 
         assert!(!result.status.success());
         assert!(String::from_utf8_lossy(&result.stderr).contains("ACI-kleur"));
         assert!(!output.exists());
+    }
+}
+
+#[test]
+fn application_defaults_and_label_gap_follow_the_original_app_rather_than_bare_exporter() {
+    let reference: Value = serde_json::from_str(include_str!(
+        "fixtures/disciplines/application-settings.json"
+    ))
+    .unwrap();
+    let settings = MigratedSettings::default();
+    assert_eq!(
+        settings.dxf_label_gap,
+        reference["label_gap"].as_f64().unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&settings.object_rules).unwrap(),
+        reference["rules"]
+    );
+    for case in reference["gap_cases"].as_array().unwrap() {
+        let imported = settings_compat::from_legacy_json(
+            &serde_json::json!({"dxf_label_gap":case["value"]}).to_string(),
+        )
+        .unwrap();
+        assert_eq!(
+            imported.dxf_label_gap,
+            case["expected"].as_f64().unwrap(),
+            "{}",
+            case["value"]
+        );
+    }
+    let mut old = serde_json::to_value(settings).unwrap();
+    old.as_object_mut().unwrap().remove("dxf_label_gap");
+    assert_eq!(
+        serde_json::from_value::<MigratedSettings>(old)
+            .unwrap()
+            .dxf_label_gap,
+        3.5
+    );
+}
+
+#[test]
+fn invalid_native_label_gap_does_not_replace_saved_settings() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("settings.json");
+    let mut settings = MigratedSettings::default();
+    settings_compat::save_rust_settings(&path, &settings).unwrap();
+    let before = std::fs::read(&path).unwrap();
+    for invalid in [f64::NAN, f64::INFINITY, -1., 101.] {
+        settings.dxf_label_gap = invalid;
+        assert!(settings_compat::save_rust_settings(&path, &settings).is_err());
+        assert_eq!(std::fs::read(&path).unwrap(), before);
     }
 }

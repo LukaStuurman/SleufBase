@@ -45,8 +45,8 @@ Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
     .\target\release\sleufbase-rust.exe --xlsx disciplines.xlsx C:\jobs\PS1\jobFeatures.json
     .\target\release\sleufbase-rust.exe --dxf objecten.dxf C:\jobs\PS1\jobFeatures.json
 
-Nieuwe uitvoerbestandsnaam verplicht. De GUI exporteert alle lokaal geladen JSON-bestanden.
-Selectie van een job wijzigt alleen het kaartvoorbeeld en de details, niet de export.
+Nieuwe uitvoerbestandsnaam verplicht. De DXF-dialog laat geladen jobs en virtuele proefsleuven afzonderlijk selecteren.
+De jobselectie in de gewone zijbalk wijzigt alleen kaartvoorbeeld en details. Excel gebruikt alle geladen jobs.
 
 Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releasecriteria.
 
@@ -69,15 +69,24 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Een releasebenchmark met 100.000 objecten produceert exact gelijke DXF-bytes via buffering en streaming: de extra getraceerde Rust-heap daalt van circa 64 MiB naar 65 KiB. Metingen en precieze grenzen staan in [benchmarks/README.md](benchmarks/README.md). Dit meet de encoder, geen volledige GUI-/schijf- of Python-workflow.
 - De standaard objectexport is verder geport. Overige exportopties in de UI, volledige bron-/groepsfilteracceptatie, interactieve exportvoortgang/annuleren, sjabloon-/profieltekeningen en raster-/fotobundels blijven open. De genoemde fontstijl verwijst naar de fontnaam; dit voegt geen fontinstallatie toe.
 
+## Objectexport: bronnen kiezen en overlay laden
+
+- **DXF objecten** opent een doorzoekbare bronlijst met afzonderlijke selectie voor geladen jobs en virtuele proefsleuven. Nieuwe bronnen die tijdens de dialoog binnenkomen worden niet automatisch geselecteerd. Een projectwissel sluit de oude exportselectie.
+- Labelafstand en puntlijnlengte zijn voor deze export instelbaar. De opgeslagen labelafstand staat onder **Instellingen** en wordt ook door de CLI gebruikt; standaard 3,5 meter, net als de oorspronkelijke app. De losse bibliotheekencoder houdt zijn eigen oorspronkelijke standaard van 6 meter.
+- Begin- en eindpunten van virtuele proefsleuven zijn een expliciete keuze, standaard aan zoals in de oorspronkelijke Python-aanroep. De oude Python-dialogtekst meldde ten onrechte dat ze altijd werden weggelaten. Zonder eindpunten worden lege virtuele bronnen overgeslagen en gemeld.
+- Aanvullende sleufgrenzen, dwarsmarkeringen en zichtbare Kadaster-/BGT-lagen zijn apart in te schakelen. Deze optie neemt alle aanvullende lagen mee; de bronselectie bepaalt de objectjobs. Alleen aanvullende geometrie exporteren blijft mogelijk.
+- **Exporteren en laden als overlay** publiceert eerst de DXF en leest daarna het werkelijke bestand via de bestaande achtergrondlader. Annuleren van het laden verwijdert de opgeslagen DXF niet. Een mislukte export houdt de dialoog/selectie beschikbaar en vervangt geen bestaand bestand.
+- De selectie leent gewone datasets; alleen geselecteerde virtuele jobs worden opgebouwd. Schrijven zelf is nog synchroon. Online jobs rechtstreeks vanuit deze exportdialog kiezen/downloaden, exportvoortgang/annuleren tijdens schrijven en volledige sjabloon-/profielworkflows blijven open.
+
 ## Objectregels en disciplineoverzicht
 
 - Open **Instellingen → Objectregels en disciplinekleuren** om coderingen, CAD-laag, ACI-kleur en disciplinenaam te bewerken, regels te verplaatsen/verwijderen of standaardregels te herstellen. De eerste passende regel wint. Een lege lijst schakelt regeltoewijzing uit. Lege disciplinenamen gebruiken de eerste codering als label.
 - Wijzigingen blijven een concept tot **Opslaan en toepassen** slaagt. Een ongeldige regel of opslagfout vervangt de actieve regels niet. Dezelfde opgeslagen regels sturen de kaart (ook MarXact-markeringen), het overzicht en de losse Excel-/DXF-export.
-- **Import oude voorkeuren** neemt `kickthemap_object_layer_rules` over. Oudere Rust-instellingen zonder dit veld behouden de standaardregels. Instellingen zijn begrensd op 2 MiB; maximaal 256 regels en 32 KiB coderingen/label per regel. Ongeldige laag-/kleurnamen worden gemeld. De CLI meldt ongeldige instellingen als fout; de GUI toont een laadmelding en gebruikt dan tijdelijke standaardwaarden.
+- **Import oude voorkeuren** neemt `kickthemap_object_layer_rules` over. Oudere Rust-instellingen zonder dit veld krijgen de oorspronkelijke app-defaults: dertien regels inclusief warmtenet en hoogspanning, met `ONBEKEND` voor monitoring. Expliciet opgeslagen regels blijven behouden. Instellingen zijn begrensd op 2 MiB; maximaal 256 regels en 32 KiB coderingen/label per regel. Ongeldige laag-/kleurnamen worden gemeld. De CLI meldt ongeldige instellingen als fout; de GUI toont een laadmelding en gebruikt dan tijdelijke standaardwaarden.
 - De CLI gebruikt dezelfde eigen Rust-instellingen. Een afzonderlijk bestand is optioneel: `sleufbase-rust.exe --settings instellingen.json --xlsx overzicht.xlsx jobFeatures.json`. Dit bestand gebruikt het native Rust-instellingenschema; import van oude voorkeuren loopt via de importactie.
 - Excel behoudt de oorspronkelijke disciplinevolgorde, kolombreedtes, rijhoogtes, kleuren, letteropmaak, vaste koprij, filter en totaalregel. Labels die volgens Python `casefold` gelijk zijn krijgen één kolom; alle aantallen worden daarin samengevoegd. Dit herstelt een Python-fout waarbij latere schrijfwijzen uit de totalen verdwenen. Tekst zoals `=1+1` blijft letterlijk.
 - De Excel-export leent geladen jobs en berekent kolomgroepen eenmaal per export. Alleen virtuele jobs worden afzonderlijk opgebouwd. Unicode-hoofdletters en kolomgroepering volgen vaste Python 3.11/Unicode 14-tabellen.
-- Negen onafhankelijke oorspronkelijke rapporten worden via de echte Rust-CLI vergeleken op cellen, opmaak, breedtes, filter en totalen; aangepaste DXF-lagen/-kleuren krijgen tevens een onafhankelijke CAD-audit. Zie de [disciplinereferenties](tests/fixtures/disciplines/README.md). Automatische Excel tijdens template-export, alle overige instellingen en volledige project-/Excel-renderacceptatie blijven open.
+- Tien onafhankelijke oorspronkelijke rapporten worden via de echte Rust-CLI vergeleken op cellen, opmaak, breedtes, filter en totalen; aangepaste DXF-lagen/-kleuren krijgen tevens een onafhankelijke CAD-audit. Zie de [disciplinereferenties](tests/fixtures/disciplines/README.md). Automatische Excel tijdens template-export, alle overige instellingen en volledige project-/Excel-renderacceptatie blijven open.
 
 ## Projectgegevens behouden
 
