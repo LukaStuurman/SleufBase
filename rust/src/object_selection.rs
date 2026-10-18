@@ -19,6 +19,15 @@ impl Selection {
         datasets: &'a [Dataset],
         trenches: &[VirtualTrench],
     ) -> Result<Prepared<'a>, String> {
+        self.prepare_with_cancel(datasets, trenches, &crate::input::NEVER_CANCEL)
+    }
+    pub(crate) fn prepare_with_cancel<'a>(
+        &self,
+        datasets: &'a [Dataset],
+        trenches: &[VirtualTrench],
+        cancel: &std::sync::atomic::AtomicBool,
+    ) -> Result<Prepared<'a>, String> {
+        crate::input::check(cancel)?;
         if self.datasets.len() != datasets.len() || self.trenches.len() != trenches.len() {
             return Err("De bronnen zijn veranderd; vernieuw de exportselectie".into());
         }
@@ -34,7 +43,7 @@ impl Selection {
             .zip(trenches)
             .filter_map(|(&selected, trench)| selected.then_some(trench))
             .collect();
-        selected.sort_by_key(|t| {
+        selected.sort_by_cached_key(|t| {
             crate::python_values::casefold(
                 t.source_path
                     .as_ref()
@@ -46,7 +55,7 @@ impl Selection {
         let mut virtual_jobs = Vec::new();
         let mut skipped = Vec::new();
         for trench in selected {
-            let job = trench.to_dataset(0, self.include_endpoints);
+            let job = trench.to_dataset_with_cancel(0, self.include_endpoints, cancel)?;
             if job.features.is_empty() {
                 skipped.push(trench.label.clone());
             } else {

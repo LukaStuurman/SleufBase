@@ -1,6 +1,6 @@
 //! Native discipline report, independently compared with the original workbook.
 use crate::{
-    disciplines::{rule_groups, summarize_grouped, Rule},
+    disciplines::{rule_groups, summarize_grouped_cancel, Rule},
     Dataset,
 };
 use rust_xlsxwriter::{Color, Format, FormatAlign, Workbook};
@@ -11,6 +11,27 @@ pub fn write<'a>(
     datasets: impl Iterator<Item = &'a Dataset>,
     rules: &[Rule],
 ) -> Result<(), String> {
+    write_inner(path, datasets, rules, None)
+}
+pub(crate) fn write_controlled<'a>(
+    path: &Path,
+    datasets: impl Iterator<Item = &'a Dataset>,
+    rules: &[Rule],
+    control: &crate::export_control::Control,
+) -> Result<(), String> {
+    write_inner(path, datasets, rules, Some(control))
+}
+fn write_inner<'a>(
+    path: &Path,
+    datasets: impl Iterator<Item = &'a Dataset>,
+    rules: &[Rule],
+    control: Option<&crate::export_control::Control>,
+) -> Result<(), String> {
+    if let Some(c) = control {
+        c.check()?;
+        c.set_stage(crate::export_control::Stage::Planning);
+    }
+    let cancel = control.map_or(&crate::input::NEVER_CANCEL, |c| c.flag());
     let mut datasets = datasets.peekable();
     if datasets.peek().is_none() {
         return Err("Geen ingeladen jobs".into());
@@ -72,7 +93,7 @@ pub fn write<'a>(
         if row >= 1_048_575 {
             return Err("Te veel proefsleuven voor Excel".into());
         }
-        let summary = summarize_grouped(dataset, rules, &groups);
+        let summary = summarize_grouped_cancel(dataset, rules, &groups, cancel)?;
         sheet
             .write_string_with_format(row, 0, &summary.proefsleuf, &body)
             .map_err(|e| e.to_string())?;
@@ -114,7 +135,22 @@ pub fn write<'a>(
             .write_number_with_format(row, (col + 3) as u16, total as f64, &total_format)
             .map_err(|e| e.to_string())?;
     }
-    crate::storage::atomic_write(path, false, |file| {
-        workbook.save_to_writer(file).map_err(|e| e.to_string())
-    })
+    if let Some(control) = control {
+        control.check()?;
+        control.set_stage(crate::export_control::Stage::Writing);
+        crate::storage::atomic_write_checked(
+            path,
+            false,
+            |file| {
+                workbook
+                    .save_to_writer(crate::export_control::CheckedWriter { out: file, control })
+                    .map_err(|e| e.to_string())
+            },
+            || control.begin_publish(),
+        )
+    } else {
+        crate::storage::atomic_write(path, false, |file| {
+            workbook.save_to_writer(file).map_err(|e| e.to_string())
+        })
+    }
 }

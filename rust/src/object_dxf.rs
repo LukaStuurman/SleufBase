@@ -101,7 +101,15 @@ impl Extents {
         }
     }
 }
-fn add_point(used: &mut usize, bounds: &mut Option<Extents>, p: Vertex) -> Result<(), String> {
+fn add_point(
+    used: &mut usize,
+    bounds: &mut Option<Extents>,
+    p: Vertex,
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<(), String> {
+    if (*used).is_multiple_of(1024) {
+        crate::input::check(cancel)?;
+    }
     *used = used
         .checked_add(1)
         .filter(|v| *v <= MAX_POINTS)
@@ -208,7 +216,9 @@ impl<'a> Plan<'a> {
         bgt: &[BgtLayer],
         rules: &[Rule],
         options: Options,
+        cancel: &std::sync::atomic::AtomicBool,
     ) -> Result<Self, String> {
+        crate::input::check(cancel)?;
         let mut jobs = Vec::new();
         let mut layers = BTreeMap::new();
         let mut bounds = None;
@@ -223,7 +233,10 @@ impl<'a> Plan<'a> {
             // Python emits all points before all polylines, even if the source
             // JSON interleaves them. Direction depends only on point order.
             for points_only in [true, false] {
-                for feature in &dataset.features {
+                for (index, feature) in dataset.features.iter().enumerate() {
+                    if index % 256 == 0 {
+                        crate::input::check(cancel)?;
+                    }
                     if matches!(feature.geometry, Geometry::Point(_)) != points_only {
                         continue;
                     }
@@ -236,7 +249,7 @@ impl<'a> Plan<'a> {
                     }
                     .validate()?;
                     let mut add = |p: Vertex| -> Result<(), String> {
-                        add_point(&mut used, &mut bounds, p)?;
+                        add_point(&mut used, &mut bounds, p, cancel)?;
                         Extents::add(&mut own, p)
                     };
                     match &feature.geometry {
@@ -269,6 +282,7 @@ impl<'a> Plan<'a> {
             let job_bounds: Vec<_> = jobs.iter().map(|j| j.bounds).collect();
             let mut placed = Vec::with_capacity(jobs.len());
             for (i, job) in jobs.iter_mut().enumerate() {
+                crate::input::check(cancel)?;
                 text(&job.label, 2049, "DXF-joblabel")?;
                 job.center =
                     layout::label_center(i, &job.label, &job_bounds, &placed, options.label_gap)?;
@@ -277,6 +291,7 @@ impl<'a> Plan<'a> {
         }
         let mut markers = Vec::with_capacity(trenches.len());
         for trench in trenches {
+            crate::input::check(cancel)?;
             trench.validate()?;
             text(&trench.label, 2049, "DXF-proefsleuflabel")?;
             for name in [
@@ -292,17 +307,17 @@ impl<'a> Plan<'a> {
                 )?;
             }
             for p in boundary(trench) {
-                add_point(&mut used, &mut bounds, p)?;
+                add_point(&mut used, &mut bounds, p, cancel)?;
             }
             if boundary(trench).count() < 3 {
                 return Err("MarXact-grens heeft minder dan drie hoekpunten".into());
             }
-            add_point(&mut used, &mut bounds, trench.start)?;
-            add_point(&mut used, &mut bounds, trench.end)?;
-            let ready = crate::cross_section::markers(trench);
+            add_point(&mut used, &mut bounds, trench.start, cancel)?;
+            add_point(&mut used, &mut bounds, trench.end, cancel)?;
+            let ready = crate::cross_section::markers_with_cancel(trench, cancel)?;
             for marker in &ready {
-                add_point(&mut used, &mut bounds, marker.start)?;
-                add_point(&mut used, &mut bounds, marker.end)?;
+                add_point(&mut used, &mut bounds, marker.start, cancel)?;
+                add_point(&mut used, &mut bounds, marker.end, cancel)?;
             }
             markers.push(ready);
         }
@@ -311,7 +326,7 @@ impl<'a> Plan<'a> {
                 ensure(&mut layers, &linework.layer_name, 7)?;
                 for path in &linework.paths {
                     for &(x, y) in path {
-                        add_point(&mut used, &mut bounds, Vertex { x, y, z: None })?;
+                        add_point(&mut used, &mut bounds, Vertex { x, y, z: None }, cancel)?;
                     }
                 }
             }
@@ -329,6 +344,7 @@ impl<'a> Plan<'a> {
                         y: label.position.1,
                         z: None,
                     },
+                    cancel,
                 )?;
             }
         }
@@ -337,7 +353,7 @@ impl<'a> Plan<'a> {
             ensure(&mut layers, layer, color)?;
             for path in &collection.paths {
                 for &(x, y) in path {
-                    add_point(&mut used, &mut bounds, Vertex { x, y, z: None })?;
+                    add_point(&mut used, &mut bounds, Vertex { x, y, z: None }, cancel)?;
                 }
             }
         }
@@ -537,7 +553,15 @@ pub fn encode_iter<'a>(
     options: Options,
 ) -> Result<(), String> {
     let options = options.checked()?;
-    let plan = Plan::new(datasets, trenches, cad, bgt, rules, options)?;
+    let plan = Plan::new(
+        datasets,
+        trenches,
+        cad,
+        bgt,
+        rules,
+        options,
+        &crate::input::NEVER_CANCEL,
+    )?;
     encode_plan(out, &plan, trenches, cad, bgt, rules, BASE)
 }
 fn envelope_slots(base: &str) -> (&str, &str, &str) {
@@ -743,6 +767,59 @@ pub fn write_with_layers_iter<'a>(
     })
 }
 
+/// Worker path: cancellable preparation/writes and a commit gate after fsync.
+pub(crate) struct Layers<'a> {
+    pub trenches: &'a [VirtualTrench],
+    pub cad: Option<&'a CadastralLayer>,
+    pub bgt: &'a [BgtLayer],
+}
+pub(crate) fn write_controlled<'a>(
+    path: &Path,
+    datasets: impl Iterator<Item = &'a Dataset>,
+    layers: Layers<'_>,
+    rules: &[Rule],
+    options: Options,
+    control: &crate::export_control::Control,
+) -> Result<(), String> {
+    use crate::export_control::{CheckedWriter, Stage};
+    let Layers { trenches, cad, bgt } = layers;
+    control.check()?;
+    if path.exists() {
+        return Err(format!(
+            "Bestand bestaat al: {}. Kies een nieuwe naam.",
+            path.display()
+        ));
+    }
+    control.set_stage(Stage::Planning);
+    let plan = Plan::new(
+        datasets,
+        trenches,
+        cad,
+        bgt,
+        rules,
+        options.checked()?,
+        control.flag(),
+    )?;
+    control.check()?;
+    control.set_stage(Stage::Writing);
+    crate::storage::atomic_write_checked(
+        path,
+        false,
+        |file| {
+            encode_plan(
+                CheckedWriter { out: file, control },
+                &plan,
+                trenches,
+                cad,
+                bgt,
+                rules,
+                BASE,
+            )
+        },
+        || control.begin_publish(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -770,6 +847,7 @@ mod tests {
             &[],
             crate::RULES,
             Default::default(),
+            &crate::input::NEVER_CANCEL,
         )
         .unwrap();
         let lf = BASE.replace("\r\n", "\n");

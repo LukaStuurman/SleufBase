@@ -5,6 +5,12 @@ use sleufbase_rust::{
     Dataset, Geometry, Rule,
 };
 use std::{path::PathBuf, process::Command};
+#[path = "support/worker.rs"]
+mod worker;
+use sleufbase_rust::{
+    export_worker::{Exporter, Inputs, Kind, Request},
+    object_selection::Selection,
+};
 #[derive(Deserialize)]
 struct Case {
     name: String,
@@ -13,6 +19,11 @@ struct Case {
     datasets: Vec<Dataset>,
 }
 fn main() {
+    let mut background = if std::env::args().any(|a| a == "--worker") {
+        Some(Exporter::new().unwrap())
+    } else {
+        None
+    };
     let mut args = std::env::args_os().skip(1);
     let output = PathBuf::from(args.next().expect("fresh output directory"));
     let exe = PathBuf::from(args.next().expect("native CLI executable"));
@@ -26,12 +37,33 @@ fn main() {
         settings_compat::save_rust_settings(
             &settings,
             &MigratedSettings {
-                object_rules: case.rules,
+                object_rules: case.rules.clone(),
                 dxf_label_gap: case.label_gap,
                 ..Default::default()
             },
         )
         .unwrap();
+        if let Some(exporter) = background.as_mut() {
+            let mut inputs = Inputs {
+                datasets: case.datasets,
+                ..Default::default()
+            };
+            for (kind, extension) in [(Kind::Dxf, "dxf"), (Kind::Xlsx, "xlsx")] {
+                let request = Request {
+                    kind,
+                    path: output.join(format!("{}.{extension}", case.name)),
+                    selection: Selection::all(inputs.datasets.len(), 0),
+                    rules: case.rules.clone(),
+                    extra_layers: false,
+                    options: sleufbase_rust::object_dxf::Options {
+                        label_gap: case.label_gap,
+                        ..Default::default()
+                    },
+                };
+                inputs = worker::run(exporter, inputs, request).unwrap();
+            }
+            continue;
+        }
         let mut inputs = Vec::new();
         for dataset in case.datasets {
             let file = folder.join(format!("{}_jobFeatures.json", dataset.job_id));

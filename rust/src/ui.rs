@@ -31,6 +31,8 @@ use std::time::{Duration, Instant};
 
 #[path="ui_file_loading.rs"]
 mod file_loading;
+#[path="ui_exporting.rs"]
+mod exporting;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -66,6 +68,8 @@ struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
     file_loader:Option<sleufbase_rust::file_loader::FileLoader>,
+    exporter:Option<sleufbase_rust::export_worker::Exporter>,
+    export_intent:Option<exporting::ExportIntent>,
     file_intent:Option<file_loading::FileIntent>,
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
@@ -133,6 +137,8 @@ impl Default for SleufBaseApp {
         };
         Self {
             file_loader:None,
+            exporter:None,
+            export_intent:None,
             file_intent:None,
             datasets:Vec::new(),
             geotiffs:Vec::new(),
@@ -244,6 +250,7 @@ impl SleufBaseApp {
     }
 
     fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        if self.defer_action_for_export(&action){return;}
         if self.pending_project_action.is_some() {return;}
         self.cancel_file_load();
         if self.dirty {self.pending_project_action=Some(action);}
@@ -257,6 +264,7 @@ impl SleufBaseApp {
     }
 
     fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        if self.defer_action_for_export(&action){return;}
         match action {
             ProjectAction::New=>{
                 self.apply_project(NativeProject::default(),None,false,Vec::new(),ctx);
@@ -305,6 +313,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_file(&mut self, save_as: bool) -> bool {
+        if self.export_intent.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         let path = if !save_as {
             self.project_path.clone()
         } else { None };
@@ -316,6 +325,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_to_path(&mut self,path:PathBuf) -> bool {
+        if self.export_intent.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         match save_project(&path,&self.snapshot()) {
             Ok(())=>{
                 self.project_path=Some(path.clone()); self.dirty=false;
@@ -327,6 +337,7 @@ impl SleufBaseApp {
     }
 
     fn try_autosave(&mut self) {
+        if self.export_intent.is_some(){return;}
         if self.file_intent.is_some(){return;}
         if !self.backup_settings.enabled ||
             self.last_backup.elapsed() <
@@ -776,6 +787,7 @@ impl SleufBaseApp {
     }
 
     fn save_excel(&mut self) {
+        if self.export_intent.is_some(){self.message="Er loopt al een export".into();return;}
         if self.datasets.is_empty() && self.virtual_trenches.is_empty() {
             self.message="Laad eerst jobFeatures.json of maak een virtuele proefsleuf".into();
             return;
@@ -784,41 +796,13 @@ impl SleufBaseApp {
             .add_filter("Excel",&["xlsx"])
             .set_file_name("SleufBase-Disciplines-Rust.xlsx").save_file()
         {
-            let virtual_jobs:Vec<_>=self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)).collect();
-            self.message=match sleufbase_rust::discipline_xlsx::write(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.migrated_settings.object_rules) {
-                Ok(())=>format!("Excel opgeslagen: {}",path.display()),
-                Err(err)=>format!("Excel-export mislukt: {err}"),
-            };
+            self.start_excel_export(path);
         }
     }
 
     fn save_dxf(&mut self) {
+        if self.export_intent.is_some(){self.message="Er loopt al een export".into();return;}
         self.export_dialog=Some(crate::export_dialog::Dialog::new(self.datasets.len(),self.virtual_trenches.len(),self.migrated_settings.dxf_label_gap,self.project_generation));
-    }
-    fn finish_dxf_export(&mut self,path:PathBuf,action:crate::export_dialog::Action) {
-        let Some(dialog)=self.export_dialog.as_ref() else {return;};
-        let result=(|| {
-            let prepared=dialog.selection.prepare(&self.datasets,&self.virtual_trenches)?;
-            if prepared.is_empty() && !dialog.extra_layers {
-                return Err("Geen bruikbare objecten geselecteerd. Kies een job of neem virtuele eindpunten mee.".into());
-            }
-            let trenches=if dialog.extra_layers{self.virtual_trenches.as_slice()}else{&[]};
-            let cadastral=if dialog.extra_layers{self.cadastral.as_ref()}else{None};
-            let bgt=if dialog.extra_layers{self.bgt_layers.as_slice()}else{&[]};
-            sleufbase_rust::object_dxf::write_with_layers_iter(&path,prepared.datasets(),trenches,cadastral,bgt,&self.migrated_settings.object_rules,dialog.options())?;
-            Ok(prepared.skipped)
-        })();
-        match result {
-            Ok(skipped)=>{
-                self.export_dialog=None;
-                if action.overlay {self.load_exported_overlay(path.clone());}
-                self.message=format!("DXF opgeslagen: {}{}",path.display(),if skipped.is_empty(){String::new()}else{format!(". Zonder objecten overgeslagen: {}",skipped.join(", "))});
-            },
-            Err(error)=>{
-                self.message=format!("DXF-export mislukt: {error}");
-                if let Some(dialog)=self.export_dialog.as_mut(){dialog.error=error;}
-            }
-        }
     }
 
 }
@@ -1071,7 +1055,17 @@ fn canvas(
 }
 
 impl eframe::App for SleufBaseApp {
-    fn update(&mut self,ctx:&egui::Context,_frame:&mut eframe::Frame) {
+    fn update(&mut self,ctx:&egui::Context,_frame:&mut eframe::Frame) {self.render(ctx);}
+}
+impl SleufBaseApp {
+    fn render(&mut self,ctx:&egui::Context) {
+        if self.export_intent.is_some(){
+            if ctx.input(|i|i.viewport().close_requested()){
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.request_project_action(ProjectAction::Close,ctx);
+            }
+            self.show_export_progress(ctx);return;
+        }
         if ctx.input(|i|i.viewport().close_requested()) && !self.close_confirmed {
             self.cancel_file_load();
             if self.dirty {
@@ -1165,6 +1159,7 @@ impl eframe::App for SleufBaseApp {
         });
 
         if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
+        if self.export_intent.is_some(){self.show_export_progress(ctx);return;}
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
             egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
@@ -1680,6 +1675,11 @@ mod project_lifecycle_tests {
         let _=aci_color(i32::MIN);
     }
 
+    fn finish_exporting(app:&mut SleufBaseApp,ctx:&egui::Context) {
+        let deadline=Instant::now()+Duration::from_secs(15);
+        while app.export_intent.is_some(){app.poll_export_jobs(ctx);assert!(Instant::now()<deadline);std::thread::sleep(Duration::from_millis(2));}
+    }
+
     #[test]
     fn selected_export_preserves_inputs_and_loads_the_actual_published_drawing_as_an_overlay() {
         let mut app=SleufBaseApp::default();
@@ -1689,6 +1689,7 @@ mod project_lifecycle_tests {
         app.save_dxf();app.export_dialog.as_mut().unwrap().selection.datasets[0]=false;
         let dir=tempfile::tempdir().unwrap();let output=dir.path().join("selected.dxf");
         app.finish_dxf_export(output.clone(),crate::export_dialog::Action{overlay:true});
+        finish_exporting(&mut app,&egui::Context::default());
         assert!(app.export_dialog.is_none());assert!(output.exists());
         finish_loading(&mut app,&egui::Context::default());
         assert_eq!(app.overlays.len(),1);assert_eq!(app.overlays[0].path,output);
@@ -1697,6 +1698,7 @@ mod project_lifecycle_tests {
         assert_eq!(serde_json::to_value(&app.datasets).unwrap(),before);
         let bytes=std::fs::read(&output).unwrap();
         app.save_dxf();app.finish_dxf_export(output.clone(),crate::export_dialog::Action{overlay:false});
+        finish_exporting(&mut app,&egui::Context::default());
         assert!(app.export_dialog.as_ref().unwrap().error.contains("bestaat al"));
         assert_eq!(std::fs::read(output).unwrap(),bytes);
     }

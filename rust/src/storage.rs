@@ -10,6 +10,15 @@ pub fn atomic_write(
     overwrite: bool,
     write: impl FnOnce(&mut File) -> Result<(), String>,
 ) -> Result<(), String> {
+    atomic_write_checked(path, overwrite, write, || Ok(()))
+}
+/// The final gate runs after flushing/syncing and before the atomic rename.
+pub(crate) fn atomic_write_checked(
+    path: &Path,
+    overwrite: bool,
+    write: impl FnOnce(&mut File) -> Result<(), String>,
+    before_publish: impl FnOnce() -> Result<(), String>,
+) -> Result<(), String> {
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -18,6 +27,7 @@ pub fn atomic_write(
     let mut temp = NamedTempFile::new_in(parent).map_err(|e| e.to_string())?;
     write(temp.as_file_mut())?;
     temp.as_file_mut().sync_all().map_err(|e| e.to_string())?;
+    before_publish()?;
     if overwrite {
         temp.persist(path)
     } else {
@@ -35,6 +45,27 @@ mod tests {
         sync::{Arc, Barrier},
         thread,
     };
+    #[test]
+    fn cancellation_at_the_final_gate_removes_staging_and_never_publishes() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("cancelled.dxf");
+        let control = crate::export_control::Control::default();
+        let result = atomic_write_checked(
+            &path,
+            false,
+            |file| {
+                file.write_all(b"complete staged drawing")
+                    .map_err(|e| e.to_string())
+            },
+            || {
+                assert!(control.cancel());
+                control.begin_publish()
+            },
+        );
+        assert!(result.unwrap_err().contains("geannuleerd"));
+        assert!(!path.exists());
+        assert_eq!(fs::read_dir(dir.path()).unwrap().count(), 0);
+    }
 
     #[test]
     fn failure_preserves_old_output_and_removes_temporary_file() {

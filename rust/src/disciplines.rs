@@ -190,17 +190,29 @@ pub(crate) fn rule_groups(rules: &[Rule]) -> Vec<usize> {
         .collect()
 }
 pub(crate) fn summarize_grouped(dataset: &Dataset, rules: &[Rule], groups: &[usize]) -> Summary {
+    summarize_grouped_cancel(dataset, rules, groups, &crate::input::NEVER_CANCEL)
+        .expect("uncancelled summary")
+}
+pub(crate) fn summarize_grouped_cancel(
+    dataset: &Dataset,
+    rules: &[Rule],
+    groups: &[usize],
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<Summary, String> {
     let mut counts = vec![0u32; rules.len()];
-    for feature in &dataset.features {
+    for (index, feature) in dataset.features.iter().enumerate() {
+        if index % 1024 == 0 {
+            crate::input::check(cancel)?;
+        }
         if let Some(index) = matching_index(&feature.source_name, rules) {
             let column = groups[index];
             counts[column] = counts[column].saturating_add(1);
         }
     }
-    Summary {
+    Ok(Summary {
         proefsleuf: crate::python_values::trim(&dataset.title).into(),
         counts,
-    }
+    })
 }
 
 #[cfg(test)]

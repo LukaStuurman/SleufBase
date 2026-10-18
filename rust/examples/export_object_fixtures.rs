@@ -1,5 +1,11 @@
 //! Produce documents for an independent ezdxf audit; no Python at runtime.
 use sleufbase_rust::{object_dxf, Dataset, RULES};
+#[path = "support/worker.rs"]
+mod worker;
+use sleufbase_rust::{
+    export_worker::{Exporter, Inputs, Kind, Request},
+    object_selection::Selection,
+};
 #[derive(serde::Deserialize)]
 struct Case {
     name: String,
@@ -7,6 +13,11 @@ struct Case {
     options: object_dxf::Options,
 }
 fn main() -> Result<(), String> {
+    let mut background = if std::env::args().any(|a| a == "--worker") {
+        Some(Exporter::new()?)
+    } else {
+        None
+    };
     let dir = std::env::args_os()
         .nth(1)
         .ok_or("Usage: export_object_fixtures output-directory")?;
@@ -20,6 +31,25 @@ fn main() -> Result<(), String> {
         serde_json::from_str(include_str!("../tests/fixtures/object-export/cases.json"))
             .map_err(|e| e.to_string())?;
     for case in cases {
+        if let Some(exporter) = background.as_mut() {
+            let selection = Selection::all(case.datasets.len(), 0);
+            worker::run(
+                exporter,
+                Inputs {
+                    datasets: case.datasets,
+                    ..Default::default()
+                },
+                Request {
+                    kind: Kind::Dxf,
+                    path: dir.join(format!("{}.dxf", case.name)),
+                    selection,
+                    rules: RULES.to_vec(),
+                    extra_layers: false,
+                    options: case.options,
+                },
+            )?;
+            continue;
+        }
         object_dxf::write(
             &dir.join(format!("{}.dxf", case.name)),
             &case.datasets,
@@ -75,13 +105,37 @@ fn main() -> Result<(), String> {
         bounds,
         paths: vec![vec![(168000., 401000.), (168002., 401002.)]],
     };
-    sleufbase_rust::write_dxf_with_layers(
-        &dir.join("extras.dxf"),
-        &[],
-        &[trench],
-        Some(&cad),
-        &[bgt],
-        RULES,
-    )?;
+    if let Some(exporter) = background.as_mut() {
+        worker::run(
+            exporter,
+            Inputs {
+                trenches: vec![trench],
+                cadastral: Some(cad),
+                bgt: vec![bgt],
+                ..Default::default()
+            },
+            Request {
+                kind: Kind::Dxf,
+                path: dir.join("extras.dxf"),
+                selection: Selection {
+                    datasets: vec![],
+                    trenches: vec![false],
+                    include_endpoints: true,
+                },
+                rules: RULES.to_vec(),
+                extra_layers: true,
+                options: Default::default(),
+            },
+        )?;
+    } else {
+        sleufbase_rust::write_dxf_with_layers(
+            &dir.join("extras.dxf"),
+            &[],
+            &[trench],
+            Some(&cad),
+            &[bgt],
+            RULES,
+        )?;
+    }
     Ok(())
 }

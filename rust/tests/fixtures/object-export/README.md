@@ -40,3 +40,10 @@ does not prove profile/template, raster bundle or arbitrary CAD-entity parity.
 Primary format definitions: [DXF group value types / UTF-8](https://help.autodesk.com/cloudhelp/2026/ENU/AutoCAD-DXF/files/GUID-2553CF98-44F6-4828-82DD-FE3BC7448113.htm),
 [255-byte extended-data strings](https://help.autodesk.com/cloudhelp/2025/ENU/AutoCAD-DXF/files/GUID-A2A628B0-3699-4740-A215-C560E7242F63.htm),
 and [3D POLYLINE flags](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-ABF6B778-BE20-4B49-9B58-A94E64CEFFF3.htm).
+
+The fixture example accepts `--worker` after its output directory to run every
+reference and the auxiliary layers through the same cancellable background
+exporter as the GUI. The verifier is unchanged: the worker must produce the same
+geometry/metadata and repair-free full documents. CI runs this separately from
+the direct encoder and actual CLI checks. Worker lifecycle/publication tests also
+cover cancellation, partial writes, unchanged input allocations and failure reuse.

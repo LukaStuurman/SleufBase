@@ -144,8 +144,13 @@ impl VirtualTrench {
     }
 
     pub fn to_dataset(&self,job_id:u64,include_endpoints:bool)->Dataset {
+        self.to_dataset_with_cancel(job_id,include_endpoints,&crate::input::NEVER_CANCEL).expect("uncancelled virtual job")
+    }
+    pub(crate) fn to_dataset_with_cancel(&self,job_id:u64,include_endpoints:bool,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String> {
+        crate::input::check(cancel)?;
         let mut features=Vec::with_capacity(self.objects.len()+if include_endpoints{2}else{0});
-        for object in &self.objects {
+        for (index,object) in self.objects.iter().enumerate() {
+            if index%1024==0 {crate::input::check(cancel)?;}
             features.push(Feature {
                 object_name:object.object_name.clone(),
                 source_name:object.source_name.clone(),
@@ -164,11 +169,12 @@ impl VirtualTrench {
             features.insert(0,endpoint("Beginpunt",self.start));
             features.push(endpoint("Eindpunt",self.end));
         }
-        Dataset {
+        crate::input::check(cancel)?;
+        Ok(Dataset {
             job_id:if job_id==0 {self.job_id} else {job_id},title:self.label.clone(),
             source_path:self.source_path.clone().unwrap_or_default(),
             features
-        }
+        })
     }
 }
 

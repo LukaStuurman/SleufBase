@@ -42,6 +42,8 @@ pub mod settings_compat;
 pub mod export;
 pub mod object_dxf;
 pub mod object_selection;
+pub mod export_control;
+pub mod export_worker;
 mod object_layout;
 pub mod model;
 pub mod parse;

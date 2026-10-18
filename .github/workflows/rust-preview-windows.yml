@@ -65,6 +65,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_discipline_exports.py "$env:DISCIPLINE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit background worker exports
+        shell: pwsh
+        env:
+          WORKER_AUDIT_DIR: ${{ runner.temp }}/SleufBase-worker-audit
+          PYTHONUTF8: '1'
+        run: |
+          cargo run --manifest-path rust/Cargo.toml --example export_object_fixtures -- "$env:WORKER_AUDIT_DIR/objects" --worker
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/sleufbase-rust.exe --settings "$env:WORKER_AUDIT_DIR/objects/cli-settings.json" --dxf "$env:WORKER_AUDIT_DIR/objects/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_object_exports.py "$env:WORKER_AUDIT_DIR/objects"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_discipline_fixtures -- "$env:WORKER_AUDIT_DIR/reports" "$PWD/rust/target/release/sleufbase-rust.exe" --worker
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_discipline_exports.py "$env:WORKER_AUDIT_DIR/reports"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Benchmark core allocations and time
         shell: pwsh
         run: |

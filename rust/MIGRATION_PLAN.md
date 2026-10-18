@@ -177,7 +177,24 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   181 Rust-tests, Clippy, releasebuild en beide onafhankelijke exportaudits
   geslaagd. Schrijven is nog synchroon; online bronkeuze/downloads vanuit de exportdialog,
   volledige templates/profielen en echte GUI-/praktijkacceptatie blijven open.
-- Volgende stappen: exportvoortgang/annuleren, volledige templates/profielen en
+- GUI-DXF/Excel schrijven op één herbruikbare exportworker. Datasets, virtuele
+  proefsleuven en aanvullende kaartlagen worden zonder volledige bronkopie
+  tijdelijk overgedragen en bij succes, fout of annulering teruggegeven.
+  Virtuele voorbereiding, geometriestappen, rapporttellingen en schrijfbatches
+  controleren annulering. Voortgangsscherm/Escape blijven beschikbaar; bewerken
+  en netwerktoepassing wachten. Een atomaire eindcontrole ná flush/fsync voorkomt
+  publicatie als annuleren wint; eenmaal begonnen publicatie wordt afgerond.
+  Projectopslag/back-ups worden niet op tijdelijk lege gegevens uitgevoerd;
+  nieuw/sluiten wachten op teruggave vóór de bestaande onopgeslagen-werkkeuze.
+  Procesfouten/panics, tweede-taakweigering, gedeeltelijke uitvoer, no-clobber,
+  teruggave van dezelfde allocatie en echte egui-interactie met een geblokkeerde
+  worker getest. 187 Rust-tests groen. De worker-exportpaden zijn onafhankelijk
+  vergeleken met alle veertien DXF- en tien rapportreferenties, inclusief lagen,
+  labels/metadata, Excel-opmaak/totalen en aanvullende geometrie; CAD-audit zonder
+  reparaties. CI controleert workeruitvoer apart van directe encoder en CLI.
+  Annulering blijft coöperatief; één systeem-/sorteer-/geometrie-/XML-/compressiefase
+  kan nog aflopen. Geen totale geheugen-/crashgarantie of volledige praktijkacceptatie.
+- Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
