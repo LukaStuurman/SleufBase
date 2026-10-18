@@ -95,6 +95,11 @@ impl DxfFeature {
             ("Laag".into(),self.layer.clone()),("Punten".into(),self.points.len().to_string()),
         ]);
         if let Some(cad)=self.cad.as_deref() {
+            if let Some(mesh)=&cad.mesh {
+                result.insert("Meshvertices".into(),mesh.vertices.len().to_string());
+                result.insert("Meshvlakken".into(),mesh.faces.len().to_string());
+                result.insert("Meshweergave".into(),"Zichtbare randen / controlekooi; geen vlakvulling".into());
+            }
             if let Some(value)=&cad.line_type {result.insert("Lijntype".into(),value.clone());}
             if let Some(value)=cad.line_weight {result.insert("Lijndikte".into(),value.to_string());}
             for (name,value) in &cad.attributes {result.insert(format!("Attribuut {name}"),value.clone());}

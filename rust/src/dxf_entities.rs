@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 const MAX_POINTS: usize = 10_000_000;
 const MAX_ENTITIES: usize = 2_000_000;
 const TOLERANCE: f64 = 0.25;
-fn point(groups: &[Group], code: i32) -> Result<V3, String> {
+pub(crate) fn point(groups: &[Group], code: i32) -> Result<V3, String> {
     Ok([
         number(groups, code).ok_or("CAD-punt mist X")?,
         number(groups, code + 10).ok_or("CAD-punt mist Y")?,
@@ -24,7 +24,7 @@ fn normal(groups: &[Group]) -> Result<Affine, String> {
         number(groups, 230).unwrap_or(1.),
     ])
 }
-fn integer(groups: &[Group], code: i32, default: u32) -> Result<u32, String> {
+pub(crate) fn integer(groups: &[Group], code: i32, default: u32) -> Result<u32, String> {
     field(groups, code)
         .map(|v| v.trim().parse().map_err(|_| "Ongeldig CAD-aantal".into()))
         .unwrap_or(Ok(default))
@@ -310,6 +310,7 @@ fn ellipse(groups: &[Group], feature: &mut DxfFeature) -> Result<(), String> {
 }
 
 struct Polyline {
+    mesh: Option<crate::dxf_mesh::PolyMesh>,
     feature: DxfFeature,
     points: Vec<(V3, f64)>,
     ocs: Affine,
@@ -335,7 +336,15 @@ impl Entities {
         }
         self.points = self
             .points
-            .checked_add(feature.points.len())
+            .checked_add(
+                feature.points.len().saturating_add(
+                    feature
+                        .cad
+                        .as_deref()
+                        .and_then(|p| p.mesh.as_ref())
+                        .map_or(0, |m| m.vertices.len()),
+                ),
+            )
             .ok_or("Te veel CAD-punten")?;
         self.count += 1;
         if self.points > MAX_POINTS || self.count > MAX_ENTITIES {
@@ -357,6 +366,11 @@ impl Entities {
                 let mut feature = common(groups, kind)?;
                 feature.closed = Some(f & 1 != 0);
                 self.polyline = Some(Polyline {
+                    mesh: if f & (16 | 64) != 0 {
+                        Some(crate::dxf_mesh::PolyMesh::new(groups, f)?)
+                    } else {
+                        None
+                    },
                     feature,
                     points: Vec::new(),
                     ocs: if f & (8 | 16 | 64) != 0 {
@@ -371,10 +385,8 @@ impl Entities {
             }
             "VERTEX" => {
                 let parent = self.polyline.as_mut().ok_or("DXF VERTEX zonder POLYLINE")?;
-                // Polyface face records may contain only vertex indices. These
-                // unsupported parents are reported at SEQEND, not decoded as lines.
-                if parent.flags & (16 | 64) != 0 {
-                    return Ok(());
+                if let Some(mesh) = &mut parent.mesh {
+                    return mesh.vertex(groups);
                 }
                 if parent.points.len() >= MAX_POINTS {
                     return Err("Te veel CAD-polylinepunten".into());
@@ -396,12 +408,18 @@ impl Entities {
             "SEQEND" => {
                 self.insert = None;
                 if let Some(mut parent) = self.polyline.take() {
-                    if parent.flags & (16 | 64) != 0 {
-                        *self
-                            .unsupported
-                            .entry("POLYLINE mesh/polyface".into())
-                            .or_default() += 1;
-                        return Ok(());
+                    if let Some(mesh) = parent.mesh.take() {
+                        if mesh.smoothed() {
+                            *self.unsupported.entry("Polygonmesh: controlekooi; glad oppervlak nog niet weergegeven".into()).or_default()+=1;
+                        }
+                        if mesh.style_overrides {
+                            *self
+                                .unsupported
+                                .entry("Mesh: vertex-/vlakeigenschappen nog niet toegepast".into())
+                                .or_default() += 1;
+                        }
+                        mesh.finish(&mut parent.feature, MAX_POINTS.saturating_sub(self.points))?;
+                        return self.append(parent.feature);
                     }
                     let transform = if parent.flags & 8 != 0 {
                         Affine::IDENTITY
@@ -451,6 +469,10 @@ impl Entities {
                 | "INSERT"
                 | "MULTILEADER"
                 | "MLEADER"
+                | "3DFACE"
+                | "SOLID"
+                | "TRACE"
+                | "MESH"
         ) {
             *self.unsupported.entry(kind.to_owned()).or_default() += 1;
             return Ok(());
@@ -468,6 +490,32 @@ impl Entities {
             "CIRCLE" | "ARC" => arc(groups, kind, &mut feature)?,
             "ELLIPSE" => ellipse(groups, &mut feature)?,
             "SPLINE" => spline(groups, &mut feature, MAX_POINTS.saturating_sub(self.points))?,
+            "3DFACE" | "SOLID" | "TRACE" => {
+                crate::dxf_mesh::quad(
+                    groups,
+                    kind,
+                    &mut feature,
+                    MAX_POINTS.saturating_sub(self.points),
+                )?;
+                if kind != "3DFACE" && number(groups, 39).is_some_and(|v| v != 0.) {
+                    *self
+                        .unsupported
+                        .entry("SOLID/TRACE: dikte-extrusie nog niet weergegeven".into())
+                        .or_default() += 1;
+                }
+            }
+            "MESH" => {
+                if crate::dxf_mesh::mesh(
+                    groups,
+                    &mut feature,
+                    MAX_POINTS.saturating_sub(self.points),
+                )? {
+                    *self
+                        .unsupported
+                        .entry("MESH: controlekooi; subdivisie nog niet weergegeven".into())
+                        .or_default() += 1;
+                }
+            }
             "INSERT" => {
                 feature.block_name = field(groups, 2).ok_or("INSERT mist bloknaam")?.to_owned();
                 let placement = Placement {
@@ -503,7 +551,10 @@ impl Entities {
             }
             _ => unreachable!(),
         }
-        if feature.points.len() >= 2 || (kind == "POINT" && feature.points.len() == 1) {
+        if feature.points.len() >= 2
+            || (kind == "POINT" && feature.points.len() == 1)
+            || feature.cad.as_deref().is_some_and(|p| p.mesh.is_some())
+        {
             self.append(feature)?;
             if kind == "INSERT" && field(groups, 66).is_some_and(|v| v.trim() == "1") {
                 self.insert = Some(self.features.len() - 1);

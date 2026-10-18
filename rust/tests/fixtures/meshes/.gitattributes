@@ -1,0 +1,2 @@
+# Preserve and accept the real ezdxf ASCII source's CRLF bytes.
+*-ascii.dxf whitespace=cr-at-eol

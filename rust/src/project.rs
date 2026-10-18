@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub const FORMAT_VERSION: u32 = 3;
@@ -115,11 +116,13 @@ impl NativeProject {
                 crate::cad_geometry::finite(block.base)?;
                 for feature in &block.features {
                     vertices(&feature.points)?;
+                    if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
                     if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
                 }
             }
             for feature in &overlay.features {
                 vertices(&feature.points)?;
+                if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
                 if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
             }
         }
@@ -198,6 +201,11 @@ pub fn read_project_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool
     // V3 stores source block/curve definitions separately from derived WCS
     // caches. V1/V2 remain readable; opening never rewrites their source bytes.
     if matches!(project.version,1|2) {project.version=FORMAT_VERSION;}
+    let mut used=0;
+    for overlay in &mut project.overlays {
+        crate::cad_mesh::restore_features(&mut overlay.features,&mut used,cancel)?;
+        for block in overlay.blocks.values_mut(){crate::cad_mesh::restore_features(&mut Arc::make_mut(block).features,&mut used,cancel)?;}
+    }
     project.validate()?;
     for overlay in &mut project.overlays {crate::input::check(cancel)?;overlay.rebuild_block_cache()?;}
     crate::input::check(cancel)?;

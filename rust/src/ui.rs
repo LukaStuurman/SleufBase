@@ -1723,6 +1723,22 @@ mod project_lifecycle_tests {
     }
 
     #[test]
+    fn canvas_draws_only_the_two_visible_edges_of_a_partly_hidden_quad(){
+        let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/meshes/meshes-binary.dxf");
+        let mut overlay=load_dxf(&path).unwrap();
+        overlay.features.retain(|f|f.cad.as_ref().is_some_and(|p|p.xdata.get("SOURCE_ID").is_some_and(|t|t[0].value=="quad-5")));
+        overlay.blocks.clear();
+        overlay.features[0].cad.as_mut().unwrap().true_color=Some(0x12ab34);
+        overlay.rebuild_block_cache().unwrap();
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan);});
+        });
+        let edges=output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count();
+        assert_eq!(edges,2,"hidden edges and gaps must not be painted");
+    }
+
+    #[test]
     fn raster_pixels_load_asynchronously_and_stay_out_of_new_projects() {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");

@@ -142,7 +142,7 @@ pub fn parse_overlay_with_cancel(overlay:&DxfOverlay,mappings:&std::collections:
     let mut skipped=0usize;
     for f in &overlay.features {
         crate::input::check(cancel)?;
-        if f.entity_type!="POLYLINE"{continue;}
+        if f.entity_type!="POLYLINE" || f.cad.as_deref().is_some_and(|p|p.mesh.is_some()){continue;}
         let endpoints_match=f.points.len()>1 && f.points.first().zip(f.points.last())
             .is_some_and(|(a,b)|a.x==b.x&&a.y==b.y);
         if !f.closed.unwrap_or(endpoints_match){skipped+=1;continue;}

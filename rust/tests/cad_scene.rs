@@ -236,13 +236,9 @@ fn ten_thousand_instances_share_large_source_metadata_and_immutable_snapshot_cac
 }
 
 #[test]
-fn unsupported_polyface_indices_do_not_reject_supported_following_entities() {
+fn polyface_face_indices_without_coordinates_are_rejected_instead_of_inventing_vertices() {
     let text = "0\nSECTION\n2\nENTITIES\n0\nPOLYLINE\n70\n64\n0\nVERTEX\n70\n128\n71\n1\n72\n2\n73\n3\n0\nSEQEND\n0\nLINE\n10\n1\n20\n2\n11\n3\n21\n4\n0\nENDSEC\n0\nEOF\n";
-    let overlay = parse_dxf(text, Path::new("polyface.dxf")).unwrap();
-    assert_eq!(overlay.features.len(), 1);
-    assert_eq!(overlay.features[0].entity_type, "LINE");
-    assert!(overlay
-        .warnings
-        .iter()
-        .any(|w| w.starts_with("POLYLINE mesh/polyface:")));
+    assert!(parse_dxf(text, Path::new("polyface.dxf"))
+        .unwrap_err()
+        .contains("vlakindices"));
 }

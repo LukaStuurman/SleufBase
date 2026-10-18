@@ -63,6 +63,8 @@ pub struct Properties {
     pub curve: Option<Box<crate::cad_geometry::CurvePath>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spline: Option<Box<crate::spline::Spline>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mesh: Option<std::sync::Arc<crate::cad_mesh::Mesh>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub path_breaks: Vec<usize>,
     #[serde(default)]
@@ -89,8 +91,15 @@ impl Properties {
         if let Some(spline) = &self.spline {
             spline.validate()?;
         }
-        if self.spline.is_some() && self.curve.is_some() {
-            return Err("CAD-object bevat meerdere curvebeschrijvingen".into());
+        if let Some(mesh) = &self.mesh {
+            mesh.validate()?;
+        }
+        if usize::from(self.spline.is_some())
+            + usize::from(self.curve.is_some())
+            + usize::from(self.mesh.is_some())
+            > 1
+        {
+            return Err("CAD-object bevat meerdere geometriebeschrijvingen".into());
         }
         if self.path_breaks.len() > 1_000_000
             || self.path_breaks.first() == Some(&0)
@@ -128,6 +137,7 @@ impl Properties {
         self.placement.is_none()
             && self.curve.is_none()
             && self.spline.is_none()
+            && self.mesh.is_none()
             && self.path_breaks.is_empty()
             && self.true_color.is_none()
             && self.line_type.is_none()

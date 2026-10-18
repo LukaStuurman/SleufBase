@@ -110,7 +110,17 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   groen. Annuleren is coöperatief: één systeemaanroep, JSON-/geometrie-/cachefase
   kan nog aflopen; opslaan/export/back-ups blijven synchroon. Geen totale
   geheugen-/rendergarantie of volledige workflowacceptatie.
-- Volgende stappen: tekst/ATTRIB-weergave, meshes, HATCH, dynamische
+- CAD-vlakken en geïndexeerde polyface-/polygon-/MESH-controlekooien geport,
+  inclusief verborgen randen, SOLID/TRACE-OCS en puntvolgorde, sluitrichtingen,
+  n-gons, expliciete randen/vouwgewichten en geneste bloktransformaties.
+  Gedeelde brondata en eenmaal gededupliceerde losse randpaden; native herstel
+  herbouwt verouderde randen en bewaart vertex-/vlakmetadata en parameters.
+  56 ezdxf-gevallen/278 zichtbare randen in ASCII/binary; alle 3DFACE-maskers,
+  native opslagfouten, budgetten, een 100 × 100 raster en echte egui-randen getest.
+  Fixtures regenereren byte voor byte. 158 Rust-tests groen. Vlakvulling,
+  subdivisie, gladde oppervlakken, dikte-extrusie, afzonderlijke vertex-/vlakstijlen
+  en MESH-subobjectoverrides blijven open; meshdata levert geen MarXact-metingen.
+- Volgende stappen: tekst/ATTRIB-weergave, volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   fijnmaziger afbreken van zware parserfasen en echte acceptatie nog open.
 

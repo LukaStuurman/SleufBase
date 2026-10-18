@@ -255,8 +255,18 @@ impl DxfOverlay {
             .features
             .iter()
             .chain(self.blocks.values().flat_map(|b| b.features.iter()))
-            .map(|f| f.points.len())
-            .sum();
+            .map(|f| {
+                f.points.len().saturating_add(
+                    f.cad
+                        .as_deref()
+                        .and_then(|p| p.mesh.as_ref())
+                        .map_or(0, |m| m.vertices.len()),
+                )
+            })
+            .try_fold(0usize, |count, extra| {
+                count.checked_add(extra).filter(|n| *n <= MAX_POINTS)
+            })
+            .ok_or("CAD-bronpunten overschrijden het weergavebudget")?;
         let mut builder = Builder {
             overlay: self,
             scene: Scene::default(),
