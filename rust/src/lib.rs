@@ -21,6 +21,7 @@ pub mod template_slots;
 pub mod template_transaction;
 pub mod template_images;
 pub mod template_metadata;
+pub mod template_geometry;
 pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;

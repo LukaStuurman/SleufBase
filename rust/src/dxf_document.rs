@@ -2,7 +2,7 @@
 //! Unknown records, sections, layouts, dictionaries and proxy data remain bytes.
 //! This is deliberately separate from the lossy overlay/scene importer.
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     io::Write,
     ops::Range,
     path::Path,
@@ -63,6 +63,7 @@ pub struct Document {
     newline: &'static str,
     output_len: usize,
     pub(crate) image_batch_added: bool,
+    pub(crate) added_layers: HashSet<String>,
 }
 #[derive(Clone, Copy)]
 pub struct RecordView<'a> {
@@ -70,6 +71,28 @@ pub struct RecordView<'a> {
     index: usize,
 }
 impl<'a> RecordView<'a> {
+    /// Current single-line text, including staged text/tag replacements. Other
+    /// tag iteration intentionally continues to describe the original source.
+    pub(crate) fn current_text(self) -> Result<&'a str, String> {
+        if !matches!(self.kind(), "TEXT" | "ATTRIB" | "ATTDEF") {
+            return Err("DXF-record is geen enkelregelige tekst".into());
+        }
+        let r = &self.document.records[self.index];
+        let tag = spans(&self.document.source[r.range.clone()], r.range.start)
+            .take_while(|s| s.code != 101 && s.code < 1000)
+            .find(|s| s.code == 1)
+            .ok_or("DXF-tekstinhoud ontbreekt")?;
+        if let Some(edit) = self.document.edits.get(&tag.value.start) {
+            return Ok(&edit.replacement);
+        }
+        if let Some(edit) = self.document.edits.get(&tag.whole.start) {
+            let text = spans(&edit.replacement, 0)
+                .find(|s| s.code == 1)
+                .ok_or("Bewerkte DXF-tekstinhoud ontbreekt")?;
+            return Ok(&edit.replacement[text.value]);
+        }
+        Ok(&self.document.source[tag.value])
+    }
     pub(crate) fn index(self) -> usize {
         self.index
     }
@@ -105,6 +128,18 @@ fn handle(value: &str) -> Result<u64, String> {
     u64::from_str_radix(value, 16).map_err(|_| "Ongeldige DXF-handle".into())
 }
 impl Document {
+    pub(crate) fn has_layer(&self, name: &str) -> bool {
+        let key = crate::python_values::casefold(name);
+        self.added_layers.contains(&key)
+            || self.records().any(|r| {
+                r.kind() == "LAYER"
+                    && r.first(2)
+                        .is_some_and(|v| crate::python_values::casefold(v) == key)
+            })
+    }
+    pub(crate) fn layer_count(&self) -> usize {
+        self.records().filter(|r| r.kind() == "LAYER").count() + self.added_layers.len()
+    }
     pub(crate) fn record_start(&self, index: usize) -> usize {
         self.records[index].range.start
     }
@@ -393,6 +428,7 @@ impl Document {
             newline,
             output_len,
             image_batch_added: false,
+            added_layers: HashSet::new(),
         })
     }
     pub fn records(&self) -> impl Iterator<Item = RecordView<'_>> {

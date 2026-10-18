@@ -84,6 +84,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native template drawing primitives
+        shell: pwsh
+        env:
+          TEMPLATE_GEOMETRY_DIR: ${{ runner.temp }}/SleufBase-template-geometry
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_geometry_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-geometry
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_template_geometry -- "$env:TEMPLATE_GEOMETRY_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_geometry.py "$env:TEMPLATE_GEOMETRY_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit template project names and dates
         shell: pwsh
         env:

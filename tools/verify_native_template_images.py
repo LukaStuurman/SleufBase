@@ -61,7 +61,7 @@ def dictionary(record):
     return base, entries
 
 
-def verify_preservation(source, native, original_doc):
+def verify_preservation(source, native, original_doc, allowed_extra=()):
     before, after = records(source), records(native)
     root = original_doc.rootdict.dxf.handle
     old_dictionary = original_doc.rootdict.get("ACAD_IMAGE_DICT")
@@ -91,7 +91,7 @@ def verify_preservation(source, native, original_doc):
         else:
             assert old == new, ("unexpected source change", key)
     allowed = {"CLASS", "LAYER", "IMAGE", "IMAGEDEF", "IMAGEDEF_REACTOR", "RASTERVARIABLES", "DICTIONARY"}
-    assert all(r[0][1] in allowed for i, r in enumerate(after) if i not in matched)
+    assert all(r[0][1] in allowed | set(allowed_extra) for i, r in enumerate(after) if i not in matched)
 
 
 def main():

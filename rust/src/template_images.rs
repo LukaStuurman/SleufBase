@@ -239,10 +239,8 @@ pub fn add_images(
             text: classes.0,
         });
     }
-    if !document
-        .records()
-        .any(|r| r.kind() == "LAYER" && r.first(2).is_some_and(|n| n.eq_ignore_ascii_case(LAYER)))
-    {
+    let add_layer = !document.has_layer(LAYER);
+    if add_layer {
         let mut table = None;
         let mut end = None;
         for r in document.records() {
@@ -268,7 +266,7 @@ pub fn add_images(
         layer.tag(62, 7);
         layer.tag(6, "Continuous");
         layer.tag(290, 1);
-        let count = document.records().filter(|r| r.kind() == "LAYER").count() + 1;
+        let count = document.layer_count() + 1;
         changes.push(document.tag_change(table.index(), 70, &count.to_string())?);
         let at = document.record_start(end.index());
         changes.push(Change {
@@ -487,6 +485,11 @@ pub fn add_images(
     changes.push(seed);
     crate::input::check(cancel)?;
     document.apply(changes)?;
+    if add_layer {
+        document
+            .added_layers
+            .insert(crate::python_values::casefold(LAYER));
+    }
     document.image_batch_added = true;
     Ok(())
 }

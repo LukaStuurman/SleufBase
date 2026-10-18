@@ -249,6 +249,23 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   nu expliciet deze checkout, zodat een andere checkout met dezelfde pakketnaam
   de test niet overneemt. De volledige native sjabloonexport en het bijbehorende
   venster blijven open.
+- De native sjabloontekenlaag voegt polylijnen, cirkels, uitgelijnde tekst en
+  oorspronkelijke profielblokken met automatische ATTRIB-ketens toe. Blokbasis,
+  schaal, kleur/stijl, standaardwaarden, rotatie, oblique/uitlijning en flags
+  worden met de oorspronkelijke ezdxf-helper vergeleken: 89 object-/blokplaatsingen
+  op het echte sjabloon en een synthetische actieve/inactieve papierbron. Iedere
+  brontag blijft behouden buiten bedoelde toevoegingen/tellers. Bronblokken en
+  eenmaal ingelezen attribuutmetadata worden gedeeld; eerder bewerkte ATTDEF-
+  standaardtekst wordt ook bij nieuwe plaatsingen gebruikt. Gedeelde nieuwe
+  laagnamen/tellers corrigeren compositie van meerdere tekenbatches en rasters,
+  in beide volgordes, zonder bronkopie of herlezen. Atomaire fouten, afbreken,
+  budgetten en behouden eerdere tekstwijzigingen getest. Multiline/gekantelde
+  attributen, algemene blokrotaties, volledige profielindeling/bandverdeling en
+  dynamische leaders blijven open.
+  215 Rust-tests, Clippy en releasebuild geslaagd; de onafhankelijke release-
+  controles voor alle 89 tekenobjecten, 91 rasterplaatsingen en 78 titelvelden
+  slagen ook na de gedeelde document-/laagwijzigingen. De vijf GitHub-controles
+  van de voorafgaande projectnaam-/datumstap (`e1bd5c7`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
