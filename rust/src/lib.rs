@@ -2,6 +2,7 @@
 //! The historical Python application remains unchanged until parity is reached.
 
 pub mod disciplines;
+mod rule_glob;
 pub mod geo;
 pub mod geotiff;
 pub mod loaded_jobs;
@@ -41,6 +42,7 @@ pub mod object_dxf;
 mod object_layout;
 pub mod model;
 pub mod parse;
+mod python_values;
 
 pub use disciplines::{summarize, matching_rule, Rule, Summary, RULES};
 pub use export::{write_dxf, write_dxf_with_trenches, write_dxf_with_layers, write_xlsx};

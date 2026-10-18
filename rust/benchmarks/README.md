@@ -124,3 +124,25 @@ Reproduceren:
 CI publiceert deze CSV en controleert dezelfde byte-/CRC-gelijkheid en een
 lagere extra heap voor streaming. Functionele gelijkheid met Python wordt apart
 getest op de [onafhankelijke exportreferenties](../tests/fixtures/object-export/README.md).
+
+### Na de objectregel-/parsercorrecties
+
+`object-export-parser-rules-windows-gnu-2026-10-18.csv` herhaalt dezelfde
+synthetische bewerking met de nieuwe regelmatcher, dezelfde toolchain en
+meetmethode. De standaard ASCII-regels normaliseren bron en keyword niet meer
+voor ieder object; het streamingpad doet nu **16 allocatieaanroepen** per ronde,
+tegenover 400.016 in de bovenstaande eerdere meting. Dit geldt voor deze
+waterleidingjob; Unicode-normalisatie, aangepaste wildcards en virtuele jobs
+kunnen nog alloceren.
+
+| Pad | Mediane encodeertijd | Hoogste extra getraceerde Rust-heap |
+|---|---:|---:|
+| Volledige uitvoerbuffer | 168,217 ms | 67.159.248 bytes |
+| Streaming met 64 KiB schrijfbuffer | 139,796 ms | 66.768 bytes |
+
+Alle drie rondes leveren voor beide paden 61.846.263 bytes met CRC32 `99c980f6`.
+De bytegelijkheid wordt binnen deze build gecontroleerd; de historische CSV
+heeft een andere checksum en is geen bytevergelijking tussen versies. De aparte
+ezdxf-audit bevestigt de geometrie/metadata van alle veertien Python-referenties,
+de echte CLI en aanvullende lagen. Tijdmetingen tussen afzonderlijke builds
+zijn indicatief; de bewerkings-/heapgrenzen hierboven blijven van toepassing.

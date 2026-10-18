@@ -134,7 +134,18 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Geen totale RSS-/GUI-/schijf- of Python-snelheidsclaim. Alle meetrondes vastgelegd.
   UI-regelopties, bron-/groepsfilters, exportvoortgang/annuleren, volledige sjablonen,
   profielen en rasterbundels blijven open; echte volledige praktijkacceptatie vereist.
-- Volgende stappen: objectparser/groepsfilters, volledige instelbare regels en
+- Objectparser/groepsfilters en Python-waarheid/waardeconversie verder geport:
+  ontbrekend versus null, selectie vóór trimmen, getallen/booleans, samengestelde
+  eigenschappen in bronvolgorde, Unicode-decimale coördinaten en underscores.
+  Ongeldige geometrycontainers laten de hele job niet meer crashen; niet-eindige
+  XY vervalt en niet-eindige optionele Z wordt onbekend. Budgetten en controles
+  voor annuleren tussen object-/vertexbatches; JSON-decodering blijft één fase.
+  Native Unicode-wildcard-/klassenmatcher volgt Python, inclusief ongeldige
+  bereiken en eerste-matchvolgorde. Standaard ASCII-regels vermijden tijdelijke
+  bron-/keywordnormalisatie. 107 oorspronkelijke parserdocumenten met 1.024
+  float-eigenschappen, 149.112 regelbeslissingen en limietregressies; 168 Rust-tests
+  groen. Synthetische referenties vervangen geen volledige praktijkacceptatie.
+- Volgende stappen: volledige instelbare regels en
   Excel-/exportworkflows verder met Python toetsen en porten; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,

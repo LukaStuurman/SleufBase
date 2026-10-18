@@ -7,7 +7,7 @@ mod unicode {
     include!("export_unicode.rs");
 }
 
-fn decimal(ch: char) -> Option<u32> {
+pub(crate) fn decimal(ch: char) -> Option<u32> {
     let n = ch as u32;
     let i = unicode::DECIMAL_ZEROS
         .partition_point(|zero| *zero <= n)

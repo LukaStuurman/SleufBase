@@ -1,0 +1,7 @@
+mode,round,features,total_us,allocation_calls,additional_peak_tracked_heap_bytes,output_bytes,crc32,build_mode
+buffered,1,100000,168217,27,67159248,61846263,99c980f6,release
+streaming,1,100000,139796,16,66768,61846263,99c980f6,release
+buffered,2,100000,166102,27,67159248,61846263,99c980f6,release
+streaming,2,100000,139604,16,66768,61846263,99c980f6,release
+buffered,3,100000,168371,27,67159248,61846263,99c980f6,release
+streaming,3,100000,140331,16,66768,61846263,99c980f6,release
