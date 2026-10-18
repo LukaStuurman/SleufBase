@@ -120,7 +120,23 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Fixtures regenereren byte voor byte. 158 Rust-tests groen. Vlakvulling,
   subdivisie, gladde oppervlakken, dikte-extrusie, afzonderlijke vertex-/vlakstijlen
   en MESH-subobjectoverrides blijven open; meshdata levert geen MarXact-metingen.
-- Volgende stappen: tekst/ATTRIB-weergave, volledige meshoppervlakken, HATCH, dynamische
+- Standalone KickTheMap-objectexport geport naar native R2018 met meters,
+  puntlijnrichting, echte 3D-polylijnen, oorspronkelijke XDATA, laagkleuren en
+  PS-labelnaam/-plaatsing/-fontstijl. GUI en CLI gebruiken dezelfde encoder;
+  de GUI leent gewone jobs en kan ook uitsluitend zichtbare kaartlagen exporteren.
+  Virtuele datasetvolgorde is hersteld naar begin, stabiel gesorteerde objecten, eind.
+  Eenmaal voorbereide jobgrenzen en streaming vermijden volledige uitvoer-/puntvectors.
+  Veertien Python-documentorakels, 87 Unicode-labelgevallen, opslag-/fout-/f64-tests
+  en onafhankelijke ezdxf-audit van native uitvoer, echte CLI en aanvullende lagen.
+  164 Rust-tests groen. Fout bij eerste laagkleur in de Python-aanroep gecorrigeerd.
+  Releasebenchmark, exact dezelfde 61.846.263 bytes/CRC: circa 64 MiB versus 65 KiB
+  extra getraceerde Rust-heap en circa 12% kortere encodeertijd voor 100.000 objecten.
+  Geen totale RSS-/GUI-/schijf- of Python-snelheidsclaim. Alle meetrondes vastgelegd.
+  UI-regelopties, bron-/groepsfilters, exportvoortgang/annuleren, volledige sjablonen,
+  profielen en rasterbundels blijven open; echte volledige praktijkacceptatie vereist.
+- Volgende stappen: objectparser/groepsfilters, volledige instelbare regels en
+  Excel-/exportworkflows verder met Python toetsen en porten; tekst/ATTRIB-weergave,
+  volledige meshoppervlakken, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
   fijnmaziger afbreken van zware parserfasen en echte acceptatie nog open.
 

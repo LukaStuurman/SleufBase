@@ -90,3 +90,37 @@ python tools/benchmark_raster.py --native rust/target/release/examples/benchmark
 De Windows-CI bewaart ook een native rastermeting van dezelfde fixture. De
 Pillow-vergelijking hierboven is lokaal uitgevoerd; CI-tijden zijn geen
 rechtstreekse vergelijking met deze machine.
+
+## Object-DXF: exact dezelfde bytes bufferen of streamen
+
+`object-export-windows-gnu-2026-10-18.csv` bevat drie gepaarde rondes met Rust
+1.99.1/GNU in release. Eén synthetische job heeft 100.000 objecten: 50.000
+meetpunten en 50.000 polylijnen van drie vertices. De twee paden gebruiken
+dezelfde R2018-encoder met dezelfde gegevens en CRC32-berekening. Het referentiepad
+bewaart de volledige uitvoer in een `Vec<u8>`; het streamingpad voert die naar
+een tellende sink af. De volgorde is per ronde buffering gevolgd door streaming,
+zonder aparte warm-up. Elke ronde controleert exact 61.846.263 bytes en CRC32
+`85e78128` voor beide paden.
+
+| Pad | Mediane encodeertijd | Hoogste extra getraceerde Rust-heap |
+|---|---:|---:|
+| Volledige uitvoerbuffer | 201,945 ms | 67.159.258 bytes (64,0 MiB) |
+| Streaming met 64 KiB schrijfbuffer | 177,037 ms | 66.778 bytes (65,2 KiB) |
+
+Dat is circa 12% minder tijd en 99,90% minder **extra getraceerde heap** voor deze
+encodeerbewerking. De input bestaat vóór de meting en is uitgesloten; startup,
+schijf-I/O, GUI, Python en OS-/GPU-geheugen zijn niet gemeten. De allocatietracker
+telt levende Rust-allocaties; bij `realloc` telt hij het netto grootteverschil,
+geen eventuele tijdelijke interne allocator-/OS-piek. Dit is geen totale
+proces-RSS-meting of vergelijking met de oorspronkelijke Python-exporter.
+Normale stringnormalisatie doet nog tijdelijke allocaties; streaming betekent
+geen nul-allocatiegarantie. De GUI leent gewone geladen jobs voor DXF-export;
+virtuele jobs en hun profielmarkeringen worden nog afzonderlijk voorbereid.
+
+Reproduceren:
+
+    cargo run --release --manifest-path rust/Cargo.toml --example benchmark_object_export
+
+CI publiceert deze CSV en controleert dezelfde byte-/CRC-gelijkheid en een
+lagere extra heap voor streaming. Functionele gelijkheid met Python wordt apart
+getest op de [onafhankelijke exportreferenties](../tests/fixtures/object-export/README.md).

@@ -1,12 +1,10 @@
-use crate::disciplines::{matching_rule, summarize, Rule};
-use crate::model::{Dataset, Geometry, Vertex};
+use crate::disciplines::{summarize, Rule};
+use crate::model::Dataset;
 use crate::virtual_trench::VirtualTrench;
 use crate::cadastral::CadastralLayer;
-use crate::bgt::{BgtKind,BgtLayer};
+use crate::bgt::BgtLayer;
 use rust_xlsxwriter::{Color, Format, Workbook};
-use std::fmt::Write as _;
 use std::fs;
-use std::io::Write as _;
 use crate::storage::atomic_write;
 use std::path::Path;
 
@@ -65,149 +63,30 @@ pub fn write_xlsx(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(
     atomic_write(path,false,|file|workbook.save_to_writer(file).map_err(|e|e.to_string()))
 }
 
-fn write_line(out: &mut String, layer: &str, color: u16, start: &Vertex, end: &Vertex) {
-    // ASCII DXF R12 LINE entity (basic CAD interoperability; no template).
-    let _ = write!(out,
-        "0\nLINE\n8\n{layer}\n62\n{color}\n10\n{:.8}\n20\n{:.8}\n30\n{:.8}\n11\n{:.8}\n21\n{:.8}\n31\n{:.8}\n",
-        start.x, start.y, start.z.unwrap_or(0.0),
-        end.x, end.y, end.z.unwrap_or(0.0));
-}
-
 pub fn write_dxf(path: &Path, datasets: &[Dataset], rules: &[Rule]) -> Result<(), String> {
     write_dxf_with_trenches(path,datasets,&[],rules)
 }
 
-/// Exports a standards-compatible R12 3D POLYLINE for each measured MarXact
+/// Exports a standards-compatible R2018 3D POLYLINE for each measured MarXact
 /// boundary or manually created virtual trench, preserving measured elevations.
 /// The DXF template/AutoCAD dynamic blocks are still separate future parity work.
 pub fn write_dxf_with_trenches(path: &Path, datasets: &[Dataset],
     trenches: &[VirtualTrench],rules: &[Rule]) -> Result<(), String> {
     write_dxf_with_layers(path,datasets,trenches,None,&[],rules)
 }
-/// Base CAD export (not a template): object lines, 3D measured trench
+/// Native object export (not a template): object lines, 3D measured trench
 /// boundaries, PDOK cadastral boundaries and text with measured rotation,
 /// and selected BGT linework, each on separate named AutoCAD layers.
 pub fn write_dxf_with_layers(path:&Path,datasets:&[Dataset],
     trenches:&[VirtualTrench],cadastral:Option<&CadastralLayer>,
     bgt:&[BgtLayer],rules:&[Rule]) -> Result<(),String> {
-    if datasets.is_empty() && trenches.is_empty() &&
-        cadastral.is_none_or(|c|!c.visible) &&
-        bgt.iter().all(|l|!l.visible)
-    {
-        return Err("Geen objecten, proefsleuven of kaartlagen om te exporteren".into());
-    }
-    prepare_output(path)?;
-    let mut out = String::from(
-        "0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n"
-    );
-    let mut segment_count = 0usize;
-    for dataset in datasets {
-        for feature in &dataset.features {
-            let rule = matching_rule(&feature.source_name, rules);
-            let (layer, color) = rule.map_or(("NIET_INGEDEELD", 7), |r| (r.target_layer, r.color_aci));
-            match &feature.geometry {
-                Geometry::Point(v) => {
-                    let d = 0.5;
-                    write_line(&mut out, layer, color,
-                        &Vertex {x:v.x-d,y:v.y,z:v.z}, &Vertex {x:v.x+d,y:v.y,z:v.z});
-                    write_line(&mut out, layer, color,
-                        &Vertex {x:v.x,y:v.y-d,z:v.z}, &Vertex {x:v.x,y:v.y+d,z:v.z});
-                    segment_count += 2;
-                }
-                Geometry::Polyline(vertices) => {
-                    for pair in vertices.windows(2) {
-                        write_line(&mut out, layer, color, &pair[0], &pair[1]);
-                        segment_count += 1;
-                    }
-                }
-            }
-        }
-    }
-    for trench in trenches {
-        let boundary=trench.measured_boundary();
-        if boundary.len()<4 { continue; }
-        let _=write!(out,"0\nPOLYLINE\n8\nVIRTUAL_TRENCH_3D\n62\n7\n66\n1\n70\n9\n");
-        for (index,(x,y)) in boundary.iter().enumerate().take(boundary.len()-1) {
-            let z=trench.boundary_3d.get(index).and_then(|v|v.z).unwrap_or(0.0);
-            let _=write!(out,
-                "0\nVERTEX\n8\nVIRTUAL_TRENCH_3D\n10\n{:.8}\n20\n{:.8}\n30\n{:.8}\n70\n32\n",
-                x,y,z);
-        }
-        out.push_str("0\nSEQEND\n8\nVIRTUAL_TRENCH_3D\n");
-        segment_count += boundary.len();
-        write_line(&mut out,"VIRTUAL_TRENCH_AXIS",30,&trench.start,&trench.end);
-        segment_count += 1;
-        for marker in crate::cross_section::markers(trench) {
-            let object=&trench.objects[marker.object_index];
-            let color=matching_rule(&object.source_name,rules).map_or(7,|r|r.color_aci);
-            write_line(&mut out,"VIRTUAL_TRENCH_MARKER",color,&marker.start,&marker.end);
-            segment_count+=1;
-        }
-        let label=trench.label.chars().filter(|c|
-            c.is_alphanumeric()||" _.-".contains(*c)).take(100).collect::<String>();
-        if !label.is_empty(){
-            let _=write!(out,
-                "0\nTEXT\n8\nVIRTUAL_TRENCH_LABEL\n10\n{:.8}\n20\n{:.8}\n30\n0.0\n40\n0.3\n1\n{}\n",
-                trench.start.x,trench.start.y,label);
-        }
-    }
-    if let Some(cad)=cadastral.filter(|c|c.visible) {
-        for collection in &cad.linework {
-            let layer=collection.layer_name.chars()
-                .filter(|c|c.is_ascii_alphanumeric()||*c=='_')
-                .take(30).collect::<String>();
-            if layer.is_empty(){continue;}
-            for line in &collection.paths {
-                for pair in line.windows(2) {
-                    let (x0,y0)=pair[0];
-                    let (x1,y1)=pair[1];
-                    if [x0,y0,x1,y1].iter().any(|v|!v.is_finite()){continue;}
-                    write_line(&mut out,&layer,7,
-                        &Vertex{x:x0,y:y0,z:None},
-                        &Vertex{x:x1,y:y1,z:None});
-                    segment_count+=1;
-                }
-            }
-        }
-        for label in &cad.labels {
-            let layer=label.layer_name.chars()
-                .filter(|c|c.is_ascii_alphanumeric()||*c=='_')
-                .take(30).collect::<String>();
-            let value=label.text.chars()
-                .filter(|c|!c.is_control() && *c!='\\')
-                .take(200).collect::<String>();
-            if layer.is_empty() || value.is_empty() ||
-                !label.position.0.is_finite() || !label.position.1.is_finite() ||
-                !label.rotation.is_finite(){continue;}
-            let _=write!(out,"0\nTEXT\n8\n{}\n10\n{:.8}\n20\n{:.8}\n30\n0\n40\n0.6\n50\n{:.6}\n1\n{}\n",
-                layer,label.position.0,label.position.1,label.rotation,value);
-            segment_count+=1;
-        }
-    }
-    for collection in bgt.iter().filter(|c|c.visible) {
-        let (layer,color)=match collection.kind {
-            BgtKind::Wegdeel=>("BGT_WEGDEEL",8u16),
-            BgtKind::OnbegroeidTerreindeel=>("BGT_TERREIN",3u16)
-        };
-        for path in &collection.paths{
-            for pair in path.windows(2){
-                let (x0,y0)=pair[0];let(x1,y1)=pair[1];
-                if [x0,y0,x1,y1].iter().any(|v|!v.is_finite()){continue;}
-                write_line(&mut out,layer,color,
-                    &Vertex{x:x0,y:y0,z:None},
-                    &Vertex{x:x1,y:y1,z:None});
-                segment_count+=1;
-            }
-        }
-    }
-    if segment_count == 0 { return Err("Geen lijnen om te exporteren".into()); }
-    out.push_str("0\nENDSEC\n0\nEOF\n");
-    atomic_write(path,false,|file|file.write_all(out.as_bytes()).map_err(|e|e.to_string()))
+    crate::object_dxf::write_with_layers(path,datasets,trenches,cadastral,bgt,rules,Default::default())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bgt::BgtKind;
     use crate::model::{Dataset, Feature, Geometry, Vertex};
     use crate::disciplines::RULES;
     use std::path::PathBuf;
@@ -240,7 +119,7 @@ mod tests {
         assert!(text.contains("8\nKAD_PERCEEL\n"));
         assert!(text.contains("8\nBGT_WEGDEEL\n"));
         assert!(text.contains("1\nNieuwe straat\n"));
-        assert!(text.contains("50\n30.000000\n"));
+        assert!(text.contains("50\n30\n"));
     }
     #[test]
     fn exports_measured_marxact_3d_polygon() {
@@ -270,7 +149,7 @@ mod tests {
         assert!(write_dxf_with_trenches(&path,&[],&[],RULES).is_err());
     }
     #[test]
-    fn exports_dxf_line_entities_and_rejects_overwrite() {
+    fn exports_object_polylines_and_rejects_overwrite() {
         let dir = std::env::temp_dir().join(format!("sleufbase-rust-{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
         let output = dir.join("test_line.dxf");
@@ -288,7 +167,7 @@ mod tests {
         write_dxf(&output, &[dataset.clone()], RULES).unwrap();
         let contents = fs::read_to_string(&output).unwrap();
         assert!(contents.contains("N-OI-KL-WATER"));
-        assert!(contents.contains("0\nLINE\n"));
+        assert!(contents.contains("0\nPOLYLINE\n"));
         assert!(contents.ends_with("0\nEOF\n"));
         assert!(write_dxf(&output, &[dataset], RULES).is_err());
         fs::remove_file(output).unwrap();

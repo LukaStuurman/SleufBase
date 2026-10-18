@@ -11,7 +11,7 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
 - Disciplinetellingen per proefsleuf gebaseerd op Python standaardregels (inclusief aantallen per discipline).
 - Excel (.xlsx) export met oranje kopregel, proefsleuf, aantal disciplines en totaal kabels/leidingen.
-- Basis DXF R12 export met kruizen voor punten en LINE-segmenten voor polylijnen per discipline.
+- R2018-object-DXF met gerichte puntlijnen, echte 3D-polylijnen, joblabels, discipline-lagen en oorspronkelijke XDATA.
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
 - Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
 - GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; TIFF-preview via begrensde strips/tegels als gedraaide/gegeorefereerde kaartlaag tonen.
@@ -57,6 +57,17 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - Eigen Rust-project opslaan/openen als `*.sleufbase-rust.json`, met brondata, GeoTIFF-metadata en DXF-lagen.
 - Automatische roterende back-ups in een **aparte** Rust-map. Het bestaande Python-projectformaat wordt niet overschreven.
 - Instellingen voor deze back-ups lezen, met dezelfde defaults 10 minuten en maximaal 20 back-ups.
+
+## KickTheMap-objecten naar R2018-DXF
+
+- De bestaande GUI-knop **DXF objecten** en CLI `--dxf` gebruiken dezelfde native R2018-encoder, in meters. Puntlijnen staan loodrecht op de richting van het eerste naar het laatste afwijkende meetpunt; polylijnen behouden één 3D-POLYLINE met oorspronkelijke Z, kleur, laag en `KTM_DXF_EXPORT`-metadata.
+- Joblabels volgen de oorspronkelijke PS-/getalfallback, inclusief Unicode-decimale cijfers en woordgrenzen. Plaatsing ontwijkt andere jobs en eerdere labels volgens dezelfde kandidaatvolgorde. Labelhoogte, witte true-color, uitlijning en `LiberationMono-Regular.ttf`-stijl volgen de Python-export.
+- Laagtabellen declareren de gevraagde disciplinekleur ook bij de eerste aanmaak. Dit herstelt een aangetoonde kleurafwijking in het Python-/ezdxf-aanroeppad; de objectkleuren blijven gelijk. Virtuele jobs sorteren meetobjecten stabiel tussen begin- en eindpunt, zodat de richting correct blijft.
+- De encoder schrijft met een buffer van 64 KiB rechtstreeks naar een tijdelijk bestand. De GUI leent gewone geladen jobs zonder volledige objectkopie. Virtuele jobs en profielmarkeringen worden nog apart voorbereid. Publicatie is atomair en overschrijft geen bestaande uitvoer, ook bij races.
+- Niet-eindige coördinaten, ongeldige laagnamen, besturingstekens/injectie en te lange XDATA geven een fout. XDATA-strings blijven binnen 255 UTF-8-bytes; de uitvoer is maximaal 256 MiB, met punt-/entiteitenbudgetten. Coördinaten worden niet naar acht decimalen afgerond. Dit is geen harde totale RAM-limiet.
+- Veertien volledige Python-exportscenario’s, 87 labelgevallen, f64-rondgangen, fout-/opslagregressies en een onafhankelijke ezdxf-audit testen de uitvoer. CI controleert ook de echte native CLI en aanvullende proefsleuf-/Kadaster-/BGT-lagen zonder DXF-reparaties. Zie de [referenties](tests/fixtures/object-export/README.md).
+- Een releasebenchmark met 100.000 objecten produceert exact gelijke DXF-bytes via buffering en streaming: de extra getraceerde Rust-heap daalt van circa 64 MiB naar 65 KiB. Metingen en precieze grenzen staan in [benchmarks/README.md](benchmarks/README.md). Dit meet de encoder, geen volledige GUI-/schijf- of Python-workflow.
+- De standaard objectexport is verder geport. Gebruikersinstelbare regel-/exportopties in de UI, volledige bron-/groepsfilteracceptatie, interactieve exportvoortgang/annuleren, sjabloon-/profieltekeningen en raster-/fotobundels blijven open. De genoemde fontstijl verwijst naar de fontnaam; dit voegt geen fontinstallatie toe.
 
 ## Projectgegevens behouden
 
@@ -248,7 +259,7 @@ of een vergelijking met de complete Python-app op echte projecten.
 
 ## MarXact- en virtuele-proefsleufgrenzen in DXF
 
-- De basis-DXF-export schrijft nu ook gesloten **3D POLYLINE**-grenzen (R12) met de oorspronkelijke gemeten MarXact-Z per vertex, of de rechthoekige grens bij handmatige proefsleuven.
+- De basis-DXF-export schrijft nu ook gesloten **3D POLYLINE**-grenzen (R2018) met de oorspronkelijke gemeten MarXact-Z per vertex, of de rechthoekige grens bij handmatige proefsleuven.
 - De polylines krijgen de laag `VIRTUAL_TRENCH_3D` en een eenvoudig `TEXT`-label; origineel blijft in het Rust-project beschikbaar.
 - Dit is nog **niet** de volledige AutoCAD-sjabloon/DXF-pariteit, maar voorkomt dat de gemeten MarXact-grens volledig uit de basisexport verdwijnt.
 
@@ -262,7 +273,7 @@ of een vergelijking met de complete Python-app op echte projecten.
 ## Kadastrale en BGT-kaartlagen in basis-DXF
 
 - De **DXF objecten**-export kan nu tevens de zichtbare Kadaster-lijnen, tekstlabels (inclusief rotatiehoek) en BGT-lijnen opnemen op afzonderlijke CAD-lagen.
-- Export gebruikt het eigen basale R12-model, niet de uitgebreide SleufBase-sjabloon-DXF of speciale dynamische blokken.
+- Export gebruikt de native R2018-objectencoder. Volledige SleufBase-sjablonen en dynamische blokken blijven een afzonderlijke workflow.
 - Alleen de zichtbare WFS/BGT-lagen worden meegenomen; grote datasetlimieten en daadwerkelijke CAD-validatie blijven nodig.
 
 ## KickTheMap-downloads: bronidentiteit behouden
@@ -275,7 +286,7 @@ of een vergelijking met de complete Python-app op echte projecten.
 ## Native MarXact batch-CLI
 
 - `sleufbase-rust.exe --marxact nieuw-project.json meting1.dxf meting2.dxf` maakt een Rust-project zonder GUI.
-- `sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting1.dxf meting2.dxf` exporteert de gemeten 3D-grenzen en objecten in de basis-R12 DXF.
+- `sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting1.dxf meting2.dxf` exporteert de gemeten 3D-grenzen en objecten in de native R2018-DXF.
 - De conversie leest de bestaande niet-gevoelige MarXact-mappings uit de Rust-instellingen en weigert bestaande uitvoerbestanden te overschrijven.
 - Omdat de DXF-invoer nog geen volledige MarXact-vendordekking heeft, controleer conversies met echte MarXact-bestanden voordat je er ontwerpbeslissingen op baseert.
 

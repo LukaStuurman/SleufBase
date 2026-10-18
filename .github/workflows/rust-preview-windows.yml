@@ -38,6 +38,23 @@ jobs:
       - name: Build release
         shell: pwsh
         run: cargo build --release --manifest-path rust/Cargo.toml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independently audit native object exports
+        shell: pwsh
+        env:
+          OBJECT_EXPORT_AUDIT_DIR: ${{ runner.temp }}/SleufBase-object-export-audit
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'ezdxf==1.4.4'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_object_fixtures -- "$env:OBJECT_EXPORT_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/sleufbase-rust.exe --dxf "$env:OBJECT_EXPORT_AUDIT_DIR/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_object_exports.py "$env:OBJECT_EXPORT_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Benchmark core allocations and time
         shell: pwsh
         run: |
@@ -64,4 +81,16 @@ jobs:
         with:
           name: SleufBase-Rust-Windows-preview
           path: rust/target/release/sleufbase-rust.exe
+          if-no-files-found: error
+      # Exact-byte sink comparison, independent of Python/app performance.
+      - name: Benchmark object export streaming
+        shell: pwsh
+        run: |
+          cargo run --release --manifest-path rust/Cargo.toml --example benchmark_object_export > rust/benchmarks-object-export.csv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload object export benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-object-export-benchmark
+          path: rust/benchmarks-object-export.csv
           if-no-files-found: error

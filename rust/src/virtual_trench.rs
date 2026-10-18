@@ -39,6 +39,10 @@ pub struct VirtualTrench {
     pub job_id:u64,
 }
 
+// Numerically equal chainages (including -0/+0) keep their source order.
+// Retain a deterministic fallback for non-comparable derived values.
+fn chainage_order(a:f64,b:f64)->std::cmp::Ordering {a.partial_cmp(&b).unwrap_or_else(||a.total_cmp(&b))}
+
 impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
@@ -134,23 +138,13 @@ impl VirtualTrench {
         let dy=end.y-start.y;
         self.objects.sort_by(|a,b| {
             let chainage=|v:Vertex|(v.x-start.x)*dx+(v.y-start.y)*dy;
-            chainage(a.position).total_cmp(&chainage(b.position))
+            chainage_order(chainage(a.position),chainage(b.position))
         });
         Ok(())
     }
 
     pub fn to_dataset(&self,job_id:u64,include_endpoints:bool)->Dataset {
-        let mut features=Vec::new();
-        if include_endpoints {
-            for (label,pos) in [("Beginpunt",self.start),("Eindpunt",self.end)] {
-                features.push(Feature {
-                    object_name:label.into(),
-                    source_name:"PUNT".into(),
-                    geometry:Geometry::Point(pos),
-                    attributes:Default::default()
-                });
-            }
-        }
+        let mut features=Vec::with_capacity(self.objects.len()+if include_endpoints{2}else{0});
         for object in &self.objects {
             features.push(Feature {
                 object_name:object.object_name.clone(),
@@ -158,6 +152,17 @@ impl VirtualTrench {
                 geometry:Geometry::Point(object.position),
                 attributes:object.attributes.clone()
             });
+        }
+        // Same stable chainage order as ordered_virtual_trench_points in Python.
+        // Keep endpoints outside the object sort: they define marker direction.
+        features.sort_by(|a,b| {
+            let chainage=|f:&Feature|match f.geometry{Geometry::Point(v)=>self.chainage(v),_=>0.};
+            chainage_order(chainage(a),chainage(b))
+        });
+        if include_endpoints {
+            let endpoint=|name:&str,position|Feature{object_name:name.into(),source_name:"PUNT".into(),geometry:Geometry::Point(position),attributes:Default::default()};
+            features.insert(0,endpoint("Beginpunt",self.start));
+            features.push(endpoint("Eindpunt",self.end));
         }
         Dataset {
             job_id:if job_id==0 {self.job_id} else {job_id},title:self.label.clone(),

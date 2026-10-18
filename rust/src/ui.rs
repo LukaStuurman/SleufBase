@@ -3,7 +3,7 @@
 
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use sleufbase_rust::{
-    write_dxf_with_layers, write_xlsx, Bounds, Dataset, Geometry,
+    write_xlsx, Bounds, Dataset, Geometry,
     Vertex, RULES
 };
 use sleufbase_rust::dxf_read::DxfOverlay;
@@ -787,15 +787,16 @@ impl SleufBaseApp {
     }
 
     fn save_dxf(&mut self) {
-        if self.datasets.is_empty() && self.virtual_trenches.is_empty() {
-            self.message="Laad eerst jobFeatures.json of maak een virtuele proefsleuf".into();
+        if self.datasets.is_empty() && self.virtual_trenches.is_empty() && self.cadastral.as_ref().is_none_or(|c|!c.visible) && self.bgt_layers.iter().all(|l|!l.visible) {
+            self.message="Laad eerst objecten, een proefsleuf of zichtbare kaartlagen".into();
             return;
         }
         if let Some(path)=rfd::FileDialog::new()
             .add_filter("DXF",&["dxf"])
             .set_file_name("SleufBase-Objecten-Rust.dxf").save_file()
         {
-            self.message=match write_dxf_with_layers(&path,&self.export_datasets(),&self.virtual_trenches,self.cadastral.as_ref(),&self.bgt_layers,RULES) {
+            let virtual_jobs:Vec<_>=self.virtual_trenches.iter().map(|t|t.to_dataset(0,true)).collect();
+            self.message=match sleufbase_rust::object_dxf::write_with_layers_iter(&path,self.datasets.iter().chain(virtual_jobs.iter()),&self.virtual_trenches,self.cadastral.as_ref(),&self.bgt_layers,RULES,Default::default()) {
                 Ok(())=>format!("DXF opgeslagen: {}",path.display()),
                 Err(err)=>format!("DXF-export mislukt: {err}"),
             };
