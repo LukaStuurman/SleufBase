@@ -60,10 +60,14 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 
 ## Projectgegevens behouden
 
+- Project openen/herstellen, Python-import, DXF toevoegen/herladen/herkoppelen, MarXact, jobFeatures en GeoTIFF-metadata laden via één achtergrondworker. Ook gedownloade bestanden gebruiken dit pad. Een voortgangsscherm houdt de interface beschikbaar voor annuleren; bewerken en het toepassen van netwerkresultaten wachten tot deze laadactie klaar is.
+- Een laadactie bereidt gegevens, CAD-caches en project-/MarXact-dwarsmarkeringen voor voordat zij het project wijzigt. Annuleren verwerpt de hele batch; na een afgeronde batch worden geslaagde bestanden toegevoegd en fouten per bestand gemeld. Een mislukt project of DXF-herladen behoudt de huidige gegevens. Taaknummer én projectgeneratie weren late resultaten.
+- De invoerwachtrij is begrensd en hergebruikt één worker. Annuleren wordt gecontroleerd bij leesblokken en parser-/objectgrenzen; een lopende systeemaanroep, JSON-decodering of afzonderlijke geometrie-/cachefase kan nog aflopen. Annuleren stopt de UI-laadactie direct, maar start geen extra lezer zolang de vorige worker nog bezig is. Opslaan, back-ups en exports zijn nog synchroon; dit is geen totale RAM-limiet of volledige workflowacceptatie.
 - Nieuw/openen/herstellen/sluiten vraagt bij onopgeslagen werk om opslaan, doorgaan zonder opslaan of annuleren. Een mislukte of geannuleerde opslag voert de projectwissel niet uit.
 - Projectwissels koppelen oude PDOK/BGT/Kadaster/AHN-resultaten los. Een eerder gestarte KickTheMap-download blijft op schijf beschikbaar, maar wordt niet aan een inmiddels ander project toegevoegd.
 - Projecten, back-ups, Excel en DXF worden eerst volledig naar een uniek tijdelijk bestand in dezelfde map geschreven. Export en CLI-conversie publiceren zonder overschrijven, ook als een ander proces tegelijkertijd dezelfde uitvoernaam kiest.
 - Projectopslag controleert alle kaartgeometrie, labels, opmerkingen en rastertransformaties. Ongeldige gegevens vervangen geen bestaand bestand. Lezen én opslaan respecteren de projectlimiet van 128 MiB.
+- jobFeatures-JSON en DXF-bronnen zijn maximaal 256 MiB. De gedeelde lezer controleert ook het werkelijk gelezen aantal bytes, zodat groei na de bestandscontrole de grens niet omzeilt; onderbroken systeemlezingen worden opnieuw geprobeerd.
 - Onbekende velden in de objectstructuren van het native projectformaat worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. De aparte Python-import bewaart het bron-JSON integraal.
 
 ## Bestaande Python-projecten importeren

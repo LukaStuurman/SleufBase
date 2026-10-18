@@ -188,25 +188,19 @@ fn validate_bounds(bounds: Bounds) -> Result<(), String> {
 }
 
 pub fn read_project(path: &Path) -> Result<NativeProject, String> {
-    let file = File::open(path).map_err(|e| format!("Projectbestand niet bereikbaar: {e}"))?;
-    if file.metadata().map_err(|e| e.to_string())?.len() > MAX_PROJECT_BYTES {
-        return Err("Projectbestand is te groot".into());
-    }
-    // Bound the actual read too: the file may grow after metadata was obtained.
-    let mut bytes = Vec::new();
-    file.take(MAX_PROJECT_BYTES + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|e| e.to_string())?;
-    if bytes.len() as u64 > MAX_PROJECT_BYTES {
-        return Err("Projectbestand is te groot".into());
-    }
+    read_project_with_cancel(path,&crate::input::NEVER_CANCEL)
+}
+pub fn read_project_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<NativeProject,String>{
+    let bytes=crate::input::read(path,MAX_PROJECT_BYTES,"Projectbestand",cancel)?;
     let mut project: NativeProject =
         serde_json::from_slice(&bytes).map_err(|e| format!("Projectbestand ongeldig: {e}"))?;
+    crate::input::check(cancel)?;
     // V3 stores source block/curve definitions separately from derived WCS
     // caches. V1/V2 remain readable; opening never rewrites their source bytes.
     if matches!(project.version,1|2) {project.version=FORMAT_VERSION;}
     project.validate()?;
-    for overlay in &mut project.overlays {overlay.rebuild_block_cache()?;}
+    for overlay in &mut project.overlays {crate::input::check(cancel)?;overlay.rebuild_block_cache()?;}
+    crate::input::check(cancel)?;
     Ok(project)
 }
 

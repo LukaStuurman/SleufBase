@@ -7,6 +7,8 @@ pub mod geotiff;
 pub mod loaded_jobs;
 pub mod raster;
 pub mod raster_loader;
+pub mod file_loader;
+mod input;
 mod raster_color;
 mod tiff_view;
 pub mod dxf_read;

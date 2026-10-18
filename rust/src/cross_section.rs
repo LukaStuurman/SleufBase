@@ -96,38 +96,45 @@ pub struct Marker {
 
 /// Prepare once after geometry edits; callers can reuse these spans during pan/zoom.
 pub fn markers(trench: &VirtualTrench) -> Vec<Marker> {
+    markers_with_cancel(trench, &crate::input::NEVER_CANCEL).unwrap_or_default()
+}
+pub fn markers_with_cancel(
+    trench: &VirtualTrench,
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<Vec<Marker>, String> {
+    crate::input::check(cancel)?;
     let length = trench.length();
     if length <= EPSILON || !length.is_finite() {
-        return Vec::new();
+        return Ok(Vec::new());
     }
     let normal = (
         -(trench.end.y - trench.start.y) / length,
         (trench.end.x - trench.start.x) / length,
     );
     let polygon = trench.measured_boundary();
-    trench
-        .objects
-        .iter()
-        .enumerate()
-        .filter_map(|(index, object)| {
-            let p = object.position;
-            let (x, y, chainage, _) = trench.project(p);
-            let preferred = (p.x - x) * normal.0 + (p.y - y) * normal.1;
-            let (start, end) = local_segment(&polygon, (x, y), normal, preferred)?;
-            Some(Marker {
-                start: Vertex {
-                    x: start.0,
-                    y: start.1,
-                    z: p.z,
-                },
-                end: Vertex {
-                    x: end.0,
-                    y: end.1,
-                    z: p.z,
-                },
-                object_index: index,
-                chainage,
-            })
+    let mut output = Vec::new();
+    for (index, object) in trench.objects.iter().enumerate() {
+        crate::input::check(cancel)?;
+        let p = object.position;
+        let (x, y, chainage, _) = trench.project(p);
+        let preferred = (p.x - x) * normal.0 + (p.y - y) * normal.1;
+        let Some((start, end)) = local_segment(&polygon, (x, y), normal, preferred) else {
+            continue;
+        };
+        output.push(Marker {
+            start: Vertex {
+                x: start.0,
+                y: start.1,
+                z: p.z,
+            },
+            end: Vertex {
+                x: end.0,
+                y: end.1,
+                z: p.z,
+            },
+            object_index: index,
+            chainage,
         })
-        .collect()
+    }
+    Ok(output)
 }

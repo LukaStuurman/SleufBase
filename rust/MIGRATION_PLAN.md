@@ -97,9 +97,22 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   Exacte JSON-floatrondgangen herstellen een aangetoonde precisiefout bij openen;
   grote getallen/decimalen in het Python-archief worden niet naar f64 afgerond.
   139 Rust-tests groen; negatieve/nulgewichten en volledige CAD-acceptatie open.
+- Lokale invoer loopt via één begrensde achtergrondworker: native openen/herstel,
+  Python-import, DXF toevoegen/herladen/herkoppelen, MarXact, jobFeatures en
+  GeoTIFF-metadata, inclusief bestanden uit live downloads. Voorbereiding van
+  CAD-zichtbaarheid en project-/MarXact-markers gebeurt vóór toepassing.
+  Voortgang/annuleren, behoud van huidig werk bij fouten, batches met losse
+  fouten en projectgeneraties zijn gekoppeld aan de echte UI. Nieuwe regressies
+  blokkeren de worker doelbewust terwijl een egui-frame Escape verwerkt of een
+  nieuw project begint; late resultaten veranderen het huidige project niet.
+  Gedeelde invoercontrole begrenst werkelijke bytes, corrigeert de oude
+  jobFeatures-groeirace en herhaalt onderbroken systeemlezingen. 151 Rust-tests
+  groen. Annuleren is coöperatief: één systeemaanroep, JSON-/geometrie-/cachefase
+  kan nog aflopen; opslaan/export/back-ups blijven synchroon. Geen totale
+  geheugen-/rendergarantie of volledige workflowacceptatie.
 - Volgende stappen: tekst/ATTRIB-weergave, meshes, HATCH, dynamische
   blokken, volledige stijlen en CAD-/profiel-/projectworkflows. Overige mijlpalen,
-  achtergrondladen van grote DXF/projecten en echte acceptatie nog open.
+  fijnmaziger afbreken van zware parserfasen en echte acceptatie nog open.
 
 Per afgeronde stap worden bron, tests, resterende beperkingen en metingen bijgewerkt.
 PR #116 blijft concept totdat **alle** releasevoorwaarden aantoonbaar gehaald zijn.

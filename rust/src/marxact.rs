@@ -124,6 +124,10 @@ struct Boundary {
 pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<String,String>)
     ->Result<MarXactResult,String>
 {
+    parse_overlay_with_cancel(overlay,mappings,&crate::input::NEVER_CANCEL)
+}
+pub fn parse_overlay_with_cancel(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<String,String>,cancel:&std::sync::atomic::AtomicBool)->Result<MarXactResult,String>{
+    crate::input::check(cancel)?;
     let leaders=overlay.features.iter().filter(|f|
         f.entity_type=="MULTILEADER"||f.entity_type=="MLEADER"
     ).filter_map(|f|{
@@ -137,6 +141,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
     let mut boundaries=Vec::new();
     let mut skipped=0usize;
     for f in &overlay.features {
+        crate::input::check(cancel)?;
         if f.entity_type!="POLYLINE"{continue;}
         let endpoints_match=f.points.len()>1 && f.points.first().zip(f.points.last())
             .is_some_and(|(a,b)|a.x==b.x&&a.y==b.y);
@@ -146,9 +151,9 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
             vertices.last().is_some_and(|last|last.x==v.x&&last.y==v.y)
         }){vertices.pop();}
         if vertices.len()<3 || signed_area(&vertices).abs()<MIN_AREA{skipped+=1;continue;}
-        let names=vertices.iter().map(|v|
-            leader_index.nearest(v.x,v.y).map(|l|l.name.clone()).unwrap_or_default()
-        ).collect::<Vec<_>>();
+        let names=vertices.iter().map(|v|{crate::input::check(cancel)?;
+            Ok::<_,String>(leader_index.nearest(v.x,v.y).map(|l|l.name.clone()).unwrap_or_default())
+        }).collect::<Result<Vec<_>,_>>()?;
         let Some(first)=names.first() else{continue};
         let normalized=normalize_name(first);
         if normalized.is_empty() || names.iter().any(|n|normalize_name(n)!=normalized){
@@ -165,6 +170,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
     let mut insert_count=0;
     let mut assigned=0;
     for feature in &overlay.features {
+        crate::input::check(cancel)?;
         if feature.entity_type!="INSERT"{continue;}
         let Some(point)=feature.points.first() else{continue};
         insert_count+=1;
@@ -192,6 +198,7 @@ pub fn parse_overlay(overlay:&DxfOverlay,mappings:&std::collections::BTreeMap<St
     let mut occurrences=HashMap::<String,usize>::new();
     let mut trenches=Vec::new();
     for boundary in boundaries {
+        crate::input::check(cancel)?;
         let object_positions=boundary.objects.iter().map(|p|p.position).collect::<Vec<_>>();
         let (start,end,width)=centerline(&boundary.points,&object_positions)?;
         let key=normalize_name(&boundary.name);
@@ -216,6 +223,9 @@ pub fn import_dxf(path:&Path,mappings:&std::collections::BTreeMap<String,String>
     ->Result<MarXactResult,String>
 {
     parse_overlay(&load_dxf(path)?,mappings)
+}
+pub fn import_dxf_with_cancel(path:&Path,mappings:&std::collections::BTreeMap<String,String>,cancel:&std::sync::atomic::AtomicBool)->Result<MarXactResult,String>{
+    parse_overlay_with_cancel(&crate::dxf_read::load_dxf_with_cancel(path,cancel)?,mappings,cancel)
 }
 
 #[cfg(test)]

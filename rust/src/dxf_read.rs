@@ -2,7 +2,6 @@
 //! Supports common entity families from existing SleufBase files without Python/ezdxf.
 //! Source entities and block definitions stay separate from derived WCS caches.
 
-use std::{fs::File,io::Read};
 use crate::dxf_tags::{self,Group};
 use std::path::{Path, PathBuf};
 
@@ -112,7 +111,7 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
         return Err("Binaire DXF vereist een aparte decoder".into());
     }
     if text.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
-    parse_groups(dxf_tags::ascii(text),path)
+    parse_groups(dxf_tags::ascii(text),path,&crate::input::NEVER_CANCEL)
 }
 
 struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize}
@@ -164,11 +163,12 @@ impl Parser {
     }
 }
 
-fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path)->Result<DxfOverlay,String>{
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<DxfOverlay,String>{
     let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None};
     let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
     let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;
     for (index,entry) in records.enumerate(){
+        if index%1024==0{crate::input::check(cancel)?;}
         let entry=entry?;
         if index>=MAX_ENTITIES*40{return Err("DXF bevat te veel velden".into());}
         if eof&&entry.code!=999{return Err("DXF bevat gegevens na EOF".into());}
@@ -199,28 +199,30 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
     let warnings=parser.entities.unsupported.iter().map(|(kind,count)|format!("{kind}: {count} entiteit(en) nog niet volledig weergegeven")).collect();
     let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,features:parser.entities.features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};
-    overlay.rebuild_block_cache()?;Ok(overlay)
+    overlay.rebuild_block_cache()?;crate::input::check(cancel)?;Ok(overlay)
 }
 
 /// ASCII and binary DXF share the same entity interpretation and limits.
 pub fn parse_dxf_bytes(bytes:&[u8],path:&Path)->Result<DxfOverlay,String> {
+    parse_dxf_bytes_with_cancel(bytes,path,&crate::input::NEVER_CANCEL)
+}
+pub fn parse_dxf_bytes_with_cancel(bytes:&[u8],path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<DxfOverlay,String>{
+    crate::input::check(cancel)?;
     if bytes.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
     if bytes.starts_with(b"AutoCAD Binary DXF") {
-        parse_groups(dxf_tags::Binary::new(bytes)?,path)
+        parse_groups(dxf_tags::Binary::new(bytes)?,path,cancel)
     } else {
         let text=dxf_tags::text(bytes)?;
-        parse_dxf(&text,path)
+        parse_groups(dxf_tags::ascii(&text),path,cancel)
     }
 }
 
 pub fn load_dxf(path: &Path) -> Result<DxfOverlay, String> {
-    let file=File::open(path).map_err(|e|format!("DXF lezen mislukt: {e}"))?;
-    if file.metadata().map_err(|e|e.to_string())?.len()>MAX_DXF_BYTES {
-        return Err("DXF bestand groter dan 256 MiB".into());
-    }
-    let mut bytes=Vec::new();
-    file.take(MAX_DXF_BYTES+1).read_to_end(&mut bytes).map_err(|e|format!("DXF lezen mislukt: {e}"))?;
-    parse_dxf_bytes(&bytes,path)
+    load_dxf_with_cancel(path,&crate::input::NEVER_CANCEL)
+}
+pub fn load_dxf_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<DxfOverlay,String>{
+    let bytes=crate::input::read(path,MAX_DXF_BYTES,"DXF bestand",cancel)?;
+    parse_dxf_bytes_with_cancel(&bytes,path,cancel)
 }
 
 #[cfg(test)]

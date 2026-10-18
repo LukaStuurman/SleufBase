@@ -3,12 +3,13 @@
 
 use eframe::egui::{self, Color32, Pos2, Stroke};
 use sleufbase_rust::{
-    load_job_features, write_dxf_with_layers, write_xlsx, Bounds, Dataset, Geometry,
+    write_dxf_with_layers, write_xlsx, Bounds, Dataset, Geometry,
     Vertex, RULES
 };
-use sleufbase_rust::dxf_read::{load_dxf, DxfOverlay};
+use sleufbase_rust::dxf_read::DxfOverlay;
+#[cfg(test)]
+use sleufbase_rust::dxf_read::load_dxf;
 use sleufbase_rust::virtual_trench::VirtualTrench;
-use sleufbase_rust::marxact;
 use sleufbase_rust::marxact_alignment;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
@@ -18,13 +19,16 @@ use sleufbase_rust::jobs_cache::{read_cache,JobsCache,Job};
 use sleufbase_rust::kickthemap_live::{KickTheMapLiveClient,RemoteFileKind};
 use sleufbase_rust::settings_compat::{self,MigratedSettings};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
-use sleufbase_rust::geotiff::{read_geotiff_metadata, GeoTiffInfo};
+use sleufbase_rust::geotiff::GeoTiffInfo;
 use sleufbase_rust::loaded_jobs::kickthemap_cache_dir;
 use sleufbase_rust::project::{
-    self, AutosaveSettings, NativeProject, Comment, read_project, save_project
+    self, AutosaveSettings, NativeProject, Comment, save_project
 };
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
+
+#[path="ui_file_loading.rs"]
+mod file_loading;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -59,6 +63,8 @@ enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf)
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    file_loader:Option<sleufbase_rust::file_loader::FileLoader>,
+    file_intent:Option<file_loading::FileIntent>,
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
     raster_textures: Vec<Option<egui::TextureHandle>>,
@@ -118,6 +124,8 @@ pub struct SleufBaseApp {
 impl Default for SleufBaseApp {
     fn default() -> Self {
         Self {
+            file_loader:None,
+            file_intent:None,
             datasets:Vec::new(),
             geotiffs:Vec::new(),
             raster_textures:Vec::new(),
@@ -195,6 +203,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.cancel_file_load();
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
         if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
@@ -209,14 +218,14 @@ impl SleufBaseApp {
         // can return. Its generation prevents importing into a different project.
     }
 
-    fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,_ctx:&egui::Context) {
+    fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,_ctx:&egui::Context) {
         self.clear_project_requests();
         self.datasets=doc.datasets; self.geotiffs=doc.rasters;
         self.raster_textures=vec![None;self.geotiffs.len()]; self.overlays=doc.overlays;
         self.dxf_selection=None;
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
-        self.trench_markers.clear();
+        self.trench_markers=markers;
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
         self.selected=(!self.datasets.is_empty()).then_some(0);
@@ -226,6 +235,7 @@ impl SleufBaseApp {
 
     fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
         if self.pending_project_action.is_some() {return;}
+        self.cancel_file_load();
         if self.dirty {self.pending_project_action=Some(action);}
         else {self.execute_project_action(action,ctx);}
     }
@@ -237,36 +247,16 @@ impl SleufBaseApp {
     }
 
     fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
-        let restore=matches!(&action,ProjectAction::Restore(_));
         match action {
             ProjectAction::New=>{
-                self.apply_project(NativeProject::default(),None,false,ctx);
+                self.apply_project(NativeProject::default(),None,false,Vec::new(),ctx);
                 self.message="Nieuw leeg Rust-project".into();
             }
-            ProjectAction::Open(path)|ProjectAction::Restore(path)=>{
-                match read_project(&path) {
-                    Ok(doc)=>{
-                        self.apply_project(doc,(!restore).then_some(path.clone()),restore,ctx);
-                        self.message=if restore {
-                            format!("Back-up hersteld uit {}. Sla op als nieuw project.",path.display())
-                        } else {format!("Rust-project geopend: {}",path.display())};
-                    }
-                    Err(err)=>self.message=format!("Project niet geladen; huidige gegevens behouden: {err}"),
-                }
-            }
-            ProjectAction::ImportPython(path)=>{
-                match sleufbase_rust::legacy_project::read_legacy_project(&path) {
-                    Ok(doc)=>{
-                        self.apply_project(doc,None,true,ctx);
-                        self.message="Python-project geïmporteerd. Sla op als Rust-project; bekijk de importmeldingen in de zijbalk.".into();
-                    }
-                    Err(err)=>self.message=format!("Python-project niet geïmporteerd; huidige gegevens behouden: {err}"),
-                }
-            }
             ProjectAction::Close=>{
-                self.close_confirmed=true;
+                self.cancel_file_load();self.close_confirmed=true;
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            other=>self.start_project_load(other),
         }
     }
 
@@ -327,6 +317,7 @@ impl SleufBaseApp {
     }
 
     fn try_autosave(&mut self) {
+        if self.file_intent.is_some(){return;}
         if !self.backup_settings.enabled ||
             self.last_backup.elapsed() <
                 Duration::from_secs(u64::from(self.backup_settings.interval_minutes)*60)
@@ -344,42 +335,6 @@ impl SleufBaseApp {
             Ok(path)=>self.message=format!("Automatische Rust-back-up: {}",path.display()),
             Err(err)=>self.message=format!("Automatische back-up mislukt: {err}"),
         }
-    }
-
-    fn load_files(&mut self, paths:Vec<PathBuf>) {
-        let mut added=0;
-        let mut failures=Vec::new();
-        for path in paths {
-            if self.datasets.iter().any(|ds| ds.source_path==path) {continue;}
-            match load_job_features(&path) {
-                Ok(dataset)=>{
-                    self.datasets.push(dataset);
-                    self.selected=Some(self.datasets.len()-1);
-                    added+=1;
-                }
-                Err(err)=>failures.push(format!("{}: {err}",path.display()))
-            }
-        }
-        if added>0 {self.dirty=true;}
-        self.message = format!("{added} KickTheMap-job(s) geladen. {}",failures.join("; "));
-    }
-
-    fn load_geotiffs(&mut self, paths:Vec<PathBuf>, _ctx:&egui::Context) {
-        let mut added=0;
-        let mut warnings=Vec::new();
-        for path in paths {
-            if self.geotiffs.iter().any(|info|info.path==path) {continue;}
-            match read_geotiff_metadata(&path) {
-                Ok(info)=>{
-                    self.geotiffs.push(info);
-                    self.raster_textures.push(None);
-                    added+=1;
-                }
-                Err(err)=>warnings.push(format!("{}: {err}",path.display()))
-            }
-        }
-        if added>0 {self.dirty=true;self.schedule_raster_previews();}
-        self.message=format!("{added} GeoTIFF-bestanden geladen. {}",warnings.join("; "));
     }
 
     fn schedule_raster_previews(&mut self) {
@@ -402,25 +357,6 @@ impl SleufBaseApp {
         ));
     }
 
-    fn replace_dxf_source(&mut self,index:usize,path:PathBuf) {
-        let Some(previous)=self.overlays.get(index)else{return;};
-        match load_dxf(&path) {
-            Ok(mut loaded)=>{
-                loaded.visible=previous.visible;
-                let choices=previous.layers.iter().map(|(name,layer)|(name.to_lowercase(),layer.visible)).collect::<std::collections::BTreeMap<_,_>>();
-                for (name,layer) in &mut loaded.layers {
-                    if let Some(old)=previous.layers.get(name){layer.visible=old.visible;}
-                    else if let Some(visible)=choices.get(&name.to_lowercase()){layer.visible = *visible;}
-                }
-                loaded.refresh_block_visibility();
-                self.overlays[index]=loaded;self.dirty=true;
-                if self.dxf_selection.as_ref().is_some_and(|s|s.overlay==index){self.dxf_selection=None;}
-                self.message=format!("DXF opnieuw geladen: {}. Laagkeuzes zijn behouden.",path.display());
-            }
-            Err(error)=>self.message=format!("DXF niet vervangen; huidige gegevens behouden: {error}"),
-        }
-    }
-
     fn poll_raster_previews(&mut self,ctx:&egui::Context) {
         let Some(loader)=&mut self.raster_loader else{return;};
         for ready in loader.poll() {
@@ -438,48 +374,6 @@ impl SleufBaseApp {
         }
         if loader.remaining()>0 {ctx.request_repaint_after(Duration::from_millis(50));}
     }
-
-    fn import_marxact(&mut self, paths:Vec<PathBuf>) {
-        let mut total=0usize;
-        let mut assigned=0usize;
-        let mut errors=Vec::new();
-        for path in paths {
-            if self.virtual_trenches.iter().any(|t|
-                t.source_path.as_deref()==Some(path.as_path())
-                && !t.boundary_3d.is_empty()) {
-                errors.push(format!("{}: dit MarXact-bestand is al geïmporteerd",path.display()));
-                continue;
-            }
-            match marxact::import_dxf(&path,&self.migrated_settings.marxact_name_mappings) {
-                Ok(result) => {
-                    total+=result.trenches.len();
-                    assigned+=result.assigned_insert_count;
-                    self.virtual_trenches.extend(result.trenches);
-                },
-                Err(err)=>errors.push(format!("{}: {err}",path.display()))
-            }
-        }
-        if total>0 {self.dirty=true;self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
-        self.message=format!(
-            "MarXact: {total} proefsleuven, {assigned} objecten ingelezen. {}",
-            errors.join("; ")
-        );
-    }
-
-    fn load_overlays(&mut self, paths:Vec<PathBuf>) {
-        let mut added=0;
-        let mut failures=Vec::new();
-        for path in paths {
-            if self.overlays.iter().any(|overlay|overlay.path==path) {continue;}
-            match load_dxf(&path) {
-                Ok(overlay)=>{self.overlays.push(overlay);added+=1;}
-                Err(err)=>failures.push(format!("{}: {err}",path.display()))
-            }
-        }
-        if added>0 {self.dirty=true;}
-        self.message=format!("{added} DXF-overlays geladen. {}",failures.join("; "));
-    }
-
 
     fn current_bounds(&self)->Option<Bounds> {
         let mut bounds=Bounds::from_datasets(&self.datasets);
@@ -1162,11 +1056,16 @@ fn canvas(
 
 impl eframe::App for SleufBaseApp {
     fn update(&mut self,ctx:&egui::Context,_frame:&mut eframe::Frame) {
-        if ctx.input(|i|i.viewport().close_requested()) && !self.close_confirmed && self.dirty {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            self.request_project_action(ProjectAction::Close,ctx);
+        if ctx.input(|i|i.viewport().close_requested()) && !self.close_confirmed {
+            self.cancel_file_load();
+            if self.dirty {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.request_project_action(ProjectAction::Close,ctx);
+            }
         }
         ctx.set_visuals(egui::Visuals::light());
+        if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
+        self.poll_file_jobs(ctx);
         self.try_autosave();
         self.poll_raster_previews(ctx);
         self.poll_pdok(ctx);
@@ -1249,6 +1148,7 @@ impl eframe::App for SleufBaseApp {
             }
         });
 
+        if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
             egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
@@ -1486,6 +1386,7 @@ impl eframe::App for SleufBaseApp {
             });
         });
 
+        if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
         if self.trench_markers.len()!=self.virtual_trenches.len() {
             self.trench_markers=self.virtual_trenches.iter().map(sleufbase_rust::cross_section::markers).collect();
         }
@@ -1617,6 +1518,14 @@ impl eframe::App for SleufBaseApp {
 #[cfg(test)]
 mod project_lifecycle_tests {
     use super::*;
+    fn finish_loading(app:&mut SleufBaseApp,ctx:&egui::Context){
+        let deadline=Instant::now()+Duration::from_secs(15);
+        while app.file_intent.is_some(){
+            app.poll_file_jobs(ctx);
+            assert!(Instant::now()<deadline,"file loading did not finish");
+            std::thread::sleep(Duration::from_millis(2));
+        }
+    }
     fn edited_app()->SleufBaseApp {
         let mut app=SleufBaseApp::default();
         app.comments.push(Comment{x:168000.0,y:401000.0,text:"unsaved".into()});
@@ -1650,6 +1559,9 @@ mod project_lifecycle_tests {
         assert_eq!(app.comments[0].text,"unsaved");
         app.finish_project_action(true,&ctx);
         assert_eq!(app.comments[0].text,"unsaved"); assert!(app.dirty);
+        finish_loading(&mut app,&ctx);
+        assert_eq!(app.comments[0].text,"unsaved");assert!(app.dirty);
+        assert!(app.message.contains("huidige gegevens behouden"));
         assert!(app.project_path.is_none());
     }
 
@@ -1662,6 +1574,7 @@ mod project_lifecycle_tests {
         app.finish_project_action(true,&ctx);
         assert!(app.comments.is_empty());
         app.request_project_action(ProjectAction::Restore(saved.clone()),&ctx);
+        finish_loading(&mut app,&ctx);
         assert_eq!(app.comments[0].text,"unsaved"); assert!(app.dirty);
         assert!(app.project_path.is_none());
         let original=std::fs::read(&saved).unwrap();
@@ -1700,6 +1613,7 @@ mod project_lifecycle_tests {
         assert!(app.datasets.is_empty());assert!(!app.dirty);assert!(path.exists());
         app.live_download_generation=app.project_generation;
         app.apply_live_download_result(Ok((RemoteFileKind::JobFeatures,path)),&ctx);
+        assert!(app.datasets.is_empty());finish_loading(&mut app,&ctx);
         assert_eq!(app.datasets.len(),1); assert!(app.dirty);
     }
 
@@ -1712,6 +1626,7 @@ mod project_lifecycle_tests {
         assert!(app.legacy_archive.is_none());assert_eq!(app.comments[0].text,"unsaved");
         app.finish_project_action(true,&ctx);
         assert!(app.dirty);assert!(app.project_path.is_none());
+        assert!(app.legacy_archive.is_none());finish_loading(&mut app,&ctx);
         let doc=app.snapshot();
         assert_eq!(doc.legacy_archive.unwrap().original["project_name"],"PS42");
         assert!(app.active_job_ids().contains(&123));
@@ -1747,11 +1662,13 @@ mod project_lifecycle_tests {
         let mut root=old.layers.remove("ROOT").unwrap();root.visible=false;old.layers.insert("rOoT".into(),root);
         app.overlays.push(old);app.select_dxf(0,0);
         app.replace_dxf_source(0,path);
+        finish_loading(&mut app,&egui::Context::default());
         assert!(!app.overlays[0].blocks.is_empty());assert_eq!(app.overlays[0].expanded.features.len(),82);
         assert!(!app.overlays[0].visible);assert!(!app.overlays[0].layers["ROOT"].visible);
         assert!(app.dirty);assert!(app.dxf_selection.is_none());
         let before=serde_json::to_value(&app.overlays[0]).unwrap();let cache=app.overlays[0].expanded.clone();
         app.dirty=false;app.replace_dxf_source(0,"does-not-exist.dxf".into());
+        finish_loading(&mut app,&egui::Context::default());
         assert_eq!(serde_json::to_value(&app.overlays[0]).unwrap(),before);
         assert!(std::sync::Arc::ptr_eq(&cache,&app.overlays[0].expanded));assert!(!app.dirty);
         assert!(app.message.contains("huidige gegevens behouden"));
@@ -1810,6 +1727,7 @@ mod project_lifecycle_tests {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");
         app.load_geotiffs(vec![root.join("gray16.tiff")],&ctx);
+        finish_loading(&mut app,&ctx);
         assert_eq!(app.geotiffs.len(),1);assert!(app.raster_textures[0].is_none());
         let deadline=Instant::now()+Duration::from_secs(10);
         while app.raster_textures[0].is_none() {

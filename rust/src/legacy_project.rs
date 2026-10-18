@@ -2,7 +2,6 @@
 //! in native saves, including fields not yet editable/rendered by the preview.
 //! This does not claim full workflow parity or a Python-format exporter.
 use crate::{
-    dxf_read::load_dxf,
     geo::GeoTransform,
     geotiff::read_geotiff_metadata,
     marxact_alignment::MarXactAlignment,
@@ -13,8 +12,6 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{
-    fs::File,
-    io::Read,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -191,23 +188,20 @@ fn virtual_trench(item: &Value, source: &Path, index: usize) -> Result<VirtualTr
 }
 
 pub fn read_legacy_project(source: &Path) -> Result<NativeProject, String> {
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    if file.metadata().map_err(|e| e.to_string())?.len() > MAX_PROJECT_BYTES {
-        return Err("Python-project is te groot".into());
-    }
-    let mut bytes = Vec::new();
-    file.take(MAX_PROJECT_BYTES + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|e| e.to_string())?;
-    if bytes.len() as u64 > MAX_PROJECT_BYTES {
-        return Err("Python-project is te groot".into());
-    }
+    read_legacy_project_with_cancel(source,&crate::input::NEVER_CANCEL)
+}
+pub fn read_legacy_project_with_cancel(source:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<NativeProject,String>{
+    let bytes=crate::input::read(source,MAX_PROJECT_BYTES,"Python-project",cancel)?;
     let original: Value =
         serde_json::from_slice(&bytes).map_err(|e| format!("Ongeldig Python-project: {e}"))?;
-    import_value(original, source)
+    import_value_with_cancel(original, source,cancel)
 }
 
 pub fn import_value(original: Value, source: &Path) -> Result<NativeProject, String> {
+    import_value_with_cancel(original,source,&crate::input::NEVER_CANCEL)
+}
+fn import_value_with_cancel(original:Value,source:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<NativeProject,String>{
+    crate::input::check(cancel)?;
     if original.get("version").and_then(Value::as_u64) != Some(1) || !original.is_object() {
         return Err("Alleen het Python .klicproject formaat versie 1 wordt ondersteund".into());
     }
@@ -221,6 +215,7 @@ pub fn import_value(original: Value, source: &Path) -> Result<NativeProject, Str
     }
     let mut notices=vec!["Originele laagmetadata, sjablooninstellingen, slotvolgorde en UI-instellingen zijn bewaard in het Rust-project; deze worden nog niet allemaal toegepast. Dit is nog geen volledige Python-projectpariteit.".into()];
     for (index, item) in items(&original, "tiffs")?.iter().enumerate() {
+        crate::input::check(cancel)?;
         if !item.is_object() {
             return Err(format!("Ongeldig proefsleufitem {}", index + 1));
         }
@@ -253,12 +248,13 @@ pub fn import_value(original: Value, source: &Path) -> Result<NativeProject, Str
         }
     }
     for item in items(&original, "dxfs")? {
+        crate::input::check(cancel)?;
         let name = text(item.get("path"));
         if name.is_empty() {
             return Err("DXF-projectitem mist een pad".into());
         }
         let path = asset_path(source, &name);
-        match load_dxf(&path) {
+        match crate::dxf_read::load_dxf_with_cancel(&path,cancel) {
             Ok(mut overlay) => {
                 overlay.visible = item.get("visible").and_then(Value::as_bool).unwrap_or(true);
                 project.overlays.push(overlay);
@@ -286,5 +282,6 @@ pub fn import_value(original: Value, source: &Path) -> Result<NativeProject, Str
         notices,
     });
     project.validate()?;
+    crate::input::check(cancel)?;
     Ok(project)
 }

@@ -1,6 +1,5 @@
 use crate::model::{Dataset, Feature, Geometry, Vertex};
 use serde_json::Value;
-use std::fs;
 use std::path::Path;
 
 const MAX_JSON_SIZE: u64 = 256 * 1024 * 1024;
@@ -87,11 +86,11 @@ pub fn parse_job_features(content: &str, job_id: u64, title: &str) -> Result<Dat
 }
 
 pub fn load_job_features(path: &Path) -> Result<Dataset, String> {
-    let size = fs::metadata(path).map_err(|e| format!("Bestand niet toegankelijk: {e}"))?.len();
-    if size > MAX_JSON_SIZE {
-        return Err("JSON-bestand is groter dan 256 MiB".into());
-    }
-    let content = fs::read_to_string(path).map_err(|e| format!("JSON lezen mislukt: {e}"))?;
+    load_job_features_with_cancel(path,&crate::input::NEVER_CANCEL)
+}
+pub fn load_job_features_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String>{
+    let bytes=crate::input::read(path,MAX_JSON_SIZE,"JSON-bestand",cancel)?;
+    let content=std::str::from_utf8(&bytes).map_err(|e|format!("JSON lezen mislukt: {e}"))?;
     // Signed-URL downloads and existing Python TIFF/jobFeatures bundles can
     // carry a safe job sidecar. Do not derive job identity only from a folder:
     // Rust stores all downloaded jobs together in a /Rust directory.
@@ -110,7 +109,8 @@ pub fn load_job_features(path: &Path) -> Result<Dataset, String> {
         .or_else(||path.parent().and_then(Path::file_name).and_then(|s|s.to_str()))
         .or_else(||path.file_stem().and_then(|s|s.to_str()))
         .unwrap_or("Onbekende job");
-    let mut dataset = parse_job_features(&content, job_id, title)?;
+    let mut dataset = parse_job_features(content, job_id, title)?;
+    crate::input::check(cancel)?;
     dataset.source_path = path.to_owned();
     Ok(dataset)
 }
@@ -118,6 +118,7 @@ pub fn load_job_features(path: &Path) -> Result<Dataset, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     #[test]
     fn point_and_linestring_and_ignored_features() {
         let json = r#"{"features":[
