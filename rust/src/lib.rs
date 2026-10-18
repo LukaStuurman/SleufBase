@@ -29,6 +29,7 @@ pub mod legacy_project;
 pub mod storage;
 pub mod virtual_trench;
 pub mod cross_section;
+pub mod profile;
 pub mod pdok_wms;
 pub mod jobs_cache;
 pub mod kickthemap_live;

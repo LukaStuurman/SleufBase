@@ -55,6 +55,21 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_object_exports.py "$env:OBJECT_EXPORT_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify original Python profile references
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'numpy==2.2.6' 'Pillow==11.3.0' 'shapely==2.0.7' 'requests==2.32.4' 'pyproj==3.7.1' 'mapbox-vector-tile==2.2.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_profile_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profiles/reference.json rust/src/profile_unicode.rs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path rust/Cargo.toml --test profiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --release --manifest-path rust/Cargo.toml --example benchmark_profiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently compare configured CLI reports and DXF colors
         shell: pwsh
         env:

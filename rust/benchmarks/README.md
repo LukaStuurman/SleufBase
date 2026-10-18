@@ -146,3 +146,28 @@ heeft een andere checksum en is geen bytevergelijking tussen versies. De aparte
 ezdxf-audit bevestigt de geometrie/metadata van alle veertien Python-referenties,
 de echte CLI en aanvullende lagen. Tijdmetingen tussen afzonderlijke builds
 zijn indicatief; de bewerkings-/heapgrenzen hierboven blijven van toepassing.
+
+## Profielkern zonder tijdelijke vertexarrays
+
+`profile-kernel-windows-gnu-2026-10-18.csv` meet alleen `profile::build` op
+Windows x64, Rust 1.99.1 GNU, release/LTO. De invoer bevat twee gemeten eindpunten
+en één rechte 3D-waterleiding met 1.000, 100.000 of 1.000.000 vertices. Het begin
+is expliciet vastgelegd; er zijn geen weg-/terreinpaden. De drie profielpunten,
+aslengte en geïnterpoleerde leidingpositie/-hoogte worden gecontroleerd.
+
+Elke grootte krijgt één opwarmronde en drie meetrondes. De mediane kerntijden
+zijn respectievelijk 7 µs, 602 µs en 7.929 µs. In alle rondes zijn er 16
+allocatieaanroepen en is de grootste afzonderlijke allocatie 336 bytes. De
+allocatorcontrole wordt pas na de opbouw van de invoer aangezet. CI weigert een
+afzonderlijke allocatie vanaf 8 KiB of vanaf 100 aanroepen, zodat een onbedoelde
+tijdelijke vertex-/segmentarray voor de grote lijn wordt ontdekt.
+
+Deze grootste allocatie is geen levende/gesommeerde heap of procespiek.
+Invoerbezit, bronladen, GUI, sortering van veel afzonderlijke features, context-
+zoeken, schijf-I/O en Python zijn hier niet gemeten. Dit bewijst geen algemene
+snelheidswinst of begrensd totaalgeheugen. Functionele geometrie wordt apart
+vergeleken met [224 oorspronkelijke Python-profielen](../tests/fixtures/profiles/README.md).
+
+Reproduceren:
+
+    cargo run --release --manifest-path rust/Cargo.toml --example benchmark_profiles

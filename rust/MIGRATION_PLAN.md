@@ -194,6 +194,17 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   reparaties. CI controleert workeruitvoer apart van directe encoder en CLI.
   Annulering blijft coöperatief; één systeem-/sorteer-/geometrie-/XML-/compressiefase
   kan nog aflopen. Geen totale geheugen-/crashgarantie of volledige praktijkacceptatie.
+- De onafhankelijke profielrekenkern is overgezet: stabiele begin/eindkeuze,
+  weg-/terreinoriëntatie, expliciet MarXact-begin (0,5 m), zelfstandig omgekeerde
+  berekening, synthetische begrenzing inclusief diameter en dubbele markers,
+  hoogtemiddens van polylijnen, kettingmaat, peil en disciplinebeschrijvingen.
+  Geen gekopieerde vertex-/segmentarrays; bronfeatures via index en regellagen
+  geleend. Niet-eindige waarden/overflow geven een fout; scans controleren
+  annulering. 224 resultaten en afzonderlijke projectie-/maaiveldwaarden zijn
+  bevroren uit de oorspronkelijke V9-gepatchte Python-methoden. CI regenereert
+  de orakels en verlangt een identieke diff. 190 Rust-tests groen. Dit is nog
+  geen profieltekening of werkende sjabloon-/UI-export; de omgekeerde bronmetadata,
+  maatbalken, leaders, clipping, rasterassets en dynamische blokken blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
