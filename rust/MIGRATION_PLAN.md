@@ -205,6 +205,19 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   de orakels en verlangt een identieke diff. 190 Rust-tests groen. Dit is nog
   geen profieltekening of werkende sjabloon-/UI-export; de omgekeerde bronmetadata,
   maatbalken, leaders, clipping, rasterassets en dynamische blokken blijven open.
+- De sjabloonbasis bewaart originele UTF-8-bronrecords en indexeert bereiken/handles,
+  zodat onbekende CAD-records/layouts/dictionaries/proxydata niet via de verliesgevende
+  kaartimport verdwijnen. Alleen bedoelde TEXT/ATTRIB/ATTDEF-/MTEXT-inhoud wordt
+  gewijzigd; MTEXT krijgt begrensde Unicode-chunks. Begrensd lezen/schrijven,
+  LF/CRLF/BOM, dubbele handles, structuurschade, injectie, herhaalde tekstbewerkingen
+  en afbreken tussen schrijfblokken getest. Oorspronkelijke vakherkenning geeft
+  dezelfde 32 vakken in het echte sjabloon en dezelfde uitkomst op vijf synthetische
+  bronnen. Onafhankelijke Python-tagvergelijking en ezdxf controleren 96 echte
+  tekstwijzigingen plus synthetische varianten, alle overige tags, layouts/blokken
+  en geen nieuwe auditproblemen. De bekende bronproxy #147B7 met ongeldige eigenaar
+  blijft behouden en vergt nog exportopschoning. 196 Rust-tests groen. Binaire/oude
+  sjabloonbewerking, pagina-/handlevermenigvuldiging, volledige geometrie/assets,
+  dynamische varianten en UI-export ontbreken; dit is geen volledige sjabloonexport.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

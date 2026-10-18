@@ -15,6 +15,8 @@ mod input;
 mod raster_color;
 mod tiff_view;
 pub mod dxf_read;
+pub mod dxf_document;
+pub mod template_slots;
 pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;
