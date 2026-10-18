@@ -1,5 +1,6 @@
 //! SleufBase Rust port — local KickTheMap data model and exports.
-//! The historical Python application remains unchanged until parity is reached.
+//! Python remains the default application until parity is reached; explicitly
+//! requested desktop improvements are also carried into the native port.
 
 pub mod disciplines;
 pub mod discipline_xlsx;
@@ -19,6 +20,7 @@ pub mod dxf_document;
 pub mod template_slots;
 pub mod template_transaction;
 pub mod template_images;
+pub mod template_metadata;
 pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;

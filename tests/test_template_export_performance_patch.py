@@ -103,6 +103,16 @@ class _FakeSession:
 class TemplateExportPerformancePatchTests(unittest.TestCase):
     def test_one_worker_policy_keeps_all_fetch_results(self) -> None:
         script = """
+import importlib.util
+from pathlib import Path
+import sys
+# Load this checkout even when its directory is named SleufBase-rust. The
+# machine may also contain a different, older checkout named SleufBase.
+root = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("SleufBase", root / "__init__.py", submodule_search_locations=[str(root)])
+package = importlib.util.module_from_spec(spec)
+sys.modules["SleufBase"] = package
+spec.loader.exec_module(package)
 from SleufBase import template_export_performance_patch as perf
 from SleufBase.large_template_export_patch import _parallel_ordered_bounded
 assert perf.MAX_LOCAL_WFS_WORKERS == perf.MAX_LOCAL_BGT_WORKERS == perf.MAX_TEMPLATE_PATH_WORKERS == 1
@@ -110,7 +120,7 @@ for fetch in (perf._parallel_ordered, _parallel_ordered_bounded):
     assert fetch(list(range(40)), lambda value: value * 2, max_workers=1) == list(range(0, 80, 2))
 """
         process = subprocess.run(
-            [sys.executable, "-c", script],
+            [sys.executable, "-c", script, str(Path(__file__).resolve().parents[1])],
             env={
                 **os.environ, "SLEUFBASE_MAX_WORKERS": "1",
                 "PYTHONPATH": os.pathsep.join((

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 import re
 import shutil
@@ -297,6 +296,7 @@ class CadastralDxfExporter:
         include_bgt_roadparts: bool = True,
         template_drawn_by: str = "",
         cross_section_diameter_text: str = "Ø",
+        template_project_name: str | None = None,
     ) -> Path:
         if not tiff_layers:
             raise CadastralExportError("Laad eerst minimaal een GeoTIFF-bestand.")
@@ -392,6 +392,7 @@ class CadastralDxfExporter:
             document,
             used_layout_names,
             template_drawn_by=template_drawn_by,
+            template_project_name=template_project_name,
         )
         self._update_template_scale_list(document)
         self._configure_template_wireframe_viewports(document, tiff_layers, used_layout_names, label_gap)
@@ -1406,24 +1407,17 @@ class CadastralDxfExporter:
         layout_names: list[str],
         *,
         template_drawn_by: str,
+        template_project_name: str | None = None,
     ) -> None:
-        values = {
-            "DATUM1": datetime.now().strftime("%d-%m-%Y"),
-            "OMSCHRIJVING1": "Proefsleuven",
-            "TEKENAAR1": str(template_drawn_by or "").strip(),
-        }
-        for layout_name in layout_names:
-            try:
-                layout = document.layouts.get(layout_name)
-            except Exception:
-                continue
-            for entity in layout:
-                if entity.dxftype() != "INSERT":
-                    continue
-                for attrib in getattr(entity, "attribs", []):
-                    tag = str(attrib.dxf.tag or "").strip().upper()
-                    if tag in values:
-                        attrib.dxf.text = values[tag]
+        from .template_metadata import update_title_blocks
+
+        update_title_blocks(
+            document,
+            layout_names,
+            drawn_by=template_drawn_by,
+            project=(template_project_name if template_project_name is not None
+                     else getattr(self, "template_project_name", None)),
+        )
 
     def _configure_template_wireframe_viewports(
         self,

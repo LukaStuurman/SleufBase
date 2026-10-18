@@ -4,6 +4,9 @@ Doel: volledige functiepariteit, aantoonbaar betere prestaties waar mogelijk,
 en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid.
 `PARITY.md` blijft de acceptatiechecklist; een compilatie is geen productacceptatie.
 
+Aanvullende gebruikerswens: projectnaam invoeren in het DXF-sjabloonexportvenster
+en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
+
 ## Volgorde en bewijs
 
 1. **Gegevensintegriteit en projectlevenscyclus**: atomair opslaan/exporteren,
@@ -231,6 +234,21 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
   zijn onafhankelijk teruggelezen, inclusief bronbehoud, koppelingen en tellers.
   Rastervoorbereiding/achtergronden/foto's, oude externe assetverplaatsing,
   volledige profiel-/pagina-/dynamische export en de UI-workflow blijven open.
+  206 Rust-tests, Clippy, releasebuild en onafhankelijke release-audits geslaagd.
+- Projectnaam is op uitdrukkelijk verzoek toegevoegd aan het bestaande desktop-
+  sjabloonexportvenster; bevestigen geeft de waarde door aan de exporter en
+  annuleren behoudt de vorige waarde. Datum wordt één keer per document lokaal
+  bepaald en vult DATUM1 of de eerste ongenummerde DATUM-revisieregel. Projectnaam
+  vult GEM-PROJECT/PROJECTOMSCHRIJVING/PROJECTNAAM; projectnummer, ongebruikte bladen,
+  blokdefinities en latere revisies blijven intact. De native Rust-kern voert
+  dezelfde bewerkingen atomair en begrensd uit. Vier onafhankelijke DXF-cases
+  controleren 78 velden en alle overige tags; Windows-lokale datum vergeleken met
+  Python. 210 Rust-tests en vijf Python-regressies inclusief een echt Tk-venster
+  geslaagd. Ook de volledige Python-suite (383 tests), Clippy, releasebuild en
+  onafhankelijke native release-audit slagen. Een bestaande subprocestest laadt
+  nu expliciet deze checkout, zodat een andere checkout met dezelfde pakketnaam
+  de test niet overneemt. De volledige native sjabloonexport en het bijbehorende
+  venster blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
