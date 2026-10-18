@@ -64,6 +64,9 @@ pub struct Document {
     output_len: usize,
     pub(crate) image_batch_added: bool,
     pub(crate) added_layers: HashSet<String>,
+    // Newly declared circle-only blocks have no ATTDEFs. Keep their bases so
+    // later entity batches can reference them without reparsing the document.
+    pub(crate) added_blocks: HashMap<String, [f64; 3]>,
 }
 #[derive(Clone, Copy)]
 pub struct RecordView<'a> {
@@ -429,6 +432,7 @@ impl Document {
             output_len,
             image_batch_added: false,
             added_layers: HashSet::new(),
+            added_blocks: HashMap::new(),
         })
     }
     pub fn records(&self) -> impl Iterator<Item = RecordView<'_>> {

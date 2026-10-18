@@ -33,6 +33,7 @@ fn dataset() -> Dataset {
 }
 fn band(anchor: f64, pinned: bool) -> Band {
     Band {
+        point_index: 0,
         feature_index: 0,
         anchor_x: anchor,
         placed_x: anchor,

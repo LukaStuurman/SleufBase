@@ -42,6 +42,7 @@ fn layer() -> Layer {
         name: "Native geometry".into(),
         color: 3,
         true_color: Some(0x123456),
+        lineweight: None,
     }
 }
 #[test]

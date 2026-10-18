@@ -286,6 +286,27 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   Releasebuild en alle vier onafhankelijke release-audits slagen: 928 kader-/
   bandobjecten, 89 generieke tekenobjecten, 91 rasterplaatsingen en 78 titelvelden.
   De vijf GitHub-controles van de voorafgaande tekenlaagstap (`3a8d6ea`) zijn groen.
+- Maaiveld-/oppervlakteweergave, grondvak, gemeten profielpolylijnen en losse
+  profielmarkeringen toegevoegd. Kleuren en tekstprioriteit volgen de oorspronkelijke
+  helpers; automatische BGT-teksten worden als vooraf opgeloste invoer doorgegeven.
+  Cirkelblokken worden native/atomair gedeclareerd en direct door latere batches
+  gebruikt, zonder het document opnieuw te lezen. Geclipte cirkels volgen de 64
+  oorspronkelijke segmenten; de onafhankelijke controle ving een fout waarbij
+  het tweede clipeindpunt vanaf het gewijzigde beginpunt werd berekend. Dat is
+  hersteld. Metadata met ongeldige hex-underscores krijgt een veilige fallback.
+  De volledige oorspronkelijke tekenmethode levert 24 samengestelde referenties
+  met 2.209 objecten; alle harde/zachte segmenten en tekstobstakels zijn vergeleken.
+  Nog 150 clips en twaalf tekst-/kleurgevallen zijn onafhankelijk gecontroleerd.
+  Directe profielpuntindices voorkomen herhaald zoeken per band; namen van
+  gelijkwaardige lagen worden geleend en eenmaal gedeclareerd met eerste
+  schrijfwijze/laatste kleur. Samenstellen verplaatst geometrie zonder kopieën
+  van bronvertices. BGT-oppervlaktegeometrie/-fetch, referentie-indicatoren, donor-
+  dynamische leaders, wijzigingen van bestaande aangepaste laagstijlen en de
+  volledige sjabloon-/pagina-/UI-workflow blijven open.
+  225 Rust-tests, Clippy en releasebuild geslaagd. Alle vijf onafhankelijke
+  release-audits slagen: 2.209 samengestelde profielobjecten, 928 kader-/bandobjecten,
+  89 generieke tekenobjecten, 91 rasterplaatsingen en 78 titelvelden. De vijf
+  GitHub-controles van de voorafgaande kader-/bandstap (`6469ff1`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

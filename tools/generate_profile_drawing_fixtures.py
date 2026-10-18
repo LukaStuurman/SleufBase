@@ -30,9 +30,12 @@ def main():
             return result
 
         def _add_template_profile_reference_indicator(self,*args,**kwargs):
-            return self.trace(super()._add_template_profile_reference_indicator,*args,**kwargs)
+            result=self.trace(super()._add_template_profile_reference_indicator,*args,**kwargs)
+            self.reference_boxes=result[1]
+            return result
 
         def _distribute_template_leader_labels(self,*args,**kwargs):
+            self.obstacles=dict(hard=kwargs.get("hard_static_line_segments",[]),soft=kwargs.get("soft_static_line_segments",[]),text=kwargs.get("static_text_boxes",[]))
             return self.trace(super()._distribute_template_leader_labels,*args,**kwargs)
 
         def trace(self,method,*args,**kwargs):
@@ -91,10 +94,21 @@ def main():
             show_reference=manual==250
             if show_reference:
                 layer.metadata[exporter.TEMPLATE_REFERENCE_POINT_METADATA_KEY]=dict(x=profile.start_point.x+profile.axis_dx*0.37,y=profile.start_point.y+profile.axis_dy*0.37)
-            exporter.bands=[];exporter.excluded=set()
-            exporter._add_template_cross_section(doc,doc.modelspace(),slot,layer,"PS007B",profile,show_reference,False,[],False,False,case["marker_scale"],manual,"Ø")
+            automatic={"start":"Asfalt","middle":"Klinkers","end":"Gras"} if manual==250 else {}
+            if manual is not None:
+                layer.metadata[exporter.TEMPLATE_MAAIVELD_METADATA_KEY]={"start":{"text":" Asfalt ","color":"#aBcDeF"},"middle":{"text":"invullen","color":"bad"},"end":{"text":"Gras 漢😀","color":"#123456"}}
+            fills=exporter._template_maaiveld_fill_segments(layer,use_custom_values=manual is not None,automatic_values=automatic)
+            # Supply pre-resolved BGT texts at the drawing-stage boundary.
+            exporter._template_bgt_surface_texts=lambda *args: automatic
+            clip=manual!=20
+            exporter.bands=[];exporter.excluded=set();exporter.reference_boxes=[]
+            exporter._add_template_cross_section(doc,doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,[],False,clip,case["marker_scale"],manual,"Ø")
             expected=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded and ((e.dxftype()=="INSERT" and e.dxf.name.startswith(PREFIX)) or (e.dxftype()=="LWPOLYLINE" and e.dxf.layer==LAYER))]
-            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands))
+            complete=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded]
+            obstacle=dict(hard=exporter.obstacles["hard"],soft=exporter.obstacles["soft"][:3],text=exporter.obstacles["text"][:len(exporter.obstacles["text"])-len(exporter.reference_boxes)])
+            marker_name="SAL-VERWIJZING_PROFIELPUNT-MARKER-SOD"
+            marker_definition=[signature(e) for e in doc.blocks[marker_name]] if marker_name in doc.blocks else None
+            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands,body_expected=complete,obstacles=obstacle,metadata=layer.metadata,automatic=automatic,use_custom=manual is not None,clip_markers=clip,fills=[dict(text=fills[k]["text"],rgb=int.from_bytes(bytes(fills[k]["rgb"]),"big")) for k in ["start","middle","end"]],marker_definition=marker_definition))
     labels=["PS007B","sleuf ٠٠١٢ſİıK","PS A","ps geen","x 0z","PS1a2b","nr １２３XYZ"]
     rng=random.Random(73318)
     band_cases=[]
@@ -113,7 +127,17 @@ def main():
         exporter._distribute_template_band_labels(doc.modelspace(),entries,low,high)
         band_cases.append(dict(min_x=low,max_x=high,height=height,anchors=anchors,pinned=pinned,expected=[e["placed_x"] for e in entries]))
     distances=[-0.0001,-0.0049,-0.005,-0.0,0.0,2.125,2.675,1.005,12345.675]
-    result=dict(cases=cases,band_cases=band_cases,labels=[dict(label=s,number=exporter._profile_identifier(s),description=exporter._profile_description(s)) for s in labels],distances=[dict(value=v,text=exporter._format_template_profile_distance(v)) for v in distances])
+    clip_cases=[]
+    for _ in range(150):
+        a=[rng.uniform(-3,3),rng.uniform(-3,3)];b=[rng.uniform(-3,3),rng.uniform(-3,3)]
+        clip_cases.append(dict(a=a,b=b,left=-1,right=1,bottom=0,expected=exporter._clip_profile_marker_segment(a,b,-1,1,0)))
+    fill_cases=[]
+    for item in [{},{"text":None,"color":"bad"},{"text":"invullen","color":"#abcdef"},{"text":" Tegels 漢😀 ","color":"#١٢٣٤٥٦"},{"text":True,"color":False},{"text":0,"color":"#123456"}]:
+        metadata={"template_maaiveld_segments":{"middle":item}}
+        for use_custom in [False,True]:
+            automatic={"middle":"Asfalt"};resolved=exporter._template_maaiveld_fill_segments(SimpleNamespace(metadata=metadata),use_custom_values=use_custom,automatic_values=automatic)
+            fill_cases.append(dict(metadata=metadata,automatic=automatic,use_custom=use_custom,expected=[dict(text=resolved[k]["text"],rgb=int.from_bytes(bytes(resolved[k]["rgb"]),"big")) for k in ["start","middle","end"]]))
+    result=dict(cases=cases,band_cases=band_cases,clip_cases=clip_cases,fill_cases=fill_cases,labels=[dict(label=s,number=exporter._profile_identifier(s),description=exporter._profile_description(s)) for s in labels],distances=[dict(value=v,text=exporter._format_template_profile_distance(v)) for v in distances])
     (OUT / "reference.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(len(cases),"original profile frame/band drawings",sum(len(c["expected"]) for c in cases),"entities")
 

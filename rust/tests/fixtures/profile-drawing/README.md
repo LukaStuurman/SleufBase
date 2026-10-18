@@ -27,6 +27,21 @@ all entities/attributes, preserved source tags, INSERT links and CAD audits.
 The original template-geometry and image audits continue to cover composition
 with the complete shipped template and permanent raster bundles.
 
-This implements the frame/band drawing stage. Terrain/surface texts, markers,
-reference indicators, dynamic leaders, page replication and the complete native
-template-export UI remain required for full migration parity.
+The `--body` audit additionally compares terrain lines/colors, surface texts and
+their rotated bounds, the soil cell, projected measured polylines and standalone
+markers (including 64-segment clipping). The 24 composed drawings contain 2,209
+objects. All hard/soft segments and text obstacles for the next leader stage are
+compared with the original collector. The marker block is declared natively and
+its circle, ownership and block-table count are independently checked.
+
+Twelve extra fill cases compare custom/automatic precedence and Unicode colors;
+150 original segment-clip cases include crossing/rejection/boundary behavior.
+Malformed underscore-containing hex colors now safely fall back instead of
+triggering the original integer-conversion failure. Source vertices remain
+borrowed; direct profile-point indices avoid scanning all points for every band.
+Frame, body, per-point geometry and connectors are composed by moving entities.
+
+Automatic text resolution accepts pre-resolved BGT values at the drawing-stage
+boundary; BGT physical-appearance geometry/fetch integration remains open.
+Reference indicators, dynamic leaders, page replication, layer-style updates
+for existing custom layers and the full native template UI also remain required.

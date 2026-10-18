@@ -3,7 +3,7 @@ use sleufbase_rust::{
     dxf_document::Document,
     profile::{self, Options as ProfileOptions, XY},
     profile_drawing::{self, Options, Templates},
-    storage, template_geometry, Bounds, Dataset, Feature, Rule,
+    profile_surface, storage, template_geometry, Bounds, Dataset, Feature, Rule,
 };
 use std::{path::PathBuf, sync::atomic::AtomicBool};
 #[derive(serde::Deserialize)]
@@ -36,8 +36,13 @@ struct Case {
     label: String,
     reference_chainage: f64,
     distance_description: String,
+    metadata: serde_json::Value,
+    automatic: serde_json::Value,
+    use_custom: bool,
+    clip_markers: bool,
 }
 fn main() -> Result<(), String> {
+    let body_mode = std::env::args().any(|a| a == "--body");
     let output = PathBuf::from(std::env::args().nth(1).ok_or("output directory required")?);
     if output.exists()
         && std::fs::read_dir(&output)
@@ -84,7 +89,7 @@ fn main() -> Result<(), String> {
             &cancel,
         )?
         .ok_or("expected profile")?;
-        let drawing = profile_drawing::frame_and_bands(
+        let mut drawing = profile_drawing::frame_and_bands(
             &profile,
             &dataset,
             [case.row, case.tiff],
@@ -100,12 +105,36 @@ fn main() -> Result<(), String> {
         )?
         .ok_or("expected drawing")?;
         let mut doc = Document::from_bytes(source.to_vec(), &cancel)?;
-        template_geometry::add(&mut doc, &[], &drawing.entities, &cancel)?;
+        let mut obstacles = None;
+        let mut fills = None;
+        let mut layers = Vec::new();
+        if body_mode {
+            let resolved =
+                profile_surface::resolve(&case.metadata, &case.automatic, case.use_custom)?;
+            let body = profile_surface::build(
+                &profile,
+                &dataset,
+                &drawing,
+                case.tiff,
+                &resolved,
+                profile_surface::Options {
+                    clip_markers: case.clip_markers,
+                    marker_in_leader: false,
+                },
+                &cancel,
+            )?;
+            let (required, context) = profile_surface::compose(&mut drawing, body)?;
+            layers = required;
+            obstacles = Some(context);
+            fills = Some(resolved);
+            if drawing.entities.iter().any(|e|matches!(&e.shape,template_geometry::Shape::Block{name,..} if name==profile_surface::MARKER)){profile_surface::prepare_marker(&mut doc,&cancel)?;}
+        }
+        template_geometry::add(&mut doc, &layers, &drawing.entities, &cancel)?;
         storage::atomic_write(&output.join(format!("{}.dxf", case.name)), false, |out| {
             doc.write_to(out, &cancel)
         })?;
         let metadata =
-            serde_json::to_vec(&serde_json::json!({"layout":drawing.layout,"bands":drawing.bands}))
+            serde_json::to_vec(&serde_json::json!({"layout":drawing.layout,"bands":drawing.bands,"obstacles":obstacles,"fills":fills}))
                 .map_err(|e| e.to_string())?;
         storage::atomic_write(&output.join(format!("{}.json", case.name)), false, |out| {
             use std::io::Write;

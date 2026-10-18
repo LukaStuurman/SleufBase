@@ -26,12 +26,121 @@ pub struct Layer {
     pub name: String,
     pub color: u16,
     pub true_color: Option<u32>,
+    pub lineweight: Option<i16>,
 }
 #[derive(Clone, Debug, Default, serde::Deserialize)]
 pub struct Paint {
     pub color: Option<u16>,
     pub true_color: Option<u32>,
     pub lineweight: Option<i16>,
+}
+pub struct CircleBlock<'a> {
+    pub name: &'a str,
+    pub center: [f64; 3],
+    pub radius: f64,
+    pub layer: &'a str,
+    pub paint: Paint,
+}
+/// Declare a reusable circle block atomically, retaining any existing block.
+pub fn ensure_circle_block(
+    document: &mut Document,
+    definition: CircleBlock<'_>,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
+    crate::input::check(cancel)?;
+    crate::object_dxf::layer_name(definition.name)?;
+    let key = casefold(definition.name);
+    if document.added_blocks.contains_key(&key)
+        || document
+            .records()
+            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|n| casefold(n) == key))
+    {
+        return Ok(());
+    }
+    if document.added_blocks.len() >= 10_000 {
+        return Err("Te veel nieuwe sjabloonblokken".into());
+    }
+    finite(&definition.center)?;
+    finite(&[definition.radius])?;
+    paint(&definition.paint)?;
+    if definition.radius <= 0. || !document.has_layer(definition.layer) {
+        return Err("Ongeldige blokcirkel of ontbrekende laag".into());
+    }
+    let mut table = None;
+    let mut end = None;
+    for r in document.records() {
+        if r.kind() == "TABLE" && r.first(2) == Some("BLOCK_RECORD") {
+            table = Some(r);
+        } else if table.is_some() && r.kind() == "ENDTAB" {
+            end = Some(r);
+            break;
+        }
+    }
+    let table = table.ok_or("DXF mist bloktabel")?;
+    let owner = table.handle().ok_or("Bloktabel mist handle")?;
+    let at = document.record_start(end.ok_or("Bloktabel is niet afgesloten")?.index());
+    let (id, mut seed) = document.seed()?;
+    let next = id.checked_add(4).ok_or("Geen vrije DXF-handles")?;
+    let mut record = Tags::default();
+    record.record("BLOCK_RECORD", id, owner);
+    record.tag(100, "AcDbSymbolTableRecord");
+    record.tag(100, "AcDbBlockTableRecord");
+    record.tag(2, definition.name);
+    record.tag(340, 0);
+    record.tag(70, 0);
+    record.tag(280, 1);
+    record.tag(281, 0);
+    let mut block = Tags::default();
+    block.record("BLOCK", id + 1, id);
+    block.tag(100, "AcDbEntity");
+    block.tag(8, "0");
+    block.tag(100, "AcDbBlockBegin");
+    block.tag(2, definition.name);
+    block.tag(70, 0);
+    block.point(10, [0.; 3]);
+    block.tag(3, definition.name);
+    block.tag(1, "");
+    block.entity(
+        "CIRCLE",
+        id + 3,
+        id,
+        false,
+        definition.layer,
+        &definition.paint,
+    );
+    block.tag(100, "AcDbCircle");
+    block.point(10, definition.center);
+    block.tag(40, definition.radius);
+    block.record("ENDBLK", id + 2, id);
+    block.tag(100, "AcDbEntity");
+    block.tag(8, "0");
+    block.tag(100, "AcDbBlockEnd");
+    let block_at = document.section_end("BLOCKS")?;
+    let count = document
+        .records()
+        .filter(|r| r.kind() == "BLOCK_RECORD")
+        .count()
+        + document.added_blocks.len()
+        + 1;
+    let count = document.tag_change(table.index(), 70, &count.to_string())?;
+    seed.text = format!("{next:X}");
+    crate::input::check(cancel)?;
+    document.apply(vec![
+        Change {
+            start: at,
+            end: at,
+            text: record.0,
+        },
+        Change {
+            start: block_at,
+            end: block_at,
+            text: block.0,
+        },
+        count,
+        seed,
+    ])?;
+    document.added_blocks.insert(key, [0.; 3]);
+    Ok(())
 }
 #[derive(Clone, Debug, serde::Deserialize)]
 pub enum Shape {
@@ -205,6 +314,9 @@ pub fn block_attribute_metrics(
         return Err("Blokschaal moet positief zijn".into());
     }
     let name = casefold(name);
+    if document.added_blocks.contains_key(&name) {
+        return Ok(None);
+    }
     let tag = crate::python_values::uppercase(crate::python_values::trim(tag));
     let mut active = false;
     let mut found = false;
@@ -458,7 +570,7 @@ pub fn add(
         paint(&Paint {
             color: Some(layer.color),
             true_color: layer.true_color,
-            lineweight: None,
+            lineweight: layer.lineweight,
         })?;
         if !(1..=255).contains(&layer.color) {
             return Err("Laagkleur moet tussen 1 en 255 liggen".into());
@@ -523,6 +635,17 @@ pub fn add(
                 }
                 attrs.push(Attribute::parse(r));
             }
+        }
+    }
+    for (name, base) in &document.added_blocks {
+        if wanted.contains(name) {
+            blocks.insert(
+                name.clone(),
+                Block {
+                    base: *base,
+                    attributes: Vec::new(),
+                },
+            );
         }
     }
     let (mut next, mut seed) = document.seed()?;
@@ -745,6 +868,9 @@ pub fn add(
             tags.tag(62, layer.color);
             tags.tag(6, "Continuous");
             tags.tag(290, 1);
+            if let Some(lineweight) = layer.lineweight {
+                tags.tag(370, lineweight);
+            }
             if let Some(color) = layer.true_color {
                 tags.tag(420, color);
             }

@@ -63,6 +63,7 @@ pub struct Layout {
 }
 #[derive(Debug, serde::Serialize)]
 pub struct Band {
+    pub point_index: usize,
     pub feature_index: usize,
     pub anchor_x: f64,
     pub placed_x: f64,
@@ -395,7 +396,7 @@ pub fn frame_and_bands(
     }
     let marker_scale = options.marker_scale.max(0.005);
     let mut bands = Vec::new();
-    for point in &profile.points {
+    for (point_index, point) in profile.points.iter().enumerate() {
         crate::input::check(cancel)?;
         let feature = &dataset.features[point.feature_index];
         let is_line = matches!(feature.geometry, Geometry::Polyline(_));
@@ -417,6 +418,7 @@ pub fn frame_and_bands(
             let y = layout.reference_y + (point.point_z - profile.reference_level) * layout.scale;
             finite(&[anchor_x, y])?;
             bands.push(Band {
+                point_index,
                 feature_index: point.feature_index,
                 anchor_x,
                 placed_x: anchor_x,

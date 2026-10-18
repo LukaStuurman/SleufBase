@@ -61,7 +61,7 @@ def dictionary(record):
     return base, entries
 
 
-def verify_preservation(source, native, original_doc, allowed_extra=()):
+def verify_preservation(source, native, original_doc, allowed_extra=(), allowed_tables=("LAYER",)):
     before, after = records(source), records(native)
     root = original_doc.rootdict.dxf.handle
     old_dictionary = original_doc.rootdict.get("ACAD_IMAGE_DICT")
@@ -78,8 +78,10 @@ def verify_preservation(source, native, original_doc, allowed_extra=()):
         position += 1
         if key == ("SECTION", "HEADER"):
             assert mask_seed(old) == mask_seed(new)
-        elif key == ("TABLE", "LAYER"):
+        elif key[0] == "TABLE" and key[1] in allowed_tables:
             assert [(c, v) for c, v in old if c != 70] == [(c, v) for c, v in new if c != 70]
+            if old != new:
+                assert int(next(v for c,v in new if c==70))==sum(r[0]==(0,key[1]) for r in after), key
         elif key[0] == "CLASS" and key[1] in {"IMAGE", "IMAGEDEF", "IMAGEDEF_REACTOR", "RASTERVARIABLES"}:
             assert [(c, v) for c, v in old if c != 91] == [(c, v) for c, v in new if c != 91]
         elif key[0] == "DICTIONARY" and key[1] in {root, old_dictionary}:
