@@ -22,5 +22,7 @@ DXFs/1,146 objects with fresh original exporter calls. Every primitive/attribute
 LEADER vertex, style/flag/color and annotation-handle link is checked; source
 records, table/handle counts, zero audit errors/repairs and ownership are retained.
 
-Full profile entry generation and end-to-end UI/template export are not covered
-by feeding these frozen entries to the native layout solver. They remain open.
+These standalone fixtures test prepared entries. Native entry generation and
+complete frame/body/reference/leader composition are now separately covered by
+the 48 complete drawing audits in `../profile-drawing/README.md`. The template
+UI, page/raster preparation and real-project acceptance remain open.

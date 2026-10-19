@@ -125,3 +125,188 @@ fn cancellation_nonfinite_and_oversized_layouts_publish_no_results() {
     assert!(profile_leaders::append(&mut output, &entries, &[], &AtomicBool::new(true)).is_err());
     assert!(output.is_empty());
 }
+#[test]
+fn all_original_sleeve_bundle_diameter_material_and_prefix_descriptions_match() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/profile-drawing/reference.json")).unwrap();
+    for case in fixture["description_cases"].as_array().unwrap() {
+        let f: sleufbase_rust::Feature = serde_json::from_value(case["feature"].clone()).unwrap();
+        assert_eq!(
+            profile_leaders::description(
+                &f,
+                case["base"].as_str().unwrap(),
+                case["prefix"].as_str().unwrap()
+            )
+            .unwrap(),
+            case["expected"].as_str().unwrap()
+        );
+    }
+    let mut f: sleufbase_rust::Feature =
+        serde_json::from_value(fixture["description_cases"][0]["feature"].clone()).unwrap();
+    f.attributes[2] = "9".repeat(4096);
+    assert!(profile_leaders::description(&f, "Water", "Ø").is_err());
+}
+fn measured_case() -> (
+    sleufbase_rust::Dataset,
+    sleufbase_rust::profile::Profile<'static>,
+    sleufbase_rust::profile_drawing::Drawing,
+) {
+    use sleufbase_rust::{
+        profile::{Profile, ProfilePoint},
+        profile_drawing::{Band, Drawing, Layout},
+        Dataset, Feature, Geometry, Vertex,
+    };
+    let position = Vertex {
+        x: 3.,
+        y: 0.,
+        z: Some(8.),
+    };
+    let data = Dataset {
+        job_id: 1,
+        title: "PS1".into(),
+        source_path: "fixture".into(),
+        features: vec![Feature {
+            object_name: "water".into(),
+            source_name: "water".into(),
+            geometry: Geometry::Point(position),
+            attributes: ["PVC".into(), "110".into(), "dubbel mantelbuis 2,5".into()],
+        }],
+    };
+    let profile = Profile {
+        start: Vertex {
+            x: 0.,
+            y: 0.,
+            z: Some(10.),
+        },
+        end: Vertex {
+            x: 10.,
+            y: 0.,
+            z: Some(11.),
+        },
+        axis_dx: 10.,
+        axis_dy: 0.,
+        axis_length: 10.,
+        reference_level: 8.,
+        points: vec![ProfilePoint {
+            feature_index: 0,
+            position,
+            chainage: 3.,
+            point_z: 8.,
+            layer_name: "Water".into(),
+            color: 3,
+            description: "Waterleiding".into(),
+            is_endpoint: false,
+        }],
+    };
+    let drawing = Drawing {
+        layout: Layout {
+            start_x: 10.,
+            end_x: 20.,
+            reference_y: 5.,
+            title_y: 4.5,
+            top_band_y: 4.,
+            bottom_band_y: 3.,
+            bottom_y: 2.,
+            denominator: 20,
+            scale: 1.,
+        },
+        entities: Vec::new(),
+        bands: [(12.9362, 13.1), (13.0638, 13.2)]
+            .into_iter()
+            .map(|(x, placed_x)| Band {
+                point_index: 0,
+                feature_index: 0,
+                anchor_x: x,
+                placed_x,
+                chainage: 3.,
+                point_z: 8.,
+                pinned: false,
+                marker_scale: 0.11,
+            })
+            .collect(),
+    };
+    (data, profile, drawing)
+}
+#[test]
+fn native_entry_generation_distinguishes_pipe_size_from_leader_scale_and_uses_shifted_bands() {
+    let (data, mut profile, drawing) = measured_case();
+    let cancel = AtomicBool::new(false);
+    let entries = profile_leaders::entries(&profile, &data, &drawing, 0.02, "DN", &cancel).unwrap();
+    assert_eq!(entries.len(), 2);
+    for (e, b) in entries.iter().zip(&drawing.bands) {
+        assert_eq!(e.anchor_x, b.anchor_x);
+        assert_eq!(e.band_x, Some(b.placed_x));
+        assert_eq!(e.leader_scale, Some(0.02));
+        assert_eq!(e.leader_line_start_y, 5.);
+        assert!((e.leader_block_start_y - 5.02).abs() < 1e-12);
+        assert!((e.leader_top_y - 5.2).abs() < 1e-12);
+        assert_eq!(e.depth_text, "Diepte: 2.00");
+        assert_eq!(
+            e.description,
+            "Waterleiding mantelbuis Bundel: 2,5X DN110 PVC"
+        );
+    }
+    profile.points[0].is_endpoint = true;
+    assert!(
+        profile_leaders::entries(&profile, &data, &drawing, 0.02, "DN", &cancel)
+            .unwrap()
+            .is_empty()
+    );
+}
+#[test]
+fn composition_cancellation_and_stale_measurement_indices_leave_the_previous_drawing_intact() {
+    let (data, profile, mut drawing) = measured_case();
+    drawing.entities.push(template_geometry::Entity {
+        layer: "0".into(),
+        layout: None,
+        paint: Default::default(),
+        shape: template_geometry::Shape::Circle {
+            center: [1., 2.],
+            radius: 0.1,
+        },
+    });
+    let obstacles = sleufbase_rust::profile_surface::Obstacles {
+        hard: Vec::new(),
+        soft: Vec::new(),
+        text: Vec::new(),
+    };
+    let options = || profile_leaders::ProfileOptions {
+        marker_scale: 0.02,
+        diameter_prefix: "Ø",
+        avoid_collisions: true,
+    };
+    let before = format!("{:?}", drawing.entities);
+    assert!(profile_leaders::compose(
+        &profile,
+        &data,
+        &mut drawing,
+        &obstacles,
+        options(),
+        &AtomicBool::new(true)
+    )
+    .is_err());
+    assert_eq!(before, format!("{:?}", drawing.entities));
+    drawing.bands[1].feature_index = 999;
+    assert!(profile_leaders::compose(
+        &profile,
+        &data,
+        &mut drawing,
+        &obstacles,
+        options(),
+        &AtomicBool::new(false)
+    )
+    .is_err());
+    assert_eq!(before, format!("{:?}", drawing.entities));
+    drawing.bands[1].feature_index = 0;
+    drawing.bands[1].point_z += 1.;
+    assert!(profile_leaders::compose(
+        &profile,
+        &data,
+        &mut drawing,
+        &obstacles,
+        options(),
+        &AtomicBool::new(false)
+    )
+    .is_err());
+    assert_eq!(before, format!("{:?}", drawing.entities));
+}

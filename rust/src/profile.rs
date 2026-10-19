@@ -115,13 +115,16 @@ fn double(f: &Feature) -> bool {
 }
 /// Python re.search(r"[-+]?\d+(?:[.,]\d+)?") with frozen Unicode 14 digits.
 pub fn diameter_mm(f: &Feature) -> Option<f64> {
-    let raw = trim(&f.attributes[1]);
+    first_number(trim(&f.attributes[1]), true)
+}
+pub(crate) fn first_number(raw: &str, signed: bool) -> Option<f64> {
     let mut chars = raw.chars().peekable();
     while let Some(ch) = chars.next() {
         let mut text = String::new();
         if let Some(d) = crate::object_layout::decimal(ch) {
             text.push(char::from(b'0' + d as u8));
-        } else if matches!(ch, '-' | '+')
+        } else if signed
+            && matches!(ch, '-' | '+')
             && chars
                 .peek()
                 .and_then(|c| crate::object_layout::decimal(*c))

@@ -389,6 +389,28 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   donorcontroles, 89 generieke tekenobjecten en 24 samengestelde profielen/2.249
   objecten. Fixtures regenereren byte-identiek met een andere hashseed. De vijf
   GitHub-controles van `8541956` zijn groen.
+- Native profielinvoer en complete tekencompositie gekoppeld: meetobjecten en
+  eigen profiel-/bandposities bepalen ankers, verschoven band-X, globale
+  leaderschaal, startdiepte en volledige beschrijvingen. Een gedeelde Unicode-
+  getalmatcher bedient diameter én bundelvelden; mantelbuizen, materiaal,
+  afronding en aangepaste diameterprefixes volgen de oorspronkelijke helpers.
+  Dubbele markerinstanties hergebruiken hun beschrijving/diepte. De publieke
+  compositiestap valideert en lost alle labels op voordat zij het bestaande
+  kader/body/referentie-resultaat aanvult. Verouderde bandindices/hoogtes,
+  numerieke overloop en annulering laten eerdere geometrie intact.
+  48 complete oorspronkelijke tekeningen met botsingsvermijding uit/aan
+  vergelijken 5.398 objecten, 150 native afgeleide entries per stand, alle
+  attributen en annotatiehandles. 336 extra beschrijvingsgevallen worden direct
+  met Python vergeleken. Bestaande oraclevelden zijn inhoudelijk ongewijzigd;
+  alleen nieuwe entry-/leader-/beschrijvingsreferenties zijn toegevoegd.
+  BGT-oppervlaktegeometrie/-fetch, bestaande aangepaste laagstijlen, pagina-/
+  rastervoorbereiding en de volledige native sjabloon-/UI-workflow blijven open.
+  243 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Alle zes profielmodi slagen met release-uitvoer: de twee complete standen,
+  kader/banden, body/markers, body/referenties en 216 directe referentiegevallen.
+  De 65 losse actieve labeltekeningen blijven eveneens groen. Fixtures regenereren
+  byte-identiek met een andere hashseed. De vijf GitHub-controles van `60453a7`
+  zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

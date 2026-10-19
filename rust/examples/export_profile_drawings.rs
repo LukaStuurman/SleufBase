@@ -3,7 +3,8 @@ use sleufbase_rust::{
     dxf_document::Document,
     profile::{self, Options as ProfileOptions, XY},
     profile_drawing::{self, Options, Templates},
-    profile_reference, profile_surface, storage, template_geometry, Bounds, Dataset, Feature, Rule,
+    profile_leaders, profile_reference, profile_surface, storage, template_geometry, Bounds,
+    Dataset, Feature, Rule,
 };
 use std::{path::PathBuf, sync::atomic::AtomicBool};
 #[derive(serde::Deserialize)]
@@ -50,9 +51,13 @@ struct Case {
     use_custom: bool,
     clip_markers: bool,
     show_reference: bool,
+    diameter_prefix: String,
 }
 fn main() -> Result<(), String> {
-    let reference_mode = std::env::args().any(|a| a == "--reference");
+    let leader_mode =
+        std::env::args().any(|a| matches!(a.as_str(), "--leaders" | "--leaders-collisions"));
+    let collision_mode = std::env::args().any(|a| a == "--leaders-collisions");
+    let reference_mode = leader_mode || std::env::args().any(|a| a == "--reference");
     let reference_cases = std::env::args().any(|a| a == "--reference-cases");
     let body_mode = reference_mode || std::env::args().any(|a| a == "--body");
     let output = PathBuf::from(std::env::args().nth(1).ok_or("output directory required")?);
@@ -174,6 +179,7 @@ fn main() -> Result<(), String> {
         let mut obstacles = None;
         let mut fills = None;
         let mut layers = Vec::new();
+        let mut leader_plan = None;
         if body_mode {
             let resolved =
                 profile_surface::resolve(&case.metadata, &case.automatic, case.use_custom)?;
@@ -205,12 +211,39 @@ fn main() -> Result<(), String> {
             fills = Some(resolved);
             if drawing.entities.iter().any(|e|matches!(&e.shape,template_geometry::Shape::Block{name,..} if name==profile_surface::MARKER)){profile_surface::prepare_marker(&mut doc,&cancel)?;}
         }
+        if leader_mode {
+            let context = obstacles
+                .as_ref()
+                .ok_or("Leader stage requires profile body")?;
+            let plan = profile_leaders::compose(
+                &profile,
+                &dataset,
+                &mut drawing,
+                context,
+                profile_leaders::ProfileOptions {
+                    marker_scale: p.marker_scale,
+                    diameter_prefix: &case.diameter_prefix,
+                    avoid_collisions: collision_mode,
+                },
+                &cancel,
+            )?;
+            if !plan.entries.is_empty() {
+                profile_leaders::prepare(&mut doc, &cancel)?;
+                layers.push(template_geometry::Layer {
+                    name: profile_leaders::LAYER.into(),
+                    color: 7,
+                    true_color: None,
+                    lineweight: Some(0),
+                });
+            }
+            leader_plan = Some(plan);
+        }
         template_geometry::add(&mut doc, &layers, &drawing.entities, &cancel)?;
         storage::atomic_write(&output.join(format!("{}.dxf", case.name)), false, |out| {
             doc.write_to(out, &cancel)
         })?;
         let metadata =
-            serde_json::to_vec(&serde_json::json!({"layout":drawing.layout,"bands":drawing.bands,"obstacles":obstacles,"fills":fills}))
+            serde_json::to_vec(&serde_json::json!({"layout":drawing.layout,"bands":drawing.bands,"obstacles":obstacles,"fills":fills,"leader_entries":leader_plan.as_ref().map(|p|&p.entries),"leader_placements":leader_plan.as_ref().map(|p|&p.placed)}))
                 .map_err(|e| e.to_string())?;
         storage::atomic_write(&output.join(format!("{}.json", case.name)), false, |out| {
             use std::io::Write;

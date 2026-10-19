@@ -135,6 +135,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-reference" --reference
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-leaders" --leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-leaders" --leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-leaders-collisions" --leaders-collisions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-leaders-collisions" --leaders-collisions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo run --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-reference-cases" --reference-cases
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-reference-cases" --reference-cases

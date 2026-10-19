@@ -7,6 +7,195 @@ use crate::{
 use std::sync::atomic::AtomicBool;
 pub const BLOCK: &str = "SAL-VERWIJZING_LEIDING_BOVENKANT_INFO_DIEPTE-SOD";
 pub const LAYER: &str = "X-XX-AL-VERWIJZING-SD";
+fn normalized_number(value: f64) -> Result<String, String> {
+    finite(&[value])?;
+    let rounded = value.round_ties_even();
+    if (value - rounded).abs() <= 1e-6 {
+        Ok(format!("{rounded:.0}"))
+    } else {
+        Ok(format!("{value:.3}")
+            .trim_end_matches('0')
+            .trim_end_matches('.')
+            .replace('.', ","))
+    }
+}
+/// Active original description: configured discipline, sleeve, bundle,
+/// diameter/prefix and material. Numeric matching shares the frozen Python
+/// Unicode-decimal matcher with profile marker sizing.
+pub fn description(feature: &crate::Feature, base: &str, prefix: &str) -> Result<String, String> {
+    use crate::python_values::{casefold, trim};
+    if [
+        base,
+        prefix,
+        &feature.attributes[0],
+        &feature.attributes[1],
+        &feature.attributes[2],
+    ]
+    .iter()
+    .any(|v| v.len() > 1_048_576)
+    {
+        return Err("Te lange profielverwijzingsmetadata".into());
+    }
+    let raw = trim(&feature.attributes[2]).trim_matches(['\'', '"']);
+    let base = trim(base);
+    let mut result = if base.is_empty() {
+        "ONBEKEND".into()
+    } else {
+        base.to_owned()
+    };
+    if casefold(raw).contains("mantelbuis") && !casefold(&result).contains("mantelbuis") {
+        result.push_str(" mantelbuis");
+    }
+    if let Some(n) = crate::profile::first_number(raw, false) {
+        result.push_str(" Bundel: ");
+        result.push_str(&normalized_number(n)?);
+        result.push('X');
+    }
+    if let Some(n) = crate::profile::diameter_mm(feature).filter(|n| *n > 0.) {
+        let prefix = trim(prefix);
+        result.push(' ');
+        result.push_str(if prefix.is_empty() { "Ø" } else { prefix });
+        result.push_str(&normalized_number(n)?);
+    }
+    let material = trim(&feature.attributes[0]);
+    if !material.is_empty() {
+        result.push(' ');
+        result.push_str(material);
+    }
+    if result.len() > 1_048_576 {
+        return Err("Te lange profielverwijzingstekst".into());
+    }
+    Ok(result)
+}
+/// Derive real leader inputs from native measurement/profile/band results.
+/// In particular the leader scale is the global marker scale, not the measured
+/// pipe diameter used for point circles; shifted bands retain their own X.
+pub fn entries(
+    profile: &crate::profile::Profile<'_>,
+    data: &crate::Dataset,
+    drawing: &crate::profile_drawing::Drawing,
+    marker_scale: f64,
+    prefix: &str,
+    cancel: &AtomicBool,
+) -> Result<Vec<Entry>, String> {
+    crate::input::check(cancel)?;
+    finite(&[marker_scale, drawing.layout.scale])?;
+    if drawing.bands.len() > 25_000 || drawing.layout.scale <= 0. {
+        return Err("Ongeldige profielverwijzingsbanden".into());
+    }
+    let marker_scale = marker_scale.max(0.005);
+    let mut output: Vec<Entry> = Vec::new();
+    let mut previous = None;
+    let mut bytes = 0usize;
+    let start_z = profile.start.z.unwrap_or(0.);
+    finite(&[start_z])?;
+    for band in &drawing.bands {
+        crate::input::check(cancel)?;
+        let point = profile
+            .points
+            .get(band.point_index)
+            .ok_or("Profielband mist meetpunt")?;
+        if point.feature_index != band.feature_index
+            || point.point_z != band.point_z
+            || point.chainage != band.chainage
+        {
+            return Err("Profielband hoort niet bij het actuele meetpunt".into());
+        }
+        if point.is_endpoint {
+            continue;
+        }
+        let feature = data
+            .features
+            .get(point.feature_index)
+            .ok_or("Profielverwijzing mist meetobject")?;
+        let (description, depth_text) = if previous == Some(band.point_index) {
+            let last = output.last().ok_or("Profielverwijzingscache ontbreekt")?;
+            (last.description.clone(), last.depth_text.clone())
+        } else {
+            let depth = start_z - band.point_z;
+            finite(&[depth])?;
+            (
+                description(feature, &point.description, prefix)?,
+                format!("Diepte: {:.2}", if depth > 0. { depth } else { 0. }),
+            )
+        };
+        previous = Some(band.point_index);
+        bytes = bytes
+            .checked_add(description.len())
+            .and_then(|b| b.checked_add(depth_text.len()))
+            .filter(|b| *b <= 128 * 1024 * 1024)
+            .ok_or("Te veel profielverwijzingstekst")?;
+        let y = drawing.layout.reference_y
+            + (band.point_z - profile.reference_level) * drawing.layout.scale;
+        let entry = Entry {
+            anchor_x: band.anchor_x,
+            leader_line_start_y: y,
+            leader_block_start_y: y + marker_scale,
+            leader_top_y: y + 10. * marker_scale,
+            band_y: drawing.layout.top_band_y,
+            band_connector_y: drawing.layout.top_band_y + 0.04,
+            band_x: Some(band.placed_x),
+            leader_scale: Some(marker_scale),
+            leader_color: point.color,
+            description,
+            depth_text,
+        };
+        finite(&[
+            entry.anchor_x,
+            entry.leader_line_start_y,
+            entry.leader_block_start_y,
+            entry.leader_top_y,
+            entry.band_y,
+            entry.band_connector_y,
+            band.placed_x,
+        ])?;
+        output.push(entry);
+    }
+    Ok(output)
+}
+pub struct ProfileOptions<'a> {
+    pub marker_scale: f64,
+    pub diameter_prefix: &'a str,
+    pub avoid_collisions: bool,
+}
+pub struct Plan {
+    pub entries: Vec<Entry>,
+    pub placed: Vec<Placed>,
+}
+/// Complete an already composed native frame/body/reference drawing. All
+/// derivation/search succeeds before append commits any geometry to the frame.
+pub fn compose(
+    profile: &crate::profile::Profile<'_>,
+    data: &crate::Dataset,
+    drawing: &mut crate::profile_drawing::Drawing,
+    obstacles: &crate::profile_surface::Obstacles,
+    options: ProfileOptions<'_>,
+    cancel: &AtomicBool,
+) -> Result<Plan, String> {
+    let entries = entries(
+        profile,
+        data,
+        drawing,
+        options.marker_scale,
+        options.diameter_prefix,
+        cancel,
+    )?;
+    let placed = solve(
+        &entries,
+        options.marker_scale,
+        Options {
+            hard: &obstacles.hard,
+            soft: &obstacles.soft,
+            text: &obstacles.text,
+            min_x: Some(drawing.layout.start_x),
+            max_x: Some(drawing.layout.end_x),
+            avoid_collisions: options.avoid_collisions,
+        },
+        cancel,
+    )?;
+    append(&mut drawing.entities, &entries, &placed, cancel)?;
+    Ok(Plan { entries, placed })
+}
 type Box4 = [f64; 4];
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Entry {

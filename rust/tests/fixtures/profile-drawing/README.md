@@ -52,5 +52,23 @@ into the frame/body stage. All 24 drawings then contain 2,249 compared objects.
 The reference metadata is resolved natively before frame distance labels are
 created; the integration no longer substitutes the Python reference chainage.
 
-Dynamic leaders, page replication, layer-style updates for existing custom
-layers and the full native template UI remain required.
+`--leaders` completes the active profile drawing from native measurement data:
+profile axes/points, frame/bands, body/markers/reference, derived label entries,
+collision solver and linked INSERT/LEADER/band lines. `--leaders-collisions`
+uses the original collision-enabled path. The 48 complete drawings compare
+5,398 objects and every attribute/annotation handle. Native leader entries are
+also compared with those captured from the complete original V9 drawer.
+
+Global leader scale stays distinct from measured point diameter. Displaced
+bands, double markers, endpoints and depth from start elevation retain their
+original behavior. 336 independent original description cases cover sleeves,
+bundles, Unicode decimals, rounding, custom diameter prefixes and material.
+Adjacent marker instances reuse the resolved description/depth; source features
+are borrowed. Stale band indices/heights, cancellation and numeric overflow are
+rejected before appending any profile annotation geometry.
+
+Existing oracle fields are semantically unchanged. Only entry/leader/description
+references are added. BGT surface geometry/fetch, page replication, styles for
+existing custom layers, raster preparation, real-project acceptance and the full
+native template UI remain open. The optional dynamic profile patch is not active
+in the production package and does not replace the active LEADER contract.
