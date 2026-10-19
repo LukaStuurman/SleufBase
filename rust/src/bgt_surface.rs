@@ -18,7 +18,7 @@ pub enum Geometry {
     MultiPolygon(Vec<Vec<Vec<XY>>>),
     Collection(Vec<Geometry>),
 }
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Feature {
     pub physical_appearance: String,
     pub geometry: Geometry,
@@ -28,6 +28,7 @@ struct Prepared<'a> {
     key: String,
     bounds: Option<Bounds>,
     geometry: &'a Geometry,
+    roundoff: f64,
 }
 pub struct Index<'a> {
     features: Vec<Prepared<'a>>,
@@ -234,6 +235,68 @@ fn line_intervals(
     }
     Ok(())
 }
+/// Constructed overlay boundaries have floating roundoff. Add inclusive
+/// boundary intervals only for segments collinear within that known budget;
+/// this never expands polygon interiors or changes strict-source semantics.
+fn constructed_boundaries(
+    g: &Geometry,
+    p: &Probe,
+    tolerance: f64,
+    out: &mut Vec<[f64; 2]>,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
+    let mut line = |points: &[XY], closed: bool| -> Result<(), String> {
+        let n = if closed {
+            points.len()
+        } else {
+            points.len().saturating_sub(1)
+        };
+        for i in 0..n {
+            if i.is_multiple_of(1024) {
+                crate::input::check(cancel)?;
+            }
+            let a = points[i];
+            let b = points[(i + 1) % points.len()];
+            if orient(p.start, p.end, a).abs() <= tolerance * p.length
+                && orient(p.start, p.end, b).abs() <= tolerance * p.length
+            {
+                let a = p.parameter(a);
+                let b = p.parameter(b);
+                let low = a.min(b).max(0.);
+                let high = a.max(b).min(1.);
+                if low < high {
+                    out.push([low, high]);
+                }
+            }
+        }
+        Ok(())
+    };
+    match g {
+        Geometry::LineString(p) => line(p, false)?,
+        Geometry::MultiLineString(p) => {
+            for p in p {
+                line(p, false)?;
+            }
+        }
+        Geometry::Polygon(p) => {
+            for p in p {
+                line(p, true)?;
+            }
+        }
+        Geometry::MultiPolygon(p) => {
+            for p in p.iter().flatten() {
+                line(p, true)?;
+            }
+        }
+        Geometry::Collection(items) => {
+            for g in items {
+                constructed_boundaries(g, p, tolerance, out, cancel)?;
+            }
+        }
+        Geometry::Point(_) | Geometry::MultiPoint(_) => (),
+    }
+    Ok(())
+}
 fn union(pieces: &mut Vec<[f64; 2]>) {
     pieces.sort_by(|a, b| a[0].total_cmp(&b[0]).then(a[1].total_cmp(&b[1])));
     let mut kept = 0;
@@ -342,12 +405,36 @@ fn polygon_intervals(
 }
 impl<'a> Index<'a> {
     pub fn new(features: &'a [Feature], cancel: &AtomicBool) -> Result<Self, String> {
-        if features.len() > 100_000 {
-            return Err("Te veel BGT-oppervlakken".into());
-        }
-        let mut prepared = Vec::with_capacity(features.len());
+        Self::from_features(features.iter(), cancel)
+    }
+    /// Borrow normalized source features without cloning their geometry.
+    pub fn from_features(
+        features: impl IntoIterator<Item = &'a Feature>,
+        cancel: &AtomicBool,
+    ) -> Result<Self, String> {
+        Self::prepare(features, false, cancel)
+    }
+    /// For geometries constructed by native tile repair/union/clipping only.
+    /// An eight-ULP coordinate budget makes boundary membership independent of
+    /// overlay interpolation order. Supplied/prepared source geometry stays
+    /// exact through `new` / `from_features`.
+    pub fn from_normalized_features(
+        features: impl IntoIterator<Item = &'a Feature>,
+        cancel: &AtomicBool,
+    ) -> Result<Self, String> {
+        Self::prepare(features, true, cancel)
+    }
+    fn prepare(
+        features: impl IntoIterator<Item = &'a Feature>,
+        constructed: bool,
+        cancel: &AtomicBool,
+    ) -> Result<Self, String> {
+        let mut prepared = Vec::new();
         let mut count = 0;
-        for feature in features {
+        for (i, feature) in features.into_iter().enumerate() {
+            if i >= 100_000 {
+                return Err("Te veel BGT-oppervlakken".into());
+            }
             crate::input::check(cancel)?;
             let name = trim(&feature.physical_appearance);
             if name.len() > 4096 || name.chars().any(char::is_control) {
@@ -356,11 +443,25 @@ impl<'a> Index<'a> {
             if name.is_empty() {
                 continue;
             }
+            let bounds = bounds(&feature.geometry, &mut count, 0, cancel)?;
+            let roundoff = if constructed {
+                bounds
+                    .map(|b| {
+                        let scale = [b.min_x, b.min_y, b.max_x, b.max_y]
+                            .iter()
+                            .fold(1f64, |a, b| a.max(b.abs()));
+                        (f64::from_bits(scale.to_bits() + 1) - scale) * 8.
+                    })
+                    .unwrap_or(0.)
+            } else {
+                0.
+            };
             prepared.push(Prepared {
                 name,
                 key: casefold(name),
-                bounds: bounds(&feature.geometry, &mut count, 0, cancel)?,
+                bounds,
                 geometry: &feature.geometry,
+                roundoff,
             });
         }
         Ok(Self { features: prepared })
@@ -385,15 +486,18 @@ impl<'a> Index<'a> {
             let Some(b) = f.bounds else {
                 continue;
             };
-            if b.max_x < p.bounds.min_x
-                || b.min_x > p.bounds.max_x
-                || b.max_y < p.bounds.min_y
-                || b.min_y > p.bounds.max_y
+            if b.max_x + f.roundoff < p.bounds.min_x
+                || b.min_x - f.roundoff > p.bounds.max_x
+                || b.max_y + f.roundoff < p.bounds.min_y
+                || b.min_y - f.roundoff > p.bounds.max_y
             {
                 continue;
             }
             pieces.clear();
             intervals(f.geometry, &p, &mut pieces, cancel)?;
+            if f.roundoff > 0. {
+                constructed_boundaries(f.geometry, &p, f.roundoff, &mut pieces, cancel)?;
+            }
             pieces.sort_by(|a, b| a[0].total_cmp(&b[0]).then(a[1].total_cmp(&b[1])));
             let mut length = 0.;
             let mut current: Option<[f64; 2]> = None;

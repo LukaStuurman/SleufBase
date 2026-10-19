@@ -63,7 +63,7 @@ pub fn tiles_for_bounds(bounds: Bounds) -> Result<Vec<TileId>, String> {
         .flat_map(|row| (min_col..=max_col).map(move |col| TileId { row, col }))
         .collect())
 }
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct TileFeature {
     pub layer_name: Arc<str>,
     pub feature_id: String,

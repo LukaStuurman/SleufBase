@@ -1,5 +1,6 @@
 //! Shared native HTTP pool, bounded decoded LRU and ordered tile batches.
-//! Tile parts remain unmerged; source-feature union/repair/clipping is separate.
+//! Raw tile batches are cached; public paths/surfaces repair, union and clip
+//! source features before handing geometry to the drawing/profile stages.
 use crate::{
     bgt_tiles::{self, Tile, TileId, MAX_TILE_BYTES},
     input, Bounds,
@@ -190,6 +191,22 @@ impl Client<HttpTransport> {
     }
 }
 impl<T: Transport> Client<T> {
+    pub fn fetch_surface_features(
+        &self,
+        bounds: Bounds,
+        cancel: &AtomicBool,
+    ) -> Result<Vec<crate::bgt_features::SurfaceFeature>, String> {
+        let batch = self.fetch(bounds, cancel)?;
+        crate::bgt_features::surfaces(batch.iter().map(|(_, tile)| tile.as_ref()), bounds, cancel)
+    }
+    pub fn fetch_paths(
+        &self,
+        bounds: Bounds,
+        cancel: &AtomicBool,
+    ) -> Result<Vec<Vec<crate::profile::XY>>, String> {
+        let batch = self.fetch(bounds, cancel)?;
+        crate::bgt_features::paths(batch.iter().map(|(_, tile)| tile.as_ref()), bounds, cancel)
+    }
     pub fn with_transport(transport: T, options: Options) -> Result<Self, String> {
         options.validate()?;
         Ok(Self {

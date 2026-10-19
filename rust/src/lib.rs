@@ -53,6 +53,8 @@ pub mod bgt_surface;
 mod mvt;
 pub mod bgt_tiles;
 pub mod bgt_tile_client;
+pub mod bgt_geometry;
+pub mod bgt_features;
 pub mod ahn;
 pub mod marxact;
 pub mod leader_index;

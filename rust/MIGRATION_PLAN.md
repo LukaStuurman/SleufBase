@@ -529,6 +529,44 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Dit zijn per-tegelgegevens: bronfeature-union, topologieherstel, clipping en
   aansluiting op de volledige sjabloon-/UI-workflow blijven open. De voorbereide
   profielgeometriekern mag de ruwe delen pas na die stappen gebruiken.
+- Native bronfeature-herstel, samenvoegen en knippen aan de tegelclient
+  gekoppeld. Groepering volgt laag/id voor paden en laag/id/ondergrond voor
+  oppervlakken, met oorspronkelijke drie-decimaal-/omkeer-deduplicatie.
+  De geleende ondergrondindex ontvangt volledige voorbereide geometrie.
+  Het pure Rust i64-overlay reconstrueert vlakken uit genodeerd lijnwerk,
+  behandelt gaten/zelfdoorsnijdingen en behoudt losse lijnen en raakpunten.
+  Ongewijzigde vertices krijgen exact hun invoercoördinaten terug via
+  roundtrip-sleutels; nieuwe snijpunten gebruiken gecompenseerde rekenkunde.
+  De index voor geconstrueerde oppervlakken heeft uitsluitend bij randintervallen
+  een expliciet acht-ULP-afrondingsbudget. De bestaande bronindex blijft exact;
+  haar 541 oorspronkelijke gevallen blijven slagen. Annuleren en invoer-/
+  resultaat-/kruisingsbudgetten begrenzen de afzonderlijke verwerkingsfasen.
+  Bovenliggende vlakken krijgen gememoiseerde dieptes, zodat diepe nesting
+  geen herhaalde kwadratische ketenwandeling vraagt; 64 geneste ringen hebben
+  een afzonderlijk oorspronkelijk GEOS-geval.
+  Een werkelijk Python-defect is gereproduceerd: unary_union op één beschadigd
+  en één geldig deel kon het hele bronobject weggooien. Beide clients herstellen
+  nu ieder deel vóór union; de gepinde generator bewijst de oude uitzondering
+  en de Python-regressie bewijst behoud van beide delen voor paden en ondergronden.
+  844 onafhankelijke GEOS-geometrieën, inclusief 300 reproduceerbare combinaties,
+  487 groepen uit de vaste PDOK-tegel en rand-/hoek-/nulbreedtegevallen worden
+  vergeleken op geldigheid, Hausdorff-afstand, symmetrisch vlakverschil en lengte.
+  De RD-coördinaattolerantie is 2e-8 meter; ringstart/-richting, componentvolgorde
+  en collineaire onderverdeling mogen verschillen. Drie volledige batches
+  vergelijken 336 voorbereide oppervlakken, het padnet en alle 120 oorspronkelijke
+  ondergrondbeslissingen. Een complete native-clienttest toont cachehergebruik
+  met één opgenomen tegel en annuleerbare voorbereide uitvoer.
+  Alle referenties zijn byte-reproduceerbaar met verschillende hashseeds;
+  onafhankelijke geometrie-/batchreadback is toegevoegd aan Windows CI.
+  264 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuilds van app
+  en auditdrivers slagen. De onafhankelijke release-audit slaagt voor alle 844
+  geometrieën/drie batches, 48 complete profielen/5.398 objecten en 216 losse
+  referentiegevallen. Beide volledige
+  Python-opstartmodi slagen met 386 tests; release-integriteit en het legacy-
+  contract blijven goed. Dit bewijst geen prestatieverbetering voor deze gehele
+  geometriefase en geen volledige app-pariteit; eerdere benchmarks behouden
+  hun eigen meetgrenzen. Bladuitbreiding/legenda's, raster-/fotovoorbereiding en
+  de complete native exportdialoog met projectnaam/datum blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

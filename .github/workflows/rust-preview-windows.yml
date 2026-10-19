@@ -142,6 +142,25 @@ jobs:
           name: SleufBase-Rust-BGT-tiles-benchmark
           path: rust/benchmarks-bgt-tiles.json
           if-no-files-found: error
+      - name: Independently verify BGT repair union clipping and complete batches
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_bgt_geometry_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/bgt-geometry
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_bgt_repair
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_repair.exe rust/tests/fixtures/bgt-geometry/reference.json > "$env:RUNNER_TEMP/bgt-geometry-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_geometry.py rust/tests/fixtures/bgt-geometry/reference.json "$env:RUNNER_TEMP/bgt-geometry-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_repair.exe rust/tests/fixtures/bgt-geometry/groups.json --groups > "$env:RUNNER_TEMP/bgt-groups-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_geometry.py rust/tests/fixtures/bgt-geometry/groups.json "$env:RUNNER_TEMP/bgt-groups-native.json" --groups
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify BGT appearance geometry and benchmark native probes
         shell: pwsh
         env:

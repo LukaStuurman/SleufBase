@@ -34,6 +34,16 @@ class BgtSurfaceFeature:
     geometry: Any
 
 
+def _merge_and_clip(geometries: list[Any], clipping_box):
+    # GEOS union can fail before it gets a chance to repair an invalid part,
+    # dropping every tile part of this source object, including valid ones.
+    repaired = [geometry if geometry.is_valid else make_valid(geometry) for geometry in geometries]
+    geometry = repaired[0] if len(repaired) == 1 else unary_union(repaired)
+    if not geometry.is_valid:
+        geometry = make_valid(geometry)
+    return geometry.intersection(clipping_box)
+
+
 class BgtVectorTileClient:
     BASE_URL = "https://api.pdok.nl/lv/bgt/ogc/v1/tiles/NetherlandsRDNewQuad"
     TILE_MATRIX = 12
@@ -132,10 +142,7 @@ class BgtVectorTileClient:
         for feature_key in sorted(features_by_id):
             geometries = features_by_id[feature_key]
             try:
-                geometry = geometries[0] if len(geometries) == 1 else unary_union(geometries)
-                if not geometry.is_valid:
-                    geometry = make_valid(geometry)
-                geometry = geometry.intersection(clipping_box)
+                geometry = _merge_and_clip(geometries, clipping_box)
             except Exception:
                 continue
             paths.extend(self._geometry_paths(geometry))
@@ -170,10 +177,7 @@ class BgtVectorTileClient:
         for layer_name, feature_id, physical_appearance in sorted(features_by_id):
             geometries = features_by_id[(layer_name, feature_id, physical_appearance)]
             try:
-                geometry = geometries[0] if len(geometries) == 1 else unary_union(geometries)
-                if not geometry.is_valid:
-                    geometry = make_valid(geometry)
-                geometry = geometry.intersection(clipping_box)
+                geometry = _merge_and_clip(geometries, clipping_box)
             except Exception:
                 continue
             if geometry.is_empty:
