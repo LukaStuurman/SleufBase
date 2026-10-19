@@ -25,6 +25,8 @@ pub mod template_metadata;
 pub mod template_geometry;
 pub mod template_prepare;
 pub mod template_layout;
+mod template_copy;
+pub mod template_pages;
 pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;

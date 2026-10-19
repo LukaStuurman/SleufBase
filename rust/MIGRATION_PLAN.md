@@ -567,6 +567,48 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   geometriefase en geen volledige app-pariteit; eerdere benchmarks behouden
   hun eigen meetgrenzen. Bladuitbreiding/legenda's, raster-/fotovoorbereiding en
   de complete native exportdialoog met projectnaam/datum blijven open.
+- Native modelblad-/papierlayoutuitbreiding toegevoegd als één transactie.
+  De oorspronkelijke selectie op TEXT/MTEXT/LINE/LWPOLYLINE-ankers en blad-
+  begrenzingen bepaalt modelkopieën; ontbrekende layouts krijgen nieuwe
+  blokrecords, BLOCK/ENDBLK, dictionaryregistratie en alle ondersteunde
+  papierobjecten. Gekoppelde ATTRIB/VERTEX/SEQEND krijgen eigen eigendom;
+  viewport-clips worden naar de gekopieerde grenzen omgelegd, alleen het
+  hoogste KADER-venster krijgt de oorspronkelijke modelbladverschuiving.
+  Bestaande fonts/blokken en IMAGEDEF blijven gedeeld; iedere IMAGE krijgt
+  een nieuwe reactor. Geneste dictionarywaarden worden zelfstandig gekopieerd.
+  Een brondefect bij soft-owned dictionaries is aangetoond: de oorspronkelijke
+  kopie verwijst naar waarden met het oude eigendom, waarna CAD-audit sleutels
+  verwijdert. Native gebruikt het daadwerkelijke eigendom en behoudt alle data
+  zonder aanvullende auditreparaties. Nieuwe papierruimten gebruiken een gedeelde
+  bloknaamindex om herhaald zoeken door het hele document te vermijden.
+  OCS, niet-eenheidsextrusie, MTEXT-rotatie en embedded R2018-kolommen zijn
+  gecontroleerd. Embedded richtingsvectoren blijven staan terwijl hun invoegpunt
+  verhuist. Appdata blijft gelijk; XDATA-posities volgen de wereldverschuiving,
+  verplaatsingsvectoren blijven ongewijzigd. Een geïndexeerde documentkopie
+  maakt eerder voorbereide tekst/symbolen/geometrie zichtbaar voor het vervolg.
+  De oorspronkelijke tekening wordt pas na volledige validatie vervangen;
+  annuleren, fout en workerpanic na een gekopieerd blad behouden alle oude bytes.
+  Voortgang, limieten en een niet-voortgangcontrole zijn beschikbaar.
+  Vijf oorspronkelijke reeksen bevatten twaalf toestanden (elf geslaagde
+  bestanden en een atomaire fout). Het echte sjabloon groeit van 32 naar 64
+  vakken. Onafhankelijke release-readback vergelijkt geometrie, bladinstellingen,
+  alle niet-default-attributen, kolommen, objectgrafen en opvolgende datum-/
+  project-/viewportbewerking; overige oorspronkelijke tags en blokken blijven
+  behouden. Alle bron-DXF's en JSON regenereren byte-identiek met twee hashseeds.
+  267 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuilds van app,
+  auditdriver en benchmark slagen. Windows CI krijgt dezelfde readback en meting.
+  Drie verse processen per route meten laden/uitbreiden naar 64 vakken op de
+  echte 18.855.304-byte tekening: mediaan native 152,538 ms tegenover Python
+  575,234 ms; proces-piekwerkset 71.966.720 tegenover 145.993.728 bytes. Beide
+  routes leveren 64 vakken, vier nieuwe bladen, 18 layouts en 603 modelobjecten.
+  Zie rust/benchmarks/template-pages.json voor alle rondes en meetgrenzen.
+  Timing sluit opstart/import, DXF-uitvoer, titel-/viewportbewerking, rasters,
+  netwerk en GUI uit; procespiek bevat wel de opstart-/importbasis. Bestandscache
+  is niet gecontroleerd. Dit is geen volledige export-/app-benchmark.
+  Legenda-/titelherstel en de complete native exportbediening blijven open,
+  evenals raster-/fotovoorbereiding en zelfstandig kopiëren van DIMENSION,
+  proxies/tabellen/underlays en andere uitbreidingsobjecttypen. Niet ondersteunde
+  kopieën geven vóór wijziging van de oorspronkelijke tekening een fout.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

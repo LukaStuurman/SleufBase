@@ -257,6 +257,30 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_geometry.py "$env:TEMPLATE_GEOMETRY_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit sheet expansion and copied layout ownership
+        shell: pwsh
+        env:
+          TEMPLATE_PAGES_DIR: ${{ runner.temp }}/SleufBase-template-pages
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_page_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_pages --example benchmark_template_pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_pages.exe "$env:TEMPLATE_PAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_pages.py "$env:TEMPLATE_PAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_pages.py rust/target/release/examples/benchmark_template_pages.exe rust/benchmarks-template-pages.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload sheet expansion benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-pages-benchmark
+          path: rust/benchmarks-template-pages.json
+          if-no-files-found: error
       - name: Independently audit template project names and dates
         shell: pwsh
         env:

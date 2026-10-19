@@ -171,3 +171,25 @@ vergeleken met [224 oorspronkelijke Python-profielen](../tests/fixtures/profiles
 Reproduceren:
 
     cargo run --release --manifest-path rust/Cargo.toml --example benchmark_profiles
+
+## Echt sjabloon laden en uitbreiden van 32 naar 64 vakken
+
+`template-pages.json` bewaart drie verse processen per route, met dezelfde
+18.855.304-byte invoer (SHA256 in het rapport). De releasebuild is Windows x64
+GNU/Rust 1.99.1; de referentie gebruikt Python 3.11.9 en ezdxf 1.4.4. Mediaan
+laden/parseren, uitbreiden en eindtellingen: native **152,538 ms**, oorspronkelijk
+**575,234 ms**. Beide routes leveren 64 vakken, vier nieuwe bladen, achttien
+layouts en 603 modelobjecten. De onafhankelijke readback controleert elders
+geometrie, eigendomsgrafen en het vervolg met titelvelden/vensters.
+
+De mediane Windows-procespiekwerkset is respectievelijk **71.966.720** en
+**145.993.728 bytes**. Die piek bevat geladen runtime/imports en alle tijdelijke
+tekeningen; het is geen geïsoleerde allocatiemeting of volledige app-piek.
+De timing sluit proces-/interpreteropstart, imports, DXF schrijven, datum-/
+project-/viewportbewerking, rasters, netwerk en GUI/GPU uit. De bestandscache
+is niet gecontroleerd. Dit bewijst geen algemene app- of exportversnelling.
+
+Reproduceren vanuit de repository:
+
+    cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_pages
+    python tools/benchmark_template_pages.py rust/target/release/examples/benchmark_template_pages.exe rust/benchmarks/template-pages.json

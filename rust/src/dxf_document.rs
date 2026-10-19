@@ -186,6 +186,17 @@ fn handle(value: &str) -> Result<u64, String> {
     u64::from_str_radix(value, 16).map_err(|_| "Ongeldige DXF-handle".into())
 }
 impl Document {
+    /// Materialize staged edits only when a structural operation needs a fresh
+    /// record index. The caller keeps the original until the whole operation
+    /// succeeds. Added symbols become ordinary source records in the copy.
+    pub(crate) fn indexed_copy(&self,cancel:&AtomicBool)->Result<Self,String>{
+        let mut bytes=Vec::with_capacity(self.output_len);
+        self.write_to(&mut bytes,cancel)?;
+        let mut result=Self::from_bytes(bytes,cancel)?;
+        result.image_batch_added=self.image_batch_added;
+        result.profile_leader_promoted=self.profile_leader_promoted;
+        Ok(result)
+    }
     pub(crate) fn has_layer(&self, name: &str) -> bool {
         let key = crate::dxf_symbols::key(name);
         self.added_layers.contains_key(&key)
