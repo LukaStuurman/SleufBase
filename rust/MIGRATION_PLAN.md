@@ -465,6 +465,36 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   voorbereidingsoracle blijft inhoudelijk gelijk en controleert ook de actieve
   helper op dezelfde eindtoestand. Bladuitbreiding, legenda's, rastervoorbereiding,
   BGT-oppervlakteresolutie en de complete native sjabloon-/UI-workflow blijven open.
+- Native BGT-oppervlakteksten uit voorbereide geldige geometrie overgezet.
+  Een geleende index bereidt naamgroepen/begrenzingen eenmaal voor. Drie
+  profielproeflijnen berekenen overlap met polygonen/gaten, multipolygonen,
+  lijnen en collecties. Een sweep over gesorteerde kruisingen vermijdt volledige
+  punt-in-polygoonscans per interval; robuuste oriëntatietekens komen uit GeoRust
+  robust 1.2. Intervallen worden binnen één feature verenigd, daarna per
+  casefold-naam opgeteld met de oorspronkelijke naam-/schrijfwijzeprioriteit.
+  Lengtes worden uit de wereldpunten berekend zodat onnodige parameterronding
+  geen gelijke horizontale overlappen tot verschillende scores maakt.
+  541 oorspronkelijke Shapely/GEOS-gevallen, waaronder 520 reproduceerbare
+  polygonen op lokale/RD-coördinaten, controleren de directe winnaar en alle
+  drie profielteksten. Een regressie met 12.000 inkepingen/ruim 60.000 vertices
+  bewaakt veel kruisingen zonder kwadratische classificatie. Grenzen voor
+  features/vertices/diepte/tekst en numerieke waarden blijven annuleerbaar.
+  De complete profielgenerator gebruikt echte geometrie in plaats van een
+  voorgedefinieerde tekstfunctie. Native export leidt dezelfde BGT-waarden af;
+  alle oudere profieloraclevelden en het blok-DXF blijven inhoudelijk gelijk.
+  Handmatige tekst-/kleurprioriteit blijft via resolve_bgt beschikbaar.
+  252 Rust-tests, Clippy zonder nieuwe waarschuwingen en de definitieve
+  releasebuild slagen. Alle zes
+  release-profielmodi slagen, waaronder 48 complete tekeningen/5.398 objecten;
+  nieuwe en geïntegreerde fixtures regenereren byte-identiek met een andere
+  hashseed. Release-integriteit en legacy-contract zijn gecontroleerd. De drie
+  PR-controles van `272e142` zijn groen, inclusief de volledige Python-suite.
+  De gerichte native/originele benchmark bewaart alle drie procesrondes en een
+  gelijke tekstchecksum in rust/benchmarks/bgt-surface.json. Voorbereiding wordt
+  afzonderlijk gemeten; netwerk, geometrie-/JSON-decodering, opstart, GUI/DXF en
+  procespiekgeheugen zijn uitgesloten. Dit bewijst geen volledige app-prestatie.
+  BGT-tegelinvoer/reprojectie/herstel/union/clipping/cache, bladuitbreiding,
+  rastervoorbereiding en de complete native sjabloon-/UI-workflow blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

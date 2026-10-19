@@ -120,6 +120,17 @@ pub fn resolve(metadata: &Value, automatic: &Value, use_custom: bool) -> Result<
     }
     Ok(fills.try_into().unwrap())
 }
+/// Resolve BGT geometry on the measured profile before applying custom values.
+pub fn resolve_bgt(
+    metadata: &Value,
+    surfaces: &crate::bgt_surface::Index<'_>,
+    profile: &Profile<'_>,
+    use_custom: bool,
+    cancel: &AtomicBool,
+) -> Result<[Fill; 3], String> {
+    let automatic = surfaces.texts(profile, cancel)?;
+    resolve(metadata, &automatic, use_custom)
+}
 fn polyline(vertices: Vec<[f64; 2]>, layer: &str, color: Option<u16>, rgb: Option<u32>) -> Entity {
     Entity {
         layer: layer.into(),

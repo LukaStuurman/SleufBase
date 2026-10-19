@@ -3780,6 +3780,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -8133,6 +8134,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -13442,6 +13444,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -2.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -18420,6 +18511,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -22773,6 +22865,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -28082,6 +28175,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  12.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  -0.05000000000000071,
+                  1.0
+                ],
+                [
+                  -0.05000000000000071,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -0.05000000000000071,
+                  1.0
+                ],
+                [
+                  -2.0500000000000007,
+                  1.0
+                ],
+                [
+                  -2.0500000000000007,
+                  -1.0
+                ],
+                [
+                  -0.05000000000000071,
+                  -1.0
+                ],
+                [
+                  -0.05000000000000071,
+                  1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -33550,6 +33732,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -39205,6 +39388,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -45852,6 +46036,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -4.0,
+                  -1.0
+                ],
+                [
+                  -2.0,
+                  -1.0
+                ],
+                [
+                  -2.0,
+                  1.0
+                ],
+                [
+                  -4.0,
+                  1.0
+                ],
+                [
+                  -4.0,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -2.0,
+                  -1.0
+                ],
+                [
+                  15.0,
+                  -1.0
+                ],
+                [
+                  15.0,
+                  1.0
+                ],
+                [
+                  -2.0,
+                  1.0
+                ],
+                [
+                  -2.0,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  15.0,
+                  -1.0
+                ],
+                [
+                  17.0,
+                  -1.0
+                ],
+                [
+                  17.0,
+                  1.0
+                ],
+                [
+                  15.0,
+                  1.0
+                ],
+                [
+                  15.0,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -50804,6 +51077,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -53893,6 +54167,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -57236,6 +57511,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -2.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -60526,6 +60890,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -63553,6 +63918,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -66708,6 +67074,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -2.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  30.05,
+                  -1.0
+                ],
+                [
+                  30.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  30.05,
+                  -1.0
+                ],
+                [
+                  32.050000000000004,
+                  -1.0
+                ],
+                [
+                  32.050000000000004,
+                  1.0
+                ],
+                [
+                  30.05,
+                  1.0
+                ],
+                [
+                  30.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -75986,6 +76441,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -89495,6 +89951,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -106150,6 +106607,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  188382.11888306867,
+                  481200.89292871504
+                ],
+                [
+                  188380.592433766,
+                  481202.18519514514
+                ],
+                [
+                  188379.3001673359,
+                  481200.65874584246
+                ],
+                [
+                  188380.82661663857,
+                  481199.36647941236
+                ],
+                [
+                  188382.11888306867,
+                  481200.89292871504
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  188380.592433766,
+                  481202.18519514514
+                ],
+                [
+                  188366.89500045846,
+                  481213.781212917
+                ],
+                [
+                  188365.60273402836,
+                  481212.2547636143
+                ],
+                [
+                  188379.3001673359,
+                  481200.65874584246
+                ],
+                [
+                  188380.592433766,
+                  481202.18519514514
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  188366.89500045846,
+                  481213.781212917
+                ],
+                [
+                  188365.36855115579,
+                  481215.0734793471
+                ],
+                [
+                  188364.07628472568,
+                  481213.5470300444
+                ],
+                [
+                  188365.60273402836,
+                  481212.2547636143
+                ],
+                [
+                  188366.89500045846,
+                  481213.781212917
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -123313,6 +123859,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -137123,6 +137670,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -154709,6 +155257,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  101952.69013974264,
+                  418807.4246516794
+                ],
+                [
+                  101951.32215709018,
+                  418805.96567139763
+                ],
+                [
+                  101952.78113737193,
+                  418804.5976887451
+                ],
+                [
+                  101954.14912002439,
+                  418806.0566690269
+                ],
+                [
+                  101952.69013974264,
+                  418807.4246516794
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  101951.32215709018,
+                  418805.96567139763
+                ],
+                [
+                  101938.3522152267,
+                  418792.13297446957
+                ],
+                [
+                  101939.81119550845,
+                  418790.76499181706
+                ],
+                [
+                  101952.78113737193,
+                  418804.5976887451
+                ],
+                [
+                  101951.32215709018,
+                  418805.96567139763
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  101938.3522152267,
+                  418792.13297446957
+                ],
+                [
+                  101936.98423257424,
+                  418790.6739941878
+                ],
+                [
+                  101938.44321285599,
+                  418789.3060115353
+                ],
+                [
+                  101939.81119550845,
+                  418790.76499181706
+                ],
+                [
+                  101938.3522152267,
+                  418792.13297446957
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [
@@ -164352,6 +164989,7 @@
       },
       "metadata": {},
       "automatic": {},
+      "surfaces": [],
       "use_custom": false,
       "clip_markers": true,
       "fills": [
@@ -168040,6 +168678,7 @@
         }
       },
       "automatic": {},
+      "surfaces": [],
       "use_custom": true,
       "clip_markers": false,
       "fills": [
@@ -171998,6 +172637,95 @@
         "middle": "Klinkers",
         "end": "Gras"
       },
+      "surfaces": [
+        {
+          "physical_appearance": "Asfalt",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -2.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  1.0
+                ],
+                [
+                  -2.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Klinkers",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  -0.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  1.0
+                ],
+                [
+                  -0.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "physical_appearance": "Gras",
+          "geometry": {
+            "Polygon": [
+              [
+                [
+                  10.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  -1.0
+                ],
+                [
+                  12.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  1.0
+                ],
+                [
+                  10.05,
+                  -1.0
+                ]
+              ]
+            ]
+          }
+        }
+      ],
       "use_custom": true,
       "clip_markers": true,
       "fills": [

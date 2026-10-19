@@ -7,6 +7,7 @@ import json
 import random
 import ezdxf
 from ezdxf.addons import Importer
+from shapely.geometry import Polygon
 from generate_object_export_fixtures import reference
 from generate_template_geometry_fixtures import signature
 from verify_native_profile_leaders import full_signature
@@ -101,29 +102,36 @@ def main():
             show_reference=manual==250
             if show_reference:
                 layer.metadata[exporter.TEMPLATE_REFERENCE_POINT_METADATA_KEY]=dict(x=profile.start_point.x+profile.axis_dx*0.37,y=profile.start_point.y+profile.axis_dy*0.37)
-            automatic={"start":"Asfalt","middle":"Klinkers","end":"Gras"} if manual==250 else {}
+            wanted_automatic={"start":"Asfalt","middle":"Klinkers","end":"Gras"} if manual==250 else {}
+            surfaces=[]
+            if manual==250:
+                ux=(profile.end_point.x-profile.start_point.x)/profile.axis_length
+                uy=(profile.end_point.y-profile.start_point.y)/profile.axis_length
+                for text,low,high in [("Asfalt",-2,0),("Klinkers",0,profile.axis_length),("Gras",profile.axis_length,profile.axis_length+2)]:
+                    ring=[(profile.start_point.x+ux*t-uy*v,profile.start_point.y+uy*t+ux*v) for t,v in [(low,-1),(high,-1),(high,1),(low,1)]]
+                    surfaces.append(module.BgtSurfaceFeature("wegdeel",text,text,Polygon(ring)))
+            automatic=exporter._template_bgt_surface_texts(profile,surfaces)
+            assert automatic==wanted_automatic,(name,automatic,wanted_automatic)
             if manual is not None:
                 layer.metadata[exporter.TEMPLATE_MAAIVELD_METADATA_KEY]={"start":{"text":" Asfalt ","color":"#aBcDeF"},"middle":{"text":"invullen","color":"bad"},"end":{"text":"Gras 漢😀","color":"#123456"}}
             fills=exporter._template_maaiveld_fill_segments(layer,use_custom_values=manual is not None,automatic_values=automatic)
-            # Supply pre-resolved BGT texts at the drawing-stage boundary.
-            exporter._template_bgt_surface_texts=lambda *args: automatic
             clip=manual!=20
             exporter.bands=[];exporter.excluded=set();exporter.reference_boxes=[];exporter.reference_entities=[];exporter.reference_at=0
             diameter_prefix="DN" if manual==250 else "Ø"
-            exporter._add_template_cross_section(doc,doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,[],False,clip,case["marker_scale"],manual,diameter_prefix)
+            exporter._add_template_cross_section(doc,doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,surfaces,False,clip,case["marker_scale"],manual,diameter_prefix)
             expected=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded and ((e.dxftype()=="INSERT" and e.dxf.name.startswith(PREFIX)) or (e.dxftype()=="LWPOLYLINE" and e.dxf.layer==LAYER))]
             complete=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded]
             obstacle=dict(hard=exporter.obstacles["hard"],soft=exporter.obstacles["soft"][:3],text=exporter.obstacles["text"][:len(exporter.obstacles["text"])-len(exporter.reference_boxes)])
             marker_name="SAL-VERWIJZING_PROFIELPUNT-MARKER-SOD"
             marker_definition=[signature(e) for e in doc.blocks[marker_name]] if marker_name in doc.blocks else None
-            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands,body_expected=complete,obstacles=obstacle,metadata=layer.metadata,automatic=automatic,use_custom=manual is not None,clip_markers=clip,fills=[dict(text=fills[k]["text"],rgb=int.from_bytes(bytes(fills[k]["rgb"]),"big")) for k in ["start","middle","end"]],marker_definition=marker_definition,show_reference=show_reference,reference_at=exporter.reference_at,reference_entities=exporter.reference_entities,reference_obstacles=exporter.obstacles))
+            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands,body_expected=complete,obstacles=obstacle,metadata=layer.metadata,automatic=automatic,surfaces=[dict(physical_appearance=f.physical_appearance,geometry={"Polygon":[list(f.geometry.exterior.coords)]}) for f in surfaces],use_custom=manual is not None,clip_markers=clip,fills=[dict(text=fills[k]["text"],rgb=int.from_bytes(bytes(fills[k]["rgb"]),"big")) for k in ["start","middle","end"]],marker_definition=marker_definition,show_reference=show_reference,reference_at=exporter.reference_at,reference_entities=exporter.reference_entities,reference_obstacles=exporter.obstacles))
             current=cases[-1]
             current.update(leader_entries=exporter.leader_entries,leader_expected=exporter.leader_entities,diameter_prefix=diameter_prefix)
             base_all=[full_signature(e) for e in doc.modelspace()]
             prefix_entities=base_all[:len(base_all)-len(exporter.leader_entities)] if exporter.leader_entities else base_all
             collision_doc=ezdxf.readfile(path)
             exporter.bands=[];exporter.excluded=set();exporter.reference_boxes=[];exporter.reference_entities=[];exporter.reference_at=0
-            exporter._add_template_cross_section(collision_doc,collision_doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,[],True,clip,case["marker_scale"],manual,diameter_prefix)
+            exporter._add_template_cross_section(collision_doc,collision_doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,surfaces,True,clip,case["marker_scale"],manual,diameter_prefix)
             assert exporter.leader_entries==current["leader_entries"]
             assert [full_signature(e) for e in list(collision_doc.modelspace())[:len(prefix_entities)]]==prefix_entities
             current["leader_collision_expected"]=exporter.leader_entities

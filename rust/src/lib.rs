@@ -49,6 +49,7 @@ pub mod pdok_wms;
 pub mod jobs_cache;
 pub mod kickthemap_live;
 pub mod bgt;
+pub mod bgt_surface;
 pub mod ahn;
 pub mod marxact;
 pub mod leader_index;

@@ -1,0 +1,49 @@
+{
+  "cases": 541,
+  "loops": 10,
+  "rounds": [
+    {
+      "native": {
+        "cases": 541,
+        "loops": 10,
+        "prepare_ms": 0.4453,
+        "queries_ms": 9.1842,
+        "checksum": "00056ae13c6a2583"
+      },
+      "original": {
+        "queries_ms": 941.6160000255331,
+        "checksum": "00056ae13c6a2583"
+      }
+    },
+    {
+      "native": {
+        "cases": 541,
+        "loops": 10,
+        "prepare_ms": 0.4423,
+        "queries_ms": 8.6098,
+        "checksum": "00056ae13c6a2583"
+      },
+      "original": {
+        "queries_ms": 1282.2120999917388,
+        "checksum": "00056ae13c6a2583"
+      }
+    },
+    {
+      "native": {
+        "cases": 541,
+        "loops": 10,
+        "prepare_ms": 0.6151000000000001,
+        "queries_ms": 9.2176,
+        "checksum": "00056ae13c6a2583"
+      },
+      "original": {
+        "queries_ms": 1351.0880999965593,
+        "checksum": "00056ae13c6a2583"
+      }
+    }
+  ],
+  "python": "3.11.9",
+  "shapely": "2.0.7",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "scope": "Prepared valid geometries, appearance voting and three profile probes; excludes JSON/geometry decoding, process startup, network, UI, DXF writing and process peak memory. Native preparation measured separately."
+}

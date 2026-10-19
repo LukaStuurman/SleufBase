@@ -48,6 +48,7 @@ struct Case {
     distance_description: String,
     metadata: serde_json::Value,
     automatic: serde_json::Value,
+    surfaces: Vec<sleufbase_rust::bgt_surface::Feature>,
     use_custom: bool,
     clip_markers: bool,
     show_reference: bool,
@@ -191,8 +192,12 @@ fn main() -> Result<(), String> {
         let mut layers = Vec::new();
         let mut leader_plan = None;
         if body_mode {
-            let resolved =
-                profile_surface::resolve(&case.metadata, &case.automatic, case.use_custom)?;
+            let surface_index = sleufbase_rust::bgt_surface::Index::new(&case.surfaces, &cancel)?;
+            let automatic = surface_index.texts(&profile, &cancel)?;
+            if automatic != case.automatic {
+                return Err(format!("Native BGT texts differ in {}", case.name));
+            }
+            let resolved = profile_surface::resolve(&case.metadata, &automatic, case.use_custom)?;
             let mut body = profile_surface::build(
                 &profile,
                 &dataset,
