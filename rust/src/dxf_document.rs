@@ -53,6 +53,10 @@ pub(crate) struct Change {
     pub end: usize,
     pub text: String,
 }
+pub(crate) struct AddedBlock {
+    pub base: [f64; 3],
+    pub attributes: Vec<Vec<(i32, String)>>,
+}
 
 pub struct Document {
     source: String,
@@ -64,9 +68,9 @@ pub struct Document {
     output_len: usize,
     pub(crate) image_batch_added: bool,
     pub(crate) added_layers: HashSet<String>,
-    // Newly declared circle-only blocks have no ATTDEFs. Keep their bases so
-    // later entity batches can reference them without reparsing the document.
-    pub(crate) added_blocks: HashMap<String, [f64; 3]>,
+    // Keep bases/ATTDEFs for new blocks so later batches can reference them
+    // without reparsing the full source document or cloning attribute strings.
+    pub(crate) added_blocks: HashMap<String, AddedBlock>,
     pub(crate) profile_leader_promoted: bool,
 }
 #[derive(Clone, Copy)]

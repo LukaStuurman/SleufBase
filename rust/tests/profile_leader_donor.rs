@@ -5,6 +5,7 @@ use sleufbase_rust::{
 };
 use std::{collections::HashMap, sync::atomic::AtomicBool};
 const SOURCE: &[u8] = include_bytes!("fixtures/profile-leader/leader.dxf");
+const EMPTY: &[u8] = include_bytes!("fixtures/profile-leader/empty.dxf");
 fn doc(bytes: &[u8]) -> Document {
     Document::from_bytes(bytes.to_vec(), &AtomicBool::new(false)).unwrap()
 }
@@ -247,4 +248,192 @@ fn shared_seed_and_unrelated_text_edits_compose_with_multiple_geometry_batches()
             .unwrap();
         assert!(u64::from_str_radix(handseed, 16).unwrap() > maximum);
     }
+}
+#[test]
+fn installed_attributes_and_multiple_reference_batches_work_without_document_reparse() {
+    let cancel = AtomicBool::new(false);
+    let mut d = doc(EMPTY);
+    assert!(profile_leader_donor::install(&mut d, &cancel).unwrap());
+    let installed = bytes(&d);
+    assert!(!profile_leader_donor::install(&mut d, &cancel).unwrap());
+    assert!(!profile_leader_donor::promote(&mut d, &cancel).unwrap());
+    assert_eq!(bytes(&d), installed);
+    let metrics =
+        template_geometry::block_attribute_metrics(&d, BLOCK_NAME, "omschrijving", 0.02, &cancel)
+            .unwrap()
+            .unwrap();
+    assert_eq!(metrics.offset, [-0.01, 0.2]);
+    assert_eq!(metrics.height, 0.03);
+    let layer = template_geometry::Layer {
+        name: "X-XX-AL-VERWIJZING-SD".into(),
+        color: 7,
+        true_color: None,
+        lineweight: Some(0),
+    };
+    for (scale, value) in [(-1., "Minimale schaal Ø"), (0.02, "Tweede batch 漢😀")] {
+        let entity = profile_leader_donor::reference(
+            value.into(),
+            "-0.50".into(),
+            [10., 20.],
+            scale,
+            Some(3),
+        )
+        .unwrap();
+        template_geometry::add(&mut d, std::slice::from_ref(&layer), &[entity], &cancel).unwrap();
+    }
+    let mut written = doc(&bytes(&d));
+    let inserts = written
+        .records()
+        .filter(|r| r.kind() == "INSERT" && r.first(2) == Some(BLOCK_NAME))
+        .collect::<Vec<_>>();
+    assert_eq!(inserts.len(), 2);
+    for (r, scale) in inserts.iter().zip([0.005, 0.02]) {
+        assert_eq!(r.first(41).unwrap().parse::<f64>().unwrap(), scale);
+        assert_eq!(r.first(20).unwrap().parse::<f64>().unwrap(), 20. - scale);
+    }
+    let attrs = written
+        .records()
+        .filter(|r| r.kind() == "ATTRIB")
+        .collect::<Vec<_>>();
+    assert_eq!(attrs.len(), 4);
+    assert_eq!(attrs[0].first(1), Some("Minimale schaal Ø"));
+    assert_eq!(attrs[2].first(1), Some("Tweede batch 漢😀"));
+    for (a, scale) in attrs.iter().zip([0.005, 0.005, 0.02, 0.02]) {
+        assert!((a.first(40).unwrap().parse::<f64>().unwrap() - scale * 1.5).abs() < 1e-12);
+    }
+    let before = bytes(&written);
+    assert!(!profile_leader_donor::install(&mut written, &cancel).unwrap());
+    assert_eq!(bytes(&written), before);
+}
+#[test]
+fn install_composes_with_circle_blocks_and_registers_missing_xdata_apps_atomically() {
+    let cancel = AtomicBool::new(false);
+    for (input, before) in [EMPTY, SOURCE]
+        .into_iter()
+        .flat_map(|input| [true, false].into_iter().map(move |before| (input, before)))
+    {
+        let source = doc(input);
+        let mut d = rewrite(&source, |kind, _, tags| {
+            if kind == "APPID" && tags.iter().any(|(c, v)| *c == 2 && v.starts_with("AcDb")) {
+                tags.clear();
+            }
+        });
+        let add = |d: &mut Document| {
+            template_geometry::ensure_circle_block(
+                d,
+                CircleBlock {
+                    name: "Other marker",
+                    center: [0.; 3],
+                    radius: 1.,
+                    layer: "0",
+                    paint: Paint::default(),
+                },
+                &cancel,
+            )
+            .unwrap()
+        };
+        if before {
+            add(&mut d);
+        }
+        profile_leader_donor::install(&mut d, &cancel).unwrap();
+        if !before {
+            add(&mut d);
+        }
+        let written = doc(&bytes(&d));
+        for name in ["APPID", "BLOCK_RECORD"] {
+            let table = written
+                .records()
+                .find(|r| r.kind() == "TABLE" && r.first(2) == Some(name))
+                .unwrap();
+            assert_eq!(
+                table.first(70).unwrap().parse::<usize>().unwrap(),
+                written.records().filter(|r| r.kind() == name).count()
+            );
+        }
+        for app in [
+            "AcDbBlockRepETag",
+            "AcDbDynamicBlockTrueName",
+            "AcDbDynamicBlockGUID",
+        ] {
+            assert!(written
+                .records()
+                .any(|r| r.kind() == "APPID" && r.first(2) == Some(app)));
+        }
+    }
+}
+#[test]
+fn failed_installation_preserves_previous_document_and_resource_cache() {
+    let cancel = AtomicBool::new(false);
+    let source = doc(EMPTY);
+    for variant in 0..4 {
+        let mut d = rewrite(&source, |kind, _, tags| {
+            if variant == 1 && kind == "STYLE" {
+                for (c, v) in tags.iter_mut() {
+                    if *c == 2 && v == "NLCS-ISO" {
+                        *v = "MISSING".into();
+                    }
+                }
+            }
+            if variant == 2 && kind == "LTYPE" {
+                for (c, v) in tags.iter_mut() {
+                    if *c == 2 && v == "Continuous" {
+                        *v = "MISSING".into();
+                    }
+                }
+            }
+            if variant == 3 && kind == "SECTION" {
+                let mut seed = false;
+                for (c, v) in tags.iter_mut() {
+                    if *c == 9 {
+                        seed = v == "$HANDSEED";
+                    } else if seed && *c == 5 {
+                        *v = "FFFFFFFFFFFFFFF8".into();
+                    }
+                }
+            }
+        });
+        let before = bytes(&d);
+        assert!(profile_leader_donor::install(&mut d, &AtomicBool::new(variant == 0)).is_err());
+        assert_eq!(bytes(&d), before);
+        assert!(template_geometry::block_attribute_metrics(
+            &d, BLOCK_NAME, "HOOGTE", 0.02, &cancel
+        )
+        .is_err());
+    }
+    for (start, scale, color) in [
+        ([f64::NAN, 0.], 0.02, None),
+        ([0., 0.], f64::INFINITY, None),
+        ([0., -f64::MAX], f64::MAX, None),
+        ([0., 0.], 0.02, Some(257)),
+    ] {
+        assert!(
+            profile_leader_donor::reference("".into(), "".into(), start, scale, color).is_err()
+        );
+    }
+}
+#[test]
+fn existing_authored_blocks_and_unrelated_xdata_are_retained_during_installation() {
+    let cancel = AtomicBool::new(false);
+    let mut d = doc(include_bytes!("fixtures/profile-leader/tagged.dxf"));
+    let old = doc(&bytes(&d))
+        .records()
+        .filter(|r| r.first(1001) == Some("KEEP_ME"))
+        .count();
+    assert_eq!(old, 5);
+    assert!(profile_leader_donor::install(&mut d, &cancel).unwrap());
+    let written = doc(&bytes(&d));
+    assert_eq!(
+        written
+            .records()
+            .filter(|r| r.tags().any(|(c, v)| c == 1001 && v == "KEEP_ME"))
+            .count(),
+        old
+    );
+    assert_eq!(
+        written
+            .records()
+            .filter(|r| r.kind() == "BLOCK_RECORD" && r.first(2) == Some(BLOCK_NAME))
+            .count(),
+        1
+    );
 }

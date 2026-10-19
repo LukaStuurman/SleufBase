@@ -1,7 +1,7 @@
 //! Profile/map primitives and existing-block inserts in a preserved template.
 //! Append a collected batch atomically. Source blocks/styles remain shared.
 use crate::{
-    dxf_document::{Change, Document, RecordView},
+    dxf_document::{AddedBlock, Change, Document, RecordView},
     python_values::casefold,
 };
 use std::{
@@ -139,7 +139,13 @@ pub fn ensure_circle_block(
         count,
         seed,
     ])?;
-    document.added_blocks.insert(key, [0.; 3]);
+    document.added_blocks.insert(
+        key,
+        AddedBlock {
+            base: [0.; 3],
+            attributes: Vec::new(),
+        },
+    );
     Ok(())
 }
 #[derive(Clone, Debug, serde::Deserialize)]
@@ -252,10 +258,13 @@ fn number(tags: &HashMap<i32, &str>, code: i32, default: f64) -> Result<f64, Str
     finite(&[n])?;
     Ok(n)
 }
-fn scoped<'a>(r: RecordView<'a>, subclass: &str) -> HashMap<i32, &'a str> {
+fn scoped<'a>(
+    pairs: impl Iterator<Item = (i32, &'a str)>,
+    subclass: &str,
+) -> HashMap<i32, &'a str> {
     let mut active = false;
     let mut tags = HashMap::new();
-    for (code, value) in r.tags() {
+    for (code, value) in pairs {
         if code == 100 {
             active = value == subclass;
             continue;
@@ -276,15 +285,20 @@ struct Attribute<'a> {
 }
 impl<'a> Attribute<'a> {
     fn parse(r: RecordView<'a>) -> Result<Self, String> {
-        if r.tags().any(|(c, _)| c == 101) {
+        let tags = r.tags().collect::<Vec<_>>();
+        let mut attribute = Self::parse_tags(tags.iter().copied())?;
+        attribute.text.insert(1, r.current_text()?);
+        Ok(attribute)
+    }
+    fn parse_tags(tags: impl Iterator<Item = (i32, &'a str)> + Clone) -> Result<Self, String> {
+        if tags.clone().any(|(c, _)| c == 101) {
             return Err("Multiline blokattributen zijn nog niet ondersteund".into());
         }
-        let mut attribute = Self {
-            entity: scoped(r, "AcDbEntity"),
-            text: scoped(r, "AcDbText"),
-            fields: scoped(r, "AcDbAttributeDefinition"),
+        let attribute = Self {
+            entity: scoped(tags.clone(), "AcDbEntity"),
+            text: scoped(tags.clone(), "AcDbText"),
+            fields: scoped(tags, "AcDbAttributeDefinition"),
         };
-        attribute.text.insert(1, r.current_text()?);
         if number(&attribute.fields, 71, 1.)? != 1. {
             return Err("Multiline blokattributen zijn nog niet ondersteund".into());
         }
@@ -314,10 +328,19 @@ pub fn block_attribute_metrics(
         return Err("Blokschaal moet positief zijn".into());
     }
     let name = casefold(name);
-    if document.added_blocks.contains_key(&name) {
+    let tag = crate::python_values::uppercase(crate::python_values::trim(tag));
+    if let Some(block) = document.added_blocks.get(&name) {
+        for tags in &block.attributes {
+            crate::input::check(cancel)?;
+            if tags.iter().any(|(c, v)| {
+                *c == 2 && crate::python_values::uppercase(crate::python_values::trim(v)) == tag
+            }) {
+                let attr = Attribute::parse_tags(tags.iter().map(|(c, v)| (*c, v.as_str())))?;
+                return attribute_metrics(&attr, [block.base[0], block.base[1]], scale).map(Some);
+            }
+        }
         return Ok(None);
     }
-    let tag = crate::python_values::uppercase(crate::python_values::trim(tag));
     let mut active = false;
     let mut found = false;
     let mut base = [0.; 2];
@@ -348,24 +371,7 @@ pub fn block_attribute_metrics(
             })
         {
             let attr = Attribute::parse(r)?;
-            if [
-                number(&attr.text, 210, 0.)?,
-                number(&attr.text, 220, 0.)?,
-                number(&attr.text, 230, 1.)?,
-            ] != [0., 0., 1.]
-            {
-                return Err("Gekantelde blokattributen zijn nog niet ondersteund".into());
-            }
-            let offset = [
-                (number(&attr.text, 10, 0.)? - base[0]) * scale,
-                (number(&attr.text, 20, 0.)? - base[1]) * scale,
-            ];
-            let height = number(&attr.text, 40, 2.5)? * scale;
-            finite(&[offset[0], offset[1], height])?;
-            if height <= 0. {
-                return Err("Ongeldige attribuuthoogte".into());
-            }
-            return Ok(Some(AttributeMetrics { offset, height }));
+            return attribute_metrics(&attr, base, scale).map(Some);
         }
     }
     crate::input::check(cancel)?;
@@ -374,6 +380,30 @@ pub fn block_attribute_metrics(
     } else {
         Err("Sjabloonblok ontbreekt".into())
     }
+}
+fn attribute_metrics(
+    attr: &Attribute<'_>,
+    base: XY,
+    scale: f64,
+) -> Result<AttributeMetrics, String> {
+    if [
+        number(&attr.text, 210, 0.)?,
+        number(&attr.text, 220, 0.)?,
+        number(&attr.text, 230, 1.)?,
+    ] != [0., 0., 1.]
+    {
+        return Err("Gekantelde blokattributen zijn nog niet ondersteund".into());
+    }
+    let offset = [
+        (number(&attr.text, 10, 0.)? - base[0]) * scale,
+        (number(&attr.text, 20, 0.)? - base[1]) * scale,
+    ];
+    let height = number(&attr.text, 40, 2.5)? * scale;
+    finite(&[offset[0], offset[1], height])?;
+    if height <= 0. {
+        return Err("Ongeldige attribuuthoogte".into());
+    }
+    Ok(AttributeMetrics { offset, height })
 }
 struct BlockPlacement<'a> {
     insert: XY,
@@ -637,13 +667,19 @@ pub fn add(
             }
         }
     }
-    for (name, base) in &document.added_blocks {
+    for (name, definition) in &document.added_blocks {
         if wanted.contains(name) {
             blocks.insert(
                 name.clone(),
                 Block {
-                    base: *base,
-                    attributes: Vec::new(),
+                    base: definition.base,
+                    attributes: definition
+                        .attributes
+                        .iter()
+                        .map(|tags| {
+                            Attribute::parse_tags(tags.iter().map(|(c, v)| (*c, v.as_str())))
+                        })
+                        .collect(),
                 },
             );
         }

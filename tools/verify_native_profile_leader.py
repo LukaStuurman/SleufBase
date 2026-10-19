@@ -6,6 +6,8 @@ No ezdxf save is allowed after promotion: it drops native action objects.
 from pathlib import Path
 import re
 import io
+import importlib
+import json
 import shutil
 import subprocess
 import sys
@@ -13,6 +15,8 @@ import tempfile
 import ezdxf
 from generate_profile_leader_fixtures import donor_module, ROOT, OUT
 from verify_native_template_edits import records
+from generate_template_geometry_fixtures import signature
+from verify_native_template_images import compare, verify_preservation
 
 
 def primary(record):
@@ -88,6 +92,71 @@ def verify(executable, source, output, module):
     print(f"{source.name}: all source tags and 15 native donor records match; Polar/stretch/move/scale checked")
 
 
+def graph(path, module):
+    pairs, _, _ = module.dv._read_pairs(path)
+    all_records=module.dv._split_records(pairs)
+    sections=module.dv._record_sections(all_records)
+    _,block=module.dv._target_block_record(all_records,sections,module.BLOCK_NAME)
+    handle=module.dv._record_handle(block)
+    root=module._extension_dictionary_handle(block)
+    descendants=module._metadata_descendant_handles(all_records,sections,root)
+    geometry=[r for r,s in zip(all_records,sections) if s=="BLOCKS" and module.dv._record_owner(r)==handle]
+    metadata=[r for r,s in zip(all_records,sections) if s=="OBJECTS" and module.dv._record_handle(r) in descendants]
+    result=[block,*geometry,*metadata]
+    assert len(result)==22
+    aliases={module.dv._record_handle(r):f"<graph {i}>" for i,r in enumerate(result)}
+    for record in result:
+        app=None
+        for i,(c,v) in enumerate(record):
+            if (c==5 or c in module.dv._HANDLE_REFERENCE_CODES) and v.strip().upper() in aliases:
+                record[i]=(c,aliases[v.strip().upper()])
+            if c==1001:app=v
+            elif app=="AcDbDynamicBlockGUID" and c==1000:record[i]=(c,"<fresh GUID>")
+    return result
+
+
+def verify_install(executable,source,output,module):
+    fixture=json.loads((OUT / "references.json").read_text(encoding="utf-8"))
+    request_path=output.with_suffix(".json")
+    request_path.write_text(json.dumps(fixture["requests"],ensure_ascii=False),encoding="utf-8")
+    subprocess.run([str(executable),str(source),str(output),"--install",str(request_path)],check=True)
+    patch=importlib.import_module(module.__package__+".template_dynamic_profile_leader_patch")
+    exporter=patch.CadastralDxfExporter(wfs_client=None)
+    original=ezdxf.readfile(source)
+    doc=ezdxf.readfile(source)
+    existing=module.BLOCK_NAME in doc.blocks
+    assert patch._find_template_profile_leader_reference(doc)==(None,None), "native prototype-clone path is a separate requirement"
+    if not existing:module.ensure_profile_leader_geometry(doc)
+    if module.LAYER_NAME not in doc.layers:doc.layers.add(module.LAYER_NAME,color=7,dxfattribs={"lineweight":0})
+    expected_original=[]
+    for request in fixture["requests"]:
+        patch._add_dynamic_template_profile_leader(exporter,doc.modelspace(),request["description"],request["depth"],request["start"],(999,999),request["scale"],request["color"])
+        expected_original.append(signature(list(doc.modelspace())[-1]))
+    oracle=output.with_name(output.stem+"-oracle.dxf")
+    doc.saveas(oracle)
+    module.promote_profile_leader_block(oracle)
+    # Existing AutoCAD graphs are retained directly from the source. Saving
+    # through ezdxf would discard native action objects and rewrite BLKREFS.
+    assert graph(output,module)==graph(source if existing else oracle,module),source.name
+    new_types={r[0][1] for r in module._donor_metadata_records()}|{"BLOCK_RECORD","BLOCK","ENDBLK","CIRCLE","ATTDEF","LWPOLYLINE","INSERT","ATTRIB","SEQEND","APPID"}
+    verify_preservation(source,output,original,allowed_extra=new_types,allowed_tables=("LAYER","BLOCK_RECORD","APPID"))
+    native=ezdxf.readfile(output)
+    inserts=[e for e in native.modelspace().query("INSERT") if e.dxf.name==module.BLOCK_NAME]
+    assert len(inserts)==len(fixture["expected"])
+    if not existing:compare(expected_original,fixture["expected"],"frozen-original-placements")
+    for i,(entity,expected) in enumerate(zip(inserts,expected_original)):compare(signature(entity),expected,f"{source.name}.reference[{i}]")
+    raw=records(output)
+    handles=[int(h,16) for r in raw if (h:=primary(r)) is not None]
+    assert len(handles)==len(set(handles)) and int(native.header["$HANDSEED"],16)>max(handles)
+    assert all(name in native.appids for name in ["AcDbBlockRepETag","AcDbDynamicBlockTrueName","AcDbDynamicBlockGUID"])
+    baseline=original.audit();audit=native.audit()
+    assert not audit.errors and [e.code for e in audit.fixes]==[e.code for e in baseline.fixes]
+    again=output.with_name(output.stem+"-again.dxf")
+    subprocess.run([str(executable),str(output),str(again),"--install"],check=True)
+    assert output.read_bytes()==again.read_bytes()
+    print(f"{source.name}: complete installed/retained graph, 40 native INSERTs/80 attributes and all source records verified")
+
+
 def main():
     executable = Path(sys.argv[1]).resolve(strict=True)
     module = donor_module()
@@ -109,7 +178,14 @@ def main():
         module.ensure_profile_leader_geometry(doc)
         doc.saveas(source)
         verify(executable, source, directory / "shipped.dxf", module)
-    print("Native donor promotion independently verified in four drawings")
+        verify_install(executable,OUT / "empty.dxf",directory / "installed-empty.dxf",module)
+        verify_install(executable,ROOT / "assets/cadastral_template.dxf",directory / "installed-shipped.dxf",module)
+        source=directory / "missing-appids-input.dxf"
+        doc=ezdxf.readfile(OUT / "empty.dxf")
+        for name in ["AcDbBlockRepETag","AcDbDynamicBlockTrueName","AcDbDynamicBlockGUID"]:doc.appids.remove(name)
+        doc.saveas(source)
+        verify_install(executable,source,directory / "installed-appids.dxf",module)
+    print("Native donor: four promotion audits and three geometry/attribute/resource audits passed")
 
 
 if __name__ == "__main__":

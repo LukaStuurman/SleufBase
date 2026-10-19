@@ -1,0 +1,4286 @@
+{
+  "requests": [
+    {
+      "description": "Water Ø0 漢😀",
+      "depth": "-0.25 N.A.P.",
+      "start": [
+        -10.0,
+        20.0
+      ],
+      "scale": -1.0,
+      "color": null
+    },
+    {
+      "description": "Water Ø0 漢😀",
+      "depth": "-0.25 N.A.P.",
+      "start": [
+        -10.0,
+        20.0
+      ],
+      "scale": -1.0,
+      "color": 0
+    },
+    {
+      "description": "Water Ø0 漢😀",
+      "depth": "-0.25 N.A.P.",
+      "start": [
+        -10.0,
+        20.0
+      ],
+      "scale": -1.0,
+      "color": 7
+    },
+    {
+      "description": "Water Ø0 漢😀",
+      "depth": "-0.25 N.A.P.",
+      "start": [
+        -10.0,
+        20.0
+      ],
+      "scale": -1.0,
+      "color": 255
+    },
+    {
+      "description": "Water Ø0 漢😀",
+      "depth": "-0.25 N.A.P.",
+      "start": [
+        -10.0,
+        20.0
+      ],
+      "scale": -1.0,
+      "color": 256
+    },
+    {
+      "description": "Water Ø1 漢😀",
+      "depth": "-1.25 N.A.P.",
+      "start": [
+        -6.5,
+        19.3
+      ],
+      "scale": 0.0,
+      "color": null
+    },
+    {
+      "description": "Water Ø1 漢😀",
+      "depth": "-1.25 N.A.P.",
+      "start": [
+        -6.5,
+        19.3
+      ],
+      "scale": 0.0,
+      "color": 0
+    },
+    {
+      "description": "Water Ø1 漢😀",
+      "depth": "-1.25 N.A.P.",
+      "start": [
+        -6.5,
+        19.3
+      ],
+      "scale": 0.0,
+      "color": 7
+    },
+    {
+      "description": "Water Ø1 漢😀",
+      "depth": "-1.25 N.A.P.",
+      "start": [
+        -6.5,
+        19.3
+      ],
+      "scale": 0.0,
+      "color": 255
+    },
+    {
+      "description": "Water Ø1 漢😀",
+      "depth": "-1.25 N.A.P.",
+      "start": [
+        -6.5,
+        19.3
+      ],
+      "scale": 0.0,
+      "color": 256
+    },
+    {
+      "description": "Water Ø2 漢😀",
+      "depth": "-2.25 N.A.P.",
+      "start": [
+        -3.0,
+        18.6
+      ],
+      "scale": 0.004,
+      "color": null
+    },
+    {
+      "description": "Water Ø2 漢😀",
+      "depth": "-2.25 N.A.P.",
+      "start": [
+        -3.0,
+        18.6
+      ],
+      "scale": 0.004,
+      "color": 0
+    },
+    {
+      "description": "Water Ø2 漢😀",
+      "depth": "-2.25 N.A.P.",
+      "start": [
+        -3.0,
+        18.6
+      ],
+      "scale": 0.004,
+      "color": 7
+    },
+    {
+      "description": "Water Ø2 漢😀",
+      "depth": "-2.25 N.A.P.",
+      "start": [
+        -3.0,
+        18.6
+      ],
+      "scale": 0.004,
+      "color": 255
+    },
+    {
+      "description": "Water Ø2 漢😀",
+      "depth": "-2.25 N.A.P.",
+      "start": [
+        -3.0,
+        18.6
+      ],
+      "scale": 0.004,
+      "color": 256
+    },
+    {
+      "description": "Water Ø3 漢😀",
+      "depth": "-3.25 N.A.P.",
+      "start": [
+        0.5,
+        17.9
+      ],
+      "scale": 0.005,
+      "color": null
+    },
+    {
+      "description": "Water Ø3 漢😀",
+      "depth": "-3.25 N.A.P.",
+      "start": [
+        0.5,
+        17.9
+      ],
+      "scale": 0.005,
+      "color": 0
+    },
+    {
+      "description": "Water Ø3 漢😀",
+      "depth": "-3.25 N.A.P.",
+      "start": [
+        0.5,
+        17.9
+      ],
+      "scale": 0.005,
+      "color": 7
+    },
+    {
+      "description": "Water Ø3 漢😀",
+      "depth": "-3.25 N.A.P.",
+      "start": [
+        0.5,
+        17.9
+      ],
+      "scale": 0.005,
+      "color": 255
+    },
+    {
+      "description": "Water Ø3 漢😀",
+      "depth": "-3.25 N.A.P.",
+      "start": [
+        0.5,
+        17.9
+      ],
+      "scale": 0.005,
+      "color": 256
+    },
+    {
+      "description": "Water Ø4 漢😀",
+      "depth": "-4.25 N.A.P.",
+      "start": [
+        4.0,
+        17.2
+      ],
+      "scale": 0.02,
+      "color": null
+    },
+    {
+      "description": "Water Ø4 漢😀",
+      "depth": "-4.25 N.A.P.",
+      "start": [
+        4.0,
+        17.2
+      ],
+      "scale": 0.02,
+      "color": 0
+    },
+    {
+      "description": "Water Ø4 漢😀",
+      "depth": "-4.25 N.A.P.",
+      "start": [
+        4.0,
+        17.2
+      ],
+      "scale": 0.02,
+      "color": 7
+    },
+    {
+      "description": "Water Ø4 漢😀",
+      "depth": "-4.25 N.A.P.",
+      "start": [
+        4.0,
+        17.2
+      ],
+      "scale": 0.02,
+      "color": 255
+    },
+    {
+      "description": "Water Ø4 漢😀",
+      "depth": "-4.25 N.A.P.",
+      "start": [
+        4.0,
+        17.2
+      ],
+      "scale": 0.02,
+      "color": 256
+    },
+    {
+      "description": "Water Ø5 漢😀",
+      "depth": "-5.25 N.A.P.",
+      "start": [
+        7.5,
+        16.5
+      ],
+      "scale": 0.1,
+      "color": null
+    },
+    {
+      "description": "Water Ø5 漢😀",
+      "depth": "-5.25 N.A.P.",
+      "start": [
+        7.5,
+        16.5
+      ],
+      "scale": 0.1,
+      "color": 0
+    },
+    {
+      "description": "Water Ø5 漢😀",
+      "depth": "-5.25 N.A.P.",
+      "start": [
+        7.5,
+        16.5
+      ],
+      "scale": 0.1,
+      "color": 7
+    },
+    {
+      "description": "Water Ø5 漢😀",
+      "depth": "-5.25 N.A.P.",
+      "start": [
+        7.5,
+        16.5
+      ],
+      "scale": 0.1,
+      "color": 255
+    },
+    {
+      "description": "Water Ø5 漢😀",
+      "depth": "-5.25 N.A.P.",
+      "start": [
+        7.5,
+        16.5
+      ],
+      "scale": 0.1,
+      "color": 256
+    },
+    {
+      "description": "Water Ø6 漢😀",
+      "depth": "-6.25 N.A.P.",
+      "start": [
+        11.0,
+        15.8
+      ],
+      "scale": 1.0,
+      "color": null
+    },
+    {
+      "description": "Water Ø6 漢😀",
+      "depth": "-6.25 N.A.P.",
+      "start": [
+        11.0,
+        15.8
+      ],
+      "scale": 1.0,
+      "color": 0
+    },
+    {
+      "description": "Water Ø6 漢😀",
+      "depth": "-6.25 N.A.P.",
+      "start": [
+        11.0,
+        15.8
+      ],
+      "scale": 1.0,
+      "color": 7
+    },
+    {
+      "description": "Water Ø6 漢😀",
+      "depth": "-6.25 N.A.P.",
+      "start": [
+        11.0,
+        15.8
+      ],
+      "scale": 1.0,
+      "color": 255
+    },
+    {
+      "description": "Water Ø6 漢😀",
+      "depth": "-6.25 N.A.P.",
+      "start": [
+        11.0,
+        15.8
+      ],
+      "scale": 1.0,
+      "color": 256
+    },
+    {
+      "description": "Water Ø7 漢😀",
+      "depth": "-7.25 N.A.P.",
+      "start": [
+        14.5,
+        15.100000000000001
+      ],
+      "scale": 2.5,
+      "color": null
+    },
+    {
+      "description": "Water Ø7 漢😀",
+      "depth": "-7.25 N.A.P.",
+      "start": [
+        14.5,
+        15.100000000000001
+      ],
+      "scale": 2.5,
+      "color": 0
+    },
+    {
+      "description": "Water Ø7 漢😀",
+      "depth": "-7.25 N.A.P.",
+      "start": [
+        14.5,
+        15.100000000000001
+      ],
+      "scale": 2.5,
+      "color": 7
+    },
+    {
+      "description": "Water Ø7 漢😀",
+      "depth": "-7.25 N.A.P.",
+      "start": [
+        14.5,
+        15.100000000000001
+      ],
+      "scale": 2.5,
+      "color": 255
+    },
+    {
+      "description": "Water Ø7 漢😀",
+      "depth": "-7.25 N.A.P.",
+      "start": [
+        14.5,
+        15.100000000000001
+      ],
+      "scale": 2.5,
+      "color": 256
+    }
+  ],
+  "expected": [
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -10.0,
+        19.995,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø0 漢😀",
+          "insert": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-0.25 N.A.P.",
+          "insert": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -10.0,
+        19.995,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø0 漢😀",
+          "insert": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-0.25 N.A.P.",
+          "insert": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -10.0,
+        19.995,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø0 漢😀",
+          "insert": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-0.25 N.A.P.",
+          "insert": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -10.0,
+        19.995,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø0 漢😀",
+          "insert": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-0.25 N.A.P.",
+          "insert": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -10.0,
+        19.995,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø0 漢😀",
+          "insert": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -10.0025,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-0.25 N.A.P.",
+          "insert": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "align": [
+            -9.99,
+            20.045,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -6.5,
+        19.295,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø1 漢😀",
+          "insert": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-1.25 N.A.P.",
+          "insert": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -6.5,
+        19.295,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø1 漢😀",
+          "insert": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-1.25 N.A.P.",
+          "insert": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -6.5,
+        19.295,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø1 漢😀",
+          "insert": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-1.25 N.A.P.",
+          "insert": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -6.5,
+        19.295,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø1 漢😀",
+          "insert": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-1.25 N.A.P.",
+          "insert": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -6.5,
+        19.295,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø1 漢😀",
+          "insert": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.5025,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-1.25 N.A.P.",
+          "insert": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "align": [
+            -6.49,
+            19.345000000000002,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -3.0,
+        18.595000000000002,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø2 漢😀",
+          "insert": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-2.25 N.A.P.",
+          "insert": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -3.0,
+        18.595000000000002,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø2 漢😀",
+          "insert": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-2.25 N.A.P.",
+          "insert": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -3.0,
+        18.595000000000002,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø2 漢😀",
+          "insert": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-2.25 N.A.P.",
+          "insert": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -3.0,
+        18.595000000000002,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø2 漢😀",
+          "insert": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-2.25 N.A.P.",
+          "insert": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        -3.0,
+        18.595000000000002,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø2 漢😀",
+          "insert": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -3.0025,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-2.25 N.A.P.",
+          "insert": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "align": [
+            -2.99,
+            18.645000000000003,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        0.5,
+        17.895,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø3 漢😀",
+          "insert": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-3.25 N.A.P.",
+          "insert": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        0.5,
+        17.895,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø3 漢😀",
+          "insert": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-3.25 N.A.P.",
+          "insert": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        0.5,
+        17.895,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø3 漢😀",
+          "insert": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-3.25 N.A.P.",
+          "insert": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        0.5,
+        17.895,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø3 漢😀",
+          "insert": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-3.25 N.A.P.",
+          "insert": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        0.5,
+        17.895,
+        0.0
+      ],
+      "scale": [
+        0.005,
+        0.005,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø3 漢😀",
+          "insert": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.4975,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-3.25 N.A.P.",
+          "insert": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "align": [
+            0.51,
+            17.945,
+            0.0
+          ],
+          "height": 0.0075,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        4.0,
+        17.18,
+        0.0
+      ],
+      "scale": [
+        0.02,
+        0.02,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø4 漢😀",
+          "insert": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "align": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-4.25 N.A.P.",
+          "insert": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "align": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        4.0,
+        17.18,
+        0.0
+      ],
+      "scale": [
+        0.02,
+        0.02,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø4 漢😀",
+          "insert": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "align": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-4.25 N.A.P.",
+          "insert": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "align": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        4.0,
+        17.18,
+        0.0
+      ],
+      "scale": [
+        0.02,
+        0.02,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø4 漢😀",
+          "insert": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "align": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-4.25 N.A.P.",
+          "insert": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "align": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        4.0,
+        17.18,
+        0.0
+      ],
+      "scale": [
+        0.02,
+        0.02,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø4 漢😀",
+          "insert": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "align": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-4.25 N.A.P.",
+          "insert": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "align": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        4.0,
+        17.18,
+        0.0
+      ],
+      "scale": [
+        0.02,
+        0.02,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø4 漢😀",
+          "insert": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "align": [
+            3.99,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-4.25 N.A.P.",
+          "insert": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "align": [
+            4.04,
+            17.38,
+            0.0
+          ],
+          "height": 0.03,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        7.5,
+        16.4,
+        0.0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø5 漢😀",
+          "insert": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-5.25 N.A.P.",
+          "insert": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        7.5,
+        16.4,
+        0.0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø5 漢😀",
+          "insert": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-5.25 N.A.P.",
+          "insert": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        7.5,
+        16.4,
+        0.0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø5 漢😀",
+          "insert": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-5.25 N.A.P.",
+          "insert": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        7.5,
+        16.4,
+        0.0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø5 漢😀",
+          "insert": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-5.25 N.A.P.",
+          "insert": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        7.5,
+        16.4,
+        0.0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø5 漢😀",
+          "insert": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.45,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-5.25 N.A.P.",
+          "insert": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "align": [
+            7.7,
+            17.4,
+            0.0
+          ],
+          "height": 0.15000000000000002,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        11.0,
+        14.8,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø6 漢😀",
+          "insert": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "align": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-6.25 N.A.P.",
+          "insert": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "align": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        11.0,
+        14.8,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø6 漢😀",
+          "insert": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "align": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-6.25 N.A.P.",
+          "insert": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "align": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        11.0,
+        14.8,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø6 漢😀",
+          "insert": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "align": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-6.25 N.A.P.",
+          "insert": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "align": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        11.0,
+        14.8,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø6 漢😀",
+          "insert": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "align": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-6.25 N.A.P.",
+          "insert": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "align": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        11.0,
+        14.8,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø6 漢😀",
+          "insert": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "align": [
+            10.5,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-6.25 N.A.P.",
+          "insert": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "align": [
+            13.0,
+            24.8,
+            0.0
+          ],
+          "height": 1.5,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        14.5,
+        12.600000000000001,
+        0.0
+      ],
+      "scale": [
+        2.5,
+        2.5,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø7 漢😀",
+          "insert": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "align": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-7.25 N.A.P.",
+          "insert": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "align": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 0,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        14.5,
+        12.600000000000001,
+        0.0
+      ],
+      "scale": [
+        2.5,
+        2.5,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø7 漢😀",
+          "insert": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "align": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-7.25 N.A.P.",
+          "insert": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "align": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 7,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        14.5,
+        12.600000000000001,
+        0.0
+      ],
+      "scale": [
+        2.5,
+        2.5,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø7 漢😀",
+          "insert": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "align": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-7.25 N.A.P.",
+          "insert": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "align": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 255,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        14.5,
+        12.600000000000001,
+        0.0
+      ],
+      "scale": [
+        2.5,
+        2.5,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø7 漢😀",
+          "insert": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "align": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-7.25 N.A.P.",
+          "insert": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "align": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    },
+    {
+      "kind": "INSERT",
+      "layer": "X-XX-AL-VERWIJZING-SD",
+      "color": 256,
+      "true_color": null,
+      "lineweight": -1,
+      "name": "SAL-VERWIJZING_LEIDING_BOVENKANT-SOD",
+      "insert": [
+        14.5,
+        12.600000000000001,
+        0.0
+      ],
+      "scale": [
+        2.5,
+        2.5,
+        1
+      ],
+      "rotation": 0.0,
+      "attributes": [
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "Water Ø7 漢😀",
+          "insert": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "align": [
+            13.25,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "OMSCHRIJVING",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        },
+        {
+          "kind": "ATTRIB",
+          "layer": "0",
+          "color": 7,
+          "true_color": null,
+          "lineweight": 0,
+          "text": "-7.25 N.A.P.",
+          "insert": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "align": [
+            19.5,
+            37.6,
+            0.0
+          ],
+          "height": 3.75,
+          "rotation": 90.0,
+          "width": 1.0,
+          "oblique": 0,
+          "generation": 0,
+          "halign": 0,
+          "style": "NLCS-ISO",
+          "extrusion": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "thickness": 0,
+          "tag": "HOOGTE",
+          "flags": 0,
+          "valign": 0,
+          "lock_position": 1,
+          "field_length": 0,
+          "attribute_type": 1,
+          "linetype": "Continuous"
+        }
+      ]
+    }
+  ]
+}

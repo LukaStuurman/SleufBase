@@ -342,6 +342,25 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   Alle vier donorvergelijkingen slagen ook met de release-executable; de fixtures
   regenereren byte-identiek met een andere Python-hashseed. De vijf GitHub-
   controles van de voorafgaande referentiestap (`681868f`) zijn groen.
+- Native donor-installatie/behoud en authored-block-verwijzingen toegevoegd.
+  Ontbrekende geometrie, blokrecord, volledige dynamische graaf en vereiste APPIDs
+  worden samen atomair toegevoegd. Bestaande volledige blokgrafen worden direct
+  behouden; het actuele meegeleverde sjabloon bevat zo'n compleet blok, maar geen
+  layoutvoorbeeld dat de oorspronkelijke prototypezoeker vindt. De native route
+  verwijdert/herbouwt die bestaande graaf niet. Nieuwe ATTDEFs worden eenmaal
+  gecachet en in volgende tekenbatches geleend; blokaantallen en handles worden
+  gedeeld met andere blokdeclaraties. Oorspronkelijke minimumschaal, basiscorrectie,
+  attribuuttransformaties en optionele/expliciete kleuren zijn geport. Drie
+  onafhankelijke audits vergelijken 120 INSERTs/240 attributen, volledige nieuwe
+  of behouden blokgrafen, ontbrekende APPID-registratie, bronbehoud en CAD-readback.
+  De eerdere vier metadatavergelijkingen blijven gelden. Prototype-INSERT-kopieën,
+  volledige leaderentrygeneratie/-verdeling en profiel-/UI-/AutoCAD-acceptatie
+  blijven open; de referentiehelper is nog geen volledige profielworkflow.
+  237 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Alle zeven donorcontroles, 89 generieke tekenobjecten en 24 samengestelde
+  profielen/2.249 objecten slagen met de release-uitvoer. Nieuwe en eerdere
+  fixtures regenereren byte-identiek met een andere hashseed. De vijf GitHub-
+  controles van de metadatastap (`18da34c`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

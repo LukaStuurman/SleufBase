@@ -19,6 +19,20 @@ tests a high HANDSEED/lower-case pointers and the actual shipped template after
 the original geometry preparation step. CAD readback must introduce no additional
 audit errors or repairs. Running promotion again must retain identical bytes.
 
-This covers metadata finalization. Native donor geometry installation, original
-prototype INSERT cloning and complete leader/profile/UI export remain separate
-requirements; a metadata comparison does not prove interactive AutoCAD behavior.
+`profile-leader-geometry.json` freezes the original authored BLOCK_RECORD and
+six BLOCKS records. `empty.dxf` is the same envelope before installation.
+`references.json` freezes 40 original authored-block placements: minimum scales,
+Unicode descriptions/depths and five optional/explicit colours. Three further
+audits compare complete native installation or retention, 120 INSERTs and 240
+ATTRIBs in two batches, all source records, handle allocation, table counts and
+missing APPID registration. Source NLCS-ISO/linetypes are retained and required.
+
+The shipped template **already contains a complete approved authored block**;
+it has no layout example found by the original prototype finder. The native
+installer retains that graph, its geometry, BLKREFS and XDATA verbatim. The
+synthetic empty envelope exercises atomic installation instead. Neither audit
+silently substitutes reconstructed geometry for an existing AutoCAD graph.
+
+Prototype INSERT cloning, profile leader entry generation/distribution and the
+complete profile/UI export remain separate requirements. These comparisons do
+not prove interactive AutoCAD behavior.
