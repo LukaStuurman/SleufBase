@@ -324,6 +324,24 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   24 samengestelde profielen met 2.249 objecten, de eerdere body-/kadergevallen,
   generieke tekenobjecten, rasterbundels en titelvelden. De vijf GitHub-controles
   van de voorafgaande maaiveld-/markerstap (`97a3ae2`) zijn groen.
+- Native donor-metadatafinalisatie toegevoegd: de 15 goedgekeurde AutoCAD-
+  records/523 tags blijven op parameterniveau behouden; alleen handles worden
+  aangepast. De complete batch gebruikt de gedeelde vrije handleteller en wordt
+  pas na alle controles/annulering toegepast. Nieuwe GUIDs komen uit de OS-
+  toevalsbron. Bestaande volledige dynamische grafen worden ongewijzigd behouden;
+  onvolledige of andere extensiedictionaries geven een fout zonder gegevensverlies.
+  De controle vereist ook de schaalactie, die de oorspronkelijke idempotentie-
+  controle vergat. De eigenaargraaf wordt eenmaal geïndexeerd in plaats van
+  herhaald volledig gescand. Vier onafhankelijke vergelijkingen controleren alle
+  bron-/donortags, Polar-punten, stretch/move/scale-doelen, representatietags en
+  CAD-readback, inclusief het echte voorbereide sjabloon, Unicode, BOM/CRLF,
+  oude XDATA, hoge HANDSEED en herhaald uitvoeren. Geometrie-installatie,
+  prototype-INSERT-kopieën, plaatsing en interactieve AutoCAD-acceptatie blijven
+  open; dit is nog geen volledige dynamische leaderworkflow.
+  233 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Alle vier donorvergelijkingen slagen ook met de release-executable; de fixtures
+  regenereren byte-identiek met een andere Python-hashseed. De vijf GitHub-
+  controles van de voorafgaande referentiestap (`681868f`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

@@ -67,6 +67,7 @@ pub struct Document {
     // Newly declared circle-only blocks have no ATTDEFs. Keep their bases so
     // later entity batches can reference them without reparsing the document.
     pub(crate) added_blocks: HashMap<String, [f64; 3]>,
+    pub(crate) profile_leader_promoted: bool,
 }
 #[derive(Clone, Copy)]
 pub struct RecordView<'a> {
@@ -145,6 +146,14 @@ impl Document {
     }
     pub(crate) fn record_start(&self, index: usize) -> usize {
         self.records[index].range.start
+    }
+    pub(crate) fn record_change(&self, index: usize, text: String) -> Change {
+        let range = &self.records[index].range;
+        Change {
+            start: range.start,
+            end: range.end,
+            text,
+        }
     }
     pub(crate) fn before_xdata(&self, index: usize) -> usize {
         let r = &self.records[index];
@@ -433,6 +442,7 @@ impl Document {
             image_batch_added: false,
             added_layers: HashSet::new(),
             added_blocks: HashMap::new(),
+            profile_leader_promoted: false,
         })
     }
     pub fn records(&self) -> impl Iterator<Item = RecordView<'_>> {

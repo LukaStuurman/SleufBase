@@ -40,6 +40,7 @@ pub mod profile;
 pub mod profile_drawing;
 pub mod profile_surface;
 pub mod profile_reference;
+pub mod profile_leader_donor;
 pub mod pdok_wms;
 pub mod jobs_cache;
 pub mod kickthemap_live;
