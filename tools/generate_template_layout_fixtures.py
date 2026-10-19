@@ -48,6 +48,8 @@ def main():
     for n in ['view_target_point','view_direction_vector','view_twist_angle']:plain.dxf.discard(n)
     for name in ['Straße','ος','ı','K','K']:
         lay=doc.layouts.new(name);insert=lay.add_blockref('Title',(0,0));insert.add_auto_attribs({'DATUM1':'old date','PROJECTNAAM':'old project'})
+    doc.classes.add_required_classes(doc.dxfversion)
+    doc.classes.classes=type(doc.classes.classes)(sorted(doc.classes.classes.items()))
     source=OUT/'sheets.dxf';doc.saveas(source)
     def bounds(x,y,w,h):return dict(min_x=x,min_y=y,max_x=x+w,max_y=y+h)
     def step(slots,gap=18):return dict(slots=slots,label_gap=gap)
