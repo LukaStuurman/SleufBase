@@ -8,7 +8,7 @@ use crate::{
 };
 use std::{collections::BTreeMap, sync::atomic::AtomicBool};
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum Geometry {
     Point(XY),
     MultiPoint(Vec<XY>),

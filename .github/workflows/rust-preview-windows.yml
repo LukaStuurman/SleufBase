@@ -118,6 +118,30 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_layout.py "$env:TEMPLATE_LAYOUT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify native BGT vector tile decoding and cache benchmark
+        shell: pwsh
+        env:
+          BGT_TILES_DIR: ${{ runner.temp }}/SleufBase-BGT-tiles
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_bgt_tile_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/bgt-tiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_bgt_tiles --example benchmark_bgt_tiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_tiles.exe "$env:BGT_TILES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_tiles.py "$env:BGT_TILES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_bgt_tiles.py rust/target/release/examples/benchmark_bgt_tiles.exe rust/benchmarks-bgt-tiles.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload BGT vector tile benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-BGT-tiles-benchmark
+          path: rust/benchmarks-bgt-tiles.json
+          if-no-files-found: error
       - name: Verify BGT appearance geometry and benchmark native probes
         shell: pwsh
         env:

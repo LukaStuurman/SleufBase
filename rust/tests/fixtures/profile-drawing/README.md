@@ -41,8 +41,11 @@ triggering the original integer-conversion failure. Source vertices remain
 borrowed; direct profile-point indices avoid scanning all points for every band.
 Frame, body, per-point geometry and connectors are composed by moving entities.
 
-Automatic text resolution accepts pre-resolved BGT values at the drawing-stage
-boundary; BGT physical-appearance geometry/fetch integration remains open.
+Automatic texts now come from native overlap calculations on prepared BGT
+polygons. The original generator calls the actual geometry helper; native export
+derives the same values before drawing. Per-tile MVT/RD and HTTP/cache are now
+available separately. Source-feature union/repair/clipping and their complete
+export integration remain open.
 Reference indicators are now independently covered by 216 direct original
 helper calls across normal/reverse profiles, three scales, exact boundaries,
 visible side padding and points beyond either edge. RD integer rounding and

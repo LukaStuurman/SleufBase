@@ -27,7 +27,7 @@ pub(crate) fn read(
     }
     read_chunks(&mut file, limit, label, cancel)
 }
-fn read_chunks(
+pub(crate) fn read_chunks(
     reader: &mut impl Read,
     limit: u64,
     label: &str,

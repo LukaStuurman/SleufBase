@@ -26,8 +26,8 @@ De drie proeflijnen liggen één meter vóór de sleuf, over de sleufas en één
 meter erna. De oorspronkelijke lengte-/asgrenzen en naamprioriteit blijven
 behouden. Annulering, ongeldige/niet-eindige coördinaten, te diepe collecties,
 te veel features/vertices en ongeldige teksten worden begrensd. De kern vervangt
-geen topologieherstel: tegelreprojectie, make-valid, union per bronfeature,
-clipping en netwerk/cache zijn nog afzonderlijk te porteren.
+geen topologieherstel. Native tegelinvoer/RD en HTTP/cache zijn inmiddels apart
+beschikbaar; make-valid, union per bronfeature en clipping blijven te porteren.
 
 `resolve_bgt` koppelt deze uitkomst aan dezelfde handmatige tekst-/kleurprioriteit.
 De complete profielgenerator gebruikt nu echte BGT-polygonen in plaats van een

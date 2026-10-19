@@ -1,0 +1,2 @@
+# MVT/PBF fixtures are protobuf; checkout must preserve every byte.
+*.pbf -text

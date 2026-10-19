@@ -495,6 +495,40 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   procespiekgeheugen zijn uitgesloten. Dit bewijst geen volledige app-prestatie.
   BGT-tegelinvoer/reprojectie/herstel/union/clipping/cache, bladuitbreiding,
   rastervoorbereiding en de complete native sjabloon-/UI-workflow blijven open.
+- Native BGT-tegelinvoer en gedeelde client toegevoegd. De begrensde MVT 1/2-
+  protobufdecoder leest waardetypen, packed/unpacked tags/commando's, polygonen
+  met gaten, meerdere vlakken/lijnen en oorspronkelijke ring-/Y-semantiek.
+  Normalisatie, identifierprioriteit/fallback en RD-omzetting volgen de oude
+  helper. Dictionarywaarden en gecachte wereldgeometrie worden gedeeld.
+  De matrix bewaart dezelfde epsilon/randklemmen en rij-/kolomvolgorde.
+  Een vaste openbare PDOK-tegel en 25 synthetische gevallen vergelijken 819
+  oorspronkelijke geometrieën/505 ondergronddelen; 360 matrixvragen controleren
+  de grenzen. Raw/decompressed bytes, woorden, features, vertices, metadata,
+  groepsdiepte, cache en totaalresultaat zijn begrensd en annuleerbaar.
+  De native HTTP-client gebruikt één verbindingenpool, een begrensde werkbatch,
+  maximaal vier pogingen met annuleerbare backoff en een LRU met aantallen én
+  bytes. Beschadigde antwoorden komen niet in de cache. Volgorde blijft stabiel
+  bij parallel ophalen; batchfouten, workerpanic, annuleren of een budgetfout
+  geven geen gedeeltelijk resultaat. Tests controleren gzip-leden/beschadiging/
+  decompressielimiet, LRU, gedeelde Arc-geometrie, hergebruik en clientherstel.
+  Live HTTPS is met native opname van de antwoordbytes gecontroleerd: dezelfde
+  518 geometrieën/330 ondergronddelen als de oorspronkelijke code; een tweede
+  opvraag deelt dezelfde geometrie en veroorzaakt geen nieuw HTTP-verzoek.
+  CI gebruikt alleen de vaste offline gegevens. Alle binaire/JSON-oracles
+  regenereren byte-identiek met verschillende hashseeds; PBF krijgt geen
+  regeleindeconversie bij checkout.
+  De eerdere layoutfixturegenerator bleek vereiste CLASS-records in een door
+  Python-hashes beïnvloede volgorde te schrijven. Expliciete registratie en
+  sortering in b3d8f31 herstellen die CI-flake. Vier onafhankelijke hashseeds
+  leveren nu dezelfde DXF en referenties; 20 bladtoestanden/vijf Unicode-layouts
+  slagen opnieuw met onafhankelijke readback.
+  259 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild slagen.
+  De 26 tegelgevallen en live-client slagen ook met de release-uitvoer, naast
+  48 complete profielen/5.398 objecten en de bladaudit. De koude-/cachebenchmark
+  bewaart drie procesrondes en dezelfde aantallen in rust/benchmarks/bgt-tiles.json.
+  Dit zijn per-tegelgegevens: bronfeature-union, topologieherstel, clipping en
+  aansluiting op de volledige sjabloon-/UI-workflow blijven open. De voorbereide
+  profielgeometriekern mag de ruwe delen pas na die stappen gebruiken.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
