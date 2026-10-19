@@ -129,7 +129,7 @@ pub fn add_images(
         return Err("Te veel sjabloonrasters".into());
     }
     if document.image_batch_added {
-        return Err("Verzamel alle sjabloonrasters in één batch".into());
+        return Err("Verzamel alle sjabloonrasters in Ã©Ã©n batch".into());
     }
     // Read/validate all PNG dimensions before changing any source tags.
     let mut prepared = Vec::with_capacity(images.len());
@@ -363,7 +363,7 @@ pub fn add_images(
         objects.tag(90, 2);
         objects.id(330, entity);
         let space = if let Some(name) = &image.layout {
-            let wanted = crate::dxf_symbols::key(name);
+            let wanted = crate::python_values::uppercase(name);
             let layout = document
                 .records()
                 .find(|r| {
@@ -371,7 +371,7 @@ pub fn add_images(
                         && r.tags()
                             .filter(|(c, _)| *c == 1)
                             .last()
-                            .is_some_and(|(_, n)| crate::dxf_symbols::key(n) == wanted)
+                            .is_some_and(|(_, n)| crate::python_values::uppercase(n) == wanted)
                 })
                 .and_then(RecordView::handle)
                 .ok_or_else(|| format!("Sjabloonlayout ontbreekt: {name}"))?;

@@ -24,6 +24,7 @@ pub mod template_images;
 pub mod template_metadata;
 pub mod template_geometry;
 pub mod template_prepare;
+pub mod template_layout;
 pub mod cad;
 mod cad_layers;
 pub mod cad_geometry;

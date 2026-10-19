@@ -11,7 +11,7 @@ Broncontrole van het **actieve** exportcontract: `__init__.py` installeert V9,
 maar niet `template_dynamic_profile_leader_patch`. De expliciete regressies in
 `tests/test_profile_leader_v0310_behavior.py` vereisen de oorspronkelijke
 attribuutblok-/LEADER-methoden. Die route bepaalt productiepariteit. De eerder
-geporte donor/parameterhelpers blijven optionele bouwstenen; prototypekopieën uit
+geporte donor/parameterhelpers blijven optionele bouwstenen; prototypekopieÃ«n uit
 een uitgeschakelde patch zijn geen voorwaarde voor de actieve profielworkflow.
 De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 
@@ -36,7 +36,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
-## Voortgang 17–18 oktober 2026
+## Voortgang 17â€“18 oktober 2026
 
 - MarXact-richting, automatische grensmiddens en absolute rotatie/reset geport.
   Tien Python-referentiegevallen, zeventig rotaties, project- en DXF-regressies.
@@ -54,11 +54,11 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 - Reproduceerbare release-kernbenchmark met 100.000 objecten en CI-artifact:
   twintig kaartinvoerupdates vermijden 10.000.080 allocaties; validatie vermijdt
   2.000.000 tijdelijke allocaties (zie `benchmarks/README.md` voor grenzen).
-- Rasterdecoder verwerkt strips/tegels naar begrensde previews op één achtergrondthread,
+- Rasterdecoder verwerkt strips/tegels naar begrensde previews op Ã©Ã©n achtergrondthread,
   ondersteunt meer samples/kleurtypen en verdeelt een geschat textuurbudget over lagen.
   47 rasterfixtures (Pillow + numerieke verwachtingen) en 93 Rust-tests groen.
   Planar RGB16 corrigeert een aangetoonde Pillow-bytefout; NoData/nonfinite transparant.
-  Releasebenchmark op 16,8 miljoen RGB8-pixels: circa 2,3× sneller en 86% lagere
+  Releasebenchmark op 16,8 miljoen RGB8-pixels: circa 2,3Ã— sneller en 86% lagere
   procespiek dan volledige Pillow-conversie, bij gelijke previewpixels. Overviews,
   viewportresolutie en volledige raster-/gebruikersacceptatie blijven open.
 - Geneste MULTILEADER-labels lezen echte pijllijnen en MTEXT afzonderlijk.
@@ -67,13 +67,13 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Open contouren worden terecht overgeslagen; labeltekst volgt eerste match en
   numerieke hoogteprefix. Oudere overlays zonder gesloten-vlag blijven leesbaar.
   97 Rust-tests groen; bloktransformaties en sjablonen blijven open.
-- ASCII/binary DXF-invoer deelt nu één geometriepad, leest tags incrementeel,
+- ASCII/binary DXF-invoer deelt nu Ã©Ã©n geometriepad, leest tags incrementeel,
   gebruikt HEADER-codepagina/UTF-8 en weigert beschadigde/afgebroken bestanden.
   Vier ezdxf ASCII/binary-paren (R12/R2000/R2018) en binaire geneste MarXact
   vergeleken; scalaire/XDATA-chunk- en afbreekregressies toegevoegd.
   105 Rust-tests groen. Geen volledige attributen/XDATA, OCS/bulges,
   bloktransformaties of sjablonen; bronbuffer en uitvoergeometrie blijven in RAM.
-- CAD-palet/true-color/laagstatus en INSERT-attributen/XDATA geïmplementeerd,
+- CAD-palet/true-color/laagstatus en INSERT-attributen/XDATA geÃ¯mplementeerd,
   met laagkeuzes en een gecachte objectinspectie in de UI. 266 Python-orakels
   (alle ACI's), ASCII/binary-vergelijking en egui-paintregressie.
   Expliciet zwart en true-color op lagen corrigeren aangetoonde Python-fouten.
@@ -88,12 +88,12 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Native v3 bewaart blokken/curveparameters, leest v1/v2 zonder bronwijziging en
   bouwt afgeleide caches opnieuw. 125 Rust-tests groen, inclusief polyface-indexen,
   recursie/budgetfouten, 10.000 metadata-delende instanties en mislukte herkoppeling.
-- MarXact-labels worden ruimtelijk geïndexeerd met gedeelde bronnen en deduplicatie
+- MarXact-labels worden ruimtelijk geÃ¯ndexeerd met gedeelde bronnen en deduplicatie
   van gelijke XY-posities. De Python-tievolgorde corrigeert een native afwijking;
   extra buurcellen herstellen Python-missers op ties-to-even-celgrenzen.
   10.018 onafhankelijke referentievragen, 36 expliciete afrondingscorrecties,
-  100.000 dubbele labels en zeer grote coördinaten getest. 128 Rust-tests groen.
-  Releasekernmeting: indexopbouw plus 20.000 vragen circa 63× sneller dan de oude
+  100.000 dubbele labels en zeer grote coÃ¶rdinaten getest. 128 Rust-tests groen.
+  Releasekernmeting: indexopbouw plus 20.000 vragen circa 63Ã— sneller dan de oude
   native lineaire scan op 20.000 verspreide labels; geen volledige importmeting.
 - Hoofdletterongevoelige Unicode-laagverwijzingen behouden nu de juiste kleur,
   zichtbaarheid en blokovererving zonder bronnaamverlies of normalisatie per frame.
@@ -101,33 +101,33 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   varianten en bronherladen bij gewijzigde schrijfwijze getest. 132 Rust-tests groen.
 - SPLINE/NURBS met controlepunten, positieve gewichten en CAD-fitpunten geport,
   inclusief natuurlijke/clamped eindvoorwaarden, ongeklemde/periodieke curves,
-  bronparameters en gescheiden paden. Bézier-hullafvlakking na WCS-transformatie,
+  bronparameters en gescheiden paden. BÃ©zier-hullafvlakking na WCS-transformatie,
   hergebruikte spanbuffer en lineaire tridiagonale fitoplossing.
   Twintig ezdxf-bronnen, 60 wereldcurves/63 paden, graad 1/3/5/11, opslag,
   numerieke fouten, budgetten en 20.000 fitpunten vergeleken/getest.
   Exacte JSON-floatrondgangen herstellen een aangetoonde precisiefout bij openen;
   grote getallen/decimalen in het Python-archief worden niet naar f64 afgerond.
   139 Rust-tests groen; negatieve/nulgewichten en volledige CAD-acceptatie open.
-- Lokale invoer loopt via één begrensde achtergrondworker: native openen/herstel,
+- Lokale invoer loopt via Ã©Ã©n begrensde achtergrondworker: native openen/herstel,
   Python-import, DXF toevoegen/herladen/herkoppelen, MarXact, jobFeatures en
   GeoTIFF-metadata, inclusief bestanden uit live downloads. Voorbereiding van
-  CAD-zichtbaarheid en project-/MarXact-markers gebeurt vóór toepassing.
+  CAD-zichtbaarheid en project-/MarXact-markers gebeurt vÃ³Ã³r toepassing.
   Voortgang/annuleren, behoud van huidig werk bij fouten, batches met losse
   fouten en projectgeneraties zijn gekoppeld aan de echte UI. Nieuwe regressies
   blokkeren de worker doelbewust terwijl een egui-frame Escape verwerkt of een
   nieuw project begint; late resultaten veranderen het huidige project niet.
   Gedeelde invoercontrole begrenst werkelijke bytes, corrigeert de oude
   jobFeatures-groeirace en herhaalt onderbroken systeemlezingen. 151 Rust-tests
-  groen. Annuleren is coöperatief: één systeemaanroep, JSON-/geometrie-/cachefase
+  groen. Annuleren is coÃ¶peratief: Ã©Ã©n systeemaanroep, JSON-/geometrie-/cachefase
   kan nog aflopen; opslaan/export/back-ups blijven synchroon. Geen totale
   geheugen-/rendergarantie of volledige workflowacceptatie.
-- CAD-vlakken en geïndexeerde polyface-/polygon-/MESH-controlekooien geport,
+- CAD-vlakken en geÃ¯ndexeerde polyface-/polygon-/MESH-controlekooien geport,
   inclusief verborgen randen, SOLID/TRACE-OCS en puntvolgorde, sluitrichtingen,
   n-gons, expliciete randen/vouwgewichten en geneste bloktransformaties.
   Gedeelde brondata en eenmaal gededupliceerde losse randpaden; native herstel
   herbouwt verouderde randen en bewaart vertex-/vlakmetadata en parameters.
   56 ezdxf-gevallen/278 zichtbare randen in ASCII/binary; alle 3DFACE-maskers,
-  native opslagfouten, budgetten, een 100 × 100 raster en echte egui-randen getest.
+  native opslagfouten, budgetten, een 100 Ã— 100 raster en echte egui-randen getest.
   Fixtures regenereren byte voor byte. 158 Rust-tests groen. Vlakvulling,
   subdivisie, gladde oppervlakken, dikte-extrusie, afzonderlijke vertex-/vlakstijlen
   en MESH-subobjectoverrides blijven open; meshdata levert geen MarXact-metingen.
@@ -146,11 +146,11 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   UI-regelopties, bron-/groepsfilters, exportvoortgang/annuleren, volledige sjablonen,
   profielen en rasterbundels blijven open; echte volledige praktijkacceptatie vereist.
 - Objectparser/groepsfilters en Python-waarheid/waardeconversie verder geport:
-  ontbrekend versus null, selectie vóór trimmen, getallen/booleans, samengestelde
-  eigenschappen in bronvolgorde, Unicode-decimale coördinaten en underscores.
+  ontbrekend versus null, selectie vÃ³Ã³r trimmen, getallen/booleans, samengestelde
+  eigenschappen in bronvolgorde, Unicode-decimale coÃ¶rdinaten en underscores.
   Ongeldige geometrycontainers laten de hele job niet meer crashen; niet-eindige
   XY vervalt en niet-eindige optionele Z wordt onbekend. Budgetten en controles
-  voor annuleren tussen object-/vertexbatches; JSON-decodering blijft één fase.
+  voor annuleren tussen object-/vertexbatches; JSON-decodering blijft Ã©Ã©n fase.
   Native Unicode-wildcard-/klassenmatcher volgt Python, inclusief ongeldige
   bereiken en eerste-matchvolgorde. Standaard ASCII-regels vermijden tijdelijke
   bron-/keywordnormalisatie. 107 oorspronkelijke parserdocumenten met 1.024
@@ -188,25 +188,25 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   181 Rust-tests, Clippy, releasebuild en beide onafhankelijke exportaudits
   geslaagd. Schrijven is nog synchroon; online bronkeuze/downloads vanuit de exportdialog,
   volledige templates/profielen en echte GUI-/praktijkacceptatie blijven open.
-- GUI-DXF/Excel schrijven op één herbruikbare exportworker. Datasets, virtuele
+- GUI-DXF/Excel schrijven op Ã©Ã©n herbruikbare exportworker. Datasets, virtuele
   proefsleuven en aanvullende kaartlagen worden zonder volledige bronkopie
   tijdelijk overgedragen en bij succes, fout of annulering teruggegeven.
   Virtuele voorbereiding, geometriestappen, rapporttellingen en schrijfbatches
   controleren annulering. Voortgangsscherm/Escape blijven beschikbaar; bewerken
-  en netwerktoepassing wachten. Een atomaire eindcontrole ná flush/fsync voorkomt
+  en netwerktoepassing wachten. Een atomaire eindcontrole nÃ¡ flush/fsync voorkomt
   publicatie als annuleren wint; eenmaal begonnen publicatie wordt afgerond.
   Projectopslag/back-ups worden niet op tijdelijk lege gegevens uitgevoerd;
-  nieuw/sluiten wachten op teruggave vóór de bestaande onopgeslagen-werkkeuze.
+  nieuw/sluiten wachten op teruggave vÃ³Ã³r de bestaande onopgeslagen-werkkeuze.
   Procesfouten/panics, tweede-taakweigering, gedeeltelijke uitvoer, no-clobber,
   teruggave van dezelfde allocatie en echte egui-interactie met een geblokkeerde
   worker getest. 187 Rust-tests groen. De worker-exportpaden zijn onafhankelijk
   vergeleken met alle veertien DXF- en tien rapportreferenties, inclusief lagen,
   labels/metadata, Excel-opmaak/totalen en aanvullende geometrie; CAD-audit zonder
   reparaties. CI controleert workeruitvoer apart van directe encoder en CLI.
-  Annulering blijft coöperatief; één systeem-/sorteer-/geometrie-/XML-/compressiefase
+  Annulering blijft coÃ¶peratief; Ã©Ã©n systeem-/sorteer-/geometrie-/XML-/compressiefase
   kan nog aflopen. Geen totale geheugen-/crashgarantie of volledige praktijkacceptatie.
 - De onafhankelijke profielrekenkern is overgezet: stabiele begin/eindkeuze,
-  weg-/terreinoriëntatie, expliciet MarXact-begin (0,5 m), zelfstandig omgekeerde
+  weg-/terreinoriÃ«ntatie, expliciet MarXact-begin (0,5 m), zelfstandig omgekeerde
   berekening, synthetische begrenzing inclusief diameter en dubbele markers,
   hoogtemiddens van polylijnen, kettingmaat, peil en disciplinebeschrijvingen.
   Geen gekopieerde vertex-/segmentarrays; bronfeatures via index en regellagen
@@ -231,11 +231,11 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   dynamische varianten en UI-export ontbreken; dit is geen volledige sjabloonexport.
 - Native rasterinvoeging maakt IMAGE/IMAGEDEF/reactors, dictionary/layer/classes,
   tellers en HANDSEED; beeldverhouding/stretch/insets volgen de oorspronkelijke
-  box-exporter. Eén verzamelde batch verwerkt alle pagina-/kaart-/logorasterpaden
+  box-exporter. EÃ©n verzamelde batch verwerkt alle pagina-/kaart-/logorasterpaden
   zonder een tweede bronkopie. Inactieve papierlayouts gebruiken hun eigen BLOCK;
   de onafhankelijke eigenaarcontrole ving en corrigeerde onjuiste actieve-bladplaatsing.
   Permanente, unieke exportbundles worden na alle fileflushes en een annuleerpoort
-  gepubliceerd via vervanging; oude assets voor kopieën blijven bestaan. Fouten,
+  gepubliceerd via vervanging; oude assets voor kopieÃ«n blijven bestaan. Fouten,
   unwinding, incomplete assets, echt vergrendelde Windows-uitvoer, overlappende
   pogingen en annuleren na sync getest. 91 originele plaatsingen op drie bronnen
   zijn met ezdxf vergeleken; beide exportrondes en alle native RGBA-PNG-pixels
@@ -245,7 +245,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   206 Rust-tests, Clippy, releasebuild en onafhankelijke release-audits geslaagd.
 - Projectnaam is op uitdrukkelijk verzoek toegevoegd aan het bestaande desktop-
   sjabloonexportvenster; bevestigen geeft de waarde door aan de exporter en
-  annuleren behoudt de vorige waarde. Datum wordt één keer per document lokaal
+  annuleren behoudt de vorige waarde. Datum wordt Ã©Ã©n keer per document lokaal
   bepaald en vult DATUM1 of de eerste ongenummerde DATUM-revisieregel. Projectnaam
   vult GEM-PROJECT/PROJECTOMSCHRIJVING/PROJECTNAAM; projectnummer, ongebruikte bladen,
   blokdefinities en latere revisies blijven intact. De native Rust-kern voert
@@ -307,7 +307,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Nog 150 clips en twaalf tekst-/kleurgevallen zijn onafhankelijk gecontroleerd.
   Directe profielpuntindices voorkomen herhaald zoeken per band; namen van
   gelijkwaardige lagen worden geleend en eenmaal gedeclareerd met eerste
-  schrijfwijze/laatste kleur. Samenstellen verplaatst geometrie zonder kopieën
+  schrijfwijze/laatste kleur. Samenstellen verplaatst geometrie zonder kopieÃ«n
   van bronvertices. BGT-oppervlaktegeometrie/-fetch, referentie-indicatoren, donor-
   dynamische leaders, wijzigingen van bestaande aangepaste laagstijlen en de
   volledige sjabloon-/pagina-/UI-workflow blijven open.
@@ -318,7 +318,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 - Native referentie-indicatoren toegevoegd: metadata-/standaardpunt, projectie op
   de profielas, RD-afronding op gehele meters, kaartrotatie, cirkel/kruis en
   labelverwijzing binnen beeld, afstandspijl buiten beeld en de oorspronkelijke
-  zachte segmenten/tekstkaders voor leaders. De native referentie wordt vóór de
+  zachte segmenten/tekstkaders voor leaders. De native referentie wordt vÃ³Ã³r de
   afstandsbanden opgelost; de samengestelde vergelijking neemt geen Python-
   kettingmaat over. 216 directe oorspronkelijke helperaanroepen dekken normale/
   omgekeerde profielen, drie schalen, exacte grenzen, zijruimte en buitenliggende
@@ -339,12 +339,12 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   toevalsbron. Bestaande volledige dynamische grafen worden ongewijzigd behouden;
   onvolledige of andere extensiedictionaries geven een fout zonder gegevensverlies.
   De controle vereist ook de schaalactie, die de oorspronkelijke idempotentie-
-  controle vergat. De eigenaargraaf wordt eenmaal geïndexeerd in plaats van
+  controle vergat. De eigenaargraaf wordt eenmaal geÃ¯ndexeerd in plaats van
   herhaald volledig gescand. Vier onafhankelijke vergelijkingen controleren alle
   bron-/donortags, Polar-punten, stretch/move/scale-doelen, representatietags en
   CAD-readback, inclusief het echte voorbereide sjabloon, Unicode, BOM/CRLF,
   oude XDATA, hoge HANDSEED en herhaald uitvoeren. Geometrie-installatie,
-  prototype-INSERT-kopieën, plaatsing en interactieve AutoCAD-acceptatie blijven
+  prototype-INSERT-kopieÃ«n, plaatsing en interactieve AutoCAD-acceptatie blijven
   open; dit is nog geen volledige dynamische leaderworkflow.
   233 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
   Alle vier donorvergelijkingen slagen ook met de release-executable; de fixtures
@@ -361,7 +361,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   attribuuttransformaties en optionele/expliciete kleuren zijn geport. Drie
   onafhankelijke audits vergelijken 120 INSERTs/240 attributen, volledige nieuwe
   of behouden blokgrafen, ontbrekende APPID-registratie, bronbehoud en CAD-readback.
-  De eerdere vier metadatavergelijkingen blijven gelden. Prototype-INSERT-kopieën,
+  De eerdere vier metadatavergelijkingen blijven gelden. Prototype-INSERT-kopieÃ«n,
   volledige leaderentrygeneratie/-verdeling en profiel-/UI-/AutoCAD-acceptatie
   blijven open; de referentiehelper is nog geen volledige profielworkflow.
   237 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
@@ -392,7 +392,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 - Native profielinvoer en complete tekencompositie gekoppeld: meetobjecten en
   eigen profiel-/bandposities bepalen ankers, verschoven band-X, globale
   leaderschaal, startdiepte en volledige beschrijvingen. Een gedeelde Unicode-
-  getalmatcher bedient diameter én bundelvelden; mantelbuizen, materiaal,
+  getalmatcher bedient diameter Ã©n bundelvelden; mantelbuizen, materiaal,
   afronding en aangepaste diameterprefixes volgen de oorspronkelijke helpers.
   Dubbele markerinstanties hergebruiken hun beschrijving/diepte. De publieke
   compositiestap valideert en lost alle labels op voordat zij het bestaande
@@ -416,11 +416,11 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   behouden; alleen de bedoelde ACI-/lijngewichtvelden worden bijgewerkt. Ook
   lagen uit eerdere geometrie-/rasterbatches kunnen zonder documentherlezing
   worden gewijzigd. Gerichte vervanging van hun invoegpayloads is atomair;
-  ontbrekende tags blijven vóór XDATA en nieuw toegevoegde records staan.
+  ontbrekende tags blijven vÃ³Ã³r XDATA en nieuw toegevoegde records staan.
   Herhaalde kleurenwijzigingen, terugkeer naar de bronkleur en annulering
   behouden het juiste resultaat en consistente gedeelde handles/tabeltellingen.
   DXF-symboolnamen gebruiken nu ezdxf lower() in plaats van casefold(), zodat
-  Straße/STRASSE en Griekse sigmavarianten niet samenvallen. Unicode-14-tabellen
+  StraÃŸe/STRASSE en Griekse sigmavarianten niet samenvallen. Unicode-14-tabellen
   en 128.358 onafhankelijke contextprobes leggen dit contract vast. De originele
   Python-aanroep voor nieuwe puntlagen gaf kleur/lijngewicht mee via dxfattribs;
   ezdxf overschreef die met zijn standaardargumenten. Expliciete argumenten en
@@ -435,6 +435,36 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   ongewijzigd. De vijf GitHub-controles van `349be99` zijn groen. BGT-oppervlakte-
   resolutie, pagina-/rastervoorbereiding en de native sjabloon-/UI-workflow
   blijven open.
+- Native bladnummering en overzichtsviewports overgezet. Acht vakken vormen een
+  blad, met behoud van lege posities. Het eerste INSERT krijgt BLAD/BLADEN;
+  de laagste KADER-viewport wordt op de gevulde bladvakken gepast met de zes
+  oorspronkelijke schalen, kaartmidden, richting/target en SCHAAL-attribuut.
+  Ontbrekende bladen, titelblokken of viewports volgen de oorspronkelijke
+  helpersemantiek. Layoutruimtes worden eenmaal geÃ¯ndexeerd; geen volledige
+  documentkopieÃ«n of herhaalde scans per blad. Viewportbewerkingen behouden alle
+  overige recordbytes en starten bij herhaling vanuit de vorige staged versie.
+  Validatiefouten, annulering en overloop op een later blad publiceren geen
+  gedeeltelijke eerdere wijzigingen. Twintig oorspronkelijke toestanden,
+  inclusief het echte sjabloon, vergelijken alle viewport-/ATTRIB-velden,
+  bronbehoud en CAD-readback. Vijf Unicode-layouts vergelijken titelvelden,
+  cirkels/rasters en hun ruimte-eigenaren. Layoutnamen volgen ezdxf upper();
+  lagen/blokken blijven afzonderlijk lower(). Dit herstelt onder meer Ä±/I en
+  voorkomt samenvoeging van K met het Kelvin-teken bij papierplaatsing.
+  De productie-Python-patch bleek dezelfde laagaanroepfout te overschrijven.
+  Ook die actieve cache gebruikt nu expliciete kleur/lijngewichtargumenten en
+  lower-sleutels, zodat een eerdere hoofdlettervariant geen verouderde kleur
+  teruggeeft. De bestaande performancetest-double volgt nu de echte ezdxf-API.
+  Beide volledige Python-suites slagen lokaal: 385 tests in productiestand en
+  385 bij volledige legacy-terugval. Op Windows is TEMP in de testharness
+  gecanonicaliseerd om 8.3-padaliassen in bestaande padvergelijkingen te vermijden.
+  249 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Release-audits slagen voor 20 bladtoestanden/vijf Unicode-layouts, de eerdere
+  15 voorbereidingstoestanden, 78 titelvelden, 89 generieke tekenobjecten,
+  91 rasterplaatsingen/alle PNG-pixels en 48 complete profielen/5.398 objecten.
+  Nieuwe fixtures regenereren byte-identiek met een andere hashseed; de eerdere
+  voorbereidingsoracle blijft inhoudelijk gelijk en controleert ook de actieve
+  helper op dezelfde eindtoestand. Bladuitbreiding, legenda's, rastervoorbereiding,
+  BGT-oppervlakteresolutie en de complete native sjabloon-/UI-workflow blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

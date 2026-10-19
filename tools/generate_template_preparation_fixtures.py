@@ -28,6 +28,7 @@ def snapshot(doc,entities=True):
 def main():
     assert ezdxf.__version__=="1.4.4" and unicodedata.unidata_version=="14.0.0"
     ref=reference();module=importlib.import_module(ref.__package__+".cadastral_export");exporter=module.CadastralDxfExporter(wfs_client=None)
+    active=importlib.import_module(ref.__package__+".template_fill_performance_patch")._configure_profile_layers_once
     ezdxf.options.write_fixed_meta_data_for_testing=True;OUT.mkdir(parents=True,exist_ok=True)
     def make(name,custom=False,missing=False):
         doc=ezdxf.new("R2018");doc.appids.add("KEEP")
@@ -58,6 +59,9 @@ def main():
         for step in case["steps"]:
             if step["kind"]=="prepare":
                 exporter._setup_text_styles(doc);exporter._ensure_template_profile_layers(doc,[SimpleNamespace(layer_name=p["name"],color=p["color"]) for p in step["points"]])
+                before=snapshot(doc,False)
+                active(exporter,doc,tuple(SimpleNamespace(layer_name=p["name"],color=p["color"]) for p in step["points"]))
+                assert snapshot(doc,False)==before,"Active cached helper differs from original layer semantics"
             else:
                 for layer in step["layers"]:
                     if layer["name"] not in doc.layers:

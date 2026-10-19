@@ -599,7 +599,7 @@ fn insertion_spaces(
             if let (Some(id), Some((_, name))) =
                 (r.handle(), r.tags().filter(|(c, _)| *c == 1).last())
             {
-                names.insert(id, symbol_key(name));
+                names.insert(id, crate::python_values::uppercase(name));
             }
         }
     }
@@ -623,21 +623,21 @@ fn insertion_spaces(
         let Some(owner) = r.handle() else { continue };
         let name = r.first(2).unwrap_or("");
         let key = if name.eq_ignore_ascii_case("*Model_Space") {
-            Some("model".to_owned())
+            Some("MODEL".to_owned())
         } else {
             r.first(340)
                 .and_then(|v| u64::from_str_radix(v.trim(), 16).ok())
                 .and_then(|id| names.get(&id).cloned())
         };
         let Some(key) = key else { continue };
-        let at = if key == "model" || name.eq_ignore_ascii_case("*Paper_Space") {
+        let at = if key == "MODEL" || name.eq_ignore_ascii_case("*Paper_Space") {
             entities
         } else {
             *block_ends
                 .get(&symbol_key(name))
                 .ok_or("Papierlayout mist BLOCK-einde")?
         };
-        let paper = key != "model";
+        let paper = key != "MODEL";
         if result.insert(key, Space { owner, at, paper }).is_some() {
             return Err("Dubbele sjabloonlayout".into());
         }
@@ -894,7 +894,7 @@ pub fn add(
         let key = entity
             .layout
             .as_deref()
-            .map_or_else(|| "model".into(), symbol_key);
+            .map_or_else(|| "MODEL".into(), crate::python_values::uppercase);
         let space = spaces.get(&key).ok_or("Sjabloonlayout ontbreekt")?;
         let id = allocate()?;
         let mut out = Tags::default();
@@ -913,7 +913,7 @@ pub fn add(
                     || entities[*annotation]
                         .layout
                         .as_deref()
-                        .map_or_else(|| "model".into(), symbol_key)
+                        .map_or_else(|| "MODEL".into(), crate::python_values::uppercase)
                         != key
                 {
                     return Err("LEADER mist een eerder annotatieblok in dezelfde layout".into());

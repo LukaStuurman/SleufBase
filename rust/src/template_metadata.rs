@@ -2,7 +2,7 @@
 //! are edited; unused sheets, block definitions and later revisions stay intact.
 use crate::{
     dxf_document::{Change, Document, RecordView},
-    python_values::{casefold, trim, uppercase},
+    python_values::{trim, uppercase},
 };
 use std::{collections::HashSet, fmt, sync::atomic::AtomicBool};
 
@@ -110,8 +110,8 @@ pub fn update(
     let date = values.date.to_string();
     let names: HashSet<_> = layouts
         .iter()
-        .map(|v| casefold(v))
-        .filter(|v| v != "model")
+        .map(|v| uppercase(v))
+        .filter(|v| v != "MODEL")
         .collect();
     let mut ids = HashSet::new();
     for r in document.records() {
@@ -122,7 +122,7 @@ pub fn update(
             && r.tags()
                 .filter(|(c, _)| *c == 1)
                 .last()
-                .is_some_and(|(_, v)| names.contains(&casefold(v)))
+                .is_some_and(|(_, v)| names.contains(&uppercase(v)))
         {
             if let Some(id) = r.handle() {
                 ids.insert(id);

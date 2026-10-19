@@ -224,6 +224,62 @@ impl Document {
             .find(|s| s.code >= 1000)
             .map_or(r.range.end, |s| s.whole.start)
     }
+    /// Edit unique scalar tags of a record, preserving every other source byte.
+    /// Repeated calls start from the previous whole-record edit. Refuse mixed
+    /// granular edits rather than accidentally discarding another operation.
+    pub(crate) fn record_scalars(
+        &self,
+        index: usize,
+        values: &[(i32, String)],
+    ) -> Result<Change, String> {
+        let range = &self.records[index].range;
+        let mut text = &self.source[range.clone()];
+        for (&at, edit) in self.edits.range(range.start..range.end) {
+            if at != range.start || edit.end != range.end {
+                return Err("DXF-record bevat al afzonderlijke tagbewerkingen".into());
+            }
+            text = &edit.replacement;
+        }
+        let mut patches = Vec::new();
+        let mut missing = String::new();
+        let mut codes = HashSet::new();
+        for (code, value) in values {
+            if !codes.insert(*code)
+                || !matches!(*code, 12 | 22 | 16 | 26 | 36 | 17 | 27 | 37 | 45 | 51)
+                || value.len() > MAX_TEXT
+                || value.chars().any(char::is_control)
+            {
+                return Err("Ongeldige viewporttag".into());
+            }
+            let mut found = spans(text, 0)
+                .take_while(|s| s.code < 1000)
+                .filter(|s| s.code == *code);
+            if let Some(tag) = found.next() {
+                if found.next().is_some() {
+                    return Err("Dubbele viewporttag".into());
+                }
+                patches.push((tag.value, value.as_str()));
+            } else {
+                missing.push_str(&format!("{code}{}{value}{}", self.newline, self.newline));
+            }
+        }
+        let at = spans(text, 0)
+            .find(|s| s.code >= 1000)
+            .map_or(text.len(), |s| s.whole.start);
+        if !missing.is_empty() {
+            patches.push((at..at, missing.as_str()));
+        }
+        patches.sort_by_key(|(r, _)| r.start);
+        let mut result = String::with_capacity(text.len() + missing.len());
+        let mut cursor = 0;
+        for (r, value) in patches {
+            result.push_str(&text[cursor..r.start]);
+            result.push_str(value);
+            cursor = r.end;
+        }
+        result.push_str(&text[cursor..]);
+        Ok(self.record_change(index, result))
+    }
     pub(crate) fn tag_change(
         &self,
         index: usize,
