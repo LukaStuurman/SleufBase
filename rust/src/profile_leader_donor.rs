@@ -349,7 +349,7 @@ fn appids(document: &Document, next: &mut u64, cancel: &AtomicBool) -> Result<Ve
 /// ATTDEFs are cached for later native INSERT batches without document reparse.
 pub fn install(document: &mut Document, cancel: &AtomicBool) -> Result<bool, String> {
     crate::input::check(cancel)?;
-    let key = crate::python_values::casefold(BLOCK_NAME);
+    let key = crate::dxf_symbols::key(BLOCK_NAME);
     if document.added_blocks.contains_key(&key) {
         return if document.profile_leader_promoted {
             Ok(false)
@@ -368,13 +368,7 @@ pub fn install(document: &mut Document, cancel: &AtomicBool) -> Result<bool, Str
     if document.added_blocks.len() >= 10_000 {
         return Err("Te veel nieuwe sjabloonblokken".into());
     }
-    if !document.has_layer("0")
-        || !document.records().any(|r| {
-            r.kind() == "STYLE"
-                && r.first(2)
-                    .is_some_and(|v| v.eq_ignore_ascii_case("NLCS-ISO"))
-        })
-    {
+    if !document.has_layer("0") || !document.has_style("NLCS-ISO") {
         return Err("Profielsjabloon mist laag 0 of tekststijl NLCS-ISO".into());
     }
     for name in ["ByBlock", "Continuous"] {

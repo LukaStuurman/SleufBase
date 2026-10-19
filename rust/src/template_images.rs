@@ -240,6 +240,7 @@ pub fn add_images(
         });
     }
     let add_layer = !document.has_layer(LAYER);
+    let mut added_layer = None;
     if add_layer {
         let mut table = None;
         let mut end = None;
@@ -254,9 +255,10 @@ pub fn add_images(
         let table = table.ok_or("DXF mist laagtabel")?;
         let end = end.ok_or("DXF-laagtabel is niet afgesloten")?;
         let mut layer = Tags::default();
+        let layer_id = allocate()?;
         layer.record(
             "LAYER",
-            allocate()?,
+            layer_id,
             table.handle().ok_or("Laagtabel mist handle")?,
         );
         layer.tag(100, "AcDbSymbolTableRecord");
@@ -269,6 +271,10 @@ pub fn add_images(
         let count = document.layer_count() + 1;
         changes.push(document.tag_change(table.index(), 70, &count.to_string())?);
         let at = document.record_start(end.index());
+        added_layer = Some(crate::dxf_document::AddedSymbol {
+            handle: layer_id,
+            at,
+        });
         changes.push(Change {
             start: at,
             end: at,
@@ -357,7 +363,7 @@ pub fn add_images(
         objects.tag(90, 2);
         objects.id(330, entity);
         let space = if let Some(name) = &image.layout {
-            let wanted = crate::python_values::casefold(name);
+            let wanted = crate::dxf_symbols::key(name);
             let layout = document
                 .records()
                 .find(|r| {
@@ -365,7 +371,7 @@ pub fn add_images(
                         && r.tags()
                             .filter(|(c, _)| *c == 1)
                             .last()
-                            .is_some_and(|(_, n)| crate::python_values::casefold(n) == wanted)
+                            .is_some_and(|(_, n)| crate::dxf_symbols::key(n) == wanted)
                 })
                 .and_then(RecordView::handle)
                 .ok_or_else(|| format!("Sjabloonlayout ontbreekt: {name}"))?;
@@ -485,10 +491,10 @@ pub fn add_images(
     changes.push(seed);
     crate::input::check(cancel)?;
     document.apply(changes)?;
-    if add_layer {
+    if let Some(symbol) = added_layer {
         document
             .added_layers
-            .insert(crate::python_values::casefold(LAYER));
+            .insert(crate::dxf_symbols::key(LAYER), symbol);
     }
     document.image_batch_added = true;
     Ok(())

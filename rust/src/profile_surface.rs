@@ -412,7 +412,7 @@ pub fn build(
                 // Keep the first spelling and the final color, like ezdxf's
                 // case-insensitive layer table. Borrow names until declaration.
                 let entry = layers
-                    .entry(python_values::casefold(&point.layer_name))
+                    .entry(crate::dxf_symbols::key(&point.layer_name))
                     .or_insert((point.layer_name.as_ref(), 0u16));
                 entry.1 = if point.color == 256 { 7 } else { point.color };
             }

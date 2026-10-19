@@ -57,6 +57,12 @@ pub(crate) struct AddedBlock {
     pub base: [f64; 3],
     pub attributes: Vec<Vec<(i32, String)>>,
 }
+#[derive(Clone, Copy)]
+pub(crate) struct AddedSymbol {
+    pub handle: u64,
+    pub at: usize,
+}
+pub(crate) type InsertedValues = BTreeMap<Option<u64>, Vec<(i32, String)>>;
 
 pub struct Document {
     source: String,
@@ -67,7 +73,8 @@ pub struct Document {
     newline: &'static str,
     output_len: usize,
     pub(crate) image_batch_added: bool,
-    pub(crate) added_layers: HashSet<String>,
+    pub(crate) added_layers: HashMap<String, AddedSymbol>,
+    pub(crate) added_styles: HashMap<String, AddedSymbol>,
     // Keep bases/ATTDEFs for new blocks so later batches can reference them
     // without reparsing the full source document or cloning attribute strings.
     pub(crate) added_blocks: HashMap<String, AddedBlock>,
@@ -79,6 +86,49 @@ pub struct RecordView<'a> {
     index: usize,
 }
 impl<'a> RecordView<'a> {
+    /// Current scalar value, including staged source-tag and missing-tag edits.
+    pub(crate) fn current_value(self, code: i32) -> Result<Option<&'a str>, String> {
+        let r = &self.document.records[self.index];
+        if let Some(edit) = self
+            .document
+            .edits
+            .get(&r.range.start)
+            .filter(|e| e.end == r.range.end)
+        {
+            return Ok(spans(&edit.replacement, 0)
+                .take_while(|s| s.code < 1000)
+                .find(|s| s.code == code)
+                .map(|s| &edit.replacement[s.value]));
+        }
+        if let Some(tag) = spans(&self.document.source[r.range.clone()], r.range.start)
+            .take_while(|s| s.code < 1000)
+            .find(|s| s.code == code)
+        {
+            if let Some(edit) = self.document.edits.get(&tag.value.start) {
+                return Ok(Some(&edit.replacement));
+            }
+            if let Some(edit) = self
+                .document
+                .edits
+                .get(&tag.whole.start)
+                .filter(|e| e.end > tag.whole.start)
+            {
+                let value = spans(&edit.replacement, 0)
+                    .find(|s| s.code == code)
+                    .ok_or("Bewerkte DXF-tag ontbreekt")?;
+                return Ok(Some(&edit.replacement[value.value]));
+            }
+            return Ok(Some(&self.document.source[tag.value]));
+        }
+        let at = self.document.before_xdata(self.index);
+        if let Some(edit) = self.document.edits.get(&at).filter(|e| e.end == at) {
+            return Ok(spans(&edit.replacement, 0)
+                .take_while(|s| s.code != 0)
+                .find(|s| s.code == code)
+                .map(|s| &edit.replacement[s.value]));
+        }
+        Ok(None)
+    }
     /// Current single-line text, including staged text/tag replacements. Other
     /// tag iteration intentionally continues to describe the original source.
     pub(crate) fn current_text(self) -> Result<&'a str, String> {
@@ -137,12 +187,21 @@ fn handle(value: &str) -> Result<u64, String> {
 }
 impl Document {
     pub(crate) fn has_layer(&self, name: &str) -> bool {
-        let key = crate::python_values::casefold(name);
-        self.added_layers.contains(&key)
+        let key = crate::dxf_symbols::key(name);
+        self.added_layers.contains_key(&key)
             || self.records().any(|r| {
                 r.kind() == "LAYER"
                     && r.first(2)
-                        .is_some_and(|v| crate::python_values::casefold(v) == key)
+                        .is_some_and(|v| crate::dxf_symbols::key(v) == key)
+            })
+    }
+    pub(crate) fn has_style(&self, name: &str) -> bool {
+        let key = crate::dxf_symbols::key(name);
+        self.added_styles.contains_key(&key)
+            || self.records().any(|r| {
+                r.kind() == "STYLE"
+                    && r.first(2)
+                        .is_some_and(|v| crate::dxf_symbols::key(v) == key)
             })
     }
     pub(crate) fn layer_count(&self) -> usize {
@@ -232,6 +291,16 @@ impl Document {
     /// Apply a prepared edit batch without copying the original drawing. Equal
     /// insertion offsets concatenate; replacement ranges must be disjoint.
     pub(crate) fn apply(&mut self, changes: Vec<Change>) -> Result<(), String> {
+        self.apply_with_insertions(changes, BTreeMap::new())
+    }
+    /// Replace prepared insertion payloads and append new edits as one atomic
+    /// batch. Replacing a payload must not turn into another concatenation.
+    pub(crate) fn apply_with_insertions(
+        &mut self,
+        changes: Vec<Change>,
+        replacements: BTreeMap<usize, String>,
+    ) -> Result<(), String> {
+        let overwritten: HashSet<_> = replacements.keys().copied().collect();
         let mut planned: BTreeMap<usize, Edit> = BTreeMap::new();
         for c in changes {
             if c.start > c.end
@@ -252,6 +321,26 @@ impl Document {
                     Edit {
                         end: c.end,
                         replacement: c.text,
+                    },
+                );
+            }
+        }
+        for (at, text) in replacements {
+            if self.edits.get(&at).is_none_or(|e| e.end != at) {
+                return Err("Te vervangen DXF-invoeging ontbreekt".into());
+            }
+            if let Some(append) = planned.get_mut(&at) {
+                if append.end != at {
+                    return Err("Overlappende DXF-invoegingsvervanging".into());
+                }
+                let suffix = std::mem::replace(&mut append.replacement, text);
+                append.replacement.push_str(&suffix);
+            } else {
+                planned.insert(
+                    at,
+                    Edit {
+                        end: at,
+                        replacement: text,
                     },
                 );
             }
@@ -281,7 +370,7 @@ impl Document {
                     return Err("Overlappende DXF-bewerkingen".into());
                 }
                 total += e.replacement.len() as i64
-                    - if start == e.end {
+                    - if start == e.end && !overwritten.contains(&start) {
                         0
                     } else {
                         old.replacement.len() as i64
@@ -294,7 +383,7 @@ impl Document {
             return Err("Bewerkt DXF-sjabloon is te groot".into());
         }
         for (start, e) in planned {
-            if start == e.end {
+            if start == e.end && !overwritten.contains(&start) {
                 if let Some(old) = self.edits.get_mut(&start) {
                     old.replacement.push_str(&e.replacement);
                     continue;
@@ -304,6 +393,104 @@ impl Document {
         }
         self.output_len = total as usize;
         Ok(())
+    }
+    /// Patch only selected scalars in pending records (or the tag prefix before
+    /// the first record). Unknown bytes and all unrelated records stay intact.
+    pub(crate) fn patch_inserted_values(
+        &self,
+        at: usize,
+        updates: &InsertedValues,
+        cancel: &AtomicBool,
+    ) -> Result<String, String> {
+        let payload = match self.edits.get(&at) {
+            Some(e) if e.end == at => e.replacement.as_str(),
+            None => "",
+            _ => return Err("DXF-invoeging overlapt een bronbewerking".into()),
+        };
+        let mut boundaries = vec![0];
+        boundaries.extend(
+            spans(payload, 0)
+                .filter(|s| s.code == 0 && s.whole.start != 0)
+                .map(|s| s.whole.start),
+        );
+        if spans(payload, 0).next().is_some_and(|s| s.code == 0) {
+            boundaries.insert(0, 0);
+        }
+        boundaries.push(payload.len());
+        let mut patches = Vec::new();
+        let mut found = HashSet::new();
+        for (i, range) in boundaries.windows(2).enumerate() {
+            if i % 1024 == 0 {
+                crate::input::check(cancel)?;
+            }
+            let start = range[0];
+            let end = range[1];
+            let is_record = start < end
+                && spans(&payload[start..end], start)
+                    .next()
+                    .is_some_and(|s| s.code == 0);
+            let key = if is_record {
+                spans(&payload[start..end], start)
+                    .take_while(|s| s.code != 100)
+                    .find(|s| s.code == 5)
+                    .map(|s| handle(&payload[s.value]))
+                    .transpose()?
+            } else {
+                None
+            };
+            let Some(values) = updates.get(&key) else {
+                continue;
+            };
+            found.insert(key);
+            let record_tags = spans(&payload[start..end], start)
+                .take_while(|s| s.code < 1000)
+                .collect::<Vec<_>>();
+            let insertion = spans(&payload[start..end], start)
+                .find(|s| s.code >= 1000)
+                .map_or(end, |s| s.whole.start);
+            let mut missing = String::new();
+            for (code, value) in values {
+                if !matches!(*code, 62 | 370)
+                    || value.len() > MAX_TEXT
+                    || value.chars().any(char::is_control)
+                {
+                    return Err("Ongeldige ingevoegde laagwaarde".into());
+                }
+                let mut matches = record_tags.iter().filter(|s| s.code == *code);
+                if let Some(tag) = matches.next() {
+                    if matches.next().is_some() {
+                        return Err("Dubbele ingevoegde laagwaarde".into());
+                    }
+                    if payload[tag.value.clone()].trim() != value {
+                        patches.push((tag.value.clone(), value.clone()));
+                    }
+                } else {
+                    missing.push_str(&format!("{code}{}{value}{}", self.newline, self.newline));
+                }
+            }
+            if !missing.is_empty() {
+                patches.push((insertion..insertion, missing));
+            }
+        }
+        if updates.keys().any(|key| !found.contains(key)) {
+            return Err("Ingevoegd laagrecord ontbreekt".into());
+        }
+        patches.sort_by_key(|(r, _)| r.start);
+        let mut output = String::with_capacity(payload.len());
+        let mut cursor = 0;
+        for (r, text) in patches {
+            if r.start < cursor {
+                return Err("Overlappende ingevoegde laagwaarden".into());
+            }
+            output.push_str(&payload[cursor..r.start]);
+            output.push_str(&text);
+            cursor = r.end;
+        }
+        output.push_str(&payload[cursor..]);
+        Ok(output)
+    }
+    pub(crate) fn has_insertion(&self, at: usize) -> bool {
+        self.edits.get(&at).is_some_and(|e| e.end == at)
     }
     pub fn load(path: &Path, cancel: &AtomicBool) -> Result<Self, String> {
         let bytes = crate::input::read(path, MAX_BYTES as u64, "DXF-sjabloon", cancel)?;
@@ -444,7 +631,8 @@ impl Document {
             newline,
             output_len,
             image_batch_added: false,
-            added_layers: HashSet::new(),
+            added_layers: HashMap::new(),
+            added_styles: HashMap::new(),
             added_blocks: HashMap::new(),
             profile_leader_promoted: false,
         })

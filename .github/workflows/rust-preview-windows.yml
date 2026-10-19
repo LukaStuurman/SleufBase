@@ -84,6 +84,24 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template fonts and repeated layer preparation
+        shell: pwsh
+        env:
+          TEMPLATE_PREPARATION_DIR: ${{ runner.temp }}/SleufBase-template-preparation
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_dxf_symbol_case.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_preparation_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/src/dxf_symbol_unicode.rs rust/tests/fixtures/template-preparation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_preparation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_preparation.exe "$env:TEMPLATE_PREPARATION_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_preparation.py "$env:TEMPLATE_PREPARATION_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit active profile labels and LEADER annotations
         shell: pwsh
         env:

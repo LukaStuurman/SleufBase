@@ -1,8 +1,8 @@
 //! Profile/map primitives and existing-block inserts in a preserved template.
 //! Append a collected batch atomically. Source blocks/styles remain shared.
 use crate::{
-    dxf_document::{AddedBlock, Change, Document, RecordView},
-    python_values::casefold,
+    dxf_document::{AddedBlock, AddedSymbol, Change, Document, RecordView},
+    dxf_symbols::key as symbol_key,
 };
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
@@ -63,11 +63,11 @@ pub(crate) fn declare_attribute_block(
 ) -> Result<(), String> {
     crate::input::check(cancel)?;
     crate::object_dxf::layer_name(name)?;
-    let key = casefold(name);
+    let key = symbol_key(name);
     if document.added_blocks.contains_key(&key)
         || document
             .records()
-            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|v| casefold(v) == key))
+            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|v| symbol_key(v) == key))
     {
         return Ok(());
     }
@@ -100,9 +100,7 @@ pub(crate) fn declare_attribute_block(
         if kind == "ATTDEF" {
             let attr = Attribute::parse_tags(r.iter().map(|(c, v)| (*c, v.as_str())))?;
             let style = attr.text.get(&7).copied().unwrap_or("Standard");
-            if !document.records().any(|r| {
-                r.kind() == "STYLE" && r.first(2).is_some_and(|v| casefold(v) == casefold(style))
-            }) {
+            if !document.has_style(style) {
                 return Err(format!("Blokattribuutstijl {style} ontbreekt"));
             }
         }
@@ -220,11 +218,11 @@ pub fn ensure_circle_block(
 ) -> Result<(), String> {
     crate::input::check(cancel)?;
     crate::object_dxf::layer_name(definition.name)?;
-    let key = casefold(definition.name);
+    let key = symbol_key(definition.name);
     if document.added_blocks.contains_key(&key)
         || document
             .records()
-            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|n| casefold(n) == key))
+            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|n| symbol_key(n) == key))
     {
         return Ok(());
     }
@@ -504,7 +502,7 @@ pub fn block_attribute_metrics(
     if scale <= 0. {
         return Err("Blokschaal moet positief zijn".into());
     }
-    let name = casefold(name);
+    let name = symbol_key(name);
     let tag = crate::python_values::uppercase(crate::python_values::trim(tag));
     if let Some(block) = document.added_blocks.get(&name) {
         for tags in &block.attributes {
@@ -526,7 +524,7 @@ pub fn block_attribute_metrics(
             crate::input::check(cancel)?;
         }
         if r.kind() == "BLOCK" {
-            active = r.first(2).is_some_and(|v| casefold(v) == name);
+            active = r.first(2).is_some_and(|v| symbol_key(v) == name);
             if active {
                 found = true;
                 for (i, code) in [10, 20].into_iter().enumerate() {
@@ -601,7 +599,7 @@ fn insertion_spaces(
             if let (Some(id), Some((_, name))) =
                 (r.handle(), r.tags().filter(|(c, _)| *c == 1).last())
             {
-                names.insert(id, casefold(name));
+                names.insert(id, symbol_key(name));
             }
         }
     }
@@ -612,7 +610,7 @@ fn insertion_spaces(
             crate::input::check(cancel)?;
         }
         if r.kind() == "BLOCK" {
-            current = r.first(2).map(casefold);
+            current = r.first(2).map(symbol_key);
         } else if r.kind() == "ENDBLK" {
             if let Some(name) = current.take() {
                 block_ends.insert(name, document.record_start(r.index()));
@@ -636,7 +634,7 @@ fn insertion_spaces(
             entities
         } else {
             *block_ends
-                .get(&casefold(name))
+                .get(&symbol_key(name))
                 .ok_or("Papierlayout mist BLOCK-einde")?
         };
         let paper = key != "model";
@@ -750,7 +748,7 @@ fn attribute(
 }
 
 /// Returns primary entity handles in request order. New resource declarations
-/// preserve source spellings/properties when a casefold-equal layer exists.
+/// preserve source spellings/properties when a case-insensitive layer exists.
 pub fn add(
     document: &mut Document,
     layers: &[Layer],
@@ -768,8 +766,8 @@ pub fn add(
         .records()
         .filter(|r| r.kind() == "LAYER")
         .filter_map(|r| r.first(2))
-        .map(casefold)
-        .chain(document.added_layers.iter().cloned())
+        .map(symbol_key)
+        .chain(document.added_layers.keys().cloned())
         .collect();
     let mut new_layers = BTreeMap::new();
     for layer in layers {
@@ -782,7 +780,7 @@ pub fn add(
         if !(1..=255).contains(&layer.color) {
             return Err("Laagkleur moet tussen 1 en 255 liggen".into());
         }
-        let key = casefold(&layer.name);
+        let key = symbol_key(&layer.name);
         if !known.contains(&key) && new_layers.insert(key, layer).is_some() {
             return Err("Dubbele nieuwe sjabloonlaag".into());
         }
@@ -792,7 +790,8 @@ pub fn add(
         .records()
         .filter(|r| r.kind() == "STYLE")
         .filter_map(|r| r.first(2))
-        .map(casefold)
+        .map(symbol_key)
+        .chain(document.added_styles.keys().cloned())
         .collect();
     if entities
         .iter()
@@ -810,7 +809,7 @@ pub fn add(
         .iter()
         .filter_map(|e| {
             if let Shape::Block { name, .. } = &e.shape {
-                Some(casefold(name))
+                Some(symbol_key(name))
             } else {
                 None
             }
@@ -823,7 +822,10 @@ pub fn add(
             crate::input::check(cancel)?;
         }
         if r.kind() == "BLOCK" {
-            current = r.first(2).map(casefold).filter(|key| wanted.contains(key));
+            current = r
+                .first(2)
+                .map(symbol_key)
+                .filter(|key| wanted.contains(key));
             if let Some(key) = &current {
                 let mut base = [0.; 3];
                 for (i, code) in [10, 20, 30].into_iter().enumerate() {
@@ -886,13 +888,13 @@ pub fn add(
         crate::input::check(cancel)?;
         paint(&entity.paint)?;
         crate::object_dxf::layer_name(&entity.layer)?;
-        if !known.contains(&casefold(&entity.layer)) {
+        if !known.contains(&symbol_key(&entity.layer)) {
             return Err(format!("Sjabloonlaag ontbreekt: {}", entity.layer));
         }
         let key = entity
             .layout
             .as_deref()
-            .map_or_else(|| "model".into(), casefold);
+            .map_or_else(|| "model".into(), symbol_key);
         let space = spaces.get(&key).ok_or("Sjabloonlayout ontbreekt")?;
         let id = allocate()?;
         let mut out = Tags::default();
@@ -911,7 +913,7 @@ pub fn add(
                     || entities[*annotation]
                         .layout
                         .as_deref()
-                        .map_or_else(|| "model".into(), casefold)
+                        .map_or_else(|| "model".into(), symbol_key)
                         != key
                 {
                     return Err("LEADER mist een eerder annotatieblok in dezelfde layout".into());
@@ -998,7 +1000,7 @@ pub fn add(
                 if *height <= 0.
                     || !matches!(*halign, 0 | 1 | 2 | 4)
                     || *valign > 3
-                    || !styles.contains(&casefold(style))
+                    || !styles.contains(&symbol_key(style))
                 {
                     return Err("Ongeldige teksthoogte, uitlijning of ontbrekende stijl".into());
                 }
@@ -1051,7 +1053,7 @@ pub fn add(
                     }
                 }
                 let block = blocks
-                    .get(&casefold(name))
+                    .get(&symbol_key(name))
                     .ok_or("Sjabloonblok ontbreekt")?;
                 let auto = !attributes.is_empty() && !block.attributes.is_empty();
                 out.entity(
@@ -1107,6 +1109,7 @@ pub fn add(
         handles.push(format!("{id:X}"));
     }
     let mut changes = Vec::new();
+    let mut added = Vec::new();
     if !new_layers.is_empty() {
         let mut table = None;
         let mut end = None;
@@ -1123,7 +1126,9 @@ pub fn add(
         let owner = table.handle().ok_or("Laagtabel mist handle")?;
         let mut tags = Tags::default();
         for layer in new_layers.values() {
-            tags.record("LAYER", allocate()?, owner);
+            let id = allocate()?;
+            tags.record("LAYER", id, owner);
+            added.push((symbol_key(&layer.name), AddedSymbol { handle: id, at }));
             tags.tag(100, "AcDbSymbolTableRecord");
             tags.tag(100, "AcDbLayerTableRecord");
             tags.tag(2, &layer.name);
@@ -1161,7 +1166,6 @@ pub fn add(
     crate::input::check(cancel)?;
     // Release source borrows before committing staged edits and resource names.
     drop(blocks);
-    let added: Vec<_> = new_layers.into_keys().collect();
     document.apply(changes)?;
     document.added_layers.extend(added);
     Ok(handles)

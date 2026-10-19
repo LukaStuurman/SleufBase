@@ -3,8 +3,8 @@ use sleufbase_rust::{
     dxf_document::Document,
     profile::{self, Options as ProfileOptions, XY},
     profile_drawing::{self, Options, Templates},
-    profile_leaders, profile_reference, profile_surface, storage, template_geometry, Bounds,
-    Dataset, Feature, Rule,
+    profile_leaders, profile_reference, profile_surface, storage, template_geometry,
+    template_prepare, Bounds, Dataset, Feature, Rule,
 };
 use std::{path::PathBuf, sync::atomic::AtomicBool};
 #[derive(serde::Deserialize)]
@@ -177,6 +177,16 @@ fn main() -> Result<(), String> {
         .ok_or("expected drawing")?;
         let mut doc = Document::from_bytes(source.to_vec(), &cancel)?;
         let mut obstacles = None;
+        if body_mode {
+            template_prepare::profile(
+                &mut doc,
+                profile
+                    .points
+                    .iter()
+                    .map(|p| (p.layer_name.as_ref(), p.color)),
+                &cancel,
+            )?;
+        }
         let mut fills = None;
         let mut layers = Vec::new();
         let mut leader_plan = None;

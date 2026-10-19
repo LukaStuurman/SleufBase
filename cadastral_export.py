@@ -2853,10 +2853,8 @@ class CadastralDxfExporter:
                 continue
             document.layers.add(
                 name=point.layer_name,
-                dxfattribs={
-                    "color": point.color,
-                    "lineweight": self.TEMPLATE_PROFILE_LINEWEIGHT,
-                },
+                color=point.color,
+                lineweight=self.TEMPLATE_PROFILE_LINEWEIGHT,
             )
 
     def _add_template_profile_leader_marker(

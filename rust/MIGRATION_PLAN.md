@@ -411,6 +411,30 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   De 65 losse actieve labeltekeningen blijven eveneens groen. Fixtures regenereren
   byte-identiek met een andere hashseed. De vijf GitHub-controles van `60453a7`
   zijn groen.
+- Native tekststijl-/laagvoorbereiding toegevoegd aan de samengestelde profielroute.
+  Ontbrekende fonts/styles worden aangemaakt, bestaande eigen fontinstellingen
+  behouden; alleen de bedoelde ACI-/lijngewichtvelden worden bijgewerkt. Ook
+  lagen uit eerdere geometrie-/rasterbatches kunnen zonder documentherlezing
+  worden gewijzigd. Gerichte vervanging van hun invoegpayloads is atomair;
+  ontbrekende tags blijven vóór XDATA en nieuw toegevoegde records staan.
+  Herhaalde kleurenwijzigingen, terugkeer naar de bronkleur en annulering
+  behouden het juiste resultaat en consistente gedeelde handles/tabeltellingen.
+  DXF-symboolnamen gebruiken nu ezdxf lower() in plaats van casefold(), zodat
+  Straße/STRASSE en Griekse sigmavarianten niet samenvallen. Unicode-14-tabellen
+  en 128.358 onafhankelijke contextprobes leggen dit contract vast. De originele
+  Python-aanroep voor nieuwe puntlagen gaf kleur/lijngewicht mee via dxfattribs;
+  ezdxf overschreef die met zijn standaardargumenten. Expliciete argumenten en
+  twee Python-regressies herstellen dezelfde fout in de bestaande app.
+  Vier oorspronkelijke reeksen/15 toestanden vergelijken alle laag-/stijlvelden,
+  Unicode-blokken/attributen en oorspronkelijke tags, inclusief het echte
+  sjabloon. CAD-readback veroorzaakt geen nieuwe auditfouten/reparaties.
+  247 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Release-audits: 15 voorbereidingstoestanden, 48 complete profielen/5.398
+  objecten, 89 generieke tekenobjecten en 91 rasterplaatsingen/alle PNG-pixels.
+  Fixtures regenereren byte-identiek; ook de eerdere profieloracle blijft
+  ongewijzigd. De vijf GitHub-controles van `349be99` zijn groen. BGT-oppervlakte-
+  resolutie, pagina-/rastervoorbereiding en de native sjabloon-/UI-workflow
+  blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
