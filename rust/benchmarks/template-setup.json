@@ -1,0 +1,72 @@
+{
+  "rounds": [
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 242.5871,
+        "peak_working_set_bytes": 92233728,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      },
+      "original": {
+        "elapsed_ms": 594.5656000403687,
+        "peak_working_set_bytes": 146780160,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      }
+    },
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 244.2827,
+        "peak_working_set_bytes": 92401664,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      },
+      "original": {
+        "elapsed_ms": 589.2556000035256,
+        "peak_working_set_bytes": 145936384,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      }
+    },
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 242.5368,
+        "peak_working_set_bytes": 92438528,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      },
+      "original": {
+        "elapsed_ms": 586.1565000377595,
+        "peak_working_set_bytes": 146497536,
+        "slots": 64,
+        "added_pages": 4,
+        "restored_legends": 7,
+        "layouts": 18,
+        "attributes": 723
+      }
+    }
+  ],
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.9",
+  "source_bytes": 18855304,
+  "source_sha256": "8096c2fd7ba287507381bacf39c05723e602f2212b577daba969885383736f3b",
+  "scope": "Three fresh processes per implementation. Timed: local real-template load/parse, extension to 64 slots, text/image-layer preparation, legend/affine attribute regeneration, drawing/raster units, scale-list cleanup, project/date/page fields, overview fitting and final counts. Native final record reindexing is included. Excludes process/interpreter/import startup time, final DXF output, rasters/photos, BGT/network, profile/object drawing and GUI/GPU. Windows process peak working set includes runtime/import baselines and temporary preparation documents; it is not isolated allocation or a full-app peak. File-system cache is uncontrolled. Geometry and graphs are verified separately against original readback."
+}

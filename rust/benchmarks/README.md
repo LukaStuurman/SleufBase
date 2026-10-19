@@ -193,3 +193,28 @@ Reproduceren vanuit de repository:
 
     cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_pages
     python tools/benchmark_template_pages.py rust/target/release/examples/benchmark_template_pages.exe rust/benchmarks/template-pages.json
+
+## Samengestelde voorbereiding van het echte sjabloon
+
+`template-setup.json` meet drie verse processen per route op dezelfde
+18.855.304-byte tekening. Windows x64 GNU/Rust 1.99.1 release en Python
+3.11.9/ezdxf 1.4.4 voeren laden, uitbreiding naar 64 vakken, fonts/imagelaag,
+legenda- en attribuutherbouw, eenheden/schaallijst, titelvelden en
+overzichtsvensters uit. De native eindindexering is inbegrepen.
+
+De mediane tijd is native **242,587 ms**, oorspronkelijk **589,256 ms**.
+De mediane Windows-procespiekwerkset is **92.401.664** tegenover
+**146.497.536 bytes**. Beide routes leveren 64 vakken, vier nieuwe bladen,
+zeven herstelde legenda's, achttien layouts en 723 ATTRIBs. Geometrie,
+eigendomsgrafen en behouden bronvelden worden afzonderlijk met onafhankelijke
+readback gecontroleerd; gelijke aantallen alleen bewijzen geen pariteit.
+
+Timing sluit proces-/interpreteropstart en imports, definitief DXF schrijven,
+raster-/foto-opbouw, BGT/netwerk, profiel-/objecttekenwerk en GUI/GPU uit.
+De procespiek bevat runtime/importbasis en tijdelijke documenten; dit is geen
+geïsoleerde allocatiemeting of volledige export-/app-meting. Bestandscache is
+niet gecontroleerd. Deze meting is niet rechtstreeks vergelijkbaar met de
+eerdere meting die uitsluitend bladen uitbreidt.
+
+    cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_setup
+    python tools/benchmark_template_setup.py rust/target/release/examples/benchmark_template_setup.exe rust/benchmarks/template-setup.json

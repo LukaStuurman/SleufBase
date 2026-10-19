@@ -609,6 +609,39 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   evenals raster-/fotovoorbereiding en zelfstandig kopiëren van DIMENSION,
   proxies/tabellen/underlays en andere uitbreidingsobjecttypen. Niet ondersteunde
   kopieën geven vóór wijziging van de oorspronkelijke tekening een fout.
+- Legenda-/titelherstel en samengestelde sjabloonvoorbereiding toegevoegd.
+  De oorspronkelijke Blad1-suffixselectie en bestaande-INSERT-controle bepalen
+  welke papierlayouts een legenda krijgen. ATTDEFs worden opnieuw omgezet naar
+  ATTRIBs met volledige 3D-affine tekstmaten, signed/nonuniform XYZ-schaal,
+  spiegeling, OCS, rotatie, schuinte, uitlijning en oorspronkelijke tagwaarden.
+  Voorbereide attributen worden per bronblok hergebruikt voor volgende bladen.
+  APPDATA met subclass-/geometrieachtige tags beïnvloedt de transformatie niet.
+  Negen oorspronkelijke referenties controleren 433 nieuwe attributen, echte
+  bladen, actieve papierruimte, dubbele namen en afbeeldingsgrafen (R2007/R2018).
+  De atomaire voorbereiding koppelt bladen, fonts/lagen, legenda's, tekening- en
+  rastereenheden, schaallijst, projectnaam/tekenaar/datum en overzichtsvensters.
+  Alias-schaalobjecten krijgen één vervanging; verwijderde dictionaryentries
+  vernietigen hun bronobjecten niet. Elf oorspronkelijke toestanden vergelijken
+  het echte sjabloon en synthetische varianten, inclusief ontbrekende INSUNITS,
+  lege vakken, herhaalde voorbereiding en aanwezige/ontbrekende rasterinstellingen.
+  Ongeldige invoer, late annulering en panic laten het origineel byte-identiek.
+  Nieuw tekenwerk en PNG kunnen daarna dezelfde stijlen, lagen en eenheden op
+  nieuw aangemaakte bladen gebruiken. Lokale datum wordt één keer vastgelegd;
+  een Windows-test controleert de automatische datumoptie op alle gebruikte bladen.
+  Alle 272 Rust-tests en releasebuilds slagen; Clippy geeft geen nieuwe
+  waarschuwingen. Beide referentiefamilies regenereren met twee hashseeds
+  byte-identiek. Onafhankelijke readback controleert velden, geometrie,
+  eigendomsgrafen, behouden brontags en auditbaseline; nieuwe SEQEND-eigenaars
+  worden ook vóór ezdxf-normalisatie in de ruwe DXF gecontroleerd.
+  Drie verse processen per route meten laden plus de gezamenlijke voorbereiding
+  naar 64 vakken op het echte sjabloon: mediaan native 242,587 ms tegenover
+  oorspronkelijk 589,256 ms; procespiekwerkset 92.401.664 tegenover 146.497.536
+  bytes. Beide routes leveren vier nieuwe bladen, zeven herstelde legenda's,
+  18 layouts en 723 ATTRIBs. Zie rust/benchmarks/template-setup.json voor rondes
+  en meetgrenzen. Dit sluit opstart/import, definitief schrijven, raster/foto,
+  BGT/netwerk, profieltekenwerk en GUI uit; procespiek bevat runtime/importbasis.
+  Multiline ATTDEF-regeneratie, andere CAD-kopieertypen, raster-/fotovoorbereiding
+  en de volledige native exportbediening blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

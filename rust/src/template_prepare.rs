@@ -69,6 +69,17 @@ pub fn profile<'a>(
     points: impl IntoIterator<Item = (&'a str, u16)>,
     cancel: &AtomicBool,
 ) -> Result<(), String> {
+    prepare(doc, points, true, cancel)
+}
+pub fn text_styles(doc: &mut Document, cancel: &AtomicBool) -> Result<(), String> {
+    prepare(doc, std::iter::empty::<(&str, u16)>(), false, cancel)
+}
+fn prepare<'a>(
+    doc: &mut Document,
+    points: impl IntoIterator<Item = (&'a str, u16)>,
+    profile_defaults: bool,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
     crate::input::check(cancel)?;
     let mut wanted = Vec::<(String, u16)>::new();
     let mut positions: HashMap<String, usize> = HashMap::new();
@@ -78,6 +89,7 @@ pub fn profile<'a>(
         ("X-XX-AL-VERWIJZING-SD", 7),
     ]
     .into_iter()
+    .filter(|_| profile_defaults)
     .chain(points.into_iter().filter(|(name, _)| *name != "0"))
     {
         crate::input::check(cancel)?;

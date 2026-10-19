@@ -484,10 +484,10 @@ struct Block<'a> {
     base: [f64; 3],
     attributes: Vec<Result<Attribute<'a>, String>>,
 }
-struct Space {
-    owner: u64,
-    at: usize,
-    paper: bool,
+pub(crate) struct Space {
+    pub owner: u64,
+    pub at: usize,
+    pub paper: bool,
 }
 /// Read a scaled attribute once when preparing a set of profile sheets.
 pub fn block_attribute_metrics(
@@ -586,7 +586,7 @@ struct BlockPlacement<'a> {
     values: &'a BTreeMap<String, String>,
     attributes: &'a BTreeMap<String, TextPlacement>,
 }
-fn insertion_spaces(
+pub(crate) fn insertion_spaces(
     document: &Document,
     cancel: &AtomicBool,
 ) -> Result<HashMap<String, Space>, String> {

@@ -281,6 +281,37 @@ jobs:
           name: SleufBase-Rust-template-pages-benchmark
           path: rust/benchmarks-template-pages.json
           if-no-files-found: error
+      - name: Independently audit legend regeneration and composed template preparation
+        shell: pwsh
+        env:
+          TEMPLATE_LEGENDS_DIR: ${{ runner.temp }}/SleufBase-template-legends
+          TEMPLATE_SETUP_DIR: ${{ runner.temp }}/SleufBase-template-setup
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_legend_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_setup_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-legends rust/tests/fixtures/template-setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_legends --example export_template_setup --example benchmark_template_setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_legends.exe "$env:TEMPLATE_LEGENDS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_legends.py "$env:TEMPLATE_LEGENDS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_setup.exe "$env:TEMPLATE_SETUP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_setup.py "$env:TEMPLATE_SETUP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_setup.py rust/target/release/examples/benchmark_template_setup.exe rust/benchmarks-template-setup.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload composed template preparation benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-setup-benchmark
+          path: rust/benchmarks-template-setup.json
+          if-no-files-found: error
       - name: Independently audit template project names and dates
         shell: pwsh
         env:

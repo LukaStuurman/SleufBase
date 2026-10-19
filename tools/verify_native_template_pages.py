@@ -34,6 +34,17 @@ def preserve_source(before,after,layout_dict):
         if kind=='IMAGEDEF':old=without_reactors(old);new=without_reactors(new)
         assert [(c,v) for c,v in old if c not in mask]==[(c,v) for c,v in new if c not in mask],(kind,h,'unrelated source tags changed')
 
+def persisted_sequences(raw,original_handles):
+    parent=None
+    for r in raw:
+        kind=r[0][1]
+        if kind in ('INSERT','POLYLINE'):parent=handle(r)
+        elif kind=='SEQEND':
+            if handle(r) not in original_handles:
+                assert parent is not None and next(v for c,v in r if c==330)==parent
+            parent=None
+        elif kind not in ('ATTRIB','VERTEX'):parent=None
+
 def ownership(doc,original_handles):
     def check_dictionary(d):
         for _,child in d.items():
@@ -44,12 +55,16 @@ def ownership(doc,original_handles):
             assert e.dxf.owner==layout.layout_key,(layout.name,e)
             if e.dxftype()=='INSERT':
                 for a in e.attribs:assert a.dxf.owner==e.dxf.handle
-                if e.seqend:
-                    allowed={e.dxf.handle,layout.layout_key} if e.seqend.dxf.handle in original_handles else {e.dxf.handle}
-                    assert e.seqend.dxf.owner in allowed
+                # ezdxf can synthesize an unpersisted layout-owned SEQEND for
+                # an INSERT without attributes. Only linked sequences need it.
+                if e.seqend and e.attribs:
+                    # Binding active-paper entities can reset SEQEND ownership
+                    # to the layout in ezdxf. Persisted owner tags are checked
+                    # separately before this reader normalization.
+                    assert e.seqend.dxf.owner in {e.dxf.handle,layout.layout_key}
             if e.dxftype()=='POLYLINE':
                 for v in e.vertices:assert v.dxf.owner==e.dxf.handle
-                if e.seqend:assert e.seqend.dxf.owner==e.dxf.handle
+                if e.seqend:assert e.seqend.dxf.owner in {e.dxf.handle,layout.layout_key}
             if e.dxftype()=='IMAGE':
                 reactor=doc.entitydb[e.dxf.image_def_reactor_handle]
                 assert reactor.dxf.owner==e.dxf.handle and reactor.dxf.image_handle==e.dxf.handle
@@ -74,7 +89,7 @@ def main():
             p=output/f'{c["name"]}-{i}.dxf';doc=ezdxf.readfile(p)
             compare(snapshot(doc,exporter),s['expected'],f'{c["name"]}-{i}')
             ownership(doc,original_handles)
-            raw=records(p);preserve_source(source_records,raw,layout_dict)
+            raw=records(p);preserve_source(source_records,raw,layout_dict);persisted_sequences(raw,original_handles)
             # Embedded MTEXT stores direction at 10 and insertion at 11; only
             # the latter moves. Check persisted data, not regenerated DXF tags.
             for r in raw:

@@ -186,6 +186,23 @@ fn handle(value: &str) -> Result<u64, String> {
     u64::from_str_radix(value, 16).map_err(|_| "Ongeldige DXF-handle".into())
 }
 impl Document {
+    pub(crate) fn header_scalar(&self,name:&str,code:i32,value:&str)->Result<Change,String>{
+        if !name.starts_with('$') || name.len()>64 || name.chars().any(char::is_control) || value.len()>MAX_TEXT || value.chars().any(char::is_control){return Err("Ongeldige DXF-headervariabele".into());}
+        for r in &self.records{
+            if r.section==NO_SECTION || self.source[self.sections[r.section].clone()].trim()!="HEADER"{continue;}
+            let mut active=false;let mut at=None;
+            for s in spans(&self.source[r.range.clone()],r.range.start){
+                if s.code==9{
+                    if active{at=Some(s.whole.start);break;}
+                    active=self.source[s.value.clone()].trim()==name;
+                }else if active && s.code==code{return Ok(Change{start:s.value.start,end:s.value.end,text:value.into()});}
+            }
+            if active{
+                let at=at.unwrap_or(r.range.end);return Ok(Change{start:at,end:at,text:format!("{code}{}{value}{}",self.newline,self.newline)});
+            }
+            let at=r.range.end;return Ok(Change{start:at,end:at,text:format!("9{}{name}{}{code}{}{value}{}",self.newline,self.newline,self.newline,self.newline)});
+        }Err("DXF mist HEADER-sectie".into())
+    }
     /// Materialize staged edits only when a structural operation needs a fresh
     /// record index. The caller keeps the original until the whole operation
     /// succeeds. Added symbols become ordinary source records in the copy.
