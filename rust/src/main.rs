@@ -14,6 +14,7 @@ fn print_help() {
     println!("sleufbase-rust.exe                               Open Windows desktopapp");
     println!("sleufbase-rust.exe --xlsx uitvoer.xlsx jobFeatures.json [extra.json ...]");
     println!("sleufbase-rust.exe --dxf uitvoer.dxf jobFeatures.json [extra.json ...]");
+    println!("sleufbase-rust.exe --template-dxf uitvoer.dxf voorbereide-export.json");
     println!("sleufbase-rust.exe --marxact uitvoer.json meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --import-python uitvoer.json project.klicproject");
@@ -31,6 +32,15 @@ fn run_cli(args: &[String]) -> Result<(), String> {
         return Err("Gebruik --xlsx/--dxf met jobFeatures.json of --marxact/--marxact-dxf met MarXact-DXF".into());
     }
     let output = PathBuf::from(&args[1]);
+    if args[0]=="--template-dxf" {
+        if args.len()!=3 { return Err("Gebruik --template-dxf uitvoer.dxf voorbereide-export.json".into()); }
+        if output.exists() { return Err("Uitvoerbestand bestaat al; overschrijven is niet toegestaan".into()); }
+        let control=sleufbase_rust::export_control::Control::default();
+        let request=sleufbase_rust::template_export::read_request(&PathBuf::from(&args[2]),&control)?;
+        let exported=sleufbase_rust::template_export::export_with_progress(&output,&request,&control,|stage|println!("{stage}"))?;
+        println!("{} vakken en {} profielen opgeslagen naar {}",exported.filled_slots,exported.profiles,exported.published.drawing.display());
+        return Ok(());
+    }
     if args[0]=="--import-python" {
         if args.len()!=3 {return Err("Gebruik --import-python uitvoer.json project.klicproject".into());}
         let project=sleufbase_rust::legacy_project::read_legacy_project(&PathBuf::from(&args[2]))?;

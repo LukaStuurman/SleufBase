@@ -312,6 +312,30 @@ jobs:
           name: SleufBase-Rust-template-setup-benchmark
           path: rust/benchmarks-template-setup.json
           if-no-files-found: error
+      - name: Independently audit prepared template exports and real CLI
+        shell: pwsh
+        env:
+          TEMPLATE_EXPORT_DIR: ${{ runner.temp }}/SleufBase-template-export
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_export_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_assemblies --example benchmark_template_export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_assemblies.exe "$env:TEMPLATE_EXPORT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_assemblies.py "$env:TEMPLATE_EXPORT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_export.py rust/target/release/examples/benchmark_template_export.exe rust/benchmarks-template-export.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload native prepared export benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-export-benchmark
+          path: rust/benchmarks-template-export.json
+          if-no-files-found: error
       - name: Independently audit template project names and dates
         shell: pwsh
         env:

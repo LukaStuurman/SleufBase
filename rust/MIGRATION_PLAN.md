@@ -642,6 +642,43 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   BGT/netwerk, profieltekenwerk en GUI uit; procespiek bevat runtime/importbasis.
   Multiline ATTDEF-regeneratie, andere CAD-kopieertypen, raster-/fotovoorbereiding
   en de volledige native exportbediening blijven open.
+- Voorbereide sjabloonexport tot één native samenstelling/publicatie gekoppeld.
+  De API en --template-dxf accepteren voorbereide PNGs, slotteksten, gemeten
+  datasets/richting/regels, BGT-oppervlakken, profielopties en overzichtsgeometrie.
+  Blad-/titelvoorbereiding wordt gevolgd door volledige profielopbouw,
+  maaiveld-/referentie-/markercompositie en actieve annotatie-INSERTs met LEADER.
+  TIFF-/kaartbeelden krijgen indexgebonden eigen bestandsnamen, zodat dubbele
+  zichtbare PS-labels nooit dezelfde uitvoer-PNG krijgen. Elke PNG wordt na een
+  begrensde, annuleerbare kopie volledig gedecodeerd; alleen afmetingen lezen
+  kan een kapotte pixelstroom ten onrechte accepteren. Eén afbeeldingengrafbatch
+  voorkomt herhaalde documentherlezing per beeld. Eén eindindexering herstelt
+  daarna de oorspronkelijke volgorde beelden/profiel per vak; bestaande objecten
+  blijven staan. Profielranges gebruiken binair zoeken; de sorteertabel bewaart alleen
+  nieuwe records. Zonder profielen vervalt deze eindindexering.
+  Vier oorspronkelijke samenstellingen vergelijken zes complete profielen,
+  twintig PNGs, lege vakken, dubbele namen, extra blad, BGT-/handmatige waarden,
+  beide botsingsmodi, omkering, schaalbegrenzing en voorbereide overzichtsgeometrie.
+  Readback toetst alle velden/geometrie, attribuut-/annotatieverwijzingen, ruwe
+  eigendomsgrafen, volgorde, brontags/header, PNG-bytes/pixels en auditbaseline.
+  277 Rust-tests slagen, inclusief annulering/panic na het laatste schrijven,
+  ontbrekende/corrupte beelden, late profiel-/tekstfouten, herexport en blijvende
+  oude bundles nadat invoer-PNGs verwijderd zijn. Een uitvoerpad dat naar een
+  invoersjabloon/-PNG wijst wordt vóór wijziging geweigerd; die gevonden
+  overschrijffout heeft een regressietest. De echte CLI controleert
+  manifest-relatieve invoer en weigert bestaand resultaat te overschrijven.
+  Referenties regenereren byte-identiek met twee hashseeds.
+  Clippy geeft geen nieuwe waarschuwingen; definitieve release-app en auditdriver
+  slagen op alle vier referenties plus de echte CLI. De gedeelde verifier houdt
+  ook de elf eerdere voorbereidingstoestanden groen. Drie verse native processen
+  meten de gemengde uitvoer met twee profielen en zes kleine voorbereide PNGs:
+  mediaan 148,304 ms, procespiekwerkset 75.116.544 bytes, DXF 18.919.176 bytes.
+  Laden, voorbereiding, tekenen, PNG-validatie/kopieën, volgordeherstel en
+  schrijven/fsync/publicatie zijn inbegrepen. Manifestuitlezing, rasterrendering,
+  ophalen, logo-/contactherstel en GUI blijven buiten deze native referentiemeting;
+  er is geen Python-vergelijking. Zie rust/benchmarks/template-export.json.
+  Dit is expliciet de stap na raster-/serverdatavoorbereiding. Die voorbereiding,
+  foto's, automatisch overzichtsgeometrie afleiden, logo-/contactherstel en het
+  complete native exportvenster blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

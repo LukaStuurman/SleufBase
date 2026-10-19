@@ -29,6 +29,7 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Native bladnummering en overzichtsvensters groeperen acht vakken per blad, inclusief lege vakken. De laagste KADER-viewport krijgt het oorspronkelijke kaartmidden en een van zes standaardschalen; BLAD/BLADEN/SCHAAL volgen het eerste bladblok. Twintig opeenvolgende toestanden, inclusief het echte sjabloon, controleren schaalgrenzen, ontbrekende vensters/blokken en bronbehoud. Unicode-bladnamen volgen afzonderlijk ezdxf uppercase(); vijf bladnamen controleren titelvelden en plaatsing van geometrie/rasters. Bladuitbreiding en legenda-/titelherstel zijn afzonderlijk overgezet; de complete export-UI blijft open. Zie [de bladcontroles](tests/fixtures/template-layout/README.md).
 - Native bladuitbreiding kopieert modelonderdelen en maakt ontbrekende papierlayouts met correcte blokrecords, vensters en clipverwijzingen. Het echte sjabloon groeit van 32 naar 64 vakken. Titelattributen, gekoppelde vertices, geneste gegevens en afbeeldingsreactoren krijgen eigen handles; named resources blijven gedeeld. Twaalf toestanden controleren kopieën en opvolgende datum-/project-/viewportbewerkingen, met exacte terugval bij annuleren, fouten of een workerpanic. Een aangetoonde kopieerfout in geneste dictionaries is in de native route hersteld. Legenda-/titelherstel is afzonderlijk overgezet; overige CAD-objecttypen blijven open. Zie [de bladuitbreidingscontroles](tests/fixtures/template-pages/README.md).
 - Native sjabloonvoorbereiding koppelt bladuitbreiding, fonts/lagen, legenda-/titelherstel, eenheden, schaallijst, projectnaam, automatische lokale datum en overzichtsvensters in één atomaire stap. Negen legendavarianten en elf samengestelde toestanden worden onafhankelijk met de oorspronkelijke uitvoer vergeleken, inclusief het echte sjabloon. Attribuuttransformaties worden per bronblok hergebruikt; signed/nonuniform schalen, spiegeling en OCS zijn gecontroleerd. Een vervolgtest voegt tekenwerk en raster toe aan een nieuw blad. Multiline ATTDEF-regeneratie en de complete native exportbediening blijven open. Zie [de voorbereidingscontroles](tests/fixtures/template-setup/README.md) en [legendacontroles](tests/fixtures/template-legends/README.md).
+- Native sjabloonsamenstelling koppelt voorbereide TIFF-/kaart-PNGs aan de vakken, vult teksten en tekent complete profielen met referenties, BGT-/maaiveldwaarden en annotatie-LEADERs. Nieuwe afbeeldingen worden naar één blijvende exportmap gekopieerd, volledig gedecodeerd/gecontroleerd en samen met de DXF atomair gepubliceerd. Eén afbeeldingsbatch plus één eindindexering behoudt de oorspronkelijke tekenvolgorde per vak. Vier onafhankelijke exportcontroles vergelijken zes profielen en twintig PNGs, inclusief extra blad en dubbele PS-namen. De CLI accepteert voorbereide invoer; raster-/kaart-/foto-opbouw, logo-/contactherstel en de native exportdialoog blijven open. Zie [de exportcontroles](tests/fixtures/template-export/README.md).
 - Titelblokkern vult projectnaam en lokale exportdatum op gebruikte bladen, met behoud van latere revisies. Onafhankelijke DXF-controle vergelijkt 78 titelvelden en alle overige tags. De bestaande Python-exportdialoog heeft het projectnaamveld al; het complete native exportvenster volgt binnen de migratie. Zie [de titelblokcontroles](tests/fixtures/template-metadata/README.md).
 - Native BGT-bronfeatures worden per laag/id/ondergrond samengevoegd en op de uitsnede geknipt, met herstel van zelfdoorsnijdingen en behoud van randlijnen/raakpunten. Repareren vóór samenvoegen voorkomt aantoonbaar verlies van geldige tegeldelen; die fout is ook in Python hersteld. 844 geometriegevallen, drie volledige batches, oorspronkelijke padafronding en ondergrondkeuze worden onafhankelijk met GEOS vergeleken. De ondergrondindex leent de geometrie. Zie [de herstelcontroles](tests/fixtures/bgt-geometry/README.md).
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
@@ -334,6 +335,37 @@ of een vergelijking met de complete Python-app op echte projecten.
 - `sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting1.dxf meting2.dxf` exporteert de gemeten 3D-grenzen en objecten in de native R2018-DXF.
 - De conversie leest de bestaande niet-gevoelige MarXact-mappings uit de Rust-instellingen en weigert bestaande uitvoerbestanden te overschrijven.
 - Omdat de DXF-invoer nog geen volledige MarXact-vendordekking heeft, controleer conversies met echte MarXact-bestanden voordat je er ontwerpbeslissingen op baseert.
+
+## Sjabloonexport met voorbereide invoer
+
+    sleufbase-rust.exe --template-dxf uitvoer.dxf voorbereide-export.json
+
+Deze route gebruikt het native exportpad en weigert bestaande uitvoer te
+overschrijven. Alle invoerpaden zijn relatief aan het JSON-bestand; regels,
+projectnaam en tekenaar komen uit dat bestand. Een ontbrekende exportdatum
+gebruikt de lokale Windows-datum één keer voor alle gebruikte bladen.
+Voorbeeld met één voorbereid vak zonder profiel:
+
+```json
+{
+  "template": "assets/cadastral_template.dxf",
+  "rules": [],
+  "settings": {"project": "Projectnaam", "drawn_by": "Tekenaar"},
+  "slots": [{
+    "bounds": {"min_x": 120000, "min_y": 450000, "max_x": 120030, "max_y": 450020},
+    "label": "PS1", "title": "Proefsleuf 1", "address": null,
+    "comments": "Opmerkingen:",
+    "tiff_png": "voorbereid/PS1_tiff.png", "map_png": "voorbereid/PS1_kaart.png",
+    "profile": null
+  }]
+}
+```
+
+Een `null` in `slots` houdt een vak leeg. `datasets`, profielopties per vak,
+BGT-oppervlakken en voorbereide overzichtsgeometrie staan in de
+[referentie-invoer](tests/fixtures/template-export/reference.json). Dit is het
+pad na afbeelding-/serverdatavoorbereiding; de volledige interactieve
+sjabloonworkflow met automatisch voorbereiden volgt nog.
 
 ## Wat nog ontbreekt
 

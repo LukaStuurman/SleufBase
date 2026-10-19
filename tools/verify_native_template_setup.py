@@ -6,9 +6,10 @@ from generate_object_export_fixtures import reference
 from verify_native_template_images import compare
 from verify_native_template_pages import ownership,persisted_sequences,handle,without_reactors
 from verify_native_template_edits import records
-def preserve_source(before,after,original,changed_layers):
+def preserve_source(before,after,original,changed_layers,texts=(),mutable_dictionaries=()):
     indexed={handle(r):r for r in after if handle(r) is not None}
     mutable_dicts={original.rootdict.dxf.handle,original.layouts.get('Model').dxf_layout.dxf.owner}
+    mutable_dicts.update(mutable_dictionaries)
     scales=original.rootdict.get('ACAD_SCALELIST')
     if scales is not None:mutable_dicts.add(scales.dxf.handle)
     for old in before:
@@ -16,6 +17,7 @@ def preserve_source(before,after,original,changed_layers):
         if h is None:continue
         new=indexed[h];kind=old[0][1];mask=set()
         if kind=='ATTRIB':mask={1}
+        elif kind in {'TEXT','MTEXT'} and h in texts:mask={1,3}
         elif kind=='VIEWPORT':mask={12,22,16,26,36,17,27,37,45,51}
         elif kind=='LAYER' and next(v for c,v in old if c==2).lower() in changed_layers:mask={62,370}
         elif kind=='TABLE' and next(v for c,v in old if c==2) in {'BLOCK_RECORD','LAYER','STYLE'}:mask={70}

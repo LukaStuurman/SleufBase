@@ -1,0 +1,60 @@
+"""Independent full readback of native prepared-export files and owned assets."""
+from pathlib import Path
+import importlib,json,os,subprocess,sys
+import ezdxf
+from PIL import Image
+from generate_object_export_fixtures import reference
+from generate_template_export_fixtures import ROOT,OUT,snapshot
+from verify_native_template_images import compare
+from verify_native_template_pages import ownership,persisted_sequences
+from verify_native_template_setup import preserve_source
+from verify_native_template_edits import records
+
+def main():
+    output=Path(sys.argv[1]);ref=reference();exporter=importlib.import_module(ref.__package__+'.cadastral_export').CadastralDxfExporter(wfs_client=None)
+    total_images=total_profiles=0
+    for case in json.loads((OUT/'reference.json').read_text(encoding='utf-8')):
+        request=case['request'];original=ezdxf.readfile(ROOT/request['template']);old_handles=set(original.entitydb)
+        targets=exporter._detect_template_slots(original)
+        texts={getattr(s,field) for s in targets[:len(request['slots'])] for field in ('label_handle','address_handle','comments_handle')}
+        baseline=original.audit();path=output/(case['name']+'.dxf');doc=ezdxf.readfile(path)
+        compare(snapshot(doc,exporter),case['expected'],case['name'])
+        metadata=json.loads((output/(case['name']+'.json')).read_text(encoding='utf-8'))
+        for key in ('filled','profiles','added_pages'):assert metadata[key]==case[key],(case['name'],key)
+        bundle=Path(metadata['assets']);assert bundle.parent.resolve()==(output/(case['name']+'_assets')).resolve()
+        image_count=0
+        for entity in doc.modelspace():
+            if entity.dxftype()=='IMAGE' and entity.dxf.handle not in old_handles:
+                image_count+=1;p=Path(entity.image_def.dxf.filename);assert p.parent==bundle and p.is_file()
+                source=OUT/('tiff.png' if p.stem.endswith('_tiff') else 'map.png')
+                assert p.read_bytes()==source.read_bytes()
+                with Image.open(p) as a,Image.open(source) as b:assert a.convert('RGBA').tobytes()==b.convert('RGBA').tobytes()
+            if entity.dxftype()=='LEADER':assert doc.entitydb[entity.dxf.annotation_handle].dxftype()=='INSERT'
+        assert image_count==2*case['filled'];assert len(list(bundle.iterdir()))==image_count
+        raw=records(path);ownership(doc,old_handles);persisted_sequences(raw,old_handles)
+        changed_layers={r['target_layer'].lower() for r in request['rules']}|{'b-we-og-terrein_profiellijn-gd','x-xx-al-profielbalk-sd','x-xx-al-verwijzing-sd'}
+        image_dict=original.rootdict.get('ACAD_IMAGE_DICT')
+        mutable=() if image_dict is None else (image_dict.dxf.handle,)
+        preserve_source(records(ROOT/request['template']),raw,original,changed_layers,texts,mutable)
+        audit=doc.audit();assert not audit.errors and [e.code for e in audit.fixes]==[e.code for e in baseline.fixes],(case['name'],[(e.code,e.message) for e in audit.fixes])
+        total_images+=image_count;total_profiles+=case['profiles']
+    print(len(json.loads((OUT/'reference.json').read_text(encoding='utf-8'))),'native prepared exports,',total_profiles,'complete profiles and',total_images,'permanent PNGs: full order/fields/graphs/pixels and source preservation verified')
+    if len(sys.argv)>2:
+        case=next(c for c in json.loads((OUT/'reference.json').read_text(encoding='utf-8')) if c['name']=='mixed')
+        request=case['request'];request['template']=os.path.relpath(ROOT/request['template'],output)
+        for slot in filter(None,request['slots']):
+            for key in ('tiff_png','map_png'):slot[key]=os.path.relpath(ROOT/slot[key],output)
+        manifest=output/'prepared-request.json';manifest.write_text(json.dumps(request,ensure_ascii=False),encoding='utf-8')
+        ignored=output/'unused-settings.json';ignored.write_text('not valid settings JSON',encoding='utf-8')
+        target=output/'cli.dxf';command=[str(Path(sys.argv[2]).resolve()),'--settings',str(ignored.resolve()),'--template-dxf',str(target.resolve()),str(manifest.resolve())]
+        result=subprocess.run(command,cwd=output,text=True,encoding='utf-8',capture_output=True)
+        assert result.returncode==0,(result.returncode,result.stdout,result.stderr)
+        doc=ezdxf.readfile(target);compare(snapshot(doc,exporter),case['expected'],'real CLI')
+        old_handles=set(ezdxf.readfile(ROOT/'assets/cadastral_template.dxf').entitydb)
+        for e in doc.modelspace().query('IMAGE'):
+            if e.dxf.handle not in old_handles:assert Path(e.image_def.dxf.filename).is_file()
+        before={p:p.read_bytes() for p in output.rglob('*') if p.is_file()}
+        again=subprocess.run(command,cwd=output,text=True,encoding='utf-8',capture_output=True)
+        assert again.returncode==2 and {p:p.read_bytes() for p in output.rglob('*') if p.is_file()}==before
+        print('Real CLI: manifest-relative inputs, full prepared export and refusal to overwrite verified')
+if __name__=='__main__':main()

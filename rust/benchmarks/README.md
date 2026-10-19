@@ -218,3 +218,27 @@ eerdere meting die uitsluitend bladen uitbreidt.
 
     cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_setup
     python tools/benchmark_template_setup.py rust/target/release/examples/benchmark_template_setup.exe rust/benchmarks/template-setup.json
+
+## Native samenstelling met voorbereide vakbeelden en profielen
+
+`template-export.json` bewaart drie verse native releaseprocessen op Windows
+x64 GNU/Rust 1.99.1. De echte 18.855.304-byte tekening wordt geladen en volledig
+voorbereid voor drie gevulde vakken en één lege positie. Twee complete profielen,
+zes reeds voorbereide kleine RGBA-PNGs, pixelstroomvalidatie, eigen assetkopieën,
+afbeeldingsgrafen, herstel van tekenvolgorde, DXF schrijven, flush/fsync en atomaire
+publicatie vallen binnen de timing. Alle rondes leveren een 18.919.176-byte DXF,
+twee profielen en zes blijvende afbeeldingsbestanden.
+
+Mediaan **148,304 ms** en **75.116.544 bytes** procespiekwerkset. Dit is een
+native referentiemeting; er is hier geen Python-vergelijking. Bron, invoerhash
+en alle rondes staan in het JSON-rapport. Onafhankelijke readback controleert
+de volledige velden/volgorde, geometrie/grafen en PNG-bytes/pixels afzonderlijk.
+
+Opstart, manifestuitlezing/padresolutie, raster-/kaartrendering, ophalen van data,
+BGT-geometrievoorbereiding, logo-/contactherstel, GUI/GPU en opruimen na afloop
+zijn uitgesloten. De procespiek bevat wel opstart-/invoerbasis en tijdelijke
+documenten. Bestandscache is niet gecontroleerd. Kleine reeds voorbereide PNGs
+bewijzen geen volledige raster-/foto-/app-prestatie.
+
+    cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_export
+    python tools/benchmark_template_export.py rust/target/release/examples/benchmark_template_export.exe rust/benchmarks/template-export.json
