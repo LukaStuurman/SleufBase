@@ -84,6 +84,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit active profile labels and LEADER annotations
+        shell: pwsh
+        env:
+          ACTIVE_LEADERS_DIR: ${{ runner.temp }}/SleufBase-active-leaders
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_profile_leader_layout_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profile-leaders rust/src/data/profile-leader-annotation.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_profile_leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_profile_leaders.exe "$env:ACTIVE_LEADERS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_leaders.py "$env:ACTIVE_LEADERS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native profile leader geometry and metadata
         shell: pwsh
         env:

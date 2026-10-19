@@ -41,6 +41,177 @@ pub struct CircleBlock<'a> {
     pub layer: &'a str,
     pub paint: Paint,
 }
+#[derive(serde::Deserialize)]
+pub(crate) struct AttributeBlockSource {
+    pub record: Vec<(i32, String)>,
+    pub geometry: Vec<Vec<(i32, String)>>,
+}
+fn raw_tags(pairs: &[(i32, String)]) -> String {
+    let mut out = Tags::default();
+    for (c, v) in pairs {
+        out.tag(*c, v);
+    }
+    out.0
+}
+/// Declare an internal, frozen attribute-only block; never import arbitrary
+/// external records here. Existing template definitions remain authoritative.
+pub(crate) fn declare_attribute_block(
+    document: &mut Document,
+    name: &str,
+    source: AttributeBlockSource,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
+    crate::input::check(cancel)?;
+    crate::object_dxf::layer_name(name)?;
+    let key = casefold(name);
+    if document.added_blocks.contains_key(&key)
+        || document
+            .records()
+            .any(|r| r.kind() == "BLOCK" && r.first(2).is_some_and(|v| casefold(v) == key))
+    {
+        return Ok(());
+    }
+    if document.added_blocks.len() >= 10_000 || source.geometry.len() > 10_002 {
+        return Err("Te veel nieuwe blokattributen".into());
+    }
+    if source.record.first().map(|(_, v)| v.as_str()) != Some("BLOCK_RECORD")
+        || !source.record.iter().any(|(c, v)| *c == 2 && v == name)
+        || source
+            .geometry
+            .first()
+            .and_then(|r| r.first())
+            .map(|(_, v)| v.as_str())
+            != Some("BLOCK")
+        || source
+            .geometry
+            .last()
+            .and_then(|r| r.first())
+            .map(|(_, v)| v.as_str())
+            != Some("ENDBLK")
+    {
+        return Err("Ongeldige interne attribuutblokdefinitie".into());
+    }
+    for r in &source.geometry {
+        crate::input::check(cancel)?;
+        let kind = r.first().map(|(_, v)| v.as_str()).unwrap_or("");
+        if !matches!(kind, "BLOCK" | "ENDBLK" | "ATTDEF") {
+            return Err("Onverwachte interne attribuutblokgeometrie".into());
+        }
+        if kind == "ATTDEF" {
+            let attr = Attribute::parse_tags(r.iter().map(|(c, v)| (*c, v.as_str())))?;
+            let style = attr.text.get(&7).copied().unwrap_or("Standard");
+            if !document.records().any(|r| {
+                r.kind() == "STYLE" && r.first(2).is_some_and(|v| casefold(v) == casefold(style))
+            }) {
+                return Err(format!("Blokattribuutstijl {style} ontbreekt"));
+            }
+        }
+    }
+    let mut table = None;
+    let mut end = None;
+    for r in document.records() {
+        if r.kind() == "TABLE" && r.first(2) == Some("BLOCK_RECORD") {
+            table = Some(r);
+        } else if table.is_some() && r.kind() == "ENDTAB" {
+            end = Some(r);
+            break;
+        }
+    }
+    let table = table.ok_or("Bloktabel ontbreekt")?;
+    let owner = table.handle().ok_or("Bloktabel mist handle")?;
+    let at = document.record_start(end.ok_or("Bloktabel is niet afgesloten")?.index());
+    let (mut next, mut seed) = document.seed()?;
+    let mut map = HashMap::new();
+    for r in std::iter::once(&source.record).chain(&source.geometry) {
+        let old = r
+            .iter()
+            .find(|(c, _)| *c == 5)
+            .ok_or("Interne blokhandle ontbreekt")?
+            .1
+            .clone();
+        if map.insert(old.to_uppercase(), next).is_some() {
+            return Err("Dubbele interne blokhandle".into());
+        }
+        next = next.checked_add(1).ok_or("Geen vrije DXF-handles")?;
+    }
+    let mut record = source.record;
+    for (c, v) in &mut record {
+        if *c == 330 {
+            *v = "0".into();
+        }
+    }
+    let remap = |tags: &mut [(i32, String)]| -> Result<(), String> {
+        for (c, v) in tags {
+            if (*c == 5 || matches!(*c,320..=369|390..=399|480|481|1005)) && v.trim() != "0" {
+                *v = format!(
+                    "{:X}",
+                    map.get(&v.trim().to_uppercase())
+                        .ok_or("Externe interne-blokhandle")?
+                );
+            }
+        }
+        Ok(())
+    };
+    remap(&mut record)?;
+    for (c, v) in &mut record {
+        if *c == 330 {
+            *v = format!("{owner:X}");
+        }
+    }
+    let record_text = raw_tags(&record);
+    let mut geometry_text = String::new();
+    let mut attributes = Vec::new();
+    let mut base = [0.; 3];
+    for mut r in source.geometry {
+        let kind = r[0].1.clone();
+        remap(&mut r)?;
+        geometry_text.push_str(&raw_tags(&r));
+        if kind == "ATTDEF" {
+            attributes.push(r);
+        } else if kind == "BLOCK" {
+            for (i, c) in [10, 20, 30].into_iter().enumerate() {
+                base[i] = r
+                    .iter()
+                    .find(|(code, _)| *code == c)
+                    .map_or(Ok(0.), |(_, v)| v.trim().parse::<f64>())
+                    .map_err(|_| "Ongeldige interne blokbasis")?;
+            }
+        }
+    }
+    finite(&base)?;
+    let block_end = document.section_end("BLOCKS")?;
+    let count = document.tag_change(
+        table.index(),
+        70,
+        &(document
+            .records()
+            .filter(|r| r.kind() == "BLOCK_RECORD")
+            .count()
+            + document.added_blocks.len()
+            + 1)
+        .to_string(),
+    )?;
+    seed.text = format!("{next:X}");
+    crate::input::check(cancel)?;
+    document.apply(vec![
+        Change {
+            start: at,
+            end: at,
+            text: record_text,
+        },
+        Change {
+            start: block_end,
+            end: block_end,
+            text: geometry_text,
+        },
+        count,
+        seed,
+    ])?;
+    document
+        .added_blocks
+        .insert(key, AddedBlock { base, attributes });
+    Ok(())
+}
 /// Declare a reusable circle block atomically, retaining any existing block.
 pub fn ensure_circle_block(
     document: &mut Document,
@@ -150,6 +321,12 @@ pub fn ensure_circle_block(
 }
 #[derive(Clone, Debug, serde::Deserialize)]
 pub enum Shape {
+    /// Native LEADER attached to an earlier Block request in the same batch.
+    Leader {
+        vertices: [XY; 2],
+        annotation: usize,
+        block_color: u16,
+    },
     Polyline {
         vertices: Vec<XY>,
         closed: bool,
@@ -617,6 +794,17 @@ pub fn add(
         .filter_map(|r| r.first(2))
         .map(casefold)
         .collect();
+    if entities
+        .iter()
+        .any(|e| matches!(e.shape, Shape::Leader { .. }))
+        && !document.records().any(|r| {
+            r.kind() == "DIMSTYLE"
+                && r.first(2)
+                    .is_some_and(|s| s.eq_ignore_ascii_case("Standard"))
+        })
+    {
+        return Err("LEADER-dimensiestijl Standard ontbreekt".into());
+    }
     let spaces = insertion_spaces(document, cancel)?;
     let wanted: HashSet<_> = entities
         .iter()
@@ -709,6 +897,45 @@ pub fn add(
         let id = allocate()?;
         let mut out = Tags::default();
         match &entity.shape {
+            Shape::Leader {
+                vertices,
+                annotation,
+                block_color,
+            } => {
+                for p in vertices {
+                    finite(p)?;
+                }
+                if *block_color > 256
+                    || *annotation >= handles.len()
+                    || !matches!(entities[*annotation].shape, Shape::Block { .. })
+                    || entities[*annotation]
+                        .layout
+                        .as_deref()
+                        .map_or_else(|| "model".into(), casefold)
+                        != key
+                {
+                    return Err("LEADER mist een eerder annotatieblok in dezelfde layout".into());
+                }
+                out.entity(
+                    "LEADER",
+                    id,
+                    space.owner,
+                    space.paper,
+                    &entity.layer,
+                    &entity.paint,
+                );
+                out.tag(100, "AcDbLeader");
+                out.tag(3, "Standard");
+                out.tag(71, 0);
+                out.tag(73, 2);
+                out.tag(75, 0);
+                out.tag(76, 2);
+                for p in vertices {
+                    out.point(10, [p[0], p[1], 0.]);
+                }
+                out.tag(77, block_color);
+                out.tag(340, &handles[*annotation]);
+            }
             Shape::Polyline { vertices, closed } => {
                 points = points
                     .checked_add(vertices.len())

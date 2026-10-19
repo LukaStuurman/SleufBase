@@ -7,6 +7,14 @@ en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid
 Aanvullende gebruikerswens: projectnaam invoeren in het DXF-sjabloonexportvenster
 en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
 
+Broncontrole van het **actieve** exportcontract: `__init__.py` installeert V9,
+maar niet `template_dynamic_profile_leader_patch`. De expliciete regressies in
+`tests/test_profile_leader_v0310_behavior.py` vereisen de oorspronkelijke
+attribuutblok-/LEADER-methoden. Die route bepaalt productiepariteit. De eerder
+geporte donor/parameterhelpers blijven optionele bouwstenen; prototypekopieën uit
+een uitgeschakelde patch zijn geen voorwaarde voor de actieve profielworkflow.
+De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
+
 ## Volgorde en bewijs
 
 1. **Gegevensintegriteit en projectlevenscyclus**: atomair opslaan/exporteren,
@@ -361,6 +369,26 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   profielen/2.249 objecten slagen met de release-uitvoer. Nieuwe en eerdere
   fixtures regenereren byte-identiek met een andere hashseed. De vijf GitHub-
   controles van de metadatastap (`18da34c`) zijn groen.
+- Actieve v0.3.10-profielverwijzingen geport: oorspronkelijke kandidaatvolgorde,
+  grens-/label-/tekst-/hard-/softlijnscores, tweede pass zonder zachte obstakels,
+  laagste-penaltyfallback en stabiele ankersortering. Een vaste scorematrix
+  vervangt hashes van floatparen. Als botsingsvermijding uitstaat of de bestaande
+  grens van 80 entries wordt overschreden, wordt de onvoorwaardelijk gekozen
+  eerste kandidaat direct berekend, zonder nutteloze obstakelscores. Het actieve
+  attribuutblok wordt atomair gedeclareerd/gecachet; echte LEADER-records verwijzen
+  naar het eerdere INSERT-handle in dezelfde batch/layout, gevolgd door de bandlijn.
+  65 oorspronkelijke scenario's bevatten 382 plaatsingen/1.146 DXF-objecten;
+  attributen, vertices/flags/kleur/stijl, annotatiekoppeling, bronbehoud en CAD-audit
+  worden onafhankelijk gecontroleerd. Ongeldige/verkeerde annotatiereferenties,
+  annulering, niet-eindige waarden en invoer-/tekstbudgetten publiceren geen deelbatch.
+  De runtime-/regressiecontrole corrigeert de eerdere prioriteit: de dynamische
+  prototypepatch staat uit. Volledige native entrygeneratie/compositie en de
+  sjabloon-/UI-workflow blijven open.
+  240 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  De 65 actieve DXF-audits slagen met release-uitvoer, evenals de zeven eerdere
+  donorcontroles, 89 generieke tekenobjecten en 24 samengestelde profielen/2.249
+  objecten. Fixtures regenereren byte-identiek met een andere hashseed. De vijf
+  GitHub-controles van `8541956` zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
