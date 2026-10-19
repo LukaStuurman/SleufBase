@@ -43,5 +43,14 @@ Frame, body, per-point geometry and connectors are composed by moving entities.
 
 Automatic text resolution accepts pre-resolved BGT values at the drawing-stage
 boundary; BGT physical-appearance geometry/fetch integration remains open.
-Reference indicators, dynamic leaders, page replication, layer-style updates
-for existing custom layers and the full native template UI also remain required.
+Reference indicators are now independently covered by 216 direct original
+helper calls across normal/reverse profiles, three scales, exact boundaries,
+visible side padding and points beyond either edge. RD integer rounding and
+rotated display coordinates are also compared. `--reference-cases` writes each
+native indicator plus its segments/boxes; `--reference` composes the indicators
+into the frame/body stage. All 24 drawings then contain 2,249 compared objects.
+The reference metadata is resolved natively before frame distance labels are
+created; the integration no longer substitutes the Python reference chainage.
+
+Dynamic leaders, page replication, layer-style updates for existing custom
+layers and the full native template UI remain required.

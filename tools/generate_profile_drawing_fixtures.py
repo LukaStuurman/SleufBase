@@ -30,7 +30,9 @@ def main():
             return result
 
         def _add_template_profile_reference_indicator(self,*args,**kwargs):
+            model=args[0];before={e.dxf.handle for e in model};self.reference_at=len(before)
             result=self.trace(super()._add_template_profile_reference_indicator,*args,**kwargs)
+            self.reference_entities=[signature(e) for e in model if e.dxf.handle not in before]
             self.reference_boxes=result[1]
             return result
 
@@ -62,7 +64,7 @@ def main():
     path.write_bytes(path.read_bytes().replace(b"\r\n",b"\n"))
     profiles=json.loads((ROOT / "rust/tests/fixtures/profiles/reference.json").read_text(encoding="utf-8"))
     selected=["basic-normal","basic-reverse","polyline-heights-normal","all-matched-normal","named-unmatched-normal","random-00-normal","random-01-reverse","custom-label-unicode-normal"]
-    cases=[]
+    cases=[];reference_cases=[]
     for name in selected:
         case=next(c for c in profiles["cases"] if c["name"]==name)
         features=[]
@@ -101,14 +103,28 @@ def main():
             # Supply pre-resolved BGT texts at the drawing-stage boundary.
             exporter._template_bgt_surface_texts=lambda *args: automatic
             clip=manual!=20
-            exporter.bands=[];exporter.excluded=set();exporter.reference_boxes=[]
+            exporter.bands=[];exporter.excluded=set();exporter.reference_boxes=[];exporter.reference_entities=[];exporter.reference_at=0
             exporter._add_template_cross_section(doc,doc.modelspace(),slot,layer,"PS007B",profile,show_reference,manual is not None,[],False,clip,case["marker_scale"],manual,"Ø")
             expected=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded and ((e.dxftype()=="INSERT" and e.dxf.name.startswith(PREFIX)) or (e.dxftype()=="LWPOLYLINE" and e.dxf.layer==LAYER))]
             complete=[signature(e) for e in doc.modelspace() if e.dxf.handle not in exporter.excluded]
             obstacle=dict(hard=exporter.obstacles["hard"],soft=exporter.obstacles["soft"][:3],text=exporter.obstacles["text"][:len(exporter.obstacles["text"])-len(exporter.reference_boxes)])
             marker_name="SAL-VERWIJZING_PROFIELPUNT-MARKER-SOD"
             marker_definition=[signature(e) for e in doc.blocks[marker_name]] if marker_name in doc.blocks else None
-            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands,body_expected=complete,obstacles=obstacle,metadata=layer.metadata,automatic=automatic,use_custom=manual is not None,clip_markers=clip,fills=[dict(text=fills[k]["text"],rgb=int.from_bytes(bytes(fills[k]["rgb"]),"big")) for k in ["start","middle","end"]],marker_definition=marker_definition))
+            cases.append(dict(name=name+"-"+str(manual),profile_case=name,row=asdict(slot.row_box),tiff=asdict(slot.tiff_box),manual_scale=manual,label="PS007B",reference_chainage=exporter._template_reference_chainage(layer,profile) if show_reference else 0,distance_description=exporter._template_profile_reference_rd_text(layer,profile) if show_reference else "",expected=expected,bands=exporter.bands,body_expected=complete,obstacles=obstacle,metadata=layer.metadata,automatic=automatic,use_custom=manual is not None,clip_markers=clip,fills=[dict(text=fills[k]["text"],rgb=int.from_bytes(bytes(fills[k]["rgb"]),"big")) for k in ["start","middle","end"]],marker_definition=marker_definition,show_reference=show_reference,reference_at=exporter.reference_at,reference_entities=exporter.reference_entities,reference_obstacles=exporter.obstacles))
+            denominator=int(expected[0]["attributes"][3]["text"].split(":")[-1])
+            start_x=slot.tiff_box.min_x-6.7895;scale=20/denominator;end_x=start_x+profile.axis_length*scale
+            layout=dict(start_x=start_x,end_x=end_x,reference_y=slot.tiff_box.min_y-.4283,title_y=slot.tiff_box.min_y-.4683,top_band_y=slot.tiff_box.min_y-.4883,bottom_band_y=slot.tiff_box.min_y-.6883,bottom_y=slot.tiff_box.min_y-.8883,denominator=denominator,scale=scale)
+            low=-2/scale;high=profile.axis_length+(slot.tiff_box.min_x-end_x)/scale
+            for target in [low-1,low,-.5,0,profile.axis_length*.25,profile.axis_length*.75,profile.axis_length,high,high+1]:
+                metadata={"template_reference_point":dict(x=profile.start_point.x+target*profile.axis_dx/profile.axis_length,y=profile.start_point.y+target*profile.axis_dy/profile.axis_length),"rotation_degrees":37.5}
+                reference_layer=SimpleNamespace(metadata=metadata,bounds=layer.bounds)
+                reference_doc=ezdxf.readfile(path)
+                model=reference_doc.modelspace()
+                sy=layout["reference_y"]+(float(profile.start_point.z or 0)-profile.reference_level)*scale;ey=layout["reference_y"]+(float(profile.end_point.z or 0)-profile.reference_level)*scale
+                segments,boxes=module.CadastralDxfExporter._add_template_profile_reference_indicator(exporter,model,reference_layer,profile,start_x=start_x,left_edge_x=start_x-2,right_edge_x=slot.tiff_box.min_x,profile_end_x=end_x,horizontal_scale=scale,terrain_start_y=sy,terrain_end_y=ey)
+                raw=exporter._template_reference_raw_point(reference_layer,profile);center=[raw[0]+3,raw[1]-4]
+                display=exporter._rotate_template_map_point(*raw,*center,37.5)
+                reference_cases.append(dict(profile_case=name,layout=layout,right_edge=slot.tiff_box.min_x,metadata=metadata,raw=raw,chainage=exporter._template_reference_chainage(reference_layer,profile),description=exporter._template_profile_reference_rd_text(reference_layer,profile),center=center,display=display,expected=[signature(e) for e in model],segments=segments,boxes=boxes))
     labels=["PS007B","sleuf ٠٠١٢ſİıK","PS A","ps geen","x 0z","PS1a2b","nr １２３XYZ"]
     rng=random.Random(73318)
     band_cases=[]
@@ -137,7 +153,7 @@ def main():
         for use_custom in [False,True]:
             automatic={"middle":"Asfalt"};resolved=exporter._template_maaiveld_fill_segments(SimpleNamespace(metadata=metadata),use_custom_values=use_custom,automatic_values=automatic)
             fill_cases.append(dict(metadata=metadata,automatic=automatic,use_custom=use_custom,expected=[dict(text=resolved[k]["text"],rgb=int.from_bytes(bytes(resolved[k]["rgb"]),"big")) for k in ["start","middle","end"]]))
-    result=dict(cases=cases,band_cases=band_cases,clip_cases=clip_cases,fill_cases=fill_cases,labels=[dict(label=s,number=exporter._profile_identifier(s),description=exporter._profile_description(s)) for s in labels],distances=[dict(value=v,text=exporter._format_template_profile_distance(v)) for v in distances])
+    result=dict(cases=cases,band_cases=band_cases,clip_cases=clip_cases,fill_cases=fill_cases,reference_cases=reference_cases,rd_values=[dict(value=v,text=exporter._format_template_rd_coordinate(v)) for v in [-2.5,-1.5,-.5,0,.5,1.5,2.5,1e20,1.234e100]],labels=[dict(label=s,number=exporter._profile_identifier(s),description=exporter._profile_description(s)) for s in labels],distances=[dict(value=v,text=exporter._format_template_profile_distance(v)) for v in distances])
     (OUT / "reference.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(len(cases),"original profile frame/band drawings",sum(len(c["expected"]) for c in cases),"entities")
 

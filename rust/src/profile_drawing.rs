@@ -49,7 +49,7 @@ impl Default for Options<'_> {
         }
     }
 }
-#[derive(Clone, Copy, Debug, serde::Serialize)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Layout {
     pub start_x: f64,
     pub end_x: f64,

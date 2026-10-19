@@ -10,23 +10,39 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def main():
-    body_mode="--body" in sys.argv
+    reference_mode="--reference" in sys.argv
+    body_mode=reference_mode or "--body" in sys.argv
     output=Path(sys.argv[1]);source=ROOT / "rust/tests/fixtures/profile-drawing/blocks.dxf"
-    cases=json.loads((ROOT / "rust/tests/fixtures/profile-drawing/reference.json").read_text(encoding="utf-8"))["cases"]
+    fixture=json.loads((ROOT / "rust/tests/fixtures/profile-drawing/reference.json").read_text(encoding="utf-8"))
+    if "--reference-cases" in sys.argv:
+        for i,case in enumerate(fixture["reference_cases"]):
+            native=output / f"ref-{i}.dxf";doc=ezdxf.readfile(native);original=ezdxf.readfile(source)
+            verify_preservation(source,native,original,allowed_extra={"CIRCLE","LWPOLYLINE","TEXT"})
+            compare([signature(e) for e in doc.modelspace()],case["expected"],f"reference {i}")
+            metadata=json.loads((output / f"ref-{i}.json").read_text(encoding="utf-8"))
+            compare(metadata["reference"],{k:case[k] for k in ["raw","chainage","description"]},f"reference {i}.resolved")
+            for key in ["display","segments","boxes"]:compare(metadata[key],case[key],f"reference {i}.{key}")
+            audit=doc.audit();assert not audit.errors and not audit.fixes
+        print(len(fixture["reference_cases"]),"original reference indicators, RD labels, rotations and obstacle sets verified")
+        return
+    cases=fixture["cases"]
     total=0
     for case in cases:
         native=output / (case["name"]+".dxf")
         original=ezdxf.readfile(source);doc=ezdxf.readfile(native)
         verify_preservation(source,native,original,allowed_extra={"INSERT","ATTRIB","SEQEND","LWPOLYLINE","TEXT","CIRCLE","BLOCK_RECORD","BLOCK","ENDBLK"} if body_mode else {"INSERT","ATTRIB","SEQEND","LWPOLYLINE"},allowed_tables=("LAYER","BLOCK_RECORD") if body_mode else ("LAYER",))
         actual=[signature(e) for e in doc.modelspace()]
-        compare(actual,case["body_expected"] if body_mode else case["expected"],case["name"])
+        expected=case["body_expected"] if body_mode else case["expected"]
+        if reference_mode and case["show_reference"]:
+            index=case["reference_at"];expected=expected[:index]+case["reference_entities"]+expected[index:]
+        compare(actual,expected,case["name"])
         metadata=json.loads((output / (case["name"]+".json")).read_text(encoding="utf-8"))
         assert len(metadata["bands"])==len(case["bands"])
         for a,e in zip(metadata["bands"],case["bands"]):
             compare({k:a[k] for k in e},e,case["name"]+".band")
         if body_mode:
             compare(metadata["fills"],case["fills"],case["name"]+".fills")
-            compare(metadata["obstacles"],case["obstacles"],case["name"]+".obstacles")
+            compare(metadata["obstacles"],case["reference_obstacles"] if reference_mode else case["obstacles"],case["name"]+".obstacles")
             marker="SAL-VERWIJZING_PROFIELPUNT-MARKER-SOD"
             assert (marker in doc.blocks)==(case["marker_definition"] is not None)
             if case["marker_definition"] is not None:
@@ -37,7 +53,8 @@ def main():
         baseline=original.audit();audit=doc.audit()
         assert not audit.errors and [(e.code,e.message) for e in audit.fixes]==[(e.code,e.message) for e in baseline.fixes],case["name"]
         total+=len(actual)
-    print(f'{len(cases)} original {"body/marker" if body_mode else "frame/band"} comparisons, {total} native objects and all attributes verified')
+    mode="body/reference" if reference_mode else "body/marker" if body_mode else "frame/band"
+    print(f'{len(cases)} original {mode} comparisons, {total} native objects and all attributes verified')
 
 
 if __name__=="__main__":main()

@@ -307,6 +307,23 @@ en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
   release-audits slagen: 2.209 samengestelde profielobjecten, 928 kader-/bandobjecten,
   89 generieke tekenobjecten, 91 rasterplaatsingen en 78 titelvelden. De vijf
   GitHub-controles van de voorafgaande kader-/bandstap (`6469ff1`) zijn groen.
+- Native referentie-indicatoren toegevoegd: metadata-/standaardpunt, projectie op
+  de profielas, RD-afronding op gehele meters, kaartrotatie, cirkel/kruis en
+  labelverwijzing binnen beeld, afstandspijl buiten beeld en de oorspronkelijke
+  zachte segmenten/tekstkaders voor leaders. De native referentie wordt vóór de
+  afstandsbanden opgelost; de samengestelde vergelijking neemt geen Python-
+  kettingmaat over. 216 directe oorspronkelijke helperaanroepen dekken normale/
+  omgekeerde profielen, drie schalen, exacte grenzen, zijruimte en buitenliggende
+  punten. 24 samengestelde tekeningen vergelijken 2.249 objecten en alle attributen/
+  obstakels. Ongeldige metadata valt terug zoals oorspronkelijk; niet-eindige
+  waarden, onnodige rotatie-invoer en annulering zijn apart gecontroleerd.
+  Dynamische donor-leaders, BGT-oppervlaktegeometrie/-fetch, bestaande aangepaste
+  laagstijlupdates en volledige sjabloon-/pagina-/UI-koppeling blijven open.
+  228 Rust-tests, Clippy zonder nieuwe waarschuwingen en releasebuild geslaagd.
+  Alle zeven onafhankelijke releasecontroles slagen: 216 referentiegevallen,
+  24 samengestelde profielen met 2.249 objecten, de eerdere body-/kadergevallen,
+  generieke tekenobjecten, rasterbundels en titelvelden. De vijf GitHub-controles
+  van de voorafgaande maaiveld-/markerstap (`97a3ae2`) zijn groen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

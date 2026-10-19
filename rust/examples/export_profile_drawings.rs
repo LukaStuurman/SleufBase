@@ -3,7 +3,7 @@ use sleufbase_rust::{
     dxf_document::Document,
     profile::{self, Options as ProfileOptions, XY},
     profile_drawing::{self, Options, Templates},
-    profile_surface, storage, template_geometry, Bounds, Dataset, Feature, Rule,
+    profile_reference, profile_surface, storage, template_geometry, Bounds, Dataset, Feature, Rule,
 };
 use std::{path::PathBuf, sync::atomic::AtomicBool};
 #[derive(serde::Deserialize)]
@@ -25,6 +25,15 @@ struct ProfileCase {
 #[derive(serde::Deserialize)]
 struct Drawings {
     cases: Vec<Case>,
+    reference_cases: Vec<ReferenceCase>,
+}
+#[derive(serde::Deserialize)]
+struct ReferenceCase {
+    profile_case: String,
+    layout: profile_drawing::Layout,
+    right_edge: f64,
+    metadata: serde_json::Value,
+    center: [f64; 2],
 }
 #[derive(serde::Deserialize)]
 struct Case {
@@ -40,9 +49,12 @@ struct Case {
     automatic: serde_json::Value,
     use_custom: bool,
     clip_markers: bool,
+    show_reference: bool,
 }
 fn main() -> Result<(), String> {
-    let body_mode = std::env::args().any(|a| a == "--body");
+    let reference_mode = std::env::args().any(|a| a == "--reference");
+    let reference_cases = std::env::args().any(|a| a == "--reference-cases");
+    let body_mode = reference_mode || std::env::args().any(|a| a == "--body");
     let output = PathBuf::from(std::env::args().nth(1).ok_or("output directory required")?);
     if output.exists()
         && std::fs::read_dir(&output)
@@ -63,6 +75,49 @@ fn main() -> Result<(), String> {
     let cancel = AtomicBool::new(false);
     let template = Document::from_bytes(source.to_vec(), &cancel)?;
     let templates = Templates::read(&template, &cancel)?;
+    if reference_cases {
+        for (index, case) in drawings.reference_cases.into_iter().enumerate() {
+            let p = profiles
+                .cases
+                .iter()
+                .find(|p| p.name == case.profile_case)
+                .ok_or("missing profile case")?;
+            let dataset = Dataset {
+                job_id: 1,
+                title: p.name.clone(),
+                source_path: "fixture.json".into(),
+                features: p.features.clone(),
+            };
+            let profile = profile::build(
+                &dataset,
+                p.rules.as_deref().unwrap_or(&profiles.rules),
+                ProfileOptions {
+                    roads: &p.roads,
+                    terrain_boundaries: &p.terrain,
+                    forced_start: p.forced_start,
+                    reverse: p.reverse,
+                    marker_scale: p.marker_scale,
+                },
+            )?
+            .ok_or("expected profile")?;
+            let reference = profile_reference::resolve(&profile, &case.metadata)?;
+            let display = reference.display(&case.metadata, case.center)?;
+            let indicator = profile_reference::draw(
+                &profile,
+                case.layout,
+                case.right_edge,
+                &reference,
+                &cancel,
+            )?;
+            let mut doc = Document::from_bytes(source.to_vec(), &cancel)?;
+            template_geometry::add(&mut doc, &[], &indicator.entities, &cancel)?;
+            storage::atomic_write(&output.join(format!("ref-{index}.dxf")), false, |out| {
+                doc.write_to(out, &cancel)
+            })?;
+            std::fs::write(output.join(format!("ref-{index}.json")),serde_json::to_vec(&serde_json::json!({"reference":reference,"display":display,"segments":indicator.segments,"boxes":indicator.boxes})).map_err(|e|e.to_string())?).map_err(|e|e.to_string())?;
+        }
+        return Ok(());
+    }
     for case in drawings.cases {
         let p = profiles
             .cases
@@ -89,6 +144,11 @@ fn main() -> Result<(), String> {
             &cancel,
         )?
         .ok_or("expected profile")?;
+        let reference = if reference_mode && case.show_reference {
+            Some(profile_reference::resolve(&profile, &case.metadata)?)
+        } else {
+            None
+        };
         let mut drawing = profile_drawing::frame_and_bands(
             &profile,
             &dataset,
@@ -98,8 +158,14 @@ fn main() -> Result<(), String> {
                 label: &case.label,
                 manual_scale: case.manual_scale,
                 marker_scale: p.marker_scale,
-                reference_chainage: case.reference_chainage,
-                distance_description: &case.distance_description,
+                reference_chainage: reference
+                    .as_ref()
+                    .map_or(case.reference_chainage, |r| r.chainage),
+                distance_description: reference
+                    .as_ref()
+                    .map_or(case.distance_description.as_str(), |r| {
+                        r.description.as_str()
+                    }),
             },
             &cancel,
         )?
@@ -111,7 +177,7 @@ fn main() -> Result<(), String> {
         if body_mode {
             let resolved =
                 profile_surface::resolve(&case.metadata, &case.automatic, case.use_custom)?;
-            let body = profile_surface::build(
+            let mut body = profile_surface::build(
                 &profile,
                 &dataset,
                 &drawing,
@@ -123,6 +189,16 @@ fn main() -> Result<(), String> {
                 },
                 &cancel,
             )?;
+            if let Some(reference) = &reference {
+                profile_reference::draw(
+                    &profile,
+                    drawing.layout,
+                    case.tiff.min_x,
+                    reference,
+                    &cancel,
+                )?
+                .append(&mut body);
+            }
             let (required, context) = profile_surface::compose(&mut drawing, body)?;
             layers = required;
             obstacles = Some(context);

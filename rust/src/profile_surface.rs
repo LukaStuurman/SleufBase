@@ -151,10 +151,10 @@ fn text(content: String, point: [f64; 2], height: f64, rotation: f64, centered: 
         },
     }
 }
-fn width(text: &str, height: f64) -> f64 {
+pub(crate) fn width(text: &str, height: f64) -> f64 {
     height.max(trim(text).chars().count() as f64 * height * 0.58)
 }
-fn rotated_box(content: &str, p: [f64; 2], height: f64, angle: f64) -> TextBox {
+pub(crate) fn rotated_box(content: &str, p: [f64; 2], height: f64, angle: f64) -> TextBox {
     let length = width(content, height);
     let angle = angle.to_radians();
     let (sin, cos) = angle.sin_cos();
