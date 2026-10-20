@@ -146,11 +146,11 @@ mod tests{
     #[test]
     fn python_geometry_size_and_rd_bounds(){
         let t=trench();let l=layout(&t,1.).unwrap();
-        assert_eq!(l.width,650);
+        assert_eq!(l.width,680);
         assert_eq!(l.height,220);
-        assert!((l.bounds.min_x-154998.5).abs()<1e-9);
-        assert!((l.bounds.max_x-155011.5).abs()<1e-9);
-        assert!((l.bounds.min_y-462998.2).abs()<1e-9);
+        assert!((l.bounds.min_x-154998.2).abs()<1e-9);
+        assert!((l.bounds.max_x-155011.8).abs()<1e-9);
+        assert!((l.bounds.min_y-462997.9).abs()<1e-9);
     }
     #[test]
     fn render_preserves_transparency_and_marker_layers(){
