@@ -99,6 +99,8 @@ impl SleufBaseApp {
                             ui.checkbox(&mut dialog.options.include_bgt, "Zichtbare BGT-gegevens op kaart");
                             ui.checkbox(&mut dialog.options.include_cadastral,
                                 "Zichtbare Kadaster-lijnen op kaart");
+                            ui.checkbox(&mut dialog.options.include_cad,
+                                "Zichtbare CAD/DXF-lagen (ook geneste blokken)");
                         });
                         ui.label("De volledige GeoTIFF wordt op het proefsleufblad én op de kaart gebruikt. Geen previewafbeeldingen.");
                         ui.separator();
