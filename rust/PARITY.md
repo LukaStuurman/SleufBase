@@ -38,7 +38,7 @@ zijn geen voorwaarde voor actieve productiepariteit.
 | Cyclomedia/StreetSmart | cyclomedia.py, streetsmart*.py | Ontbreekt | Browser, selectie, overdracht/extern auth |
 | Instellingen en oude voorkeuren | settings.py, settings_ui.py, settings_* | Niet-gevoelige instellingenimport, autosave-config en bewerkbare objectregels met volgorde/kleuren/labels, overige opties ontbreken | Migratie van bestaande settings zonder wachtwoordverlies |
 | Performance voor grote jobs / lage hardware | resource_policy.py, kickthemap_scalability_patch.py, renderer.py | Reproduceerbare kernmicrobenchmark (100.000 objecten), camera zonder objectkopie en validatie zonder tijdelijke puntvectors; lokale markers, CAD-blokken en zichtbare kaartgrenzen gecachet; RGB8-rastermicrobenchmark circa 2,3× sneller/86% lagere procespiek dan volledige Pillow-preview; totale render-/geheugenprestatie nog niet aangetoond | Zelfde of betere stabiliteit op representatieve benchmark datasets |
-| Portable EXE, Windows installer, updates, signing | installer/, .github/workflows/build-windows-exe.yml | Alleen CI preview EXE | Installer, portable, upgrade/rollback en release integriteit |
+| Portable EXE, Windows installer, updates, signing | installer/, .github/workflows/build-windows-exe.yml | Rust CI bouwt een preview EXE en (bij succesvolle auditruns) een extract-and-run portable ZIP met SHA-256 en leesmij; CI verhindert niet dat AppData elders wordt gebruikt. Installer, updater, rollback en codeondertekening ontbreken | Installer, portable, upgrade/rollback en release integriteit |
 
 ## Verplichte go/no-go voorwaarden
 
