@@ -1,7 +1,10 @@
 //! Cooperative cancellation with a single, linearized publication boundary.
 use std::{
     io::{self, Seek, SeekFrom, Write},
-    sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering},
+    sync::{
+        atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering},
+        Mutex,
+    },
 };
 const RUNNING: u8 = 0;
 const CANCELLED: u8 = 1;
@@ -19,6 +22,7 @@ pub struct Control {
     cancel: AtomicBool,
     stage: AtomicU8,
     bytes: AtomicU64,
+    detail: Mutex<String>,
 }
 impl Default for Control {
     fn default() -> Self {
@@ -27,10 +31,20 @@ impl Default for Control {
             cancel: AtomicBool::new(false),
             stage: AtomicU8::new(0),
             bytes: AtomicU64::new(0),
+            detail: Mutex::new(String::new()),
         }
     }
 }
 impl Control {
+    pub fn detail(&self) -> String {
+        self.detail.lock().map(|s| s.clone()).unwrap_or_default()
+    }
+    pub(crate) fn set_detail(&self, text: &str) {
+        if let Ok(mut s) = self.detail.lock() {
+            s.clear();
+            s.extend(text.chars().take(2048));
+        }
+    }
     pub fn cancel(&self) -> bool {
         if self
             .state

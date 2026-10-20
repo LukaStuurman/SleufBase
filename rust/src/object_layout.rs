@@ -15,7 +15,7 @@ pub(crate) fn decimal(ch: char) -> Option<u32> {
     let d = n - unicode::DECIMAL_ZEROS[i];
     (d < 10).then_some(d)
 }
-fn word(ch: char) -> bool {
+pub(crate) fn word(ch: char) -> bool {
     let n = ch as u32;
     unicode::WORD_RANGES
         .get(unicode::WORD_RANGES.partition_point(|(_, end)| *end < n))

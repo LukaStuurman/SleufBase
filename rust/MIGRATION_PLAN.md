@@ -750,6 +750,32 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   herhaalde glyphvector-kopieën. Dit zijn componentbudgetten, geen totale RAM-cap.
   Volledige native bediening, foto-/virtuele beelden, aanvullende providers/cache,
   exacte CAD-tekstweergave en praktijkacceptatie blijven open.
+- Native sjabloonvenster en desktopworker gekoppeld. Het venster biedt project-
+  naam/tekenaar met automatische datum, PS-nummers/varianten, multi-selectie,
+  volgorde, lege/uitgesloten vakken, schalen, profieljob/richting, referentie,
+  botsingsvermijding, adres/comments en luchtfoto/BGT-keuzes. De ingevoerde
+  waarden blijven een draft tot bevestigen; projectwissels sluiten oud werk.
+  Nieuwe bronnen beginnen uitgesloten. Native formaat 4 bewaart deze keuzes
+  en opaque rijmetadata; 1/2/3 blijven leesbaar zonder bronbytes te herschrijven.
+  Grote datasets/rasters/CAD/comments worden naar de bestaande worker verplaatst
+  en bij resultaat, fout, annuleren of panic teruggegeven. Projectacties worden
+  pas daarna uitgevoerd. Assemblage leent datasets; alle kaartvakken delen één
+  CAD-padvector. BGT-batches worden per gelijke uitsnede hergebruikt, met een
+  gezamenlijk vertex-/featurebudget en behoud van de geconstrueerde 8-ULP-
+  geometrieafspraak. Profielen uitzetten houdt de gemeten beeldas beschikbaar.
+  Het echte sjabloon wordt ingebouwd, zodat de losse executable zonder checkout
+  kan exporteren. 140 oorspronkelijke label-/volgordegevallen, 64 bewegingen,
+  twintig bestandsnamen en 48 commentbatches vergelijken de sourcehelpers.
+  Echte egui klik-/Escape-/projectwisseltests en productie-workerexports
+  controleren projectnaam, lokale datum, bronallocaties en uitgesteld sluiten.
+  310 Rust-tests slagen, inclusief 26 desktoptests. Vier release-workerexports
+  (normaal, omgekeerd, zonder getekend profiel en varianten met leeg vak)
+  hebben onafhankelijke DXF-/PNG-readback. De oorspronkelijke vijf samengestelde
+  exports en kaart-/CLI-pixelcontroles blijven aparte regressiecontroles.
+  Uitvoer naar geladen meetbestanden, CAD, TIFF/sidecar, sjabloon of het huidige
+  project-/importbestand wordt vóór netwerk- of assetwerk geweigerd.
+  Volledige begeleidende exports/Excel, foto’s/virtuele beelden, oude instellingen
+  en praktijkacceptatie blijven open; dit vervangt de globale release-eisen niet.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

@@ -16,11 +16,17 @@ pub struct Inputs {
     pub trenches: Vec<VirtualTrench>,
     pub cadastral: Option<CadastralLayer>,
     pub bgt: Vec<BgtLayer>,
+    pub rasters: Vec<crate::geotiff::GeoTiffInfo>,
+    pub overlays: Vec<crate::dxf_read::DxfOverlay>,
+    pub comments: Vec<crate::project::Comment>,
+    /// Project containers / imported archives that must never become DXF output.
+    pub protected_paths: Vec<PathBuf>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Kind {
     Dxf,
     Xlsx,
+    Template,
 }
 pub struct Request {
     pub kind: Kind,
@@ -29,6 +35,7 @@ pub struct Request {
     pub rules: Vec<Rule>,
     pub extra_layers: bool,
     pub options: Options,
+    pub template: Option<Box<crate::template_order::State>>,
 }
 #[derive(Debug)]
 pub struct Exported {
@@ -58,6 +65,16 @@ pub struct Exporter {
 #[doc(hidden)]
 pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<Exported, String> {
     control.check()?;
+    if request.kind == Kind::Template {
+        let state = request
+            .template
+            .as_deref()
+            .ok_or("Sjablooninstellingen ontbreken")?;
+        crate::template_workflow::export(&request.path, state, inputs, &request.rules, control)?;
+        return Ok(Exported {
+            skipped: Vec::new(),
+        });
+    }
     let prepared = request.selection.prepare_with_cancel(
         &inputs.datasets,
         &inputs.trenches,
@@ -101,6 +118,7 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
             &request.rules,
             control,
         )?,
+        Kind::Template => unreachable!("handled before object selection"),
     }
     Ok(Exported {
         skipped: prepared.skipped,
@@ -240,6 +258,7 @@ mod tests {
             rules: crate::RULES.to_vec(),
             extra_layers: false,
             options: Default::default(),
+            template: None,
         }
     }
     fn wait(worker: &mut Exporter) -> Ready {

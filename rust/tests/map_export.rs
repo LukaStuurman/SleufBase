@@ -190,13 +190,14 @@ fn invalid_maps_fail_before_network_or_large_allocations() {
             color: [0; 3],
             selected: false,
             highlighted: false,
-        }],
+        }]
+        .into(),
         ..Default::default()
     };
     assert!(map_export::Renderer::default()
         .render(&source, b, None, None, &cancel)
         .is_err());
-    source.overlays.clear();
+    std::sync::Arc::make_mut(&mut source.overlays).clear();
     source.settings.dpi = u32::MAX;
     assert!(map_export::Renderer::default()
         .render(&source, b, None, None, &cancel)

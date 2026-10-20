@@ -12,12 +12,71 @@ pub(super) struct ExportIntent {
 }
 
 impl SleufBaseApp {
+    pub(super) fn open_template_export(&mut self) {
+        if self.geotiffs.is_empty() {
+            self.message = "Laad eerst GeoTIFF-proefsleuven voor de sjabloonexport".into();
+            return;
+        }
+        let state =
+            self.template_state
+                .clone()
+                .unwrap_or_else(|| sleufbase_rust::template_order::State {
+                    project: self.project_name.clone(),
+                    auto_bgt: self
+                        .migrated_settings
+                        .template_auto_fill_bgt_fysiek_voorkomen,
+                    label_gap: self.migrated_settings.dxf_label_gap,
+                    ..Default::default()
+                });
+        self.template_dialog = Some(crate::template_dialog::Dialog::new(
+            state,
+            &self.geotiffs,
+            self.project_generation,
+        ));
+    }
+    pub(super) fn finish_template_export(
+        &mut self,
+        path: PathBuf,
+        state: sleufbase_rust::template_order::State,
+    ) {
+        let state = match state.confirmed() {
+            Ok(state) => state,
+            Err(e) => {
+                if let Some(d) = &mut self.template_dialog {
+                    d.error = e;
+                }
+                return;
+            }
+        };
+        let request = Request {
+            kind: Kind::Template,
+            path,
+            selection: sleufbase_rust::object_selection::Selection::all(0, 0),
+            rules: self.migrated_settings.object_rules.clone(),
+            extra_layers: false,
+            options: self.migrated_settings.object_dxf_options(),
+            template: Some(Box::new(state.clone())),
+        };
+        if self.start_export(request, false) {
+            self.template_state = Some(state);
+            self.dirty = true;
+        }
+    }
     fn take_export_inputs(&mut self) -> Inputs {
         Inputs {
             datasets: std::mem::take(&mut self.datasets),
             trenches: std::mem::take(&mut self.virtual_trenches),
             cadastral: self.cadastral.take(),
             bgt: std::mem::take(&mut self.bgt_layers),
+            rasters: std::mem::take(&mut self.geotiffs),
+            overlays: std::mem::take(&mut self.overlays),
+            comments: std::mem::take(&mut self.comments),
+            protected_paths: self
+                .project_path
+                .iter()
+                .cloned()
+                .chain(self.legacy_archive.iter().map(|a| a.source_path.clone()))
+                .collect(),
         }
     }
     fn restore_export_inputs(&mut self, inputs: Inputs) {
@@ -26,31 +85,36 @@ impl SleufBaseApp {
                 && self.virtual_trenches.is_empty()
                 && self.cadastral.is_none()
                 && self.bgt_layers.is_empty()
+                && self.geotiffs.is_empty()
+                && self.overlays.is_empty()
         );
         self.datasets = inputs.datasets;
         self.virtual_trenches = inputs.trenches;
         self.cadastral = inputs.cadastral;
         self.bgt_layers = inputs.bgt;
+        self.geotiffs = inputs.rasters;
+        self.overlays = inputs.overlays;
+        self.comments = inputs.comments;
     }
-    fn start_export(&mut self, request: Request, overlay: bool) {
+    fn start_export(&mut self, request: Request, overlay: bool) -> bool {
         if self.export_intent.is_some() {
             self.message = "Er loopt al een export".into();
-            return;
+            return false;
         }
         if self.file_intent.is_some() {
             self.message = "Wacht tot het laden is afgerond voordat je exporteert".into();
-            return;
+            return false;
         }
         if self.pending_project_action.is_some() {
             self.message = "Rond eerst de projectkeuze af".into();
-            return;
+            return false;
         }
         if self.exporter.as_ref().is_none_or(Exporter::is_closed) {
             match Exporter::new() {
                 Ok(worker) => self.exporter = Some(worker),
                 Err(error) => {
                     self.message = error;
-                    return;
+                    return false;
                 }
             }
         }
@@ -66,11 +130,13 @@ impl SleufBaseApp {
                     queued_action: None,
                 });
                 self.message = "Export wordt voorbereid…".into();
+                true
             }
             Err(error) => {
                 let failure = *error;
                 self.restore_export_inputs(failure.inputs);
                 self.message = failure.message;
+                false
             }
         }
     }
@@ -85,6 +151,7 @@ impl SleufBaseApp {
             rules: self.migrated_settings.object_rules.clone(),
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
+            template: None,
         };
         self.start_export(request, false);
     }
@@ -103,6 +170,7 @@ impl SleufBaseApp {
             rules: self.migrated_settings.object_rules.clone(),
             extra_layers: dialog.extra_layers,
             options: dialog.options(),
+            template: None,
         };
         self.start_export(request, action.overlay);
     }
@@ -131,6 +199,9 @@ impl SleufBaseApp {
                 if intent.kind == Kind::Dxf {
                     self.export_dialog = None;
                 }
+                if intent.kind == Kind::Template {
+                    self.template_dialog = None;
+                }
                 if intent.overlay && intent.queued_action.is_none() {
                     self.load_exported_overlay(intent.path.clone());
                 }
@@ -148,12 +219,19 @@ impl SleufBaseApp {
                 self.message = format!("Export niet opgeslagen; projectgegevens behouden: {error}");
                 if intent.kind == Kind::Dxf {
                     if let Some(dialog) = self.export_dialog.as_mut() {
+                        dialog.error = error.clone();
+                    }
+                }
+                if intent.kind == Kind::Template {
+                    if let Some(dialog) = self.template_dialog.as_mut() {
                         dialog.error = error;
                     }
                 }
             }
         }
         if let Some(action) = intent.queued_action {
+            self.export_dialog = None;
+            self.template_dialog = None;
             self.request_project_action(action, ctx);
         }
     }
@@ -181,6 +259,15 @@ impl SleufBaseApp {
                         Stage::Publishing => "Bestand definitief opslaan…",
                     }
                 });
+                let detail = self
+                    .exporter
+                    .as_ref()
+                    .and_then(Exporter::control)
+                    .map(|c| c.detail())
+                    .unwrap_or_default();
+                if !detail.is_empty() {
+                    ui.label(detail);
+                }
                 if bytes > 0 {
                     ui.label(format!(
                         "{:.1} MiB geschreven",
@@ -214,6 +301,140 @@ impl SleufBaseApp {
 mod tests {
     use super::*;
     use std::sync::mpsc;
+    fn template_app() -> SleufBaseApp {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let cases: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/template-export/reference.json"
+        ))
+        .unwrap();
+        let r: sleufbase_rust::template_export::Request = serde_json::from_value(
+            cases
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|c| c["name"] == "native-tiff")
+                .unwrap()["request"]
+                .clone(),
+        )
+        .unwrap();
+        let source = r.slots[0].as_ref().unwrap().tiff_source.as_ref().unwrap();
+        let path = root.join("..").join(&source.path);
+        let pixels = sleufbase_rust::raster::decode_full_with_cancel(
+            &path,
+            &std::sync::atomic::AtomicBool::new(false),
+        )
+        .unwrap();
+        SleufBaseApp {
+            datasets: r.datasets,
+            geotiffs: vec![GeoTiffInfo {
+                path,
+                width: pixels.width,
+                height: pixels.height,
+                transform: source.transform,
+                bounds: source
+                    .transform
+                    .bounds(pixels.width, pixels.height)
+                    .unwrap(),
+                epsg: Some(28992),
+                kickthemap_job_id: Some(1),
+                kickthemap_job_title: "PS1".into(),
+                kickthemap_job_sidecar: None,
+            }],
+            raster_textures: vec![None],
+            raster_errors: vec![None],
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn native_template_window_worker_snapshot_and_project_switch_keep_complete_sources() {
+        let mut app = template_app();
+        let ctx = egui::Context::default();
+        app.open_template_export();
+        let mut state = app.template_dialog.as_ref().unwrap().state.clone();
+        state.project = "  Uitvoerproject Ø  ".into();
+        state.aerial = false;
+        state.auto_bgt = false;
+        let pointers = (app.datasets[0].features.as_ptr(), app.geotiffs.as_ptr());
+        let temp = tempfile::tempdir().unwrap();
+        let output = temp.path().join("native-window.dxf");
+        app.finish_template_export(output.clone(), state);
+        assert!(app.datasets.is_empty() && app.geotiffs.is_empty());
+        assert!(!app.save_project_to_path(temp.path().join("empty.json")));
+        let deadline = Instant::now() + Duration::from_secs(45);
+        while app.export_intent.is_some() {
+            app.poll_export_jobs(&ctx);
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(output.exists(), "{}", app.message);
+        assert!(app.template_dialog.is_none());
+        assert_eq!(
+            (app.datasets[0].features.as_ptr(), app.geotiffs.as_ptr()),
+            pointers
+        );
+        assert_eq!(
+            app.snapshot().template_export.unwrap().project,
+            "Uitvoerproject Ø"
+        );
+        app.open_template_export();
+        assert!(app.template_dialog.is_some());
+        app.request_project_action(ProjectAction::New, &ctx);
+        assert!(app.pending_project_action.is_some());
+        app.finish_project_action(false, &ctx);
+        assert_eq!(app.geotiffs.len(), 1);
+        assert_eq!(
+            app.template_state.as_ref().unwrap().project,
+            "Uitvoerproject Ø"
+        );
+    }
+    #[test]
+    fn template_cancellation_defers_close_until_the_rasters_return_and_rejected_start_keeps_metadata(
+    ) {
+        let mut app = template_app();
+        let (tx, rx) = mpsc::sync_channel(1);
+        let (gate, waiting) = mpsc::sync_channel(1);
+        app.exporter = Some(
+            Exporter::with_processor(move |inputs, request, control| {
+                tx.send(()).unwrap();
+                waiting.recv_timeout(Duration::from_secs(10)).unwrap();
+                sleufbase_rust::export_worker::process(inputs, request, control)
+            })
+            .unwrap(),
+        );
+        app.open_template_export();
+        let state = app.template_dialog.as_ref().unwrap().state.clone();
+        let original = app.geotiffs.as_ptr();
+        let dir = tempfile::tempdir().unwrap();
+        let out = dir.path().join("cancelled.dxf");
+        let ctx = egui::Context::default();
+        app.pending_project_action = Some(ProjectAction::New);
+        app.finish_template_export(out.clone(), state.clone());
+        assert!(app.template_state.is_none());
+        assert!(app.export_intent.is_none());
+        assert_eq!(app.geotiffs.as_ptr(), original);
+        app.pending_project_action = None;
+        app.finish_template_export(out.clone(), state);
+        rx.recv_timeout(Duration::from_secs(10)).unwrap();
+        app.request_project_action(ProjectAction::Close, &ctx);
+        assert!(app.pending_project_action.is_none());
+        assert!(!app.close_confirmed);
+        let frame = ctx.run(Default::default(), |ctx| app.render(ctx));
+        assert!(frame.shapes.iter().any(
+            |s| matches!(&s.shape,egui::Shape::Text(t) if t.galley.job.text.contains("Exporteren"))
+        ));
+        gate.send(()).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while app.export_intent.is_some() {
+            app.poll_export_jobs(&ctx);
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert_eq!(app.geotiffs.as_ptr(), original);
+        assert_eq!(app.pending_project_action, Some(ProjectAction::Close));
+        assert!(app.template_dialog.is_none());
+        assert!(!out.exists());
+        assert!(!app.close_confirmed);
+    }
     #[test]
     fn real_ui_stays_responsive_and_restores_inputs_before_new_or_close_confirmation() {
         for action in [ProjectAction::New, ProjectAction::Close] {
@@ -317,6 +538,7 @@ mod tests {
                 std::thread::sleep(Duration::from_millis(2));
             }
             assert_eq!(app.pending_project_action, Some(action));
+            assert!(app.export_dialog.is_none());
             assert!(!app.close_confirmed);
             assert_eq!(app.datasets[0].features.as_ptr(), pointer);
             assert_eq!(

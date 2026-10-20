@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub const FORMAT_VERSION: u32 = 3;
+pub const FORMAT_VERSION: u32 = 4;
 pub const MAX_PROJECT_BYTES: u64 = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -44,6 +44,8 @@ pub struct NativeProject {
     pub virtual_trenches: Vec<VirtualTrench>,
     pub comments: Vec<Comment>,
     #[serde(default,skip_serializing_if="Option::is_none")]
+    pub template_export:Option<crate::template_order::State>,
+    #[serde(default,skip_serializing_if="Option::is_none")]
     pub legacy_archive:Option<crate::legacy_project::LegacyArchive>,
 }
 
@@ -60,6 +62,7 @@ impl Default for NativeProject {
             cadastral: None,
             virtual_trenches: Vec::new(),
             comments: Vec::new(),
+            template_export:None,
             legacy_archive:None,
         }
     }
@@ -74,6 +77,7 @@ impl NativeProject {
             return Err(format!("Niet ondersteunde projectversie {}", self.version));
         }
         if let Some(archive)=&self.legacy_archive {archive.validate()?;}
+        if let Some(state)=&self.template_export{state.validate()?;}
         let mut count = 0usize;
         let mut vertices = |points: &[Vertex]| -> Result<(), String> {
             count = count
@@ -200,7 +204,7 @@ pub fn read_project_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool
     crate::input::check(cancel)?;
     // V3 stores source block/curve definitions separately from derived WCS
     // caches. V1/V2 remain readable; opening never rewrites their source bytes.
-    if matches!(project.version,1|2) {project.version=FORMAT_VERSION;}
+    if matches!(project.version,1..=3) {project.version=FORMAT_VERSION;}
     let mut used=0;
     for overlay in &mut project.overlays {
         crate::cad_mesh::restore_features(&mut overlay.features,&mut used,cancel)?;

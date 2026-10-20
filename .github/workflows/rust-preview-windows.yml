@@ -359,6 +359,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_map_pages.py "$env:MAP_EXPORT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native template order dialog and worker outputs
+        shell: pwsh
+        env:
+          TEMPLATE_WORKFLOW_DIR: ${{ runner.temp }}/SleufBase-template-workflows
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_order_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-order
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_workflows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_workflows.exe "$env:TEMPLATE_WORKFLOW_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_workflows.py "$env:TEMPLATE_WORKFLOW_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit prepared template exports and real CLI
         shell: pwsh
         env:

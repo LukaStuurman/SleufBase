@@ -11,7 +11,7 @@ use image::{ImageReader, Limits, Rgba, RgbaImage};
 use std::{
     io::Cursor,
     path::{Path, PathBuf},
-    sync::atomic::AtomicBool,
+    sync::{atomic::AtomicBool, Arc},
 };
 
 #[derive(Clone, Debug, Default, serde::Deserialize)]
@@ -45,7 +45,7 @@ pub struct Source {
     /// By default use tiff above, or the slot's unrotated full-resolution TIFF.
     /// An image-only/vector map must explicitly opt out rather than omit a TIFF.
     pub include_tiff: bool,
-    pub overlays: Vec<Stroke>,
+    pub overlays: Arc<Vec<Stroke>>,
     pub attribution: Option<String>,
     /// Already in displayed RD coordinates. None inherits the measured profile.
     pub reference: Option<[f64; 2]>,
@@ -58,7 +58,7 @@ impl Default for Source {
             background: Background::default(),
             tiff: None,
             include_tiff: true,
-            overlays: Vec::new(),
+            overlays: Arc::new(Vec::new()),
             attribution: None,
             reference: None,
             fonts: None,
@@ -183,7 +183,7 @@ fn overlays(
         2
     };
     let mut budget = 200_000_000;
-    for stroke in &source.overlays {
+    for stroke in source.overlays.iter() {
         input::check(cancel)?;
         if stroke.points.len() < 2 {
             continue;

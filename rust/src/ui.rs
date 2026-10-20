@@ -108,6 +108,8 @@ pub struct SleufBaseApp {
     show_settings_dialog:bool,
     rule_editor:Option<crate::rule_editor::Editor>,
     export_dialog:Option<crate::export_dialog::Dialog>,
+    template_dialog:Option<crate::template_dialog::Dialog>,
+    template_state:Option<sleufbase_rust::template_order::State>,
     migrated_settings:MigratedSettings,
     comment_form:CommentForm,
     only_active_cached:bool,
@@ -177,6 +179,8 @@ impl Default for SleufBaseApp {
             show_settings_dialog:false,
             rule_editor:None,
             export_dialog:None,
+            template_dialog:None,
+            template_state:None,
             migrated_settings,
             comment_form:CommentForm::default(),
             only_active_cached:false,
@@ -213,6 +217,7 @@ impl SleufBaseApp {
             cadastral:self.cadastral.clone(),
             virtual_trenches:self.virtual_trenches.clone(),
             comments:self.comments.clone(),
+            template_export:self.template_state.clone(),
             ..NativeProject::default()
         }
     }
@@ -220,6 +225,7 @@ impl SleufBaseApp {
     fn clear_project_requests(&mut self) {
         self.cancel_file_load();
         self.export_dialog=None;
+        self.template_dialog=None;
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
         if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
@@ -237,6 +243,7 @@ impl SleufBaseApp {
     fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,_ctx:&egui::Context) {
         self.clear_project_requests();
         self.datasets=doc.datasets; self.geotiffs=doc.rasters;
+        self.template_state=doc.template_export;
         self.raster_textures=vec![None;self.geotiffs.len()]; self.overlays=doc.overlays;
         self.dxf_selection=None;
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
@@ -1151,6 +1158,7 @@ impl SleufBaseApp {
                 ui.separator();
                 if ui.button("Excel disciplines").clicked() {self.save_excel();}
                 if ui.button("DXF objecten").clicked() {self.save_dxf();}
+                if ui.button("DXF-sjabloon").clicked() {self.open_template_export();}
                 if ui.button("Kaart terugzetten").clicked() {self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
             });
             if !self.message.is_empty() {
@@ -1546,6 +1554,9 @@ impl SleufBaseApp {
             }
         }
         self.show_unsaved_project_dialog(ctx);
+        if let Some(state)=crate::template_dialog::show(ctx,&mut self.template_dialog,&self.geotiffs,&self.datasets,self.project_generation){
+            if let Some(path)=rfd::FileDialog::new().add_filter("DXF",&["dxf"]).set_file_name(if state.reverse{"SleufBase-Proefsleuven-omgekeerd.dxf"}else{"SleufBase-Proefsleuven.dxf"}).save_file(){self.finish_template_export(path,state);}
+        }
 
     }
 }

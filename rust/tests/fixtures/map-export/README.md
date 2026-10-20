@@ -37,8 +37,8 @@ WMS reads enforce their byte limit while streaming and validate PNG/JPEG dimensi
 before decoding. Export tiles share exact pixel boundaries and a pooled client;
 offline tests verify all pixels across six tiles, errors and cancellation.
 
-Map preparation is connected to template CLI/publication. Full native dialog,
-photo/virtual assets, background-provider/cache parity, exact CAD text rendering
+Map preparation is connected to template CLI/publication and the native ordering
+dialog/worker. Photo/virtual assets, background-provider/cache parity, exact CAD text rendering
 and real-project acceptance remain open in the global PARITY checklist.
 
 Local verification: 297 Rust tests, release audit with 66,667 exact RGBA pixels

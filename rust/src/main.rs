@@ -1,6 +1,7 @@
 mod ui;
 mod rule_editor;
 mod export_dialog;
+mod template_dialog;
 
 use sleufbase_rust::{
     load_job_features, write_xlsx,

@@ -17,6 +17,7 @@ use std::{
     fs::{File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 #[derive(serde::Deserialize)]
@@ -57,6 +58,11 @@ pub struct Slot {
     #[serde(default)]
     pub map_source: Option<crate::map_export::Source>,
     pub profile: Option<Profile>,
+    /// A locally clipped, independently prepared BGT batch for this slot.
+    #[serde(default)]
+    pub surfaces: Option<Arc<Vec<bgt_surface::Feature>>>,
+    #[serde(default)]
+    pub surfaces_constructed: bool,
 }
 #[derive(serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
@@ -81,6 +87,7 @@ impl Default for Settings {
 #[serde(default, deny_unknown_fields)]
 pub struct Profile {
     pub dataset: usize,
+    pub draw: bool,
     pub metadata: serde_json::Value,
     pub forced_start: Option<profile::XY>,
     pub reverse: bool,
@@ -97,6 +104,7 @@ impl Default for Profile {
     fn default() -> Self {
         Self {
             dataset: 0,
+            draw: true,
             metadata: serde_json::Value::Null,
             forced_start: None,
             reverse: false,
@@ -203,17 +211,17 @@ fn copy_asset(
     control.check()
 }
 struct ProfileContext<'a> {
-    request: &'a Request,
+    datasets: &'a [Dataset],
     templates: &'a profile_drawing::Templates,
     surfaces: &'a bgt_surface::Index<'a>,
 }
 fn build_profile<'a>(
     request: &'a Request,
+    datasets: &'a [Dataset],
     options: &Profile,
     cancel: &std::sync::atomic::AtomicBool,
 ) -> Result<Option<profile::Profile<'a>>, String> {
-    let dataset = request
-        .datasets
+    let dataset = datasets
         .get(options.dataset)
         .ok_or("Profiel verwijst naar een ontbrekende dataset")?;
     if !options.marker_diameter.is_finite() {
@@ -242,13 +250,12 @@ fn draw_profile(
     control: &Control,
 ) -> Result<bool, String> {
     let ProfileContext {
-        request,
+        datasets,
         templates,
         surfaces,
     } = context;
     let cancel = control.flag();
-    let dataset = request
-        .datasets
+    let dataset = datasets
         .get(options.dataset)
         .ok_or("Profiel verwijst naar een ontbrekende dataset")?;
     let marker_scale = options.marker_diameter.max(0.005);
@@ -451,6 +458,17 @@ pub fn export_with_progress(
     output: &Path,
     request: &Request,
     control: &Control,
+    progress: impl FnMut(&str),
+) -> Result<Exported, String> {
+    export_with_datasets(output, request, &request.datasets, control, progress)
+}
+/// Worker entry point: borrow the moved project datasets without cloning their
+/// vertices into an intermediate request. The manifest API uses the same body.
+pub fn export_with_datasets(
+    output: &Path,
+    request: &Request,
+    datasets: &[Dataset],
+    control: &Control,
     mut progress: impl FnMut(&str),
 ) -> Result<Exported, String> {
     control.check()?;
@@ -519,7 +537,12 @@ pub fn export_with_progress(
     )?;
     control.set_stage(Stage::Planning);
     template_geometry::add(&mut doc, &request.layers, &request.geometry, control.flag())?;
-    let templates = if request.slots.iter().flatten().any(|s| s.profile.is_some()) {
+    let templates = if request
+        .slots
+        .iter()
+        .flatten()
+        .any(|s| s.profile.as_ref().is_some_and(|p| p.draw))
+    {
         Some(profile_drawing::Templates::read(&doc, control.flag())?)
     } else {
         None
@@ -562,7 +585,7 @@ pub fn export_with_progress(
         let measured = slot
             .profile
             .as_ref()
-            .map(|p| build_profile(request, p, control.flag()))
+            .map(|p| build_profile(request, datasets, p, control.flag()))
             .transpose()?
             .flatten();
         for (role, path, bounds, inset, preserve_aspect) in [
@@ -638,14 +661,27 @@ pub fn export_with_progress(
             });
             image_order.push(index * 2);
         }
-        if let (Some(options), Some(measured)) = (&slot.profile, &measured) {
+        if let (Some(options), Some(measured)) =
+            (slot.profile.as_ref().filter(|p| p.draw), &measured)
+        {
+            let local_surfaces = slot
+                .surfaces
+                .as_ref()
+                .map(|s| {
+                    if slot.surfaces_constructed {
+                        bgt_surface::Index::from_normalized_features(s.iter(), control.flag())
+                    } else {
+                        bgt_surface::Index::new(s, control.flag())
+                    }
+                })
+                .transpose()?;
             let start = doc.seed()?.0;
             profiles += usize::from(draw_profile(
                 &mut doc,
                 &ProfileContext {
                     templates: templates.as_ref().unwrap(),
-                    request,
-                    surfaces: &surfaces,
+                    datasets,
+                    surfaces: local_surfaces.as_ref().unwrap_or(&surfaces),
                 },
                 slot,
                 target,

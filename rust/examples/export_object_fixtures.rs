@@ -46,6 +46,7 @@ fn main() -> Result<(), String> {
                     rules: RULES.to_vec(),
                     extra_layers: false,
                     options: case.options,
+                    template:None,
                 },
             )?;
             continue;
@@ -125,6 +126,7 @@ fn main() -> Result<(), String> {
                 rules: RULES.to_vec(),
                 extra_layers: true,
                 options: Default::default(),
+                template:None,
             },
         )?;
     } else {

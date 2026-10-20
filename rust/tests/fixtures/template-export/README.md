@@ -37,8 +37,9 @@ geweigerd. De echte CLI wordt gecontroleerd met relatieve invoerpaden en bestaan
     python tools/verify_native_template_assemblies.py NIEUWE_MAP rust/target/release/sleufbase-rust.exe
 
 Voorbereide PNGs en directe TIFF-bronnen kunnen per vak worden gecombineerd.
-De volledige TIFF-voorbereiding is gekoppeld; kaart-/fotorendering, automatisch
-ophalen en overzichtsgeometrie afleiden, logo-/
-contactherstel en de complete native exportdialoog blijven migratiewerk.
+De volledige TIFF-voorbereiding en A4-kaartopbouw zijn gekoppeld. Het native
+volgordevenster/worker leidt overzichtspaden af uit geladen CAD/TIFFs en kan
+PDOK/BGT ophalen. Foto's, logo-/contactherstel, begeleidende exports en volledige
+praktijkacceptatie blijven migratiewerk.
 De API accepteert voorbereide overzichtsgeometrie; zij verzint geen ontbrekende
 data en vervangt geen exportafbeelding door een kaartpreview.
