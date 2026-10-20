@@ -77,6 +77,7 @@ pub struct SleufBaseApp {
     export_intent:Option<exporting::ExportIntent>,
     template_dialog:Option<template_exporting::TemplateDialog>,
     project_template_dialog:Option<project_template_ui::Dialog>,
+    template_preferences:Option<sleufbase_rust::template_prefs::TemplatePreferences>,
     template_job:Option<template_exporting::TemplateJob>,
     file_intent:Option<file_loading::FileIntent>,
     datasets: Vec<Dataset>,
@@ -154,6 +155,7 @@ impl Default for SleufBaseApp {
             export_intent:None,
             template_dialog:None,
             project_template_dialog:None,
+            template_preferences:None,
             template_job:None,
             file_intent:None,
             datasets:Vec::new(),
@@ -227,6 +229,7 @@ impl SleufBaseApp {
         NativeProject {
             name:self.project_name.clone(),
             legacy_archive:self.legacy_archive.clone(),
+            template_preferences:self.template_preferences.clone(),
             datasets:self.datasets.clone(),
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
@@ -270,6 +273,7 @@ impl SleufBaseApp {
         self.trench_markers=markers;
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
+        self.template_preferences=doc.template_preferences;
         self.selected=(!self.datasets.is_empty()).then_some(0);
         self.dirty=restored;
         self.schedule_raster_previews();
