@@ -776,9 +776,12 @@ impl SleufBaseApp {
             self.browser_ui.cancel.store(false,std::sync::atomic::Ordering::SeqCst);
         }
         let cancel=std::sync::Arc::clone(&self.browser_ui.cancel);
+        let browser=self.browser_ui.browser.as_ref().map(|b|b.channel());
         std::thread::spawn(move || {
             let root=kickthemap_cache_dir().join("Rust");
-            let result=client.download_job_with_cancel(&job,kind,&root,&cancel).map(|p|(kind,p));
+            let result=client.download_job_with_browser(
+                &job,kind,&root,&cancel,browser.as_ref()
+            ).map(|p|(kind,p));
             let _=tx.send((client,result));
         });
     }
