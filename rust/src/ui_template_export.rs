@@ -242,6 +242,46 @@ mod tests {
         assert!(app.dirty);
     }
     #[test]
+    fn desktop_template_button_runs_real_native_image_only_export() {
+        let cases: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/template-export/reference.json"
+        )).unwrap();
+        let mut request = cases.as_array().unwrap().iter()
+            .find(|v| v["name"] == "image-only").unwrap()["request"].clone();
+        let repository_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
+        let absolute = |name: &str| repository_root.join(name).to_string_lossy().into_owned();
+        let template = request["template"].as_str().unwrap().to_owned();
+        request["template"] = absolute(&template).into();
+        for slot in request["slots"].as_array_mut().unwrap() {
+            if slot.is_null() { continue; }
+            for key in ["tiff_png", "map_png"] {
+                let path = slot[key].as_str().unwrap().to_owned();
+                slot[key] = absolute(&path).into();
+            }
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let input = dir.path().join("prepared.json");
+        let output = dir.path().join("native.dxf");
+        std::fs::write(&input, serde_json::to_vec(&request).unwrap()).unwrap();
+        let mut app = SleufBaseApp::default();
+        app.comments.push(Comment { x: 5., y: 10., text: "retained".into() });
+        app.start_template_export(input.clone(), output.clone());
+        let ctx = egui::Context::default();
+        let deadline = Instant::now() + Duration::from_secs(40);
+        while app.template_job.is_some() {
+            app.poll_template_job(&ctx);
+            assert!(Instant::now() < deadline, "native export took too long");
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert!(output.is_file(), "{}", app.message);
+        assert!(app.message.contains("2 vakken"), "{}", app.message);
+        assert_eq!(app.comments[0].text, "retained");
+        assert_eq!(std::fs::read(&input).unwrap(), serde_json::to_vec(&request).unwrap());
+        let doc = sleufbase_rust::dxf_document::Document::load(
+            &output, &std::sync::atomic::AtomicBool::new(false)).unwrap();
+        assert!(doc.records().any(|record| record.kind() == "IMAGEDEF"));
+    }
+    #[test]
     fn project_action_is_deferred_and_cancels_template_job() {
         let mut app = SleufBaseApp::default();
         let (tx, rx) = mpsc::channel();
