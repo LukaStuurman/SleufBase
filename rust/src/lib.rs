@@ -30,6 +30,7 @@ mod template_attributes;
 pub mod template_legends;
 pub mod template_setup;
 pub mod template_export;
+pub mod template_project;
 pub mod template_raster;
 mod raster_rotation;
 mod map_canvas;
