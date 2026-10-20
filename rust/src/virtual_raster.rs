@@ -90,6 +90,23 @@ pub fn render(source:&Source,cancel:&AtomicBool)->Result<RgbaImage,String>{
     let ny=(t.end.x-t.start.x)/length;
     let point_width=(t.width_meters*0.5).max(0.04);
     let border=t.measured_boundary();
+    // Python-compatible dekband strokes run along the measured axis; even
+    // bounds reversed by imports are clamped to the physical trench length.
+    for (index,row) in t.dekband_rows.iter().enumerate() {
+        if index%256==0 {input::check(cancel)?;}
+        let a=row.start_chainage.clamp(0.,length);
+        let b=row.end_chainage.clamp(0.,length);
+        if b-a<=1e-6 {continue;}
+        let point=|distance:f64|{
+            let f=distance/length;
+            pixel(info,t.start.x+f*(t.end.x-t.start.x),
+                t.start.y+f*(t.end.y-t.start.y))
+        };
+        let color=row.display_rgb.unwrap_or([17,24,39]);
+        stroke(&mut result,point(a),point(b),
+            (4.*source.quality).round().max(3.) as i32,
+            Rgba([color[0],color[1],color[2],235]));
+    }
     // Keep markers and endpoints visibly separate from the source contour.
     for (i,object) in t.objects.iter().enumerate() {
         if i%256==0 {input::check(cancel)?;}
@@ -145,6 +162,17 @@ mod tests{
         assert_eq!(img.get_pixel(0,0)[3],0);
         assert!(img.pixels().any(|p|p[0]==0&&p[3]==255));
         assert!(img.pixels().any(|p|p[2]==229&&p[3]==235));
+    }
+    #[test]
+    fn dekband_segments_are_drawn_with_custom_color() {
+        let mut t=trench();
+        t.dekband_rows.push(crate::virtual_trench::Dekband {
+            start_chainage:2.,end_chainage:7.,
+            source_name:"Waarschuwingsband".into(),
+            display_rgb:Some([239,33,44]),
+        });
+        let img=render(&Source{trench:t,quality:1.},&AtomicBool::new(false)).unwrap();
+        assert!(img.pixels().any(|p|p.0==[239,33,44,235]));
     }
     #[test]
     fn cancel_and_invalid_scale_are_rejected(){
