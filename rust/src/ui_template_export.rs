@@ -13,9 +13,9 @@ pub(super) struct TemplateDialog {
 
 enum Event {
     Progress(String),
-    Finished(Result<(usize, usize, usize), String>),
+    Finished(Result<template_export::Exported, String>),
     ProjectFinished(
-        Result<(usize, usize, usize), String>,
+        Result<template_export::Exported, String>,
         sleufbase_rust::export_worker::Inputs,
     ),
 }
@@ -122,6 +122,7 @@ impl SleufBaseApp {
         let owned = Arc::new(std::sync::Mutex::new(Some(inputs)));
         let worker_owned = Arc::clone(&owned);
         let rules = self.migrated_settings.object_rules.clone();
+        let discipline_excel=self.migrated_settings.template_auto_export_discipline_excel;
         let (tx, rx) = mpsc::channel();
         let control = Arc::new(Control::default());
         let task_control = Arc::clone(&control);
@@ -132,15 +133,17 @@ impl SleufBaseApp {
                 let inputs = worker_owned.lock().expect("project export ownership lock")
                     .take().expect("project inputs already owned by another worker");
                 let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    let request = sleufbase_rust::template_project::build_with_cad(
+                    let mut request = sleufbase_rust::template_project::build_with_cad(
                         &options, &inputs.datasets, &inputs.rasters, &inputs.trenches,
                         &inputs.bgt, inputs.cadastral.as_ref(), &inputs.overlays,
                         &rules, &task_control,
                     )?;
+                    request.settings.discipline_excel=discipline_excel;
+                    request.settings.protected_sources.extend(inputs.protected_paths.iter().cloned());
                     template_export::export_with_progress(
                         &task_output, &request, &task_control,
                         |message| { let _ = tx.send(Event::Progress(message.to_owned())); }
-                    ).map(|v| (v.filled_slots, v.profiles, v.added_pages))
+                    )
                 })).unwrap_or_else(|_|Err(
                     "Project-sjabloonexport is onverwacht gestopt; projectgegevens worden hersteld".into()
                 ));
@@ -194,14 +197,15 @@ impl SleufBaseApp {
         let control = Arc::new(Control::default());
         let task_control = Arc::clone(&control);
         let task_output = output.clone();
+        let discipline_excel=self.migrated_settings.template_auto_export_discipline_excel;
         let result = std::thread::Builder::new()
             .name("sleufbase-template-export".into())
             .spawn(move || {
                 let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    let request = template_export::read_request(&manifest, &task_control)?;
+                    let mut request = template_export::read_request(&manifest, &task_control)?;
+                    request.settings.discipline_excel=discipline_excel;
                     template_export::export_with_progress(&task_output, &request, &task_control,
                         |message| { let _ = tx.send(Event::Progress(message.to_owned())); })
-                    .map(|result| (result.filled_slots, result.profiles, result.added_pages))
                 })).unwrap_or_else(|_| Err("Sjabloonexport is onverwacht gestopt; uitvoer is niet gepubliceerd".into()));
                 let _ = tx.send(Event::Finished(outcome));
             });
@@ -252,8 +256,8 @@ impl SleufBaseApp {
             if let Some(inputs) = return_inputs { self.restore_export_inputs(inputs); }
             let job = self.template_job.take().unwrap();
             self.message = match result {
-                Ok((slots, profiles, pages)) =>
-                    format!("Sjabloon-DXF opgeslagen: {} ({slots} vakken, {profiles} profielen, {pages} extra bladen)", job.output.display()),
+                Ok(exported) =>
+                    format!("Sjabloon-DXF opgeslagen: {} ({} vakken, {} profielen, {} extra bladen){}", job.output.display(),exported.filled_slots,exported.profiles,exported.added_pages,exporting::report_notice(exported.companion.as_deref(),&exported.warnings)),
                 Err(error) => format!("Sjabloonexport niet opgeslagen: {error}"),
             };
             if let Some(action) = job.queued_action {

@@ -7,6 +7,9 @@ pub(super) struct Dialog {
     pub output: Option<PathBuf>,
     pub error: String,
     pub automatic: Vec<sleufbase_rust::template_match::Suggestion>,
+    jobs:Vec<(u64,PathBuf)>,
+    rasters:Vec<(PathBuf,Option<u64>)>,
+    trenches:Vec<(u64,String)>,
 }
 impl Dialog {
     fn new(app: &SleufBaseApp) -> Self {
@@ -26,7 +29,18 @@ impl Dialog {
             Source::Job(i) => sleufbase_rust::template_match::for_job(&app.datasets[i], &app.geotiffs),
             Source::Virtual(i) => sleufbase_rust::template_match::for_trench(&app.virtual_trenches[i], &app.geotiffs),
         }).collect();
-        Self { options, output: None, error: String::new(), automatic }
+        Self { options, output: None, error: String::new(), automatic,
+            jobs:app.datasets.iter().map(|d|(d.job_id,d.source_path.clone())).collect(),
+            rasters:app.geotiffs.iter().map(|r|(r.path.clone(),r.kickthemap_job_id)).collect(),
+            trenches:app.virtual_trenches.iter().map(|t|(t.job_id,t.label.clone())).collect(),
+        }
+    }
+    fn sources_match(&self,app:&SleufBaseApp)->bool {
+        self.jobs.len()==app.datasets.len() && self.rasters.len()==app.geotiffs.len()
+            && self.trenches.len()==app.virtual_trenches.len()
+            && self.jobs.iter().zip(&app.datasets).all(|(key,d)|key.0==d.job_id && key.1==d.source_path)
+            && self.rasters.iter().zip(&app.geotiffs).all(|(key,r)|key.0==r.path && key.1==r.kickthemap_job_id)
+            && self.trenches.iter().zip(&app.virtual_trenches).all(|(key,t)|key.0==t.job_id && key.1==t.label)
     }
 }
 
@@ -46,6 +60,13 @@ impl SleufBaseApp {
         self.project_template_dialog = Some(Dialog::new(self));
     }
     pub(super) fn show_project_template_dialog(&mut self, ctx: &egui::Context) {
+        // Choices contain vector indices. Never let removed/reordered sources
+        // silently turn a reviewed slot into a different measurement job.
+        if self.project_template_dialog.as_ref().is_some_and(|d|!d.sources_match(self)) {
+            self.project_template_dialog=None;
+            self.message="Projectbronnen gewijzigd. Open de sjabloonexport opnieuw om de koppelingen te controleren.".into();
+            return;
+        }
         let mut open = true;
         let mut launch = None;
         let rasters = &self.geotiffs;

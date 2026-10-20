@@ -28,18 +28,18 @@ from Python projects; complete legacy UI/settings migration and Python-format
 export are still open.
 
 `export_template_workflows` uses the production desktop worker and embedded
-template for normal, reversed, image-only and ordered-variant exports. The
+template for normal, reversed, image-only, ordered-variant and missing-data exports. The
 independent ezdxf/Pillow verifier checks actual project/date/drawn-by/title
 values, comments, annotation handles, blank slots and durable raster dimensions.
 The template is embedded in the standalone executable; no source-checkout path
 is required. Earlier prepared export/map oracles remain separate checks.
 
-The final release worker passed all four independent readbacks (10 PNGs),
-including visible CAD geometry/colors. The combined 360 Rust tests include 34 desktop
+The worker passes five independent readbacks (12 PNGs and five automatic XLSX
+companions), including visible CAD geometry/colors. The combined 364 Rust tests include 35 desktop
 tests. Export targets that alias loaded measurements, CAD, TIFF/sidecars, the
 template or current project/import container are rejected before network/assets.
 
 This is the native ordering/export path. Paired normal/reverse publication,
-automatic companion Excel, complete photo annotations/virtual-mask parity, legacy
+complete photo annotations/virtual-mask parity, legacy
 settings, remaining CAD families and real-project desktop acceptance still
 remain in PARITY.md; the migration is not a completed product replacement.

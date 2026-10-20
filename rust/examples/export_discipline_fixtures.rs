@@ -59,7 +59,7 @@ fn main() {
                         label_gap: case.label_gap,
                         ..Default::default()
                     },
-                    template:None,
+                    template:None,discipline_excel:false,
                 };
                 inputs = worker::run(exporter, inputs, request).unwrap();
             }

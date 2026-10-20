@@ -10,6 +10,17 @@ pub(super) struct ExportIntent {
     overlay: bool,
     queued_action: Option<ProjectAction>,
 }
+pub(super) fn report_notice(companion: Option<&std::path::Path>, warnings: &[String]) -> String {
+    let mut text = companion.map_or_else(String::new, |p| format!(". Excel: {}", p.display()));
+    for warning in warnings.iter().take(10) {
+        text.push('\n');
+        text.push_str(warning);
+    }
+    if warnings.len() > 10 {
+        text.push_str(&format!("\nEn {} overige meldingen", warnings.len() - 10));
+    }
+    text
+}
 
 impl SleufBaseApp {
     pub(super) fn open_template_export(&mut self) {
@@ -66,6 +77,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: Some(Box::new(state.clone())),
+            discipline_excel: self.migrated_settings.template_auto_export_discipline_excel,
         };
         if self.start_export(request, false) {
             self.template_state = Some(state);
@@ -162,6 +174,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: None,
+            discipline_excel: false,
         };
         self.start_export(request, false);
     }
@@ -181,6 +194,7 @@ impl SleufBaseApp {
             extra_layers: dialog.extra_layers,
             options: dialog.options(),
             template: None,
+            discipline_excel: false,
         };
         self.start_export(request, action.overlay);
     }
@@ -223,7 +237,11 @@ impl SleufBaseApp {
                         exported.skipped.join(", ")
                     )
                 };
-                self.message = format!("Export opgeslagen: {}{skipped}", intent.path.display());
+                self.message = format!(
+                    "Export opgeslagen: {}{skipped}{}",
+                    intent.path.display(),
+                    report_notice(exported.companion.as_deref(), &exported.warnings)
+                );
             }
             Err(error) => {
                 self.message = format!("Export niet opgeslagen; projectgegevens behouden: {error}");
@@ -336,6 +354,7 @@ mod tests {
         .unwrap();
         SleufBaseApp {
             datasets: r.datasets,
+            migrated_settings: MigratedSettings::default(),
             geotiffs: vec![GeoTiffInfo {
                 path,
                 width: pixels.width,
@@ -353,6 +372,42 @@ mod tests {
             raster_textures: vec![None],
             raster_errors: vec![None],
             ..Default::default()
+        }
+    }
+    #[test]
+    fn project_export_never_retargets_reviewed_slots_after_source_lists_change() {
+        for change in 0..3 {
+            let mut app = template_app();
+            app.open_project_template_dialog();
+            assert!(app.project_template_dialog.is_some());
+            match change {
+                0 => app.datasets.swap(0, 1),
+                1 => app.geotiffs[0].kickthemap_job_id = Some(999),
+                _ => app.virtual_trenches.push(
+                    VirtualTrench::new(
+                        "Nieuwe sleuf".into(),
+                        Vertex {
+                            x: 0.,
+                            y: 0.,
+                            z: None,
+                        },
+                        Vertex {
+                            x: 10.,
+                            y: 0.,
+                            z: None,
+                        },
+                        0.6,
+                    )
+                    .unwrap(),
+                ),
+            }
+            let ctx = egui::Context::default();
+            let _ = ctx.run(Default::default(), |ctx| {
+                app.show_project_template_dialog(ctx)
+            });
+            assert!(app.project_template_dialog.is_none());
+            assert!(app.template_job.is_none() && app.export_intent.is_none());
+            assert!(app.message.contains("Projectbronnen gewijzigd"));
         }
     }
     #[test]
@@ -421,6 +476,8 @@ mod tests {
             std::thread::sleep(Duration::from_millis(2));
         }
         assert!(out.exists(), "{}", app.message);
+        assert!(out.with_extension("xlsx").exists(), "{}", app.message);
+        assert!(app.message.contains("Excel:"));
         assert_eq!(
             (
                 app.datasets[0].features.as_ptr(),
@@ -460,6 +517,17 @@ mod tests {
             std::thread::sleep(Duration::from_millis(2));
         }
         assert!(output.exists(), "{}", app.message);
+        assert!(output.with_extension("xlsx").exists(), "{}", app.message);
+        app.migrated_settings.template_auto_export_discipline_excel = false;
+        let without_excel = temp.path().join("disabled-report.dxf");
+        app.finish_template_export(without_excel.clone(), app.template_state.clone().unwrap());
+        while app.export_intent.is_some() {
+            app.poll_export_jobs(&ctx);
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(without_excel.exists(), "{}", app.message);
+        assert!(!without_excel.with_extension("xlsx").exists());
         assert!(app.template_order_dialog.is_none());
         assert_eq!(
             (app.datasets[0].features.as_ptr(), app.geotiffs.as_ptr()),

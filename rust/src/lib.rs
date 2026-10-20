@@ -30,6 +30,7 @@ mod template_attributes;
 pub mod template_legends;
 pub mod template_setup;
 pub mod template_export;
+mod template_report;
 pub mod template_order;
 pub mod template_workflow;
 pub mod template_project;

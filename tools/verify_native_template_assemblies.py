@@ -42,7 +42,7 @@ def main():
     print(len(json.loads((OUT/'reference.json').read_text(encoding='utf-8'))),'native prepared exports,',total_profiles,'complete profiles and',total_images,'permanent PNGs: full order/fields/graphs/pixels and source preservation verified')
     if len(sys.argv)>2:
         case=next(c for c in json.loads((OUT/'reference.json').read_text(encoding='utf-8')) if c['name']=='native-tiff')
-        request=case['request'];request['template']=os.path.relpath(ROOT/request['template'],output)
+        request=case['request'];request['settings']['discipline_excel']=True;request['template']=os.path.relpath(ROOT/request['template'],output)
         for slot in filter(None,request['slots']):
             for key in ('tiff_png','map_png'):
                 if key in slot:slot[key]=os.path.relpath(ROOT/slot[key],output)
@@ -52,6 +52,11 @@ def main():
         target=output/'cli.dxf';command=[str(Path(sys.argv[2]).resolve()),'--settings',str(ignored.resolve()),'--template-dxf',str(target.resolve()),str(manifest.resolve())]
         result=subprocess.run(command,cwd=output,text=True,encoding='utf-8',capture_output=True)
         assert result.returncode==0,(result.returncode,result.stdout,result.stderr)
+        from verify_native_template_reports import original_signature
+        from verify_native_discipline_exports import signature
+        rows=[None if s is None else (s.get('report_label',s['label']),s.get('report_dataset',(s.get('profile') or {}).get('dataset'))) for s in request['slots']]
+        expected,_=original_signature(request['rules'],request['datasets'],rows)
+        assert signature(target.with_suffix('.xlsx'))==expected,'CLI automatic workbook differs from original'
         doc=ezdxf.readfile(target);compare(snapshot(doc,exporter),case['expected'],'real CLI')
         old_handles=set(ezdxf.readfile(ROOT/'assets/cadastral_template.dxf').entitydb)
         for e in doc.modelspace().query('IMAGE'):

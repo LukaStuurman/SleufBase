@@ -36,10 +36,13 @@ pub struct Request {
     pub extra_layers: bool,
     pub options: Options,
     pub template: Option<Box<crate::template_order::State>>,
+    pub discipline_excel: bool,
 }
 #[derive(Debug)]
 pub struct Exported {
     pub skipped: Vec<String>,
+    pub companion: Option<PathBuf>,
+    pub warnings: Vec<String>,
 }
 pub struct Ready {
     pub inputs: Inputs,
@@ -70,9 +73,18 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
             .template
             .as_deref()
             .ok_or("Sjablooninstellingen ontbreken")?;
-        crate::template_workflow::export(&request.path, state, inputs, &request.rules, control)?;
+        let exported = crate::template_workflow::export_with_excel(
+            &request.path,
+            state,
+            inputs,
+            &request.rules,
+            request.discipline_excel,
+            control,
+        )?;
         return Ok(Exported {
             skipped: Vec::new(),
+            companion: exported.companion,
+            warnings: exported.warnings,
         });
     }
     let prepared = request.selection.prepare_with_cancel(
@@ -122,6 +134,8 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
     }
     Ok(Exported {
         skipped: prepared.skipped,
+        companion: None,
+        warnings: Vec::new(),
     })
 }
 impl Exporter {
@@ -259,6 +273,7 @@ mod tests {
             extra_layers: false,
             options: Default::default(),
             template: None,
+            discipline_excel: false,
         }
     }
     fn wait(worker: &mut Exporter) -> Ready {

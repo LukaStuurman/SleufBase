@@ -199,6 +199,17 @@ pub(crate) fn summarize_grouped_cancel(
     groups: &[usize],
     cancel: &std::sync::atomic::AtomicBool,
 ) -> Result<Summary, String> {
+    Ok(Summary {
+        proefsleuf: crate::python_values::trim(&dataset.title).into(),
+        counts: counts_grouped_cancel(dataset, rules, groups, cancel)?,
+    })
+}
+pub(crate) fn counts_grouped_cancel(
+    dataset: &Dataset,
+    rules: &[Rule],
+    groups: &[usize],
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<Vec<u32>, String> {
     let mut counts = vec![0u32; rules.len()];
     for (index, feature) in dataset.features.iter().enumerate() {
         if index % 1024 == 0 {
@@ -209,10 +220,7 @@ pub(crate) fn summarize_grouped_cancel(
             counts[column] = counts[column].saturating_add(1);
         }
     }
-    Ok(Summary {
-        proefsleuf: crate::python_values::trim(&dataset.title).into(),
-        counts,
-    })
+    Ok(counts)
 }
 
 #[cfg(test)]

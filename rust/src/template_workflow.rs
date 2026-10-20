@@ -337,6 +337,12 @@ pub fn request_with_bgt(
                 auto_fill_bgt: state.auto_bgt,
                 ..Default::default()
             }),
+            report_dataset: dataset.or_else(|| {
+                raster
+                    .kickthemap_job_id
+                    .and_then(|id| datasets.get(&id).copied())
+            }),
+            report_label: None,
             surfaces_constructed: surfaces.is_some(),
             surfaces,
         }));
@@ -372,6 +378,16 @@ pub fn export(
     rules: &[Rule],
     control: &Control,
 ) -> Result<template_export::Exported, String> {
+    export_with_excel(path, state, inputs, rules, false, control)
+}
+pub fn export_with_excel(
+    path: &Path,
+    state: &State,
+    inputs: &Inputs,
+    rules: &[Rule],
+    discipline_excel: bool,
+    control: &Control,
+) -> Result<template_export::Exported, String> {
     control.check()?;
     // Replacement is valid for earlier exports, never for loaded project data.
     // Do this before fetching BGT or preparing any new assets.
@@ -394,7 +410,7 @@ pub fn export(
             .filter_map(|t| t.source_path.as_deref()),
     );
     sources.extend(state.template.as_deref());
-    for source in sources {
+    for &source in &sources {
         control.check()?;
         if source == path
             || target
@@ -407,6 +423,8 @@ pub fn export(
         }
     }
     let mut request = request(state, inputs, rules, control)?;
+    request.settings.discipline_excel = discipline_excel;
+    request.settings.protected_sources = sources.into_iter().map(Path::to_owned).collect();
     let mut bundled = None;
     if request.template.as_os_str().is_empty() {
         let mut file = tempfile::Builder::new()

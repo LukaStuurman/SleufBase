@@ -1651,7 +1651,8 @@ impl SleufBaseApp {
                 ui.checkbox(&mut self.migrated_settings.template_auto_fill_bgt_fysiek_voorkomen,
                     "BGT fysiek voorkomen automatisch aanvullen (voorbereid)");
                 ui.checkbox(&mut self.migrated_settings.template_auto_export_discipline_excel,
-                    "Excel automatisch bij template-DXF (voorbereid)");
+                    "Automatisch discipline-Excel naast sjabloon-DXF");
+                ui.small("Het overzicht volgt dezelfde PS-namen en volgorde. Bij vervangen blijft de vorige Excel-versie in de exportmap bewaard.");
                 ui.separator();
                 ui.checkbox(&mut self.backup_settings.enabled,"Automatische projectback-ups");
                 ui.horizontal(|ui|{

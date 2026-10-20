@@ -41,6 +41,8 @@ fn run_cli(args: &[String]) -> Result<(), String> {
         let request=sleufbase_rust::template_export::read_request(&PathBuf::from(&args[2]),&control)?;
         let exported=sleufbase_rust::template_export::export_with_progress(&output,&request,&control,|stage|println!("{stage}"))?;
         println!("{} vakken en {} profielen opgeslagen naar {}",exported.filled_slots,exported.profiles,exported.published.drawing.display());
+        if let Some(path)=exported.companion {println!("Discipline-Excel opgeslagen naar {}",path.display());}
+        for warning in exported.warnings {eprintln!("Melding: {warning}");}
         return Ok(());
     }
     if args[0]=="--import-python" {

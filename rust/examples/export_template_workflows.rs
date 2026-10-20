@@ -104,7 +104,13 @@ fn main() -> Result<(), String> {
         ("reverse", true, true, false),
         ("image-only", false, false, false),
         ("ordered-variants", false, true, true),
+        ("missing-measurements", false, false, false),
     ] {
+        inputs.rasters[0].kickthemap_job_id = Some(if name == "missing-measurements" {
+            999
+        } else {
+            1
+        });
         let mut state = State {
             project: "Native venster Ø 漢".into(),
             drawn_by: "Native test".into(),
@@ -136,6 +142,7 @@ fn main() -> Result<(), String> {
                     extra_layers: false,
                     options: Default::default(),
                     template: Some(Box::new(state.clone())),
+                    discipline_excel: true,
                 },
             )
             .map_err(|e| e.message.clone())?;
@@ -149,7 +156,10 @@ fn main() -> Result<(), String> {
             }
             std::thread::sleep(Duration::from_millis(2));
         };
-        ready.result?;
+        let result = ready.result?;
+        if result.companion.as_deref() != Some(output.with_extension("xlsx").as_path()) {
+            return Err(format!("Companion missing: {:?}", result.warnings));
+        }
         inputs = ready.inputs;
         if inputs.datasets[0].features.as_ptr() != original_pointer
             || inputs.rasters.as_ptr() != original_raster

@@ -794,6 +794,26 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   van de oorspronkelijke virtuele rastermaskers.
   Volledige oorspronkelijke fotoannotaties/rastermaskers, begeleidende Excel/
   gepaarde exports en alle globale praktijk-/releasevoorwaarden blijven open.
+- Automatisch discipline-Excel gekoppeld aan beide projectexportvensters en de
+  bestaande voorkeur; CLI-manifests kunnen `settings.discipline_excel` inschakelen.
+  Tellen volgt alle geselecteerde vakken, ongeacht profieltekenen. Lege vakken
+  vallen weg, PS-varianten/volgorde blijven behouden, ontbrekende data wordt een
+  nulregel met melding. Datasetvertices worden geleend. Een cache van maximaal
+  2 MiB aan aantallen en 4096 bronverwijzingen vermijdt herhaald classificeren.
+  Dit is een componentbudget, geen totale Excel-/app-geheugenlimiet.
+  Na DXF-publicatie volgt een afzonderlijke atomaire XLSX-publicatie. Vervangen
+  bewaart de vorige werkmap in de blijvende exportbundle (maximaal 128 MiB).
+  Bron-/manifest-/DXF-aliases, vergrendelde bestanden, mislukte backup en rapport-
+  panic behouden de DXF en oude werkmap; geen onjuiste melding dat de DXF faalde.
+  10 oorspronkelijke werkmappen/60 geordende rijen vergelijken cellen, totalen,
+  opmaak, breedtes en filters; twee hashseeds reproduceren de fixturebytes.
+  Vijf productie-workerexports vergelijken hun automatische Excel met de bron.
+  Een nieuwe desktopbewaking sluit verouderde job-/raster-/sleufkeuzes af, zodat
+  gewijzigde bronlijsten niet stilzwijgend een andere meetjob exporteren.
+  364 Rust-tests slagen, inclusief 35 desktoptests. De bestaande tien standalone
+  werkmappen en samengestelde DXF-/CLI-controles blijven afzonderlijke regressies.
+  Gepaard normaal/omgekeerd, overige exportfamilies, echte projecten en alle
+  oorspronkelijke globale releasevoorwaarden blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

@@ -362,3 +362,97 @@ fn map_sources_resolve_all_paths_relative_to_the_manifest() {
         expected.iter().map(PathBuf::as_path).collect::<Vec<_>>()
     );
 }
+
+#[test]
+fn automatic_excel_replacement_keeps_the_previous_workbook_and_protects_sources_and_the_dxf() {
+    let dir = tempfile::tempdir().unwrap();
+    let output = dir.path().join("report.dxf");
+    let mut r = request("image-only");
+    r.settings.discipline_excel = true;
+    r.rules = sleufbase_rust::RULES.to_vec();
+    let exported = template_export::export(&output, &r, &Control::default()).unwrap();
+    let xlsx = output.with_extension("xlsx");
+    assert_eq!(exported.companion.as_deref(), Some(xlsx.as_path()));
+    assert_eq!(exported.warnings.len(), exported.filled_slots);
+    assert!(fs::metadata(&xlsx).unwrap().len() > 1000);
+    let workbook = fs::read(&xlsx).unwrap();
+    r.slots.iter_mut().flatten().next().unwrap().report_label = Some("PS99".into());
+    let repeated = template_export::export(&output, &r, &Control::default()).unwrap();
+    assert_eq!(repeated.companion.as_deref(), Some(xlsx.as_path()));
+    assert_eq!(
+        fs::read(repeated.published.assets.join("previous-disciplines.xlsx")).unwrap(),
+        workbook
+    );
+    let latest = fs::read(&xlsx).unwrap();
+    assert_ne!(latest, workbook);
+    r.settings.protected_sources.push(xlsx.clone());
+    let protected = template_export::export(&output, &r, &Control::default()).unwrap();
+    assert!(protected.companion.is_none());
+    assert!(protected.warnings.iter().any(|s| s.contains("projectbron")));
+    assert_eq!(fs::read(&xlsx).unwrap(), latest);
+    assert!(
+        template_export::export(&dir.path().join("cancelled.dxf"), &r, &{
+            let c = Control::default();
+            c.cancel();
+            c
+        })
+        .is_err()
+    );
+    assert!(!dir.path().join("cancelled.xlsx").exists());
+    let same = dir.path().join("unusual.xlsx");
+    let unusual = template_export::export(&same, &r, &Control::default()).unwrap();
+    assert!(unusual.companion.is_none());
+    assert!(fs::read_to_string(&same).unwrap().contains("SECTION"));
+}
+#[cfg(windows)]
+#[test]
+fn a_locked_previous_workbook_is_retained_while_the_dxf_finishes_successfully() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let dir = tempfile::tempdir().unwrap();
+    let output = dir.path().join("locked.dxf");
+    let xlsx = output.with_extension("xlsx");
+    fs::write(&xlsx, b"previous workbook").unwrap();
+    let lock = fs::OpenOptions::new()
+        .read(true)
+        .share_mode(0)
+        .open(&xlsx)
+        .unwrap();
+    let mut r = request("image-only");
+    r.settings.discipline_excel = true;
+    r.rules = sleufbase_rust::RULES.to_vec();
+    let exported = template_export::export(&output, &r, &Control::default()).unwrap();
+    assert!(output.exists() && exported.companion.is_none());
+    assert!(exported
+        .warnings
+        .iter()
+        .any(|s| s.contains("DXF opgeslagen")));
+    assert!(!exported
+        .published
+        .assets
+        .join("previous-disciplines.xlsx")
+        .exists());
+    drop(lock);
+    assert_eq!(fs::read(xlsx).unwrap(), b"previous workbook");
+}
+#[test]
+fn a_report_panic_or_missing_rules_does_not_claim_the_published_dxf_failed() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut r = request("image-only");
+    r.settings.discipline_excel = true;
+    r.rules = sleufbase_rust::RULES.to_vec();
+    let output = dir.path().join("panic.dxf");
+    let exported = template_export::export_with_progress(&output, &r, &Control::default(), |s| {
+        if s == "Excel-disciplineoverzicht opslaan" {
+            panic!("report progress observer");
+        }
+    })
+    .unwrap();
+    assert!(exported.companion.is_none() && output.exists());
+    assert!(exported.warnings[0].contains("DXF opgeslagen"));
+    assert!(!output.with_extension("xlsx").exists());
+    r.rules.clear();
+    let empty = dir.path().join("empty-rules.dxf");
+    let exported = template_export::export(&empty, &r, &Control::default()).unwrap();
+    assert!(empty.exists() && exported.companion.is_none());
+    assert!(exported.warnings[0].contains("geen disciplines"));
+}

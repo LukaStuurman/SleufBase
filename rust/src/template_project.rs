@@ -295,7 +295,8 @@ pub fn build_with_cad(
         datasets.push(dataset);
         slots.push(Some(Slot {
             bounds, label: format!("PS{:03}", local_index + 1),
-            title: label, address: None, comments: choice.comments.clone(),
+            title: label.clone(), address: None, comments: choice.comments.clone(),
+            report_dataset:Some(local_index), report_label:Some(label),
             tiff_png: PathBuf::new(),
             tiff_source: raster.map(|raster|template_raster::Source {
                 path: raster.path.clone(), transform: raster.transform,
@@ -326,6 +327,10 @@ pub fn build_with_cad(
         settings: template_export::Settings {
             project: (!opts.project.trim().is_empty()).then(||opts.project.trim().to_owned()),
             drawn_by: opts.drawn_by.trim().to_owned(),
+            protected_sources:jobs.iter().map(|d|d.source_path.clone())
+                .chain(rasters.iter().flat_map(|r|std::iter::once(r.path.clone()).chain(r.kickthemap_job_sidecar.clone())))
+                .chain(trenches.iter().filter_map(|t|t.source_path.clone()))
+                .chain(cad.iter().map(|d|d.path.clone())).collect(),
             ..template_export::Settings::default()
         },
     })

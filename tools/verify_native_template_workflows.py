@@ -6,9 +6,17 @@ checks published output, title fields, annotations, images and stable variants.
 from pathlib import Path
 from datetime import datetime,timedelta
 import json,sys
+from verify_native_discipline_exports import signature
+from verify_native_template_reports import original_signature
 import ezdxf
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
+def workbook(path,name):
+    original=next(c['request'] for c in json.loads((ROOT/'rust/tests/fixtures/template-export/reference.json').read_text(encoding='utf-8')) if c['name']=='native-tiff')
+    rows=[('PS12',None if name=='missing-measurements' else 0)]
+    if name=='ordered-variants':rows.extend([None,('PS12B',0)])
+    expected,_=original_signature(original['rules'],original['datasets'],rows)
+    assert signature(path)==expected,(name,'automatic workbook differs from original')
 def main():
     out=Path(sys.argv[1]);audit=json.loads((out/'audit.json').read_text(encoding='utf-8'));start=datetime.fromtimestamp((out/'started.txt').stat().st_mtime).date();end=datetime.fromtimestamp((out/'audit.json').stat().st_mtime).date();dates={(start+timedelta(days=i)).strftime('%d-%m-%Y') for i in range((end-start).days+1)}
     baseline=ezdxf.readfile(ROOT/'assets/cadastral_template.dxf');base_profiles=len([e for e in baseline.modelspace() if e.dxf.layer=='X-XX-AL-PROFIELBALK-SD'])
@@ -35,6 +43,7 @@ def main():
                 if image.name.endswith('_kaart.png'):assert pixels.size==(3508,2480)
                 else:assert pixels.width>0 and pixels.height>0
         if case['name']=='ordered-variants':assert not any('slot00002' in p.name for p in images) and any('slot00003' in p.name for p in images)
+        workbook(path.with_suffix('.xlsx'),case['name'])
         print(case['name'],': native worker titles/date/project, DXF ownership/annotations and',len(images),'durable PNGs passed')
-    assert [c['name'] for c in audit]==['normal','reverse','image-only','ordered-variants']
+    assert [c['name'] for c in audit]==['normal','reverse','image-only','ordered-variants','missing-measurements']
 if __name__=='__main__':main()

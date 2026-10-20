@@ -74,6 +74,7 @@ fn request(path: PathBuf, state: State) -> Request {
         extra_layers: false,
         options: Default::default(),
         template: Some(Box::new(state)),
+        discipline_excel: false,
     }
 }
 fn wait(worker: &mut Exporter) -> sleufbase_rust::export_worker::Ready {
@@ -104,6 +105,7 @@ fn project_planning_preserves_empty_slots_excludes_rows_and_borrows_datasets_and
     let b = r.slots[2].as_ref().unwrap();
     assert_eq!((a.label.as_str(), b.label.as_str()), ("PS12", "PS12B"));
     assert_eq!(a.profile.as_ref().unwrap().dataset, 0);
+    assert_eq!(a.report_dataset, Some(0));
     assert!(std::sync::Arc::ptr_eq(
         &a.map_source.as_ref().unwrap().overlays,
         &b.map_source.as_ref().unwrap().overlays
@@ -111,6 +113,17 @@ fn project_planning_preserves_empty_slots_excludes_rows_and_borrows_datasets_and
     let original = inputs.datasets[0].features.as_ptr();
     drop(r);
     assert_eq!(inputs.datasets[0].features.as_ptr(), original);
+    state.rows[0].without_profile = true;
+    let no_drawing =
+        template_workflow::request(&state, &inputs, sleufbase_rust::RULES, &Control::default())
+            .unwrap();
+    let first = no_drawing.slots[0].as_ref().unwrap();
+    assert!(first.profile.is_none());
+    assert_eq!(
+        first.report_dataset,
+        Some(0),
+        "Discipline counting must not follow the drawing switch"
+    );
 }
 #[test]
 fn real_native_worker_exports_the_bundled_template_and_returns_all_source_allocations() {

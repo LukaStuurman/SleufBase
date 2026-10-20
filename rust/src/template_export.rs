@@ -60,6 +60,11 @@ pub struct Slot {
     #[serde(default)]
     pub map_source: Option<crate::map_export::Source>,
     pub profile: Option<Profile>,
+    /// Discipline counting is independent of whether a profile is drawn.
+    #[serde(default)]
+    pub report_dataset: Option<usize>,
+    #[serde(default)]
+    pub report_label: Option<String>,
     /// A locally clipped, independently prepared BGT batch for this slot.
     #[serde(default)]
     pub surfaces: Option<Arc<Vec<bgt_surface::Feature>>>,
@@ -76,6 +81,11 @@ pub struct Settings {
     /// Year, month, day. None captures the Windows local date once per export.
     pub export_date: Option<[u16; 3]>,
     pub label_gap: f64,
+    /// Standalone manifests opt in; desktop workflows follow the user's setting.
+    pub discipline_excel: bool,
+    /// Additional live project paths are never eligible for workbook replacement.
+    #[serde(skip)]
+    pub protected_sources: Vec<PathBuf>,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -84,6 +94,8 @@ impl Default for Settings {
             drawn_by: String::new(),
             export_date: None,
             label_gap: 18.,
+            discipline_excel: false,
+            protected_sources: Vec::new(),
         }
     }
 }
@@ -129,6 +141,8 @@ pub struct Exported {
     pub filled_slots: usize,
     pub profiles: usize,
     pub added_pages: usize,
+    pub companion: Option<PathBuf>,
+    pub warnings: Vec<String>,
 }
 /// Resolve manifest-relative input paths without changing process working dir.
 /// Project preferences/credentials are not read by this prepared-input path.
@@ -142,6 +156,11 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
     let mut request: Request = serde_json::from_slice(&data)
         .map_err(|e| format!("Ongeldige sjabloonexportinvoer: {e}"))?;
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
+    request.settings.protected_sources.push(path.to_owned());
+    request
+        .settings
+        .protected_sources
+        .extend(request.datasets.iter().map(|d| parent.join(&d.source_path)));
     let resolve = |p: &mut PathBuf| {
         if !p.as_os_str().is_empty() && p.is_relative() {
             *p = parent.join(&*p);
@@ -498,21 +517,7 @@ pub fn export_with_datasets(
         }
     }
     if let Ok(target) = std::fs::canonicalize(output) {
-        let sources = std::iter::once(request.template.as_path()).chain(
-            request.slots.iter().flatten().flat_map(|s| {
-                let mut paths = vec![
-                    s.tiff_source
-                        .as_ref()
-                        .map_or(s.tiff_png.as_path(), |t| t.path.as_path()),
-                    s.map_png.as_path(),
-                ];
-                paths.extend(s.photos.iter().map(|p| p.path.as_path()));
-                if let Some(source) = &s.map_source {
-                    paths.extend(source.input_paths());
-                }
-                paths
-            }),
-        );
+        let sources = crate::template_report::input_paths(request, datasets);
         for source in sources {
             control.check()?;
             if std::fs::canonicalize(source).is_ok_and(|p| p == target) {
@@ -781,10 +786,38 @@ pub fn export_with_datasets(
     progress("Export definitief opslaan");
     control.check()?;
     let published = tx.publish(control)?;
+    // Match the desktop contract: the DXF is already durable. A workbook failure
+    // must be reported separately, never turn this into "DXF not saved". The
+    // publication boundary has passed; this small final step is not cancellable.
+    let report = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let mut warnings = Vec::new();
+        let mut companion = None;
+        if request.settings.discipline_excel {
+            progress("Excel-disciplineoverzicht opslaan");
+            match crate::template_report::write(output, &published, request, datasets) {
+                Ok((path, messages)) => {
+                    companion = Some(path);
+                    warnings = messages;
+                }
+                Err(error) => warnings.push(format!(
+                    "DXF opgeslagen; discipline-Excel kon niet worden gemaakt: {error}"
+                )),
+            }
+        }
+        (companion, warnings)
+    }));
+    let (companion, warnings) = report.unwrap_or_else(|_| {
+        (
+            None,
+            vec!["DXF opgeslagen; discipline-Excel is onverwacht gestopt".into()],
+        )
+    });
     Ok(Exported {
         published,
         filled_slots,
         profiles,
         added_pages: prepared.added_pages,
+        companion,
+        warnings,
     })
 }
