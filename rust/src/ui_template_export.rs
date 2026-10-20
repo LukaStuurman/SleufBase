@@ -364,6 +364,38 @@ mod tests {
         assert!(doc.records().any(|record| record.kind() == "IMAGEDEF"));
     }
     #[test]
+    fn project_bound_worker_restores_owned_datasets_when_mapping_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut app = SleufBaseApp::default();
+        app.datasets.push(sleufbase_rust::parse_job_features(
+            include_str!("../tests/fixtures/jobFeatures.json"), 42, "PS42").unwrap());
+        let expected = serde_json::to_value(&app.datasets).unwrap();
+        let ptr = app.datasets[0].features.as_ptr();
+        app.dirty = true;
+        let template = dir.path().join("template.dxf");
+        std::fs::write(&template, b"not needed for validation").unwrap();
+        let opts = sleufbase_rust::template_project::Options {
+            template,
+            choices: sleufbase_rust::template_project::suggest(&app.datasets, &[], &[]),
+            ..Default::default()
+        };
+        app.start_project_template_export(opts, dir.path().join("never.dxf"));
+        assert!(app.datasets.is_empty(), "inputs must be owned by the export worker");
+        assert!(app.template_job.is_some());
+        let ctx = egui::Context::default();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while app.template_job.is_some() {
+            app.poll_template_job(&ctx);
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert_eq!(serde_json::to_value(&app.datasets).unwrap(), expected);
+        assert_eq!(app.datasets[0].features.as_ptr(), ptr);
+        assert!(app.dirty);
+        assert!(app.message.contains("niet opgeslagen"));
+        assert!(!dir.path().join("never.dxf").exists());
+    }
+    #[test]
     fn project_action_is_deferred_and_cancels_template_job() {
         let mut app = SleufBaseApp::default();
         let (tx, rx) = mpsc::channel();
