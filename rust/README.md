@@ -80,6 +80,14 @@ Wanneer je een projectgebonden sjabloonexport start, bewaart SleufBase de vakvol
 
 Deze functionaliteit heeft regressies voor lijnknippen, zichtbaarheid, DXF/kaart-imagebundels, persistente voorkeuren en het lezen van oudere v3-projectbestanden. Een groene CI controleert de geautomatiseerde gevallen, geen volledige praktijkacceptatie op alle oorspronkelijke Python-projecten.
 
+### Virtuele proefsleuven en MarXact-bronnen bewerken
+
+Open in de linkerkolom **Virtuele proefsleuven → Bewerken** om een bestaande (of uit MarXact ingelezen) proefsleuf te bewerken. De native editor heeft een bovenaanzicht van de sleuf en meetpunten, RD-begin-/eindcoördinaten, breedte, proefsleufnaam, omkeren van een handmatige meetas en een volledige lijst met meetobjecten. Je kunt per object rol, objectnaam, discipline-/broncode, kettingmaat, getekende dwarsafstand (positief links van de as), optionele Z-hoogte en drie attributen aanpassen.
+
+**Excel:** de sectie *Excel: meerdere meetobjecten importeren / kopiëren* ondersteunt tab-gescheiden data, bijvoorbeeld geplakte cellen met `Rol / Object / Bron / Kettingmaat / Dwarsafstand / Z / Attribuut1 / Attribuut2 / Attribuut3`. Komma's als decimaalteken zijn toegestaan. De import is transactioneel: één ongeldige rij betekent dat geen enkele rij wordt toegevoegd. Het exporteren via de klembordknop levert direct een tabel die je in Excel kunt plakken.
+
+Je bewerkt eerst een **concept** en kiest **Opslaan in project** om wijzigingen door te voeren. Verwijderen vraagt extra bevestiging. De oorspronkelijke 3D-grenzen en uitlijning van een gemeten MarXact-sleuf worden niet stilzwijgend gewijzigd. Klik **Handmatige kopie** om een losstaand, bewerkbaar exemplaar te maken; de originele bron wordt behouden. Gewijzigde objecten gaan mee in native projectopslag en bestaande object-/profiel-/sjabloonexports. Een volledig interactieve plaats-/sleepfunctie in de hoofdkaart, alle oorspronkelijke MarXact-visualisaties en volledige Python-pariteit ontbreken nog.
+
 ### Nieuw: volledige projectgebonden sjabloon-DXF vanuit de desktopapp
 
 Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavanceerde voorbereide export). Je hoeft voor de projectroute geen JSON-exportmanifest meer te maken.
