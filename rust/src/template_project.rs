@@ -147,8 +147,8 @@ pub fn build(
     let mut slots = Vec::with_capacity(enabled.len());
     // Full BGT geometry is retained once per export; only visible source lines
     // needed near a slot become map overlays.
-    let mut roads = Vec::new();
-    let mut terrain = Vec::new();
+    let mut roads: Vec<Vec<crate::profile::XY>> = Vec::new();
+    let mut terrain: Vec<Vec<crate::profile::XY>> = Vec::new();
     if opts.include_bgt {
         for layer in bgt.iter().filter(|layer| layer.visible) {
             control.check()?;
