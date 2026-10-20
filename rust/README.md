@@ -68,6 +68,12 @@ Installeer Rust via https://rustup.rs en voer in PowerShell uit:
 Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
 'SleufBase-Rust-Windows-preview' van een geslaagde build. Dit is geen stable release.
 
+### Sjabloonexport in de Rust-desktopapp (voorbereide invoer)
+
+Kies in de werkbalk **Sjabloon DXF**. Selecteer een voorbereide export-JSON (dezelfde invoer als de CLI-optie `--template-dxf`) en kies een nieuwe `.dxf`-bestandsnaam. De app voert daarna de **native** sjabloon-, kaart-, TIFF- en profielpipeline uit op een achtergrondthread. Het voortgangsscherm ondersteunt annuleren/Escape; bestaande tekeningen en beeldbundels blijven onaangeroerd bij fouten of annulering. Projectwissel en afsluiten tijdens de taak worden veilig uitgesteld.
+
+**Beperking:** dit venster bouwt nog **niet** automatisch de vakken uit het geopende Rust-project op. De gebruiker moet de export-JSON, inclusief sjabloonpaden en bronbestanden, vooraf voorbereiden. Het volledige oorspronkelijke interactieve Python-sjabloonvenster is nog niet gemigreerd.
+
 ### CLI export
 
     .\target\release\sleufbase-rust.exe --xlsx disciplines.xlsx C:\jobs\PS1\jobFeatures.json
