@@ -67,6 +67,7 @@ pub mod pdok_wms;
 pub mod osm_tiles;
 pub mod jobs_cache;
 pub mod kickthemap_live;
+pub mod kickthemap_browser;
 pub mod bgt;
 pub mod bgt_surface;
 mod mvt;
