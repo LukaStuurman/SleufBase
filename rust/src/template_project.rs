@@ -293,7 +293,9 @@ mod tests {
         let choices = suggest(&jobs,&ambiguous,&[]);
         assert_eq!(choices[0].raster,None);
         assert_eq!(choices[1].raster,None);
-        assert_eq!(suggest(&[sample_job(1)], &[raster(None)], &[])[0].raster,Some(0));
+        // A single image with no job-ID is not sufficient when its bounds
+        // do not cover the actual proefsleuf geometry.
+        assert_eq!(suggest(&[sample_job(1)], &[raster(None)], &[])[0].raster,None);
     }
     #[test]
     fn validation_before_export_never_requires_an_image_decode() {
