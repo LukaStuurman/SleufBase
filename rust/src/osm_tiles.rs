@@ -321,7 +321,8 @@ mod tests {
         assert!(cached(&path).is_none());
         let image = RgbaImage::from_pixel(256, 256, image::Rgba([1, 2, 3, 255]));
         let mut png = Vec::new();
-        image.write_to(&mut std::io::Cursor::new(&mut png), ImageFormat::Png).unwrap();
+        image::DynamicImage::ImageRgba8(image).write_to(&mut std::io::Cursor::new(&mut png), ImageFormat::Png).unwrap();
+        std::fs::remove_file(&path).unwrap();
         store(&path, &png);
         assert_eq!(cached(&path).unwrap().0.get_pixel(7, 7).0, [1, 2, 3, 255]);
     }
