@@ -859,8 +859,8 @@ impl SleufBaseApp {
     }
 
     fn logout_live_jobs(&mut self) {
-        if self.live_busy {
-            self.message="Rond het lopende verzoek af voordat je uitlogt".into();
+        if self.live_busy || self.browser_ui.capturing.is_some() {
+            self.message="Rond het lopende browser- of downloadverzoek af voordat je uitlogt".into();
             return;
         }
         self.live_session=None;
@@ -1302,7 +1302,7 @@ impl SleufBaseApp {
                 ui.separator();
             }
             ui.heading("KickTheMap online");
-            if ui.button("Open KickTheMap browser & jobbeheer").clicked(){self.browser_ui.open=true;}
+            if ui.button("Open KickTheMap browser & jobbeheer").clicked(){self.open_kickthemap_workspace();}
             ui.horizontal(|ui|{
                 ui.label("E-mail");
                 ui.add(egui::TextEdit::singleline(&mut self.live_email)
