@@ -88,6 +88,21 @@ Open in de linkerkolom **Virtuele proefsleuven → Bewerken** om een bestaande (
 
 Je bewerkt eerst een **concept** en kiest **Opslaan in project** om wijzigingen door te voeren. Verwijderen vraagt extra bevestiging. De oorspronkelijke 3D-grenzen en uitlijning van een gemeten MarXact-sleuf worden niet stilzwijgend gewijzigd. Klik **Handmatige kopie** om een losstaand, bewerkbaar exemplaar te maken; de originele bron wordt behouden. Gewijzigde objecten gaan mee in native projectopslag en bestaande object-/profiel-/sjabloonexports. Een volledig interactieve plaats-/sleepfunctie in de hoofdkaart, alle oorspronkelijke MarXact-visualisaties en volledige Python-pariteit ontbreken nog.
 
+### KickTheMap — browseraanmelding, live/offline jobmanager en batchdownloads
+
+Open de linkerkolom **KickTheMap online → Open KickTheMap browser & jobbeheer**.
+
+1. Klik **Open KickTheMap in Edge**. SleufBase start een **nieuw tijdelijk Edge-profiel** met een alleen-lokaal DevTools-kanaal. Het gebruikt niet de cookies of wachtwoorden uit jouw gewone browserprofiel.
+2. Meld je in het Edge-venster zelf aan op `https://www.my.kickthemap.com/signin` en los eventuele reCAPTCHA handmatig op. Klik in SleufBase op **Sessie overnemen**. De browsercookies van uitsluitend dit nieuw gestarte KickTheMap-profiel worden in een vluchtige native Rust-client overgenomen en op de website gevalideerd. De volledige browsersessie is niet opgeslagen in het Rust-project.
+3. De manager toont **live jobs** en kan sorteren (naam/datum/job-ID), zoeken (adres, gemeente, titel, datum en ID), filters toepassen op downloadbaarheid en alleen daadwerkelijk geladen Rust-jobs, en meerdere jobs tegelijk selecteren. **Vernieuw live jobs** haalt de lijst opnieuw op. Als de normale jobs-API faalt, probeert de manager een **zelfde-origin** jobs-request vanuit het zelf gestarte, reeds ingelogde Edge-tabblad.
+4. Klik **Objecten downloaden + laden**, **GeoTIFF downloaden + laden** of **Beide bestanden per job**. Jobs worden op de achtergrond afgewerkt, met voortgang en annuleerknop; downloads worden beperkt, gevalideerd en samen met een `.job.json`-sidecar permanent opgeslagen. Een bestaand bestand wordt alleen hergebruikt wanneer de sidecar dezelfde job-ID vermeldt en het bestand opnieuw is gevalideerd. Onbekende bestaande bestanden worden nooit overschreven.
+5. Na een batch worden object-JSON en GeoTIFF **achtereenvolgens** in het actieve Rust-project geladen, zodat een lopende import niet door het volgende bestandstype wordt afgebroken. Bij een projectwissel worden downloads niet aan het verkeerde project gekoppeld.
+6. Bij een succesvolle vernieuwing schrijft Rust een **tokenvrije offline jobs-cache** (alleen jobmetadata), die later automatisch in de manager kan worden geopend. Als je uitlogt of het privé Edge-venster sluit, worden de sessiegegevens in SleufBase verwijderd en het tijdelijke browserproces gesloten.
+
+**Windows-vereiste:** Microsoft Edge moet zijn geïnstalleerd en mag door bedrijfsbeleid niet geblokkeerd zijn voor lokaal remote debugging. Dit is een interactieve browserworkflow met menselijke login, **geen** reCAPTCHA-bypass, scraping van normale browserprofielen of opslag van wachtwoorden. Bij beperkte bedrijfsapparaten kan deze functionaliteit niet beschikbaar zijn. De officiële KickTheMap-website in het eigen browservenster kan ook worden gebruikt voor handmatige providerbewerkingen.
+
+**Openstaande pariteit:** volledige Python-specifieke veldvertalingen/injecties in de KickTheMap-website, sommige download-requestvarianten die de Python-browser kan vastleggen, automatische herstelstappen na alle denkbare providerwijzigingen en praktijkacceptatie met een echt KickTheMap-account zijn nog niet afgetoetst. Bij mislukte live login/download blijft de offline projectworkflow beschikbaar; een succesvolle volledige providerworkflow kan pas met echte accountgegevens worden bevestigd.
+
 ### Nieuw: volledige projectgebonden sjabloon-DXF vanuit de desktopapp
 
 Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavanceerde voorbereide export). Je hoeft voor de projectroute geen JSON-exportmanifest meer te maken.
