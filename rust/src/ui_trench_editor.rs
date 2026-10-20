@@ -155,6 +155,21 @@ impl Editor {
         }
         painter.line_segment([point(start.x,start.y),point(end.x,end.y)],
             Stroke::new(2.2,ORANGE));
+        if len>1e-9 {
+            let stride=(t.dekband_rows.len()/1024).max(1);
+            for band in t.dekband_rows.iter().step_by(stride) {
+                let start_m=band.start_chainage.clamp(0.,len);
+                let end_m=band.end_chainage.clamp(0.,len);
+                if end_m<=start_m {continue;}
+                let at=|m:f64|{
+                    let f=m/len;
+                    point(start.x+(end.x-start.x)*f,start.y+(end.y-start.y)*f)
+                };
+                let c=band.display_rgb.unwrap_or([17,24,39]);
+                painter.line_segment([at(start_m),at(end_m)],
+                    Stroke::new(3.,Color32::from_rgb(c[0],c[1],c[2])));
+            }
+        }
         painter.circle_filled(point(start.x,start.y),4.,Color32::GREEN);
         painter.circle_filled(point(end.x,end.y),4.,Color32::RED);
         for obj in sampled {
