@@ -144,6 +144,70 @@ pub fn translate(t:&mut VirtualTrench,dx:f64,dy:f64)->Result<(),String> {
     *t=next;
     Ok(())
 }
+/// Paste from a spreadsheet in the order:
+/// role, object, source, chainage, signed offset, optional Z, attr1..attr3.
+/// Comma decimals are supported; column separators must be tab characters.
+/// All rows are validated before a single atomic mutation is performed.
+pub fn import_tabular(t:&mut VirtualTrench,source:&str)->Result<usize,String> {
+    if source.len()>1_000_000 {return Err("Excel-invoer is groter dan 1 MB".into());}
+    check(t)?;
+    let mut new_objects=Vec::new();
+    for (line_no,line) in source.lines().enumerate() {
+        if line.trim().is_empty(){continue;}
+        if new_objects.is_empty() && line_no==0 &&
+            (line.to_lowercase().starts_with("rol\t") ||
+            line.to_lowercase().starts_with("role\t")) {continue;}
+        if new_objects.len()>=10_000 {return Err("Maximaal 10.000 Excel-regels per import".into());}
+        let cols=line.split('\t').map(str::trim).collect::<Vec<_>>();
+        if !(5..=9).contains(&cols.len()) {
+            return Err(format!("Regel {}: verwacht 5 t/m 9 tab-gescheiden kolommen",line_no+1));
+        }
+        let number=|index:usize|->Result<f64,String>{
+            cols[index].replace(',','.').parse::<f64>()
+                .map_err(|_|format!("Regel {}: ongeldige meterwaarde in kolom {}",line_no+1,index+1))
+        };
+        let chainage=number(3)?;
+        let offset=number(4)?;
+        let z=if cols.get(5).is_some_and(|v|!v.is_empty()) {Some(number(5)?)}else{None};
+        let mut attributes:[String;3]=Default::default();
+        for (i,value) in cols.iter().skip(6).enumerate() {
+            if i<3 {attributes[i]=(*value).to_owned();}
+        }
+        new_objects.push(TrenchPoint {
+            role:cols[0].to_owned(),object_name:cols[1].to_owned(),
+            source_name:cols[2].to_owned(),
+            position:position(t,chainage,offset,z)?,
+            attributes,
+        });
+    }
+    if new_objects.is_empty() {return Err("Er zijn geen geldige meetobjectregels gevonden".into());}
+    if t.objects.len().saturating_add(new_objects.len())>MAX_OBJECTS {
+        return Err("Te veel meetobjecten na import".into());
+    }
+    let n=new_objects.len();
+    let mut next=t.clone();
+    next.objects.extend(new_objects);
+    sort_objects(&mut next);
+    check(&next)?;
+    *t=next;
+    Ok(n)
+}
+pub fn export_tabular(t:&VirtualTrench)->Result<String,String> {
+    check(t)?;
+    let mut out=String::from("Rol\tObject\tBron\tKettingmaat\tDwarsafstand\tZ\tAttribuut1\tAttribuut2\tAttribuut3\n");
+    for object in &t.objects {
+        let (chainage,offset)=coordinates(t,object.position);
+        if !chainage.is_finite() || !offset.is_finite(){return Err("Ongeldige meetobjectpositie".into());}
+        // Tabs/newlines cannot be faithfully represented in TSV fields.
+        let cell=|value:&str| value.replace(['\t','\n','\r']," ");
+        out.push_str(&format!("{}\t{}\t{}\t{:.4}\t{:.4}\t{}\t{}\t{}\t{}\n",
+            cell(&object.role),cell(&object.object_name),cell(&object.source_name),
+            chainage,offset,object.position.z.map_or(String::new(),|z|format!("{z:.4}")),
+            cell(&object.attributes[0]),cell(&object.attributes[1]),cell(&object.attributes[2])));
+    }
+    if out.len()>10_000_000 {return Err("Excel-export overschrijdt het maximum".into());}
+    Ok(out)
+}
 /// Preserve measured 3D original; create a standalone editable derivative.
 pub fn manual_copy(original:&VirtualTrench,suffix:&str)->Result<VirtualTrench,String> {
     let mut copy=original.clone();
@@ -226,6 +290,21 @@ mod tests {
         let new_end=new.end;
         edit_axis(&mut new,"Copy".into(),changed,new_end,0.8).unwrap();
         assert_eq!(t.label,"Test");
+    }
+    #[test]
+    fn paste_from_excel_is_atomic_and_roundtrips_to_tsv() {
+        let mut t=trench();
+        let good="Rol\tObject\tBron\tKettingmaat\tDwarsafstand\tZ\tA\tB\tC\nLS\tKabel\tIngemeten\t2,5\t-0,4\t-1,2\t1\t2\t3\nGAS\tBuis\tGB\t7.0\t0.2\t\t\t\t";
+        assert_eq!(import_tabular(&mut t,good).unwrap(),2);
+        assert_eq!(t.objects[0].position,Vertex{x:102.5,y:199.6,z:Some(-1.2)});
+        let original=serde_json::to_vec(&t).unwrap();
+        assert!(import_tabular(&mut t,"LS\tA\tB\t8\t0\nGAS\tC\tD\tinvalid\t1").is_err());
+        assert_eq!(serde_json::to_vec(&t).unwrap(),original);
+        let tsv=export_tabular(&t).unwrap();
+        let mut target=trench();
+        assert_eq!(import_tabular(&mut target,&tsv).unwrap(),2);
+        assert_eq!(target.objects.len(),t.objects.len());
+        assert_eq!(target.objects[0].source_name,t.objects[0].source_name);
     }
     #[test]
     fn add_edit_delete_sort_and_shift_objects() {
