@@ -178,6 +178,125 @@ impl Browser {
         crate::kickthemap_live::parse_live_jobs(content)
     }
 }
+
+/// A lightweight capability limited to this process's own Edge debug port.
+/// It never owns or reads other Edge profiles or browser instances.
+#[derive(Clone)]
+pub struct BrowserChannel { port:u16, websocket:String }
+impl Browser {
+    pub fn channel(&self)->BrowserChannel {
+        BrowserChannel {port:self.port,websocket:self.websocket.clone()}
+    }
+}
+impl BrowserChannel {
+    fn command(&self,method:&str,params:Value,target:Option<&str>)->Result<Value,String>{
+        let ws=target.unwrap_or(&self.websocket);
+        validated_ws_url(ws,self.port)?;
+        let (mut socket,_)=connect(ws).map_err(|e|format!("Edge-CDP niet beschikbaar: {e}"))?;
+        if let MaybeTlsStream::Plain(stream)=socket.get_mut() {
+            stream.set_read_timeout(Some(Duration::from_secs(15))).map_err(|e|e.to_string())?;
+            stream.set_write_timeout(Some(Duration::from_secs(15))).map_err(|e|e.to_string())?;
+        }
+        socket.send(Message::Text(
+            json!({"id":1,"method":method,"params":params}).to_string().into()
+        )).map_err(|e|format!("Edge-CDP-opdracht mislukt: {e}"))?;
+        loop {
+            let message=socket.read().map_err(|e|format!("Edge-CDP-antwoord ontbreekt: {e}"))?;
+            if let Message::Text(body)=message {
+                if body.len()>MAX_CDP_RESPONSE {return Err("Edge antwoord is te groot".into());}
+                let reply:Value=serde_json::from_str(&body).map_err(|e|e.to_string())?;
+                if reply["id"]==1 {
+                    if reply.get("error").is_some() {
+                        return Err(format!("Edge ondersteunt CDP {} niet",method));
+                    }
+                    return reply.get("result").cloned()
+                        .ok_or_else(||"Geen CDP-resultaat".into());
+                }
+            }
+        }
+    }
+    fn job_tab(&self)->Result<String,String>{
+        let client=Client::builder().timeout(Duration::from_secs(8))
+            .build().map_err(|e|e.to_string())?;
+        let uri=format!("http://127.0.0.1:{}/json/list",self.port);
+        let mut response=client.get(uri).send().map_err(|e|e.to_string())?
+            .error_for_status().map_err(|e|e.to_string())?;
+        let mut buffer=Vec::new();
+        response.by_ref().take(1024*1024).read_to_end(&mut buffer)
+            .map_err(|e|e.to_string())?;
+        if buffer.len()>=1024*1024{return Err("Edge-taboverzicht is te groot".into());}
+        let list:Vec<Value>=serde_json::from_slice(&buffer).map_err(|e|e.to_string())?;
+        let page=list.iter().find(|p|{
+            p["type"]=="page" && p["url"].as_str().is_some_and(|s|
+                reqwest::Url::parse(s).ok().is_some_and(|u|
+                    u.scheme()=="https"&&u.host_str()==Some("www.my.kickthemap.com")))
+        }).ok_or("Er is geen KickTheMap-tabblad actief in het eigen Edge-venster")?;
+        let ws=page["webSocketDebuggerUrl"].as_str()
+            .ok_or("Edge-tabblad heeft geen DevTools-socket")?;
+        validated_ws_url(ws,self.port)
+    }
+    /// Fallback to the same-origin browser session for a *signed download URL*.
+    /// The resulting URL is still validated and downloaded by the independent
+    /// bounded Rust HTTP client, never by blindly accepting a remote redirect.
+    pub fn signed_download_url(&self,job:&crate::jobs_cache::Job,
+        kind:crate::kickthemap_live::RemoteFileKind)
+        ->Result<reqwest::Url,String>
+    {
+        use crate::kickthemap_live::RemoteFileKind;
+        let filename=match kind {
+            RemoteFileKind::GeoTiff if !job.prefix.trim().is_empty()=>
+                format!("{}.tiff",job.prefix.trim()),
+            RemoteFileKind::GeoTiff=>
+                return Err("KickTheMap-job heeft geen GeoTIFF bestands-prefix".into()),
+            RemoteFileKind::JobFeatures=>"jobFeatures.json".into(),
+        };
+        let stem=job.title.trim().chars().map(|c|
+            if c.is_ascii_alphanumeric()||"._-".contains(c) {c} else {'_'}
+        ).collect::<String>();
+        let export_name=match kind {
+            RemoteFileKind::GeoTiff=>format!("{stem}.tiff"),
+            RemoteFileKind::JobFeatures=>format!("{stem}_jobFeatures.json"),
+        };
+        let fields=json!({
+            "projectId":job.job_id.to_string(),
+            "folder":"cloud",
+            "fileName":filename,
+            "exportName":export_name
+        });
+        let expression=[
+            "(async()=>{const fields=", &fields.to_string(),
+            r#";const csrf=document.querySelector('meta[name="csrf-token"]')?.content||'';
+            for(const kind of ['multipart','form','json']){
+              let headers={'Accept':'application/json','X-CSRF-TOKEN':csrf};
+              let body;
+              if(kind==='multipart'){body=new FormData();for(const [key,val] of Object.entries(fields))body.append(key,val);}
+              else if(kind==='form'){body=new URLSearchParams(fields);headers['Content-Type']='application/x-www-form-urlencoded';}
+              else {body=JSON.stringify(fields);headers['Content-Type']='application/json';}
+              try {
+                const response=await fetch('/jobs/get-file-url',{method:'POST',credentials:'same-origin',headers,body});
+                if(!response.ok)continue;
+                const result=await response.json();
+                const data=result?.data;
+                const url=typeof data==='string'?data:(data?.url||data?.downloadUrl||data?.download_url||result?.url);
+                if(result?.status===true&&typeof url==='string'&&url.length>0)return url;
+              }catch(_e){}
+            }
+            throw new Error('KickTheMap returned no signed URL');
+            })()"#
+        ].concat();
+        let target=self.job_tab()?;
+        let response=self.command("Runtime.evaluate",
+            json!({"expression":expression,"awaitPromise":true,"returnByValue":true}),
+            Some(&target))?;
+        if response.get("exceptionDetails").is_some() {
+            return Err("Ook de ingelogde KickTheMap-browser kon geen downloadlink genereren".into());
+        }
+        let signed=response["result"]["value"].as_str()
+            .ok_or("KickTheMap-browser leverde geen geldige downloadlink")?;
+        crate::kickthemap_live::validate_signed_url(signed)
+    }
+}
+
 impl Drop for Browser {
     fn drop(&mut self) {
         let _=self.process.kill();
