@@ -156,6 +156,10 @@ mod tests {
         original.choices[0].raster=Some(1);
         original.choices[0].title="Custom PS2".into();
         original.choices[0].reverse=true;
+        original.choices[0].photos.push(crate::template_photo::Photo {
+            path:PathBuf::from("site-photo.png"),
+            turns:3,area:crate::template_photo::Area::Map,
+        });
         original.choices[1].raster=Some(0);
         original.choices[1].include=false;
         let prefs=TemplatePreferences::capture(&original,&jobs,&rasters,&[]);
@@ -167,6 +171,16 @@ mod tests {
         assert_eq!(next.choices[0].title,"Custom PS2");
         assert_eq!(next.choices[0].raster,Some(0));
         assert!(next.choices[0].reverse);
+        assert_eq!(next.choices[0].photos.len(),1);
+        assert_eq!(next.choices[0].photos[0].turns,3);
+        assert_eq!(next.choices[0].photos[0].area,crate::template_photo::Area::Map);
+        assert_eq!(next.choices[0].photos[0].path,PathBuf::from("site-photo.png"));
+        let mut legacy:serde_json::Value=serde_json::from_str(&encoded).unwrap();
+        for choice in legacy["choices"].as_array_mut().unwrap() {
+            choice.as_object_mut().unwrap().remove("photos");
+        }
+        let older:TemplatePreferences=serde_json::from_value(legacy).unwrap();
+        assert!(older.restore(&jobs,&rasters,&[]).choices.iter().all(|x|x.photos.is_empty()));
         assert_eq!(next.choices[1].raster,Some(1));
         assert!(!next.choices[1].include);
         assert!(!next.include_cad);
