@@ -228,6 +228,12 @@ pub fn build_with_cad(
             Source::Virtual(i) => {
                 let trench = trenches.get(i).ok_or("Virtuele proefsleuf bestaat niet meer")?;
                 trench.validate()?;
+                if choice.profile && (trench.start.z.is_none() || trench.end.z.is_none()) {
+                    return Err(format!(
+                        "Dwarsprofiel voor '{}' heeft een gemeten Z-hoogte van het begin- en eindpunt nodig. Vul de hoogtes in de virtuele sleufeditor in of schakel profiel tekenen uit",
+                        trench.label
+                    ));
+                }
                 let outline = trench.measured_boundary().into_iter()
                     .map(|(x,y)| [x,y]).collect::<Vec<_>>();
                 (trench.to_dataset(trench.job_id, true),
