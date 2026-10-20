@@ -55,6 +55,7 @@ pub mod project;
 pub mod legacy_project;
 pub mod storage;
 pub mod virtual_trench;
+pub mod virtual_trench_editor;
 pub mod cross_section;
 pub mod profile;
 pub mod profile_drawing;
