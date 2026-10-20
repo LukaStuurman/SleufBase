@@ -199,7 +199,7 @@ pub fn export_tabular(t:&VirtualTrench)->Result<String,String> {
         let (chainage,offset)=coordinates(t,object.position);
         if !chainage.is_finite() || !offset.is_finite(){return Err("Ongeldige meetobjectpositie".into());}
         // Tabs/newlines cannot be faithfully represented in TSV fields.
-        let cell=|value:&str| value.replace(['\t','\n','\r']," ");
+        let cell=|value:&str| value.replace('\t'," ").replace('\n'," ").replace('\r'," ");
         out.push_str(&format!("{}\t{}\t{}\t{:.4}\t{:.4}\t{}\t{}\t{}\t{}\n",
             cell(&object.role),cell(&object.object_name),cell(&object.source_name),
             chainage,offset,object.position.z.map_or(String::new(),|z|format!("{z:.4}")),
