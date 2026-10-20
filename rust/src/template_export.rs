@@ -57,6 +57,8 @@ pub struct Slot {
     #[serde(default)]
     pub map_source: Option<crate::map_export::Source>,
     pub profile: Option<Profile>,
+    #[serde(default)]
+    pub photos: Vec<crate::template_photo::Photo>,
 }
 #[derive(serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
@@ -142,6 +144,7 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
             resolve(&mut source.path);
         }
         resolve(&mut slot.map_png);
+        for photo in &mut slot.photos {resolve(&mut photo.path);}
         if let Some(source) = &mut slot.map_source {
             source.resolve_paths(parent);
         }
@@ -461,6 +464,7 @@ pub fn export_with_progress(
         return Err("Te veel sjabloonvakken voor het afbeeldingsbudget".into());
     }
     for slot in request.slots.iter().flatten() {
+        crate::template_photo::validate(&slot.photos)?;
         if slot.tiff_source.is_some() == !slot.tiff_png.as_os_str().is_empty() {
             return Err("Geef per vak één TIFF-bron of één voorbereide TIFF-PNG op".into());
         }
@@ -477,6 +481,7 @@ pub fn export_with_progress(
                         .map_or(s.tiff_png.as_path(), |t| t.path.as_path()),
                     s.map_png.as_path(),
                 ];
+                paths.extend(s.photos.iter().map(|p|p.path.as_path()));
                 if let Some(source) = &s.map_source {
                     paths.extend(source.input_paths());
                 }
@@ -637,6 +642,27 @@ pub fn export_with_progress(
                 layout: None,
             });
             image_order.push(index * 2);
+        }
+        // Additional digital site photos are normalized into separate owned
+        // PNG assets. They sit as inset overlays, never replace the full TIFF
+        // or map and use the same atomic export transaction.
+        if !slot.photos.is_empty() {
+            progress(&format!("Werkfoto's voor vak {} verwerken",index+1));
+            let boxes=crate::template_photo::boxes(target.tiff_box,target.map_box,&slot.photos)?;
+            for (photo_index,(photo,bounds)) in slot.photos.iter().zip(boxes).enumerate() {
+                control.check()?;
+                let filename=format!("slot{:05}_photo{:02}.png",index+1,photo_index+1);
+                let destination=tx.asset_path(&filename)?;
+                let bytes=crate::template_photo::prepare(photo,&destination,control)?;
+                total=total.checked_add(bytes).ok_or("Foto-uitvoerbudget overschreden")?;
+                if total>2*1024*1024*1024 {return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());}
+                images.push(Image{
+                    path:destination,bounds,
+                    definition_name:format!("{}_photo{:02}",slot.label,photo_index+1),
+                    inset:0.015,preserve_aspect:true,layout:None,
+                });
+                image_order.push(index*2);
+            }
         }
         if let (Some(options), Some(measured)) = (&slot.profile, &measured) {
             let start = doc.seed()?.0;
