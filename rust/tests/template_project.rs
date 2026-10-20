@@ -132,9 +132,13 @@ fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters
         &source.rules,&Control::default(),
     ).unwrap();
     let overlays=&request.slots[0].as_ref().unwrap().map_source.as_ref().unwrap().overlays;
-    assert!(overlays.iter().any(|v|
-        v.points==vec![[bounds.min_x,center_y],[bounds.max_x,center_y]]
-    ),"a CAD line crossing the viewport must not disappear");
+    assert!(overlays.iter().any(|stroke| {
+        stroke.points.len()==2
+            && (stroke.points[0][0]-bounds.min_x).abs()<1e-6
+            && (stroke.points[1][0]-bounds.max_x).abs()<1e-6
+            && (stroke.points[0][1]-center_y).abs()<1e-6
+            && (stroke.points[1][1]-center_y).abs()<1e-6
+    }),"a CAD line crossing the viewport must not disappear");
     let temp=tempfile::tempdir().unwrap();
     let output=temp.path().join("project-cad.dxf");
     let result=template_export::export(&output,&request,&Control::default()).unwrap();
