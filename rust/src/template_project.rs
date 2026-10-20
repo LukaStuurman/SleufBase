@@ -99,20 +99,32 @@ fn checked_bounds(bounds: Bounds) -> Result<Bounds, String> {
     }
     Ok(bounds)
 }
-fn overlaps(bounds: Bounds, points: &[[f64; 2]]) -> bool {
-    let margin = 5.;
-    points.iter().any(|p|
-        p[0].is_finite() && p[1].is_finite()
-        && (bounds.min_x-margin..=bounds.max_x+margin).contains(&p[0])
-        && (bounds.min_y-margin..=bounds.max_y+margin).contains(&p[1]))
-}
-fn append_stroke(overlays: &mut Vec<Stroke>, total: &mut usize, bounds: Bounds,
-    points: Vec<[f64; 2]>, color: [u8; 3], highlight: bool) -> Result<(), String>
-{
-    if points.len() < 2 || !overlaps(bounds, &points) { return Ok(()); }
-    *total = total.checked_add(points.len()).ok_or("Te veel kaartgeometrie")?;
-    if *total > MAX_MAP_POINTS { return Err("Kaart bevat te veel overlaypunten voor deze export".into()); }
-    overlays.push(Stroke { points, color, selected: false, highlighted: highlight });
+/// Clip every visible path segment to the raster viewport. Outside-only
+/// lines must not disappear when they cross the viewport. Avoid sending huge
+/// far-offscreen coordinates to the bounded rasterizer.
+fn append_stroke(
+    overlays: &mut Vec<Stroke>,
+    total: &mut usize,
+    bounds: Bounds,
+    points: Vec<[f64; 2]>,
+    color: [u8; 3],
+    highlight: bool,
+) -> Result<(), String> {
+    if points.len()<2 {return Ok(());}
+    if points.iter().flatten().any(|v|!v.is_finite()) {
+        return Err("Kaartpad bevat niet-eindige RD-coördinaten".into());
+    }
+    for edge in points.windows(2) {
+        if let Some((from,to))=crate::template_cad::clip(edge[0],edge[1],bounds) {
+            *total=total.checked_add(2).ok_or("Te veel kaartgeometrie")?;
+            if *total>MAX_MAP_POINTS {
+                return Err("Kaart bevat te veel overlaypunten voor deze export".into());
+            }
+            overlays.push(Stroke{
+                points:vec![from,to],color,selected:false,highlighted:highlight,
+            });
+        }
+    }
     Ok(())
 }
 /// The selection is validated before any DXF or image is written. The existing
@@ -321,6 +333,20 @@ mod tests {
         // A single image with no job-ID is not sufficient when its bounds
         // do not cover the actual proefsleuf geometry.
         assert_eq!(suggest(&[sample_job(1)], &[raster(None)], &[])[0].raster,None);
+    }
+    #[test]
+    fn offscreen_endpoints_crossing_the_tiff_are_exported_as_clipped_lines() {
+        let bounds=Bounds{min_x:0.,min_y:0.,max_x:10.,max_y:10.};
+        let mut strokes=Vec::new();
+        let mut count=0;
+        append_stroke(&mut strokes,&mut count,bounds,
+            vec![[-100.,5.],[100.,5.]],[10,20,30],false).unwrap();
+        assert_eq!(strokes.len(),1);
+        assert_eq!(count,2);
+        assert_eq!(strokes[0].points,vec![[0.,5.],[10.,5.]]);
+        append_stroke(&mut strokes,&mut count,bounds,
+            vec![[-100.,50.],[100.,50.]],[10,20,30],false).unwrap();
+        assert_eq!(strokes.len(),1);
     }
     #[test]
     fn validation_before_export_never_requires_an_image_decode() {
