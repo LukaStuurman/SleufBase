@@ -94,3 +94,52 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     ]));
     assert_eq!(slot.map_source.as_ref().unwrap().overlays.len(),1);
 }
+
+#[test]
+fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters() {
+    use sleufbase_rust::{
+        dxf_read::{DxfFeature, DxfOverlay},
+        model::Vertex,
+    };
+    let (source, tiff) = fixture();
+    let bounds = tiff.bounds;
+    let center_y = (bounds.min_y + bounds.max_y) * 0.5;
+    let mut cad = DxfOverlay::default();
+    cad.visible = true;
+    cad.features.push(DxfFeature {
+        entity_type: "LINE".into(), handle: "A12".into(),
+        layer: "Leidingen".into(), color_aci: 1,
+        points: vec![
+            Vertex {x:bounds.min_x-100.,y:center_y,z:None},
+            Vertex {x:bounds.max_x+100.,y:center_y,z:None},
+        ],
+        raw_text:String::new(),block_name:String::new(),closed:None,cad:None,
+    });
+    let options=Options {
+        template: source.template.clone(),
+        dpi:96,scale:225.,
+        include_bgt:false,include_cadastral:false,include_cad:true,
+        background:BackgroundKind::Blank,
+        choices:vec![Choice {
+            source:Source::Job(0),raster:Some(0),include:true,
+            title:"CAD op kaart".into(),profile:false,reverse:false,
+            comments:String::new(),
+        }],
+        ..Options::default()
+    };
+    let request=template_project::build_with_cad(
+        &options,&source.datasets,&[tiff],&[],&[],None,&[cad],
+        &source.rules,&Control::default(),
+    ).unwrap();
+    let overlays=&request.slots[0].as_ref().unwrap().map_source.as_ref().unwrap().overlays;
+    assert!(overlays.iter().any(|v|
+        v.points==vec![[bounds.min_x,center_y],[bounds.max_x,center_y]]
+    ),"a CAD line crossing the viewport must not disappear");
+    let temp=tempfile::tempdir().unwrap();
+    let output=temp.path().join("project-cad.dxf");
+    let result=template_export::export(&output,&request,&Control::default()).unwrap();
+    assert_eq!(result.filled_slots,1);
+    assert!(output.exists());
+    assert!(result.published.assets.join("slot00001_kaart.png").is_file());
+    assert!(result.published.assets.join("slot00001_tiff.png").is_file());
+}
