@@ -487,6 +487,13 @@ impl KickTheMapLiveClient {
         &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path,
         cancel:&std::sync::atomic::AtomicBool
     )->Result<std::path::PathBuf,String> {
+        self.download_job_with_browser(job,kind,root,cancel,None)
+    }
+    pub fn download_job_with_browser(
+        &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path,
+        cancel:&std::sync::atomic::AtomicBool,
+        browser:Option<&crate::kickthemap_browser::BrowserChannel>,
+    )->Result<std::path::PathBuf,String> {
         use std::{io::{Read,Write},sync::atomic::Ordering};
         let check=||if cancel.load(Ordering::Relaxed) {
             Err("KickTheMap-download geannuleerd".to_owned())
@@ -556,7 +563,14 @@ impl KickTheMapLiveClient {
                 }
             }
         }
-        let signed=signed.ok_or("KickTheMap gaf geen bruikbare downloadlink terug")?;
+        let signed=match signed {
+            Some(url)=>url,
+            None=>{
+                check()?;
+                let browser=browser.ok_or("KickTheMap gaf geen bruikbare downloadlink terug; meld je aan via het privé Edge-venster voor de browserfallback")?;
+                browser.signed_download_url(job,kind)?
+            }
+        };
         let download_client=Client::builder()
             .redirect(redirect::Policy::custom(|attempt|{
                 match validate_signed_url(attempt.url().as_str()) {
