@@ -193,3 +193,81 @@ fn template_photos_are_persistently_bundled_without_replacing_tiff_or_map() {
     // Input source remains unchanged and is never relocated/deleted.
     assert_eq!(image::open(&photo).unwrap().width(),64);
 }
+
+#[test]
+fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_geotiff() {
+    use sleufbase_rust::virtual_trench::{VirtualTrench,TrenchPoint};
+    use sleufbase_rust::model::Vertex;
+    let (reference,_)=fixture();
+    let mut trench=VirtualTrench::new(
+        "Zelfstandig virtueel raster".into(),
+        Vertex{x:155000.,y:463000.,z:Some(-1.0)},
+        Vertex{x:155008.,y:463000.,z:Some(-1.2)},0.6,
+    ).unwrap();
+    trench.objects.push(TrenchPoint{
+        role:"water".into(),object_name:"Waterleiding".into(),
+        source_name:"WATER".into(),
+        position:Vertex{x:155003.,y:463000.,z:Some(-1.5)},
+        attributes:Default::default(),
+    });
+    let dir=tempfile::tempdir().unwrap();
+    let options=Options {
+        template:reference.template,
+        include_bgt:false,include_cadastral:false,include_cad:false,
+        background:BackgroundKind::Blank,
+        choices:vec![Choice{
+            source:Source::Virtual(0),raster:None,include:true,
+            title:trench.label.clone(),profile:false,reverse:false,
+            comments:"Eigen meetraster zonder KickTheMap".into(),photos:Vec::new(),
+        }],
+        ..Options::default()
+    };
+    let request=template_project::build(
+        &options,&[],&[],&[trench.clone()],&[],None,&reference.rules,
+        &Control::default(),
+    ).unwrap();
+    let slot=request.slots[0].as_ref().unwrap();
+    assert!(slot.tiff_png.as_os_str().is_empty());
+    assert!(slot.tiff_source.is_none());
+    assert!(slot.virtual_source.is_some());
+    assert_eq!(request.datasets[0].features.len(),3);
+    let expected=slot.bounds;
+    assert!(expected.min_x < trench.start.x);
+    assert!(expected.max_x > trench.end.x);
+    let output=dir.path().join("standalone-virtual.dxf");
+    let export=template_export::export(&output,&request,&Control::default()).unwrap();
+    assert_eq!(export.filled_slots,1);
+    let photo=export.published.assets.join("slot00001_tiff.png");
+    assert!(photo.is_file());
+    let synthetic=image::open(photo).unwrap().to_rgba8();
+    assert!(synthetic.pixels().any(|p|p[3]==0));
+    assert!(synthetic.pixels().any(|p|p[0]==0&&p[3]==255));
+    assert!(synthetic.pixels().any(|p|p[2]==229&&p[3]==235));
+    assert!(export.published.assets.join("slot00001_kaart.png").is_file());
+    let doc=sleufbase_rust::dxf_document::Document::load(
+        &output,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+    assert!(doc.records().filter(|x|x.kind()=="IMAGEDEF").count()>=2);
+    assert_eq!(request.datasets[0].features[1].object_name,"Waterleiding");
+
+    let mut with_profile=options;
+    with_profile.choices[0].profile=true;
+    let project=template_project::build(&with_profile,&[],&[],&[trench],
+        &[],None,&reference.rules,&Control::default()).unwrap();
+    assert!(project.slots[0].as_ref().unwrap().profile.is_some());
+    assert_eq!(project.slots[0].as_ref().unwrap().profile.as_ref().unwrap().forced_start,
+        Some([155000.,463000.]));
+}
+#[test]
+fn real_job_still_requires_geotiff_but_virtual_job_does_not(){
+    let (reference,_)=fixture();
+    let opts=Options{
+        template:reference.template,
+        choices:vec![Choice{source:Source::Job(0),raster:None,include:true,
+            title:"Echte KickTheMap-job".into(),profile:false,reverse:false,
+            comments:String::new(),photos:Vec::new()}],
+        ..Options::default()
+    };
+    let err=template_project::build(&opts,&reference.datasets,&[],&[],&[],None,
+        &reference.rules,&Control::default()).err().unwrap();
+    assert!(err.contains("GeoTIFF"));
+}
