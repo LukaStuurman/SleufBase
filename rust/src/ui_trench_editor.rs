@@ -63,6 +63,7 @@ pub(super) struct Editor {
     confirm_delete:bool,
     error:String,
     paste:String,
+    notice:String,
 }
 #[derive(Clone, Copy)]
 enum Action {Save,Copy,Remove}
@@ -74,7 +75,7 @@ impl Editor {
             label:source.label.clone(),start:source.start,
             end:source.end,width:source.width_meters,
             selected:None,object:ObjectForm::default(),
-            confirm_delete:false,error:String::new(),paste:String::new(),
+            confirm_delete:false,error:String::new(),paste:String::new(),notice:String::new(),
         }
     }
     fn build(&self)->Result<VirtualTrench,String> {
@@ -256,13 +257,16 @@ impl SleufBaseApp {
                         ui.add(egui::TextEdit::multiline(&mut editor.paste)
                             .desired_rows(5).hint_text("LS\\tKabel\\tKickTheMap\\t2,5\\t-0,3\\t-1,2"));
                         if ui.button("Importeer geplakte Excel-regels").clicked() {
-                            let mut next=editor.build();
-                            match next.as_mut().and_then(|t|edit::import_tabular(t,&editor.paste)){
-                                Ok(count)=>{
-                                    editor.draft=next.unwrap();
-                                    editor.error=format!("{count} meetobjecten toegevoegd aan concept; klik op Opslaan in project om definitief te bewaren.");
-                                    editor.paste.clear();
-                                }
+                            match editor.build(){
+                                Ok(mut next)=>match edit::import_tabular(&mut next,&editor.paste) {
+                                    Ok(count)=>{
+                                        editor.draft=next;
+                                        editor.error.clear();
+                                        editor.notice=format!("{count} meetobjecten toegevoegd; klik op Opslaan in project om definitief te bewaren.");
+                                        editor.paste.clear();
+                                    }
+                                    Err(e)=>editor.error=e,
+                                },
                                 Err(e)=>editor.error=e,
                             }
                         }
@@ -277,6 +281,7 @@ impl SleufBaseApp {
                     if !editor.error.is_empty() {
                         ui.colored_label(DARK,&editor.error);
                     }
+                    if !editor.notice.is_empty() {ui.small(&editor.notice);}
                     ui.horizontal(|ui|{
                         if ui.button("Opslaan in project").clicked() {action=Some(Action::Save);}
                         if ui.button("Handmatige kopie").clicked() {action=Some(Action::Copy);}
