@@ -124,6 +124,12 @@ impl Source {
 pub struct Renderer {
     fonts: Option<(Option<Paths>, Fonts)>,
 }
+/// A slot may supply either an actual GeoTIFF or its native virtual RD raster.
+/// Both use the same affine sampler, without temporary TIFF files or copies.
+pub enum Raster<'a> {
+    Tiff(&'a template_raster::Source),
+    Virtual(&'a crate::virtual_raster::Source),
+}
 pub struct Page {
     pub image: RgbaImage,
     pub layout: Layout,
@@ -226,6 +232,22 @@ impl Renderer {
         profile_reference: Option<[f64; 2]>,
         cancel: &AtomicBool,
     ) -> Result<Page, String> {
+        self.render_with_raster(
+            source,
+            bounds,
+            slot_tiff.map(Raster::Tiff),
+            profile_reference,
+            cancel,
+        )
+    }
+    pub fn render_with_raster(
+        &mut self,
+        source: &Source,
+        bounds: Bounds,
+        fallback: Option<Raster<'_>>,
+        profile_reference: Option<[f64; 2]>,
+        cancel: &AtomicBool,
+    ) -> Result<Page, String> {
         input::check(cancel)?;
         source.validate()?;
         let layout = map_page::layout(bounds, source.settings)?;
@@ -234,7 +256,8 @@ impl Renderer {
                 source
                     .tiff
                     .as_ref()
-                    .or(slot_tiff)
+                    .map(Raster::Tiff)
+                    .or(fallback)
                     .ok_or("Een volledige TIFF-bron is nodig voor dit kaartblad")?,
             )
         } else {
@@ -260,10 +283,22 @@ impl Renderer {
         )?;
         let mut map = background(&source.background, &layout, cancel)?;
         if let Some(tiff) = tiff {
-            let raster = crate::raster::decode_full_with_cancel(&tiff.path, cancel)?;
-            let image = RgbaImage::from_raw(raster.width, raster.height, raster.rgba)
-                .ok_or("Ongeldige kaart-TIFF-pixelbuffer")?;
-            map_raster::paint(&mut map, image, tiff.transform, &layout, cancel)?;
+            let (image, transform) = match tiff {
+                Raster::Tiff(tiff) => {
+                    let raster = crate::raster::decode_full_with_cancel(&tiff.path, cancel)?;
+                    let image = RgbaImage::from_raw(raster.width, raster.height, raster.rgba)
+                        .ok_or("Ongeldige kaart-TIFF-pixelbuffer")?;
+                    (image, tiff.transform)
+                }
+                Raster::Virtual(source) => {
+                    let info = crate::virtual_raster::layout(&source.trench, source.quality)?;
+                    (
+                        crate::virtual_raster::render(source, cancel)?,
+                        info.transform(),
+                    )
+                }
+            };
+            map_raster::paint(&mut map, image, transform, &layout, cancel)?;
         }
         overlays(&mut map, source, &layout, cancel)?;
         let mut image = crate::raster_rotation::allocate(layout.page_size[0], layout.page_size[1])?;

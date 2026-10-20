@@ -14,6 +14,7 @@ use sleufbase_rust::dxf_read::load_dxf;
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::marxact_alignment;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
+use sleufbase_rust::osm_tiles::{self, OsmRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
 use sleufbase_rust::cadastral::{self,CadastralLayer};
 use sleufbase_rust::ahn;
@@ -33,6 +34,14 @@ use std::time::{Duration, Instant};
 mod file_loading;
 #[path="ui_exporting.rs"]
 mod exporting;
+#[path="ui_template_export.rs"]
+mod template_exporting;
+#[path="ui_project_template.rs"]
+mod project_template_ui;
+#[path="ui_trench_editor.rs"]
+mod trench_editing;
+#[path="ui_kickthemap_browser.rs"]
+mod kick_browser_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -70,6 +79,10 @@ pub struct SleufBaseApp {
     file_loader:Option<sleufbase_rust::file_loader::FileLoader>,
     exporter:Option<sleufbase_rust::export_worker::Exporter>,
     export_intent:Option<exporting::ExportIntent>,
+    template_dialog:Option<template_exporting::TemplateDialog>,
+    project_template_dialog:Option<project_template_ui::Dialog>,
+    template_preferences:Option<sleufbase_rust::template_prefs::TemplatePreferences>,
+    template_job:Option<template_exporting::TemplateJob>,
     file_intent:Option<file_loading::FileIntent>,
     datasets: Vec<Dataset>,
     geotiffs: Vec<GeoTiffInfo>,
@@ -82,10 +95,16 @@ pub struct SleufBaseApp {
     trench_markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,
     show_trench_dialog: bool,
     trench_form:TrenchForm,
+    trench_editor:Option<trench_editing::Editor>,
     pdok_texture:Option<egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
     pdok_busy:bool,
+    osm_texture:Option<egui::TextureHandle>,
+    osm_bounds:Option<Bounds>,
+    osm_rx:Option<Receiver<Result<OsmRaster,String>>>,
+    osm_busy:bool,
+    osm_visible:bool,
     bgt_layers:Vec<BgtLayer>,
     bgt_rx:Option<Receiver<Result<BgtLayer,String>>>,
     bgt_busy:bool,
@@ -98,6 +117,7 @@ pub struct SleufBaseApp {
     live_email:String,
     live_password:String,
     live_session:Option<KickTheMapLiveClient>,
+    browser_ui:kick_browser_ui::BrowserUi,
     live_jobs:Vec<Job>,
     live_rx:Option<Receiver<Result<(KickTheMapLiveClient,Vec<Job>),String>>>,
     live_download_rx:Option<Receiver<(KickTheMapLiveClient,Result<(RemoteFileKind,PathBuf),String>)>>,
@@ -108,7 +128,7 @@ pub struct SleufBaseApp {
     show_settings_dialog:bool,
     rule_editor:Option<crate::rule_editor::Editor>,
     export_dialog:Option<crate::export_dialog::Dialog>,
-    template_dialog:Option<crate::template_dialog::Dialog>,
+    template_order_dialog:Option<crate::template_dialog::Dialog>,
     template_state:Option<sleufbase_rust::template_order::State>,
     migrated_settings:MigratedSettings,
     comment_form:CommentForm,
@@ -141,6 +161,10 @@ impl Default for SleufBaseApp {
             file_loader:None,
             exporter:None,
             export_intent:None,
+            template_dialog:None,
+            project_template_dialog:None,
+            template_preferences:None,
+            template_job:None,
             file_intent:None,
             datasets:Vec::new(),
             geotiffs:Vec::new(),
@@ -153,10 +177,16 @@ impl Default for SleufBaseApp {
             trench_markers:Vec::new(),
             show_trench_dialog:false,
             trench_form:TrenchForm::default(),
+            trench_editor:None,
             pdok_texture:None,
             pdok_bounds:None,
             pdok_rx:None,
             pdok_busy:false,
+            osm_texture:None,
+            osm_bounds:None,
+            osm_rx:None,
+            osm_busy:false,
+            osm_visible:false,
             bgt_layers:Vec::new(),
             bgt_rx:None,
             bgt_busy:false,
@@ -169,6 +199,7 @@ impl Default for SleufBaseApp {
             live_email:String::new(),
             live_password:String::new(),
             live_session:None,
+            browser_ui:kick_browser_ui::BrowserUi::default(),
             live_jobs:Vec::new(),
             live_rx:None,
             live_download_rx:None,
@@ -179,7 +210,7 @@ impl Default for SleufBaseApp {
             show_settings_dialog:false,
             rule_editor:None,
             export_dialog:None,
-            template_dialog:None,
+            template_order_dialog:None,
             template_state:None,
             migrated_settings,
             comment_form:CommentForm::default(),
@@ -210,6 +241,7 @@ impl SleufBaseApp {
         NativeProject {
             name:self.project_name.clone(),
             legacy_archive:self.legacy_archive.clone(),
+            template_preferences:self.template_preferences.clone(),
             datasets:self.datasets.clone(),
             rasters:self.geotiffs.clone(),
             overlays:self.overlays.clone(),
@@ -226,14 +258,20 @@ impl SleufBaseApp {
         self.cancel_file_load();
         self.export_dialog=None;
         self.template_dialog=None;
+        self.template_order_dialog=None;
+        self.project_template_dialog=None;
+        debug_assert!(self.template_job.is_none(), "active template exports must settle before switching projects");
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
+        self.osm_rx=None; self.osm_busy=false;
+        self.osm_texture=None; self.osm_bounds=None; self.osm_visible=false;
         if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
         self.bgt_rx=None; self.bgt_busy=false;
         self.cadastral_rx=None; self.cadastral_busy=false;
         self.ahn_rx=None; self.ahn_busy=false;
         self.pdok_texture=None; self.pdok_bounds=None;
         self.show_trench_dialog=false; self.show_comment_dialog=false;
+        self.trench_editor=None;
         self.zoom=1.0; self.pan=egui::Vec2::ZERO;
         self.last_backup=Instant::now();
         // Keep an in-flight download receiver so its in-memory login session
@@ -251,13 +289,14 @@ impl SleufBaseApp {
         self.trench_markers=markers;
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
+        self.template_preferences=doc.template_preferences;
         self.selected=(!self.datasets.is_empty()).then_some(0);
         self.dirty=restored;
         self.schedule_raster_previews();
     }
 
     fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
-        if self.defer_action_for_export(&action){return;}
+        if self.defer_action_for_export(&action)||self.defer_action_for_template(&action){return;}
         if self.pending_project_action.is_some() {return;}
         self.cancel_file_load();
         if self.dirty {self.pending_project_action=Some(action);}
@@ -271,7 +310,7 @@ impl SleufBaseApp {
     }
 
     fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
-        if self.defer_action_for_export(&action){return;}
+        if self.defer_action_for_export(&action)||self.defer_action_for_template(&action){return;}
         match action {
             ProjectAction::New=>{
                 self.apply_project(NativeProject::default(),None,false,Vec::new(),ctx);
@@ -320,7 +359,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_file(&mut self, save_as: bool) -> bool {
-        if self.export_intent.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
+        if self.export_intent.is_some() || self.template_job.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         let path = if !save_as {
             self.project_path.clone()
         } else { None };
@@ -332,7 +371,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_to_path(&mut self,path:PathBuf) -> bool {
-        if self.export_intent.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
+        if self.export_intent.is_some() || self.template_job.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         match save_project(&path,&self.snapshot()) {
             Ok(())=>{
                 self.project_path=Some(path.clone()); self.dirty=false;
@@ -344,7 +383,7 @@ impl SleufBaseApp {
     }
 
     fn try_autosave(&mut self) {
-        if self.export_intent.is_some(){return;}
+        if self.export_intent.is_some() || self.template_job.is_some(){return;}
         if self.file_intent.is_some(){return;}
         if !self.backup_settings.enabled ||
             self.last_backup.elapsed() <
@@ -596,6 +635,7 @@ impl SleufBaseApp {
                 self.pdok_bounds=Some(raster.bounds);
                 self.pdok_busy=false;
                 self.pdok_rx=None;
+                self.osm_visible=false;
                 self.message="PDOK-luchtfoto geladen".into();
             }
             Some(Ok(Err(err)))=>{
@@ -613,6 +653,58 @@ impl SleufBaseApp {
     }
 
 
+
+    fn start_osm(&mut self) {
+        if self.osm_busy {return;}
+        if self.geotiffs.iter().any(|i| i.epsg.is_some_and(|epsg|epsg!=28992)) {
+            self.message="OSM-kaart is RD (EPSG:28992). Transformeer afwijkende GeoTIFF eerst.".into();
+            return;
+        }
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad eerst een RD-kaartlaag om OpenStreetMap op te halen".into();
+            return;
+        };
+        let (sender,receiver)=mpsc::channel();
+        self.osm_rx=Some(receiver);
+        self.osm_busy=true;
+        self.message="OpenStreetMap-tegels worden geladen (lokaal 7 dagen gecachet)".into();
+        let cache=project::app_data_directory().join("osm-tiles");
+        std::thread::spawn(move||{
+            let result=osm_tiles::request_map(bounds,1200,900,cache);
+            let _=sender.send(result);
+        });
+    }
+
+    fn poll_osm(&mut self,ctx:&egui::Context) {
+        let state=self.osm_rx.as_ref().map(|rx|rx.try_recv());
+        match state {
+            Some(Ok(Ok(raster)))=>{
+                let image=egui::ColorImage::from_rgba_unmultiplied(
+                    [raster.width as usize,raster.height as usize],&raster.rgba
+                );
+                self.osm_texture=Some(ctx.load_texture(
+                    "OpenStreetMap",image,egui::TextureOptions::LINEAR));
+                self.osm_bounds=Some(raster.bounds);
+                self.osm_visible=true;
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message=if raster.stale_cache {
+                    "OSM-kaart geladen uit verouderde cache (netwerk niet beschikbaar)".into()
+                } else {"OpenStreetMap-kaart geladen".into()};
+            }
+            Some(Ok(Err(err)))=>{
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message=format!("OpenStreetMap mislukt: {err}");
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message="OSM-verzoek onverwacht afgebroken".into();
+            }
+            _=>{}
+        }
+    }
 
     fn import_old_settings(&mut self) {
         if let Some(path)=rfd::FileDialog::new()
@@ -687,9 +779,16 @@ impl SleufBaseApp {
         let (tx,rx)=mpsc::channel();
         self.live_download_generation=self.project_generation;
         self.live_download_rx=Some(rx);
+        if !self.browser_ui.batch_mode {
+            self.browser_ui.cancel.store(false,std::sync::atomic::Ordering::SeqCst);
+        }
+        let cancel=std::sync::Arc::clone(&self.browser_ui.cancel);
+        let browser=self.browser_ui.browser.as_ref().map(|b|b.channel());
         std::thread::spawn(move || {
             let root=kickthemap_cache_dir().join("Rust");
-            let result=client.download_job(&job,kind,&root).map(|p|(kind,p));
+            let result=client.download_job_with_browser(
+                &job,kind,&root,&cancel,browser.as_ref()
+            ).map(|p|(kind,p));
             let _=tx.send((client,result));
         });
     }
@@ -720,7 +819,18 @@ impl SleufBaseApp {
                 self.live_session=Some(client);
                 self.live_download_rx=None;
                 self.live_busy=false;
-                self.apply_live_download_result(result,ctx);
+                if self.browser_ui.batch_mode {
+                    self.browser_ui.completed+=1;
+                    match result {
+                        Ok((RemoteFileKind::GeoTiff,path)) =>
+                            self.browser_ui.downloaded_tiffs.push(path),
+                        Ok((RemoteFileKind::JobFeatures,path)) =>
+                            self.browser_ui.downloaded_json.push(path),
+                        Err(err)=>self.browser_ui.failures.push(err),
+                    }
+                } else {
+                    self.apply_live_download_result(result,ctx);
+                }
             }
             Some(Err(TryRecvError::Disconnected))=>{
                 self.live_busy=false;
@@ -740,6 +850,7 @@ impl SleufBaseApp {
                 self.live_busy=false;
                 self.live_rx=None;
                 self.message=format!("{} KickTheMap jobs live opgehaald",self.live_jobs.len());
+                self.save_live_cache();
             }
             Some(Ok(Err(err)))=>{
                 self.live_busy=false;
@@ -758,13 +869,17 @@ impl SleufBaseApp {
     }
 
     fn logout_live_jobs(&mut self) {
-        if self.live_busy {
-            self.message="Rond het lopende verzoek af voordat je uitlogt".into();
+        if self.live_busy || self.browser_ui.capturing.is_some() {
+            self.message="Rond het lopende browser- of downloadverzoek af voordat je uitlogt".into();
             return;
         }
         self.live_session=None;
         self.live_jobs.clear();
         self.live_password.clear();
+        self.browser_ui.browser=None;
+        self.browser_ui.selected.clear();
+        self.browser_ui.queue.clear();
+        self.browser_ui.cancel.store(true,std::sync::atomic::Ordering::SeqCst);
         self.message="KickTheMap-sessie uit het geheugen verwijderd".into();
     }
 
@@ -848,6 +963,7 @@ fn canvas(
     comments:&[Comment],
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
+    osm_visible:bool,
     zoom:&mut f64,
     pan:&mut egui::Vec2,
     rules:&[sleufbase_rust::Rule]
@@ -1059,6 +1175,10 @@ fn canvas(
         format!("X: {:.2} - {:.2}, Y: {:.2} - {:.2}; zoom {:.1}x",
             bounds.min_x,bounds.max_x,bounds.min_y,bounds.max_y,zoom),
         egui::FontId::monospace(11.0),Color32::DARK_GRAY);
+    if osm_visible {
+        painter.text(rect.right_bottom()+egui::vec2(-10.0,-10.0),egui::Align2::RIGHT_BOTTOM,
+            "© OpenStreetMap contributors",egui::FontId::proportional(12.0),INK);
+    }
 }
 
 impl eframe::App for SleufBaseApp {
@@ -1066,6 +1186,13 @@ impl eframe::App for SleufBaseApp {
 }
 impl SleufBaseApp {
     fn render(&mut self,ctx:&egui::Context) {
+        if self.template_job.is_some() {
+            if ctx.input(|i|i.viewport().close_requested()) {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.request_project_action(ProjectAction::Close,ctx);
+            }
+            self.show_template_progress(ctx); return;
+        }
         if self.export_intent.is_some(){
             if ctx.input(|i|i.viewport().close_requested()){
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
@@ -1085,9 +1212,10 @@ impl SleufBaseApp {
         self.poll_file_jobs(ctx);
         self.try_autosave();
         self.poll_raster_previews(ctx);
-        self.poll_pdok(ctx);
+        self.poll_pdok(ctx);self.poll_osm(ctx);
         self.poll_live_jobs();
         self.poll_live_download(ctx);
+        self.poll_kickthemap_browser(ctx);
         self.poll_bgt();
         self.poll_cadastral();
         self.poll_ahn();
@@ -1133,6 +1261,9 @@ impl SleufBaseApp {
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
+                if ui.add_enabled(!self.osm_busy,egui::Button::new("OpenStreetMap")).clicked() {self.start_osm();}
+                if self.osm_texture.is_some() && ui.selectable_label(self.osm_visible,"OSM tonen").clicked() {self.osm_visible=true;}
+                if self.pdok_texture.is_some() && ui.selectable_label(!self.osm_visible,"PDOK tonen").clicked() {self.osm_visible=false;}
                 if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT wegdelen")).clicked() {
                     self.start_bgt(BgtKind::Wegdeel);
                 }
@@ -1158,7 +1289,11 @@ impl SleufBaseApp {
                 ui.separator();
                 if ui.button("Excel disciplines").clicked() {self.save_excel();}
                 if ui.button("DXF objecten").clicked() {self.save_dxf();}
-                if ui.button("DXF-sjabloon").clicked() {self.open_template_export();}
+                ui.menu_button("DXF-sjabloon", |ui| {
+                    if ui.button("TIFF-bladen en PS-varianten…").clicked() {self.open_template_export();ui.close_menu();}
+                    if ui.button("Jobs en virtuele proefsleuven…").clicked() {self.open_project_template_dialog();ui.close_menu();}
+                    if ui.button("Opgeslagen exportinvoer…").clicked() {self.open_template_dialog();ui.close_menu();}
+                });
                 if ui.button("Kaart terugzetten").clicked() {self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
             });
             if !self.message.is_empty() {
@@ -1168,6 +1303,8 @@ impl SleufBaseApp {
 
         if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
         if self.export_intent.is_some(){self.show_export_progress(ctx);return;}
+        if self.template_dialog.is_some() {self.show_template_dialog(ctx);}
+        if self.project_template_dialog.is_some() {self.show_project_template_dialog(ctx);}
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
             egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
@@ -1178,6 +1315,7 @@ impl SleufBaseApp {
                 ui.separator();
             }
             ui.heading("KickTheMap online");
+            if ui.button("Open KickTheMap browser & jobbeheer").clicked(){self.open_kickthemap_workspace();}
             ui.horizontal(|ui|{
                 ui.label("E-mail");
                 ui.add(egui::TextEdit::singleline(&mut self.live_email)
@@ -1283,11 +1421,15 @@ impl SleufBaseApp {
             }
             ui.separator();
             ui.heading("Virtuele proefsleuven");
+            let mut edit_virtual = None;
             for (index,trench) in self.virtual_trenches.iter_mut().enumerate() {
-                ui.label(format!("{} ({:.2} m, {} objecten{})",
-                    trench.label,trench.length(),trench.objects.len(),
-                    if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
-                ));
+                ui.horizontal(|ui|{
+                    ui.label(format!("{} ({:.2} m, {} objecten{})",
+                        trench.label,trench.length(),trench.objects.len(),
+                        if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
+                    ));
+                    if ui.small_button("Bewerken").clicked(){edit_virtual=Some(index);}
+                });
                 if !trench.boundary_3d.is_empty() {
                     ui.push_id(index,|ui|{
                         let mut rotation=trench.alignment.as_ref()
@@ -1309,6 +1451,7 @@ impl SleufBaseApp {
                     });
                 }
             }
+            if let Some(index)=edit_virtual {self.open_virtual_editor(index);}
             ui.separator();
             ui.heading("Kaartopmerkingen");
             let mut remove_comment=None;
@@ -1411,12 +1554,14 @@ impl SleufBaseApp {
         }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.heading("Kaart");
-            ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, BGT en Kadaster (preview).");
+            ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, OpenStreetMap, BGT en Kadaster (preview).");
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
             canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
-                self.pdok_texture.as_ref(),self.pdok_bounds,
+                if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
+                if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
+                self.osm_visible && self.osm_texture.is_some(),
                 &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules);
         });
 
@@ -1454,6 +1599,9 @@ impl SleufBaseApp {
             }
         }
 
+
+        if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
+        if self.browser_ui.open {self.show_kickthemap_workspace(ctx);}
 
         if self.show_comment_dialog {
             let mut opened=self.show_comment_dialog;
@@ -1554,7 +1702,7 @@ impl SleufBaseApp {
             }
         }
         self.show_unsaved_project_dialog(ctx);
-        if let Some(state)=crate::template_dialog::show(ctx,&mut self.template_dialog,&self.geotiffs,&self.datasets,self.project_generation){
+        if let Some(state)=crate::template_dialog::show(ctx,&mut self.template_order_dialog,&self.geotiffs,&self.datasets,self.project_generation){
             if let Some(path)=rfd::FileDialog::new().add_filter("DXF",&["dxf"]).set_file_name(if state.reverse{"SleufBase-Proefsleuven-omgekeerd.dxf"}else{"SleufBase-Proefsleuven.dxf"}).save_file(){self.finish_template_export(path,state);}
         }
 
@@ -1637,15 +1785,17 @@ mod project_lifecycle_tests {
         let (ctx_send,crx)=mpsc::channel();app.cadastral_rx=Some(crx);app.cadastral_busy=true;
         let (atx,arx)=mpsc::channel();app.ahn_rx=Some(arx);app.ahn_busy=true;
         let (ptx,prx)=mpsc::channel();app.pdok_rx=Some(prx);app.pdok_busy=true;
+        let (otx,orx)=mpsc::channel();app.osm_rx=Some(orx);app.osm_busy=true;
         let old_generation=app.project_generation;
         app.execute_project_action(ProjectAction::New,&ctx);
         assert_ne!(app.project_generation,old_generation);
-        assert!(!app.bgt_busy&&!app.cadastral_busy&&!app.ahn_busy&&!app.pdok_busy);
+        assert!(!app.bgt_busy&&!app.cadastral_busy&&!app.ahn_busy&&!app.pdok_busy&&!app.osm_busy);
         assert!(btx.send(Err("late".into())).is_err());
         assert!(ctx_send.send(Err("late".into())).is_err());
         assert!(atx.send(Err("late".into())).is_err());
         assert!(ptx.send(Err("late".into())).is_err());
-        app.poll_bgt();app.poll_cadastral();app.poll_ahn();app.poll_pdok(&ctx);
+        assert!(otx.send(Err("late".into())).is_err());
+        app.poll_bgt();app.poll_cadastral();app.poll_ahn();app.poll_pdok(&ctx);app.poll_osm(&ctx);
         assert!(app.bgt_layers.is_empty()); assert!(app.cadastral.is_none()); assert!(!app.dirty);
     }
     #[test]
@@ -1720,7 +1870,7 @@ mod project_lifecycle_tests {
         let custom=[sleufbase_rust::Rule::new(vec!["water".into()],"CUSTOM".into(),6,"Andere naam".into())];
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|rules:&[sleufbase_rust::Rule]|ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,rules);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,rules);});
         });
         let has_magenta=|output:egui::FullOutput|output.shapes.iter().any(|s|matches!(&s.shape,egui::Shape::Circle(c)if c.fill==aci_color(6)));
         assert!(has_magenta(render(&custom)));
@@ -1775,7 +1925,7 @@ mod project_lifecycle_tests {
         let mut render=|overlay:&DxfOverlay| {
             ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.0,600.0))),..Default::default()},|ctx|{
                 egui::CentralPanel::default().show(ctx,|ui|{
-                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
+                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
                 });
             })
         };
@@ -1798,7 +1948,7 @@ mod project_lifecycle_tests {
         assert_eq!(overlay.features.len(),1);
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
             egui::CentralPanel::default().show(ctx,|ui|{
-                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
+                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
             });
         });
         let edges:Vec<_>=output.shapes.iter().filter_map(|s|match &s.shape {
@@ -1820,7 +1970,7 @@ mod project_lifecycle_tests {
         overlay.rebuild_block_cache().unwrap();
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
         });
         let edges=output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count();
         assert_eq!(edges,2,"hidden edges and gaps must not be painted");

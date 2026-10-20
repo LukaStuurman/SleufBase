@@ -91,6 +91,64 @@ fn main() -> Result<(), String> {
     for c in cases["texts"].as_array().unwrap() {
         output["texts"].as_array_mut().unwrap().push(json!({"text":c["text"],"size":c["size"],"bold":c["bold"],"bbox":fonts.measure(c["text"].as_str().unwrap(),parse(&c["size"]),parse(&c["bold"]))?}));
     }
+    // Regress the standalone virtual/MarXact map path through the independent
+    // original Pillow painter as well as native TIFF-equivalence unit tests.
+    let mut trench = sleufbase_rust::virtual_trench::VirtualTrench::new(
+        "Virtueel kaartblad".into(),
+        sleufbase_rust::Vertex {
+            x: 168000.,
+            y: 450000.,
+            z: Some(1.),
+        },
+        sleufbase_rust::Vertex {
+            x: 168010.,
+            y: 450004.,
+            z: Some(0.8),
+        },
+        0.6,
+    )?;
+    trench
+        .objects
+        .push(sleufbase_rust::virtual_trench::TrenchPoint {
+            role: "water".into(),
+            object_name: "Waterleiding".into(),
+            source_name: "WATER".into(),
+            position: sleufbase_rust::Vertex {
+                x: 168005.,
+                y: 450002.,
+                z: Some(-1.),
+            },
+            attributes: Default::default(),
+        });
+    let virtual_source = sleufbase_rust::virtual_raster::Source {
+        trench,
+        quality: 1.,
+        reverse: false,
+    };
+    let info =
+        sleufbase_rust::virtual_raster::layout(&virtual_source.trench, virtual_source.quality)?;
+    sleufbase_rust::virtual_raster::render(&virtual_source, &cancel)?
+        .save(out.join("virtual-raw.png"))
+        .map_err(|e| e.to_string())?;
+    let source = map_export::Source {
+        background: map_export::Background::Solid {
+            color: [123, 156, 189, 255],
+        },
+        fonts: Some(paths.clone()),
+        ..Default::default()
+    };
+    map_export::Renderer::default()
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel,
+        )?
+        .image
+        .save(out.join("virtual-map.png"))
+        .map_err(|e| e.to_string())?;
+    output["virtual_raster"] = json!({"bounds":info.bounds,"transform":info.transform()});
     std::fs::write(
         out.join("audit.json"),
         serde_json::to_vec_pretty(&output).unwrap(),

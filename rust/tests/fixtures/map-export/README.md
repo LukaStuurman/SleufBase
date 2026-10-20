@@ -55,3 +55,11 @@ and [PDOK public-use CC BY statement](https://www.pdok.nl/-/luchtfoto-2025-nu-be
 The live probe is deliberately outside the deterministic CI tests.
 A complete native 300-DPI A4 template export with live HTTPS PDOK tiles
 also passed DXF readback and image-content checks after this correction.
+
+Virtual/MarXact sheets without an external TIFF now supply their unrotated RD
+raster to the same affine map painter. The release driver saves the raw raster
+and final map; the independent original Pillow painter matches 41,915 map-
+interior pixels, separately from font/annotation contours. Native tests compare
+an explicitly tagged physical RGBA TIFF with the same raster, reverse direction,
+explicit map-source precedence and include_tiff=false. This proves placement
+and compositing, not complete original virtual-mask drawing parity.

@@ -253,6 +253,48 @@ impl KickTheMapLiveClient {
         Ok(Self{client,csrf})
     }
 
+    /// Adopt cookies only from the Edge profile launched by this Rust process.
+    /// CSRF is obtained from the signed-in KickTheMap home page, never copied
+    /// from an unrelated browser tab or kept on disk.
+    pub fn from_browser_cookies(cookies:&[crate::kickthemap_browser::BrowserCookie])
+        ->Result<Self,String>
+    {
+        use reqwest::cookie::Jar;
+        use std::sync::Arc;
+        let base=reqwest::Url::parse(ORIGIN).map_err(|e|e.to_string())?;
+        let jar=Arc::new(Jar::default());
+        let mut accepted=0usize;
+        for cookie in cookies {
+            let domain=cookie.domain.trim_start_matches('.').to_ascii_lowercase();
+            if !matches!(domain.as_str(),"www.my.kickthemap.com"|"my.kickthemap.com")
+                || !cookie.secure || cookie.name.len()>256
+                || cookie.value.len()>8192 || cookie.path.len()>1024
+                || !cookie.path.starts_with('/')
+                || cookie.value.chars().any(|c|matches!(c,'\r'|'\n'|';'))
+            {continue;}
+            jar.add_cookie_str(&format!("{}={}; Domain={}; Path={}; Secure",
+                cookie.name,cookie.value,domain,cookie.path),&base);
+            accepted+=1;
+        }
+        if accepted==0{return Err("Edge bevat nog geen geldige KickTheMap-sessiecookies".into());}
+        let client=Client::builder()
+            .cookie_provider(jar)
+            .redirect(redirect::Policy::none())
+            .timeout(Duration::from_secs(25))
+            .user_agent("SleufBase-Rust/0.1 (interactive Edge session)")
+            .build().map_err(|e|e.to_string())?;
+        let home=client.get(format!("{ORIGIN}/")).send()
+            .map_err(|e|format!("KickTheMap browser-sessie valideren: {e}"))?
+            .error_for_status().map_err(|e|format!("KickTheMap sessie: {e}"))?;
+        let page=response_text(home,MAX_HTML)?;
+        if login_page(&page) {
+            return Err("De Edge-browser is nog niet bij KickTheMap ingelogd".into());
+        }
+        let csrf=html_token(&page,"meta","csrf-token")
+            .ok_or("KickTheMap-browser heeft geen actieve CSRF-sessie")?;
+        Ok(Self{client,csrf})
+    }
+
     pub fn fetch_jobs(&mut self) -> Result<Vec<Job>, String> {
         for attempt in 0..3 {
             if attempt>0 {
@@ -436,7 +478,27 @@ impl KickTheMapLiveClient {
     pub fn download_job(
         &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path
     )->Result<std::path::PathBuf,String> {
-        use std::io::Write;
+        self.download_job_with_cancel(job,kind,root,
+            &std::sync::atomic::AtomicBool::new(false))
+    }
+    /// Checked streaming download; cancellation prevents publishing temporary
+    /// files and never damages existing downloaded jobs.
+    pub fn download_job_with_cancel(
+        &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path,
+        cancel:&std::sync::atomic::AtomicBool
+    )->Result<std::path::PathBuf,String> {
+        self.download_job_with_browser(job,kind,root,cancel,None)
+    }
+    pub fn download_job_with_browser(
+        &mut self,job:&Job,kind:RemoteFileKind,root:&std::path::Path,
+        cancel:&std::sync::atomic::AtomicBool,
+        browser:Option<&crate::kickthemap_browser::BrowserChannel>,
+    )->Result<std::path::PathBuf,String> {
+        use std::{io::{Read,Write},sync::atomic::Ordering};
+        let check=||if cancel.load(Ordering::Relaxed) {
+            Err("KickTheMap-download geannuleerd".to_owned())
+        } else {Ok(())};
+        check()?;
         let remote=kind.remote_name(job)?;
         let name=safe_file_stem(&job.title,job.job_id);
         let export_name=match kind {
@@ -450,7 +512,21 @@ impl KickTheMapLiveClient {
                 format!("{name}_{}_jobFeatures.json",job.job_id)
         };
         let destination=root.join(filename);
-        if destination.exists() {return Err("Bestand bestaat al; overschrijven is uitgeschakeld".into());}
+        if destination.exists() {
+            // Reusing an identical validated file allows a safe interrupted
+            // batch to resume; never trust an existing different job file.
+            let sidecar=job_sidecar_path(&destination)?;
+            let metadata=std::fs::read(&sidecar)
+                .map_err(|_|"Bestand bestaat al zonder vertrouwde job-sidecar".to_owned())?;
+            let identity:Value=serde_json::from_slice(&metadata)
+                .map_err(|_|"Bestaande download heeft ongeldige jobmetadata".to_owned())?;
+            if identity["job_id"].as_u64()!=Some(job.job_id) ||
+                identity["source"]!="kickthemap-rust" {
+                return Err("Bestand bestaat al voor andere of onbekende job".into());
+            }
+            verify_download(&destination,kind)?;
+            return Ok(destination);
+        }
         std::fs::create_dir_all(root).map_err(|e|e.to_string())?;
         let fields=[
             ("projectId",job.job_id.to_string()),
@@ -460,6 +536,7 @@ impl KickTheMapLiveClient {
         ];
         let mut signed=None;
         for mode in ["multipart","form","json"] {
+            check()?;
             let mut request=self.client.post(format!("{ORIGIN}/jobs/get-file-url"))
                 .header("X-CSRF-TOKEN",self.csrf.as_str());
             request=match mode {
@@ -486,7 +563,14 @@ impl KickTheMapLiveClient {
                 }
             }
         }
-        let signed=signed.ok_or("KickTheMap gaf geen bruikbare downloadlink terug")?;
+        let signed=match signed {
+            Some(url)=>url,
+            None=>{
+                check()?;
+                let browser=browser.ok_or("KickTheMap gaf geen bruikbare downloadlink terug; meld je aan via het privé Edge-venster voor de browserfallback")?;
+                browser.signed_download_url(job,kind)?
+            }
+        };
         let download_client=Client::builder()
             .redirect(redirect::Policy::custom(|attempt|{
                 match validate_signed_url(attempt.url().as_str()) {
@@ -508,9 +592,18 @@ impl KickTheMapLiveClient {
             return Err("Downloadbestand is groter dan de toegestane limiet".into());
         }
         let mut temporary=tempfile::NamedTempFile::new_in(root).map_err(|e|e.to_string())?;
-        let downloaded=std::io::copy(&mut response.take(max_bytes+1),temporary.as_file_mut())
-            .map_err(|e|format!("Download schrijven mislukt: {e}"))?;
-        if downloaded>max_bytes {return Err("Download is te groot".into());}
+        let mut downloaded=0u64;
+        let mut buffer=[0u8;128*1024];
+        loop {
+            check()?;
+            let n=response.read(&mut buffer)
+                .map_err(|e|format!("Download lezen mislukt: {e}"))?;
+            if n==0 {break;}
+            downloaded=downloaded.saturating_add(n as u64);
+            if downloaded>max_bytes {return Err("Download is te groot".into());}
+            temporary.write_all(&buffer[..n])
+                .map_err(|e|format!("Download schrijven mislukt: {e}"))?;
+        }
         temporary.as_file_mut().flush().map_err(|e|e.to_string())?;
         temporary.as_file_mut().sync_all().map_err(|e|e.to_string())?;
         verify_download(temporary.path(),kind)?;
@@ -533,6 +626,7 @@ impl KickTheMapLiveClient {
             })).map_err(|e|e.to_string())?;
         metadata.as_file_mut().write_all(b"\n").map_err(|e|e.to_string())?;
         metadata.as_file_mut().sync_all().map_err(|e|e.to_string())?;
+        check()?;
         temporary.persist_noclobber(&destination)
             .map_err(|e|format!("Downloadbestand niet opgeslagen: {}",e.error))?;
         if let Err(e)=metadata.persist_noclobber(&sidecar_path) {

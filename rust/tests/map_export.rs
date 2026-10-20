@@ -138,6 +138,132 @@ pub fn font_paths() -> map_text::Paths {
     }
 }
 #[test]
+fn virtual_rd_map_matches_an_actual_tiff_and_keeps_source_precedence_and_orientation() {
+    use sleufbase_rust::{template_raster, virtual_raster, virtual_trench::VirtualTrench, Vertex};
+    let cancel = AtomicBool::new(false);
+    let mut virtual_source = virtual_raster::Source {
+        trench: VirtualTrench::new(
+            "PS virtueel".into(),
+            Vertex {
+                x: 168000.,
+                y: 450000.,
+                z: Some(1.),
+            },
+            Vertex {
+                x: 168010.,
+                y: 450004.,
+                z: Some(0.8),
+            },
+            0.6,
+        )
+        .unwrap(),
+        quality: 1.,
+        reverse: false,
+    };
+    let info = virtual_raster::layout(&virtual_source.trench, virtual_source.quality).unwrap();
+    let raw = virtual_raster::render(&virtual_source, &cancel).unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("equivalent.tiff");
+    let file = std::fs::File::create(&path).unwrap();
+    let mut encoder = tiff::encoder::TiffEncoder::new(file).unwrap();
+    let mut encoded = encoder
+        .new_image::<tiff::encoder::colortype::RGBA8>(info.width, info.height)
+        .unwrap();
+    // Declare straight alpha; RGBA samples alone do not imply ExtraSamples.
+    encoded
+        .encoder()
+        .write_tag(tiff::tags::Tag::ExtraSamples, &[2u16][..])
+        .unwrap();
+    encoded.write_data(raw.as_raw()).unwrap();
+    drop(encoder);
+    let physical = template_raster::Source {
+        path,
+        transform: info.transform(),
+        reverse_orientation: false,
+        axis: None,
+    };
+    let mut source = map_export::Source {
+        settings: map_page::Settings {
+            dpi: 72,
+            scale: 225.,
+        },
+        background: Background::Solid {
+            color: [245, 245, 245, 255],
+        },
+        fonts: Some(font_paths()),
+        ..Default::default()
+    };
+    let mut renderer = map_export::Renderer::default();
+    let physical_page = renderer
+        .render(&source, info.bounds, Some(&physical), None, &cancel)
+        .unwrap();
+    let virtual_page = renderer
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel,
+        )
+        .unwrap();
+    pixels(
+        &virtual_page.image,
+        &physical_page.image,
+        "virtual RD vs TIFF map",
+    );
+    virtual_source.reverse = true;
+    let reversed = renderer
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel,
+        )
+        .unwrap();
+    pixels(
+        &reversed.image,
+        &physical_page.image,
+        "map remains at RD position when profile reverses",
+    );
+    virtual_source.quality = f64::NAN;
+    assert!(renderer
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel
+        )
+        .is_err());
+    source.tiff = Some(physical);
+    let explicit = renderer
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel,
+        )
+        .unwrap();
+    pixels(
+        &explicit.image,
+        &physical_page.image,
+        "explicit map source precedes slot fallback",
+    );
+    source.include_tiff = false;
+    let blank = renderer
+        .render_with_raster(
+            &source,
+            info.bounds,
+            Some(map_export::Raster::Virtual(&virtual_source)),
+            None,
+            &cancel,
+        )
+        .unwrap();
+    assert_ne!(blank.image, physical_page.image);
+}
+#[test]
 fn page_border_preserves_the_map_interior_and_cancel_rejects_before_fetch() {
     let source = map_export::Source {
         settings: map_page::Settings {

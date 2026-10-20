@@ -35,11 +35,11 @@ The template is embedded in the standalone executable; no source-checkout path
 is required. Earlier prepared export/map oracles remain separate checks.
 
 The final release worker passed all four independent readbacks (10 PNGs),
-including visible CAD geometry/colors. The 310 Rust tests include 26 desktop
+including visible CAD geometry/colors. The combined 360 Rust tests include 34 desktop
 tests. Export targets that alias loaded measurements, CAD, TIFF/sidecars, the
 template or current project/import container are rejected before network/assets.
 
 This is the native ordering/export path. Paired normal/reverse publication,
-automatic companion Excel, photos/virtual raster preparation, complete legacy
+automatic companion Excel, complete photo annotations/virtual-mask parity, legacy
 settings, remaining CAD families and real-project desktop acceptance still
 remain in PARITY.md; the migration is not a completed product replacement.

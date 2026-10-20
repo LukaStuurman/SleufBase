@@ -54,6 +54,8 @@ pub struct Slot {
     #[serde(default)]
     pub tiff_source: Option<crate::template_raster::Source>,
     #[serde(default)]
+    pub virtual_source: Option<crate::virtual_raster::Source>,
+    #[serde(default)]
     pub map_png: PathBuf,
     #[serde(default)]
     pub map_source: Option<crate::map_export::Source>,
@@ -63,6 +65,8 @@ pub struct Slot {
     pub surfaces: Option<Arc<Vec<bgt_surface::Feature>>>,
     #[serde(default)]
     pub surfaces_constructed: bool,
+    #[serde(default)]
+    pub photos: Vec<crate::template_photo::Photo>,
 }
 #[derive(serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
@@ -150,6 +154,9 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
             resolve(&mut source.path);
         }
         resolve(&mut slot.map_png);
+        for photo in &mut slot.photos {
+            resolve(&mut photo.path);
+        }
         if let Some(source) = &mut slot.map_source {
             source.resolve_paths(parent);
         }
@@ -479,7 +486,11 @@ pub fn export_with_datasets(
         return Err("Te veel sjabloonvakken voor het afbeeldingsbudget".into());
     }
     for slot in request.slots.iter().flatten() {
-        if slot.tiff_source.is_some() == !slot.tiff_png.as_os_str().is_empty() {
+        crate::template_photo::validate(&slot.photos)?;
+        let available = usize::from(slot.tiff_source.is_some())
+            + usize::from(slot.virtual_source.is_some())
+            + usize::from(!slot.tiff_png.as_os_str().is_empty());
+        if available != 1 {
             return Err("Geef per vak één TIFF-bron of één voorbereide TIFF-PNG op".into());
         }
         if slot.map_source.is_some() == !slot.map_png.as_os_str().is_empty() {
@@ -495,6 +506,7 @@ pub fn export_with_datasets(
                         .map_or(s.tiff_png.as_path(), |t| t.path.as_path()),
                     s.map_png.as_path(),
                 ];
+                paths.extend(s.photos.iter().map(|p| p.path.as_path()));
                 if let Some(source) = &s.map_source {
                     paths.extend(source.input_paths());
                 }
@@ -554,7 +566,7 @@ pub fn export_with_datasets(
     let mut images = Vec::new();
     let mut profiles = 0;
     let mut filled_slots = 0;
-    let mut total = 0;
+    let mut total: u64 = 0;
     let mut map_renderer = crate::map_export::Renderer::default();
     for (index, (source, target)) in request.slots.iter().zip(&prepared.slots).enumerate() {
         progress(&format!("Proefsleufvak {} invullen", index + 1));
@@ -594,7 +606,20 @@ pub fn export_with_datasets(
         ] {
             // Index, not visible label, guarantees uniqueness for duplicate PS names.
             let destination = tx.asset_path(&format!("slot{:05}_{role}.png", index + 1))?;
-            if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
+            if let Some(source) = slot.virtual_source.as_ref().filter(|_| role == "tiff") {
+                progress(&format!("Virtuele proefsleufraster {} opbouwen", index + 1));
+                let prepared = crate::virtual_raster::prepare_for_template(source, control.flag())?;
+                crate::template_raster::save(&prepared, &destination, control.flag())?;
+                let bytes = std::fs::metadata(&destination)
+                    .map_err(|e| e.to_string())?
+                    .len();
+                total = total
+                    .checked_add(bytes)
+                    .ok_or("Rasterbudget overschreden")?;
+                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                }
+            } else if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
                 let axis = measured
                     .as_ref()
                     .map(|p| [[p.start.x, p.start.y], [p.end.x, p.end.y]]);
@@ -633,10 +658,17 @@ pub fn export_with_datasets(
                 };
                 progress(&format!("Kaartblad {} opbouwen", index + 1));
                 control.check()?;
-                let page = map_renderer.render(
+                let page = map_renderer.render_with_raster(
                     source,
                     slot.bounds,
-                    slot.tiff_source.as_ref(),
+                    slot.tiff_source
+                        .as_ref()
+                        .map(crate::map_export::Raster::Tiff)
+                        .or_else(|| {
+                            slot.virtual_source
+                                .as_ref()
+                                .map(crate::map_export::Raster::Virtual)
+                        }),
                     reference,
                     control.flag(),
                 )?;
@@ -660,6 +692,35 @@ pub fn export_with_datasets(
                 layout: None,
             });
             image_order.push(index * 2);
+        }
+        // Additional digital site photos are normalized into separate owned
+        // PNG assets. They sit as inset overlays, never replace the full TIFF
+        // or map and use the same atomic export transaction.
+        if !slot.photos.is_empty() {
+            progress(&format!("Werkfoto's voor vak {} verwerken", index + 1));
+            let boxes =
+                crate::template_photo::boxes(target.tiff_box, target.map_box, &slot.photos)?;
+            for (photo_index, (photo, bounds)) in slot.photos.iter().zip(boxes).enumerate() {
+                control.check()?;
+                let filename = format!("slot{:05}_photo{:02}.png", index + 1, photo_index + 1);
+                let destination = tx.asset_path(&filename)?;
+                let bytes = crate::template_photo::prepare(photo, &destination, control)?;
+                total = total
+                    .checked_add(bytes)
+                    .ok_or("Foto-uitvoerbudget overschreden")?;
+                if total > 2 * 1024 * 1024 * 1024 {
+                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                }
+                images.push(Image {
+                    path: destination,
+                    bounds,
+                    definition_name: format!("{}_photo{:02}", slot.label, photo_index + 1),
+                    inset: 0.015,
+                    preserve_aspect: true,
+                    layout: None,
+                });
+                image_order.push(index * 2);
+            }
         }
         if let (Some(options), Some(measured)) =
             (slot.profile.as_ref().filter(|p| p.draw), &measured)

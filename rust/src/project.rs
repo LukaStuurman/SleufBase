@@ -46,6 +46,8 @@ pub struct NativeProject {
     #[serde(default,skip_serializing_if="Option::is_none")]
     pub template_export:Option<crate::template_order::State>,
     #[serde(default,skip_serializing_if="Option::is_none")]
+    pub template_preferences:Option<crate::template_prefs::TemplatePreferences>,
+    #[serde(default,skip_serializing_if="Option::is_none")]
     pub legacy_archive:Option<crate::legacy_project::LegacyArchive>,
 }
 
@@ -63,6 +65,7 @@ impl Default for NativeProject {
             virtual_trenches: Vec::new(),
             comments: Vec::new(),
             template_export:None,
+            template_preferences:None,
             legacy_archive:None,
         }
     }
@@ -78,6 +81,7 @@ impl NativeProject {
         }
         if let Some(archive)=&self.legacy_archive {archive.validate()?;}
         if let Some(state)=&self.template_export{state.validate()?;}
+        if let Some(settings)=&self.template_preferences {settings.validate()?;}
         let mut count = 0usize;
         let mut vertices = |points: &[Vertex]| -> Result<(), String> {
             count = count

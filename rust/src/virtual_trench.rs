@@ -20,6 +20,15 @@ pub struct TrenchPoint {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub struct Dekband {
+    pub start_chainage:f64,
+    pub end_chainage:f64,
+    pub source_name:String,
+    #[serde(default)]
+    pub display_rgb:Option<[u8;3]>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct VirtualTrench {
     pub label:String,
     pub width_meters:f64,
@@ -27,6 +36,8 @@ pub struct VirtualTrench {
     pub end:Vertex,
     #[serde(default)]
     pub objects:Vec<TrenchPoint>,
+    #[serde(default)]
+    pub dekband_rows:Vec<Dekband>,
     #[serde(default)]
     pub source_path:Option<PathBuf>,
     /// Original measured 3D MarXact boundary; empty for manually drawn trenches.
@@ -47,7 +58,7 @@ impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
             label,width_meters:width,start,end,
-            objects:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0
+            objects:Vec::new(),dekband_rows:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0
         };
         result.validate()?;
         Ok(result)
@@ -70,6 +81,13 @@ impl VirtualTrench {
         }
         if self.boundary_3d.iter().any(|p|!p.x.is_finite() || !p.y.is_finite() || p.z.is_some_and(|z|!z.is_finite())) {
             return Err("MarXact-grens heeft ongeldige 3D-coördinaten".into());
+        }
+        if self.dekband_rows.len()>10_000 {return Err("Te veel dekbandsegmenten".into());}
+        for row in &self.dekband_rows {
+            if !row.start_chainage.is_finite() || !row.end_chainage.is_finite()
+                || row.end_chainage <= row.start_chainage+1e-6
+                || row.source_name.len()>256 || row.source_name.chars().any(char::is_control)
+            {return Err("Dekband heeft ongeldige kettingmaten of omschrijving".into());}
         }
         if self.length()<=1e-9 {
             return Err("Begin- en eindpunt van proefsleuf vallen samen".into());

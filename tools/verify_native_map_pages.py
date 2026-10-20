@@ -29,8 +29,21 @@ def main():
     for c,n in zip(cases['texts'],native['texts']):
         assert all(n[k]==c[k] for k in ['text','size','bold'])
         b=n['bbox'];assert all(math.isfinite(x) for x in b) and b[2]>b[0] and b[3]>b[1],n
+    verify_virtual(out,native['virtual_raster'])
     if len(sys.argv)>2:verify_cli(Path(sys.argv[2]).resolve())
     print(f'{len(cases["resizes"])} resizes + {len(cases["paints"])} paints: {pixels:,} exact RGBA pixels; {len(cases["pages"])} exact page plans; {len(cases["texts"])} native font bounds checked')
+def verify_virtual(out,info):
+    ref=reference();exp=importlib.import_module(ref.__package__+'.exporting');models=importlib.import_module(ref.__package__+'.models');renderer=importlib.import_module(ref.__package__+'.renderer').MapRenderer()
+    exporter=exp.MapExporter(None,renderer);bounds=models.Bounds(**info['bounds']);view=exporter._determine_map_bounds(bounds.padded(max(1.,min(4.,max(bounds.width,bounds.height)*.1))))
+    transform=models.ViewportTransform(view,exporter.map_width_px,exporter.map_height_px)
+    with Image.open(out/'virtual-raw.png') as raw,Image.open(out/'virtual-map.png') as native:
+        raw=raw.convert('RGBA');geo=models.GeoTransform(**info['transform']);layer=models.GeoTiffLayer(Path('virtual.tiff'),raw,geo,bounds,28992)
+        prepared=exp._prepare_export_tiff_layer(layer,forced_opacity=1.);canvas=Image.new('RGBA',(exporter.map_width_px,exporter.map_height_px),(123,156,189,255));renderer._paint_tiff(canvas,transform,prepared)
+        a=transform.world_to_screen(168001.,450003.);b=transform.world_to_screen(168009.,450001.);roi=tuple(map(int,[a[0]+2,a[1]+2,b[0]-2,b[1]-2]));page_roi=(roi[0]+82,roi[1]+82,roi[2]+82,roi[3]+82)
+        count=equal_pixels(native.convert('RGBA').crop(page_roi),canvas.crop(roi),'virtual raster RD map interior');assert count>40_000
+        assert len(set(canvas.crop(roi).getdata()))>10
+        print(f'Virtual/MarXact RD map: {count:,} interior pixels match original Pillow painter without an external TIFF')
+
 def verify_cli(binary):
     with tempfile.TemporaryDirectory(prefix='sleufbase-map-cli-') as folder:
         temp=Path(folder);r=deepcopy(next(c['request'] for c in json.loads((ROOT/'rust/tests/fixtures/template-export/reference.json').read_text(encoding='utf-8')) if c['name']=='native-tiff'))

@@ -13,6 +13,14 @@ pub(super) struct ExportIntent {
 
 impl SleufBaseApp {
     pub(super) fn open_template_export(&mut self) {
+        if self.export_intent.is_some()
+            || self.template_job.is_some()
+            || self.file_intent.is_some()
+            || self.pending_project_action.is_some()
+        {
+            self.message = "Rond de lopende taak eerst af".into();
+            return;
+        }
         if self.geotiffs.is_empty() {
             self.message = "Laad eerst GeoTIFF-proefsleuven voor de sjabloonexport".into();
             return;
@@ -28,7 +36,9 @@ impl SleufBaseApp {
                     label_gap: self.migrated_settings.dxf_label_gap,
                     ..Default::default()
                 });
-        self.template_dialog = Some(crate::template_dialog::Dialog::new(
+        self.template_dialog = None;
+        self.project_template_dialog = None;
+        self.template_order_dialog = Some(crate::template_dialog::Dialog::new(
             state,
             &self.geotiffs,
             self.project_generation,
@@ -42,7 +52,7 @@ impl SleufBaseApp {
         let state = match state.confirmed() {
             Ok(state) => state,
             Err(e) => {
-                if let Some(d) = &mut self.template_dialog {
+                if let Some(d) = &mut self.template_order_dialog {
                     d.error = e;
                 }
                 return;
@@ -62,7 +72,7 @@ impl SleufBaseApp {
             self.dirty = true;
         }
     }
-    fn take_export_inputs(&mut self) -> Inputs {
+    pub(super) fn take_export_inputs(&mut self) -> Inputs {
         Inputs {
             datasets: std::mem::take(&mut self.datasets),
             trenches: std::mem::take(&mut self.virtual_trenches),
@@ -79,7 +89,7 @@ impl SleufBaseApp {
                 .collect(),
         }
     }
-    fn restore_export_inputs(&mut self, inputs: Inputs) {
+    pub(super) fn restore_export_inputs(&mut self, inputs: Inputs) {
         debug_assert!(
             self.datasets.is_empty()
                 && self.virtual_trenches.is_empty()
@@ -97,7 +107,7 @@ impl SleufBaseApp {
         self.comments = inputs.comments;
     }
     fn start_export(&mut self, request: Request, overlay: bool) -> bool {
-        if self.export_intent.is_some() {
+        if self.export_intent.is_some() || self.template_job.is_some() {
             self.message = "Er loopt al een export".into();
             return false;
         }
@@ -200,7 +210,7 @@ impl SleufBaseApp {
                     self.export_dialog = None;
                 }
                 if intent.kind == Kind::Template {
-                    self.template_dialog = None;
+                    self.template_order_dialog = None;
                 }
                 if intent.overlay && intent.queued_action.is_none() {
                     self.load_exported_overlay(intent.path.clone());
@@ -223,7 +233,7 @@ impl SleufBaseApp {
                     }
                 }
                 if intent.kind == Kind::Template {
-                    if let Some(dialog) = self.template_dialog.as_mut() {
+                    if let Some(dialog) = self.template_order_dialog.as_mut() {
                         dialog.error = error;
                     }
                 }
@@ -231,7 +241,7 @@ impl SleufBaseApp {
         }
         if let Some(action) = intent.queued_action {
             self.export_dialog = None;
-            self.template_dialog = None;
+            self.template_order_dialog = None;
             self.request_project_action(action, ctx);
         }
     }
@@ -346,11 +356,94 @@ mod tests {
         }
     }
     #[test]
+    fn project_template_worker_moves_rasters_cad_comments_and_blocks_all_other_exports() {
+        use sleufbase_rust::template_project::{BackgroundKind, Choice, Options, Source};
+        let mut app = template_app();
+        app.comments.push(Comment {
+            x: 1.,
+            y: 2.,
+            text: "Behouden".into(),
+        });
+        app.overlays.push(DxfOverlay {
+            visible: true,
+            ..Default::default()
+        });
+        let pointers = (
+            app.datasets[0].features.as_ptr(),
+            app.geotiffs.as_ptr(),
+            app.overlays.as_ptr(),
+            app.comments.as_ptr(),
+        );
+        app.open_template_export();
+        app.open_project_template_dialog();
+        assert!(app.template_order_dialog.is_none());
+        assert!(app.project_template_dialog.is_some());
+        let options = Options {
+            template: PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("../assets/cadastral_template.dxf"),
+            project: "Gecombineerd project".into(),
+            dpi: 72,
+            background: BackgroundKind::Blank,
+            include_bgt: false,
+            include_cadastral: false,
+            include_cad: true,
+            choices: vec![Choice {
+                source: Source::Job(0),
+                raster: Some(0),
+                include: true,
+                title: "PS12".into(),
+                profile: false,
+                reverse: false,
+                comments: String::new(),
+                photos: Vec::new(),
+            }],
+            ..Default::default()
+        };
+        let dir = tempfile::tempdir().unwrap();
+        let out = dir.path().join("combined.dxf");
+        app.start_project_template_export(options, out.clone());
+        assert!(app.template_job.is_some());
+        assert!(
+            app.datasets.is_empty()
+                && app.geotiffs.is_empty()
+                && app.overlays.is_empty()
+                && app.comments.is_empty()
+        );
+        assert!(!app.save_project_to_path(dir.path().join("empty.json")));
+        let ctx = egui::Context::default();
+        app.start_excel_export(dir.path().join("blocked.xlsx"));
+        app.open_template_export();
+        assert!(app.export_intent.is_none() && app.template_order_dialog.is_none());
+        let deadline = Instant::now() + Duration::from_secs(45);
+        while app.template_job.is_some() {
+            app.poll_template_job(&ctx);
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(out.exists(), "{}", app.message);
+        assert_eq!(
+            (
+                app.datasets[0].features.as_ptr(),
+                app.geotiffs.as_ptr(),
+                app.overlays.as_ptr(),
+                app.comments.as_ptr()
+            ),
+            pointers
+        );
+        assert_eq!(
+            app.snapshot().template_preferences.unwrap().project,
+            "Gecombineerd project"
+        );
+        assert!(app.save_project_to_path(dir.path().join("restored.json")));
+        app.open_template_export();
+        assert!(app.template_order_dialog.is_some() && app.project_template_dialog.is_none());
+    }
+    #[test]
     fn native_template_window_worker_snapshot_and_project_switch_keep_complete_sources() {
         let mut app = template_app();
         let ctx = egui::Context::default();
         app.open_template_export();
-        let mut state = app.template_dialog.as_ref().unwrap().state.clone();
+        let mut state = app.template_order_dialog.as_ref().unwrap().state.clone();
         state.project = "  Uitvoerproject Ø  ".into();
         state.aerial = false;
         state.auto_bgt = false;
@@ -367,7 +460,7 @@ mod tests {
             std::thread::sleep(Duration::from_millis(2));
         }
         assert!(output.exists(), "{}", app.message);
-        assert!(app.template_dialog.is_none());
+        assert!(app.template_order_dialog.is_none());
         assert_eq!(
             (app.datasets[0].features.as_ptr(), app.geotiffs.as_ptr()),
             pointers
@@ -377,7 +470,7 @@ mod tests {
             "Uitvoerproject Ø"
         );
         app.open_template_export();
-        assert!(app.template_dialog.is_some());
+        assert!(app.template_order_dialog.is_some());
         app.request_project_action(ProjectAction::New, &ctx);
         assert!(app.pending_project_action.is_some());
         app.finish_project_action(false, &ctx);
@@ -402,7 +495,7 @@ mod tests {
             .unwrap(),
         );
         app.open_template_export();
-        let state = app.template_dialog.as_ref().unwrap().state.clone();
+        let state = app.template_order_dialog.as_ref().unwrap().state.clone();
         let original = app.geotiffs.as_ptr();
         let dir = tempfile::tempdir().unwrap();
         let out = dir.path().join("cancelled.dxf");
@@ -431,7 +524,7 @@ mod tests {
         }
         assert_eq!(app.geotiffs.as_ptr(), original);
         assert_eq!(app.pending_project_action, Some(ProjectAction::Close));
-        assert!(app.template_dialog.is_none());
+        assert!(app.template_order_dialog.is_none());
         assert!(!out.exists());
         assert!(!app.close_confirmed);
     }

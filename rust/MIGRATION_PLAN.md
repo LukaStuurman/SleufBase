@@ -776,6 +776,24 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   project-/importbestand wordt vóór netwerk- of assetwerk geweigerd.
   Volledige begeleidende exports/Excel, foto’s/virtuele beelden, oude instellingen
   en praktijkacceptatie blijven open; dit vervangt de globale release-eisen niet.
+- Gecombineerde native exportbediening: één DXF-sjabloonmenu voor oorspronkelijke
+  TIFF-volgorde/PS-varianten, jobs/virtuele sleuven met werkfoto's en opgeslagen
+  exportinvoer. Native v4 bewaart beide instellingen en leest eerdere v3-projecten.
+  Alle projectexports delen de invoeroverdracht; TIFF/CAD/comments worden niet
+  nogmaals gekopieerd of afzonderlijk teruggezet. Opslaan/autosave en andere
+  exports wachten op de actieve worker. Een echte desktopexport controleert
+  behouden bronallocaties, kaartassets en voorkeuren na terugkomst.
+  Een bestaande fout bij virtuele/MarXact-export zonder externe TIFF is hersteld:
+  het kaartblad gebruikt nu het eigen ongeoriënteerde RD-raster via dezelfde
+  affine sampler als TIFF. Omgekeerde profielen verplaatsen geen kaartgeometrie.
+  Pixelvergelijking met een expliciet RGBA-TIFF controleert bronvoorrang en
+  ontbrekende/uitgeschakelde bronnen. 360 Rust-tests slagen (34 desktoptests).
+  De release-kaartdriver vergelijkt 41.915 pixels van de virtuele RD-kaart
+  met de oorspronkelijke Pillow-schilderfunctie, naast 66.667 eerdere exacte
+  rasterpixels. Dit bewijst kaartplaatsing/compositie, geen complete pariteit
+  van de oorspronkelijke virtuele rastermaskers.
+  Volledige oorspronkelijke fotoannotaties/rastermaskers, begeleidende Excel/
+  gepaarde exports en alle globale praktijk-/releasevoorwaarden blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

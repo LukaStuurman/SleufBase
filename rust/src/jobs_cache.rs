@@ -96,6 +96,27 @@ pub fn parse_cache(body:&str,path:&Path)->Result<JobsCache,String> {
     })
 }
 
+/// Save a safe account-specific snapshot; never includes passwords, tokens
+/// or download URLs. This is only an offline fallback, not proof of freshness.
+pub fn write_live_cache(path:&Path,email:&str,jobs:&[Job])->Result<(),String>{
+    use std::io::Write;
+    if jobs.len()>100_000 {return Err("Te veel jobs voor offline opslag".into());}
+    let now=std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).map_err(|e|e.to_string())?.as_secs_f64();
+    let data=serde_json::json!({
+        "version":1,"saved_at":now,"email":email.trim(),
+        "jobs":jobs.iter().map(|j|serde_json::json!({
+            "job_id":j.job_id,"title":j.title,"address":j.address,
+            "municipality":j.municipality,"coordinates":j.coordinates,
+            "client_date":j.client_date,"status":j.status,
+            "download_available":j.downloadable,"prefix":j.prefix,
+        })).collect::<Vec<_>>()
+    });
+    crate::storage::atomic_write(path,true,|f|{
+        serde_json::to_writer(&mut *f,&data).map_err(|e|e.to_string())?;
+        f.write_all(b"\n").map_err(|e|e.to_string())
+    })
+}
 pub fn read_cache(path:&Path)->Result<JobsCache,String> {
     let length=fs::metadata(path).map_err(|e|e.to_string())?.len();
     if length>24*1024*1024 {return Err("KickTheMap jobcache is te groot".into());}
@@ -137,6 +158,24 @@ mod tests {
         assert_eq!(cache.jobs[0].status,9);
         assert!(cache.jobs[0].downloadable);
         assert_eq!(filter_jobs(&cache.jobs,"made",None).len(),1);
+    }
+    #[test]
+    fn live_snapshot_is_token_free_and_restorable() {
+        let dir=tempfile::tempdir().unwrap();
+        let file=dir.path().join("jobs.json");
+        let j=Job {job_id:42,title:"Proefsleuf".into(),address:"Breda".into(),
+            municipality:"Breda".into(),coordinates:"150000,400000".into(),
+            client_date:"2026-10-20".into(),status:9,downloadable:true,prefix:"s3_dir".into()};
+        write_live_cache(&file,"team@example.com",&[j.clone()]).unwrap();
+        let recovered=read_cache(&file).unwrap();
+        assert_eq!(recovered.jobs.len(),1);
+        assert_eq!(recovered.jobs[0].prefix,j.prefix);
+        assert_eq!(recovered.email,"team@example.com");
+        write_live_cache(&file,"team@example.com",&[j]).unwrap();
+        assert_eq!(read_cache(&file).unwrap().jobs.len(),1);
+        let contents=std::fs::read_to_string(&file).unwrap();
+        assert!(!contents.contains("password"));
+        assert!(!contents.contains("cookie"));
     }
     #[test]
     fn file_name_sanitization() {

@@ -311,6 +311,8 @@ pub fn request_with_bgt(
             comments: comments(b, &inputs.comments, &row.comments),
             tiff_png: Default::default(),
             tiff_source: Some(source),
+            virtual_source: None,
+            photos: Vec::new(),
             map_png: Default::default(),
             map_source: Some(Source {
                 background: if state.aerial {
