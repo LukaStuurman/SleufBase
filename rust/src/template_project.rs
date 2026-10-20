@@ -209,7 +209,7 @@ pub fn build_with_cad(
         let virtual_source=match (choice.source,raster){
             (Source::Virtual(i),None)=>{
                 let trench=trenches.get(i).ok_or("Virtuele sleuf niet meer beschikbaar")?;
-                Some(crate::virtual_raster::Source{trench:trench.clone(),quality:1.})
+                Some(crate::virtual_raster::Source{trench:trench.clone(),quality:1.,reverse:choice.reverse})
             },
             _=>None,
         };
