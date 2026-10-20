@@ -68,6 +68,14 @@ Installeer Rust via https://rustup.rs en voer in PowerShell uit:
 Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
 'SleufBase-Rust-Windows-preview' van een geslaagde build. Dit is geen stable release.
 
+### Native project-naar-sjabloon met CAD-lagen en bewaarde vakinstellingen
+
+De projectgebonden **Project → sjabloon DXF**-route ondersteunt optioneel ook **zichtbare CAD/DXF-lagen**, inclusief geëxpandeerde `INSERT`/`MINSERT`-blokken en bijbehorende RGB/ACI-laagkleuren. Lijnen worden op de grenzen van elk RD-kaartvak afgeknipt; ook een kabel of leiding waarvan beide eindpunten buiten het vak liggen wordt correct weergegeven als die het vak kruist. De exporter begrenst de hoeveelheid kaartgeometrie en respecteert annulering.
+
+Wanneer je een projectgebonden sjabloonexport start, bewaart SleufBase de vakvolgorde, titel, selectie, GeoTIFF-bestandspaden, profielkeuze/richting, opmerkingen, kaartinstellingen en sjabloonpad als **niet-gevoelige projectvoorkeuren**. Deze instellingen gaan mee bij het normale **Rust-project opslaan/automatische back-up**, en worden bij opnieuw openen hersteld. Bronidentiteit wordt gekoppeld via de combinatie van job-ID en bronbestandspad of virtuele-proefsleufidentiteit, in plaats van via vluchtige lijstnummers. Verdwenen of dubbelzinnige TIFF- en jobsbronnen worden niet stilzwijgend vervangen.
+
+Deze functionaliteit heeft regressies voor lijnknippen, zichtbaarheid, DXF/kaart-imagebundels, persistente voorkeuren en het lezen van oudere v3-projectbestanden. Een groene CI controleert de geautomatiseerde gevallen, geen volledige praktijkacceptatie op alle oorspronkelijke Python-projecten.
+
 ### Nieuw: volledige projectgebonden sjabloon-DXF vanuit de desktopapp
 
 Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavanceerde voorbereide export). Je hoeft voor de projectroute geen JSON-exportmanifest meer te maken.
@@ -75,7 +83,7 @@ Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavancee
 1. Laad één of meerdere KickTheMap `jobFeatures.json`-bestanden, optionele virtuele proefsleuven en de volledige bron-GeoTIFF-bestanden.
 2. Selecteer het oorspronkelijke DWG/DXF-*sjabloon* als DXF, geef een **nieuwe** uitvoer-DXF op, vul de projectnaam/getekend-door in en kies resolutie en schaal.
 3. Voor iedere job of virtuele proefsleuf kies je of die als vak meegaat, welke **GeoTIFF** erbij hoort en of het profiel getekend wordt. Rust probeert eerst een unieke KickTheMap-job-ID; zonder bruikbare ID controleert het de RD-ligging van de job of virtuele sleuf tegen TIFF-grenzen. Alleen een eenduidige sterke match wordt automatisch gekozen. Dubbele/tegenstrijdige bronnen blijven voor handmatige keuze.
-4. Kies lokaal/offline neutraal kaartbeeld of live **PDOK**-luchtfoto. Optioneel kunnen zichtbare BGT-weg-/terreindelen en Kadasterlijnen op de kaart komen.
+4. Kies lokaal/offline neutraal kaartbeeld of live **PDOK**-luchtfoto. Optioneel kunnen zichtbare BGT-weg-/terreindelen, Kadasterlijnen en geladen CAD/DXF-lagen (ook geneste blokken) op de kaart komen.
 5. Start de export. Rust bouwt automatisch de vakken en kaartbladen op uit volledige TIFF-data en profielbroninformatie, en publiceert de DXF met permanente afbeeldingsbundel via de bestaande transactionele exporter.
 
 De exportworker neemt de geladen brondata tijdelijk **in eigendom** en geeft die terug bij succes, fout en coöperatieve annulering. Voor de uiteindelijke sjabloonaanvraag maakt de huidige planner nog een kopie van de geselecteerde jobdata; nul-kopie-export is dus nog niet voltooid. Tijdens export kun je annuleren met Escape; afsluiten/projectwisselen gebeurt veilig na de taak. Er is een limiet van 128 geselecteerde vakken en 100.000 kaart-overlaypunten per vak. Een bestaand uitvoerbestand wordt in deze UI geweigerd.
