@@ -14,6 +14,7 @@ pub(super) struct TemplateDialog {
 enum Event {
     Progress(String),
     Finished(Result<(usize, usize, usize), String>),
+    ProjectFinished(Result<(usize, usize, usize), String>, sleufbase_rust::export_worker::Inputs),
 }
 
 pub(super) struct TemplateJob {
@@ -82,6 +83,80 @@ impl SleufBaseApp {
         }
     }
 
+    pub(super) fn start_project_template_export(
+        &mut self,
+        options: sleufbase_rust::template_project::Options,
+        output: PathBuf,
+    ) {
+        if self.export_intent.is_some() || self.file_intent.is_some()
+            || self.template_job.is_some() || self.pending_project_action.is_some()
+        {
+            self.message = "Er is al een lopende taak of projectkeuze".into();
+            return;
+        }
+        if !options.template.is_file() ||
+            output.extension().is_none_or(|ext| !ext.to_string_lossy().eq_ignore_ascii_case("dxf"))
+        {
+            self.message = "Kies een geldig DXF-sjabloon en een uitvoer-DXF".into();
+            return;
+        }
+        if output.exists() {
+            self.message = "Het uitvoerbestand bestaat al; kies een andere naam".into();
+            return;
+        }
+        if options.choices.iter().filter(|choice|choice.include).count() == 0 {
+            self.message = "Selecteer minimaal één proefsleufvak".into();
+            return;
+        }
+        // Move the large datasets instead of deep-cloning every feature and
+        // geometry. They are returned by the worker on both success and error.
+        let inputs = self.take_export_inputs();
+        let owned = Arc::new(std::sync::Mutex::new(Some(inputs)));
+        let worker_owned = Arc::clone(&owned);
+        let rasters = self.geotiffs.clone();
+        let rules = self.migrated_settings.object_rules.clone();
+        let (tx, rx) = mpsc::channel();
+        let control = Arc::new(Control::default());
+        let task_control = Arc::clone(&control);
+        let task_output = output.clone();
+        let launch = std::thread::Builder::new()
+            .name("sleufbase-project-template".into())
+            .spawn(move || {
+                let inputs = worker_owned.lock().expect("project export ownership lock")
+                    .take().expect("project inputs already owned by another worker");
+                let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    let request = sleufbase_rust::template_project::build(
+                        &options, &inputs.datasets, &rasters, &inputs.trenches,
+                        &inputs.bgt, inputs.cadastral.as_ref(), &rules, &task_control,
+                    )?;
+                    template_export::export_with_progress(
+                        &task_output, &request, &task_control,
+                        |message| { let _ = tx.send(Event::Progress(message.to_owned())); }
+                    ).map(|v| (v.filled_slots, v.profiles, v.added_pages))
+                })).unwrap_or_else(|_|Err(
+                    "Project-sjabloonexport is onverwacht gestopt; projectgegevens worden hersteld".into()
+                ));
+                let _ = tx.send(Event::ProjectFinished(outcome, inputs));
+            });
+        match launch {
+            Ok(_) => {
+                self.template_job = Some(TemplateJob {
+                    control, events: rx, output,
+                    status: "Projectbronnen en GeoTIFF-koppelingen voorbereiden…".into(),
+                    queued_action: None,
+                });
+                self.project_template_dialog = None;
+                self.message = "Projectgebonden Rust-sjabloonexport gestart".into();
+            }
+            Err(error) => {
+                if let Ok(mut guard) = owned.lock() {
+                    if let Some(inputs) = guard.take() { self.restore_export_inputs(inputs); }
+                }
+                self.message = format!("Exportworker kan niet starten: {error}");
+            }
+        }
+    }
+
     pub(super) fn start_template_export(&mut self, manifest: PathBuf, output: PathBuf) {
         if self.export_intent.is_some() || self.file_intent.is_some() ||
            self.template_job.is_some() || self.pending_project_action.is_some() {
@@ -146,10 +221,16 @@ impl SleufBaseApp {
     pub(super) fn poll_template_job(&mut self, ctx: &egui::Context) {
         let Some(job) = &mut self.template_job else { return };
         let mut finished = None;
+        let mut return_inputs = None;
         loop {
             match job.events.try_recv() {
                 Ok(Event::Progress(status)) => job.status = status,
                 Ok(Event::Finished(result)) => { finished = Some(result); break; }
+                Ok(Event::ProjectFinished(result, inputs)) => {
+                    return_inputs = Some(inputs);
+                    finished = Some(result);
+                    break;
+                }
                 Err(TryRecvError::Empty) => break,
                 Err(TryRecvError::Disconnected) => {
                     finished = Some(Err("Sjabloonexportthread zonder resultaat gestopt".into()));
@@ -158,6 +239,7 @@ impl SleufBaseApp {
             }
         }
         if let Some(result) = finished {
+            if let Some(inputs) = return_inputs { self.restore_export_inputs(inputs); }
             let job = self.template_job.take().unwrap();
             self.message = match result {
                 Ok((slots, profiles, pages)) =>
