@@ -16,7 +16,7 @@ fn valid(b: Bounds) -> bool {
 }
 /// Clip a segment without losing paths that cross a map with both endpoints
 /// outside it (the old vertex-only test silently dropped those paths).
-fn clip(a: [f64;2], b: [f64;2], bounds: Bounds) -> Option<([f64;2],[f64;2])> {
+pub(crate) fn clip(a: [f64;2], b: [f64;2], bounds: Bounds) -> Option<([f64;2],[f64;2])> {
     if !valid(bounds) || !a.into_iter().chain(b).all(|x|x.is_finite()) {return None;}
     let d=[b[0]-a[0],b[1]-a[1]];
     let p=[-d[0],d[0],-d[1],d[1]];
