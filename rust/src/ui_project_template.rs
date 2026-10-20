@@ -105,7 +105,7 @@ impl SleufBaseApp {
                             ui.checkbox(&mut dialog.options.include_cad,
                                 "Zichtbare CAD/DXF-lagen (ook geneste blokken)");
                         });
-                        ui.label("De volledige GeoTIFF wordt op het proefsleufblad én op de kaart gebruikt. Geen previewafbeeldingen.");
+                        ui.label("Jobs gebruiken de volledige GeoTIFF. Virtuele/MarXact-sleuven kunnen zonder externe TIFF hun eigen transparante raster met meetpunten en grens gebruiken.");
                         ui.separator();
                         ui.heading("3. Proefsleufvakken en GeoTIFF-koppelingen");
                         let selected = dialog.options.choices.iter().filter(|s|s.include).count();
@@ -147,12 +147,17 @@ impl SleufBaseApp {
                                         let selected_name = slot.raster.and_then(|i| rasters.get(i))
                                             .and_then(|r|r.path.file_name())
                                             .map(|s|s.to_string_lossy().to_string())
-                                            .unwrap_or_else(||"Ontbreekt — selecteer een TIFF".into());
+                                            .unwrap_or_else(||match slot.source {
+                                                Source::Virtual(_)=>"Eigen virtueel raster (geen TIFF nodig)".into(),
+                                                Source::Job(_)=>"Ontbreekt — selecteer een TIFF".into(),
+                                            });
                                         egui::ComboBox::from_id_salt("raster")
                                             .selected_text(selected_name)
                                             .show_ui(ui, |ui| {
                                                 ui.selectable_value(&mut slot.raster, None,
-                                                    "Geen (niet exporteerbaar)");
+                                                    if matches!(slot.source,Source::Virtual(_)){
+                                                        "Eigen virtueel raster (zonder externe TIFF)"
+                                                    }else{"Geen (niet exporteerbaar)"});
                                                 for (i, info) in rasters.iter().enumerate() {
                                                     let filename = info.path.file_name()
                                                         .map(|s|s.to_string_lossy().to_string())
@@ -165,7 +170,7 @@ impl SleufBaseApp {
                                         ui.checkbox(&mut slot.profile, "Profiel tekenen");
                                         ui.checkbox(&mut slot.reverse, "Richting omkeren");
                                     });
-                                    if slot.include && slot.raster.is_none() {
+                                    if slot.include && slot.raster.is_none() && matches!(slot.source,Source::Job(_)) {
                                         ui.colored_label(DARK, "Koppel eerst een GeoTIFF voordat dit vak geëxporteerd kan worden.");
                                     }
                                     let suggested = dialog.automatic[idx];
@@ -264,7 +269,8 @@ impl SleufBaseApp {
                         let ready = dialog.options.template.is_file() &&
                             dialog.output.as_ref().is_some_and(|p|!p.exists()) &&
                             dialog.options.choices.iter().any(|c|c.include) &&
-                            dialog.options.choices.iter().filter(|c|c.include).all(|c|c.raster.is_some());
+                            dialog.options.choices.iter().filter(|c|c.include)
+                                .all(|c|c.raster.is_some()||matches!(c.source,Source::Virtual(_)));
                         if ui.add_enabled(ready, egui::Button::new("Volledige project-sjabloonexport starten")).clicked() {
                             launch = dialog.output.clone();
                         }
