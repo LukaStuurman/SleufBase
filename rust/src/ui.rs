@@ -14,6 +14,7 @@ use sleufbase_rust::dxf_read::load_dxf;
 use sleufbase_rust::virtual_trench::VirtualTrench;
 use sleufbase_rust::marxact_alignment;
 use sleufbase_rust::pdok_wms::{self, PdokRaster};
+use sleufbase_rust::osm_tiles::{self, OsmRaster};
 use sleufbase_rust::bgt::{self,BgtKind,BgtLayer};
 use sleufbase_rust::cadastral::{self,CadastralLayer};
 use sleufbase_rust::ahn;
@@ -86,6 +87,11 @@ pub struct SleufBaseApp {
     pdok_bounds:Option<Bounds>,
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
     pdok_busy:bool,
+    osm_texture:Option<egui::TextureHandle>,
+    osm_bounds:Option<Bounds>,
+    osm_rx:Option<Receiver<Result<OsmRaster,String>>>,
+    osm_busy:bool,
+    osm_visible:bool,
     bgt_layers:Vec<BgtLayer>,
     bgt_rx:Option<Receiver<Result<BgtLayer,String>>>,
     bgt_busy:bool,
@@ -155,6 +161,11 @@ impl Default for SleufBaseApp {
             pdok_bounds:None,
             pdok_rx:None,
             pdok_busy:false,
+            osm_texture:None,
+            osm_bounds:None,
+            osm_rx:None,
+            osm_busy:false,
+            osm_visible:false,
             bgt_layers:Vec::new(),
             bgt_rx:None,
             bgt_busy:false,
@@ -222,6 +233,8 @@ impl SleufBaseApp {
         self.export_dialog=None;
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
+        self.osm_rx=None; self.osm_busy=false;
+        self.osm_texture=None; self.osm_bounds=None; self.osm_visible=false;
         if let Some(loader)=&mut self.raster_loader {loader.replace(Vec::new(),Default::default());}
         self.bgt_rx=None; self.bgt_busy=false;
         self.cadastral_rx=None; self.cadastral_busy=false;
@@ -589,6 +602,7 @@ impl SleufBaseApp {
                 self.pdok_bounds=Some(raster.bounds);
                 self.pdok_busy=false;
                 self.pdok_rx=None;
+                self.osm_visible=false;
                 self.message="PDOK-luchtfoto geladen".into();
             }
             Some(Ok(Err(err)))=>{
@@ -606,6 +620,58 @@ impl SleufBaseApp {
     }
 
 
+
+    fn start_osm(&mut self) {
+        if self.osm_busy {return;}
+        if self.geotiffs.iter().any(|i| i.epsg.is_some_and(|epsg|epsg!=28992)) {
+            self.message="OSM-kaart is RD (EPSG:28992). Transformeer afwijkende GeoTIFF eerst.".into();
+            return;
+        }
+        let Some(bounds)=self.current_bounds() else {
+            self.message="Laad eerst een RD-kaartlaag om OpenStreetMap op te halen".into();
+            return;
+        };
+        let (sender,receiver)=mpsc::channel();
+        self.osm_rx=Some(receiver);
+        self.osm_busy=true;
+        self.message="OpenStreetMap-tegels worden geladen (lokaal 7 dagen gecachet)".into();
+        let cache=project::app_data_directory().join("osm-tiles");
+        std::thread::spawn(move||{
+            let result=osm_tiles::request_map(bounds,1200,900,cache);
+            let _=sender.send(result);
+        });
+    }
+
+    fn poll_osm(&mut self,ctx:&egui::Context) {
+        let state=self.osm_rx.as_ref().map(|rx|rx.try_recv());
+        match state {
+            Some(Ok(Ok(raster)))=>{
+                let image=egui::ColorImage::from_rgba_unmultiplied(
+                    [raster.width as usize,raster.height as usize],&raster.rgba
+                );
+                self.osm_texture=Some(ctx.load_texture(
+                    "OpenStreetMap",image,egui::TextureOptions::LINEAR));
+                self.osm_bounds=Some(raster.bounds);
+                self.osm_visible=true;
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message=if raster.stale_cache {
+                    "OSM-kaart geladen uit verouderde cache (netwerk niet beschikbaar)".into()
+                } else {"OpenStreetMap-kaart geladen".into()};
+            }
+            Some(Ok(Err(err)))=>{
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message=format!("OpenStreetMap mislukt: {err}");
+            }
+            Some(Err(TryRecvError::Disconnected))=>{
+                self.osm_busy=false;
+                self.osm_rx=None;
+                self.message="OSM-verzoek onverwacht afgebroken".into();
+            }
+            _=>{}
+        }
+    }
 
     fn import_old_settings(&mut self) {
         if let Some(path)=rfd::FileDialog::new()
@@ -841,6 +907,7 @@ fn canvas(
     comments:&[Comment],
     pdok_texture:Option<&egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
+    osm_visible:bool,
     zoom:&mut f64,
     pan:&mut egui::Vec2,
     rules:&[sleufbase_rust::Rule]
@@ -1052,6 +1119,10 @@ fn canvas(
         format!("X: {:.2} - {:.2}, Y: {:.2} - {:.2}; zoom {:.1}x",
             bounds.min_x,bounds.max_x,bounds.min_y,bounds.max_y,zoom),
         egui::FontId::monospace(11.0),Color32::DARK_GRAY);
+    if osm_visible {
+        painter.text(rect.right_bottom()+egui::vec2(-10.0,-10.0),egui::Align2::RIGHT_BOTTOM,
+            "© OpenStreetMap contributors",egui::FontId::proportional(12.0),INK);
+    }
 }
 
 impl eframe::App for SleufBaseApp {
@@ -1078,7 +1149,7 @@ impl SleufBaseApp {
         self.poll_file_jobs(ctx);
         self.try_autosave();
         self.poll_raster_previews(ctx);
-        self.poll_pdok(ctx);
+        self.poll_pdok(ctx);self.poll_osm(ctx);
         self.poll_live_jobs();
         self.poll_live_download(ctx);
         self.poll_bgt();
@@ -1126,6 +1197,9 @@ impl SleufBaseApp {
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
+                if ui.add_enabled(!self.osm_busy,egui::Button::new("OpenStreetMap")).clicked() {self.start_osm();}
+                if self.osm_texture.is_some() && ui.selectable_label(self.osm_visible,"OSM tonen").clicked() {self.osm_visible=true;}
+                if self.pdok_texture.is_some() && ui.selectable_label(!self.osm_visible,"PDOK tonen").clicked() {self.osm_visible=false;}
                 if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT wegdelen")).clicked() {
                     self.start_bgt(BgtKind::Wegdeel);
                 }
@@ -1403,12 +1477,14 @@ impl SleufBaseApp {
         }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.heading("Kaart");
-            ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, BGT en Kadaster (preview).");
+            ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, OpenStreetMap, BGT en Kadaster (preview).");
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
             canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
-                self.pdok_texture.as_ref(),self.pdok_bounds,
+                if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
+                if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
+                self.osm_visible && self.osm_texture.is_some(),
                 &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules);
         });
 
