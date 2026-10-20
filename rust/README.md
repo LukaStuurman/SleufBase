@@ -72,6 +72,14 @@ Installeer Rust via https://rustup.rs en voer in PowerShell uit:
 Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
 'SleufBase-Rust-Windows-preview' van een geslaagde build. Dit is geen stable release.
 
+### Werkfoto's in native sjabloon-DXF (PNG/JPEG)
+
+In **Project → sjabloon DXF** kun je per proefsleufvak de nieuwe sectie **Werkfoto's** openen. Kies maximaal vier JPEG- of PNG-bestanden, stel per foto de kwartslagrotatie (0°, 90°, 180° of 270°) in en kies of de foto rechts **op TIFF** of **op kaart** wordt geplaatst. De oorspronkelijke volledige TIFF en kaart worden niet vervangen: elke foto krijgt een eigen IMAGE/IMAGEDEF-verwijzing met passende DXF-referenties en wordt verwerkt in dezelfde atomaire exporttransactie.
+
+De afbeelding wordt vóór het publiceren gecontroleerd op bestandstype, afmetingen, bestandsgrootte en geheugenlimieten, waar nodig verkleind tot maximaal 1800 pixels langs de langste zijde en met bewaarde beeldverhouding opgenomen. De uitvoer bevat `slot00001_photo01.png`, enzovoort, in de permanente DXF-afbeeldingsbundel. Ontbrekende of corrupte bestanden verhinderen de export zonder eerdere DXF of assetbundel te overschrijven.
+
+Fotopaden, plaatsing en rotatie worden bij export vastgelegd in de native Rust-projectvoorkeuren. Oudere v3-projectinstellingen zonder fotoveld blijven leesbaar. De fotostrip neemt een deel van de zichtbare kaart of TIFF in beslag; voor aparte bladvakken, fotocaptions, beeldannotatie en alle oorspronkelijke Python-fotobewerking is verdere migratie nodig.
+
 ### Native project-naar-sjabloon met CAD-lagen en bewaarde vakinstellingen
 
 De projectgebonden **Project → sjabloon DXF**-route ondersteunt optioneel ook **zichtbare CAD/DXF-lagen**, inclusief geëxpandeerde `INSERT`/`MINSERT`-blokken en bijbehorende RGB/ACI-laagkleuren. Lijnen worden op de grenzen van elk RD-kaartvak afgeknipt; ook een kabel of leiding waarvan beide eindpunten buiten het vak liggen wordt correct weergegeven als die het vak kruist. De exporter begrenst de hoeveelheid kaartgeometrie en respecteert annulering.
