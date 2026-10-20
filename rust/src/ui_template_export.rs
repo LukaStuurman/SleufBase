@@ -112,6 +112,11 @@ impl SleufBaseApp {
             self.message = "Selecteer minimaal één proefsleufvak".into();
             return;
         }
+        let saved=sleufbase_rust::template_prefs::TemplatePreferences::capture(
+            &options,&self.datasets,&self.geotiffs,&self.virtual_trenches
+        );
+        self.template_preferences=Some(saved);
+        self.dirty=true;
         // Move the large datasets instead of deep-cloning every feature and
         // geometry. They are returned by the worker on both success and error.
         let inputs = self.take_export_inputs();
