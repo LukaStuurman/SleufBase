@@ -164,7 +164,7 @@ pub fn import_tabular(t:&mut VirtualTrench,source:&str)->Result<usize,String> {
             return Err(format!("Regel {}: verwacht 5 t/m 9 tab-gescheiden kolommen",line_no+1));
         }
         let number=|index:usize|->Result<f64,String>{
-            cols[index].replace(',','.').parse::<f64>()
+            cols[index].replace(',',".").parse::<f64>()
                 .map_err(|_|format!("Regel {}: ongeldige meterwaarde in kolom {}",line_no+1,index+1))
         };
         let chainage=number(3)?;
