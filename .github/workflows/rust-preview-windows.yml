@@ -466,6 +466,27 @@ jobs:
             rust/target/release/sleufbase-rust.exe
             rust/target/release/Pillow-LICENSE.txt
           if-no-files-found: error
+      - name: Package portable Rust Windows preview
+        shell: pwsh
+        run: |
+          $folder = "rust/dist/SleufBase-Rust-portable-preview"
+          $archive = "rust/dist/SleufBase-Rust-portable-preview.zip"
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          Copy-Item -LiteralPath "rust/target/release/sleufbase-rust.exe" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/target/release/Pillow-LICENSE.txt" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/PORTABLE.md" -Destination "$folder/README.md" -ErrorAction Stop
+          Compress-Archive -Path "$folder/*" -DestinationPath $archive -CompressionLevel Optimal -Force
+          $checksum = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "rust/dist/SleufBase-Rust-portable-preview.sha256" -Value "$checksum  SleufBase-Rust-portable-preview.zip" -Encoding ascii
+          if ((Get-Item -LiteralPath $archive).Length -lt 500000) { throw "Portable preview ZIP lijkt onvolledig" }
+      - name: Upload portable Rust Windows preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-Windows-portable-preview
+          path: |
+            rust/dist/SleufBase-Rust-portable-preview.zip
+            rust/dist/SleufBase-Rust-portable-preview.sha256
+          if-no-files-found: error
       # Exact-byte sink comparison, independent of Python/app performance.
       - name: Benchmark object export streaming
         shell: pwsh
