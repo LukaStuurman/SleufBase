@@ -38,6 +38,8 @@ mod exporting;
 mod template_exporting;
 #[path="ui_project_template.rs"]
 mod project_template_ui;
+#[path="ui_trench_editor.rs"]
+mod trench_editing;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -91,6 +93,7 @@ pub struct SleufBaseApp {
     trench_markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,
     show_trench_dialog: bool,
     trench_form:TrenchForm,
+    trench_editor:Option<trench_editing::Editor>,
     pdok_texture:Option<egui::TextureHandle>,
     pdok_bounds:Option<Bounds>,
     pdok_rx:Option<Receiver<Result<PdokRaster,String>>>,
@@ -169,6 +172,7 @@ impl Default for SleufBaseApp {
             trench_markers:Vec::new(),
             show_trench_dialog:false,
             trench_form:TrenchForm::default(),
+            trench_editor:None,
             pdok_texture:None,
             pdok_bounds:None,
             pdok_rx:None,
@@ -257,6 +261,7 @@ impl SleufBaseApp {
         self.ahn_rx=None; self.ahn_busy=false;
         self.pdok_texture=None; self.pdok_bounds=None;
         self.show_trench_dialog=false; self.show_comment_dialog=false;
+        self.trench_editor=None;
         self.zoom=1.0; self.pan=egui::Vec2::ZERO;
         self.last_backup=Instant::now();
         // Keep an in-flight download receiver so its in-memory login session
@@ -1377,11 +1382,15 @@ impl SleufBaseApp {
             }
             ui.separator();
             ui.heading("Virtuele proefsleuven");
+            let mut edit_virtual = None;
             for (index,trench) in self.virtual_trenches.iter_mut().enumerate() {
-                ui.label(format!("{} ({:.2} m, {} objecten{})",
-                    trench.label,trench.length(),trench.objects.len(),
-                    if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
-                ));
+                ui.horizontal(|ui|{
+                    ui.label(format!("{} ({:.2} m, {} objecten{})",
+                        trench.label,trench.length(),trench.objects.len(),
+                        if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
+                    ));
+                    if ui.small_button("Bewerken").clicked(){edit_virtual=Some(index);}
+                });
                 if !trench.boundary_3d.is_empty() {
                     ui.push_id(index,|ui|{
                         let mut rotation=trench.alignment.as_ref()
@@ -1403,6 +1412,7 @@ impl SleufBaseApp {
                     });
                 }
             }
+            if let Some(index)=edit_virtual {self.open_virtual_editor(index);}
             ui.separator();
             ui.heading("Kaartopmerkingen");
             let mut remove_comment=None;
@@ -1550,6 +1560,8 @@ impl SleufBaseApp {
             }
         }
 
+
+        if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
 
         if self.show_comment_dialog {
             let mut opened=self.show_comment_dialog;
