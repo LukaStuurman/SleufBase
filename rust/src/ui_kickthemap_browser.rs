@@ -22,6 +22,7 @@ pub(super) struct BrowserUi {
     sort:Sort,
     pub(super) queue:VecDeque<(u64,RemoteFileKind)>,
     pub(super) batch_mode:bool,
+    batch_generation:u64,
     pub(super) downloaded_json:Vec<PathBuf>,
     pub(super) downloaded_tiffs:Vec<PathBuf>,
     pub(super) completed:usize,
@@ -35,6 +36,7 @@ impl Default for BrowserUi {
             selected:BTreeSet::new(),filter:String::new(),
             only_downloadable:false,only_loaded:false,
             sort:Sort::Newest,queue:VecDeque::new(),batch_mode:false,
+            batch_generation:0,
             downloaded_json:Vec::new(),downloaded_tiffs:Vec::new(),
             completed:0,failures:Vec::new(),cancel:Arc::new(AtomicBool::new(false)),
             status:String::new()}
@@ -99,6 +101,15 @@ impl SleufBaseApp {
         });
     }
     pub(super) fn poll_kickthemap_browser(&mut self,ctx:&egui::Context) {
+        if self.browser_ui.batch_mode &&
+            self.browser_ui.batch_generation!=self.project_generation {
+            self.browser_ui.cancel.store(true,Ordering::SeqCst);
+            self.browser_ui.queue.clear();
+            self.browser_ui.downloaded_json.clear();
+            self.browser_ui.downloaded_tiffs.clear();
+            self.browser_ui.batch_mode=false;
+            self.browser_ui.status="Project gewijzigd tijdens downloads; bestanden blijven op schijf, maar zijn niet in het nieuwe project ingeladen".into();
+        }
         let event=self.browser_ui.launching.as_ref().map(|rx|rx.try_recv());
         match event {
             Some(Ok(Ok(browser)))=>{
@@ -200,6 +211,7 @@ impl SleufBaseApp {
         self.browser_ui.failures.clear();
         self.browser_ui.cancel.store(false,Ordering::SeqCst);
         self.browser_ui.batch_mode=true;
+        self.browser_ui.batch_generation=self.project_generation;
         self.browser_ui.status=format!(
             "{} bestanden ingepland. Elke download wordt na validatie opgeslagen zonder overschrijven.",
             self.browser_ui.queue.len()
@@ -350,5 +362,27 @@ impl SleufBaseApp {
             }
             _=>{}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn switching_projects_aborts_batch_and_never_imports_old_downloads() {
+        let mut app=SleufBaseApp::default();
+        app.browser_ui.batch_mode=true;
+        app.browser_ui.batch_generation=17;
+        app.project_generation=18;
+        app.browser_ui.queue.push_back((42,RemoteFileKind::GeoTiff));
+        app.browser_ui.downloaded_json.push(PathBuf::from("old_project.json"));
+        app.browser_ui.downloaded_tiffs.push(PathBuf::from("old_project.tiff"));
+        app.poll_kickthemap_browser(&egui::Context::default());
+        assert!(!app.browser_ui.batch_mode);
+        assert!(app.browser_ui.queue.is_empty());
+        assert!(app.browser_ui.downloaded_json.is_empty());
+        assert!(app.browser_ui.downloaded_tiffs.is_empty());
+        assert!(app.browser_ui.cancel.load(Ordering::Relaxed));
+        assert!(app.file_intent.is_none());
     }
 }
