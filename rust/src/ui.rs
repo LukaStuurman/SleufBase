@@ -1702,15 +1702,17 @@ mod project_lifecycle_tests {
         let (ctx_send,crx)=mpsc::channel();app.cadastral_rx=Some(crx);app.cadastral_busy=true;
         let (atx,arx)=mpsc::channel();app.ahn_rx=Some(arx);app.ahn_busy=true;
         let (ptx,prx)=mpsc::channel();app.pdok_rx=Some(prx);app.pdok_busy=true;
+        let (otx,orx)=mpsc::channel();app.osm_rx=Some(orx);app.osm_busy=true;
         let old_generation=app.project_generation;
         app.execute_project_action(ProjectAction::New,&ctx);
         assert_ne!(app.project_generation,old_generation);
-        assert!(!app.bgt_busy&&!app.cadastral_busy&&!app.ahn_busy&&!app.pdok_busy);
+        assert!(!app.bgt_busy&&!app.cadastral_busy&&!app.ahn_busy&&!app.pdok_busy&&!app.osm_busy);
         assert!(btx.send(Err("late".into())).is_err());
         assert!(ctx_send.send(Err("late".into())).is_err());
         assert!(atx.send(Err("late".into())).is_err());
         assert!(ptx.send(Err("late".into())).is_err());
-        app.poll_bgt();app.poll_cadastral();app.poll_ahn();app.poll_pdok(&ctx);
+        assert!(otx.send(Err("late".into())).is_err());
+        app.poll_bgt();app.poll_cadastral();app.poll_ahn();app.poll_pdok(&ctx);app.poll_osm(&ctx);
         assert!(app.bgt_layers.is_empty()); assert!(app.cadastral.is_none()); assert!(!app.dirty);
     }
     #[test]
