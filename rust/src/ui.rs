@@ -1785,7 +1785,7 @@ mod project_lifecycle_tests {
         let custom=[sleufbase_rust::Rule::new(vec!["water".into()],"CUSTOM".into(),6,"Andere naam".into())];
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|rules:&[sleufbase_rust::Rule]|ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,rules);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,rules);});
         });
         let has_magenta=|output:egui::FullOutput|output.shapes.iter().any(|s|matches!(&s.shape,egui::Shape::Circle(c)if c.fill==aci_color(6)));
         assert!(has_magenta(render(&custom)));
@@ -1840,7 +1840,7 @@ mod project_lifecycle_tests {
         let mut render=|overlay:&DxfOverlay| {
             ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.0,600.0))),..Default::default()},|ctx|{
                 egui::CentralPanel::default().show(ctx,|ui|{
-                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
+                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
                 });
             })
         };
@@ -1863,7 +1863,7 @@ mod project_lifecycle_tests {
         assert_eq!(overlay.features.len(),1);
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
             egui::CentralPanel::default().show(ctx,|ui|{
-                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);
+                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
             });
         });
         let edges:Vec<_>=output.shapes.iter().filter_map(|s|match &s.shape {
@@ -1885,7 +1885,7 @@ mod project_lifecycle_tests {
         overlay.rebuild_block_cache().unwrap();
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
         });
         let edges=output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count();
         assert_eq!(edges,2,"hidden edges and gaps must not be painted");
