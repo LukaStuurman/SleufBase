@@ -190,17 +190,36 @@ pub fn build_with_cad(
         control.check()?;
         crate::template_photo::validate(&choice.photos)?;
         if !seen.insert(choice.source) { return Err("Dubbele proefsleufselectie".into()); }
-        let raster_index = choice.raster.ok_or_else(|| {
-            format!("Voor '{}' ontbreekt een GeoTIFF; koppel deze handmatig in het exportvenster", choice.title)
-        })?;
-        let raster = rasters.get(raster_index).ok_or("GeoTIFF-verwijzing buiten de projectlijst")?;
-        if raster.epsg.is_some_and(|epsg| epsg != 28992) {
-            return Err(format!("GeoTIFF '{}' staat niet in EPSG:28992", raster.path.display()));
+        let raster = choice.raster.map(|index|
+            rasters.get(index).ok_or("GeoTIFF-verwijzing buiten de projectlijst")
+        ).transpose()?;
+        if raster.is_none() && matches!(choice.source,Source::Job(_)){
+            return Err(format!("Voor '{}' ontbreekt een GeoTIFF; koppel deze in het exportvenster",choice.title));
         }
-        if !raster.path.is_file() {
-            return Err(format!("GeoTIFF niet gevonden: {}", raster.path.display()));
+        if let Some(raster)=raster {
+            if raster.epsg.is_some_and(|epsg|epsg!=28992){
+                return Err(format!("GeoTIFF '{}' staat niet in EPSG:28992",raster.path.display()));
+            }
+            if !raster.path.is_file(){
+                return Err(format!("GeoTIFF niet gevonden: {}",raster.path.display()));
+            }
         }
-        let bounds = checked_bounds(raster.bounds)?;
+        // A virtual or measured MarXact trench can export its own transparent
+        // synthetic TIFF pane; it does not need an unrelated KickTheMap job.
+        let virtual_source=match (choice.source,raster){
+            (Source::Virtual(i),None)=>{
+                let trench=trenches.get(i).ok_or("Virtuele sleuf niet meer beschikbaar")?;
+                Some(crate::virtual_raster::Source{trench:trench.clone(),quality:1.})
+            },
+            _=>None,
+        };
+        let bounds=match (raster,virtual_source.as_ref()){
+            (Some(info),_)=>checked_bounds(info.bounds)?,
+            (None,Some(source))=>checked_bounds(
+                crate::virtual_raster::layout(&source.trench,source.quality)?.bounds
+            )?,
+            _=>return Err("Geen proefsleufrasterbron".into()),
+        };
         let (dataset, forced_start, axis, extra_polyline) = match choice.source {
             Source::Job(i) => {
                 let job = jobs.get(i).ok_or("Job bestaat niet meer in dit project")?;
@@ -272,10 +291,11 @@ pub fn build_with_cad(
             bounds, label: format!("PS{:03}", local_index + 1),
             title: label, address: None, comments: choice.comments.clone(),
             tiff_png: PathBuf::new(),
-            tiff_source: Some(template_raster::Source {
+            tiff_source: raster.map(|raster|template_raster::Source {
                 path: raster.path.clone(), transform: raster.transform,
                 reverse_orientation: choice.reverse, axis,
             }),
+            virtual_source,
             map_png: PathBuf::new(),
             map_source: Some(MapSource {
                 settings: map_page::Settings { dpi: opts.dpi, scale: opts.scale },
