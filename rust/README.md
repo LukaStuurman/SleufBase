@@ -88,6 +88,16 @@ Wanneer je een projectgebonden sjabloonexport start, bewaart SleufBase de vakvol
 
 Deze functionaliteit heeft regressies voor lijnknippen, zichtbaarheid, DXF/kaart-imagebundels, persistente voorkeuren en het lezen van oudere v3-projectbestanden. Een groene CI controleert de geautomatiseerde gevallen, geen volledige praktijkacceptatie op alle oorspronkelijke Python-projecten.
 
+### Virtuele/MarXact-rasterprofielen rechtstreeks vanuit Rust
+
+Het projectgebonden sjabloonvenster kan nu **virtuele en MarXact-proefsleuven zonder externe KickTheMap-GeoTIFF** exporteren. Kies bij de proefsleuf **GeoTIFF → Eigen virtueel raster (zonder externe TIFF)**. In dat geval tekent Rust de originele sleufgrens, gemeten positie en dwarsmarkeringen van objecten in een eigen transparante rasterplaat op basis van RD-coördinaten en sleufbreedte. De afbeeldingsresolutie/bounds volgen de Python-basismethode (1,5 m of driemaal sleufbreedte marge; normaal 220–1600 pixels per as). Er wordt **geen verzonnen satellietbeeld** gemaakt. De kaart en het dwarsprofiel blijven aparte onderdelen van hetzelfde sjabloonvak; de PNG gaat via de bestaande atomaire DXF-afbeeldingsbundel.
+
+In **Virtuele proefsleuven → Bewerken** zijn nu bovendien de **Z-hoogtes van begin- en eindpunt** instelbaar en kun je **dekbandsegmenten** toevoegen/wijzigen/verwijderen met begin-/eindkettingmaat, omschrijving en RGB-kleur. Dekbanden verschijnen als gekleurde langslijnen in het gegenereerde raster. Een omgekeerde handmatige meetas zet de kettingmaten van dekbanden automatisch om, zonder hun geografische positie te verliezen. Oude Rust-projecten zonder `dekband_rows` blijven leesbaar. De gemeten MarXact-as blijft beschermd; gebruik voor handmatige geometrische wijzigingen een kopie.
+
+Voor het daadwerkelijk tekenen van een **dwarsprofiel** moeten de begin- én eindpunthoogte bekend zijn. Is een Z-hoogte onbekend, vul die handmatig met een bekende meting in of zet **Profiel tekenen** uit. De rasterexport zonder dwarsprofiel blijft beschikbaar. Een gewone KickTheMap-job vereist nog wel een echte GeoTIFF.
+
+**Nog geen volledige Python-pariteit:** originele per-object display_rgb-instellingen, uitgebreid Python-dekbandmodel, raster-previewbewerking op de hoofkaart, complexe fotobewerking en pixel-perfect Pillow-gelijkheid ontbreken nog. De eerste integratietests controleren export zonder externe TIFF, kaart-/PNG-bundel, segmenten en projectcompatibiliteit; echte MarXact-projecten moeten aanvullend worden geaccepteerd.
+
 ### Virtuele proefsleuven en MarXact-bronnen bewerken
 
 Open in de linkerkolom **Virtuele proefsleuven → Bewerken** om een bestaande (of uit MarXact ingelezen) proefsleuf te bewerken. De native editor heeft een bovenaanzicht van de sleuf en meetpunten, RD-begin-/eindcoördinaten, breedte, proefsleufnaam, omkeren van een handmatige meetas en een volledige lijst met meetobjecten. Je kunt per object rol, objectnaam, discipline-/broncode, kettingmaat, getekende dwarsafstand (positief links van de as), optionele Z-hoogte en drie attributen aanpassen.
