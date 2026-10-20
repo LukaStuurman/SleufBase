@@ -41,6 +41,29 @@ impl Default for BrowserUi {
     }
 }
 impl SleufBaseApp {
+    pub(super) fn open_kickthemap_workspace(&mut self) {
+        self.browser_ui.open=true;
+        if self.jobs_cache.is_some() {return;}
+        let dir=kickthemap_cache_dir().join("jobs_cache");
+        let mut newest=None::<(f64,JobsCache)>;
+        if let Ok(entries)=std::fs::read_dir(dir) {
+            for item in entries.flatten().take(250) {
+                if item.path().extension().is_none_or(|ext|ext!="json") {continue;}
+                if let Ok(cache)=read_cache(&item.path()) {
+                    if newest.as_ref().is_none_or(|(ts,_)|cache.saved_at>*ts) {
+                        newest=Some((cache.saved_at,cache));
+                    }
+                }
+            }
+        }
+        if let Some((_,cache))=newest {
+            self.browser_ui.status=format!(
+                "Offline cache geopend: {} jobs. Log via Edge in voor de huidige gegevens.",
+                cache.jobs.len()
+            );
+            self.jobs_cache=Some(cache);
+        }
+    }
     pub(super) fn launch_kickthemap_browser(&mut self) {
         if self.browser_ui.launching.is_some() || self.browser_ui.capturing.is_some() ||
             self.browser_ui.browser.is_some() {return;}
