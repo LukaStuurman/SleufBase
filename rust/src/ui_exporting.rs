@@ -12,7 +12,7 @@ pub(super) struct ExportIntent {
 }
 
 impl SleufBaseApp {
-    fn take_export_inputs(&mut self) -> Inputs {
+    pub(super) fn take_export_inputs(&mut self) -> Inputs {
         Inputs {
             datasets: std::mem::take(&mut self.datasets),
             trenches: std::mem::take(&mut self.virtual_trenches),
@@ -20,7 +20,7 @@ impl SleufBaseApp {
             bgt: std::mem::take(&mut self.bgt_layers),
         }
     }
-    fn restore_export_inputs(&mut self, inputs: Inputs) {
+    pub(super) fn restore_export_inputs(&mut self, inputs: Inputs) {
         debug_assert!(
             self.datasets.is_empty()
                 && self.virtual_trenches.is_empty()
