@@ -6,6 +6,7 @@ pub(super) struct Dialog {
     pub options: Options,
     pub output: Option<PathBuf>,
     pub error: String,
+    pub automatic: Vec<sleufbase_rust::template_match::Suggestion>,
 }
 impl Dialog {
     fn new(app: &SleufBaseApp) -> Self {
@@ -18,7 +19,11 @@ impl Dialog {
         // Do not silently reuse stale project-specific settings from another
         // project. Users explicitly select the desired CAD template each time.
         options.include_bgt = true;
-        Self { options, output: None, error: String::new() }
+        let automatic=options.choices.iter().map(|choice| match choice.source {
+            Source::Job(i) => sleufbase_rust::template_match::for_job(&app.datasets[i], &app.geotiffs),
+            Source::Virtual(i) => sleufbase_rust::template_match::for_trench(&app.virtual_trenches[i], &app.geotiffs),
+        }).collect();
+        Self { options, output: None, error: String::new(), automatic }
     }
 }
 
@@ -39,7 +44,9 @@ impl SleufBaseApp {
         let mut open = true;
         let mut launch = None;
         let rasters = &self.geotiffs;
+        let raster_previews = &self.raster_textures;
         if let Some(dialog) = &mut self.project_template_dialog {
+            let mut reorder = None;
             egui::Window::new("Project naar sjabloon-DXF — volledig native Rust")
                 .open(&mut open)
                 .default_width(730.)
@@ -102,6 +109,17 @@ impl SleufBaseApp {
                         if selected > template_project::MAX_SLOTS {
                             ui.colored_label(DARK, "Te veel proefsleufvakken");
                         }
+                        ui.horizontal(|ui| {
+                            if ui.small_button("Alle vakken selecteren").clicked() {
+                                for c in &mut dialog.options.choices { c.include = true; }
+                            }
+                            if ui.small_button("Alles deselecteren").clicked() {
+                                for c in &mut dialog.options.choices { c.include = false; }
+                            }
+                            if ui.small_button("Alleen gekoppelde TIFF's").clicked() {
+                                for c in &mut dialog.options.choices { c.include = c.raster.is_some(); }
+                            }
+                        });
                         for (idx, slot) in dialog.options.choices.iter_mut().enumerate() {
                             ui.push_id(idx, |ui| {
                                 ui.group(|ui| {
@@ -112,6 +130,12 @@ impl SleufBaseApp {
                                             Source::Virtual(i) => format!("Virtuele sleuf {}", i + 1),
                                         });
                                         ui.text_edit_singleline(&mut slot.title);
+                                        if idx>0 && ui.small_button("↑").on_hover_text("Eerder op het sjabloon").clicked() {
+                                            reorder=Some((idx,idx-1));
+                                        }
+                                        if idx+1<dialog.automatic.len() && ui.small_button("↓").on_hover_text("Later op het sjabloon").clicked() {
+                                            reorder=Some((idx,idx+1));
+                                        }
                                     });
                                     ui.horizontal(|ui| {
                                         ui.label("GeoTIFF:");
@@ -139,6 +163,36 @@ impl SleufBaseApp {
                                     if slot.include && slot.raster.is_none() {
                                         ui.colored_label(DARK, "Koppel eerst een GeoTIFF voordat dit vak geëxporteerd kan worden.");
                                     }
+                                    let suggested = dialog.automatic[idx];
+                                    if let Some(automatic_idx)=suggested.raster {
+                                        if slot.raster==Some(automatic_idx) {
+                                            ui.small(match suggested.reason {
+                                                sleufbase_rust::template_match::MatchKind::JobId =>
+                                                    "Automatische TIFF-koppeling: unieke KickTheMap-job-ID",
+                                                sleufbase_rust::template_match::MatchKind::Location =>
+                                                    "Automatische TIFF-koppeling: unieke ligging in RD",
+                                                _ => "TIFF handmatig beoordelen",
+                                            });
+                                        } else if ui.small_button("Herstel automatische TIFF-keuze").clicked() {
+                                            slot.raster=Some(automatic_idx);
+                                        }
+                                    } else if suggested.reason == sleufbase_rust::template_match::MatchKind::Ambiguous {
+                                        ui.small("Meerdere mogelijke TIFF's; handmatige keuze nodig.");
+                                    }
+                                    if let Some(raster_index)=slot.raster {
+                                        if let Some(info)=rasters.get(raster_index) {
+                                            ui.horizontal(|ui| {
+                                                if let Some(Some(preview))=raster_previews.get(raster_index) {
+                                                    ui.add(egui::Image::new((preview.id(),egui::vec2(190.,120.))));
+                                                }
+                                                ui.vertical(|ui| {
+                                                    ui.small(format!("RD X {:.1}–{:.1}",info.bounds.min_x,info.bounds.max_x));
+                                                    ui.small(format!("RD Y {:.1}–{:.1}",info.bounds.min_y,info.bounds.max_y));
+                                                    ui.small(format!("CRS: {}",info.epsg.map_or("onbekend".into(),|id|format!("EPSG:{id}"))));
+                                                });
+                                            });
+                                        }
+                                    }
                                     ui.collapsing("Opmerkingen", |ui| {
                                         ui.text_edit_multiline(&mut slot.comments);
                                     });
@@ -159,6 +213,10 @@ impl SleufBaseApp {
                         }
                     });
                 });
+            if let Some((a,b))=reorder {
+                dialog.options.choices.swap(a,b);
+                dialog.automatic.swap(a,b);
+            }
         }
         if !open { self.project_template_dialog = None; }
         if let Some(output) = launch {
