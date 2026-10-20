@@ -198,6 +198,58 @@ impl SleufBaseApp {
                                             });
                                         }
                                     }
+                                    ui.collapsing(format!("Werkfoto's voor dit vak ({}/{})",
+                                        slot.photos.len(),
+                                        sleufbase_rust::template_photo::MAX_PHOTOS_PER_SLOT), |ui| {
+                                        ui.small("JPEG/PNG als eigen afbeeldingsbestand op de rechterkant van het gekozen kaart- of TIFF-vak. De oorspronkelijke rasterbron blijft bestaan.");
+                                        if ui.add_enabled(slot.photos.len() <
+                                            sleufbase_rust::template_photo::MAX_PHOTOS_PER_SLOT,
+                                            egui::Button::new("Voeg werkfoto's toe…")).clicked() {
+                                            if let Some(selected)=rfd::FileDialog::new()
+                                                .add_filter("Foto's", &["jpg","jpeg","png"])
+                                                .pick_files() {
+                                                for path in selected {
+                                                    if slot.photos.len()>=sleufbase_rust::template_photo::MAX_PHOTOS_PER_SLOT {break;}
+                                                    if !slot.photos.iter().any(|p|p.path==path) {
+                                                        slot.photos.push(sleufbase_rust::template_photo::Photo {
+                                                            path,turns:0,
+                                                            area:sleufbase_rust::template_photo::Area::Tiff
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        let mut remove=None;
+                                        for (photo_index,photo) in slot.photos.iter_mut().enumerate() {
+                                            ui.push_id(photo_index,|ui|{
+                                                ui.horizontal(|ui|{
+                                                    ui.label(photo.path.file_name()
+                                                        .map(|s|s.to_string_lossy().to_string())
+                                                        .unwrap_or_else(||"Werkfoto".into()));
+                                                    egui::ComboBox::from_id_salt("rotate")
+                                                        .selected_text(format!("{}°",photo.turns*90))
+                                                        .show_ui(ui,|ui|{
+                                                            for turn in 0..4 {
+                                                                ui.selectable_value(&mut photo.turns,turn,format!("{}°",turn*90));
+                                                            }
+                                                        });
+                                                    egui::ComboBox::from_id_salt("area")
+                                                        .selected_text(match photo.area{
+                                                            sleufbase_rust::template_photo::Area::Tiff=>"Op TIFF",
+                                                            sleufbase_rust::template_photo::Area::Map=>"Op kaart",
+                                                        }).show_ui(ui,|ui|{
+                                                            ui.selectable_value(&mut photo.area,
+                                                                sleufbase_rust::template_photo::Area::Tiff,"Op TIFF");
+                                                            ui.selectable_value(&mut photo.area,
+                                                                sleufbase_rust::template_photo::Area::Map,"Op kaart");
+                                                        });
+                                                    if ui.small_button("Verwijder").clicked(){remove=Some(photo_index);}
+                                                });
+                                                if !photo.path.is_file(){ui.colored_label(DARK,"Fotobestand ontbreekt");}
+                                            });
+                                        }
+                                        if let Some(index)=remove {slot.photos.remove(index);}
+                                    });
                                     ui.collapsing("Opmerkingen", |ui| {
                                         ui.text_edit_multiline(&mut slot.comments);
                                     });
