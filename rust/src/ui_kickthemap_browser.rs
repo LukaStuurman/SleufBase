@@ -11,22 +11,22 @@ use std::{collections::{BTreeSet,VecDeque},sync::{Arc,atomic::{AtomicBool,Orderi
 #[derive(Clone,Copy,PartialEq,Eq)]
 enum Sort {Newest,Name,Id}
 pub(super) struct BrowserUi {
-    open:bool,
-    browser:Option<Browser>,
+    pub(super) open:bool,
+    pub(super) browser:Option<Browser>,
     launching:Option<Receiver<Result<Browser,String>>>,
     capturing:Option<Receiver<(Browser,Result<(KickTheMapLiveClient,Vec<Job>),String>)>>,
-    selected:BTreeSet<u64>,
+    pub(super) selected:BTreeSet<u64>,
     filter:String,
     only_downloadable:bool,
     only_loaded:bool,
     sort:Sort,
-    queue:VecDeque<(u64,RemoteFileKind)>,
-    batch_mode:bool,
-    downloaded_json:Vec<PathBuf>,
-    downloaded_tiffs:Vec<PathBuf>,
-    completed:usize,
-    failures:Vec<String>,
-    cancel:Arc<AtomicBool>,
+    pub(super) queue:VecDeque<(u64,RemoteFileKind)>,
+    pub(super) batch_mode:bool,
+    pub(super) downloaded_json:Vec<PathBuf>,
+    pub(super) downloaded_tiffs:Vec<PathBuf>,
+    pub(super) completed:usize,
+    pub(super) failures:Vec<String>,
+    pub(super) cancel:Arc<AtomicBool>,
     status:String,
 }
 impl Default for BrowserUi {
