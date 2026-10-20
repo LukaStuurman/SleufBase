@@ -33,6 +33,7 @@ pub struct Choice {
     pub profile: bool,
     pub reverse: bool,
     pub comments: String,
+    pub photos: Vec<crate::template_photo::Photo>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all="snake_case")]
@@ -77,7 +78,7 @@ pub fn suggest(datasets: &[Dataset], rasters: &[GeoTiffInfo], trenches: &[Virtua
             source: Source::Job(i),
             raster: crate::template_match::for_job(job,rasters).raster,
             include: true, title: job.title.clone(), profile: true,
-            reverse: false, comments: String::new(),
+            reverse: false, comments: String::new(), photos:Vec::new(),
         });
     }
     for (i, trench) in trenches.iter().enumerate() {
@@ -85,7 +86,7 @@ pub fn suggest(datasets: &[Dataset], rasters: &[GeoTiffInfo], trenches: &[Virtua
             source: Source::Virtual(i),
             raster: crate::template_match::for_trench(trench,rasters).raster,
             include: true, title: trench.label.clone(), profile: true,
-            reverse: false, comments: String::new(),
+            reverse: false, comments: String::new(), photos:Vec::new(),
         });
     }
     choices
@@ -187,6 +188,7 @@ pub fn build_with_cad(
     }
     for choice in enabled {
         control.check()?;
+        crate::template_photo::validate(&choice.photos)?;
         if !seen.insert(choice.source) { return Err("Dubbele proefsleufselectie".into()); }
         let raster_index = choice.raster.ok_or_else(|| {
             format!("Voor '{}' ontbreekt een GeoTIFF; koppel deze handmatig in het exportvenster", choice.title)
@@ -287,6 +289,7 @@ pub fn build_with_cad(
                 dataset: local_index, forced_start, reverse: choice.reverse,
                 ..Profile::default()
             }),
+            photos:choice.photos.clone(),
         }));
     }
     Ok(template_export::Request {
