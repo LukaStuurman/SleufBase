@@ -4,6 +4,7 @@ use crate::{
     bgt::BgtLayer,
     cadastral::CadastralLayer,
     export_control::Control,
+    dxf_read::DxfOverlay,
     geotiff::GeoTiffInfo,
     map_export::{Background, Source as MapSource, Stroke},
     map_page,
@@ -47,6 +48,7 @@ pub struct Options {
     pub background: BackgroundKind,
     pub include_bgt: bool,
     pub include_cadastral: bool,
+    pub include_cad: bool,
     pub choices: Vec<Choice>,
 }
 impl Default for Options {
@@ -60,6 +62,7 @@ impl Default for Options {
             background: BackgroundKind::Blank,
             include_bgt: true,
             include_cadastral: true,
+            include_cad: true,
             choices: Vec::new(),
         }
     }
@@ -120,6 +123,21 @@ pub fn build(
     trenches: &[VirtualTrench],
     bgt: &[BgtLayer],
     cadastral: Option<&CadastralLayer>,
+    rules: &[Rule],
+    control: &Control,
+) -> Result<template_export::Request, String> {
+    build_with_cad(opts, jobs, rasters, trenches, bgt, cadastral, &[], rules, control)
+}
+/// Build using the current CAD overlay scene, preserving drawing-layer visibility
+/// and respecting linework from nested INSERT/MINSERT blocks.
+pub fn build_with_cad(
+    opts: &Options,
+    jobs: &[Dataset],
+    rasters: &[GeoTiffInfo],
+    trenches: &[VirtualTrench],
+    bgt: &[BgtLayer],
+    cadastral: Option<&CadastralLayer>,
+    cad: &[DxfOverlay],
     rules: &[Rule],
     control: &Control,
 ) -> Result<template_export::Request, String> {
@@ -225,6 +243,12 @@ pub fn build(
                             path.iter().map(|&(x,y)| [x,y]).collect(), [140,80,145], false)?;
                     }
                 }
+            }
+        }
+        if opts.include_cad {
+            crate::template_cad::append_visible(cad, bounds, &mut overlays, control)?;
+            if overlays.iter().map(|stroke|stroke.points.len()).sum::<usize>()>MAX_MAP_POINTS {
+                return Err("Kaart bevat te veel gecombineerde CAD-, BGT- en Kadasterpunten".into());
             }
         }
         let local_index = datasets.len();
