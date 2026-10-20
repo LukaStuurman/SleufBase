@@ -122,7 +122,7 @@ impl SleufBaseApp {
                                 for c in &mut dialog.options.choices { c.include = false; }
                             }
                             if ui.small_button("Alleen gekoppelde TIFF's").clicked() {
-                                for c in &mut dialog.options.choices { c.include = c.raster.is_some(); }
+                                for c in &mut dialog.options.choices { c.include = c.raster.is_some() || matches!(c.source,Source::Virtual(_)); }
                             }
                         });
                         for (idx, slot) in dialog.options.choices.iter_mut().enumerate() {
