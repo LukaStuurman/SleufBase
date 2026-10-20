@@ -19,6 +19,7 @@ fn print_help() {
     println!("sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --import-python uitvoer.json project.klicproject");
     println!("Optioneel vóór de opdracht: --settings Rust-instellingen.json");
+    println!("Licenties van overgenomen onderdelen: --licenses");
     println!("Bestaande uitvoerbestanden worden niet overschreven.");
     println!("De volledige Python-sjabloonexport en interactieve KickTheMap-WebView2 zijn nog niet gemigreerd.");
 }
@@ -91,6 +92,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
 fn main() -> eframe::Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if !args.is_empty() {
+        if args[0]=="--licenses" {println!("Pillow 11.3.0 — affine bicubische rasterrotatie\n{}",include_str!("../third_party/Pillow-LICENSE.txt"));return Ok(());}
         if ["-h", "--help", "help"].contains(&args[0].as_str()) {
             print_help();
             return Ok(());

@@ -242,3 +242,31 @@ bewijzen geen volledige raster-/foto-/app-prestatie.
 
     cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_export
     python tools/benchmark_template_export.py rust/target/release/examples/benchmark_template_export.exe rust/benchmarks/template-export.json
+
+## GeoTIFF-vakbeeld: richting, bicubische rotatie en achtergrondalpha
+
+`template-raster.json` meet drie verse processen per route en stand op Windows
+x64 GNU/Rust 1.99.1, Python 3.11.9/Pillow 11.3.0. Een reeds aanwezige RGBA-buffer
+van 1400×1000 pixels bevat gedeeltelijke alpha en een bijna-witte buitenrand.
+Richting, eventuele uitgebreide premultiplied bicubische rotatie, zichtbare-alpha-
+crop en randverbonden achtergrondnormalisatie zijn inbegrepen.
+
+| Stand | Native mediaan | Oorspronkelijke mediaan | Native procespiek | Oorspronkelijke procespiek |
+|---|---:|---:|---:|---:|
+| Zonder rotatie | 5,882 ms | 66,073 ms | 18.780.160 bytes | 161.939.456 bytes |
+| Met rotatie | 78,500 ms | 199,368 ms | 27.729.920 bytes | 198.361.088 bytes |
+
+Alle ruwe RGBA-bytes worden na timing/piekmeting rechtstreeks vergeleken, naast
+CRC32. Zonder rotatie: 1400×1000/CRC `80864330`; met rotatie:
+1630×1362/CRC `36ff342e`. Native verwerkt zijn eigen buffer in plaats; Python
+volgt de bestaande convert-/crop-/NumPy-hulpfuncties en eventuele beschikbare
+bronversnelling. Dit is het productiegedrag van beide beeldstappen.
+
+Opstart/imports, pixelopbouw, TIFF-decodering, PNG-encoding, DXF/netwerk/GUI en
+checksum-/ruwe-byte-I/O vallen buiten de timing. De procespiek wordt direct na
+voorbereiding vastgelegd en bevat runtime/import-/invoerbasis; dit is geen
+geïsoleerde allocatiemeting. Bestandscache is niet gecontroleerd. De meting
+bewijst deze beeldstap, niet de snelheid of piek van een volledige export/app.
+
+    cargo build --release --manifest-path rust/Cargo.toml --example benchmark_template_raster
+    python tools/benchmark_template_raster.py rust/target/release/examples/benchmark_template_raster.exe rust/benchmarks/template-raster.json

@@ -48,7 +48,10 @@ pub struct Slot {
     pub title: String,
     pub address: Option<String>,
     pub comments: String,
+    #[serde(default)]
     pub tiff_png: PathBuf,
+    #[serde(default)]
+    pub tiff_source: Option<crate::template_raster::Source>,
     pub map_png: PathBuf,
     pub profile: Option<Profile>,
 }
@@ -125,13 +128,16 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
         .map_err(|e| format!("Ongeldige sjabloonexportinvoer: {e}"))?;
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
     let resolve = |p: &mut PathBuf| {
-        if p.is_relative() {
+        if !p.as_os_str().is_empty() && p.is_relative() {
             *p = parent.join(&*p);
         }
     };
     resolve(&mut request.template);
     for slot in request.slots.iter_mut().flatten() {
         resolve(&mut slot.tiff_png);
+        if let Some(source) = &mut slot.tiff_source {
+            resolve(&mut source.path);
+        }
         resolve(&mut slot.map_png);
     }
     control.check()?;
@@ -195,12 +201,38 @@ struct ProfileContext<'a> {
     templates: &'a profile_drawing::Templates,
     surfaces: &'a bgt_surface::Index<'a>,
 }
+fn build_profile<'a>(
+    request: &'a Request,
+    options: &Profile,
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<Option<profile::Profile<'a>>, String> {
+    let dataset = request
+        .datasets
+        .get(options.dataset)
+        .ok_or("Profiel verwijst naar een ontbrekende dataset")?;
+    if !options.marker_diameter.is_finite() {
+        return Err("Ongeldige profielmarkerdiameter".into());
+    }
+    profile::build_with_cancel(
+        dataset,
+        &request.rules,
+        profile::Options {
+            roads: &request.roads,
+            terrain_boundaries: &request.terrain_boundaries,
+            forced_start: options.forced_start,
+            reverse: options.reverse,
+            marker_scale: options.marker_diameter.max(0.005),
+        },
+        cancel,
+    )
+}
 fn draw_profile(
     doc: &mut Document,
     context: &ProfileContext<'_>,
     slot: &Slot,
     target: &crate::template_slots::Slot,
     options: &Profile,
+    profile: &profile::Profile<'_>,
     control: &Control,
 ) -> Result<bool, String> {
     let ProfileContext {
@@ -213,33 +245,15 @@ fn draw_profile(
         .datasets
         .get(options.dataset)
         .ok_or("Profiel verwijst naar een ontbrekende dataset")?;
-    if !options.marker_diameter.is_finite() {
-        return Err("Ongeldige profielmarkerdiameter".into());
-    }
     let marker_scale = options.marker_diameter.max(0.005);
-    let Some(profile) = profile::build_with_cancel(
-        dataset,
-        &request.rules,
-        profile::Options {
-            roads: &request.roads,
-            terrain_boundaries: &request.terrain_boundaries,
-            forced_start: options.forced_start,
-            reverse: options.reverse,
-            marker_scale,
-        },
-        cancel,
-    )?
-    else {
-        return Ok(false);
-    };
-    template_prepare_profile(doc, &profile, cancel)?;
+    template_prepare_profile(doc, profile, cancel)?;
     let reference = if options.show_reference {
-        Some(profile_reference::resolve(&profile, &options.metadata)?)
+        Some(profile_reference::resolve(profile, &options.metadata)?)
     } else {
         None
     };
     let Some(mut drawing) = profile_drawing::frame_and_bands(
-        &profile,
+        profile,
         dataset,
         [target.row_box, target.tiff_box],
         templates,
@@ -256,14 +270,14 @@ fn draw_profile(
         return Ok(false);
     };
     let automatic = if options.auto_fill_bgt {
-        surfaces.texts(&profile, cancel)?
+        surfaces.texts(profile, cancel)?
     } else {
         serde_json::json!({})
     };
     let fills =
         profile_surface::resolve(&options.metadata, &automatic, options.use_custom_maaiveld)?;
     let mut body = profile_surface::build(
-        &profile,
+        profile,
         dataset,
         &drawing,
         target.tiff_box,
@@ -276,7 +290,7 @@ fn draw_profile(
     )?;
     if let Some(reference) = &reference {
         profile_reference::draw(
-            &profile,
+            profile,
             drawing.layout,
             target.tiff_box.min_x,
             reference,
@@ -294,7 +308,7 @@ fn draw_profile(
     }
     let prefix = crate::python_values::trim(&options.diameter_prefix);
     let leaders = profile_leaders::compose(
-        &profile,
+        profile,
         dataset,
         &mut drawing,
         &obstacles,
@@ -440,13 +454,21 @@ pub fn export_with_progress(
     if request.slots.len() > 5000 {
         return Err("Te veel sjabloonvakken voor het afbeeldingsbudget".into());
     }
+    for slot in request.slots.iter().flatten() {
+        if slot.tiff_source.is_some() == !slot.tiff_png.as_os_str().is_empty() {
+            return Err("Geef per vak één TIFF-bron of één voorbereide TIFF-PNG op".into());
+        }
+    }
     if let Ok(target) = std::fs::canonicalize(output) {
         let sources = std::iter::once(request.template.as_path()).chain(
-            request
-                .slots
-                .iter()
-                .flatten()
-                .flat_map(|s| [s.tiff_png.as_path(), s.map_png.as_path()]),
+            request.slots.iter().flatten().flat_map(|s| {
+                [
+                    s.tiff_source
+                        .as_ref()
+                        .map_or(s.tiff_png.as_path(), |t| t.path.as_path()),
+                    s.map_png.as_path(),
+                ]
+            }),
         );
         for source in sources {
             control.check()?;
@@ -523,13 +545,40 @@ pub fn export_with_progress(
         if let Some(h) = &target.comments_handle {
             doc.replace_text(h, &slot.comments)?;
         }
+        let measured = slot
+            .profile
+            .as_ref()
+            .map(|p| build_profile(request, p, control.flag()))
+            .transpose()?
+            .flatten();
         for (role, path, bounds, inset, preserve_aspect) in [
             ("tiff", &slot.tiff_png, target.tiff_box, 0.04, true),
             ("kaart", &slot.map_png, target.map_box, 0., false),
         ] {
             // Index, not visible label, guarantees uniqueness for duplicate PS names.
             let destination = tx.asset_path(&format!("slot{:05}_{role}.png", index + 1))?;
-            copy_asset(path, &destination, &mut total, control)?;
+            if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
+                let axis = measured
+                    .as_ref()
+                    .map(|p| [[p.start.x, p.start.y], [p.end.x, p.end.y]]);
+                let raster = crate::template_raster::from_tiff(
+                    source,
+                    &request.roads,
+                    &request.terrain_boundaries,
+                    axis,
+                    control.flag(),
+                )?;
+                crate::template_raster::save(&raster, &destination, control.flag())?;
+                let bytes = std::fs::metadata(&destination)
+                    .map_err(|e| e.to_string())?
+                    .len();
+                total += bytes;
+                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                }
+            } else {
+                copy_asset(path, &destination, &mut total, control)?;
+            }
             images.push(Image {
                 path: destination,
                 bounds,
@@ -540,7 +589,7 @@ pub fn export_with_progress(
             });
             image_order.push(index * 2);
         }
-        if let Some(options) = &slot.profile {
+        if let (Some(options), Some(measured)) = (&slot.profile, &measured) {
             let start = doc.seed()?.0;
             profiles += usize::from(draw_profile(
                 &mut doc,
@@ -552,6 +601,7 @@ pub fn export_with_progress(
                 slot,
                 target,
                 options,
+                measured,
                 control,
             )?);
             profile_ranges.push((start, doc.seed()?.0, index * 2 + 1));

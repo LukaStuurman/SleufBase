@@ -6,7 +6,7 @@ drawer and insertion helpers; no Rust output is used to generate expectations.
 from pathlib import Path
 from types import SimpleNamespace
 from datetime import datetime
-import importlib,io,json,os
+import importlib,io,json,os,shutil,tempfile
 import ezdxf
 from PIL import Image
 from shapely.geometry import Polygon
@@ -58,6 +58,7 @@ def main():
         ('mixed','assets/cadastral_template.dxf',[slot(0,dict(dataset=0,show_reference=False,avoid_collisions=True)),None,slot(2,dict(dataset=1,reverse=True,manual_scale=250,metadata=custom,diameter_prefix=' DN ',clip_markers=True)),slot(3)]),
         ('extended','assets/cadastral_template.dxf',[slot(0)]+[None]*38+[slot(39,dict(dataset=2,manual_scale=20,avoid_collisions=False,auto_fill_bgt=False,show_reference=False))]),
         ('image-only','rust/tests/fixtures/template-pages/one-page.dxf',[None,slot(1)]+[None]*6+[slot(8)]),
+        ('native-tiff','assets/cadastral_template.dxf',[slot(0,dict(dataset=0)),None,slot(2,dict(dataset=0,reverse=True)),slot(3)]),
         ('surface-reference','assets/cadastral_template.dxf',[
             slot(0,dict(dataset=0,metadata=surface_case['metadata'],manual_scale=250)),
             slot(1,dict(dataset=0,metadata=surface_case['metadata'],use_custom_maaiveld=False,reverse=True,marker_diameter=.001)),
@@ -71,6 +72,10 @@ def main():
             request['surfaces']=surface_case['surfaces']
             request['layers']=[dict(name='Prepared overview',color=3,true_color=None,lineweight=None)]
             request['geometry']=[dict(layer='Prepared overview',layout=None,shape=dict(Circle=dict(center=[120000.,450000.],radius=2.)))]
+        prepared_tiffs={}
+        if name=='native-tiff':
+            for item in filter(None,slots):
+                item.pop('tiff_png');item['tiff_source']=dict(path='rust/tests/fixtures/template-raster/orientation-1.tiff',transform=dict(a=1.,b=0.,c=0.,d=0.,e=-1.,f=6.),reverse_orientation=True,axis=None)
         doc=ezdxf.readfile(ROOT/source);before=len(exporter._detect_template_slots(doc));exporter._extend_template_for_slot_count(doc,len(slots));targets=exporter._detect_template_slots(doc)
         names=exporter._used_template_layout_names(len(slots));exporter._ensure_template_image_layer(doc);exporter._setup_text_styles(doc);exporter._ensure_template_layout_legends(doc,names)
         doc.units=6;doc.set_raster_variables(frame=0,quality=1,units='m');exporter._update_template_scale_list(doc)
@@ -84,23 +89,29 @@ def main():
             exporter._set_template_text(doc,target.label_handle,s['title'])
             if target.address_handle:exporter._set_template_mtext(doc,target.address_handle,s['address'] or 'Adres:')
             if target.comments_handle:exporter._set_template_mtext(doc,target.comments_handle,s['comments'])
+            p=s['profile'];profile=None
+            if p is not None:
+                source_case=selected[p['dataset']];p.setdefault('forced_start',source_case['forced_start']);p.setdefault('marker_diameter',source_case['marker_scale'])
+                data=original_dataset(ref,datasets[p['dataset']],p['forced_start']);rules=tuple(ref.ObjectLayerRule(tuple(r['keywords']),r['target_layer'],r['color_aci'],r['label']) for r in request['rules'])
+                profile=exporter._build_template_cross_section_profile(data,rules,request['roads'],request['terrain_boundaries'],max(.005,p['marker_diameter']),p.get('reverse',False))
             for role,box,inset,aspect in [('tiff',target.tiff_box,.04,True),('kaart',target.map_box,0.,False)]:
                 # The actual pixels have been prepared upstream; original image
                 # insertion uses only the verified dimensions and final path.
                 path=OUT/('tiff.png' if role=='tiff' else 'map.png')
+                if role=='tiff' and s.get('tiff_source') is not None:
+                    src=s['tiff_source'];models=importlib.import_module(ref.__package__+'.models');image=Image.open(ROOT/src['path']);tx=models.GeoTransform(**src['transform'])
+                    layer=models.GeoTiffLayer(ROOT/src['path'],image,tx,models.Bounds(**s['bounds']),28992)
+                    with tempfile.TemporaryDirectory() as td:
+                        generated=exporter._build_template_tiff_raster(Path(td),layer,s['label'],i+1,request['roads'],request['terrain_boundaries'],profile,src['reverse_orientation'])
+                        path=OUT/f'{name}-slot{i:03}.png';shutil.copyfile(generated,path);prepared_tiffs[str(i)]=path.name
                 exporter._add_box_image(doc,doc.modelspace(),path,box,s['label']+'_'+role,inset=inset,preserve_aspect=aspect)
                 list(doc.modelspace().query('IMAGE'))[-1].image_def.dxf.filename=f'slot{i+1:05}_{role}.png'
-            p=s['profile']
-            if p is None:continue
-            source_case=selected[p['dataset']];p.setdefault('forced_start',source_case['forced_start']);p.setdefault('marker_diameter',source_case['marker_scale'])
-            data=original_dataset(ref,datasets[p['dataset']],p['forced_start']);rules=tuple(ref.ObjectLayerRule(tuple(r['keywords']),r['target_layer'],r['color_aci'],r['label']) for r in request['rules'])
-            profile=exporter._build_template_cross_section_profile(data,rules,request['roads'],request['terrain_boundaries'],max(.005,p['marker_diameter']),p.get('reverse',False))
             if profile is not None:
                 layer=SimpleNamespace(metadata=p.get('metadata',{}),bounds=module.Bounds(**s['bounds']))
                 surfaces=[module.BgtSurfaceFeature('wegdeel',f['physical_appearance'],f['physical_appearance'],Polygon(f['geometry']['Polygon'][0],f['geometry']['Polygon'][1:])) for f in request['surfaces']] if p.get('auto_fill_bgt',True) else []
                 exporter._add_template_cross_section(doc,doc.modelspace(),target,layer,s['label'],profile,p.get('show_reference',True),p.get('use_custom_maaiveld',True),surfaces,p.get('avoid_collisions',True),p.get('clip_markers',False),max(.005,p['marker_diameter']),p.get('manual_scale'),p.get('diameter_prefix','Ø').strip() or 'Ø');drawn+=1
         stream=io.StringIO();doc.write(stream);stream.seek(0);doc=ezdxf.read(stream)
-        cases.append(dict(name=name,request=request,filled=sum(s is not None for s in slots),profiles=drawn,added_pages=max(0,(len(targets)-before)//8),expected=snapshot(doc,exporter)))
+        cases.append(dict(name=name,request=request,filled=sum(s is not None for s in slots),profiles=drawn,added_pages=max(0,(len(targets)-before)//8),expected=snapshot(doc,exporter),prepared_tiffs=prepared_tiffs))
     (OUT/'reference.json').write_text(json.dumps(cases,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
     print(len(cases),'prepared export assemblies;',sum(c['profiles'] for c in cases),'complete active profiles')
 if __name__=='__main__':main()

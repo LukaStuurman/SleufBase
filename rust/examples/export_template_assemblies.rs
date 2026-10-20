@@ -27,7 +27,12 @@ fn main() -> Result<(), String> {
     for mut case in cases {
         case.request.template = root.join(&case.request.template);
         for slot in case.request.slots.iter_mut().flatten() {
-            slot.tiff_png = root.join(&slot.tiff_png);
+            if !slot.tiff_png.as_os_str().is_empty() {
+                slot.tiff_png = root.join(&slot.tiff_png);
+            }
+            if let Some(source) = &mut slot.tiff_source {
+                source.path = root.join(&source.path);
+            }
             slot.map_png = root.join(&slot.map_png);
         }
         let result = template_export::export(

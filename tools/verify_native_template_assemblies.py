@@ -26,8 +26,9 @@ def main():
         for entity in doc.modelspace():
             if entity.dxftype()=='IMAGE' and entity.dxf.handle not in old_handles:
                 image_count+=1;p=Path(entity.image_def.dxf.filename);assert p.parent==bundle and p.is_file()
-                source=OUT/('tiff.png' if p.stem.endswith('_tiff') else 'map.png')
-                assert p.read_bytes()==source.read_bytes()
+                generated=case.get('prepared_tiffs',{}).get(str(int(p.stem[4:9])-1)) if p.stem.endswith('_tiff') else None
+                source=OUT/generated if generated else OUT/('tiff.png' if p.stem.endswith('_tiff') else 'map.png')
+                if not generated:assert p.read_bytes()==source.read_bytes()
                 with Image.open(p) as a,Image.open(source) as b:assert a.convert('RGBA').tobytes()==b.convert('RGBA').tobytes()
             if entity.dxftype()=='LEADER':assert doc.entitydb[entity.dxf.annotation_handle].dxftype()=='INSERT'
         assert image_count==2*case['filled'];assert len(list(bundle.iterdir()))==image_count
@@ -40,10 +41,12 @@ def main():
         total_images+=image_count;total_profiles+=case['profiles']
     print(len(json.loads((OUT/'reference.json').read_text(encoding='utf-8'))),'native prepared exports,',total_profiles,'complete profiles and',total_images,'permanent PNGs: full order/fields/graphs/pixels and source preservation verified')
     if len(sys.argv)>2:
-        case=next(c for c in json.loads((OUT/'reference.json').read_text(encoding='utf-8')) if c['name']=='mixed')
+        case=next(c for c in json.loads((OUT/'reference.json').read_text(encoding='utf-8')) if c['name']=='native-tiff')
         request=case['request'];request['template']=os.path.relpath(ROOT/request['template'],output)
         for slot in filter(None,request['slots']):
-            for key in ('tiff_png','map_png'):slot[key]=os.path.relpath(ROOT/slot[key],output)
+            for key in ('tiff_png','map_png'):
+                if key in slot:slot[key]=os.path.relpath(ROOT/slot[key],output)
+            if slot.get('tiff_source') is not None:slot['tiff_source']['path']=os.path.relpath(ROOT/slot['tiff_source']['path'],output)
         manifest=output/'prepared-request.json';manifest.write_text(json.dumps(request,ensure_ascii=False),encoding='utf-8')
         ignored=output/'unused-settings.json';ignored.write_text('not valid settings JSON',encoding='utf-8')
         target=output/'cli.dxf';command=[str(Path(sys.argv[2]).resolve()),'--settings',str(ignored.resolve()),'--template-dxf',str(target.resolve()),str(manifest.resolve())]
@@ -57,4 +60,7 @@ def main():
         again=subprocess.run(command,cwd=output,text=True,encoding='utf-8',capture_output=True)
         assert again.returncode==2 and {p:p.read_bytes() for p in output.rglob('*') if p.is_file()}==before
         print('Real CLI: manifest-relative inputs, full prepared export and refusal to overwrite verified')
+        notices=subprocess.run([str(Path(sys.argv[2]).resolve()),'--licenses'],text=True,encoding='utf-8',capture_output=True)
+        assert notices.returncode==0 and 'Secret Labs AB' in notices.stdout and 'Pillow 11.3.0' in notices.stdout
+        print('Standalone binary contains the adapted Pillow copyright/license notice')
 if __name__=='__main__':main()

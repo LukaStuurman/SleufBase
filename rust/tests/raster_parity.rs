@@ -90,6 +90,67 @@ fn tiff_strips_tiles_formats_and_orientation_match_pixel_oracles() {
 }
 
 #[test]
+fn full_export_decoding_matches_existing_color_and_orientation_oracles_without_resizing() {
+    let cases: Vec<Case> =
+        serde_json::from_str(include_str!("fixtures/rasters/manifest.json")).unwrap();
+    let mut checked = 0;
+    for case in cases
+        .into_iter()
+        .filter(|c| c.options.is_none() && c.rgba.is_some())
+    {
+        let image = sleufbase_rust::raster::decode_full_with_cancel(
+            &fixtures().join(&case.file),
+            &AtomicBool::new(false),
+        )
+        .unwrap_or_else(|e| panic!("{}: {e}", case.file));
+        assert_eq!(
+            (image.width, image.height),
+            (case.width, case.height),
+            "{} full size",
+            case.file
+        );
+        assert_eq!(
+            image.stats.source_pixels,
+            u64::from(case.width) * u64::from(case.height)
+        );
+        let expected = case.rgba.unwrap();
+        assert_eq!(image.rgba.len(), expected.len());
+        assert!(
+            image
+                .rgba
+                .iter()
+                .zip(expected)
+                .all(|(a, b)| a.abs_diff(b) <= case.tolerance),
+            "{} full pixels",
+            case.file
+        );
+        checked += 1;
+    }
+    assert!(checked >= 35);
+}
+#[test]
+fn full_export_of_a_large_strip_tiff_keeps_every_source_pixel() {
+    let image = sleufbase_rust::raster::decode_full_with_cancel(
+        &fixtures().join("large-striped.tiff"),
+        &AtomicBool::new(false),
+    )
+    .unwrap();
+    assert_eq!((image.width, image.height), (4097, 4097));
+    assert_eq!(image.stats.source_pixels, 4097 * 4097);
+    assert_eq!(image.stats.decoded_chunks, 257);
+    assert_eq!(image.stats.skipped_chunks, 0);
+    assert!(image.stats.peak_chunk_bytes <= 4097 * 16 * 3);
+    // The independent TIFF generator writes x, y, 17. Check every original
+    // pixel, including the final row/column omitted by the 2048px preview.
+    for (i, p) in image.rgba.as_chunks::<4>().0.iter().enumerate() {
+        assert_eq!(
+            *p,
+            [(i % 4097 % 256) as u8, (i / 4097 % 256) as u8, 17, 255],
+            "source pixel {i}"
+        );
+    }
+}
+#[test]
 fn invalid_limits_and_cancellation_do_not_return_partial_images() {
     let path = fixtures().join("rgb8-strips.tiff");
     for options in [

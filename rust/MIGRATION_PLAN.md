@@ -679,6 +679,45 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Dit is expliciet de stap na raster-/serverdatavoorbereiding. Die voorbereiding,
   foto's, automatisch overzichtsgeometrie afleiden, logo-/contactherstel en het
   complete native exportvenster blijven open.
+- Volledige TIFF-vakbeeldvoorbereiding aan de native export gekoppeld.
+  De volledige decoder deelt de bestaande kleur-/strook-/tegelkern, zonder
+  previewverkleining of tijdelijke bronkolom-/rijvectoren. 45 ongeschaalde
+  kleurexactreferenties en iedere pixel van een 4097×4097-strokenbestand worden
+  getoetst; alle 257 stroken worden gelezen met maximaal 196.656 chunkbytes.
+  Oriëntatie gebruikt dezelfde eenmaal gebouwde gemeten profielas als de
+  tekening, of de oorspronkelijke gewogen weg-/terreinprojectie. Een reeds
+  omgekeerde as krijgt geen tweede omkering. Native bicubische RGBA-rotatie
+  volgt 15-decimale affine afronding, premultiplicatie en oorspronkelijke
+  rand-/byteconversie. Volledige bronbuffers worden in plaats gepremultiplied.
+  Eerst wordt op alpha>15 met twee pixels marge gecropt; daarna verwijdert een
+  vier-verbonden scanline-fill randachtergrond met behoud van ingesloten wit.
+  Vier staten in de eigen alphabuffer vervangen volledige RGB-/booleaanse
+  maskerkopieën. Runs worden meteen gemarkeerd, zodat geen dubbelen ophopen.
+  140 oorspronkelijke beeldgevallen vergelijken 42.716 volledige RGBA-pixels
+  zonder tolerantie, inclusief verborgen RGB. Vier RGBA-TIFF-oriëntaties 5..8
+  tonen een echte Pillow 11.3.0-afmetingenfout; numerieke TIFF-pixels plus
+  expliciete oriëntatie corrigeren alleen die gevallen. Zowel de oorspronkelijke
+  foutieve als gecorrigeerde PNG/details blijven als bewijs bewaard.
+  TIFF-bronnen en voorbereide PNGs kunnen per vak worden gemengd; dubbelzinnige
+  invoer wordt geweigerd. Iedere bron blijft beschermd tegen overschrijven.
+  Native PNG-opslag is begrensd, annuleerbaar en atomair met behoud van oudere
+  assets. Vijf volledige exports vergelijken acht profielen en 26 PNGs,
+  waaronder drie direct voorbereide TIFF-vakken. Alle oudere oraclevelden
+  blijven ongewijzigd; de echte CLI controleert nu ook directe TIFF-invoer.
+  284 Rust-tests, Clippy zonder nieuwe waarschuwingen en definitieve
+  release-readback slagen. Beide fixturefamilies regenereren byte-identiek met
+  twee hashseeds. Pillow-afgeleide code heeft de MIT-CMU-notice in bron, binary
+  (--licenses) en Windows-artifact. Volledige decoder- en rotatiebudgetten geven
+  vóór te grote allocaties een fout; geen onzichtbare verlaging van resolutie.
+  Drie verse processen per route meten de reeds gedecodeerde beeldstap:
+  zonder rotatie mediaan 5,882 tegenover 66,073 ms; met rotatie
+  78,500 tegenover 199,368 ms. Procespieken met rotatie
+  27.729.920 tegenover 198.361.088 bytes. Iedere uitvoerbyte is gelijk;
+  TIFF-decodering, PNG/DXF-opslag, opstart/imports, invoeropbouw en GUI/netwerk
+  vallen buiten de timing. Procespieken bevatten runtime-/invoerbasis en zijn
+  geen geïsoleerde allocaties of app-pieken; zie benchmarks/template-raster.json.
+  Kaart-/foto-/virtuele rastervoorbereiding, gepaarde normale/omgekeerde eind-
+  exports, server-/overzichtscompositie en het volledige native venster blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

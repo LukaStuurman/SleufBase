@@ -38,6 +38,9 @@ jobs:
       - name: Build release
         shell: pwsh
         run: cargo build --release --manifest-path rust/Cargo.toml
+      - name: Bundle third-party notice
+        shell: pwsh
+        run: Copy-Item -LiteralPath rust/third_party/Pillow-LICENSE.txt -Destination rust/target/release/Pillow-LICENSE.txt
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -312,6 +315,32 @@ jobs:
           name: SleufBase-Rust-template-setup-benchmark
           path: rust/benchmarks-template-setup.json
           if-no-files-found: error
+      - name: Independently audit full-resolution TIFF asset preparation
+        shell: pwsh
+        env:
+          TEMPLATE_RASTER_DIR: ${{ runner.temp }}/SleufBase-template-raster
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'tifffile==2025.5.10'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_raster_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-raster
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_template_rasters --example benchmark_template_raster
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_rasters.exe "$env:TEMPLATE_RASTER_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_rasters.py "$env:TEMPLATE_RASTER_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_raster.py rust/target/release/examples/benchmark_template_raster.exe rust/benchmarks-template-raster.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload TIFF asset preparation benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-raster-benchmark
+          path: rust/benchmarks-template-raster.json
+          if-no-files-found: error
       - name: Independently audit prepared template exports and real CLI
         shell: pwsh
         env:
@@ -415,7 +444,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SleufBase-Rust-Windows-preview
-          path: rust/target/release/sleufbase-rust.exe
+          path: |
+            rust/target/release/sleufbase-rust.exe
+            rust/target/release/Pillow-LICENSE.txt
           if-no-files-found: error
       # Exact-byte sink comparison, independent of Python/app performance.
       - name: Benchmark object export streaming

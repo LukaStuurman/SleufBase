@@ -108,6 +108,14 @@ fn sample_positions(source: u32, target: u32) -> Vec<u32> {
         .map(|p| (((2 * u64::from(p) + 1) * u64::from(source)) / (2 * u64::from(target))) as u32)
         .collect()
 }
+fn selected_positions(
+    full: bool,
+    positions: &[u32],
+    start: usize,
+    end: usize,
+) -> impl Iterator<Item = (usize, u32)> + '_ {
+    (start..end).map(move |index| (index, if full { index as u32 } else { positions[index] }))
+}
 fn numbers(value: Value) -> Result<Vec<f64>, String> {
     let v = match value {
         Value::List(values) => {
@@ -152,6 +160,27 @@ pub fn decode_preview(path: &Path, options: PreviewOptions) -> Result<RasterPrev
 pub fn decode_preview_with_cancel(
     path: &Path,
     options: PreviewOptions,
+    cancel: &AtomicBool,
+) -> Result<RasterPreview, String> {
+    decode_pixels(path, options, false, cancel)
+}
+/// Full export pixels, with the same source/chunk safety limits and color
+/// conversion as previews. Never silently reduce export resolution.
+pub fn decode_full_with_cancel(path: &Path, cancel: &AtomicBool) -> Result<RasterPreview, String> {
+    decode_pixels(
+        path,
+        PreviewOptions {
+            max_chunk_bytes: MAX_CHUNK_BYTES,
+            ..PreviewOptions::default()
+        },
+        true,
+        cancel,
+    )
+}
+fn decode_pixels(
+    path: &Path,
+    options: PreviewOptions,
+    full: bool,
     cancel: &AtomicBool,
 ) -> Result<RasterPreview, String> {
     options.validate()?;
@@ -311,11 +340,25 @@ pub fn decode_preview_with_cancel(
     if encoded_bytes > options.max_chunk_bytes as u128 {
         return Err("TIFF-strook/tegel overschrijdt het decodergeheugenbudget".into());
     }
-    let (preview_w, preview_h) = preview_dimensions(source_w, source_h, options);
+    let (preview_w, preview_h) = if full {
+        (source_w, source_h)
+    } else {
+        preview_dimensions(source_w, source_h, options)
+    };
     let (width, height) = oriented_dimensions(preview_w, preview_h, orientation)?;
     let mut rgba = vec![0; (u64::from(width) * u64::from(height) * 4) as usize];
-    let xs = sample_positions(source_w, preview_w);
-    let ys = sample_positions(source_h, preview_h);
+    // Full decoding uses identity positions; don't allocate a coordinate per
+    // source column/row (particularly costly for very long narrow TIFFs).
+    let xs = if full {
+        Vec::new()
+    } else {
+        sample_positions(source_w, preview_w)
+    };
+    let ys = if full {
+        Vec::new()
+    } else {
+        sample_positions(source_h, preview_h)
+    };
     let mut stats = DecodeStats {
         source_pixels: pixels,
         ..Default::default()
@@ -323,8 +366,16 @@ pub fn decode_preview_with_cancel(
     for row in 0..rows {
         let top = row * chunk_h;
         let bottom = top.saturating_add(chunk_h).min(source_h);
-        let ya = ys.partition_point(|y| *y < top);
-        let yb = ys.partition_point(|y| *y < bottom);
+        let ya = if full {
+            top as usize
+        } else {
+            ys.partition_point(|y| *y < top)
+        };
+        let yb = if full {
+            bottom as usize
+        } else {
+            ys.partition_point(|y| *y < bottom)
+        };
         if ya == yb {
             continue;
         }
@@ -334,8 +385,16 @@ pub fn decode_preview_with_cancel(
             }
             let left = column * chunk_w;
             let right = left.saturating_add(chunk_w).min(source_w);
-            let xa = xs.partition_point(|x| *x < left);
-            let xb = xs.partition_point(|x| *x < right);
+            let xa = if full {
+                left as usize
+            } else {
+                xs.partition_point(|x| *x < left)
+            };
+            let xb = if full {
+                right as usize
+            } else {
+                xs.partition_point(|x| *x < right)
+            };
             if xa == xb {
                 continue;
             }
@@ -378,8 +437,11 @@ pub fn decode_preview_with_cancel(
             } else {
                 None
             };
-            for (y, sy) in ys.iter().enumerate().take(yb).skip(ya) {
-                for (x, sx) in xs.iter().enumerate().take(xb).skip(xa) {
+            for (y, sy) in selected_positions(full, &ys, ya, yb) {
+                if cancel.load(Ordering::Relaxed) {
+                    return Err("Rasterverwerking geannuleerd".into());
+                }
+                for (x, sx) in selected_positions(full, &xs, xa, xb) {
                     let pixel = if let Some(bytes) = rgb8 {
                         let offset = (sy - top) as usize * chunks[0].row_stride
                             + (sx - left) as usize * colors.channels;

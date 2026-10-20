@@ -1,0 +1,7034 @@
+[
+  {
+    "name": "case-000",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        12.0,
+        -3.0000000000000018
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-000__slot000_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        10.0,
+        1.7763568394002505e-15
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        1,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-001",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.04619407772,
+        449991.1360389693
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-001__slot001_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        7.071067811884861,
+        7.071067811848481
+      ],
+      "rotation": 44.99999999985263,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-002",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        1.9999999999999987,
+        -13.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-002__slot002_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        -1.3322676295501878e-15,
+        10.0
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        1,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-003",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119998.97512626585,
+        449993.96446609404
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-003__slot003_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        -7.071067811857575,
+        7.071067811903051
+      ],
+      "rotation": 134.99999999981577,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-004",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -8.0,
+        -2.9999999999999996
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-004__slot004_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        -10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        1,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-005",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.85380592229,
+        450003.8639610307
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-005__slot005_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        -7.071067811853028,
+        -7.071067811857576
+      ],
+      "rotation": -134.99999999998158,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-006",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.0,
+        7.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-006__slot006_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        0.0,
+        -10.0
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        1,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-007",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120003.92487373415,
+        450001.03553390596
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-007__slot007_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        7.071067811889407,
+        -7.071067811912146
+      ],
+      "rotation": -45.00000000009214,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-008",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        11.72897087776357,
+        -5.312385274911675
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-008__slot008_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        9.72897087776357,
+        2.3123852749116747
+      ],
+      "rotation": 13.370000000000005,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-009",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95000008726,
+        450004.4999999651
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-009__slot009_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        1.7452748579671606e-07,
+        -9.999999999972717
+      ],
+      "rotation": -89.99999900003115,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-010",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        10.354881311041597,
+        -8.495084920036073
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-010__slot010_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        8.354881311041597,
+        5.4950849200360725
+      ],
+      "rotation": 33.33329999999998,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-011",
+    "input": "input-0.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45000002618,
+        449999.4999998778
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-011__slot011_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        1
+      ],
+      "vector": [
+        -10.000000000004547,
+        1.7454112821724266e-07
+      ],
+      "rotation": 179.999998999953,
+      "rotated_size": [
+        3,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-012",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45,
+        449995.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-012__slot012_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        1,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-013",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        -10.071067811865477
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-013__slot013_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        7.0710678118654755,
+        7.071067811865477
+      ],
+      "rotation": 45.0,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-014",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120002.95,
+        449990.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-014__slot014_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        -6.661338147750939e-16,
+        10.000000000000002
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        9,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-015",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        -10.071067811865476
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-015__slot015_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        -7.0710678118654755,
+        7.0710678118654755
+      ],
+      "rotation": 135.0,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-016",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45,
+        449999.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-016__slot016_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        -10.0,
+        4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        1,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-017",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-017__slot017_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        -7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -135.0,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-018",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95,
+        450004.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-018__slot018_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        0.0,
+        -10.000000000000002
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        9,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-019",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-019__slot019_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -45.0,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        9,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-020",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.66134323012,
+        449993.935536132
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-020__slot020_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        9.728970877786198,
+        2.3123852748904032
+      ],
+      "rotation": 13.369999999851416,
+      "rotated_size": [
+        5,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        5,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-021",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.000000174532924,
+        6.999999999999998
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-021__slot021_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        1.745329241131799e-07,
+        -9.999999999999998
+      ],
+      "rotation": -89.999999,
+      "rotated_size": [
+        11,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-022",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45170339353,
+        449991.9824642938
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-022__slot022_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        8.354881311051942,
+        5.495084920021329
+      ],
+      "rotation": 33.33329999989684,
+      "rotated_size": [
+        7,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-023",
+    "input": "input-1.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -7.999999999999998,
+        -3.0000001745329254
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-023__slot023_geotiff.png",
+    "details": {
+      "source_size": [
+        1,
+        9
+      ],
+      "vector": [
+        -9.999999999999998,
+        1.7453292544544752e-07
+      ],
+      "rotation": 179.999999,
+      "rotated_size": [
+        3,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-024",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        12.0,
+        -3.0000000000000018
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-024__slot024_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        10.0,
+        1.7763568394002505e-15
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        9,
+        1
+      ],
+      "crop": [
+        1,
+        0,
+        9,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-025",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.04619407772,
+        449991.1360389693
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-025__slot025_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        7.071067811884861,
+        7.071067811848481
+      ],
+      "rotation": 44.99999999985263,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        2,
+        0,
+        9,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-026",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        1.9999999999999987,
+        -13.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-026__slot026_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        -1.3322676295501878e-15,
+        10.0
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        1,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        1,
+        8
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-027",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119998.97512626585,
+        449993.96446609404
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-027__slot027_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        -7.071067811857575,
+        7.071067811903051
+      ],
+      "rotation": 134.99999999981577,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-028",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -8.0,
+        -2.9999999999999996
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-028__slot028_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        -10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        9,
+        1
+      ],
+      "crop": [
+        0,
+        0,
+        8,
+        1
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-029",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.85380592229,
+        450003.8639610307
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-029__slot029_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        -7.071067811853028,
+        -7.071067811857576
+      ],
+      "rotation": -134.99999999998158,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        0,
+        2,
+        7,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-030",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.0,
+        7.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-030__slot030_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        0.0,
+        -10.0
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        1,
+        9
+      ],
+      "crop": [
+        0,
+        1,
+        1,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-031",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120003.92487373415,
+        450001.03553390596
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-031__slot031_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        7.071067811889407,
+        -7.071067811912146
+      ],
+      "rotation": -45.00000000009214,
+      "rotated_size": [
+        9,
+        9
+      ],
+      "crop": [
+        2,
+        2,
+        9,
+        9
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-032",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        11.72897087776357,
+        -5.312385274911675
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-032__slot032_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        9.72897087776357,
+        2.3123852749116747
+      ],
+      "rotation": 13.370000000000005,
+      "rotated_size": [
+        9,
+        5
+      ],
+      "crop": [
+        1,
+        0,
+        9,
+        5
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-033",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95000008726,
+        450004.4999999651
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-033__slot033_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        1.7452748579671606e-07,
+        -9.999999999972717
+      ],
+      "rotation": -89.99999900003115,
+      "rotated_size": [
+        3,
+        11
+      ],
+      "crop": [
+        0,
+        2,
+        3,
+        10
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-034",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        10.354881311041597,
+        -8.495084920036073
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-034__slot034_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        8.354881311041597,
+        5.4950849200360725
+      ],
+      "rotation": 33.33329999999998,
+      "rotated_size": [
+        9,
+        7
+      ],
+      "crop": [
+        2,
+        0,
+        9,
+        6
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-035",
+    "input": "input-2.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45000002618,
+        449999.4999998778
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-035__slot035_geotiff.png",
+    "details": {
+      "source_size": [
+        9,
+        1
+      ],
+      "vector": [
+        -10.000000000004547,
+        1.7454112821724266e-07
+      ],
+      "rotation": 179.999998999953,
+      "rotated_size": [
+        11,
+        3
+      ],
+      "crop": [
+        1,
+        0,
+        9,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-036",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45,
+        449995.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-036__slot036_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        3,
+        5
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        5
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-037",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        -10.071067811865477
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-037__slot037_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        7.0710678118654755,
+        7.071067811865477
+      ],
+      "rotation": 45.0,
+      "rotated_size": [
+        7,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-038",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120002.95,
+        449990.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-038__slot038_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        -6.661338147750939e-16,
+        10.000000000000002
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        5,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        5,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-039",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        -10.071067811865476
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-039__slot039_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        -7.0710678118654755,
+        7.0710678118654755
+      ],
+      "rotation": 135.0,
+      "rotated_size": [
+        7,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-040",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45,
+        449999.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-040__slot040_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        -10.0,
+        4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        3,
+        5
+      ],
+      "crop": [
+        0,
+        0,
+        3,
+        5
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-041",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-041__slot041_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        -7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -135.0,
+      "rotated_size": [
+        7,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-042",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95,
+        450004.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-042__slot042_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        0.0,
+        -10.000000000000002
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        5,
+        3
+      ],
+      "crop": [
+        0,
+        0,
+        5,
+        3
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-043",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-043__slot043_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -45.0,
+      "rotated_size": [
+        7,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-044",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.66134323012,
+        449993.935536132
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-044__slot044_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        9.728970877786198,
+        2.3123852748904032
+      ],
+      "rotation": 13.369999999851416,
+      "rotated_size": [
+        5,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        5,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-045",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.000000174532924,
+        6.999999999999998
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-045__slot045_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        1.745329241131799e-07,
+        -9.999999999999998
+      ],
+      "rotation": -89.999999,
+      "rotated_size": [
+        7,
+        5
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        5
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-046",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45170339353,
+        449991.9824642938
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-046__slot046_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        8.354881311051942,
+        5.495084920021329
+      ],
+      "rotation": 33.33329999989684,
+      "rotated_size": [
+        7,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        7,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-047",
+    "input": "input-3.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -7.999999999999998,
+        -3.0000001745329254
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-047__slot047_geotiff.png",
+    "details": {
+      "source_size": [
+        3,
+        5
+      ],
+      "vector": [
+        -9.999999999999998,
+        1.7453292544544752e-07
+      ],
+      "rotation": 179.999999,
+      "rotated_size": [
+        5,
+        7
+      ],
+      "crop": [
+        0,
+        0,
+        5,
+        7
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-048",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        12.0,
+        -3.0000000000000018
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-048__slot048_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        10.0,
+        1.7763568394002505e-15
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-049",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.04619407772,
+        449991.1360389693
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-049__slot049_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        7.071067811884861,
+        7.071067811848481
+      ],
+      "rotation": 44.99999999985263,
+      "rotated_size": [
+        20,
+        21
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        21
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-050",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        1.9999999999999987,
+        -13.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-050__slot050_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -1.3322676295501878e-15,
+        10.0
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        11,
+        16
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        16
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-051",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119998.97512626585,
+        449993.96446609404
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-051__slot051_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -7.071067811857575,
+        7.071067811903051
+      ],
+      "rotation": 134.99999999981577,
+      "rotated_size": [
+        20,
+        21
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        21
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-052",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -8.0,
+        -2.9999999999999996
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-052__slot052_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-053",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.85380592229,
+        450003.8639610307
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-053__slot053_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -7.071067811853028,
+        -7.071067811857576
+      ],
+      "rotation": -134.99999999998158,
+      "rotated_size": [
+        20,
+        21
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        21
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-054",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.0,
+        7.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-054__slot054_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        0.0,
+        -10.0
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        11,
+        16
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        16
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-055",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120003.92487373415,
+        450001.03553390596
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-055__slot055_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        7.071067811889407,
+        -7.071067811912146
+      ],
+      "rotation": -45.00000000009214,
+      "rotated_size": [
+        20,
+        21
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        21
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-056",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        11.72897087776357,
+        -5.312385274911675
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-056__slot056_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        9.72897087776357,
+        2.3123852749116747
+      ],
+      "rotation": 13.370000000000005,
+      "rotated_size": [
+        20,
+        15
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        15
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-057",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95000008726,
+        450004.4999999651
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-057__slot057_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        1.7452748579671606e-07,
+        -9.999999999972717
+      ],
+      "rotation": -89.99999900003115,
+      "rotated_size": [
+        12,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        12,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-058",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        10.354881311041597,
+        -8.495084920036073
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-058__slot058_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        8.354881311041597,
+        5.4950849200360725
+      ],
+      "rotation": 33.33329999999998,
+      "rotated_size": [
+        20,
+        19
+      ],
+      "crop": [
+        0,
+        0,
+        20,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-059",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45000002618,
+        449999.4999998778
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-059__slot059_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -10.000000000004547,
+        1.7454112821724266e-07
+      ],
+      "rotation": 179.999998999953,
+      "rotated_size": [
+        18,
+        13
+      ],
+      "crop": [
+        0,
+        0,
+        18,
+        13
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-060",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45,
+        449995.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-060__slot060_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        17,
+        13
+      ],
+      "crop": [
+        2,
+        1,
+        15,
+        12
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-061",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        -10.071067811865477
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-061__slot061_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        7.0710678118654755,
+        7.071067811865477
+      ],
+      "rotation": 45.0,
+      "rotated_size": [
+        23,
+        23
+      ],
+      "crop": [
+        4,
+        4,
+        19,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-062",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120002.95,
+        449990.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-062__slot062_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        -6.661338147750939e-16,
+        10.000000000000002
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        13,
+        17
+      ],
+      "crop": [
+        1,
+        2,
+        12,
+        15
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-063",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        -10.071067811865476
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-063__slot063_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        -7.0710678118654755,
+        7.0710678118654755
+      ],
+      "rotation": 135.0,
+      "rotated_size": [
+        23,
+        23
+      ],
+      "crop": [
+        4,
+        4,
+        19,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-064",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45,
+        449999.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-064__slot064_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        -10.0,
+        4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        17,
+        13
+      ],
+      "crop": [
+        2,
+        1,
+        15,
+        12
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-065",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-065__slot065_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        -7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -135.0,
+      "rotated_size": [
+        23,
+        23
+      ],
+      "crop": [
+        4,
+        4,
+        19,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-066",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95,
+        450004.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-066__slot066_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        0.0,
+        -10.000000000000002
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        13,
+        17
+      ],
+      "crop": [
+        1,
+        2,
+        12,
+        15
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-067",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-067__slot067_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -45.0,
+      "rotated_size": [
+        23,
+        23
+      ],
+      "crop": [
+        4,
+        4,
+        19,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-068",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.66134323012,
+        449993.935536132
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-068__slot068_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        9.728970877786198,
+        2.3123852748904032
+      ],
+      "rotation": 13.369999999851416,
+      "rotated_size": [
+        21,
+        17
+      ],
+      "crop": [
+        3,
+        2,
+        18,
+        15
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-069",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.000000174532924,
+        6.999999999999998
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-069__slot069_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        1.745329241131799e-07,
+        -9.999999999999998
+      ],
+      "rotation": -89.999999,
+      "rotated_size": [
+        15,
+        19
+      ],
+      "crop": [
+        2,
+        3,
+        13,
+        16
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-070",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45170339353,
+        449991.9824642938
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-070__slot070_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        8.354881311051942,
+        5.495084920021329
+      ],
+      "rotation": 33.33329999989684,
+      "rotated_size": [
+        23,
+        21
+      ],
+      "crop": [
+        4,
+        3,
+        19,
+        18
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-071",
+    "input": "input-5.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -7.999999999999998,
+        -3.0000001745329254
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-071__slot071_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        -9.999999999999998,
+        1.7453292544544752e-07
+      ],
+      "rotation": 179.999999,
+      "rotated_size": [
+        19,
+        15
+      ],
+      "crop": [
+        3,
+        2,
+        16,
+        13
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-072",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        12.0,
+        -3.0000000000000018
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-072__slot072_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        10.0,
+        1.7763568394002505e-15
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        31,
+        19
+      ],
+      "crop": [
+        0,
+        0,
+        31,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-073",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.04619407772,
+        449991.1360389693
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-073__slot073_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        7.071067811884861,
+        7.071067811848481
+      ],
+      "rotation": 44.99999999985263,
+      "rotated_size": [
+        37,
+        37
+      ],
+      "crop": [
+        0,
+        0,
+        37,
+        37
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-074",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        1.9999999999999987,
+        -13.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-074__slot074_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        -1.3322676295501878e-15,
+        10.0
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        19,
+        31
+      ],
+      "crop": [
+        0,
+        0,
+        19,
+        31
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-075",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119998.97512626585,
+        449993.96446609404
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-075__slot075_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        -7.071067811857575,
+        7.071067811903051
+      ],
+      "rotation": 134.99999999981577,
+      "rotated_size": [
+        37,
+        37
+      ],
+      "crop": [
+        0,
+        0,
+        37,
+        37
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-076",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -8.0,
+        -2.9999999999999996
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-076__slot076_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        -10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        31,
+        19
+      ],
+      "crop": [
+        0,
+        0,
+        31,
+        19
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-077",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.85380592229,
+        450003.8639610307
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-077__slot077_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        -7.071067811853028,
+        -7.071067811857576
+      ],
+      "rotation": -134.99999999998158,
+      "rotated_size": [
+        37,
+        37
+      ],
+      "crop": [
+        0,
+        0,
+        37,
+        37
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-078",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.0,
+        7.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-078__slot078_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        0.0,
+        -10.0
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        19,
+        31
+      ],
+      "crop": [
+        0,
+        0,
+        19,
+        31
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-079",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120003.92487373415,
+        450001.03553390596
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-079__slot079_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        7.071067811889407,
+        -7.071067811912146
+      ],
+      "rotation": -45.00000000009214,
+      "rotated_size": [
+        37,
+        37
+      ],
+      "crop": [
+        0,
+        0,
+        37,
+        37
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-080",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        11.72897087776357,
+        -5.312385274911675
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-080__slot080_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        9.72897087776357,
+        2.3123852749116747
+      ],
+      "rotation": 13.370000000000005,
+      "rotated_size": [
+        35,
+        27
+      ],
+      "crop": [
+        0,
+        0,
+        35,
+        27
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-081",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95000008726,
+        450004.4999999651
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-081__slot081_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        1.7452748579671606e-07,
+        -9.999999999972717
+      ],
+      "rotation": -89.99999900003115,
+      "rotated_size": [
+        21,
+        33
+      ],
+      "crop": [
+        0,
+        0,
+        21,
+        33
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-082",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        10.354881311041597,
+        -8.495084920036073
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-082__slot082_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        8.354881311041597,
+        5.4950849200360725
+      ],
+      "rotation": 33.33329999999998,
+      "rotated_size": [
+        37,
+        33
+      ],
+      "crop": [
+        0,
+        0,
+        37,
+        33
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-083",
+    "input": "input-6.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45000002618,
+        449999.4999998778
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-083__slot083_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        19
+      ],
+      "vector": [
+        -10.000000000004547,
+        1.7454112821724266e-07
+      ],
+      "rotation": 179.999998999953,
+      "rotated_size": [
+        33,
+        21
+      ],
+      "crop": [
+        0,
+        0,
+        33,
+        21
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-084",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45,
+        449995.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-084__slot084_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        2,
+        2
+      ],
+      "crop": [
+        0,
+        0,
+        2,
+        2
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-085",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        -10.071067811865477
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-085__slot085_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        7.0710678118654755,
+        7.071067811865477
+      ],
+      "rotation": 45.0,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-086",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120002.95,
+        449990.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-086__slot086_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        -6.661338147750939e-16,
+        10.000000000000002
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        2,
+        2
+      ],
+      "crop": [
+        0,
+        0,
+        2,
+        2
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-087",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        -10.071067811865476
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-087__slot087_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        -7.0710678118654755,
+        7.0710678118654755
+      ],
+      "rotation": 135.0,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-088",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45,
+        449999.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-088__slot088_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        -10.0,
+        4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        2,
+        2
+      ],
+      "crop": [
+        0,
+        0,
+        2,
+        2
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-089",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-089__slot089_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        -7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -135.0,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-090",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95,
+        450004.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-090__slot090_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        0.0,
+        -10.000000000000002
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        2,
+        2
+      ],
+      "crop": [
+        0,
+        0,
+        2,
+        2
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-091",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-091__slot091_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -45.0,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-092",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.66134323012,
+        449993.935536132
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-092__slot092_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        9.728970877786198,
+        2.3123852748904032
+      ],
+      "rotation": 13.369999999851416,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-093",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.000000174532924,
+        6.999999999999998
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-093__slot093_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        1.745329241131799e-07,
+        -9.999999999999998
+      ],
+      "rotation": -89.999999,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-094",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45170339353,
+        449991.9824642938
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-094__slot094_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        8.354881311051942,
+        5.495084920021329
+      ],
+      "rotation": 33.33329999989684,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-095",
+    "input": "input-7.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -7.999999999999998,
+        -3.0000001745329254
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-095__slot095_geotiff.png",
+    "details": {
+      "source_size": [
+        2,
+        2
+      ],
+      "vector": [
+        -9.999999999999998,
+        1.7453292544544752e-07
+      ],
+      "rotation": 179.999999,
+      "rotated_size": [
+        4,
+        4
+      ],
+      "crop": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-096",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        12.0,
+        -3.0000000000000018
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-096__slot096_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        10.0,
+        1.7763568394002505e-15
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        11,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-097",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.04619407772,
+        449991.1360389693
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-097__slot097_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        7.071067811884861,
+        7.071067811848481
+      ],
+      "rotation": 44.99999999985263,
+      "rotated_size": [
+        17,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        17,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-098",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        1.9999999999999987,
+        -13.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-098__slot098_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        -1.3322676295501878e-15,
+        10.0
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        11,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-099",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119998.97512626585,
+        449993.96446609404
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-099__slot099_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        -7.071067811857575,
+        7.071067811903051
+      ],
+      "rotation": 134.99999999981577,
+      "rotated_size": [
+        17,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        17,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-100",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -8.0,
+        -2.9999999999999996
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-100__slot100_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        -10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        11,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-101",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.85380592229,
+        450003.8639610307
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-101__slot101_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        -7.071067811853028,
+        -7.071067811857576
+      ],
+      "rotation": -134.99999999998158,
+      "rotated_size": [
+        17,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        17,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-102",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.0,
+        7.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-102__slot102_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        0.0,
+        -10.0
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        11,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-103",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120003.92487373415,
+        450001.03553390596
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-103__slot103_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        7.071067811889407,
+        -7.071067811912146
+      ],
+      "rotation": -45.00000000009214,
+      "rotated_size": [
+        17,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        17,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-104",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        11.72897087776357,
+        -5.312385274911675
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-104__slot104_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        9.72897087776357,
+        2.3123852749116747
+      ],
+      "rotation": 13.370000000000005,
+      "rotated_size": [
+        15,
+        15
+      ],
+      "crop": [
+        0,
+        0,
+        15,
+        15
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-105",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95000008726,
+        450004.4999999651
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-105__slot105_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        1.7452748579671606e-07,
+        -9.999999999972717
+      ],
+      "rotation": -89.99999900003115,
+      "rotated_size": [
+        13,
+        13
+      ],
+      "crop": [
+        0,
+        0,
+        13,
+        13
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-106",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        10.354881311041597,
+        -8.495084920036073
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-106__slot106_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        8.354881311041597,
+        5.4950849200360725
+      ],
+      "rotation": 33.33329999999998,
+      "rotated_size": [
+        17,
+        17
+      ],
+      "crop": [
+        0,
+        0,
+        17,
+        17
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-107",
+    "input": "input-8.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45000002618,
+        449999.4999998778
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-107__slot107_geotiff.png",
+    "details": {
+      "source_size": [
+        11,
+        11
+      ],
+      "vector": [
+        -10.000000000004547,
+        1.7454112821724266e-07
+      ],
+      "rotation": 179.999998999953,
+      "rotated_size": [
+        13,
+        13
+      ],
+      "crop": [
+        0,
+        0,
+        13,
+        13
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-108",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45,
+        449995.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-108__slot108_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        10.0,
+        -4.440892098500626e-16
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        31,
+        32
+      ],
+      "crop": [
+        0,
+        0,
+        31,
+        32
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-109",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        -10.071067811865477
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-109__slot109_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        7.0710678118654755,
+        7.071067811865477
+      ],
+      "rotation": 45.0,
+      "rotated_size": [
+        45,
+        46
+      ],
+      "crop": [
+        0,
+        0,
+        45,
+        46
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-110",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120002.95,
+        449990.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-110__slot110_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        -6.661338147750939e-16,
+        10.000000000000002
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        32,
+        31
+      ],
+      "crop": [
+        0,
+        0,
+        32,
+        31
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-111",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        -10.071067811865476
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-111__slot111_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        -7.0710678118654755,
+        7.0710678118654755
+      ],
+      "rotation": 135.0,
+      "rotated_size": [
+        45,
+        46
+      ],
+      "crop": [
+        0,
+        0,
+        45,
+        46
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-112",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119996.45,
+        449999.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-112__slot112_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        -10.0,
+        4.440892098500626e-16
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        31,
+        32
+      ],
+      "crop": [
+        0,
+        0,
+        31,
+        32
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-113",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -5.0710678118654755,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-113__slot113_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        -7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -135.0,
+      "rotated_size": [
+        45,
+        46
+      ],
+      "crop": [
+        0,
+        0,
+        45,
+        46
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-114",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        119999.95,
+        450004.5
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-114__slot114_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        0.0,
+        -10.000000000000002
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        32,
+        31
+      ],
+      "crop": [
+        0,
+        0,
+        32,
+        31
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-115",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        9.071067811865476,
+        4.0710678118654755
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-115__slot115_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        7.0710678118654755,
+        -7.0710678118654755
+      ],
+      "rotation": -45.0,
+      "rotated_size": [
+        45,
+        46
+      ],
+      "crop": [
+        0,
+        0,
+        45,
+        46
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-116",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.66134323012,
+        449993.935536132
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-116__slot116_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        9.728970877786198,
+        2.3123852748904032
+      ],
+      "rotation": 13.369999999851416,
+      "rotated_size": [
+        39,
+        40
+      ],
+      "crop": [
+        0,
+        0,
+        39,
+        40
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-117",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        2.000000174532924,
+        6.999999999999998
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-117__slot117_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        1.745329241131799e-07,
+        -9.999999999999998
+      ],
+      "rotation": -89.999999,
+      "rotated_size": [
+        33,
+        32
+      ],
+      "crop": [
+        0,
+        0,
+        33,
+        32
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-118",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.45,
+        449997.5
+      ],
+      [
+        120006.45170339353,
+        449991.9824642938
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-118__slot118_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        8.354881311051942,
+        5.495084920021329
+      ],
+      "rotation": 33.33329999989684,
+      "rotated_size": [
+        45,
+        44
+      ],
+      "crop": [
+        0,
+        0,
+        45,
+        44
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-119",
+    "input": "input-9.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        2.0,
+        -3.0
+      ],
+      [
+        -7.999999999999998,
+        -3.0000001745329254
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-119__slot119_geotiff.png",
+    "details": {
+      "source_size": [
+        31,
+        32
+      ],
+      "vector": [
+        -9.999999999999998,
+        1.7453292544544752e-07
+      ],
+      "rotation": 179.999999,
+      "rotated_size": [
+        33,
+        34
+      ],
+      "crop": [
+        0,
+        0,
+        33,
+        34
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-120",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-120__slot120_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": null,
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-121",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          -100.0,
+          -8.0
+        ],
+        [
+          100.0,
+          -8.0
+        ]
+      ]
+    ],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-121__slot121_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        0.0,
+        -2.5
+      ],
+      "rotation": -90.0,
+      "rotated_size": [
+        11,
+        16
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        16
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-122",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          -100.0,
+          -9.5
+        ],
+        [
+          100.0,
+          -9.5
+        ]
+      ]
+    ],
+    "terrain": [
+      [
+        [
+          12.0,
+          100.0
+        ],
+        [
+          12.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": false,
+    "expected": "expected-122__slot122_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -4.0,
+        0.0
+      ],
+      "rotation": -180.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-123",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          8.0,
+          100.0
+        ],
+        [
+          8.0,
+          -100.0
+        ]
+      ]
+    ],
+    "terrain": [
+      [
+        [
+          4.0,
+          100.0
+        ],
+        [
+          4.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": false,
+    "expected": "expected-123__slot123_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        0.0,
+        0.0
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-124",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          100.0,
+          100.0
+        ],
+        [
+          101.0,
+          100.0
+        ]
+      ],
+      [
+        [
+          1.0,
+          2.0
+        ],
+        [
+          1.0,
+          2.0
+        ]
+      ]
+    ],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-124__slot124_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": null,
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-125",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        1.0,
+        2.0
+      ],
+      [
+        1.0,
+        2.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [
+      [
+        [
+          4.0,
+          100.0
+        ],
+        [
+          4.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": false,
+    "expected": "expected-125__slot125_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        4.0,
+        0.0
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-126",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-126__slot126_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": null,
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-127",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          -100.0,
+          -8.0
+        ],
+        [
+          100.0,
+          -8.0
+        ]
+      ]
+    ],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-127__slot127_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        0.0,
+        -2.5
+      ],
+      "rotation": 90.0,
+      "rotated_size": [
+        11,
+        16
+      ],
+      "crop": [
+        0,
+        0,
+        11,
+        16
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-128",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          -100.0,
+          -9.5
+        ],
+        [
+          100.0,
+          -9.5
+        ]
+      ]
+    ],
+    "terrain": [
+      [
+        [
+          12.0,
+          100.0
+        ],
+        [
+          12.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": true,
+    "expected": "expected-128__slot128_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        -4.0,
+        0.0
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-129",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          8.0,
+          100.0
+        ],
+        [
+          8.0,
+          -100.0
+        ]
+      ]
+    ],
+    "terrain": [
+      [
+        [
+          4.0,
+          100.0
+        ],
+        [
+          4.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": true,
+    "expected": "expected-129__slot129_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        0.0,
+        0.0
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-130",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": null,
+    "roads": [
+      [
+        [
+          100.0,
+          100.0
+        ],
+        [
+          101.0,
+          100.0
+        ]
+      ],
+      [
+        [
+          1.0,
+          2.0
+        ],
+        [
+          1.0,
+          2.0
+        ]
+      ]
+    ],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-130__slot130_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": null,
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-131",
+    "input": "input-4.png",
+    "kind": "png",
+    "transform": {
+      "a": 1.0,
+      "b": 0.0,
+      "c": 0.0,
+      "d": 0.0,
+      "e": -1.0,
+      "f": 0.0
+    },
+    "axis": [
+      [
+        1.0,
+        2.0
+      ],
+      [
+        1.0,
+        2.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [
+      [
+        [
+          4.0,
+          100.0
+        ],
+        [
+          4.0,
+          -100.0
+        ]
+      ]
+    ],
+    "reverse": true,
+    "expected": "expected-131__slot131_geotiff.png",
+    "details": {
+      "source_size": [
+        16,
+        11
+      ],
+      "vector": [
+        4.0,
+        0.0
+      ],
+      "rotation": 0.0,
+      "rotated_size": [
+        16,
+        11
+      ],
+      "crop": [
+        0,
+        0,
+        16,
+        11
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-132",
+    "input": "orientation-1.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-132__slot132_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        19,
+        15
+      ],
+      "crop": [
+        2,
+        1,
+        17,
+        14
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-133",
+    "input": "orientation-2.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-133__slot133_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        19,
+        15
+      ],
+      "crop": [
+        2,
+        1,
+        17,
+        14
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-134",
+    "input": "orientation-3.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-134__slot134_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        19,
+        15
+      ],
+      "crop": [
+        2,
+        1,
+        17,
+        14
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-135",
+    "input": "orientation-4.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-135__slot135_geotiff.png",
+    "details": {
+      "source_size": [
+        17,
+        13
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        19,
+        15
+      ],
+      "crop": [
+        2,
+        1,
+        17,
+        14
+      ]
+    },
+    "intentional_difference": null
+  },
+  {
+    "name": "case-136",
+    "input": "orientation-5.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-native-136__slot136_geotiff.png",
+    "details": {
+      "source_size": [
+        13,
+        17
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        15,
+        19
+      ],
+      "crop": [
+        1,
+        2,
+        14,
+        17
+      ]
+    },
+    "intentional_difference": {
+      "reason": "Pillow 11.3.0 RGBA TIFF Orientation 5..8 has wrong post-load dimensions; native follows raw numeric pixels and the orientation tag.",
+      "original_expected": "expected-136__slot136_geotiff.png",
+      "original_details": {
+        "source_size": [
+          17,
+          13
+        ],
+        "vector": [
+          18.281250000000004,
+          -0.9375000000000002
+        ],
+        "rotation": -2.9356734464211627,
+        "rotated_size": [
+          19,
+          15
+        ],
+        "crop": [
+          2,
+          0,
+          17,
+          15
+        ]
+      },
+      "oracle": "tifffile numeric RGBA plus explicit orientation; original rotation/crop/alpha thereafter"
+    }
+  },
+  {
+    "name": "case-137",
+    "input": "orientation-6.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-native-137__slot137_geotiff.png",
+    "details": {
+      "source_size": [
+        13,
+        17
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        15,
+        19
+      ],
+      "crop": [
+        1,
+        2,
+        14,
+        17
+      ]
+    },
+    "intentional_difference": {
+      "reason": "Pillow 11.3.0 RGBA TIFF Orientation 5..8 has wrong post-load dimensions; native follows raw numeric pixels and the orientation tag.",
+      "original_expected": "expected-137__slot137_geotiff.png",
+      "original_details": {
+        "source_size": [
+          17,
+          13
+        ],
+        "vector": [
+          18.281250000000004,
+          -0.9375000000000002
+        ],
+        "rotation": -2.9356734464211627,
+        "rotated_size": [
+          19,
+          15
+        ],
+        "crop": [
+          2,
+          0,
+          17,
+          15
+        ]
+      },
+      "oracle": "tifffile numeric RGBA plus explicit orientation; original rotation/crop/alpha thereafter"
+    }
+  },
+  {
+    "name": "case-138",
+    "input": "orientation-7.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": false,
+    "expected": "expected-native-138__slot138_geotiff.png",
+    "details": {
+      "source_size": [
+        13,
+        17
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        15,
+        19
+      ],
+      "crop": [
+        1,
+        2,
+        14,
+        17
+      ]
+    },
+    "intentional_difference": {
+      "reason": "Pillow 11.3.0 RGBA TIFF Orientation 5..8 has wrong post-load dimensions; native follows raw numeric pixels and the orientation tag.",
+      "original_expected": "expected-138__slot138_geotiff.png",
+      "original_details": {
+        "source_size": [
+          17,
+          13
+        ],
+        "vector": [
+          18.281250000000004,
+          -0.9375000000000002
+        ],
+        "rotation": -2.9356734464211627,
+        "rotated_size": [
+          19,
+          15
+        ],
+        "crop": [
+          2,
+          0,
+          17,
+          15
+        ]
+      },
+      "oracle": "tifffile numeric RGBA plus explicit orientation; original rotation/crop/alpha thereafter"
+    }
+  },
+  {
+    "name": "case-139",
+    "input": "orientation-8.tiff",
+    "kind": "tiff",
+    "transform": {
+      "a": 0.5,
+      "b": 0.15,
+      "c": 120000.0,
+      "d": -0.2,
+      "e": -0.7,
+      "f": 450000.0
+    },
+    "axis": [
+      [
+        120001.0,
+        449998.0
+      ],
+      [
+        120010.0,
+        449995.0
+      ]
+    ],
+    "roads": [],
+    "terrain": [],
+    "reverse": true,
+    "expected": "expected-native-139__slot139_geotiff.png",
+    "details": {
+      "source_size": [
+        13,
+        17
+      ],
+      "vector": [
+        18.281250000000004,
+        -0.9375000000000002
+      ],
+      "rotation": -2.9356734464211627,
+      "rotated_size": [
+        15,
+        19
+      ],
+      "crop": [
+        1,
+        2,
+        14,
+        17
+      ]
+    },
+    "intentional_difference": {
+      "reason": "Pillow 11.3.0 RGBA TIFF Orientation 5..8 has wrong post-load dimensions; native follows raw numeric pixels and the orientation tag.",
+      "original_expected": "expected-139__slot139_geotiff.png",
+      "original_details": {
+        "source_size": [
+          17,
+          13
+        ],
+        "vector": [
+          18.281250000000004,
+          -0.9375000000000002
+        ],
+        "rotation": -2.9356734464211627,
+        "rotated_size": [
+          19,
+          15
+        ],
+        "crop": [
+          2,
+          0,
+          17,
+          15
+        ]
+      },
+      "oracle": "tifffile numeric RGBA plus explicit orientation; original rotation/crop/alpha thereafter"
+    }
+  }
+]

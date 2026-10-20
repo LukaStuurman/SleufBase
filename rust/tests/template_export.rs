@@ -18,7 +18,12 @@ fn request(name: &str) -> Request {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
     r.template = root.join(&r.template);
     for s in r.slots.iter_mut().flatten() {
-        s.tiff_png = root.join(&s.tiff_png);
+        if !s.tiff_png.as_os_str().is_empty() {
+            s.tiff_png = root.join(&s.tiff_png);
+        }
+        if let Some(source) = &mut s.tiff_source {
+            source.path = root.join(&source.path);
+        }
         s.map_png = root.join(&s.map_png);
     }
     r
@@ -174,6 +179,83 @@ fn an_output_alias_cannot_replace_the_input_template_or_png() {
         assert!(template_export::export(&output, &r, &Control::default()).is_err());
         assert_eq!(files(temp.path()), before);
     }
+}
+#[test]
+fn native_tiff_preparation_uses_the_profile_axis_once_and_keeps_its_own_pixels() {
+    let temp = tempfile::tempdir().unwrap();
+    let mut r = request("native-tiff");
+    let input = temp.path().join("source.tiff");
+    std::fs::copy(
+        &r.slots[0]
+            .as_ref()
+            .unwrap()
+            .tiff_source
+            .as_ref()
+            .unwrap()
+            .path,
+        &input,
+    )
+    .unwrap();
+    for s in r.slots.iter_mut().flatten() {
+        s.tiff_source.as_mut().unwrap().path = input.clone();
+    }
+    let out =
+        template_export::export(&temp.path().join("export.dxf"), &r, &Control::default()).unwrap();
+    assert_eq!((out.filled_slots, out.profiles), (3, 2));
+    std::fs::remove_file(input).unwrap();
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/template-export");
+    for i in [0, 2, 3] {
+        let native = image::open(
+            out.published
+                .assets
+                .join(format!("slot{:05}_tiff.png", i + 1)),
+        )
+        .unwrap()
+        .into_rgba8();
+        let original = image::open(root.join(format!("native-tiff-slot{i:03}.png")))
+            .unwrap()
+            .into_rgba8();
+        assert_eq!(native, original, "slot {i}");
+    }
+}
+#[test]
+fn native_tiff_errors_and_ambiguous_inputs_preserve_previous_outputs() {
+    let temp = tempfile::tempdir().unwrap();
+    let output = temp.path().join("export.dxf");
+    let mut r = request("native-tiff");
+    let input = temp.path().join("source.tiff");
+    std::fs::copy(
+        &r.slots[0]
+            .as_ref()
+            .unwrap()
+            .tiff_source
+            .as_ref()
+            .unwrap()
+            .path,
+        &input,
+    )
+    .unwrap();
+    for s in r.slots.iter_mut().flatten() {
+        s.tiff_source.as_mut().unwrap().path = input.clone();
+    }
+    template_export::export(&output, &r, &Control::default()).unwrap();
+    let bad = temp.path().join("bad.tiff");
+    std::fs::write(&bad, b"broken TIFF").unwrap();
+    let before = files(temp.path());
+    assert!(template_export::export(&input, &r, &Control::default()).is_err());
+    assert_eq!(files(temp.path()), before);
+    r.slots[2]
+        .as_mut()
+        .unwrap()
+        .tiff_source
+        .as_mut()
+        .unwrap()
+        .path = bad;
+    assert!(template_export::export(&output, &r, &Control::default()).is_err());
+    assert_eq!(files(temp.path()), before);
+    r.slots[0].as_mut().unwrap().tiff_png = input;
+    assert!(template_export::export(&output, &r, &Control::default()).is_err());
+    assert_eq!(files(temp.path()), before);
 }
 #[test]
 fn empty_exports_are_rejected_and_manifest_paths_are_relative_to_the_manifest() {
