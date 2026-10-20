@@ -18,7 +18,7 @@ use std::{collections::HashSet, path::PathBuf};
 pub const MAX_SLOTS: usize = 128;
 const MAX_MAP_POINTS: usize = 100_000;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Source {
     Job(usize),
     Virtual(usize),
@@ -308,17 +308,17 @@ mod tests {
         let mut opts=Options::default();
         opts.choices=suggest(&jobs,&[raster(Some(17))],&[]);
         assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
-            .unwrap_err().contains("DXF-sjabloon"));
+            .err().unwrap().contains("DXF-sjabloon"));
         let dir=tempfile::tempdir().unwrap();
         opts.template=dir.path().join("template.dxf");
         std::fs::write(&opts.template,b"dummy").unwrap();
         assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
-            .unwrap_err().contains("GeoTIFF niet gevonden"));
+            .err().unwrap().contains("GeoTIFF niet gevonden"));
         opts.choices[0].raster=None;
         assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
-            .unwrap_err().contains("koppel"));
+            .err().unwrap().contains("koppel"));
         opts.choices[0].include=false;
         assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
-            .unwrap_err().contains("minstens"));
+            .err().unwrap().contains("minstens"));
     }
 }
