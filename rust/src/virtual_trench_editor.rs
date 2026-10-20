@@ -78,6 +78,7 @@ pub fn edit_axis(t:&mut VirtualTrench,label:String,start:Vertex,end:Vertex,width
     candidate.start=start;
     candidate.end=end;
     candidate.width_meters=width;
+    sort_objects(&mut candidate);
     check(&candidate)?;
     *t=candidate;
     Ok(())
