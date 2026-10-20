@@ -257,20 +257,22 @@ impl SleufBaseApp {
                         }
                     });
                     let mut remove=None;
-                    egui::ScrollArea::vertical().max_height(190.).show(ui,|ui|{
-                        for (index,obj) in editor.draft.objects.iter().enumerate() {
-                            let (c,o)=edit::coordinates(&editor.draft,obj.position);
-                            ui.horizontal(|ui|{
-                                ui.label(format!("{:>3}  {} — {:.2} m / {:+.2} m",
-                                    index+1,obj.object_name,c,o));
-                                if ui.small_button("Bewerk").clicked() {
-                                    editor.selected=Some(index);
-                                    editor.object=ObjectForm::from_object(&editor.draft,obj);
-                                }
-                                if ui.small_button("Verwijder").clicked(){remove=Some(index);}
-                            });
-                        }
-                    });
+                    egui::ScrollArea::vertical().max_height(190.)
+                        .show_rows(ui,24.,editor.draft.objects.len(),|ui,rows|{
+                            for index in rows {
+                                let obj=&editor.draft.objects[index];
+                                let (c,o)=edit::coordinates(&editor.draft,obj.position);
+                                ui.horizontal(|ui|{
+                                    ui.label(format!("{:>3}  {} — {:.2} m / {:+.2} m",
+                                        index+1,obj.object_name,c,o));
+                                    if ui.small_button("Bewerk").clicked() {
+                                        editor.selected=Some(index);
+                                        editor.object=ObjectForm::from_object(&editor.draft,obj);
+                                    }
+                                    if ui.small_button("Verwijder").clicked(){remove=Some(index);}
+                                });
+                            }
+                        });
                     if let Some(index)=remove {
                         if let Err(e)=edit::remove_object(&mut editor.draft,index){editor.error=e;}
                         editor.selected=None;
