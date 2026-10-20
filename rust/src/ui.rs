@@ -40,6 +40,8 @@ mod template_exporting;
 mod project_template_ui;
 #[path="ui_trench_editor.rs"]
 mod trench_editing;
+#[path="ui_kickthemap_browser.rs"]
+mod kick_browser_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -115,6 +117,7 @@ pub struct SleufBaseApp {
     live_email:String,
     live_password:String,
     live_session:Option<KickTheMapLiveClient>,
+    browser_ui:kick_browser_ui::BrowserUi,
     live_jobs:Vec<Job>,
     live_rx:Option<Receiver<Result<(KickTheMapLiveClient,Vec<Job>),String>>>,
     live_download_rx:Option<Receiver<(KickTheMapLiveClient,Result<(RemoteFileKind,PathBuf),String>)>>,
@@ -194,6 +197,7 @@ impl Default for SleufBaseApp {
             live_email:String::new(),
             live_password:String::new(),
             live_session:None,
+            browser_ui:kick_browser_ui::BrowserUi::default(),
             live_jobs:Vec::new(),
             live_rx:None,
             live_download_rx:None,
@@ -821,6 +825,7 @@ impl SleufBaseApp {
                 self.live_busy=false;
                 self.live_rx=None;
                 self.message=format!("{} KickTheMap jobs live opgehaald",self.live_jobs.len());
+                self.save_live_cache();
             }
             Some(Ok(Err(err)))=>{
                 self.live_busy=false;
@@ -846,6 +851,10 @@ impl SleufBaseApp {
         self.live_session=None;
         self.live_jobs.clear();
         self.live_password.clear();
+        self.browser_ui.browser=None;
+        self.browser_ui.selected.clear();
+        self.browser_ui.queue.clear();
+        self.browser_ui.cancel.store(true,std::sync::atomic::Ordering::SeqCst);
         self.message="KickTheMap-sessie uit het geheugen verwijderd".into();
     }
 
@@ -1181,6 +1190,7 @@ impl SleufBaseApp {
         self.poll_pdok(ctx);self.poll_osm(ctx);
         self.poll_live_jobs();
         self.poll_live_download(ctx);
+        self.poll_kickthemap_browser(ctx);
         self.poll_bgt();
         self.poll_cadastral();
         self.poll_ahn();
@@ -1277,6 +1287,7 @@ impl SleufBaseApp {
                 ui.separator();
             }
             ui.heading("KickTheMap online");
+            if ui.button("Open KickTheMap browser & jobbeheer").clicked(){self.browser_ui.open=true;}
             ui.horizontal(|ui|{
                 ui.label("E-mail");
                 ui.add(egui::TextEdit::singleline(&mut self.live_email)
@@ -1562,6 +1573,7 @@ impl SleufBaseApp {
 
 
         if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
+        if self.browser_ui.open {self.show_kickthemap_workspace(ctx);}
 
         if self.show_comment_dialog {
             let mut opened=self.show_comment_dialog;
