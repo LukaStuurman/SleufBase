@@ -147,3 +147,44 @@ fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters
     assert!(result.published.assets.join("slot00001_kaart.png").is_file());
     assert!(result.published.assets.join("slot00001_tiff.png").is_file());
 }
+
+#[test]
+fn template_photos_are_persistently_bundled_without_replacing_tiff_or_map() {
+    use sleufbase_rust::template_photo::{Photo,Area};
+    let (reference,tiff)=fixture();
+    let dir=tempfile::tempdir().unwrap();
+    let photo=dir.path().join("site.png");
+    let mut pixels=image::RgbaImage::from_pixel(64,48,image::Rgba([36,64,112,255]));
+    pixels.put_pixel(0,0,image::Rgba([255,10,20,255]));
+    pixels.save(&photo).unwrap();
+    let options=Options {
+        template:reference.template,
+        include_bgt:false,include_cadastral:false,include_cad:false,
+        choices:vec![Choice {
+            source:Source::Job(0),raster:Some(0),include:true,
+            title:"Vak met foto's".into(),profile:false,reverse:false,
+            comments:String::new(),photos:vec![
+                Photo{path:photo.clone(),turns:1,area:Area::Tiff},
+                Photo{path:photo.clone(),turns:0,area:Area::Map},
+            ],
+        }],
+        ..Options::default()
+    };
+    let req=template_project::build(&options,&reference.datasets,&[tiff],
+        &[],&[],None,&reference.rules,&Control::default()).unwrap();
+    assert_eq!(req.slots[0].as_ref().unwrap().photos.len(),2);
+    let output=dir.path().join("photos.dxf");
+    let result=template_export::export(&output,&req,&Control::default()).unwrap();
+    for asset in [
+        "slot00001_tiff.png","slot00001_kaart.png",
+        "slot00001_photo01.png","slot00001_photo02.png"
+    ] { assert!(result.published.assets.join(asset).is_file(),"{asset}"); }
+    let rotated=image::open(result.published.assets.join("slot00001_photo01.png")).unwrap();
+    assert_eq!((rotated.width(),rotated.height()),(48,64));
+    let doc=sleufbase_rust::dxf_document::Document::load(
+        &output,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+    assert_eq!(doc.records().filter(|r|r.kind()=="IMAGEDEF").count(),4);
+    assert_eq!(doc.records().filter(|r|r.kind()=="IMAGE").count(),4);
+    // Input source remains unchanged and is never relocated/deleted.
+    assert_eq!(image::open(&photo).unwrap().width(),64);
+}
