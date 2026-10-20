@@ -9,7 +9,13 @@ use std::sync::atomic::AtomicBool;
 
 #[derive(Clone,Debug,Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Source {pub trench:VirtualTrench,#[serde(default="default_quality")]pub quality:f64}
+pub struct Source {
+    pub trench:VirtualTrench,
+    #[serde(default="default_quality")]
+    pub quality:f64,
+    #[serde(default)]
+    pub reverse:bool,
+}
 fn default_quality()->f64{1.}
 #[derive(Clone,Copy,Debug)]
 pub struct Layout {pub bounds:Bounds,pub width:u32,pub height:u32}
@@ -79,6 +85,36 @@ fn stroke(image:&mut RgbaImage,a:[f64;2],b:[f64;2],thickness:i32,color:Rgba<u8>)
         let y=(a[1]+ratio*dy).round() as i32;
         circle(image,x,y,radius,color);
     }
+}
+/// Match Python's virtual-template pixel alignment: render in RD space and
+/// then rotate/crop through the same full-resolution engine as GeoTIFF sheets.
+/// Reverse swaps measured orientation before rotating, so profile and image
+/// follow the same start/end direction.
+pub fn prepare_for_template(source:&Source,cancel:&AtomicBool)
+    ->Result<crate::template_raster::Prepared,String>
+{
+    input::check(cancel)?;
+    let info=layout(&source.trench,source.quality)?;
+    let image=render(source,cancel)?;
+    let transform=crate::geo::GeoTransform {
+        a:(info.bounds.max_x-info.bounds.min_x)/info.width as f64,
+        b:0.,c:info.bounds.min_x,
+        d:0.,e:-(info.bounds.max_y-info.bounds.min_y)/info.height as f64,
+        f:info.bounds.max_y,
+    };
+    let start=[source.trench.start.x,source.trench.start.y];
+    let end=[source.trench.end.x,source.trench.end.y];
+    crate::template_raster::prepare(
+        image,
+        &crate::template_raster::Options {
+            transform,
+            roads:&[],
+            terrain:&[],
+            axis:Some(if source.reverse {[end,start]}else{[start,end]}),
+            reverse:source.reverse,
+        },
+        cancel,
+    )
 }
 pub fn render(source:&Source,cancel:&AtomicBool)->Result<RgbaImage,String>{
     input::check(cancel)?;
@@ -158,7 +194,7 @@ mod tests{
         t.objects.push(TrenchPoint{role:"water".into(),object_name:"Water".into(),
             source_name:"Water".into(),position:Vertex{x:155005.,y:463000.1,z:Some(-1.2)},
             attributes:Default::default()});
-        let img=render(&Source{trench:t,quality:1.},&AtomicBool::new(false)).unwrap();
+        let img=render(&Source{trench:t,quality:1.,reverse:false},&AtomicBool::new(false)).unwrap();
         assert_eq!(img.get_pixel(0,0)[3],0);
         assert!(img.pixels().any(|p|p[0]==0&&p[3]==255));
         assert!(img.pixels().any(|p|p[2]==229&&p[3]==235));
@@ -171,13 +207,28 @@ mod tests{
             source_name:"Waarschuwingsband".into(),
             display_rgb:Some([239,33,44]),
         });
-        let img=render(&Source{trench:t,quality:1.},&AtomicBool::new(false)).unwrap();
+        let img=render(&Source{trench:t,quality:1.,reverse:false},&AtomicBool::new(false)).unwrap();
         assert!(img.pixels().any(|p|p.0==[239,33,44,235]));
+    }
+    #[test]
+    fn template_preparation_aligns_vertical_measurement_axis_and_reversal(){
+        let mut t=trench();
+        t.end.x=t.start.x;
+        t.end.y=t.start.y+10.;
+        let forward=prepare_for_template(
+            &Source{trench:t.clone(),quality:1.,reverse:false},
+            &AtomicBool::new(false)).unwrap();
+        let reverse=prepare_for_template(
+            &Source{trench:t,quality:1.,reverse:true},
+            &AtomicBool::new(false)).unwrap();
+        assert_eq!(forward.image.dimensions(),reverse.image.dimensions());
+        assert!(forward.details.rotation.abs()>1.);
+        assert!((forward.details.rotation-reverse.details.rotation).abs()>90.);
     }
     #[test]
     fn cancel_and_invalid_scale_are_rejected(){
         let t=trench();
         assert!(layout(&t,0.).is_err());
-        assert!(render(&Source{trench:t,quality:1.},&AtomicBool::new(true)).is_err());
+        assert!(render(&Source{trench:t,quality:1.,reverse:false},&AtomicBool::new(true)).is_err());
     }
 }
