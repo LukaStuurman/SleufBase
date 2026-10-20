@@ -150,7 +150,7 @@ impl SleufBaseApp {
     pub(super) fn save_live_cache(&mut self) {
         if self.live_jobs.is_empty() {return;}
         let email=self.live_email.trim();
-        let root=kickthemap_cache_dir().join("jobs_cache");
+        let root=kickthemap_cache_dir();
         let path=jobs_cache::cache_path(&root,email);
         if jobs_cache::write_live_cache(&path,email,&self.live_jobs).is_ok() {
             if let Ok(cache)=read_cache(&path) {self.jobs_cache=Some(cache);}
