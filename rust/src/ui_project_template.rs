@@ -227,10 +227,10 @@ impl SleufBaseApp {
                                                         .map(|s|s.to_string_lossy().to_string())
                                                         .unwrap_or_else(||"Werkfoto".into()));
                                                     egui::ComboBox::from_id_salt("rotate")
-                                                        .selected_text(format!("{}°",photo.turns*90))
+                                                        .selected_text(format!("{}°",u32::from(photo.turns)*90))
                                                         .show_ui(ui,|ui|{
                                                             for turn in 0..4 {
-                                                                ui.selectable_value(&mut photo.turns,turn,format!("{}°",turn*90));
+                                                                ui.selectable_value(&mut photo.turns,turn,format!("{}°",u32::from(turn)*90));
                                                             }
                                                         });
                                                     egui::ComboBox::from_id_salt("area")
