@@ -14,7 +14,7 @@ pub(super) struct BrowserUi {
     pub(super) open:bool,
     pub(super) browser:Option<Browser>,
     launching:Option<Receiver<Result<Browser,String>>>,
-    capturing:Option<Receiver<(Browser,Result<(KickTheMapLiveClient,Vec<Job>),String>)>>,
+    pub(super) capturing:Option<Receiver<(Browser,Result<(KickTheMapLiveClient,Vec<Job>),String>)>>,
     pub(super) selected:BTreeSet<u64>,
     filter:String,
     only_downloadable:bool,
