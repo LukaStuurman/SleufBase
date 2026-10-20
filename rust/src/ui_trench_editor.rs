@@ -66,6 +66,10 @@ pub(super) struct Editor {
     notice:String,
     shift_x:f64,
     shift_y:f64,
+    dekband_start:f64,
+    dekband_end:f64,
+    dekband_name:String,
+    dekband_rgb:[u8;3],
 }
 #[derive(Clone, Copy)]
 enum Action {Save,Copy,Remove}
@@ -78,6 +82,8 @@ impl Editor {
             end:source.end,width:source.width_meters,
             selected:None,object:ObjectForm::default(),
             confirm_delete:false,error:String::new(),paste:String::new(),notice:String::new(),shift_x:0.,shift_y:0.,
+            dekband_start:0.,dekband_end:source.length(),
+            dekband_name:"Dekband".into(),dekband_rgb:[17,24,39],
         }
     }
     fn build(&self)->Result<VirtualTrench,String> {
@@ -214,7 +220,18 @@ impl SleufBaseApp {
                             ui.add(egui::DragValue::new(&mut editor.width).range(0.1..=100.).speed(0.05));
                         });
                         if ui.button("Begin- en eindpunt omkeren").clicked() {
-                            std::mem::swap(&mut editor.start,&mut editor.end);
+                            match editor.build() {
+                                Ok(mut next)=>match edit::reverse_axis(&mut next) {
+                                    Ok(())=>{
+                                        editor.start=next.start;
+                                        editor.end=next.end;
+                                        editor.draft=next;
+                                        editor.error.clear();
+                                    },
+                                    Err(e)=>editor.error=e,
+                                },
+                                Err(e)=>editor.error=e,
+                            }
                         }
                         ui.horizontal(|ui|{
                             ui.label("Verschuif gehele sleuf RD ΔX");
@@ -240,6 +257,58 @@ impl SleufBaseApp {
                         });
                     });
                     editor.draw_preview(ui);
+                    ui.separator();
+                    ui.collapsing(format!("Dekbandsegmenten ({})",editor.draft.dekband_rows.len()),|ui|{
+                        ui.small("De dekband volgt de meetas tussen twee kettingmaten en verschijnt als gekleurde langsstreep in het gegenereerde virtuele raster.");
+                        ui.horizontal(|ui|{
+                            ui.label("Van (m)");
+                            ui.add(egui::DragValue::new(&mut editor.dekband_start).speed(0.05));
+                            ui.label("Tot (m)");
+                            ui.add(egui::DragValue::new(&mut editor.dekband_end).speed(0.05));
+                            ui.label("Beschrijving");
+                            ui.text_edit_singleline(&mut editor.dekband_name);
+                        });
+                        ui.horizontal(|ui|{
+                            ui.label("Kleur");
+                            ui.color_edit_button_srgb(&mut editor.dekband_rgb);
+                            if ui.add_enabled(editor.draft.dekband_rows.len()<10_000,
+                                egui::Button::new("Voeg dekband toe")).clicked() {
+                                let segment=sleufbase_rust::virtual_trench::Dekband{
+                                    start_chainage:editor.dekband_start,
+                                    end_chainage:editor.dekband_end,
+                                    source_name:editor.dekband_name.clone(),
+                                    display_rgb:Some(editor.dekband_rgb),
+                                };
+                                let mut next=editor.draft.clone();
+                                next.dekband_rows.push(segment);
+                                match edit::check(&next) {
+                                    Ok(())=>{
+                                        editor.draft=next;
+                                        editor.error.clear();
+                                    },
+                                    Err(err)=>editor.error=err,
+                                }
+                            }
+                        });
+                        let mut remove=None;
+                        egui::ScrollArea::vertical().max_height(170.).show(ui,|ui|{
+                            for (i,band) in editor.draft.dekband_rows.iter_mut().enumerate(){
+                                ui.push_id(i,|ui|{
+                                    ui.horizontal(|ui|{
+                                        ui.label(format!("{}:",i+1));
+                                        ui.add(egui::DragValue::new(&mut band.start_chainage).speed(0.05));
+                                        ui.label("–");
+                                        ui.add(egui::DragValue::new(&mut band.end_chainage).speed(0.05));
+                                        ui.text_edit_singleline(&mut band.source_name);
+                                        let rgb=band.display_rgb.get_or_insert([17,24,39]);
+                                        ui.color_edit_button_srgb(rgb);
+                                        if ui.small_button("Verwijder").clicked(){remove=Some(i);}
+                                    });
+                                });
+                            }
+                        });
+                        if let Some(index)=remove{editor.draft.dekband_rows.remove(index);}
+                    });
                     ui.separator();
                     ui.heading("Meetobjecten");
                     ui.small("Kettingmaat: meters vanaf het beginpunt. Dwarsafstand: positief links van de meetas.");
