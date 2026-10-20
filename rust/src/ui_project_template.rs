@@ -16,9 +16,12 @@ impl Dialog {
                 &app.datasets, &app.geotiffs, &app.virtual_trenches),
             ..Options::default()
         };
+        if let Some(saved)=&app.template_preferences {
+            options=saved.restore(&app.datasets,&app.geotiffs,&app.virtual_trenches);
+        }
         // Do not silently reuse stale project-specific settings from another
         // project. Users explicitly select the desired CAD template each time.
-        options.include_bgt = true;
+        if app.template_preferences.is_none() {options.include_bgt = true;}
         let automatic=options.choices.iter().map(|choice| match choice.source {
             Source::Job(i) => sleufbase_rust::template_match::for_job(&app.datasets[i], &app.geotiffs),
             Source::Virtual(i) => sleufbase_rust::template_match::for_trench(&app.virtual_trenches[i], &app.geotiffs),
