@@ -32,8 +32,11 @@ pub(crate) fn clip(a: [f64;2], b: [f64;2], bounds: Bounds) -> Option<([f64;2],[f
             if entry>exit {return None;}
         }
     }
-    let start=[a[0]+entry*d[0],a[1]+entry*d[1]];
-    let end=[a[0]+exit*d[0],a[1]+exit*d[1]];
+    let clamp=|x:f64,lo:f64,hi:f64|x.max(lo).min(hi);
+    let start=[clamp(a[0]+entry*d[0],bounds.min_x,bounds.max_x),
+               clamp(a[1]+entry*d[1],bounds.min_y,bounds.max_y)];
+    let end=[clamp(a[0]+exit*d[0],bounds.min_x,bounds.max_x),
+             clamp(a[1]+exit*d[1],bounds.min_y,bounds.max_y)];
     (start.iter().chain(end.iter()).all(|x|x.is_finite()) && start!=end)
         .then_some((start,end))
 }
