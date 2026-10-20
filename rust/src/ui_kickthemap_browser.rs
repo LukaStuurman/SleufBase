@@ -6,7 +6,7 @@ use sleufbase_rust::{
     kickthemap_browser::Browser,
     jobs_cache::{self, Job},
 };
-use std::{collections::{BTreeSet,VecDeque},sync::atomic::{AtomicBool,Ordering}};
+use std::{collections::{BTreeSet,VecDeque},sync::{Arc,atomic::{AtomicBool,Ordering}}};
 
 #[derive(Clone,Copy,PartialEq,Eq)]
 enum Sort {Newest,Name,Id}
@@ -190,6 +190,7 @@ impl SleufBaseApp {
         let jobs=&self.live_jobs;
         let cache=self.jobs_cache.as_ref().map(|c|c.jobs.as_slice()).unwrap_or(&[]);
         let live=self.live_session.is_some();
+        let busy=self.live_busy;
         let source=if live {jobs.as_slice()} else {cache};
         let browser=&mut self.browser_ui;
         let query=browser.filter.trim().to_lowercase();
@@ -225,13 +226,13 @@ impl SleufBaseApp {
                             egui::Button::new("Open KickTheMap in Edge")).clicked() {
                             action=Some("launch");
                         }
-                        if ui.add_enabled(browser.browser.is_some()&&browser.capturing.is_none()&&!self.live_busy,
+                        if ui.add_enabled(browser.browser.is_some()&&browser.capturing.is_none()&&!busy,
                             egui::Button::new("Sessie overnemen")).clicked(){
                             action=Some("capture");
                         }
                         if ui.add_enabled(browser.browser.is_some()&&browser.capturing.is_none(),
                             egui::Button::new("Privé Edge-venster sluiten")).clicked(){action=Some("close");}
-                        if ui.add_enabled(live&&!self.live_busy,
+                        if ui.add_enabled(live&&!busy,
                             egui::Button::new("Vernieuw live jobs")).clicked(){action=Some("refresh");}
                     });
                     if browser.launching.is_some()||browser.capturing.is_some() {ui.spinner();}
@@ -280,7 +281,7 @@ impl SleufBaseApp {
                     ui.separator();
                     ui.heading(format!("Downloads — {} geselecteerd",browser.selected.len()));
                     ui.horizontal(|ui|{
-                        let can=live&&!self.live_busy&&!browser.batch_mode&&
+                        let can=live&&!busy&&!browser.batch_mode&&
                             !browser.selected.is_empty()&&browser.capturing.is_none();
                         if ui.add_enabled(can,egui::Button::new("Objecten downloaden + laden")).clicked(){
                             action=Some("objects");
@@ -292,7 +293,7 @@ impl SleufBaseApp {
                             action=Some("both");
                         }
                     });
-                    if browser.batch_mode||self.live_busy {ui.spinner();}
+                    if browser.batch_mode||busy {ui.spinner();}
                     if browser.batch_mode {
                         ui.label(format!("{} verwerkt, {} in wachtrij",
                             browser.completed,browser.queue.len()));
