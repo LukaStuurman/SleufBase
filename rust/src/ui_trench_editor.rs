@@ -64,6 +64,8 @@ pub(super) struct Editor {
     error:String,
     paste:String,
     notice:String,
+    shift_x:f64,
+    shift_y:f64,
 }
 #[derive(Clone, Copy)]
 enum Action {Save,Copy,Remove}
@@ -75,7 +77,7 @@ impl Editor {
             label:source.label.clone(),start:source.start,
             end:source.end,width:source.width_meters,
             selected:None,object:ObjectForm::default(),
-            confirm_delete:false,error:String::new(),paste:String::new(),notice:String::new(),
+            confirm_delete:false,error:String::new(),paste:String::new(),notice:String::new(),shift_x:0.,shift_y:0.,
         }
     }
     fn build(&self)->Result<VirtualTrench,String> {
@@ -189,6 +191,28 @@ impl SleufBaseApp {
                         if ui.button("Begin- en eindpunt omkeren").clicked() {
                             std::mem::swap(&mut editor.start,&mut editor.end);
                         }
+                        ui.horizontal(|ui|{
+                            ui.label("Verschuif gehele sleuf RD ΔX");
+                            ui.add(egui::DragValue::new(&mut editor.shift_x).speed(0.1));
+                            ui.label("ΔY");
+                            ui.add(egui::DragValue::new(&mut editor.shift_y).speed(0.1));
+                            if ui.small_button("Pas verplaatsing toe").clicked() {
+                                match editor.build() {
+                                    Ok(mut next)=>match edit::translate(&mut next,editor.shift_x,editor.shift_y) {
+                                        Ok(())=>{
+                                            editor.start=next.start;
+                                            editor.end=next.end;
+                                            editor.draft=next;
+                                            editor.shift_x=0.;
+                                            editor.shift_y=0.;
+                                            editor.error.clear();
+                                        },
+                                        Err(e)=>editor.error=e,
+                                    },
+                                    Err(e)=>editor.error=e,
+                                }
+                            }
+                        });
                     });
                     editor.draw_preview(ui);
                     ui.separator();
