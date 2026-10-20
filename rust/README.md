@@ -56,6 +56,10 @@ Via **OpenStreetMap** in de werkbalk kan de gebruiker voor de huidige RD-kaartui
 
 De app vraagt uitsluitend na deze expliciete kaartactie de benodigde tegels op (maximaal 24 per verzoek), gebruikt een eigen herkenbare HTTP User-Agent en bewaart PNG-tegels ten minste zeven dagen onder de Rust-appdatamap `osm-tiles`. Bij een tijdelijk netwerkprobleem mag de gebruiker bestaande verouderde cachetegels terugzien; dit is **geen** offline-kaartdownloadfunctie. Er wordt niet vooruit geladen. De RD→WGS84-omrekening is benaderend en niet bedoeld voor landmeetkundige nauwkeurigheid. Extra basemapproviders, cachebeheer/conditionele HTTP-requests en praktijkacceptatie blijven open. Het publieke OSM-tegelplatform heeft eigen [gebruiksregels](https://operations.osmfoundation.org/policies/tiles/).
 
+## Portable Windows-preview (geen installer)
+
+De Windows-preview CI kan na geslaagde tests een **portable ZIP** en bijbehorend **SHA-256**-bestand publiceren als GitHub Actions-artifact `SleufBase-Rust-Windows-portable-preview`. Pak de map uit en start `sleufbase-rust.exe` zonder Python of installer. Dit is een **previewbuild**, geen officiële release; instellingen/back-ups bevinden zich nog in Windows AppData, en EXE-codeondertekening en automatische updates ontbreken. Zie [PORTABLE.md](PORTABLE.md) voor stappen en verificatie.
+
 ## Bouwen en starten op Windows
 
 Installeer Rust via https://rustup.rs en voer in PowerShell uit:
