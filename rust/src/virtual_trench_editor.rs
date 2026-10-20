@@ -190,7 +190,9 @@ mod tests {
     fn failed_edits_preserve_original_bytes_and_names() {
         let mut t=trench();
         let original=serde_json::to_vec(&t).unwrap();
-        assert!(edit_axis(&mut t,"".into(),t.start,t.end,0.6).is_err());
+        let start=t.start;
+        let end=t.end;
+        assert!(edit_axis(&mut t,"".into(),start,end,0.6).is_err());
         assert_eq!(serde_json::to_vec(&t).unwrap(),original);
         assert!(replace_object(&mut t,None,TrenchPoint {
             object_name:"A".into(),source_name:"B".into(),role:"C".into(),
@@ -211,7 +213,8 @@ mod tests {
         t.job_id=443;
         let measured=t.clone();
         let changed=Vertex{x:99.,y:200.,z:None};
-        assert!(edit_axis(&mut t,"Changed".into(),changed,t.end,0.8).is_err());
+        let end=t.end;
+        assert!(edit_axis(&mut t,"Changed".into(),changed,end,0.8).is_err());
         assert_eq!(t.start,measured.start);
         assert_eq!(t.boundary_3d,measured.boundary_3d);
         assert!(reverse_axis(&mut t).is_err());
@@ -220,7 +223,8 @@ mod tests {
         assert!(new.boundary_3d.is_empty());
         assert!(new.source_path.is_none());
         assert_eq!(new.job_id,0);
-        edit_axis(&mut new,"Copy".into(),changed,new.end,0.8).unwrap();
+        let new_end=new.end;
+        edit_axis(&mut new,"Copy".into(),changed,new_end,0.8).unwrap();
         assert_eq!(t.label,"Test");
     }
     #[test]
