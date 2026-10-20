@@ -718,6 +718,38 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   geen geïsoleerde allocaties of app-pieken; zie benchmarks/template-raster.json.
   Kaart-/foto-/virtuele rastervoorbereiding, gepaarde normale/omgekeerde eind-
   exports, server-/overzichtscompositie en het volledige native venster blijven open.
+- Native A4-kaartvoorbereiding aan de sjabloon-CLI/publicatie gekoppeld.
+  De kaart neemt volledige TIFF-pixels, CAD-paden, achtergrond-PNG of PDOK WMS,
+  coördinaten/grid, schaalbalk, noordpijl en dezelfde weergegeven profielreferentie.
+  54 anti-aliased bilineaire crops/resizes en acht oorspronkelijke volledige
+  TIFF-paintbewerkingen vergelijken alle RGBA-bytes zonder tolerantie.
+  Een rijcache van 8 MiB voorkomt de volledige horizontale tussenafbeelding.
+  Twaalf A4-instellingen vergelijken iedere tekenopdracht en exacte geometrie
+  met de oorspronkelijke paginaopbouw bij bevroren bronfontmetingen.
+  Tien onafhankelijke HarfBuzz-C-referenties controleren glyphs/posities voor
+  Latin/combining, Arabic, Hebrew en Indic. Native ab_glyph is unhinted;
+  glyphcontouren en primitive edgepixels zijn geen Pillow/FreeType-pixelkopie.
+  De originele en native 300-DPI-bladen zijn visueel gecontroleerd.
+  PDOK hergebruikt verbindingen, begrenst reads tijdens streaming en controleert
+  PNG/JPEG-afmetingen vóór decode; aansluitende tegels gebruiken één pixelgrid.
+  De live proef vond een bestaande PNG-only-fout: PDOK beantwoordt een PNG-
+  aanvraag soms met JPEG. Contentdetectie ondersteunt beide, met aparte
+  decodeerlimieten en een echte 64×64-respons als regressie (JPEG maximaal drie
+  bytewaarden kleurtolerantie, los van alle exacte PNG-vergelijkingen).
+  Offline tests toetsen alle pixels over zes tegels en vroeg annuleren.
+  Een volledige native 300-DPI-export met live HTTPS PDOK-tegels slaagt ook
+  op DXF-readback en echte luchtfotopixels; dit is geen tijdbenchmark.
+  Kaartfalen, ontbrekende fonts en annulering na een eerder ingevuld vak houden
+  de vorige DXF/bundle intact. Bronpaden worden manifest-relatief opgelost en
+  tegen uitvoeraliases beschermd. De echte CLI toetst datum/project, profiel,
+  DXF-readback en een pixel-exact TIFF-kaartinterieur.
+  297 Rust-tests slagen. De onafhankelijke kaartdriver vergelijkt 66.667 exacte
+  RGBA-pixels; de echte CLI nog 53.095 kaartinterieurpixels. Twee hashseeds
+  regenereren byte-identieke referenties. Een cachebudget van 100.000 glyphs
+  voorkomt groei door veel verschillende teksten; gedeelde layouts vermijden
+  herhaalde glyphvector-kopieën. Dit zijn componentbudgetten, geen totale RAM-cap.
+  Volledige native bediening, foto-/virtuele beelden, aanvullende providers/cache,
+  exacte CAD-tekstweergave en praktijkacceptatie blijven open.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

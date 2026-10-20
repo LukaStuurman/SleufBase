@@ -341,6 +341,24 @@ jobs:
           name: SleufBase-Rust-template-raster-benchmark
           path: rust/benchmarks-template-raster.json
           if-no-files-found: error
+      - name: Independently audit native map rasters page geometry and template CLI
+        shell: pwsh
+        env:
+          MAP_EXPORT_DIR: ${{ runner.temp }}/SleufBase-map-export
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'uharfbuzz==0.51.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_map_export_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/map-export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example export_map_pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_map_pages.exe "$env:MAP_EXPORT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_map_pages.py "$env:MAP_EXPORT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit prepared template exports and real CLI
         shell: pwsh
         env:

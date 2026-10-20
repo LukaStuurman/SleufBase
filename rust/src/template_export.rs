@@ -1,6 +1,6 @@
-//! Native assembly/publication after raster and server-data preparation.
-//! The caller supplies prepared PNGs; this stage never substitutes previews or
-//! silently omits failed assets. One owned bundle contains every new image.
+//! Native template assembly/publication from prepared PNGs or full TIFF/map
+//! sources. Never substitutes previews or silently omits failed assets.
+//! One owned bundle contains every new image.
 use crate::{
     bgt_surface,
     dxf_document::Document,
@@ -52,7 +52,10 @@ pub struct Slot {
     pub tiff_png: PathBuf,
     #[serde(default)]
     pub tiff_source: Option<crate::template_raster::Source>,
+    #[serde(default)]
     pub map_png: PathBuf,
+    #[serde(default)]
+    pub map_source: Option<crate::map_export::Source>,
     pub profile: Option<Profile>,
 }
 #[derive(serde::Deserialize)]
@@ -139,6 +142,9 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
             resolve(&mut source.path);
         }
         resolve(&mut slot.map_png);
+        if let Some(source) = &mut slot.map_source {
+            source.resolve_paths(parent);
+        }
     }
     control.check()?;
     Ok(request)
@@ -458,16 +464,23 @@ pub fn export_with_progress(
         if slot.tiff_source.is_some() == !slot.tiff_png.as_os_str().is_empty() {
             return Err("Geef per vak één TIFF-bron of één voorbereide TIFF-PNG op".into());
         }
+        if slot.map_source.is_some() == !slot.map_png.as_os_str().is_empty() {
+            return Err("Geef per vak één kaartbron of één voorbereide kaart-PNG op".into());
+        }
     }
     if let Ok(target) = std::fs::canonicalize(output) {
         let sources = std::iter::once(request.template.as_path()).chain(
             request.slots.iter().flatten().flat_map(|s| {
-                [
+                let mut paths = vec![
                     s.tiff_source
                         .as_ref()
                         .map_or(s.tiff_png.as_path(), |t| t.path.as_path()),
                     s.map_png.as_path(),
-                ]
+                ];
+                if let Some(source) = &s.map_source {
+                    paths.extend(source.input_paths());
+                }
+                paths
             }),
         );
         for source in sources {
@@ -519,6 +532,7 @@ pub fn export_with_progress(
     let mut profiles = 0;
     let mut filled_slots = 0;
     let mut total = 0;
+    let mut map_renderer = crate::map_export::Renderer::default();
     for (index, (source, target)) in request.slots.iter().zip(&prepared.slots).enumerate() {
         progress(&format!("Proefsleufvak {} invullen", index + 1));
         control.check()?;
@@ -569,6 +583,41 @@ pub fn export_with_progress(
                     control.flag(),
                 )?;
                 crate::template_raster::save(&raster, &destination, control.flag())?;
+                let bytes = std::fs::metadata(&destination)
+                    .map_err(|e| e.to_string())?
+                    .len();
+                total += bytes;
+                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                }
+            } else if let Some(source) = slot.map_source.as_ref().filter(|_| role == "kaart") {
+                let reference = if let (Some(options), Some(profile)) = (&slot.profile, &measured) {
+                    if options.show_reference {
+                        Some(
+                            profile_reference::resolve(profile, &options.metadata)?.display(
+                                &options.metadata,
+                                [
+                                    (slot.bounds.min_x + slot.bounds.max_x) / 2.,
+                                    (slot.bounds.min_y + slot.bounds.max_y) / 2.,
+                                ],
+                            )?,
+                        )
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+                progress(&format!("Kaartblad {} opbouwen", index + 1));
+                control.check()?;
+                let page = map_renderer.render(
+                    source,
+                    slot.bounds,
+                    slot.tiff_source.as_ref(),
+                    reference,
+                    control.flag(),
+                )?;
+                crate::template_raster::save_image(&page.image, &destination, control.flag())?;
                 let bytes = std::fs::metadata(&destination)
                     .map_err(|e| e.to_string())?
                     .len();

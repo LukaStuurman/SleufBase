@@ -326,6 +326,13 @@ impl<W: std::io::Write> std::io::Write for CheckedPng<'_, W> {
 /// Encode a new asset atomically. Errors/cancellation leave no partial PNG and
 /// never replace an earlier file. Export assembly supplies an owned bundle path.
 pub fn save(prepared: &Prepared, path: &Path, cancel: &AtomicBool) -> Result<(), String> {
+    save_image(&prepared.image, path, cancel)
+}
+pub(crate) fn save_image(
+    image: &RgbaImage,
+    path: &Path,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
     use image::{
         codecs::png::{CompressionType, FilterType, PngEncoder},
         ImageEncoder,
@@ -342,9 +349,9 @@ pub fn save(prepared: &Prepared, path: &Path, cancel: &AtomicBool) -> Result<(),
             };
             PngEncoder::new_with_quality(writer, CompressionType::Fast, FilterType::Adaptive)
                 .write_image(
-                    prepared.image.as_raw(),
-                    prepared.image.width(),
-                    prepared.image.height(),
+                    image.as_raw(),
+                    image.width(),
+                    image.height(),
                     image::ExtendedColorType::Rgba8,
                 )
                 .map_err(|e| e.to_string())

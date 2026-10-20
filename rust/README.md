@@ -29,8 +29,9 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - Native bladnummering en overzichtsvensters groeperen acht vakken per blad, inclusief lege vakken. De laagste KADER-viewport krijgt het oorspronkelijke kaartmidden en een van zes standaardschalen; BLAD/BLADEN/SCHAAL volgen het eerste bladblok. Twintig opeenvolgende toestanden, inclusief het echte sjabloon, controleren schaalgrenzen, ontbrekende vensters/blokken en bronbehoud. Unicode-bladnamen volgen afzonderlijk ezdxf uppercase(); vijf bladnamen controleren titelvelden en plaatsing van geometrie/rasters. Bladuitbreiding en legenda-/titelherstel zijn afzonderlijk overgezet; de complete export-UI blijft open. Zie [de bladcontroles](tests/fixtures/template-layout/README.md).
 - Native bladuitbreiding kopieert modelonderdelen en maakt ontbrekende papierlayouts met correcte blokrecords, vensters en clipverwijzingen. Het echte sjabloon groeit van 32 naar 64 vakken. Titelattributen, gekoppelde vertices, geneste gegevens en afbeeldingsreactoren krijgen eigen handles; named resources blijven gedeeld. Twaalf toestanden controleren kopieën en opvolgende datum-/project-/viewportbewerkingen, met exacte terugval bij annuleren, fouten of een workerpanic. Een aangetoonde kopieerfout in geneste dictionaries is in de native route hersteld. Legenda-/titelherstel is afzonderlijk overgezet; overige CAD-objecttypen blijven open. Zie [de bladuitbreidingscontroles](tests/fixtures/template-pages/README.md).
 - Native sjabloonvoorbereiding koppelt bladuitbreiding, fonts/lagen, legenda-/titelherstel, eenheden, schaallijst, projectnaam, automatische lokale datum en overzichtsvensters in één atomaire stap. Negen legendavarianten en elf samengestelde toestanden worden onafhankelijk met de oorspronkelijke uitvoer vergeleken, inclusief het echte sjabloon. Attribuuttransformaties worden per bronblok hergebruikt; signed/nonuniform schalen, spiegeling en OCS zijn gecontroleerd. Een vervolgtest voegt tekenwerk en raster toe aan een nieuw blad. Multiline ATTDEF-regeneratie en de complete native exportbediening blijven open. Zie [de voorbereidingscontroles](tests/fixtures/template-setup/README.md) en [legendacontroles](tests/fixtures/template-legends/README.md).
-- Native sjabloonsamenstelling koppelt voorbereide TIFF-/kaart-PNGs aan de vakken, vult teksten en tekent complete profielen met referenties, BGT-/maaiveldwaarden en annotatie-LEADERs. Nieuwe afbeeldingen worden naar één blijvende exportmap gekopieerd, volledig gedecodeerd/gecontroleerd en samen met de DXF atomair gepubliceerd. Eén afbeeldingsbatch plus één eindindexering behoudt de oorspronkelijke tekenvolgorde per vak. Vijf onafhankelijke exportcontroles vergelijken acht profielen en 26 PNGs, inclusief extra blad en dubbele PS-namen. De CLI accepteert voorbereide invoer en directe TIFF-bronnen; kaart-/foto-opbouw, logo-/contactherstel en de native exportdialoog blijven open. Zie [de exportcontroles](tests/fixtures/template-export/README.md).
-- Native GeoTIFF-voorbereiding leest alle ondersteunde bronpixels en bepaalt richting uit dezelfde profielas of uit wegen/terrein. Bicubische rotatie, crop met twee pixels marge en transparante randachtergrond zijn op 140 beeldgevallen gecontroleerd, met exacte RGBA-pixels; vier aantoonbaar foutieve Pillow-TIFF-oriëntaties hebben een expliciete numerieke referentiecorrectie. Volledig decoderen is ook op 45 kleur- en oriëntatiegevallen en alle pixels van een 4097×4097-TIFF getest. De CLI kan per vak direct een TIFF-bron voorbereiden; vijf volledige exports vergelijken acht profielen en 26 PNGs. Kaart-/foto-opbouw en de native exportdialoog blijven open. Zie [de beeldcontroles](tests/fixtures/template-raster/README.md).
+- Native sjabloonsamenstelling koppelt voorbereide TIFF-/kaart-PNGs aan de vakken, vult teksten en tekent complete profielen met referenties, BGT-/maaiveldwaarden en annotatie-LEADERs. Nieuwe afbeeldingen worden naar één blijvende exportmap gekopieerd, volledig gedecodeerd/gecontroleerd en samen met de DXF atomair gepubliceerd. Eén afbeeldingsbatch plus één eindindexering behoudt de oorspronkelijke tekenvolgorde per vak. Vijf onafhankelijke exportcontroles vergelijken acht profielen en 26 PNGs, inclusief extra blad en dubbele PS-namen. De CLI accepteert voorbereide invoer en directe TIFF-bronnen; foto-/virtuele opbouw, logo-/contactherstel en de native exportdialoog blijven open. Zie [de exportcontroles](tests/fixtures/template-export/README.md).
+- Native GeoTIFF-voorbereiding leest alle ondersteunde bronpixels en bepaalt richting uit dezelfde profielas of uit wegen/terrein. Bicubische rotatie, crop met twee pixels marge en transparante randachtergrond zijn op 140 beeldgevallen gecontroleerd, met exacte RGBA-pixels; vier aantoonbaar foutieve Pillow-TIFF-oriëntaties hebben een expliciete numerieke referentiecorrectie. Volledig decoderen is ook op 45 kleur- en oriëntatiegevallen en alle pixels van een 4097×4097-TIFF getest. De CLI kan per vak direct een TIFF-bron voorbereiden; vijf volledige exports vergelijken acht profielen en 26 PNGs. Foto-/virtuele opbouw en de native exportdialoog blijven open. Zie [de beeldcontroles](tests/fixtures/template-raster/README.md).
+- Native A4-kaartopbouw voor de sjabloon-CLI: volledige TIFF, CAD-paden, PDOK WMS-tegels/voorbereide achtergrond, coördinaten, schaalbalk, noordpijl en gedeelde profielreferentie. Een rijcache van 8 MiB vervangt de volledige horizontale resamplingbuffer. 54 verkleiningen en acht TIFF-bewerkingen zijn pixel-exact; twaalf bladindelingen volgen iedere oorspronkelijke tekenopdracht. Tien glyph-/positiereferenties volgen onafhankelijke HarfBuzz; fonts en primitieve contourpixels zijn geen FreeType-pixelkopie. Zie [de kaartcontroles](tests/fixtures/map-export/README.md). Het native sjabloonvenster blijft open.
 - Titelblokkern vult projectnaam en lokale exportdatum op gebruikte bladen, met behoud van latere revisies. Onafhankelijke DXF-controle vergelijkt 78 titelvelden en alle overige tags. De bestaande Python-exportdialoog heeft het projectnaamveld al; het complete native exportvenster volgt binnen de migratie. Zie [de titelblokcontroles](tests/fixtures/template-metadata/README.md).
 - Native BGT-bronfeatures worden per laag/id/ondergrond samengevoegd en op de uitsnede geknipt, met herstel van zelfdoorsnijdingen en behoud van randlijnen/raakpunten. Repareren vóór samenvoegen voorkomt aantoonbaar verlies van geldige tegeldelen; die fout is ook in Python hersteld. 844 geometriegevallen, drie volledige batches, oorspronkelijke padafronding en ondergrondkeuze worden onafhankelijk met GEOS vergeleken. De ondergrondindex leent de geometrie. Zie [de herstelcontroles](tests/fixtures/bgt-geometry/README.md).
 - Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
@@ -377,12 +378,34 @@ beschrijft de georiënteerde bronpixels, inclusief eventuele gebruikersrotatie:
 Geef precies één van `tiff_png` en `tiff_source`. Een aanwezig gemeten profiel
 levert zijn al berekende as ook aan de beeldstap; anders kan `axis` expliciet
 begin/eindpunten bevatten of worden de meegegeven wegen/terrein gebruikt.
-De TIFF wordt volledig gedecodeerd en voorbereid; een kaart-PNG blijft nodig.
+De TIFF wordt volledig gedecodeerd en voorbereid. Geef voor de kaart precies één
+van `map_png` en `map_source`. Een kaartbron bouwt zelf het A4-blad met TIFF,
+CAD-paden, coördinaten, schaalbalk, noordpijl, referentielegenda en bronvermelding:
+
+```json
+"map_source": {
+  "background": {"kind": "pdok"},
+  "attribution": "Luchtfoto: PDOK",
+  "overlays": [{"points": [[120000,450010],[120015,450012]], "color": [200,20,20]}]
+}
+```
+
+De kaart gebruikt standaard dezelfde volledige TIFF-bron als het vak.
+`map_source.tiff` kan die bron expliciet opgeven; `include_tiff: false` maakt een
+kaart zonder TIFF. De achtergrond kan ook `{"kind":"solid","color":[245,245,245,255]}`
+of `{"kind":"png","path":"achtergrond.png"}` zijn. Een voorbereide achtergrond
+moet exact bij de berekende uitsnede/afmetingen passen. `settings` bevat standaard
+`dpi: 300` en `scale: 225`; fonts komen uit Windows Segoe UI/Arial, of uit
+expliciete `fonts.regular`/`fonts.bold`-paden. Alle paden zijn manifest-relatief.
+Een gemeten profiel deelt zijn weergegeven referentiepunt met de kaart.
+PDOK wordt op volle kaartresolutie in aansluitende WMS-tegels aangevraagd.
+Zie [de kaartcontroles en grenzen](tests/fixtures/map-export/README.md).
 De PNG-opslag is atomair en vorige exports blijven behouden bij fouten.
 
 Een `null` in `slots` houdt een vak leeg. `datasets`, profielopties per vak,
 BGT-oppervlakken en voorbereide overzichtsgeometrie staan in de
-[referentie-invoer](tests/fixtures/template-export/reference.json). Dit pad kan TIFF-beelden zelf voorbereiden; kaart-/serverdata blijven
+[referentie-invoer](tests/fixtures/template-export/reference.json). Dit pad kan TIFF-
+en kaartbeelden zelf voorbereiden; overige server-/overzichtsgegevens worden
 aangeleverd. De volledige interactieve
 sjabloonworkflow met automatisch voorbereiden volgt nog.
 

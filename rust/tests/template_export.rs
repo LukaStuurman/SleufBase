@@ -278,3 +278,87 @@ fn empty_exports_are_rejected_and_manifest_paths_are_relative_to_the_manifest() 
     control.cancel();
     assert!(template_export::read_request(&path, &control).is_err());
 }
+#[test]
+fn native_map_pages_are_published_with_profiles_and_failures_keep_the_old_bundle() {
+    use sleufbase_rust::{
+        map_export::{Background, Source},
+        map_page, map_text,
+    };
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/map-export");
+    let temp = tempfile::tempdir().unwrap();
+    let output = temp.path().join("export.dxf");
+    let mut r = request("native-tiff");
+    r.slots.truncate(3);
+    for slot in r.slots.iter_mut().flatten() {
+        slot.bounds = sleufbase_rust::Bounds {
+            min_x: 0.,
+            min_y: 0.,
+            max_x: 11.,
+            max_y: 6.,
+        };
+        slot.map_png = PathBuf::new();
+        slot.map_source = Some(Source {
+            settings: map_page::Settings {
+                dpi: 96,
+                scale: 225.,
+            },
+            background: Background::Solid {
+                color: [123, 156, 189, 255],
+            },
+            fonts: Some(map_text::Paths {
+                regular: root.join("Hack-Regular.ttf"),
+                bold: root.join("Hack-Regular.ttf"),
+            }),
+            ..Default::default()
+        });
+    }
+    let exported = template_export::export(&output, &r, &Control::default()).unwrap();
+    assert_eq!((exported.filled_slots, exported.profiles), (2, 2));
+    let map = image::open(exported.published.assets.join("slot00001_kaart.png"))
+        .unwrap()
+        .into_rgba8();
+    assert_eq!(map.dimensions(), (1123, 794));
+    assert!(map.pixels().any(|p| p.0 == [123, 156, 189, 255]));
+    let before = files(temp.path());
+    let control = Control::default();
+    assert!(
+        template_export::export_with_progress(&output, &r, &control, |stage| {
+            if stage == "Kaartblad 3 opbouwen" {
+                control.cancel();
+            }
+        })
+        .is_err()
+    );
+    assert_eq!(files(temp.path()), before);
+    let source = r.slots[2].as_mut().unwrap().map_source.as_mut().unwrap();
+    source.fonts.as_mut().unwrap().bold = temp.path().join("missing.ttf");
+    assert!(template_export::export(&output, &r, &Control::default()).is_err());
+    assert_eq!(files(temp.path()), before);
+    let source = r.slots[0].as_mut().unwrap().map_source.as_mut().unwrap();
+    source.background = Background::Png {
+        path: output.clone(),
+    };
+    assert!(template_export::export(&output, &r, &Control::default())
+        .unwrap_err()
+        .contains("verschilt"));
+    assert_eq!(files(temp.path()), before);
+    r.slots[0].as_mut().unwrap().map_png = output.clone();
+    assert!(template_export::export(&output, &r, &Control::default())
+        .unwrap_err()
+        .contains("kaartbron"));
+    assert_eq!(files(temp.path()), before);
+}
+#[test]
+fn map_sources_resolve_all_paths_relative_to_the_manifest() {
+    let temp = tempfile::tempdir().unwrap();
+    let path = temp.path().join("request.json");
+    fs::write(&path,r#"{"template":"template.dxf","rules":[],"slots":[{"bounds":{"min_x":1,"min_y":2,"max_x":3,"max_y":4},"label":"PS1","title":"PS1","address":null,"comments":"","tiff_png":"tiff.png","map_source":{"tiff":{"path":"source.tiff","transform":{"a":1,"b":0,"c":0,"d":0,"e":-1,"f":6},"axis":null},"background":{"kind":"png","path":"background.png"},"fonts":{"regular":"regular.ttf","bold":"bold.ttf"}},"profile":null}]}"#).unwrap();
+    let r = template_export::read_request(&path, &Control::default()).unwrap();
+    let source = r.slots[0].as_ref().unwrap().map_source.as_ref().unwrap();
+    let expected =
+        ["background.png", "source.tiff", "regular.ttf", "bold.ttf"].map(|s| temp.path().join(s));
+    assert_eq!(
+        source.input_paths(),
+        expected.iter().map(PathBuf::as_path).collect::<Vec<_>>()
+    );
+}
