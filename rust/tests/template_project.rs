@@ -40,7 +40,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
         choices:vec![Choice {
             source:Source::Job(0),raster:Some(0),include:true,
             title:"Automatisch vak 1".into(),profile:false,
-            reverse:false,comments:"Geïmporteerde projectgegevens".into(),
+            reverse:false,comments:"Geïmporteerde projectgegevens".into(),photos:Vec::new(),
         }],
     };
     let output=dir.path().join("project-output.dxf");
@@ -79,7 +79,7 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
         template:fixture.template,
         choices:vec![Choice {source:Source::Virtual(0),raster:Some(0),
             include:true,title:"Virtueel profiel".into(),profile:true,
-            reverse:false,comments:String::new()}],
+            reverse:false,comments:String::new(),photos:Vec::new()}],
         include_bgt:false,include_cadastral:false,
         ..Options::default()
     };
@@ -123,7 +123,7 @@ fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters
         choices:vec![Choice {
             source:Source::Job(0),raster:Some(0),include:true,
             title:"CAD op kaart".into(),profile:false,reverse:false,
-            comments:String::new(),
+            comments:String::new(),photos:Vec::new(),
         }],
         ..Options::default()
     };
