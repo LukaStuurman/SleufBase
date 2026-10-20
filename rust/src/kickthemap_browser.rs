@@ -4,7 +4,7 @@
 //! Credentials and session cookies are never saved to SleufBase project files.
 use reqwest::blocking::Client;
 use serde_json::{Value,json};
-use std::{fs, path::{Path,PathBuf},process::{Child,Command,Stdio}, time::{Duration,Instant}};
+use std::{fs, io::Read, path::{Path,PathBuf},process::{Child,Command,Stdio}, time::{Duration,Instant}};
 use tungstenite::{connect,Message,stream::MaybeTlsStream};
 
 const ORIGIN:&str="https://www.my.kickthemap.com";
@@ -29,8 +29,8 @@ fn parse_cookie(value:&Value)->Option<BrowserCookie>{
     let secure=value["secure"].as_bool()?;
     if !allowed_domain(&domain) || !secure || name.is_empty() || name.len()>256
         || !name.bytes().all(|c|c.is_ascii_alphanumeric()||b"!#$%&'*+-.^_`|~".contains(&c))
-        || content.len()>8192 || content.contains(['\r','\n',';'])
-        || !path.starts_with('/') || path.len()>1024 || path.contains(['\r','\n',';'])
+        || content.len()>8192 || content.chars().any(|c|matches!(c,'\r'|'\n'|';'))
+        || !path.starts_with('/') || path.len()>1024 || path.chars().any(|c|matches!(c,'\r'|'\n'|';'))
     {return None;}
     Some(BrowserCookie{name,value:content,domain,path,secure})
 }
@@ -155,7 +155,7 @@ impl Browser {
         let mut response=client.get(uri).send().map_err(|e|e.to_string())?
             .error_for_status().map_err(|e|e.to_string())?;
         let mut data=Vec::new();
-        std::io::Read::by_ref(&mut response).take(1024*1024)
+        response.by_ref().take(1024*1024)
             .read_to_end(&mut data).map_err(|e|e.to_string())?;
         if data.len()>=1024*1024 {return Err("Te veel Edge-tabgegevens".into());}
         let targets:Vec<Value>=serde_json::from_slice(&data).map_err(|e|e.to_string())?;
