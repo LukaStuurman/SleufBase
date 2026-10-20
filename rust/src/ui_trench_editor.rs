@@ -219,6 +219,18 @@ impl SleufBaseApp {
                             ui.label("Breedte (m)");
                             ui.add(egui::DragValue::new(&mut editor.width).range(0.1..=100.).speed(0.05));
                         });
+                        ui.horizontal(|ui|{
+                            let mut has_begin=editor.start.z.is_some();
+                            let mut begin_z=editor.start.z.unwrap_or(0.);
+                            ui.checkbox(&mut has_begin,"Beginhoogte Z");
+                            ui.add_enabled(has_begin,egui::DragValue::new(&mut begin_z).speed(0.05));
+                            editor.start.z=has_begin.then_some(begin_z);
+                            let mut has_end=editor.end.z.is_some();
+                            let mut end_z=editor.end.z.unwrap_or(0.);
+                            ui.checkbox(&mut has_end,"Eindhoogte Z");
+                            ui.add_enabled(has_end,egui::DragValue::new(&mut end_z).speed(0.05));
+                            editor.end.z=has_end.then_some(end_z);
+                        });
                         if ui.button("Begin- en eindpunt omkeren").clicked() {
                             match editor.build() {
                                 Ok(mut next)=>match edit::reverse_axis(&mut next) {
