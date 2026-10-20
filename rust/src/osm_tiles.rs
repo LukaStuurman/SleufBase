@@ -190,13 +190,13 @@ fn store(path: &Path, bytes: &[u8]) {
     }
 }
 fn load_tile(id: TileId, cache: &Path, client: &reqwest::blocking::Client, cancel: &AtomicBool)
-    -> Result<(RgbaImage, bool), String>
+    -> Result<(RgbaImage, bool, bool), String>
 {
     input::check(cancel)?;
     let path = id.path(cache);
     let old = cached(&path);
     if let Some((tile, true)) = &old {
-        return Ok((tile.clone(), false));
+        return Ok((tile.clone(), false, false));
     }
     let remote = (|| -> Result<RgbaImage, String> {
         input::check(cancel)?;
@@ -214,11 +214,11 @@ fn load_tile(id: TileId, cache: &Path, client: &reqwest::blocking::Client, cance
         Ok(decoded)
     })();
     match remote {
-        Ok(tile) => Ok((tile, false)),
+        Ok(tile) => Ok((tile, false, true)),
         Err(e) => {
             input::check(cancel)?;
             if let Some((tile, _)) = old {
-                Ok((tile, true))
+                Ok((tile, true, false))
             } else {
                 Err(e)
             }
@@ -270,11 +270,11 @@ pub fn request_map_with_cancel(bounds: Bounds, width: u32, height: u32,
     let mut stale_cache = false;
     for id in grid.ids() {
         input::check(cancel)?;
-        let (tile, stale) = load_tile(id, cache_dir, &client, cancel)?;
+        let (tile, stale, downloaded) = load_tile(id, cache_dir, &client, cancel)?;
         stale_cache |= stale;
         tiles.insert(id, tile);
         // User-initiated viewport only; avoid hammering the public tile server.
-        std::thread::sleep(Duration::from_millis(150));
+        if downloaded { std::thread::sleep(Duration::from_millis(300)); }
     }
     let rgba = render(bounds, width, height, grid, &tiles, cancel)?;
     Ok(OsmRaster { bounds, width, height, rgba, stale_cache })
@@ -311,6 +311,22 @@ mod tests {
         let rgba = render(bounds, 96, 96, grid, &tiles, &AtomicBool::new(false)).unwrap();
         assert!(rgba.chunks_exact(4).all(|px| px == [14, 61, 80, 255]));
         assert!(render(bounds, 96, 96, grid, &tiles, &AtomicBool::new(true)).is_err());
+    }
+    #[test]
+    fn cached_viewport_reprojects_without_any_network_access() {
+        let bounds = Bounds { min_x: 154800., min_y: 462800., max_x: 155200., max_y: 463200. };
+        let grid = grid_for(bounds, 96, 96).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let image = image::DynamicImage::ImageRgba8(
+            RgbaImage::from_pixel(256, 256, image::Rgba([29, 44, 61, 255]))
+        );
+        let mut png = Vec::new();
+        image.write_to(&mut std::io::Cursor::new(&mut png), ImageFormat::Png).unwrap();
+        for id in grid.ids() { store(&id.path(dir.path()), &png); }
+        let view = request_map_with_cancel(bounds, 96, 96, dir.path(), &AtomicBool::new(false)).unwrap();
+        assert!(!view.stale_cache);
+        assert_eq!(view.rgba.len(), 96 * 96 * 4);
+        assert!(view.rgba.chunks_exact(4).all(|px| px == [29, 44, 61, 255]));
     }
     #[test]
     fn bad_cache_or_png_is_never_used() {
