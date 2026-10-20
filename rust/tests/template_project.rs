@@ -36,7 +36,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
         template:fixture.template.clone(),
         project:"Native projectport".into(), drawn_by:"Techbase".into(),
         background:BackgroundKind::Blank, dpi:96, scale:225.,
-        include_bgt:false, include_cadastral:false,
+        include_bgt:false, include_cadastral:false, include_cad:false,
         choices:vec![Choice {
             source:Source::Job(0),raster:Some(0),include:true,
             title:"Automatisch vak 1".into(),profile:false,
