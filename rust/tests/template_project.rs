@@ -1,0 +1,93 @@
+use sleufbase_rust::{
+    export_control::Control,
+    geotiff::GeoTiffInfo,
+    map_export::Background,
+    template_export,
+    template_project::{self, BackgroundKind, Choice, Options, Source},
+};
+use std::path::PathBuf;
+
+fn fixture() -> (template_export::Request, GeoTiffInfo) {
+    let data: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/template-export/reference.json"
+    )).unwrap();
+    let value = data.as_array().unwrap().iter()
+        .find(|v|v["name"] == "native-tiff").unwrap()["request"].clone();
+    let mut prepared:template_export::Request = serde_json::from_value(value).unwrap();
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
+    prepared.template = base.join(&prepared.template);
+    let input = prepared.slots.iter().flatten()
+        .find_map(|s|s.tiff_source.as_ref().map(|source|(source, s.bounds)))
+        .unwrap();
+    let geotiff = GeoTiffInfo {
+        path: base.join(&input.0.path), width: 100, height: 100,
+        transform: input.0.transform, bounds: input.1, epsg:Some(28992),
+        kickthemap_job_id:Some(9),kickthemap_job_title:String::new(),
+        kickthemap_job_sidecar:None,
+    };
+    (prepared,geotiff)
+}
+#[test]
+fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_network() {
+    let (fixture,tiff) = fixture();
+    assert!(!fixture.datasets.is_empty());
+    let dir=tempfile::tempdir().unwrap();
+    let mut options=Options {
+        template:fixture.template.clone(),
+        project:"Native projectport".into(), drawn_by:"Techbase".into(),
+        background:BackgroundKind::Blank, dpi:96, scale:225.,
+        include_bgt:false, include_cadastral:false,
+        choices:vec![Choice {
+            source:Source::Job(0),raster:Some(0),include:true,
+            title:"Automatisch vak 1".into(),profile:false,
+            reverse:false,comments:"Geïmporteerde projectgegevens".into(),
+        }],
+    };
+    let output=dir.path().join("project-output.dxf");
+    let request=template_project::build(&options,&fixture.datasets,&[tiff.clone()],
+        &[],&[],None,&fixture.rules,&Control::default()).unwrap();
+    assert_eq!(request.slots.len(),1);
+    assert_eq!(request.datasets.len(),1);
+    assert_eq!(request.slots[0].as_ref().unwrap().title,"Automatisch vak 1");
+    assert!(matches!(request.slots[0].as_ref().unwrap().map_source.as_ref().unwrap().background,
+        Background::Solid{..}));
+    let result=template_export::export(&output,&request,&Control::default()).unwrap();
+    assert_eq!(result.filled_slots,1);
+    assert!(output.is_file());
+    assert!(result.published.assets.join("slot00001_tiff.png").is_file());
+    assert!(result.published.assets.join("slot00001_kaart.png").is_file());
+    let doc=sleufbase_rust::dxf_document::Document::load(
+        &output,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+    assert!(doc.records().any(|r|r.kind()=="IMAGEDEF"));
+    // Same input can safely be exported again under a distinct output name.
+    options.choices[0].title="Tweede vak".into();
+    let second=template_project::build(&options,&fixture.datasets,&[tiff],
+        &[],&[],None,&fixture.rules,&Control::default()).unwrap();
+    assert_eq!(second.slots[0].as_ref().unwrap().title,"Tweede vak");
+}
+#[test]
+fn virtual_trench_keeps_measured_start_and_selected_source() {
+    let (fixture,tiff)=fixture();
+    let start=sleufbase_rust::Vertex{x:155000.,y:463000.,z:Some(-1.)};
+    let end=sleufbase_rust::Vertex{x:155005.,y:463000.,z:Some(-1.)};
+    let trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
+        "PS-virtual".into(),start,end,0.6).unwrap();
+    let opts=Options {
+        template:fixture.template,
+        choices:vec![Choice {source:Source::Virtual(0),raster:Some(0),
+            include:true,title:"Virtueel profiel".into(),profile:true,
+            reverse:false,comments:String::new()}],
+        include_bgt:false,include_cadastral:false,
+        ..Options::default()
+    };
+    let request=template_project::build(&opts,&[],&[tiff],&[trench],&[],None,
+        &fixture.rules,&Control::default()).unwrap();
+    assert_eq!(request.slots.len(),1);
+    assert_eq!(request.datasets.len(),1);
+    let slot=request.slots[0].as_ref().unwrap();
+    assert_eq!(slot.profile.as_ref().unwrap().forced_start,Some([155000.,463000.]));
+    assert_eq!(slot.tiff_source.as_ref().unwrap().axis,Some([
+        [155000.,463000.],[155005.,463000.]
+    ]));
+    assert_eq!(slot.map_source.as_ref().unwrap().overlays.len(),1);
+}
