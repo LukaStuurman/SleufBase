@@ -14,7 +14,11 @@ pub(super) struct TemplateDialog {
 enum Event {
     Progress(String),
     Finished(Result<(usize, usize, usize), String>),
-    ProjectFinished(Result<(usize, usize, usize), String>, sleufbase_rust::export_worker::Inputs),
+    ProjectFinished(
+        Result<(usize, usize, usize), String>,
+        sleufbase_rust::export_worker::Inputs,
+        Vec<sleufbase_rust::dxf_read::DxfOverlay>,
+    ),
 }
 
 pub(super) struct TemplateJob {
@@ -112,6 +116,10 @@ impl SleufBaseApp {
         // geometry. They are returned by the worker on both success and error.
         let inputs = self.take_export_inputs();
         let owned = Arc::new(std::sync::Mutex::new(Some(inputs)));
+        let cad_owned = Arc::new(std::sync::Mutex::new(Some(
+            std::mem::take(&mut self.overlays)
+        )));
+        let worker_cad = Arc::clone(&cad_owned);
         let worker_owned = Arc::clone(&owned);
         let rasters = self.geotiffs.clone();
         let rules = self.migrated_settings.object_rules.clone();
@@ -124,10 +132,13 @@ impl SleufBaseApp {
             .spawn(move || {
                 let inputs = worker_owned.lock().expect("project export ownership lock")
                     .take().expect("project inputs already owned by another worker");
+                let cad_layers=worker_cad.lock().expect("CAD export ownership lock")
+                    .take().expect("CAD overlays already owned by another worker");
                 let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    let request = sleufbase_rust::template_project::build(
+                    let request = sleufbase_rust::template_project::build_with_cad(
                         &options, &inputs.datasets, &rasters, &inputs.trenches,
-                        &inputs.bgt, inputs.cadastral.as_ref(), &rules, &task_control,
+                        &inputs.bgt, inputs.cadastral.as_ref(), &cad_layers,
+                        &rules, &task_control,
                     )?;
                     template_export::export_with_progress(
                         &task_output, &request, &task_control,
@@ -136,7 +147,7 @@ impl SleufBaseApp {
                 })).unwrap_or_else(|_|Err(
                     "Project-sjabloonexport is onverwacht gestopt; projectgegevens worden hersteld".into()
                 ));
-                let _ = tx.send(Event::ProjectFinished(outcome, inputs));
+                let _ = tx.send(Event::ProjectFinished(outcome, inputs, cad_layers));
             });
         match launch {
             Ok(_) => {
@@ -151,6 +162,9 @@ impl SleufBaseApp {
             Err(error) => {
                 if let Ok(mut guard) = owned.lock() {
                     if let Some(inputs) = guard.take() { self.restore_export_inputs(inputs); }
+                }
+                if let Ok(mut guard) = cad_owned.lock() {
+                    if let Some(overlays) = guard.take() { self.overlays = overlays; }
                 }
                 self.message = format!("Exportworker kan niet starten: {error}");
             }
@@ -222,12 +236,14 @@ impl SleufBaseApp {
         let Some(job) = &mut self.template_job else { return };
         let mut finished = None;
         let mut return_inputs = None;
+        let mut return_cad = None;
         loop {
             match job.events.try_recv() {
                 Ok(Event::Progress(status)) => job.status = status,
                 Ok(Event::Finished(result)) => { finished = Some(result); break; }
-                Ok(Event::ProjectFinished(result, inputs)) => {
+                Ok(Event::ProjectFinished(result, inputs, cad)) => {
                     return_inputs = Some(inputs);
+                    return_cad = Some(cad);
                     finished = Some(result);
                     break;
                 }
@@ -240,6 +256,7 @@ impl SleufBaseApp {
         }
         if let Some(result) = finished {
             if let Some(inputs) = return_inputs { self.restore_export_inputs(inputs); }
+            if let Some(overlays) = return_cad { self.overlays = overlays; }
             let job = self.template_job.take().unwrap();
             self.message = match result {
                 Ok((slots, profiles, pages)) =>
