@@ -98,16 +98,37 @@ impl Editor {
         Ok(())
     }
     fn draw_preview(&self,ui:&mut egui::Ui) {
-        let t=self.build().unwrap_or_else(|_|self.draft.clone());
-        let (rect,_response)=ui.allocate_exact_size(Vec2::new(ui.available_width().max(240.),190.),
-            egui::Sense::hover());
+        // Never clone/validate thousands of measured objects per animation
+        // frame. The project stays untouched until the Save action.
+        let t=&self.draft;
+        let start=self.start;
+        let end=self.end;
+        let width=self.width;
+        let len=(end.x-start.x).hypot(end.y-start.y);
+        let outline=if edit::is_measured(t) {
+            t.measured_boundary()
+        } else {
+            let denom=len.max(1e-9);
+            let nx=-(end.y-start.y)/denom*width.max(0.1)*0.5;
+            let ny=(end.x-start.x)/denom*width.max(0.1)*0.5;
+            let mut points=vec![
+                (start.x+nx,start.y+ny),(start.x-nx,start.y-ny),
+                (end.x-nx,end.y-ny),(end.x+nx,end.y+ny)
+            ];
+            points.push(points[0]);
+            points
+        };
+        let (rect,_response)=ui.allocate_exact_size(
+            Vec2::new(ui.available_width().max(240.),190.),egui::Sense::hover()
+        );
         let painter=ui.painter_at(rect);
         painter.rect_filled(rect,6.,Color32::from_rgb(250,250,250));
-        let outline=t.measured_boundary();
-        let mut xs=vec![t.start.x,t.end.x];
-        let mut ys=vec![t.start.y,t.end.y];
+        let stride=(t.objects.len()/2048).max(1);
+        let sampled=t.objects.iter().step_by(stride).collect::<Vec<_>>();
+        let mut xs=vec![start.x,end.x];
+        let mut ys=vec![start.y,end.y];
         for &(x,y) in &outline {xs.push(x);ys.push(y);}
-        for obj in &t.objects {xs.push(obj.position.x);ys.push(obj.position.y);}
+        for obj in &sampled {xs.push(obj.position.x);ys.push(obj.position.y);}
         let min_x=xs.iter().copied().fold(f64::INFINITY,f64::min);
         let max_x=xs.iter().copied().fold(f64::NEG_INFINITY,f64::max);
         let min_y=ys.iter().copied().fold(f64::INFINITY,f64::min);
@@ -120,23 +141,27 @@ impl Editor {
         let center=rect.center();
         let point=|x:f64,y:f64|Pos2::new(
             center.x+((x-center_x)*scale) as f32,
-            center.y-((y-center_y)*scale) as f32);
-        for line in outline.windows(2){
+            center.y-((y-center_y)*scale) as f32
+        );
+        for line in outline.windows(2) {
             painter.line_segment([point(line[0].0,line[0].1),point(line[1].0,line[1].1)],
                 Stroke::new(2.,Color32::from_rgb(75,85,99)));
         }
-        painter.line_segment([point(t.start.x,t.start.y),point(t.end.x,t.end.y)],
+        painter.line_segment([point(start.x,start.y),point(end.x,end.y)],
             Stroke::new(2.2,ORANGE));
-        painter.circle_filled(point(t.start.x,t.start.y),4.,Color32::GREEN);
-        painter.circle_filled(point(t.end.x,t.end.y),4.,Color32::RED);
-        for (i,obj) in t.objects.iter().enumerate() {
-            painter.circle_filled(point(obj.position.x,obj.position.y),
-                if Some(i)==self.selected {5.} else {3.},
-                if Some(i)==self.selected {ORANGE} else {INK});
+        painter.circle_filled(point(start.x,start.y),4.,Color32::GREEN);
+        painter.circle_filled(point(end.x,end.y),4.,Color32::RED);
+        for obj in sampled {
+            painter.circle_filled(point(obj.position.x,obj.position.y),3.,INK);
+        }
+        if let Some(i)=self.selected {
+            if let Some(obj)=t.objects.get(i) {
+                painter.circle_filled(point(obj.position.x,obj.position.y),5.,ORANGE);
+            }
         }
         painter.text(rect.left_top()+Vec2::new(8.,6.),egui::Align2::LEFT_TOP,
             format!("Bovenaanzicht | lengte {:.2} m | breedte {:.2} m | {} objecten",
-                t.length(),t.width_meters,t.objects.len()),
+                len,width,t.objects.len()),
             egui::FontId::proportional(11.),INK);
     }
 }
