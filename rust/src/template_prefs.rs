@@ -25,6 +25,8 @@ struct SavedChoice {
     profile:bool,
     reverse:bool,
     comments:String,
+    #[serde(default)]
+    photos:Vec<crate::template_photo::Photo>,
 }
 #[derive(Clone,Debug,Serialize,Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -60,6 +62,7 @@ impl TemplatePreferences {
                 raster_path:item.raster.and_then(|idx|rasters.get(idx)).map(|r|r.path.clone()),
                 include:item.include,title:item.title.clone(),
                 profile:item.profile,reverse:item.reverse,comments:item.comments.clone(),
+                photos:item.photos.clone(),
             })
         }).collect();
         Self {template:opts.template.clone(),project:opts.project.clone(),
@@ -75,6 +78,10 @@ impl TemplatePreferences {
             || !(30..=600).contains(&self.dpi)
         {return Err("Ongeldige sjabloonvoorkeuren".into());}
         for item in &self.choices {
+            if item.photos.len()>crate::template_photo::MAX_PHOTOS_PER_SLOT
+                || item.photos.iter().any(|p|p.turns>3) {
+                return Err("Te veel of ongeldig gedraaide projectfoto's".into());
+            }
             if item.title.len()>256 || item.comments.len()>4096
                 || item.title.chars().any(char::is_control)
                 || item.comments.chars().any(|c|c.is_control()&&c!='\n')
@@ -108,6 +115,7 @@ impl TemplatePreferences {
             next.profile=old.profile;
             next.reverse=old.reverse;
             next.comments=old.comments.clone();
+            next.photos=old.photos.clone();
             if let Some(saved_path)=&old.raster_path {
                 let found=rasters.iter().enumerate().filter(|(_,r)|&r.path==saved_path)
                     .map(|(i,_)|i).collect::<Vec<_>>();
