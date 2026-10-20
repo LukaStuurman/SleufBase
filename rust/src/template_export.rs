@@ -541,7 +541,7 @@ pub fn export_with_progress(
     let mut images = Vec::new();
     let mut profiles = 0;
     let mut filled_slots = 0;
-    let mut total = 0;
+    let mut total: u64 = 0;
     let mut map_renderer = crate::map_export::Renderer::default();
     for (index, (source, target)) in request.slots.iter().zip(&prepared.slots).enumerate() {
         progress(&format!("Proefsleufvak {} invullen", index + 1));
