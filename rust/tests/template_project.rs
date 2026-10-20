@@ -73,6 +73,7 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     let half_width = (tiff.bounds.max_x - tiff.bounds.min_x) / 4.0;
     let start=sleufbase_rust::Vertex{x:x-half_width,y,z:Some(-1.)};
     let end=sleufbase_rust::Vertex{x:x+half_width,y,z:Some(-1.)};
+    let tiff_bounds=tiff.bounds;
     let trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
         "PS-virtual".into(),start,end,0.6).unwrap();
     let opts=Options {
@@ -92,7 +93,11 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     assert_eq!(slot.tiff_source.as_ref().unwrap().axis,Some([
         [start.x,start.y],[end.x,end.y]
     ]));
-    assert_eq!(slot.map_source.as_ref().unwrap().overlays.len(),1);
+    let overlays=&slot.map_source.as_ref().unwrap().overlays;
+    assert_eq!(overlays.len(),4, "four clipped trench outline edges");
+    assert!(overlays.iter().all(|stroke|stroke.points.len()==2 &&
+        stroke.points.iter().all(|p|p[0]>=tiff_bounds.min_x && p[0]<=tiff_bounds.max_x &&
+            p[1]>=tiff_bounds.min_y && p[1]<=tiff_bounds.max_y)));
 }
 
 #[test]
