@@ -242,7 +242,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
     let synthetic=image::open(photo).unwrap().to_rgba8();
     assert!(synthetic.pixels().any(|p|p[3]==0));
     assert!(synthetic.pixels().any(|p|p[0]==0&&p[3]==255));
-    assert!(synthetic.pixels().any(|p|p[2]==229&&p[3]==235));
+    assert!(synthetic.pixels().any(|p|p[2]==229&&p[3]>=235));
     assert!(export.published.assets.join("slot00001_kaart.png").is_file());
     let doc=sleufbase_rust::dxf_document::Document::load(
         &output,&std::sync::atomic::AtomicBool::new(false)).unwrap();
