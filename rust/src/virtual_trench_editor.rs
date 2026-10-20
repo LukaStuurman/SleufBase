@@ -107,11 +107,11 @@ pub fn remove_object(t:&mut VirtualTrench,index:usize) -> Result<(), String> {
     Ok(())
 }
 pub fn sort_objects(t:&mut VirtualTrench) {
-    let a=t.start;
-    let dx=t.end.x-a.x;
-    let dy=t.end.y-a.y;
+    let start=t.start;
+    let dx=t.end.x-start.x;
+    let dy=t.end.y-start.y;
     t.objects.sort_by(|a,b|{
-        let chain=|p:Vertex|(p.x-t.start.x)*dx+(p.y-t.start.y)*dy;
+        let chain=|p:Vertex|(p.x-start.x)*dx+(p.y-start.y)*dy;
         chain(a.position).total_cmp(&chain(b.position))
     });
 }
