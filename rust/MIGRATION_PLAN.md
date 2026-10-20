@@ -814,6 +814,31 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   werkmappen en samengestelde DXF-/CLI-controles blijven afzonderlijke regressies.
   Gepaard normaal/omgekeerd, overige exportfamilies, echte projecten en alle
   oorspronkelijke globale releasevoorwaarden blijven open.
+- Native Normaal/Reverse-containerkern toegevoegd op basis van de werkelijk
+  geladen productieketen. De donor wordt in hetzelfde sjabloon gevonden en met
+  alle acht metadatarecords gekopieerd; geen tweede sjabloon of DXF-import.
+  Twee inhoudsblokken en een wrapper behouden oorspronkelijke objecthandles,
+  lagen, afbeeldingen en annotaties. De AutoCAD-keuze heet Versie, begint op
+  Normaal en bevat Reverse. Parameter en grip verplaatsen met behoud van hun
+  onderlinge afstand; bestaande variantlagen worden ingeschakeld met behoud
+  van hun overige eigenschappen. Eén eigendomsindex en een batched wijziging
+  vermijden herhaalde imports en indexopbouw per vak.
+  De oorspronkelijke functies leveren vijf tekeningen/acht paren en 49 Unicode-
+  naamgevallen. Onafhankelijke controle vergelijkt alle donortags/referenties,
+  geometrie, laagattributen en DXF-audits zonder reparaties. Ruwe ownertags
+  worden apart getoetst omdat ezdxf foutieve gekoppelde owners bij lezen stil
+  herstelt; hierdoor is een aanvankelijk gemiste fout daadwerkelijk gevonden.
+  Twee hashseeds reproduceren alle fixturebytes. Annuleren, callback-panic,
+  ongeldige groepen, bewerkte bronvelden en handle-uitputting laten de bron
+  intact; het echte sjabloon behoudt alle oorspronkelijke handled records,
+  behalve bijgewerkte tabeltellingen. 368 Rust-tests slagen; Clippy geeft geen
+  nieuwe waarschuwingen in deze kern. De geoptimaliseerde app en auditdriver
+  bouwen; alle vijf native uitvoertekeningen slagen voor de onafhankelijke
+  vergelijking. Windows CI voert dezelfde bronvergelijking uit.
+  Dit is de container-/zichtbaarheidskern, nog geen complete gepaarde export:
+  dubbele raster-/profielvoorbereiding, de oorspronkelijke fontafhankelijke
+  selectorplaatsing, de GUI-koppeling en interactieve AutoCAD-acceptatie blijven
+  open, naast alle eerdere globale releasevoorwaarden.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

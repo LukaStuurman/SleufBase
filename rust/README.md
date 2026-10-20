@@ -491,6 +491,13 @@ aangeleverd. Het native venster stelt deze invoer samen uit geladen TIFFs,
 meetjobs, CAD en opmerkingen; dezelfde worker bereidt beelden en profielen voor.
 De projectroute ondersteunt ook werkfoto’s en eigen virtuele rasters. Begeleidende exports en de overige volledige workflow volgen nog.
 
+De native Normaal/Reverse-blokkern behoudt bronobjecten en maakt de AutoCAD-
+keuze `Versie` met `Normaal` en `Reverse` uit de donor van hetzelfde sjabloon.
+[De onafhankelijke controles](tests/fixtures/template-variants/README.md) dekken
+metadata, beginzichtbaarheid en gekoppelde onderdelen. Automatisch beide
+beelden/profielen voorbereiden en deze keuze aanbieden in de exportworkflow
+zijn nog niet aangesloten.
+
 ## Wat nog ontbreekt
 
 1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.

@@ -72,7 +72,7 @@ fn encoded(tags: &[(i32, String)]) -> String {
     }
     text
 }
-fn guid() -> Result<String, String> {
+pub(crate) fn guid() -> Result<String, String> {
     let mut bytes = [0u8; 16];
     getrandom::fill(&mut bytes).map_err(|e| format!("Dynamische blokidentiteit: {e}"))?;
     bytes[6] = (bytes[6] & 15) | 0x40;
@@ -288,7 +288,7 @@ struct GeometryDefinition {
     record: Tags,
     geometry: Vec<Tags>,
 }
-fn appids(document: &Document, next: &mut u64, cancel: &AtomicBool) -> Result<Vec<Change>, String> {
+pub(crate) fn appids(document: &Document, next: &mut u64, cancel: &AtomicBool) -> Result<Vec<Change>, String> {
     let names = [
         "AcDbBlockRepETag",
         "AcDbDynamicBlockTrueName",

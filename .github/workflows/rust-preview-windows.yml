@@ -415,6 +415,20 @@ jobs:
           name: SleufBase-Rust-template-export-benchmark
           path: rust/benchmarks-template-export.json
           if-no-files-found: error
+      - name: Independently audit native normal reverse visibility graph
+        shell: pwsh
+        env:
+          TEMPLATE_VARIANTS_DIR: ${{ runner.temp }}/SleufBase-template-variants
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_variant_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-variants
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --release --manifest-path rust/Cargo.toml --example export_template_variants -- "$env:TEMPLATE_VARIANTS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_variants.py "$env:TEMPLATE_VARIANTS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit template project names and dates
         shell: pwsh
         env:

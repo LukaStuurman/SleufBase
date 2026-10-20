@@ -88,7 +88,7 @@ fn clean(source: Tags) -> Tags {
     }
     result
 }
-fn set_owner(tags: &mut Tags, value: u64) {
+pub(crate) fn set_owner(tags: &mut Tags, value: u64) {
     let mut depth = 0;
     let mut at = 1;
     for (i, (c, v)) in tags.iter_mut().enumerate() {
