@@ -101,7 +101,9 @@ impl SleufBaseApp {
         });
     }
     pub(super) fn poll_kickthemap_browser(&mut self,ctx:&egui::Context) {
-        if self.browser_ui.batch_mode &&
+        if (self.browser_ui.batch_mode ||
+             !self.browser_ui.downloaded_json.is_empty() ||
+             !self.browser_ui.downloaded_tiffs.is_empty()) &&
             self.browser_ui.batch_generation!=self.project_generation {
             self.browser_ui.cancel.store(true,Ordering::SeqCst);
             self.browser_ui.queue.clear();
