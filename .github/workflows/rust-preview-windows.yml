@@ -10,6 +10,12 @@ on:
       - '.github/workflows/rust-preview-windows.yml'
   workflow_dispatch:
 
+# Push and PR events for the same migration branch share a single runner slot.
+# Superseded builds are cancelled; only the newest preview produces an artifact.
+concurrency:
+  group: rust-preview-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
