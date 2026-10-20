@@ -122,6 +122,13 @@ pub fn reverse_axis(t:&mut VirtualTrench)->Result<(),String>{
     }
     let mut next=t.clone();
     std::mem::swap(&mut next.start,&mut next.end);
+    let length=next.length();
+    for row in &mut next.dekband_rows {
+        let old_start=row.start_chainage;
+        row.start_chainage=length-row.end_chainage;
+        row.end_chainage=length-old_start;
+    }
+    next.dekband_rows.sort_by(|a,b|a.start_chainage.total_cmp(&b.start_chainage));
     sort_objects(&mut next);
     check(&next)?;
     *t=next;
@@ -306,6 +313,25 @@ mod tests {
         assert_eq!(import_tabular(&mut target,&tsv).unwrap(),2);
         assert_eq!(target.objects.len(),t.objects.len());
         assert_eq!(target.objects[0].source_name,t.objects[0].source_name);
+    }
+    #[test]
+    fn reverse_axis_preserves_geographic_dekband_segment_and_old_projects() {
+        let mut t=trench();
+        t.dekband_rows.push(crate::virtual_trench::Dekband{
+            start_chainage:1.,end_chainage:3.,
+            source_name:"LS dekband".into(),display_rgb:Some([12,34,56]),
+        });
+        let json=serde_json::to_value(&t).unwrap();
+        let restored:VirtualTrench=serde_json::from_value(json.clone()).unwrap();
+        assert_eq!(restored.dekband_rows.len(),1);
+        let mut older=json;
+        older.as_object_mut().unwrap().remove("dekband_rows");
+        let old:VirtualTrench=serde_json::from_value(older).unwrap();
+        assert!(old.dekband_rows.is_empty());
+        reverse_axis(&mut t).unwrap();
+        assert_eq!(t.dekband_rows[0].start_chainage,7.);
+        assert_eq!(t.dekband_rows[0].end_chainage,9.);
+        assert_eq!(t.dekband_rows[0].display_rgb,Some([12,34,56]));
     }
     #[test]
     fn add_edit_delete_sort_and_shift_objects() {
