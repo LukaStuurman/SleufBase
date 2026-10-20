@@ -68,8 +68,11 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
 #[test]
 fn virtual_trench_keeps_measured_start_and_selected_source() {
     let (fixture,tiff)=fixture();
-    let start=sleufbase_rust::Vertex{x:155000.,y:463000.,z:Some(-1.)};
-    let end=sleufbase_rust::Vertex{x:155005.,y:463000.,z:Some(-1.)};
+    let x = (tiff.bounds.min_x + tiff.bounds.max_x) / 2.0;
+    let y = (tiff.bounds.min_y + tiff.bounds.max_y) / 2.0;
+    let half_width = (tiff.bounds.max_x - tiff.bounds.min_x) / 4.0;
+    let start=sleufbase_rust::Vertex{x:x-half_width,y,z:Some(-1.)};
+    let end=sleufbase_rust::Vertex{x:x+half_width,y,z:Some(-1.)};
     let trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
         "PS-virtual".into(),start,end,0.6).unwrap();
     let opts=Options {
@@ -85,9 +88,9 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     assert_eq!(request.slots.len(),1);
     assert_eq!(request.datasets.len(),1);
     let slot=request.slots[0].as_ref().unwrap();
-    assert_eq!(slot.profile.as_ref().unwrap().forced_start,Some([155000.,463000.]));
+    assert_eq!(slot.profile.as_ref().unwrap().forced_start,Some([start.x,start.y]));
     assert_eq!(slot.tiff_source.as_ref().unwrap().axis,Some([
-        [155000.,463000.],[155005.,463000.]
+        [start.x,start.y],[end.x,end.y]
     ]));
     assert_eq!(slot.map_source.as_ref().unwrap().overlays.len(),1);
 }
