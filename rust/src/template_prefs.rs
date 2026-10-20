@@ -28,10 +28,13 @@ struct SavedChoice {
     #[serde(default)]
     photos:Vec<crate::template_photo::Photo>,
 }
+fn default_paired()->bool{true}
 #[derive(Clone,Debug,Serialize,Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TemplatePreferences {
     pub template:PathBuf,
+    #[serde(default="default_paired")]
+    pub paired:bool,
     pub project:String,
     pub drawn_by:String,
     pub dpi:u32,
@@ -65,7 +68,7 @@ impl TemplatePreferences {
                 photos:item.photos.clone(),
             })
         }).collect();
-        Self {template:opts.template.clone(),project:opts.project.clone(),
+        Self {template:opts.template.clone(),paired:opts.paired,project:opts.project.clone(),
             drawn_by:opts.drawn_by.clone(),dpi:opts.dpi,scale:opts.scale,
             background:opts.background,include_bgt:opts.include_bgt,
             include_cadastral:opts.include_cadastral,include_cad:opts.include_cad,
@@ -93,7 +96,7 @@ impl TemplatePreferences {
         trenches:&[VirtualTrench])->Options
     {
         let mut options=Options {
-            template:self.template.clone(),project:self.project.clone(),
+            template:self.template.clone(),paired:self.paired,project:self.project.clone(),
             drawn_by:self.drawn_by.clone(),dpi:self.dpi,scale:self.scale,
             background:self.background,include_bgt:self.include_bgt,
             include_cadastral:self.include_cadastral,include_cad:self.include_cad,

@@ -112,6 +112,7 @@ fn main() -> Result<(), String> {
             1
         });
         let mut state = State {
+            paired: false,
             project: "Native venster Ø 漢".into(),
             drawn_by: "Native test".into(),
             aerial: false,

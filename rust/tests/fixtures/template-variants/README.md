@@ -29,8 +29,9 @@ directory can be selected with `SLEUFBASE_TEMPLATE_VARIANT_FIXTURES`; two hash
 seeds reproduce all four generated files byte for byte.
 
 This proves the same-document container/visibility kernel for fresh groups and
-its automatic selector path with supplied font resolution. Font discovery,
-dual raster/profile preparation, native export-dialog integration and interactive
-AutoCAD acceptance remain requirements for full paired-export parity. The
+its automatic selector path with supplied font resolution. Windows font discovery, dual raster/profile preparation and both native dialogs
+are now connected through the real worker; see the template-paired audit.
+Interactive AutoCAD acceptance, other font types and complete legacy workflow
+parity remain requirements. The
 separate text-metrics and template-extents fixtures document the supported
 geometry/font contracts and their remaining limitations.

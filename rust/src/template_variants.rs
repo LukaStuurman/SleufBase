@@ -303,10 +303,8 @@ pub fn assemble_with_progress(
     *doc = indexed;
     Ok(names)
 }
-/// Derive each normal selector from the same profile/image/font bounds as the
-/// production pipeline, then install both states. The caller resolves actual
-/// template fonts; missing/unsupported data never yields an approximate grip.
-/// One fresh DXF index serves both measurement and container assembly.
+/// Resolve the original profile/image/font bounds, then install both states.
+/// Failures retain the caller's complete document, including staged edits.
 pub fn assemble_automatic(
     doc: &mut Document,
     pairs: &[Pair],
@@ -318,7 +316,25 @@ pub fn assemble_automatic(
         return Ok(Vec::new());
     }
     validate_pairs(pairs)?;
-    let mut indexed = doc.indexed_copy(cancel)?;
+    let indexed = doc.indexed_copy(cancel)?;
+    let (indexed, names) = assemble_automatic_indexed(indexed, pairs, resolve, cancel)?;
+    *doc = indexed;
+    Ok(names)
+}
+/// Transaction-local entry: consume the current index collected with slot
+/// handles. No second full-document copy or reindex is necessary.
+pub(crate) fn assemble_automatic_indexed(
+    mut indexed: Document,
+    pairs: &[Pair],
+    resolve: &mut impl FnMut(&str) -> Result<crate::dxf_text_metrics::Font, String>,
+    cancel: &AtomicBool,
+) -> Result<(Document, Vec<String>), String> {
+    crate::input::check(cancel)?;
+    validate_pairs(pairs)?;
+    indexed.require_current_index()?;
+    if pairs.is_empty() {
+        return Ok((indexed, Vec::new()));
+    }
     let mut automatic = pairs.to_vec();
     {
         let extents = crate::template_extents::Index::new(&indexed, cancel)?;
@@ -327,8 +343,7 @@ pub fn assemble_automatic(
         }
     }
     let names = assemble_indexed(&mut indexed, &automatic, cancel, |_, _| {})?;
-    *doc = indexed;
-    Ok(names)
+    Ok((indexed, names))
 }
 fn validate_pairs(pairs: &[Pair]) -> Result<(), String> {
     if pairs.len() > 5000 {

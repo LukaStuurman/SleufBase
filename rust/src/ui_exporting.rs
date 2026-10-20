@@ -476,6 +476,10 @@ mod tests {
             std::thread::sleep(Duration::from_millis(2));
         }
         assert!(out.exists(), "{}", app.message);
+        let drawing=sleufbase_rust::dxf_document::Document::load(&out,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+        assert_eq!(drawing.records().filter(|r|r.kind()=="BLOCKVISIBILITYPARAMETER" && r.first(301)==Some("Versie")).count(),1);
+        assert!(app.template_preferences.as_ref().unwrap().paired);
+
         assert!(out.with_extension("xlsx").exists(), "{}", app.message);
         assert!(app.message.contains("Excel:"));
         assert_eq!(
@@ -501,12 +505,14 @@ mod tests {
         let ctx = egui::Context::default();
         app.open_template_export();
         let mut state = app.template_order_dialog.as_ref().unwrap().state.clone();
+        assert!(state.paired);
         state.project = "  Uitvoerproject Ø  ".into();
         state.aerial = false;
         state.auto_bgt = false;
         let pointers = (app.datasets[0].features.as_ptr(), app.geotiffs.as_ptr());
         let temp = tempfile::tempdir().unwrap();
         let output = temp.path().join("native-window.dxf");
+        let export_day=sleufbase_rust::template_metadata::Date::today().unwrap().to_string();
         app.finish_template_export(output.clone(), state);
         assert!(app.datasets.is_empty() && app.geotiffs.is_empty());
         assert!(!app.save_project_to_path(temp.path().join("empty.json")));
@@ -517,6 +523,12 @@ mod tests {
             std::thread::sleep(Duration::from_millis(2));
         }
         assert!(output.exists(), "{}", app.message);
+        let drawing=sleufbase_rust::dxf_document::Document::load(&output,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+        assert_eq!(drawing.records().filter(|r|r.kind()=="BLOCKVISIBILITYPARAMETER" && r.first(301)==Some("Versie")).count(),1);
+        let today=sleufbase_rust::template_metadata::Date::today().unwrap().to_string();
+        assert!(drawing.records().any(|r|r.kind()=="ATTRIB" && matches!(r.first(2),Some("DATUM1"|"DATUM")) && (r.first(1)==Some(today.as_str()) || r.first(1)==Some(export_day.as_str()))));
+        assert!(drawing.records().any(|r|r.kind()=="ATTRIB" && r.first(1)==Some("Uitvoerproject Ø")));
+
         assert!(output.with_extension("xlsx").exists(), "{}", app.message);
         app.migrated_settings.template_auto_export_discipline_excel = false;
         let without_excel = temp.path().join("disabled-report.dxf");

@@ -109,6 +109,8 @@ impl SleufBaseApp {
                         });
                         ui.separator();
                         ui.heading("2. Kaarten en profielen");
+                        ui.checkbox(&mut dialog.options.paired,"Beide richtingen (Normaal / Reverse)");
+                        if dialog.options.paired {ui.small("Kies na export in AutoCAD de gewenste richting met Versie.");}
                         ui.horizontal(|ui| {
                             ui.label("Resolutie (DPI)");
                             ui.add(egui::DragValue::new(&mut dialog.options.dpi).range(72..=300));
@@ -191,7 +193,7 @@ impl SleufBaseApp {
                                                 }
                                             });
                                         ui.checkbox(&mut slot.profile, "Profiel tekenen");
-                                        ui.checkbox(&mut slot.reverse, "Richting omkeren");
+                                        ui.add_enabled(!dialog.options.paired,egui::Checkbox::new(&mut slot.reverse,"Alleen omgekeerde richting"));
                                     });
                                     if slot.include && slot.raster.is_none() && matches!(slot.source,Source::Job(_)) {
                                         ui.colored_label(DARK, "Koppel eerst een GeoTIFF voordat dit vak geëxporteerd kan worden.");

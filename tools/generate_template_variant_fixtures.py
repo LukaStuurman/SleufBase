@@ -19,9 +19,9 @@ def modules():
     ref=reference();pkg=ref.__package__
     return tuple(importlib.import_module(pkg+'.'+n) for n in ['autocad_dynamic_visibility','template_reverse_patch','template_dynamic_visibility_patch','dxf_template_pipeline_patch','dynamic_visibility_finalize_patch'])
 
-def snapshot(path,wrappers):
+def snapshot(path,wrappers,expected_fixes=()):
     dv,reverse,dynamic,pipeline,finalize=modules()
-    doc=ezdxf.readfile(path);report=doc.audit();assert not report.has_errors and not report.has_fixes,(report.errors,report.fixes)
+    doc=ezdxf.readfile(path);report=doc.audit();assert not report.has_errors and [(e.code,e.message) for e in report.fixes]==list(expected_fixes),(report.errors,[(e.code,e.message) for e in report.fixes])
     pairs,_,_=dv._read_pairs(path);records=dv._split_records(pairs);sections=dv._record_sections(records)
     # ezdxf binds linked owners while reading, before audit() can report repairs.
     # Inspect original tags as well, so those implicit corrections cannot hide
@@ -39,11 +39,14 @@ def snapshot(path,wrappers):
             for e in layout:
                 assert raw_owners[e.dxf.handle]==layout.block_record_handle,(e.dxftype(),'content owner')
                 if e.dxftype() in ('INSERT','POLYLINE'):
-                    children=e.attribs if e.dxftype()=='INSERT' else e.vertices
+                    children=list(e.attribs if e.dxftype()=='INSERT' else e.vertices)
                     for child in children:
                         assert raw_owners[child.dxf.handle]==e.dxf.handle,(child.dxftype(),'parent owner')
                     if e.seqend:
-                        assert raw_owners[e.seqend.dxf.handle]==e.dxf.handle,('SEQEND','parent owner')
+                        # Reader may create a transient SEQEND for a plain
+                        # INSERT without attributes; no sequence is serialized.
+                        if children:assert e.seqend.dxf.handle in raw_owners,('SEQEND','missing sequence')
+                        if e.seqend.dxf.handle in raw_owners:assert raw_owners[e.seqend.dxf.handle]==e.dxf.handle,('SEQEND','parent owner')
                 result.append(entity(e,{},doc))
             return result
         _index,br=dv._target_block_record(records,sections,name);root=finalize._extension_dictionary_handle(br)

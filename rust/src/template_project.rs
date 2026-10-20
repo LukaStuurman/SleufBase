@@ -43,6 +43,7 @@ pub enum BackgroundKind {
 }
 pub struct Options {
     pub template: PathBuf,
+    pub paired: bool,
     pub project: String,
     pub drawn_by: String,
     pub dpi: u32,
@@ -57,6 +58,7 @@ impl Default for Options {
     fn default() -> Self {
         Self {
             template: PathBuf::new(),
+            paired: true,
             project: String::new(),
             drawn_by: String::new(),
             dpi: 150,
@@ -325,6 +327,7 @@ pub fn build_with_cad(
         rules: rules.to_vec(), roads, terrain_boundaries: terrain,
         surfaces: Vec::new(), layers: Vec::new(), geometry: Vec::new(),
         settings: template_export::Settings {
+            paired: opts.paired,
             project: (!opts.project.trim().is_empty()).then(||opts.project.trim().to_owned()),
             drawn_by: opts.drawn_by.trim().to_owned(),
             protected_sources:jobs.iter().map(|d|d.source_path.clone())

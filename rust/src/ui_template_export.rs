@@ -286,7 +286,7 @@ impl SleufBaseApp {
             if ui.add_enabled(job.control.can_cancel(), egui::Button::new("Annuleren")).clicked() {
                 cancel = true;
             }
-            ui.label("De bestaande DXF wordt niet overschreven. Bij annuleren blijft de vorige export behouden.");
+            ui.label("Bij succes vervangt de nieuwe DXF het gekozen uitvoerbestand.");
             ui.spinner();
         });
         if cancel {
@@ -389,6 +389,7 @@ mod tests {
         let template = dir.path().join("template.dxf");
         std::fs::write(&template, b"not needed for validation").unwrap();
         let opts = sleufbase_rust::template_project::Options {
+            paired:false,
             template,
             choices: sleufbase_rust::template_project::suggest(&app.datasets, &[], &[]),
             ..Default::default()

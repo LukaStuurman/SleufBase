@@ -38,6 +38,7 @@ pub(crate) fn write(
     published: &Published,
     request: &Request,
     datasets: &[Dataset],
+    font_paths: &[PathBuf],
 ) -> Result<(PathBuf, Vec<String>), String> {
     if request.rules.is_empty() {
         return Err("er zijn geen disciplines geconfigureerd".into());
@@ -45,6 +46,7 @@ pub(crate) fn write(
     let path = output.with_extension("xlsx");
     let target = fs::canonicalize(&path).ok();
     let mut sources = input_paths(request, datasets);
+    sources.extend(font_paths.iter().map(PathBuf::as_path));
     sources.push(output);
     for source in sources.into_iter().filter(|p| !p.as_os_str().is_empty()) {
         if source == path

@@ -432,6 +432,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit real paired exports and system font selection
+        shell: pwsh
+        env:
+          PAIRED_TEMPLATE_DIR: ${{ runner.temp }}/SleufBase-paired-template-export
+          PYTHONUTF8: '1'
+        run: |
+          cargo build --release --manifest-path rust/Cargo.toml --example measure_dxf_fonts --example export_paired_templates
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_dxf_fonts.py rust/target/release/examples/measure_dxf_fonts.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_paired_templates.exe "$env:PAIRED_TEMPLATE_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_paired_templates.py "$env:PAIRED_TEMPLATE_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native normal reverse visibility graph
         shell: pwsh
         env:

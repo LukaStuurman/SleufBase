@@ -364,6 +364,7 @@ pub fn request_with_bgt(
         layers,
         geometry,
         settings: template_export::Settings {
+            paired: state.paired,
             project: Some(crate::python_values::trim(&state.project).into()),
             drawn_by: state.drawn_by.clone(),
             label_gap: state.label_gap,

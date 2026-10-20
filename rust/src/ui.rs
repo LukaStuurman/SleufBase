@@ -1704,7 +1704,7 @@ impl SleufBaseApp {
         }
         self.show_unsaved_project_dialog(ctx);
         if let Some(state)=crate::template_dialog::show(ctx,&mut self.template_order_dialog,&self.geotiffs,&self.datasets,self.project_generation){
-            if let Some(path)=rfd::FileDialog::new().add_filter("DXF",&["dxf"]).set_file_name(if state.reverse{"SleufBase-Proefsleuven-omgekeerd.dxf"}else{"SleufBase-Proefsleuven.dxf"}).save_file(){self.finish_template_export(path,state);}
+            if let Some(path)=rfd::FileDialog::new().add_filter("DXF",&["dxf"]).set_file_name(if !state.paired && state.reverse{"SleufBase-Proefsleuven-omgekeerd.dxf"}else{"SleufBase-Proefsleuven.dxf"}).save_file(){self.finish_template_export(path,state);}
         }
 
     }

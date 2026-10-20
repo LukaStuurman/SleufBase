@@ -33,6 +33,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
     assert!(!fixture.datasets.is_empty());
     let dir=tempfile::tempdir().unwrap();
     let mut options=Options {
+        paired:false,
         template:fixture.template.clone(),
         project:"Native projectport".into(), drawn_by:"Techbase".into(),
         background:BackgroundKind::Blank, dpi:96, scale:225.,
@@ -77,6 +78,7 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     let trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
         "PS-virtual".into(),start,end,0.6).unwrap();
     let opts=Options {
+        paired:false,
         template:fixture.template,
         choices:vec![Choice {source:Source::Virtual(0),raster:Some(0),
             include:true,title:"Virtueel profiel".into(),profile:true,
@@ -121,6 +123,7 @@ fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters
         raw_text:String::new(),block_name:String::new(),closed:None,cad:None,
     });
     let options=Options {
+        paired:false,
         template: source.template.clone(),
         dpi:96,scale:225.,
         include_bgt:false,include_cadastral:false,include_cad:true,
@@ -163,6 +166,7 @@ fn template_photos_are_persistently_bundled_without_replacing_tiff_or_map() {
     pixels.put_pixel(0,0,image::Rgba([255,10,20,255]));
     pixels.save(&photo).unwrap();
     let options=Options {
+        paired:false,
         template:reference.template,
         include_bgt:false,include_cadastral:false,include_cad:false,
         choices:vec![Choice {
@@ -212,6 +216,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
     });
     let dir=tempfile::tempdir().unwrap();
     let options=Options {
+        paired:false,
         template:reference.template,
         include_bgt:false,include_cadastral:false,include_cad:false,
         background:BackgroundKind::Blank,

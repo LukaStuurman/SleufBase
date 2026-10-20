@@ -83,6 +83,8 @@ pub struct Settings {
     pub label_gap: f64,
     /// Standalone manifests opt in; desktop workflows follow the user's setting.
     pub discipline_excel: bool,
+    /// Keep both freshly rendered directions behind AutoCAD Versie.
+    pub paired: bool,
     /// Additional live project paths are never eligible for workbook replacement.
     #[serde(skip)]
     pub protected_sources: Vec<PathBuf>,
@@ -95,6 +97,7 @@ impl Default for Settings {
             export_date: None,
             label_gap: 18.,
             discipline_excel: false,
+            paired: false,
             protected_sources: Vec::new(),
         }
     }
@@ -245,6 +248,7 @@ fn build_profile<'a>(
     request: &'a Request,
     datasets: &'a [Dataset],
     options: &Profile,
+    reverse_override: Option<bool>,
     cancel: &std::sync::atomic::AtomicBool,
 ) -> Result<Option<profile::Profile<'a>>, String> {
     let dataset = datasets
@@ -260,7 +264,7 @@ fn build_profile<'a>(
             roads: &request.roads,
             terrain_boundaries: &request.terrain_boundaries,
             forced_start: options.forced_start,
-            reverse: options.reverse,
+            reverse: reverse_override.unwrap_or(options.reverse),
             marker_scale: options.marker_diameter.max(0.005),
         },
         cancel,
@@ -386,13 +390,15 @@ fn template_prepare_profile(
 }
 /// Images are built in one graph batch; restore the source per-slot draw order
 /// afterwards with one reindex, rather than reloading a large DXF per image.
+type SlotParents = std::collections::BTreeMap<usize, Vec<u64>>;
 fn order_slot_entities(
-    doc: &mut Document,
+    doc: &Document,
     first: u64,
     ranges: &[(u64, u64, usize)],
     image_order: &[usize],
+    reorder: bool,
     control: &Control,
-) -> Result<(), String> {
+) -> Result<(Document, SlotParents), String> {
     use crate::template_copy as copy;
     use std::collections::BTreeMap;
     let mut indexed = doc.indexed_copy(control.flag())?;
@@ -406,6 +412,7 @@ fn order_slot_entities(
         .and_then(|r| r.handle())
         .ok_or("Sjabloon mist modelruimte")?;
     let mut groups: BTreeMap<usize, Vec<_>> = BTreeMap::new();
+    let mut parents = SlotParents::new();
     let mut images = 0;
     let mut active = None;
     let mut first_index = None;
@@ -438,6 +445,7 @@ fn order_slot_entities(
                         .map(|&(_, _, order)| order)
                         .ok_or("Onverwacht nieuw sjabloonobject")?
                 };
+                parents.entry(group).or_default().push(handle);
                 active = Some(group);
             }
         }
@@ -451,7 +459,7 @@ fn order_slot_entities(
     if images != image_order.len() {
         return Err("Niet alle sjabloonafbeeldingen zijn gekoppeld".into());
     }
-    if let Some(first_index) = first_index {
+    if let Some(first_index) = first_index.filter(|_| reorder) {
         if last_index - first_index + 1 != count {
             return Err("Nieuwe sjabloonobjecten zijn niet aaneengesloten".into());
         }
@@ -470,8 +478,7 @@ fn order_slot_entities(
         drop(groups);
         indexed.apply(vec![change])?;
     }
-    *doc = indexed;
-    Ok(())
+    Ok((indexed, parents))
 }
 /// Prepared asset assembly is separate from raster/server-data preparation.
 /// No previous drawing or bundle changes until publication succeeds.
@@ -504,8 +511,26 @@ pub fn export_with_datasets(
     if request.slots.len() > 5000 {
         return Err("Te veel sjabloonvakken voor het afbeeldingsbudget".into());
     }
+    let directions = if request.settings.paired { 2 } else { 1 };
+    let mut estimated_images = 0usize;
     for slot in request.slots.iter().flatten() {
         crate::template_photo::validate(&slot.photos)?;
+        estimated_images = estimated_images
+            .checked_add((2 + slot.photos.len()) * directions)
+            .ok_or("Te veel sjabloonrasters")?;
+        if estimated_images > 10_000 {
+            return Err("Te veel sjabloonrasters voor beide richtingen".into());
+        }
+        if request.settings.paired
+            && ((slot.tiff_source.is_none() && slot.virtual_source.is_none())
+                || slot.map_source.is_none())
+        {
+            return Err(
+                "Voor Normaal/Reverse zijn een originele TIFF/virtuele bron en een kaartbron nodig"
+                    .into(),
+            );
+        }
+
         let available = usize::from(slot.tiff_source.is_some())
             + usize::from(slot.virtual_source.is_some())
             + usize::from(!slot.tiff_png.as_os_str().is_empty());
@@ -522,6 +547,23 @@ pub fn export_with_datasets(
             control.check()?;
             if std::fs::canonicalize(source).is_ok_and(|p| p == target) {
                 return Err("Kies een uitvoerbestand dat verschilt van het sjabloon en de invoerafbeeldingen".into());
+            }
+        }
+    }
+    let mut font_catalog = if request.settings.paired {
+        Some(crate::dxf_fonts::Catalog::system(control.flag())?)
+    } else {
+        None
+    };
+    let font_paths = font_catalog
+        .as_ref()
+        .map(|c| c.source_paths().map(Path::to_owned).collect::<Vec<_>>())
+        .unwrap_or_default();
+    if let Ok(target) = std::fs::canonicalize(output) {
+        for font in &font_paths {
+            control.check()?;
+            if std::fs::canonicalize(font).is_ok_and(|p| p == target) {
+                return Err("Het uitvoerpad verwijst naar een sjabloonlettertype".into());
             }
         }
     }
@@ -599,177 +641,282 @@ pub fn export_with_datasets(
         if let Some(h) = &target.comments_handle {
             doc.replace_text(h, &slot.comments)?;
         }
-        let measured = slot
-            .profile
-            .as_ref()
-            .map(|p| build_profile(request, datasets, p, control.flag()))
-            .transpose()?
-            .flatten();
-        for (role, path, bounds, inset, preserve_aspect) in [
-            ("tiff", &slot.tiff_png, target.tiff_box, 0.04, true),
-            ("kaart", &slot.map_png, target.map_box, 0., false),
-        ] {
-            // Index, not visible label, guarantees uniqueness for duplicate PS names.
-            let destination = tx.asset_path(&format!("slot{:05}_{role}.png", index + 1))?;
-            if let Some(source) = slot.virtual_source.as_ref().filter(|_| role == "tiff") {
-                progress(&format!("Virtuele proefsleufraster {} opbouwen", index + 1));
-                let prepared = crate::virtual_raster::prepare_for_template(source, control.flag())?;
-                crate::template_raster::save(&prepared, &destination, control.flag())?;
-                let bytes = std::fs::metadata(&destination)
-                    .map_err(|e| e.to_string())?
-                    .len();
-                total = total
-                    .checked_add(bytes)
-                    .ok_or("Rasterbudget overschreden")?;
-                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
-                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
-                }
-            } else if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
-                let axis = measured
-                    .as_ref()
-                    .map(|p| [[p.start.x, p.start.y], [p.end.x, p.end.y]]);
-                let raster = crate::template_raster::from_tiff(
-                    source,
-                    &request.roads,
-                    &request.terrain_boundaries,
-                    axis,
-                    control.flag(),
-                )?;
-                crate::template_raster::save(&raster, &destination, control.flag())?;
-                let bytes = std::fs::metadata(&destination)
-                    .map_err(|e| e.to_string())?
-                    .len();
-                total += bytes;
-                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
-                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
-                }
-            } else if let Some(source) = slot.map_source.as_ref().filter(|_| role == "kaart") {
-                let reference = if let (Some(options), Some(profile)) = (&slot.profile, &measured) {
-                    if options.show_reference {
-                        Some(
-                            profile_reference::resolve(profile, &options.metadata)?.display(
-                                &options.metadata,
-                                [
-                                    (slot.bounds.min_x + slot.bounds.max_x) / 2.,
-                                    (slot.bounds.min_y + slot.bounds.max_y) / 2.,
-                                ],
-                            )?,
-                        )
-                    } else {
-                        None
-                    }
+        let mut local_surfaces = None;
+        let mut cached_map: Option<(Option<[f64; 2]>, PathBuf)> = None;
+        let mut cached_photos = Vec::<PathBuf>::new();
+        for direction in 0..directions {
+            let reverse_override = request.settings.paired.then_some(direction == 1);
+            let suffix = if request.settings.paired {
+                if direction == 0 {
+                    "_normaal"
                 } else {
-                    None
-                };
-                progress(&format!("Kaartblad {} opbouwen", index + 1));
-                control.check()?;
-                let page = map_renderer.render_with_raster(
-                    source,
-                    slot.bounds,
-                    slot.tiff_source
-                        .as_ref()
-                        .map(crate::map_export::Raster::Tiff)
-                        .or_else(|| {
-                            slot.virtual_source
-                                .as_ref()
-                                .map(crate::map_export::Raster::Virtual)
-                        }),
-                    reference,
-                    control.flag(),
-                )?;
-                crate::template_raster::save_image(&page.image, &destination, control.flag())?;
-                let bytes = std::fs::metadata(&destination)
-                    .map_err(|e| e.to_string())?
-                    .len();
-                total += bytes;
-                if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
-                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                    "_reverse"
                 }
             } else {
-                copy_asset(path, &destination, &mut total, control)?;
-            }
-            images.push(Image {
-                path: destination,
-                bounds,
-                definition_name: format!("{}_{role}", slot.label),
-                inset,
-                preserve_aspect,
-                layout: None,
-            });
-            image_order.push(index * 2);
-        }
-        // Additional digital site photos are normalized into separate owned
-        // PNG assets. They sit as inset overlays, never replace the full TIFF
-        // or map and use the same atomic export transaction.
-        if !slot.photos.is_empty() {
-            progress(&format!("Werkfoto's voor vak {} verwerken", index + 1));
-            let boxes =
-                crate::template_photo::boxes(target.tiff_box, target.map_box, &slot.photos)?;
-            for (photo_index, (photo, bounds)) in slot.photos.iter().zip(boxes).enumerate() {
-                control.check()?;
-                let filename = format!("slot{:05}_photo{:02}.png", index + 1, photo_index + 1);
-                let destination = tx.asset_path(&filename)?;
-                let bytes = crate::template_photo::prepare(photo, &destination, control)?;
-                total = total
-                    .checked_add(bytes)
-                    .ok_or("Foto-uitvoerbudget overschreden")?;
-                if total > 2 * 1024 * 1024 * 1024 {
-                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                ""
+            };
+            let group = (index * directions + direction) * 2;
+            let measured = slot
+                .profile
+                .as_ref()
+                .map(|p| build_profile(request, datasets, p, reverse_override, control.flag()))
+                .transpose()?
+                .flatten();
+            for (role, path, bounds, inset, preserve_aspect) in [
+                ("tiff", &slot.tiff_png, target.tiff_box, 0.04, true),
+                ("kaart", &slot.map_png, target.map_box, 0., false),
+            ] {
+                // Index, not visible label, guarantees uniqueness for duplicate PS names.
+                let destination =
+                    tx.asset_path(&format!("slot{:05}_{role}{suffix}.png", index + 1))?;
+                if let Some(source) = slot.virtual_source.as_ref().filter(|_| role == "tiff") {
+                    progress(&format!("Virtuele proefsleufraster {} opbouwen", index + 1));
+                    let prepared = crate::virtual_raster::prepare_for_template_direction(
+                        source,
+                        reverse_override.unwrap_or(source.reverse),
+                        control.flag(),
+                    )?;
+                    crate::template_raster::save(&prepared, &destination, control.flag())?;
+                    let bytes = std::fs::metadata(&destination)
+                        .map_err(|e| e.to_string())?
+                        .len();
+                    total = total
+                        .checked_add(bytes)
+                        .ok_or("Rasterbudget overschreden")?;
+                    if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                        return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                    }
+                } else if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
+                    let axis = measured
+                        .as_ref()
+                        .map(|p| [[p.start.x, p.start.y], [p.end.x, p.end.y]])
+                        .or_else(|| {
+                            source.axis.map(|[a, b]| {
+                                if reverse_override == Some(true) {
+                                    [b, a]
+                                } else {
+                                    [a, b]
+                                }
+                            })
+                        });
+                    let mut oriented = source.clone();
+                    oriented.reverse_orientation =
+                        reverse_override.unwrap_or(source.reverse_orientation);
+                    let raster = crate::template_raster::from_tiff(
+                        &oriented,
+                        &request.roads,
+                        &request.terrain_boundaries,
+                        axis,
+                        control.flag(),
+                    )?;
+                    crate::template_raster::save(&raster, &destination, control.flag())?;
+                    let bytes = std::fs::metadata(&destination)
+                        .map_err(|e| e.to_string())?
+                        .len();
+                    total += bytes;
+                    if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                        return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                    }
+                } else if let Some(source) = slot.map_source.as_ref().filter(|_| role == "kaart") {
+                    let reference = if let (Some(options), Some(profile)) =
+                        (&slot.profile, &measured)
+                    {
+                        if options.show_reference {
+                            Some(
+                                profile_reference::resolve(profile, &options.metadata)?.display(
+                                    &options.metadata,
+                                    [
+                                        (slot.bounds.min_x + slot.bounds.max_x) / 2.,
+                                        (slot.bounds.min_y + slot.bounds.max_y) / 2.,
+                                    ],
+                                )?,
+                            )
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+                    let effective_reference = source.reference.or(reference);
+                    if let Some((_, previous)) = cached_map
+                        .as_ref()
+                        .filter(|(r, _)| *r == effective_reference)
+                    {
+                        copy_asset(previous, &destination, &mut total, control)?;
+                    } else {
+                        progress(&format!("Kaartblad {} opbouwen", index + 1));
+                        control.check()?;
+                        let page = map_renderer.render_with_raster(
+                            source,
+                            slot.bounds,
+                            slot.tiff_source
+                                .as_ref()
+                                .map(crate::map_export::Raster::Tiff)
+                                .or_else(|| {
+                                    slot.virtual_source
+                                        .as_ref()
+                                        .map(crate::map_export::Raster::Virtual)
+                                }),
+                            reference,
+                            control.flag(),
+                        )?;
+                        crate::template_raster::save_image(
+                            &page.image,
+                            &destination,
+                            control.flag(),
+                        )?;
+                        let bytes = std::fs::metadata(&destination)
+                            .map_err(|e| e.to_string())?
+                            .len();
+                        total += bytes;
+                        if bytes > 256 * 1024 * 1024 || total > 2 * 1024 * 1024 * 1024 {
+                            return Err(
+                                "Sjabloonafbeeldingen overschrijden het exportbudget".into()
+                            );
+                        }
+                        cached_map = Some((effective_reference, destination.clone()));
+                    }
+                } else {
+                    copy_asset(path, &destination, &mut total, control)?;
                 }
                 images.push(Image {
                     path: destination,
                     bounds,
-                    definition_name: format!("{}_photo{:02}", slot.label, photo_index + 1),
-                    inset: 0.015,
-                    preserve_aspect: true,
+                    definition_name: format!("{}_{role}{suffix}", slot.label),
+                    inset,
+                    preserve_aspect,
                     layout: None,
                 });
-                image_order.push(index * 2);
+                image_order.push(group);
             }
-        }
-        if let (Some(options), Some(measured)) =
-            (slot.profile.as_ref().filter(|p| p.draw), &measured)
-        {
-            let local_surfaces = slot
-                .surfaces
-                .as_ref()
-                .map(|s| {
-                    if slot.surfaces_constructed {
-                        bgt_surface::Index::from_normalized_features(s.iter(), control.flag())
+            // Additional digital site photos are normalized into separate owned
+            // PNG assets. They sit as inset overlays, never replace the full TIFF
+            // or map and use the same atomic export transaction.
+            if !slot.photos.is_empty() {
+                progress(&format!("Werkfoto's voor vak {} verwerken", index + 1));
+                let boxes =
+                    crate::template_photo::boxes(target.tiff_box, target.map_box, &slot.photos)?;
+                for (photo_index, (photo, bounds)) in slot.photos.iter().zip(boxes).enumerate() {
+                    control.check()?;
+                    let filename = format!(
+                        "slot{:05}_photo{:02}{suffix}.png",
+                        index + 1,
+                        photo_index + 1
+                    );
+                    let destination = tx.asset_path(&filename)?;
+                    let bytes = if let Some(previous) = cached_photos.get(photo_index) {
+                        // Stream the already normalized PNG, without decoding the
+                        // same high-resolution site photo again for Reverse.
+                        copy_asset(previous, &destination, &mut total, control)?;
+                        0
                     } else {
-                        bgt_surface::Index::new(s, control.flag())
+                        let bytes = crate::template_photo::prepare(photo, &destination, control)?;
+                        cached_photos.push(destination.clone());
+                        bytes
+                    };
+                    total = total
+                        .checked_add(bytes)
+                        .ok_or("Foto-uitvoerbudget overschreden")?;
+                    if total > 2 * 1024 * 1024 * 1024 {
+                        return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
                     }
-                })
-                .transpose()?;
-            let start = doc.seed()?.0;
-            profiles += usize::from(draw_profile(
-                &mut doc,
-                &ProfileContext {
-                    templates: templates.as_ref().unwrap(),
-                    datasets,
-                    surfaces: local_surfaces.as_ref().unwrap_or(&surfaces),
-                },
-                slot,
-                target,
-                options,
-                measured,
-                control,
-            )?);
-            profile_ranges.push((start, doc.seed()?.0, index * 2 + 1));
+                    images.push(Image {
+                        path: destination,
+                        bounds,
+                        definition_name: format!(
+                            "{}_photo{:02}{suffix}",
+                            slot.label,
+                            photo_index + 1
+                        ),
+                        inset: 0.015,
+                        preserve_aspect: true,
+                        layout: None,
+                    });
+                    image_order.push(group);
+                }
+            }
+            if let (Some(options), Some(measured)) =
+                (slot.profile.as_ref().filter(|p| p.draw), &measured)
+            {
+                if local_surfaces.is_none() {
+                    local_surfaces = slot
+                        .surfaces
+                        .as_ref()
+                        .map(|s| {
+                            if slot.surfaces_constructed {
+                                bgt_surface::Index::from_normalized_features(
+                                    s.iter(),
+                                    control.flag(),
+                                )
+                            } else {
+                                bgt_surface::Index::new(s, control.flag())
+                            }
+                        })
+                        .transpose()?;
+                }
+                let start = doc.seed()?.0;
+                profiles += usize::from(draw_profile(
+                    &mut doc,
+                    &ProfileContext {
+                        templates: templates.as_ref().unwrap(),
+                        datasets,
+                        surfaces: local_surfaces.as_ref().unwrap_or(&surfaces),
+                    },
+                    slot,
+                    target,
+                    options,
+                    measured,
+                    control,
+                )?);
+                profile_ranges.push((start, doc.seed()?.0, group + 1));
+            }
         }
         filled_slots += 1;
     }
     progress("Afbeeldingen koppelen");
     control.check()?;
     template_images::add_images(&mut doc, &images, control.flag())?;
-    if profiles > 0 {
-        order_slot_entities(
-            &mut doc,
+    if profiles > 0 || request.settings.paired {
+        let (indexed, mut parents) = order_slot_entities(
+            &doc,
             first_slot_handle,
             &profile_ranges,
             &image_order,
+            !request.settings.paired,
             control,
         )?;
+        doc = if request.settings.paired {
+            let mut pairs = Vec::new();
+            for (index, slot) in request.slots.iter().enumerate() {
+                if let Some(slot) = slot {
+                    let normal = index * 4;
+                    let reverse = normal + 2;
+                    let mut content = |group| {
+                        let mut ids = parents.remove(&group).unwrap_or_default();
+                        ids.extend(parents.remove(&(group + 1)).unwrap_or_default());
+                        ids
+                    };
+                    pairs.push(crate::template_variants::Pair {
+                        label: slot.label.clone(),
+                        slot_index: (index + 1) as i64,
+                        normal: content(normal),
+                        reverse: content(reverse),
+                        selector: None,
+                    });
+                }
+            }
+            progress("Normaal/Reverse-keuze koppelen");
+            control.check()?;
+            crate::template_variants::assemble_automatic_indexed(
+                indexed,
+                &pairs,
+                &mut |name| font_catalog.as_mut().unwrap().resolve(name, control.flag()),
+                control.flag(),
+            )?
+            .0
+        } else {
+            indexed
+        };
     }
     progress("DXF schrijven");
     control.check()?;
@@ -794,7 +941,8 @@ pub fn export_with_datasets(
         let mut companion = None;
         if request.settings.discipline_excel {
             progress("Excel-disciplineoverzicht opslaan");
-            match crate::template_report::write(output, &published, request, datasets) {
+            match crate::template_report::write(output, &published, request, datasets, &font_paths)
+            {
                 Ok((path, messages)) => {
                     companion = Some(path);
                     warnings = messages;

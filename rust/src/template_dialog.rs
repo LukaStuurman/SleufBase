@@ -399,7 +399,8 @@ pub(crate) fn show(
         ui.separator();
         ui.horizontal_wrapped(|ui| {
             ui.checkbox(&mut d.state.profiles, "Dwarsprofielen");
-            ui.checkbox(&mut d.state.reverse, "Omgekeerde profielrichting");
+            ui.checkbox(&mut d.state.paired,"Beide richtingen (Normaal / Reverse)");
+            ui.add_enabled(!d.state.paired,egui::Checkbox::new(&mut d.state.reverse,"Alleen omgekeerde richting"));
             ui.checkbox(&mut d.state.show_reference, "Referentiepunt");
             ui.checkbox(&mut d.state.avoid_collisions, "Labels uit elkaar plaatsen");
         });

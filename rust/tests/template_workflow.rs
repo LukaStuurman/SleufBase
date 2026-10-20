@@ -56,6 +56,7 @@ fn inputs() -> Inputs {
 }
 fn state(inputs: &Inputs) -> State {
     let mut state = State {
+        paired: false,
         project: "Werkproject Ø".into(),
         aerial: false,
         auto_bgt: false,

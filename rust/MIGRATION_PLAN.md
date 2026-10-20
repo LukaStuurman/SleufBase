@@ -876,6 +876,46 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   niet-uniforme bloktekst en overige CAD-families vragen hun volledige eigen
   semantiek. Alle oorspronkelijke globale pariteits-/releasevoorwaarden blijven
   gelden; dit is nog geen productie-release.
+- De volledige native exportworker bouwt nu beide richtingen in hetzelfde
+  document en verbindt beide native vensters standaard aan Normaal/Reverse.
+  Enkelvoudige uitvoer blijft beschikbaar; de keuze wordt in beide soorten
+  projectvoorkeuren opgeslagen. Oude voorkeuren zonder veld krijgen de
+  productiestandaard, expliciet enkelvoudige keuzes blijven behouden. De
+  voorbereide CLI blijft standaard enkelvoudig; `settings.paired` vraagt echte
+  TIFF-/virtuele en kaartbronnen voor een betrouwbare tweede richting.
+  Windows-lettertypen worden op oorspronkelijke bestandsnaam-/familie-/fallback-
+  regels gekozen. Alleen kleine SFNT name/OS2-tabellen worden geïndexeerd;
+  glyphdata wordt op gebruik geladen en gedeeld. Vijftien oorspronkelijke
+  selecties toetsen bestandsnamen, hoofdletters, families en ontbrekende fonts.
+  Bekende SHX/SHP/LFF-files worden expliciet geweigerd totdat hun uitlezer is
+  geport, in plaats van een onjuiste selector te maken.
+  Normal/Reverse delen bladmetadata, profieltemplates, geleende datasets en de
+  BGT-index per vak. Werkfoto's worden eenmaal genormaliseerd; gelijke effectieve
+  kaartreferenties hergebruiken de PNG zonder nieuwe kaart-/netwerkrendering.
+  Eén eindindex wordt voor ouderhandles, grensmeting en zichtbaarheidsgrafen
+  gebruikt. Nieuwe document-/assetfouten, late panic of annulering bewaren de
+  vorige DXF en bundle. Fontbronnen worden ook tegen overschrijven beschermd.
+  Vijf echte samengestelde scenario's leveren veertien dynamische paren:
+  profielen, geen getekend profiel, foto's, virtuele sleuven, alleen beelden,
+  dubbele labels, lege vakken en een toegevoegd blad. Beide standen vergelijken
+  alle geometrie/gekoppelde attributen/annotaties en PNG-pixels met aparte
+  enkelvoudige exports. Het oorspronkelijke promote/finalize/grip-pad bouwt
+  een onafhankelijke metadata-oracle. De bestaande owner-0 proxy in het
+  goedgekeurde sjabloon blijft tag voor tag behouden; geen nieuwe auditreparatie
+  is toegestaan. Alle Excel-onderdelen vergelijken met de enkelvoudige uitvoer,
+  afgezien van geldige aanmaak-/wijzigingstijdstempels. Vakken worden eenmaal
+  geteld. Beide echte desktopworkers zijn op beide richtingen gecontroleerd,
+  inclusief automatische lokale datum, projectnaam, bronallocaties en blokkeren
+  van opslaan tijdens de worker. 378 Rust-tests en alle 35 desktoptests slagen.
+  Clippy geeft geen nieuwe waarschuwingen. De geoptimaliseerde app en vijf
+  auditdrivers bouwen; alle nieuwe controles slagen ook met die uitvoer.
+  Vijf eerdere samengestelde exports/acht profielen/26 PNGs, de echte CLI,
+  vijf enkelvoudige workerexports met hun Excel en zeven losse dynamische
+  containertekeningen/twaalf paren blijven onafhankelijk gecontroleerd.
+  Alle drie Windows-runs van de vorige stap zijn geslaagd.
+  Oorspronkelijke fotoannotaties/virtuele maskers, overige CAD-/fontfamilies,
+  volledige oude voorkeuren en interactieve AutoCAD-/projectacceptatie blijven
+  open, naast alle eerdere globale releasevoorwaarden.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

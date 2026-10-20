@@ -47,6 +47,92 @@ fn files(root: &Path) -> Vec<(PathBuf, Vec<u8>)> {
     result.sort_by(|a, b| a.0.cmp(&b.0));
     result
 }
+fn paired_request() -> Request {
+    let mut r = request("native-tiff");
+    r.settings.paired = true;
+    for slot in r.slots.iter_mut().flatten() {
+        slot.map_png = PathBuf::new();
+        slot.map_source = Some(sleufbase_rust::map_export::Source {
+            settings: sleufbase_rust::map_page::Settings {
+                dpi: 30,
+                scale: 225.,
+            },
+            background: sleufbase_rust::map_export::Background::Solid {
+                color: [245, 245, 245, 255],
+            },
+            ..Default::default()
+        });
+    }
+    r
+}
+#[test]
+fn paired_export_cancellation_and_late_panic_keep_the_previous_bundle_and_drawing() {
+    let dir = tempfile::tempdir().unwrap();
+    let r = paired_request();
+    let path = dir.path().join("paired.dxf");
+    let published = template_export::export(&path, &r, &Control::default()).unwrap();
+    let doc = sleufbase_rust::dxf_document::Document::load(
+        &path,
+        &std::sync::atomic::AtomicBool::new(false),
+    )
+    .unwrap();
+    assert_eq!(
+        doc.records()
+            .filter(|r| r.kind() == "BLOCKVISIBILITYPARAMETER" && r.first(301) == Some("Versie"))
+            .count(),
+        published.filled_slots
+    );
+    let before = files(dir.path());
+    let control = Control::default();
+    let mut reached = false;
+    assert!(
+        template_export::export_with_progress(&path, &r, &control, |stage| {
+            if stage == "Normaal/Reverse-keuze koppelen" {
+                reached = true;
+                assert!(control.cancel());
+            }
+        })
+        .is_err()
+    );
+    assert!(reached);
+    assert_eq!(files(dir.path()), before);
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        template_export::export_with_progress(&path, &r, &Control::default(), |stage| {
+            if stage == "Export definitief opslaan" {
+                panic!("late paired export failure");
+            }
+        })
+    }));
+    assert!(result.is_err());
+    assert_eq!(files(dir.path()), before);
+}
+#[test]
+fn paired_export_refuses_ambiguous_prepared_assets_and_rolls_back_a_missing_donor() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("old.dxf");
+    fs::write(&path, b"Previous export must remain").unwrap();
+    let mut prepared = request("mixed");
+    prepared.settings.paired = true;
+    let before = files(dir.path());
+    assert!(template_export::export(&path, &prepared, &Control::default()).is_err());
+    assert_eq!(files(dir.path()), before);
+    let mut r = paired_request();
+    let missing = dir.path().join("missing-donor.dxf");
+    fs::write(
+        &missing,
+        fs::read_to_string(&r.template)
+            .unwrap()
+            .replace("BLOCKVISIBILITYPARAMETER", "UNSUPPORTED_PARAMETER"),
+    )
+    .unwrap();
+    r.template = missing;
+    let before = files(dir.path());
+    let error = template_export::export(&path, &r, &Control::default())
+        .err()
+        .unwrap();
+    assert!(error.contains("donor"), "{error}");
+    assert_eq!(files(dir.path()), before);
+}
 #[test]
 fn completed_exports_keep_their_own_images_after_replacement_and_input_removal() {
     let temp = tempfile::tempdir().unwrap();

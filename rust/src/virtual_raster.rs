@@ -103,6 +103,11 @@ fn stroke(image:&mut RgbaImage,a:[f64;2],b:[f64;2],thickness:i32,color:Rgba<u8>)
 pub fn prepare_for_template(source:&Source,cancel:&AtomicBool)
     ->Result<crate::template_raster::Prepared,String>
 {
+    prepare_for_template_direction(source,source.reverse,cancel)
+}
+pub fn prepare_for_template_direction(source:&Source,reverse:bool,cancel:&AtomicBool)
+    ->Result<crate::template_raster::Prepared,String>
+{
     input::check(cancel)?;
     let info=layout(&source.trench,source.quality)?;
     let image=render(source,cancel)?;
@@ -115,8 +120,8 @@ pub fn prepare_for_template(source:&Source,cancel:&AtomicBool)
             transform,
             roads:&[],
             terrain:&[],
-            axis:Some(if source.reverse {[end,start]}else{[start,end]}),
-            reverse:source.reverse,
+            axis:Some(if reverse {[end,start]}else{[start,end]}),
+            reverse,
         },
         cancel,
     )
