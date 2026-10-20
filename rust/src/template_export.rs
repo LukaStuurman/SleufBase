@@ -53,6 +53,8 @@ pub struct Slot {
     #[serde(default)]
     pub tiff_source: Option<crate::template_raster::Source>,
     #[serde(default)]
+    pub virtual_source: Option<crate::virtual_raster::Source>,
+    #[serde(default)]
     pub map_png: PathBuf,
     #[serde(default)]
     pub map_source: Option<crate::map_export::Source>,
@@ -465,7 +467,10 @@ pub fn export_with_progress(
     }
     for slot in request.slots.iter().flatten() {
         crate::template_photo::validate(&slot.photos)?;
-        if slot.tiff_source.is_some() == !slot.tiff_png.as_os_str().is_empty() {
+        let available=usize::from(slot.tiff_source.is_some())
+            +usize::from(slot.virtual_source.is_some())
+            +usize::from(!slot.tiff_png.as_os_str().is_empty());
+        if available!=1 {
             return Err("Geef per vak één TIFF-bron of één voorbereide TIFF-PNG op".into());
         }
         if slot.map_source.is_some() == !slot.map_png.as_os_str().is_empty() {
@@ -576,7 +581,16 @@ pub fn export_with_progress(
         ] {
             // Index, not visible label, guarantees uniqueness for duplicate PS names.
             let destination = tx.asset_path(&format!("slot{:05}_{role}.png", index + 1))?;
-            if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
+            if let Some(source) = slot.virtual_source.as_ref().filter(|_| role == "tiff") {
+                progress(&format!("Virtuele proefsleufraster {} opbouwen", index+1));
+                let image=crate::virtual_raster::render(source,control.flag())?;
+                crate::template_raster::save_image(&image,&destination,control.flag())?;
+                let bytes=std::fs::metadata(&destination).map_err(|e|e.to_string())?.len();
+                total=total.checked_add(bytes).ok_or("Rasterbudget overschreden")?;
+                if bytes>256*1024*1024||total>2*1024*1024*1024 {
+                    return Err("Sjabloonafbeeldingen overschrijden het exportbudget".into());
+                }
+            } else if let Some(source) = slot.tiff_source.as_ref().filter(|_| role == "tiff") {
                 let axis = measured
                     .as_ref()
                     .map(|p| [[p.start.x, p.start.y], [p.end.x, p.end.y]]);
