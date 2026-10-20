@@ -1,0 +1,324 @@
+//! Build complete native template exports directly from the open Rust project.
+//! Keep this independent from egui so matching, validation and output can be tested.
+use crate::{
+    bgt::BgtLayer,
+    cadastral::CadastralLayer,
+    export_control::Control,
+    geotiff::GeoTiffInfo,
+    map_export::{Background, Source as MapSource, Stroke},
+    map_page,
+    model::{Bounds, Dataset, Geometry},
+    template_export::{self, Profile, Slot},
+    template_raster,
+    virtual_trench::VirtualTrench,
+    Rule,
+};
+use std::{collections::HashSet, path::PathBuf};
+
+pub const MAX_SLOTS: usize = 128;
+const MAX_MAP_POINTS: usize = 100_000;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Source {
+    Job(usize),
+    Virtual(usize),
+}
+#[derive(Clone, Debug)]
+pub struct Choice {
+    pub source: Source,
+    pub raster: Option<usize>,
+    pub include: bool,
+    pub title: String,
+    pub profile: bool,
+    pub reverse: bool,
+    pub comments: String,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BackgroundKind {
+    Blank,
+    Pdok,
+}
+pub struct Options {
+    pub template: PathBuf,
+    pub project: String,
+    pub drawn_by: String,
+    pub dpi: u32,
+    pub scale: f64,
+    pub background: BackgroundKind,
+    pub include_bgt: bool,
+    pub include_cadastral: bool,
+    pub choices: Vec<Choice>,
+}
+impl Default for Options {
+    fn default() -> Self {
+        Self {
+            template: PathBuf::new(),
+            project: String::new(),
+            drawn_by: String::new(),
+            dpi: 150,
+            scale: 225.,
+            background: BackgroundKind::Blank,
+            include_bgt: true,
+            include_cadastral: true,
+            choices: Vec::new(),
+        }
+    }
+}
+/// Only exact positive KickTheMap job IDs are considered automatic matches.
+/// Never guess a wrong sheet from file order or equal display names.
+pub fn suggest(datasets: &[Dataset], rasters: &[GeoTiffInfo], trenches: &[VirtualTrench]) -> Vec<Choice> {
+    let matching = |job_id: u64| -> Option<usize> {
+        if job_id == 0 { return None; }
+        let matches = rasters.iter().enumerate()
+            .filter(|(_, t)| t.kickthemap_job_id == Some(job_id))
+            .map(|(i, _)| i).collect::<Vec<_>>();
+        (matches.len() == 1).then(|| matches.first().copied()).flatten()
+    };
+    let mut choices = Vec::new();
+    for (i, job) in datasets.iter().enumerate() {
+        choices.push(Choice {
+            source: Source::Job(i), raster: matching(job.job_id), include: true,
+            title: job.title.clone(), profile: true, reverse: false, comments: String::new(),
+        });
+    }
+    for (i, trench) in trenches.iter().enumerate() {
+        choices.push(Choice {
+            source: Source::Virtual(i), raster: matching(trench.job_id), include: true,
+            title: trench.label.clone(), profile: true, reverse: false, comments: String::new(),
+        });
+    }
+    // Unambiguous one-sheet projects with a missing job sidecar are common.
+    if rasters.len() == 1 && choices.len() == 1 && choices[0].raster.is_none() {
+        choices[0].raster = Some(0);
+    }
+    choices
+}
+fn checked_bounds(bounds: Bounds) -> Result<Bounds, String> {
+    if ![bounds.min_x, bounds.min_y, bounds.max_x, bounds.max_y]
+        .into_iter().all(|v| v.is_finite() && v.abs() < 1e9)
+        || bounds.max_x <= bounds.min_x || bounds.max_y <= bounds.min_y
+    {
+        return Err("Ongeldige GeoTIFF-kaartgrenzen".into());
+    }
+    Ok(bounds)
+}
+fn overlaps(bounds: Bounds, points: &[[f64; 2]]) -> bool {
+    let margin = 5.;
+    points.iter().any(|p|
+        p[0].is_finite() && p[1].is_finite()
+        && (bounds.min_x-margin..=bounds.max_x+margin).contains(&p[0])
+        && (bounds.min_y-margin..=bounds.max_y+margin).contains(&p[1]))
+}
+fn append_stroke(overlays: &mut Vec<Stroke>, total: &mut usize, bounds: Bounds,
+    points: Vec<[f64; 2]>, color: [u8; 3], highlight: bool) -> Result<(), String>
+{
+    if points.len() < 2 || !overlaps(bounds, &points) { return Ok(()); }
+    *total = total.checked_add(points.len()).ok_or("Te veel kaartgeometrie")?;
+    if *total > MAX_MAP_POINTS { return Err("Kaart bevat te veel overlaypunten voor deze export".into()); }
+    overlays.push(Stroke { points, color, selected: false, highlighted: highlight });
+    Ok(())
+}
+/// The selection is validated before any DXF or image is written. The existing
+/// atomic template-export transaction remains responsible for final publication.
+pub fn build(
+    opts: &Options,
+    jobs: &[Dataset],
+    rasters: &[GeoTiffInfo],
+    trenches: &[VirtualTrench],
+    bgt: &[BgtLayer],
+    cadastral: Option<&CadastralLayer>,
+    rules: &[Rule],
+    control: &Control,
+) -> Result<template_export::Request, String> {
+    control.check()?;
+    if !opts.template.is_file() {
+        return Err("Kies een bestaand DXF-sjabloon".into());
+    }
+    if !(30..=600).contains(&opts.dpi)
+        || !opts.scale.is_finite() || !(1. ..=100_000.).contains(&opts.scale)
+    {
+        return Err("Ongeldige kaart-DPI of schaal".into());
+    }
+    let enabled = opts.choices.iter().filter(|c| c.include).collect::<Vec<_>>();
+    if enabled.is_empty() { return Err("Selecteer minstens één proefsleufvak".into()); }
+    if enabled.len() > MAX_SLOTS { return Err("Te veel proefsleufvakken voor één export".into()); }
+    let mut seen = HashSet::new();
+    let mut datasets = Vec::with_capacity(enabled.len());
+    let mut slots = Vec::with_capacity(enabled.len());
+    // Full BGT geometry is retained once per export; only visible source lines
+    // needed near a slot become map overlays.
+    let mut roads = Vec::new();
+    let mut terrain = Vec::new();
+    if opts.include_bgt {
+        for layer in bgt.iter().filter(|layer| layer.visible) {
+            control.check()?;
+            let to = if matches!(layer.kind, crate::bgt::BgtKind::Wegdeel) {
+                &mut roads
+            } else { &mut terrain };
+            for path in &layer.paths {
+                if path.len() > MAX_MAP_POINTS || to.len() >= 10_000 { break; }
+                to.push(path.iter().map(|&(x,y)| [x,y]).collect());
+            }
+        }
+    }
+    for choice in enabled {
+        control.check()?;
+        if !seen.insert(choice.source) { return Err("Dubbele proefsleufselectie".into()); }
+        let raster_index = choice.raster.ok_or_else(|| {
+            format!("Voor '{}' ontbreekt een GeoTIFF; koppel deze handmatig in het exportvenster", choice.title)
+        })?;
+        let raster = rasters.get(raster_index).ok_or("GeoTIFF-verwijzing buiten de projectlijst")?;
+        if raster.epsg.is_some_and(|epsg| epsg != 28992) {
+            return Err(format!("GeoTIFF '{}' staat niet in EPSG:28992", raster.path.display()));
+        }
+        if !raster.path.is_file() {
+            return Err(format!("GeoTIFF niet gevonden: {}", raster.path.display()));
+        }
+        let bounds = checked_bounds(raster.bounds)?;
+        let (dataset, forced_start, axis, extra_polyline) = match choice.source {
+            Source::Job(i) => {
+                let job = jobs.get(i).ok_or("Job bestaat niet meer in dit project")?;
+                (job.clone(), None, None, Vec::new())
+            }
+            Source::Virtual(i) => {
+                let trench = trenches.get(i).ok_or("Virtuele proefsleuf bestaat niet meer")?;
+                trench.validate()?;
+                let outline = trench.measured_boundary().into_iter()
+                    .map(|(x,y)| [x,y]).collect::<Vec<_>>();
+                (trench.to_dataset(trench.job_id, true),
+                    Some([trench.start.x, trench.start.y]),
+                    Some([[trench.start.x,trench.start.y],[trench.end.x,trench.end.y]]),
+                    outline)
+            }
+        };
+        let label = if choice.title.trim().is_empty() {
+            dataset.title.clone()
+        } else { choice.title.trim().to_owned() };
+        if label.is_empty() || label.chars().any(char::is_control) || label.len() > 256
+            || choice.comments.chars().any(|c| c.is_control() && c != '\n')
+            || choice.comments.len() > 4096
+        {
+            return Err("Ongeldige proefsleuftitel of opmerking".into());
+        }
+        let mut overlays = Vec::new();
+        let mut points = 0usize;
+        for feature in &dataset.features {
+            if let Geometry::Polyline(vertices) = &feature.geometry {
+                append_stroke(&mut overlays, &mut points, bounds,
+                    vertices.iter().map(|p| [p.x,p.y]).collect(),
+                    [249,115,22], true)?;
+            }
+        }
+        if !extra_polyline.is_empty() {
+            append_stroke(&mut overlays, &mut points, bounds, extra_polyline,
+                [249,115,22], true)?;
+        }
+        if opts.include_bgt {
+            for path in &roads {
+                control.check()?;
+                append_stroke(&mut overlays, &mut points, bounds, path.clone(), [109,119,130], false)?;
+            }
+            for path in &terrain {
+                control.check()?;
+                append_stroke(&mut overlays, &mut points, bounds, path.clone(), [98,145,83], false)?;
+            }
+        }
+        if opts.include_cadastral {
+            if let Some(cad) = cadastral.filter(|layer|layer.visible) {
+                for l in &cad.linework {
+                    for path in &l.paths {
+                        control.check()?;
+                        append_stroke(&mut overlays, &mut points, bounds,
+                            path.iter().map(|&(x,y)| [x,y]).collect(), [140,80,145], false)?;
+                    }
+                }
+            }
+        }
+        let local_index = datasets.len();
+        datasets.push(dataset);
+        slots.push(Some(Slot {
+            bounds, label: format!("PS{:03}", local_index + 1),
+            title: label, address: None, comments: choice.comments.clone(),
+            tiff_png: PathBuf::new(),
+            tiff_source: Some(template_raster::Source {
+                path: raster.path.clone(), transform: raster.transform,
+                reverse_orientation: choice.reverse, axis,
+            }),
+            map_png: PathBuf::new(),
+            map_source: Some(MapSource {
+                settings: map_page::Settings { dpi: opts.dpi, scale: opts.scale },
+                background: match opts.background {
+                    BackgroundKind::Blank => Background::Solid { color: [250,250,250,255] },
+                    BackgroundKind::Pdok => Background::Pdok,
+                },
+                overlays, ..MapSource::default()
+            }),
+            profile: choice.profile.then_some(Profile {
+                dataset: local_index, forced_start, reverse: choice.reverse,
+                ..Profile::default()
+            }),
+        }));
+    }
+    Ok(template_export::Request {
+        template: opts.template.clone(), slots, datasets,
+        rules: rules.to_vec(), roads, terrain_boundaries: terrain,
+        surfaces: Vec::new(), layers: Vec::new(), geometry: Vec::new(),
+        settings: template_export::Settings {
+            project: (!opts.project.trim().is_empty()).then(||opts.project.trim().to_owned()),
+            drawn_by: opts.drawn_by.trim().to_owned(),
+            ..template_export::Settings::default()
+        },
+    })
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{model::{Feature, Vertex}, geo::GeoTransform};
+    fn sample_job(id:u64) -> Dataset {
+        Dataset {job_id:id,title:format!("PS-{id}"),source_path:PathBuf::new(),
+            features:vec![Feature {object_name:"Test".into(),source_name:"KABEL".into(),
+                geometry:Geometry::Polyline(vec![
+                    Vertex{x:155000.,y:463000.,z:Some(-1.)},
+                    Vertex{x:155005.,y:463000.,z:Some(-1.)}]),
+                attributes:Default::default()}]}
+    }
+    fn raster(id:Option<u64>) -> GeoTiffInfo {
+        GeoTiffInfo {path:PathBuf::from("test.tif"),width:100,height:100,
+            transform:GeoTransform{a:0.05,b:0.,c:154999.,d:0.,e:-0.05,f:463001.},
+            bounds:Bounds{min_x:154999.,min_y:462996.,max_x:155004.,max_y:463001.},
+            epsg:Some(28992),kickthemap_job_id:id,kickthemap_job_title:String::new(),
+            kickthemap_job_sidecar:None}
+    }
+    #[test]
+    fn exact_job_id_matching_and_ambiguity_are_not_guessed() {
+        let jobs = [sample_job(17),sample_job(18)];
+        let r = [raster(Some(18)),raster(Some(17))];
+        let proposed = suggest(&jobs,&r,&[]);
+        assert_eq!(proposed[0].raster,Some(1));
+        assert_eq!(proposed[1].raster,Some(0));
+        let ambiguous = [raster(Some(17)),raster(Some(17))];
+        let choices = suggest(&jobs,&ambiguous,&[]);
+        assert_eq!(choices[0].raster,None);
+        assert_eq!(choices[1].raster,None);
+        assert_eq!(suggest(&[sample_job(1)], &[raster(None)], &[])[0].raster,Some(0));
+    }
+    #[test]
+    fn validation_before_export_never_requires_an_image_decode() {
+        let jobs=[sample_job(17)];
+        let mut opts=Options::default();
+        opts.choices=suggest(&jobs,&[raster(Some(17))],&[]);
+        assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
+            .unwrap_err().contains("DXF-sjabloon"));
+        let dir=tempfile::tempdir().unwrap();
+        opts.template=dir.path().join("template.dxf");
+        std::fs::write(&opts.template,b"dummy").unwrap();
+        assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
+            .unwrap_err().contains("GeoTIFF niet gevonden"));
+        opts.choices[0].raster=None;
+        assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
+            .unwrap_err().contains("koppel"));
+        opts.choices[0].include=false;
+        assert!(build(&opts,&jobs,&[raster(Some(17))],&[],&[],None,&[],&Control::default())
+            .unwrap_err().contains("minstens"));
+    }
+}
