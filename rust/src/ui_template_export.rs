@@ -92,7 +92,7 @@ impl SleufBaseApp {
             self.message = "De voorbereide JSON-exportinvoer bestaat niet".into();
             return;
         }
-        if output.extension().is_none_or(|ext| !ext.eq_ignore_ascii_case("dxf")) {
+        if output.extension().is_none_or(|ext| !ext.to_string_lossy().eq_ignore_ascii_case("dxf")) {
             self.message = "Kies een uitvoerbestand met de extensie .dxf".into();
             return;
         }
@@ -177,7 +177,7 @@ impl SleufBaseApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Rust-sjabloonexport");
             ui.label(job.output.display().to_string());
-            ui.label(&job.status);
+            ui.label(job.status.as_str());
             ui.label(match stage {
                 Stage::Preparing => "Invoer en sjabloon voorbereiden",
                 Stage::Planning => "Vakken, profielen en kaartbeelden samenstellen",
