@@ -31,6 +31,7 @@ pub mod template_legends;
 pub mod template_setup;
 pub mod template_export;
 pub mod template_project;
+pub mod template_cad;
 pub mod template_match;
 pub mod template_raster;
 mod raster_rotation;
