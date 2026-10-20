@@ -1,2 +1,4 @@
 # MVT/PBF fixtures are protobuf; checkout must preserve every byte.
 *.pbf -text
+# Synthetic TrueType oracle fonts must keep their exact SFNT bytes.
+*.ttf -text

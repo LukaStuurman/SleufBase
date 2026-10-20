@@ -6,9 +6,12 @@ class definitions and two donor states. Two tiny RGBA PNGs are local image
 resources. No project, account, settings or network access is required.
 
 `tools/generate_template_variant_fixtures.py` runs the original container,
-promotion and finalization functions in isolation. Five drawings contain eight
+promotion and finalization functions in isolation. Seven drawings contain twelve
 pairs: duplicate labels with separate slots, Unicode/long names, shuffled input,
 existing disabled layers, an omitted selector and fractional 3D coordinates.
+Two drawings compute selectors through the actual original automatic-placement
+helper, with profile candidates and an image-only fallback. The native
+`assemble_automatic` path measures and installs these through one fresh index.
 Another 49 naming decisions cover Python Unicode uppercasing and whitespace.
 UUID4 values are normalized; source metadata and references are compared tag
 by tag, including the parameter/grip offset and initial normal visibility.
@@ -25,7 +28,9 @@ Regeneration uses Python 3.11, ezdxf 1.4.4 and Pillow 11.3.0. A separate output
 directory can be selected with `SLEUFBASE_TEMPLATE_VARIANT_FIXTURES`; two hash
 seeds reproduce all four generated files byte for byte.
 
-This proves the same-document container/visibility kernel for fresh groups.
-It does not prove dual raster/profile preparation, automatic font-dependent
-selector placement, native export-dialog integration or interactive AutoCAD
-acceptance. Those remain requirements for full paired-export parity.
+This proves the same-document container/visibility kernel for fresh groups and
+its automatic selector path with supplied font resolution. Font discovery,
+dual raster/profile preparation, native export-dialog integration and interactive
+AutoCAD acceptance remain requirements for full paired-export parity. The
+separate text-metrics and template-extents fixtures document the supported
+geometry/font contracts and their remaining limitations.

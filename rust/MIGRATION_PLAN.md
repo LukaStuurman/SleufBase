@@ -839,6 +839,43 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   dubbele raster-/profielvoorbereiding, de oorspronkelijke fontafhankelijke
   selectorplaatsing, de GUI-koppeling en interactieve AutoCAD-acceptatie blijven
   open, naast alle eerdere globale releasevoorwaarden.
+- Fontafhankelijke profielgrenzen en automatische Normaal/Reverse-selectors
+  toegevoegd aan de native blokkern. Het broncontract gebruikt
+  letteradvances zonder kerning en A/x/p-controlgrenzen, niet de UI-/kaarttekst-rasterizer.
+  Native TTF-contourmeting, alle vijftien TEXT-uitlijningen, FIT/ALIGNED,
+  attribuutplaatsing, spiegel-/schuinhoek en OCS zijn onafhankelijk vergeleken.
+  Een zelfgemaakt testfont bevat afwijkende baseline, descender en kwadratische
+  controles; geen geïnstalleerd font wordt meegedistribueerd. 360 oorspronkelijke
+  tekstgevallen en 23 caret-/percentcodegevallen worden gereproduceerd. Zes door
+  de oorspronkelijke fontmanager opgeloste aanvragen controleren 36 extra
+  gevallen met precies dezelfde actuele fontbestanden.
+  De grensindex volgt profielblokken/attributen, oorspronkelijke snelle
+  curve-controlgrenzen, eenvoudige profielleaders, 2D/3D-geometrie en geknipte
+  afbeeldingsgrenzen. 44 oorspronkelijke geometrie-/selectorgevallen en dertien
+  vakgroepen uit vijf native sjabloonexports vergelijken grenzen en de werkelijke
+  bronhelper voor gripplaatsing. Vergelijkingsbudget: 1e-12 plus 32 maal f64-
+  epsilon maal coördinaatgrootte. Verouderde documentindices worden geweigerd;
+  ontbrekende/ongeldige gegevens, cycli, nestingbudgetten en annuleren leveren
+  geen verzonnen of gedeeltelijke selector. Fontbytes worden gedeeld; advances
+  hebben een begrensde cache. Geen claim over totaal app-geheugen of FPS.
+  Automatische gripplaatsing en containergeneratie gebruiken één verse DXF-index;
+  de herhaald berekende Unicode-sorteersleutels zijn vervangen door gecachte
+  sleutels. Zeven volledige tekeningen/twaalf dynamische paren controleren ook
+  profielkandidaten en fallback met alleen afbeeldingen. Een mislukte/afgebroken/panikerende
+  fontprovider laat bewerkte bronvelden intact. Alle drie fixturefamilies worden
+  met twee hashseeds byte-identiek gereproduceerd; Windows CI herhaalt de audits.
+  373 Rust-tests slagen, inclusief 35 desktoptests; Clippy heeft geen nieuwe
+  waarschuwingen in de gewijzigde code. De definitieve geoptimaliseerde app en
+  drie auditdrivers bouwen; alle bovenstaande onafhankelijke controles slagen
+  ook met die uitvoer. De vijf samengestelde exports/acht profielen/26 PNGs en
+  de echte CLI blijven afzonderlijk gecontroleerd op inhoud, grafen, pixels,
+  bronbehoud en veilige publicatie. Alle drie Windows-runs van de vorige stap
+  zijn geslaagd.
+  Dubbele raster-/profielvoorbereiding, automatische fontdiscovery, de GUI-
+  koppeling en interactieve AutoCAD-acceptatie blijven open. MTEXT, SHX/SHP/LFF,
+  niet-uniforme bloktekst en overige CAD-families vragen hun volledige eigen
+  semantiek. Alle oorspronkelijke globale pariteits-/releasevoorwaarden blijven
+  gelden; dit is nog geen productie-release.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

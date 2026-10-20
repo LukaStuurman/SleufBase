@@ -415,6 +415,23 @@ jobs:
           name: SleufBase-Rust-template-export-benchmark
           path: rust/benchmarks-template-export.json
           if-no-files-found: error
+      - name: Independently audit font dependent profile extents and automatic selectors
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'fonttools==4.67.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_dxf_text_metrics_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_extents_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example measure_template_extents
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native normal reverse visibility graph
         shell: pwsh
         env:

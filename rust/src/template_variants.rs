@@ -291,12 +291,46 @@ pub fn assemble_with_progress(
     doc: &mut Document,
     pairs: &[Pair],
     cancel: &AtomicBool,
-    mut progress: impl FnMut(usize, usize),
+    progress: impl FnMut(usize, usize),
 ) -> Result<Vec<String>, String> {
     crate::input::check(cancel)?;
     if pairs.is_empty() {
         return Ok(Vec::new());
     }
+    validate_pairs(pairs)?;
+    let mut indexed = doc.indexed_copy(cancel)?;
+    let names = assemble_indexed(&mut indexed, pairs, cancel, progress)?;
+    *doc = indexed;
+    Ok(names)
+}
+/// Derive each normal selector from the same profile/image/font bounds as the
+/// production pipeline, then install both states. The caller resolves actual
+/// template fonts; missing/unsupported data never yields an approximate grip.
+/// One fresh DXF index serves both measurement and container assembly.
+pub fn assemble_automatic(
+    doc: &mut Document,
+    pairs: &[Pair],
+    resolve: &mut impl FnMut(&str) -> Result<crate::dxf_text_metrics::Font, String>,
+    cancel: &AtomicBool,
+) -> Result<Vec<String>, String> {
+    crate::input::check(cancel)?;
+    if pairs.is_empty() {
+        return Ok(Vec::new());
+    }
+    validate_pairs(pairs)?;
+    let mut indexed = doc.indexed_copy(cancel)?;
+    let mut automatic = pairs.to_vec();
+    {
+        let extents = crate::template_extents::Index::new(&indexed, cancel)?;
+        for p in &mut automatic {
+            p.selector = extents.selector(&p.normal, resolve, cancel)?;
+        }
+    }
+    let names = assemble_indexed(&mut indexed, &automatic, cancel, |_, _| {})?;
+    *doc = indexed;
+    Ok(names)
+}
+fn validate_pairs(pairs: &[Pair]) -> Result<(), String> {
     if pairs.len() > 5000 {
         return Err("Te veel Normaal/Reverse-vakken".into());
     }
@@ -313,8 +347,15 @@ pub fn assemble_with_progress(
             return Err("Te veel variantobjecten".into());
         }
     }
-    let mut indexed = doc.indexed_copy(cancel)?;
-    let d = donor(&indexed, cancel)?;
+    Ok(())
+}
+fn assemble_indexed(
+    indexed: &mut Document,
+    pairs: &[Pair],
+    cancel: &AtomicBool,
+    mut progress: impl FnMut(usize, usize),
+) -> Result<Vec<String>, String> {
+    let d = donor(indexed, cancel)?;
     if pairs
         .len()
         .checked_mul(d.records.len())
@@ -331,10 +372,10 @@ pub fn assemble_with_progress(
         })
         .and_then(|r| r.handle())
         .ok_or("DXF mist modelruimte")?;
-    let (bt, bt_at) = table(&indexed, "BLOCK_RECORD")?;
-    let (lt, lt_at) = table(&indexed, "LAYER")?;
+    let (bt, bt_at) = table(indexed, "BLOCK_RECORD")?;
+    let (lt, lt_at) = table(indexed, "LAYER")?;
     let (mut next, mut seed) = indexed.seed()?;
-    let mut changes = crate::profile_leader_donor::appids(&indexed, &mut next, cancel)?;
+    let mut changes = crate::profile_leader_donor::appids(indexed, &mut next, cancel)?;
     let mut block_table = String::new();
     let mut blocks = Vec::<BlockPart>::new();
     let mut layers = String::new();
@@ -357,7 +398,7 @@ pub fn assemble_with_progress(
         .filter_map(|r| r.first(2).map(|n| (crate::dxf_symbols::key(n), r)))
         .collect::<HashMap<_, _>>();
     let mut ordered = pairs.iter().collect::<Vec<_>>();
-    ordered.sort_by_key(|p| names(&p.label, p.slot_index)[2].clone());
+    ordered.sort_by_cached_key(|p| names(&p.label, p.slot_index)[2].clone());
     let mut orders = HashMap::<u64, &Vec<u64>>::new();
     progress(0, pairs.len());
     for (pair_index, p) in ordered.into_iter().enumerate() {
@@ -666,6 +707,5 @@ pub fn assemble_with_progress(
         );
     }
     crate::input::check(cancel)?;
-    *doc = indexed;
     Ok(wrappers)
 }

@@ -7,6 +7,8 @@ use std::{path::PathBuf, sync::atomic::AtomicBool};
 #[derive(serde::Deserialize)]
 struct Case {
     name: String,
+    #[serde(default)]
+    automatic: bool,
     pairs: Vec<Pair>,
     wrappers: Vec<String>,
 }
@@ -35,7 +37,16 @@ fn main() -> Result<(), String> {
     }
     for c in data.cases {
         let mut doc = Document::load(&root.join("input.dxf"), &cancel)?;
-        let names = template_variants::assemble(&mut doc, &c.pairs, &cancel)?;
+        let names = if c.automatic {
+            template_variants::assemble_automatic(
+                &mut doc,
+                &c.pairs,
+                &mut |_| Ok(sleufbase_rust::dxf_text_metrics::Font::monospace()),
+                &cancel,
+            )?
+        } else {
+            template_variants::assemble(&mut doc, &c.pairs, &cancel)?
+        };
         if names != c.wrappers {
             return Err(format!("Wrong wrapper names: {}", c.name));
         }

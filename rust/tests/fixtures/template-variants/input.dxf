@@ -1859,7 +1859,7 @@ Standard
  42
 2.5
   3
-txt
+*monospace
   4
 
   0
@@ -2884,8 +2884,10 @@ KABELS
 AcDbLeader
   3
 Standard
+ 71
+0
  73
-3
+2
  76
 2
  10
@@ -3256,8 +3258,10 @@ KABELS
 AcDbLeader
   3
 Standard
+ 71
+0
  73
-3
+2
  76
 2
  10
@@ -3628,8 +3632,10 @@ KABELS
 AcDbLeader
   3
 Standard
+ 71
+0
  73
-3
+2
  76
 2
  10

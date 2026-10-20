@@ -62,8 +62,17 @@ fn original_unicode_names_and_finalized_pairs_keep_complete_graph_references() {
             .records()
             .filter_map(|r| r.handle())
             .collect::<std::collections::HashSet<_>>();
-        let names =
-            template_variants::assemble(&mut d, &pairs(i), &AtomicBool::new(false)).unwrap();
+        let names = if f["cases"][i]["automatic"] == true {
+            template_variants::assemble_automatic(
+                &mut d,
+                &pairs(i),
+                &mut |_| Ok(sleufbase_rust::dxf_text_metrics::Font::monospace()),
+                &AtomicBool::new(false),
+            )
+            .unwrap()
+        } else {
+            template_variants::assemble(&mut d, &pairs(i), &AtomicBool::new(false)).unwrap()
+        };
         assert_eq!(
             serde_json::to_value(&names).unwrap(),
             f["cases"][i]["wrappers"]
@@ -167,6 +176,52 @@ fn invalid_groups_and_late_cancellation_or_panic_preserve_staged_source_edits() 
         )
     }));
     assert!(panic.is_err());
+    assert_eq!(bytes(&source), initial);
+}
+#[test]
+fn automatic_selector_font_failure_cancel_and_panic_keep_staged_source_edits() {
+    use sleufbase_rust::dxf_text_metrics::Font;
+    let mut source = doc();
+    let h = source
+        .records()
+        .find(|r| r.kind() == "ATTRIB")
+        .unwrap()
+        .handle()
+        .unwrap();
+    source
+        .replace_text(&format!("{h:X}"), "Gewijzigde langere profieltekst")
+        .unwrap();
+    let initial = bytes(&source);
+    let request = pairs(5);
+    let cancel = AtomicBool::new(false);
+    assert!(template_variants::assemble_automatic(
+        &mut source,
+        &request,
+        &mut |_| Err("Font ontbreekt".into()),
+        &cancel
+    )
+    .is_err());
+    assert_eq!(bytes(&source), initial);
+    assert!(template_variants::assemble_automatic(
+        &mut source,
+        &request,
+        &mut |_| {
+            cancel.store(true, Ordering::Relaxed);
+            Ok(Font::monospace())
+        },
+        &cancel
+    )
+    .is_err());
+    assert_eq!(bytes(&source), initial);
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        template_variants::assemble_automatic(
+            &mut source,
+            &request,
+            &mut |_| panic!("font callback failed"),
+            &AtomicBool::new(false),
+        )
+    }));
+    assert!(result.is_err());
     assert_eq!(bytes(&source), initial);
 }
 #[test]

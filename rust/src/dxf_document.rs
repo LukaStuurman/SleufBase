@@ -206,6 +206,9 @@ impl Document {
     /// Materialize staged edits only when a structural operation needs a fresh
     /// record index. The caller keeps the original until the whole operation
     /// succeeds. Added symbols become ordinary source records in the copy.
+    pub(crate) fn require_current_index(&self)->Result<(),String>{
+        if self.edits.is_empty(){Ok(())}else{Err("Profielgrenzen vereisen een actuele DXF-index".into())}
+    }
     pub(crate) fn indexed_copy(&self,cancel:&AtomicBool)->Result<Self,String>{
         let mut bytes=Vec::with_capacity(self.output_len);
         self.write_to(&mut bytes,cancel)?;

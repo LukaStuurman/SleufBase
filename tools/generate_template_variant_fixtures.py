@@ -84,7 +84,7 @@ def main():
     dv,reverse,dynamic,pipeline,finalize=modules()
     source,_,_=dv._read_pairs(ROOT/'assets/cadastral_template.dxf');src=dv._split_records(source);sec=dv._record_sections(src);donor=dv._discover_donor(src,sec)
     selected=[r for r in src if dv._record_handle(r) in donor.metadata_handles]
-    doc=ezdxf.new('R2018');doc.layers.new('KABELS',dxfattribs={'color':3});doc.appids.new('CUSTOM')
+    doc=ezdxf.new('R2018');doc.styles.get('Standard').dxf.font='*monospace';doc.layers.new('KABELS',dxfattribs={'color':3});doc.appids.new('CUSTOM')
     for app in ['AcDbBlockRepETag','AcDbDynamicBlockTrueName','AcDbDynamicBlockGUID']:doc.appids.new(app)
     for mode,color in [(reverse.NORMAL_MODE,5),(reverse.REVERSE_MODE,6)]:
         layer=doc.layers.new(reverse.variant_layer_name('PS 2/A?',3,mode),dxfattribs={'color':color,'lineweight':35});layer.off()
@@ -101,7 +101,7 @@ def main():
         normal[-1].new_extension_dict().add_xrecord('USER').tags.extend([(1,'Eigen data'),(90,42)])
         normal.append(ms.add_image(image_defs[0],insert=(i*10,3),size_in_units=(4,3)))
         ann=ms.add_blockref('LABEL',(i*10+1,8),dxfattribs={'layer':'KABELS'});ann.add_auto_attribs({'INFO':'Water Ø 110'})
-        normal.append(ann);leader=ms.add_leader([(i*10,5),(i*10+1,8)],dxfattribs={'layer':'KABELS'});leader.dxf.annotation_handle=ann.dxf.handle;normal.append(leader)
+        normal.append(ann);leader=ms.add_leader([(i*10,5),(i*10+1,8)],dxfattribs={'layer':'KABELS','has_arrowhead':0,'annotation_type':2});leader.dxf.annotation_handle=ann.dxf.handle;normal.append(leader)
         back.append(ms.add_polyline3d([(i*10,0,1),(i*10+2,1,3),(i*10+3,0,2)],dxfattribs={'layer':'KABELS'}))
         back.append(ms.add_image(image_defs[1],insert=(i*10,3),size_in_units=(4,3)))
         data.append(dict(label=name,slot_index=index,normal=[int(e.dxf.handle,16) for e in normal],reverse=[int(e.dxf.handle,16) for e in back],selector=[i*10+5.25,9.5,2.]))
@@ -122,22 +122,24 @@ def main():
     dv._write_pairs(path,dv._flatten_records(records),newline=nl,had_bom=bom)
     Image.new('RGBA',(8,6),(200,40,80,210)).save(OUT/'image.png');Image.new('RGBA',(8,6),(20,110,210,180)).save(OUT/'reverse.png')
     cases=[]
-    for name,indices,selector in [('one',[0],'original'),('all-shuffled',[2,0,1],'original'),('same-label',[1,0],'original'),('without-selector',[0],None),('coordinate-precision',[0],[123456.78901234,-.0000123456,55.012345678901])]:
+    for name,indices,selector in [('one',[0],'original'),('all-shuffled',[2,0,1],'original'),('same-label',[1,0],'original'),('without-selector',[0],None),('coordinate-precision',[0],[123456.78901234,-.0000123456,55.012345678901]),('automatic-selector',[2,0,1],'auto'),('automatic-images',[0],'auto-images')]:
         d=ezdxf.readfile(path);specs=[]
         for i in indices:
-            spec=dict(data[i]);spec['selector']=spec['selector'] if selector=='original' else selector;specs.append(spec)
+            spec=dict(data[i]);spec['selector']=spec['selector'] if selector=='original' else (None if selector in ('auto','auto-images') else selector);specs.append(spec)
+            if selector=='auto-images':spec['normal']=[spec['normal'][1]];spec['reverse']=[spec['reverse'][1]]
             for key,mode in [('normal',reverse.NORMAL_MODE),('reverse',reverse.REVERSE_MODE)]:
                 reverse._move_entities_to_variant_container(d,d.modelspace(),[d.entitydb[f'{h:X}'] for h in spec[key]],label=spec['label'],slot_index=spec['slot_index'],mode=mode)
         wrappers=dynamic._wrap_variant_pairs_as_static_blocks(d)
         for layer in d.layers:
             if dynamic._variant_pair_key(layer.dxf.name):layer.on()
+        automatic_locations=pipeline._selector_locations_from_document(d,wrappers) if selector in ('auto','auto-images') else None
         target=OUT/'working.dxf';d.saveas(target)
         raw,nl,bom=dv._read_pairs(target);records=dv._split_records(raw);sections=dv._record_sections(records)
-        locations={dynamic.dynamic_block_name(s['label'],s['slot_index']):s['selector'] for s in specs if s['selector'] is not None}
+        locations=automatic_locations if automatic_locations is not None else {dynamic.dynamic_block_name(s['label'],s['slot_index']):s['selector'] for s in specs if s['selector'] is not None}
         with patch.object(dv,'uuid4',return_value=FIXED):promoted,next_id=pipeline._promote_records(records,sections,wrappers,next_handle=max(dv._max_handle_value(raw)+1,dv._header_handseed(raw)))
         assert promoted==len(specs);pipeline._set_handseed_in_records(records,next_id);assert pipeline._finalize_records(records,dv._record_sections(records),wrappers,locations)==len(specs)
         dv._write_pairs(target,dv._flatten_records(records),newline=nl,had_bom=bom)
-        cases.append(dict(name=name,pairs=specs,wrappers=wrappers,expected=snapshot(target,wrappers)))
+        cases.append(dict(name=name,automatic=selector in ('auto','auto-images'),pairs=specs,wrappers=wrappers,expected=snapshot(target,wrappers)))
     (OUT/'working.dxf').unlink()
     labels=['','._.','PS 5/A?','Straße ſ K İ 漢','a\u001cb\u0085c','x'*119+'__Y','漢'*125]
     names=[dict(label=s,index=i,expected=[reverse.variant_layer_name(s,i,reverse.NORMAL_MODE),reverse.variant_layer_name(s,i,reverse.REVERSE_MODE),dynamic.dynamic_block_name(s,i)]) for s in labels for i in [-5,0,1,9,99,100,5000]]

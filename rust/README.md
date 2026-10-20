@@ -494,9 +494,12 @@ De projectroute ondersteunt ook werkfoto’s en eigen virtuele rasters. Begeleid
 De native Normaal/Reverse-blokkern behoudt bronobjecten en maakt de AutoCAD-
 keuze `Versie` met `Normaal` en `Reverse` uit de donor van hetzelfde sjabloon.
 [De onafhankelijke controles](tests/fixtures/template-variants/README.md) dekken
-metadata, beginzichtbaarheid en gekoppelde onderdelen. Automatisch beide
-beelden/profielen voorbereiden en deze keuze aanbieden in de exportworkflow
-zijn nog niet aangesloten.
+metadata, beginzichtbaarheid en gekoppelde onderdelen. De kern plaatst de keuzegrip
+nu ook automatisch op basis van profiel-/beeldgrenzen en werkelijke TTF-tekstmaten;
+[de grenscontroles](tests/fixtures/template-extents/README.md) vergelijken de
+oorspronkelijke plaatsing, inclusief complete sjabloonexports. Automatische
+fontkeuze, beide beelden/profielen voorbereiden en de keuze aanbieden in de
+exportworkflow zijn nog niet aangesloten.
 
 ## Wat nog ontbreekt
 
