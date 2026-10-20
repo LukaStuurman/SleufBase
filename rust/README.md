@@ -68,11 +68,25 @@ Installeer Rust via https://rustup.rs en voer in PowerShell uit:
 Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
 'SleufBase-Rust-Windows-preview' van een geslaagde build. Dit is geen stable release.
 
+### Nieuw: volledige projectgebonden sjabloon-DXF vanuit de desktopapp
+
+Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavanceerde voorbereide export). Je hoeft voor de projectroute geen JSON-exportmanifest meer te maken.
+
+1. Laad één of meerdere KickTheMap `jobFeatures.json`-bestanden, optionele virtuele proefsleuven en de volledige bron-GeoTIFF-bestanden.
+2. Selecteer het oorspronkelijke DWG/DXF-*sjabloon* als DXF, geef een **nieuwe** uitvoer-DXF op, vul de projectnaam/getekend-door in en kies resolutie en schaal.
+3. Voor iedere job of virtuele proefsleuf kies je of die als vak meegaat, welke **GeoTIFF** erbij hoort en of het profiel getekend wordt. Een unieke passende KickTheMap-job-ID wordt automatisch gekoppeld; bij onduidelijke IDs moet je de TIFF expliciet selecteren (geen risicovolle gok).
+4. Kies lokaal/offline neutraal kaartbeeld of live **PDOK**-luchtfoto. Optioneel kunnen zichtbare BGT-weg-/terreindelen en Kadasterlijnen op de kaart komen.
+5. Start de export. Rust bouwt automatisch de vakken en kaartbladen op uit volledige TIFF-data en profielbroninformatie, en publiceert de DXF met permanente afbeeldingsbundel via de bestaande transactionele exporter.
+
+De exportworker neemt de grote projectdata tijdelijk **in eigendom** in plaats van alle jobs te kopiëren en geeft die terug bij succes, fout en coöperatieve annulering. Tijdens export kun je annuleren met Escape; afsluiten/projectwisselen gebeurt veilig na de taak. Er is een limiet van 128 geselecteerde vakken en 100.000 kaart-overlaypunten per vak. Een bestaand uitvoerbestand wordt in deze UI geweigerd.
+
+**Beperkingen (nog geen 100% Python-pariteit):** de CAD-sjabloon moet vooraf als geldige ondersteunde DXF beschikbaar zijn; er is nog geen visuele vak-/profiel-/fotobewerker met alle legacy-opties. Automatische job-TIFF matching vereist unieke positieve job-IDs, anders kies je de TIFF handmatig. Profiel- en kaartuitvoer blijven onderworpen aan bestaande technische limieten van de Rust-exportkern en vereisen praktijkacceptatie met echte projecten. Alle bron-TIFF’s moeten EPSG:28992 gebruiken. PDF/PNG-foto-overlays en onderliggende volledige Python-templateconfiguraties zijn nog niet allemaal gemigreerd.
+
 ### Sjabloonexport in de Rust-desktopapp (voorbereide invoer)
 
-Kies in de werkbalk **Sjabloon DXF**. Selecteer een voorbereide export-JSON (dezelfde invoer als de CLI-optie `--template-dxf`) en kies een nieuwe `.dxf`-bestandsnaam. De app voert daarna de **native** sjabloon-, kaart-, TIFF- en profielpipeline uit op een achtergrondthread. Het voortgangsscherm ondersteunt annuleren/Escape; bestaande tekeningen en beeldbundels blijven onaangeroerd bij fouten of annulering. Projectwissel en afsluiten tijdens de taak worden veilig uitgesteld.
+Kies in de werkbalk **Sjabloon via JSON**. Selecteer een voorbereide export-JSON (dezelfde invoer als de CLI-optie `--template-dxf`) en kies een nieuwe `.dxf`-bestandsnaam. De app voert daarna de **native** sjabloon-, kaart-, TIFF- en profielpipeline uit op een achtergrondthread. Het voortgangsscherm ondersteunt annuleren/Escape; bestaande tekeningen en beeldbundels blijven onaangeroerd bij fouten of annulering. Projectwissel en afsluiten tijdens de taak worden veilig uitgesteld.
 
-**Beperking:** dit venster bouwt nog **niet** automatisch de vakken uit het geopende Rust-project op. De gebruiker moet de export-JSON, inclusief sjabloonpaden en bronbestanden, vooraf voorbereiden. Het volledige oorspronkelijke interactieve Python-sjabloonvenster is nog niet gemigreerd.
+**Beperking van de JSON-route:** dit venster bouwt niet automatisch de vakken uit het geopende Rust-project op; gebruik daarvoor **Project → sjabloon DXF**. De gebruiker moet de export-JSON, inclusief sjabloonpaden en bronbestanden, vooraf voorbereiden. Het volledige oorspronkelijke interactieve Python-sjabloonvenster is nog niet gemigreerd.
 
 ### CLI export
 
