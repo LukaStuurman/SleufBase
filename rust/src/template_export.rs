@@ -583,8 +583,8 @@ pub fn export_with_progress(
             let destination = tx.asset_path(&format!("slot{:05}_{role}.png", index + 1))?;
             if let Some(source) = slot.virtual_source.as_ref().filter(|_| role == "tiff") {
                 progress(&format!("Virtuele proefsleufraster {} opbouwen", index+1));
-                let image=crate::virtual_raster::render(source,control.flag())?;
-                crate::template_raster::save_image(&image,&destination,control.flag())?;
+                let prepared=crate::virtual_raster::prepare_for_template(source,control.flag())?;
+                crate::template_raster::save(&prepared,&destination,control.flag())?;
                 let bytes=std::fs::metadata(&destination).map_err(|e|e.to_string())?.len();
                 total=total.checked_add(bytes).ok_or("Rasterbudget overschreden")?;
                 if bytes>256*1024*1024||total>2*1024*1024*1024 {
