@@ -772,9 +772,13 @@ impl SleufBaseApp {
         let (tx,rx)=mpsc::channel();
         self.live_download_generation=self.project_generation;
         self.live_download_rx=Some(rx);
+        if !self.browser_ui.batch_mode {
+            self.browser_ui.cancel.store(false,std::sync::atomic::Ordering::SeqCst);
+        }
+        let cancel=std::sync::Arc::clone(&self.browser_ui.cancel);
         std::thread::spawn(move || {
             let root=kickthemap_cache_dir().join("Rust");
-            let result=client.download_job(&job,kind,&root).map(|p|(kind,p));
+            let result=client.download_job_with_cancel(&job,kind,&root,&cancel).map(|p|(kind,p));
             let _=tx.send((client,result));
         });
     }
@@ -805,7 +809,18 @@ impl SleufBaseApp {
                 self.live_session=Some(client);
                 self.live_download_rx=None;
                 self.live_busy=false;
-                self.apply_live_download_result(result,ctx);
+                if self.browser_ui.batch_mode {
+                    self.browser_ui.completed+=1;
+                    match result {
+                        Ok((RemoteFileKind::GeoTiff,path)) =>
+                            self.browser_ui.downloaded_tiffs.push(path),
+                        Ok((RemoteFileKind::JobFeatures,path)) =>
+                            self.browser_ui.downloaded_json.push(path),
+                        Err(err)=>self.browser_ui.failures.push(err),
+                    }
+                } else {
+                    self.apply_live_download_result(result,ctx);
+                }
             }
             Some(Err(TryRecvError::Disconnected))=>{
                 self.live_busy=false;
