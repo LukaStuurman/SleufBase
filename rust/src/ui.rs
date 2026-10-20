@@ -36,6 +36,8 @@ mod file_loading;
 mod exporting;
 #[path="ui_template_export.rs"]
 mod template_exporting;
+#[path="ui_project_template.rs"]
+mod project_template_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -74,6 +76,7 @@ pub struct SleufBaseApp {
     exporter:Option<sleufbase_rust::export_worker::Exporter>,
     export_intent:Option<exporting::ExportIntent>,
     template_dialog:Option<template_exporting::TemplateDialog>,
+    project_template_dialog:Option<project_template_ui::Dialog>,
     template_job:Option<template_exporting::TemplateJob>,
     file_intent:Option<file_loading::FileIntent>,
     datasets: Vec<Dataset>,
@@ -150,6 +153,7 @@ impl Default for SleufBaseApp {
             exporter:None,
             export_intent:None,
             template_dialog:None,
+            project_template_dialog:None,
             template_job:None,
             file_intent:None,
             datasets:Vec::new(),
@@ -238,6 +242,7 @@ impl SleufBaseApp {
         self.cancel_file_load();
         self.export_dialog=None;
         self.template_dialog=None;
+        self.project_template_dialog=None;
         debug_assert!(self.template_job.is_none(), "active template exports must settle before switching projects");
         self.project_generation=self.project_generation.wrapping_add(1);
         self.pdok_rx=None; self.pdok_busy=false;
@@ -1240,7 +1245,8 @@ impl SleufBaseApp {
                 ui.separator();
                 if ui.button("Excel disciplines").clicked() {self.save_excel();}
                 if ui.button("DXF objecten").clicked() {self.save_dxf();}
-                if ui.button("Sjabloon DXF").clicked() {self.open_template_dialog();}
+                if ui.button("Project → sjabloon DXF").clicked() {self.open_project_template_dialog();}
+                if ui.button("Sjabloon via JSON").clicked() {self.open_template_dialog();}
                 if ui.button("Kaart terugzetten").clicked() {self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
             });
             if !self.message.is_empty() {
@@ -1251,6 +1257,7 @@ impl SleufBaseApp {
         if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
         if self.export_intent.is_some(){self.show_export_progress(ctx);return;}
         if self.template_dialog.is_some() {self.show_template_dialog(ctx);}
+        if self.project_template_dialog.is_some() {self.show_project_template_dialog(ctx);}
         egui::SidePanel::left("sources")
             .default_width(300.0).min_width(230.0).show(ctx,|ui|{
             egui::ScrollArea::vertical().id_salt("source_controls").show(ui,|ui|{
