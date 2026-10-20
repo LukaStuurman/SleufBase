@@ -50,6 +50,12 @@ De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 - De lokale releasebenchmark op een RGB8-bron van 16,8 miljoen pixels levert dezelfde preview met circa 2,3× hogere snelheid en 86% lagere procespiek dan volledige Pillow-conversie. Methode en alle meetrondes staan in [benchmarks/README.md](benchmarks/README.md).
 - Volledige resolutie bij inzoomen, overviews/pyramides, gesubsamplede YCbCr, overige kleurmodi en acceptatie op grote echte GeoTIFFs blijven open.
 
+## OpenStreetMap in de Rust-preview
+
+Via **OpenStreetMap** in de werkbalk kan de gebruiker voor de huidige RD-kaartuitsnede een OSM-raster laden. De rasterlaag wordt naar Nederlandse RD-coördinaten benaderend geherprojecteerd en is als alternatieve kaartachtergrond te kiezen naast PDOK. De bronvermelding **© OpenStreetMap contributors** blijft zichtbaar op de kaart.
+
+De app vraagt uitsluitend na deze expliciete kaartactie de benodigde tegels op (maximaal 24 per verzoek), gebruikt een eigen herkenbare HTTP User-Agent en bewaart PNG-tegels ten minste zeven dagen onder de Rust-appdatamap `osm-tiles`. Bij een tijdelijk netwerkprobleem mag de gebruiker bestaande verouderde cachetegels terugzien; dit is **geen** offline-kaartdownloadfunctie. Er wordt niet vooruit geladen. De RD→WGS84-omrekening is benaderend en niet bedoeld voor landmeetkundige nauwkeurigheid. Extra basemapproviders, cachebeheer/conditionele HTTP-requests en praktijkacceptatie blijven open. Het publieke OSM-tegelplatform heeft eigen [gebruiksregels](https://operations.osmfoundation.org/policies/tiles/).
+
 ## Bouwen en starten op Windows
 
 Installeer Rust via https://rustup.rs en voer in PowerShell uit:
