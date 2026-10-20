@@ -64,32 +64,25 @@ impl Default for Options {
         }
     }
 }
-/// Only exact positive KickTheMap job IDs are considered automatic matches.
-/// Never guess a wrong sheet from file order or equal display names.
+/// Match exact job IDs first, then unique RD geometry coverage only when the
+/// source sidecar does not point to a different job. Uncertain matches stay unassigned.
 pub fn suggest(datasets: &[Dataset], rasters: &[GeoTiffInfo], trenches: &[VirtualTrench]) -> Vec<Choice> {
-    let matching = |job_id: u64| -> Option<usize> {
-        if job_id == 0 { return None; }
-        let matches = rasters.iter().enumerate()
-            .filter(|(_, t)| t.kickthemap_job_id == Some(job_id))
-            .map(|(i, _)| i).collect::<Vec<_>>();
-        (matches.len() == 1).then(|| matches.first().copied()).flatten()
-    };
-    let mut choices = Vec::new();
+    let mut choices = Vec::with_capacity(datasets.len()+trenches.len());
     for (i, job) in datasets.iter().enumerate() {
         choices.push(Choice {
-            source: Source::Job(i), raster: matching(job.job_id), include: true,
-            title: job.title.clone(), profile: true, reverse: false, comments: String::new(),
+            source: Source::Job(i),
+            raster: crate::template_match::for_job(job,rasters).raster,
+            include: true, title: job.title.clone(), profile: true,
+            reverse: false, comments: String::new(),
         });
     }
     for (i, trench) in trenches.iter().enumerate() {
         choices.push(Choice {
-            source: Source::Virtual(i), raster: matching(trench.job_id), include: true,
-            title: trench.label.clone(), profile: true, reverse: false, comments: String::new(),
+            source: Source::Virtual(i),
+            raster: crate::template_match::for_trench(trench,rasters).raster,
+            include: true, title: trench.label.clone(), profile: true,
+            reverse: false, comments: String::new(),
         });
-    }
-    // Unambiguous one-sheet projects with a missing job sidecar are common.
-    if rasters.len() == 1 && choices.len() == 1 && choices[0].raster.is_none() {
-        choices[0].raster = Some(0);
     }
     choices
 }
