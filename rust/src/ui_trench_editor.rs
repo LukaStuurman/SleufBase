@@ -62,6 +62,7 @@ pub(super) struct Editor {
     object:ObjectForm,
     confirm_delete:bool,
     error:String,
+    paste:String,
 }
 #[derive(Clone, Copy)]
 enum Action {Save,Copy,Remove}
@@ -73,7 +74,7 @@ impl Editor {
             label:source.label.clone(),start:source.start,
             end:source.end,width:source.width_meters,
             selected:None,object:ObjectForm::default(),
-            confirm_delete:false,error:String::new(),
+            confirm_delete:false,error:String::new(),paste:String::new(),
         }
     }
     fn build(&self)->Result<VirtualTrench,String> {
@@ -250,6 +251,28 @@ impl SleufBaseApp {
                         editor.selected=None;
                         editor.object=ObjectForm::default();
                     }
+                    ui.collapsing("Excel: meerdere meetobjecten importeren / kopiëren",|ui|{
+                        ui.small("Plak tab-gescheiden cellen uit Excel: Rol, Object, Bron, Kettingmaat, Dwarsafstand, optionele Z en 3 attributen. Komma als decimaalteken is toegestaan.");
+                        ui.add(egui::TextEdit::multiline(&mut editor.paste)
+                            .desired_rows(5).hint_text("LS\\tKabel\\tKickTheMap\\t2,5\\t-0,3\\t-1,2"));
+                        if ui.button("Importeer geplakte Excel-regels").clicked() {
+                            let mut next=editor.build();
+                            match next.as_mut().and_then(|t|edit::import_tabular(t,&editor.paste)){
+                                Ok(count)=>{
+                                    editor.draft=next.unwrap();
+                                    editor.error=format!("{count} meetobjecten toegevoegd aan concept; klik op Opslaan in project om definitief te bewaren.");
+                                    editor.paste.clear();
+                                }
+                                Err(e)=>editor.error=e,
+                            }
+                        }
+                        if ui.button("Kopieer alle meetobjecten naar Excel").clicked() {
+                            match editor.build().and_then(|t|edit::export_tabular(&t)){
+                                Ok(table)=>ui.ctx().copy_text(table),
+                                Err(e)=>editor.error=e,
+                            }
+                        }
+                    });
                     ui.separator();
                     if !editor.error.is_empty() {
                         ui.colored_label(DARK,&editor.error);
