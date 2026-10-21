@@ -20,9 +20,50 @@ pub struct Source {
     #[serde(default)]
     pub big_font: String,
     pub contours: Path,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attribute: Option<Box<Attribute>>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Attribute {
+    pub tag: String,
+    pub flags: u32,
+    pub field_length: u32,
+    pub lock_position: bool,
+    pub attribute_type: u8,
+    /// Preserve XRECORD/embedded-MTEXT tags for later native layout support.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub extra: Vec<crate::cad::Tag>,
+}
+impl Attribute {
+    pub fn multiline(&self) -> bool {
+        self.attribute_type != 1
+            || self
+                .extra
+                .iter()
+                .any(|t| t.code == 101 && t.value == "Embedded Object")
+    }
+    fn validate(&self) -> Result<(), String> {
+        if self.tag.len() > 1_048_576
+            || self.flags > 65535
+            || self.field_length > 65535
+            || !matches!(self.attribute_type, 1 | 2 | 4)
+            || self.extra.len() > 1_000_000
+            || self
+                .extra
+                .iter()
+                .any(|t| !(0..=1071).contains(&t.code) || t.value.len() > 1_048_576)
+        {
+            return Err("Ongeldige CAD-attribuutgegevens".into());
+        }
+        Ok(())
+    }
 }
 impl Source {
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(attribute) = &self.attribute {
+            attribute.validate()?;
+        }
         let t = &self.layout;
         if t.content.len() > 1_048_576
             || self.style.len() > 1_048_576
@@ -77,6 +118,14 @@ impl<'a> Renderer<'a> {
     pub fn prepare(&mut self, source: &mut Source) -> Result<(), String> {
         source.validate()?;
         crate::input::check(self.cancel)?;
+        if source
+            .attribute
+            .as_deref()
+            .is_some_and(Attribute::multiline)
+        {
+            source.contours = Path::default();
+            return Ok(());
+        }
         let content = metrics::plain_text(&source.layout.content);
         if content.is_empty() {
             source.contours = Path::default();
@@ -240,9 +289,7 @@ pub(crate) fn prepare_overlay(
     cancel: &AtomicBool,
 ) -> Result<(), String> {
     let has_text = overlay
-        .features
-        .iter()
-        .chain(overlay.blocks.values().flat_map(|b| b.features.iter()))
+        .source_features()
         .any(|f| f.cad.as_deref().is_some_and(|p| p.text.is_some()));
     if !has_text {
         return Ok(());
@@ -264,41 +311,74 @@ pub(crate) fn prepare_overlay(
     let mut renderer = Renderer::new(catalog, cancel);
     let mut points = 0usize;
     let mut warnings = std::collections::BTreeSet::new();
+    fn prepare_one(
+        feature: &mut crate::dxf_read::DxfFeature,
+        renderer: &mut Renderer<'_>,
+        styles: &std::collections::BTreeMap<String, Style>,
+        points: &mut usize,
+        warnings: &mut std::collections::BTreeSet<String>,
+        cancel: &AtomicBool,
+    ) -> Result<(), String> {
+        crate::input::check(cancel)?;
+        let Some(cad) = feature.cad.as_deref_mut() else {
+            return Ok(());
+        };
+        let Some(text) = cad.text.as_deref_mut() else {
+            return Ok(());
+        };
+        if text.attribute.as_deref().is_some_and(Attribute::multiline) && warnings.len() < 100 {
+            warnings.insert("ATTRIB: ingebouwde MTEXT bewaard; opmaak nog niet weergegeven".into());
+        }
+        if let Some(style) = styles.get(&text.style.to_lowercase()) {
+            text.font = style.font.clone();
+            text.big_font = style.big_font.clone();
+            if style.vertical && warnings.len() < 100 {
+                warnings.insert("TEXT: verticale tekststijl nog niet toegepast".into());
+            }
+        } else {
+            text.font = "txt".into();
+        }
+        if !text.big_font.is_empty() && warnings.len() < 100 {
+            warnings.insert("TEXT: aanvullend BIGFONT nog niet toegepast".into());
+        }
+        renderer.prepare(text)?;
+        let flattened = text.contours.flatten(
+            Affine::IDENTITY,
+            0.005,
+            10_000_000usize.saturating_sub(*points),
+            cancel,
+        )?;
+        *points += flattened.points.len();
+        feature.points = flattened.points;
+        cad.path_breaks = flattened.breaks;
+        Ok(())
+    }
     for feature in overlay.features.iter_mut().chain(
         overlay
             .blocks
             .values_mut()
             .flat_map(|b| Arc::make_mut(b).features.iter_mut()),
     ) {
-        crate::input::check(cancel)?;
-        let Some(cad) = feature.cad.as_deref_mut() else {
-            continue;
-        };
-        let Some(text) = cad.text.as_deref_mut() else {
-            continue;
-        };
-        if let Some(style) = styles.get(&text.style.to_lowercase()) {
-            text.font = style.font.clone();
-            text.big_font = style.big_font.clone();
-            if style.vertical && warnings.len() < 100 {
-                warnings.insert("TEXT: verticale tekststijl nog niet toegepast".to_owned());
-            }
-        } else {
-            text.font = "txt".into();
-        }
-        if !text.big_font.is_empty() && warnings.len() < 100 {
-            warnings.insert("TEXT: aanvullend BIGFONT nog niet toegepast".to_owned());
-        }
-        renderer.prepare(text)?;
-        let flattened = text.contours.flatten(
-            Affine::IDENTITY,
-            0.005,
-            10_000_000usize.saturating_sub(points),
+        prepare_one(
+            feature,
+            &mut renderer,
+            styles,
+            &mut points,
+            &mut warnings,
             cancel,
         )?;
-        points += flattened.points.len();
-        feature.points = flattened.points;
-        cad.path_breaks = flattened.breaks;
+        if let Some(cad) = feature.cad.as_deref_mut() {
+            for attribute in &mut cad.linked_attributes {
+                prepare_one(
+                    attribute,
+                    &mut renderer,
+                    styles,
+                    &mut points,
+                    &mut warnings,
+                    cancel,
+                )?;
+            }
+        }
     }
     overlay.warnings.extend(warnings);
     Ok(())

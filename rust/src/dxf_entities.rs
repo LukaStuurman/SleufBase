@@ -1,4 +1,6 @@
 //! Stateful decoding of supported DXF entities, reused for modelspace and blocks.
+//! Attribute subclass semantics follow ezdxf 1.4.4 entities/attrib.py (MIT,
+//! Copyright 2019-2024 Manfred Moitzi; see third_party/ezdxf-LICENSE.txt).
 use crate::{
     cad_geometry::{self as g, Affine, ArcCurve, CurvePath, Placement, Segment, V3},
     dxf_read::DxfFeature,
@@ -449,10 +451,17 @@ impl Entities {
                     .get_or_insert_with(Default::default)
                     .attributes
                     .insert(name.to_owned(), field(groups, 1).unwrap_or("").to_owned());
-                *self
-                    .unsupported
-                    .entry("ATTRIB geometrie (metadata behouden)".into())
-                    .or_default() += 1;
+                let mut feature = common(groups, kind)?;
+                text(groups, kind, &mut feature)?;
+                if self.count >= MAX_ENTITIES {
+                    return Err("Te veel CAD-attributen".into());
+                }
+                self.count += 1;
+                self.features[index]
+                    .cad
+                    .get_or_insert_with(Default::default)
+                    .linked_attributes
+                    .push(feature);
                 return Ok(());
             }
             _ => {}
@@ -480,38 +489,7 @@ impl Entities {
         }
         let mut feature = common(groups, kind)?;
         match kind {
-            "TEXT" => {
-                let text = crate::dxf_text_metrics::Text {
-                    content: field(groups, 1).unwrap_or("").to_owned(),
-                    insert: point(groups, 10)?,
-                    align_point: field(groups, 11).map(|_| point(groups, 11)).transpose()?,
-                    height: number(groups, 40).unwrap_or(2.5),
-                    width: number(groups, 41).unwrap_or(1.),
-                    rotation: number(groups, 50).unwrap_or(0.),
-                    oblique: number(groups, 51).unwrap_or(0.),
-                    generation: u8::try_from(integer(groups, 71, 0)?)
-                        .map_err(|_| "Ongeldige TEXT-spiegeling")?,
-                    halign: u8::try_from(integer(groups, 72, 0)?)
-                        .map_err(|_| "Ongeldige TEXT-uitlijning")?,
-                    valign: u8::try_from(integer(groups, 73, 0)?)
-                        .map_err(|_| "Ongeldige TEXT-uitlijning")?,
-                    normal: [
-                        number(groups, 210).unwrap_or(0.),
-                        number(groups, 220).unwrap_or(0.),
-                        number(groups, 230).unwrap_or(1.),
-                    ],
-                };
-                feature.raw_text = text.content.clone();
-                let text = crate::cad_text::Source {
-                    layout: text,
-                    style: field(groups, 7).unwrap_or("Standard").to_owned(),
-                    font: String::new(),
-                    big_font: String::new(),
-                    contours: Default::default(),
-                };
-                text.validate()?;
-                feature.cad.get_or_insert_with(Default::default).text = Some(Box::new(text));
-            }
+            "TEXT" => text(groups, kind, &mut feature)?,
             "LINE" => {
                 feature.points = vec![g::vertex(point(groups, 10)?), g::vertex(point(groups, 11)?)]
             }
@@ -631,6 +609,117 @@ fn common(groups: &[Group], kind: &str) -> Result<DxfFeature, String> {
         closed: None,
         cad: crate::cad::properties(groups)?,
     })
+}
+
+/// Attribute text codes live in AcDbText, whereas flags/valign are in
+/// AcDbAttribute. R2018 repeats 71/72/11 after that subclass; never use them
+/// as text generation/alignment codes. R12 has no subclass markers.
+fn subclass<'a, 'b>(groups: &'a [Group<'b>], name: &str) -> &'a [Group<'b>] {
+    if let Some(at) = groups.iter().position(|g| g.code == 100 && g.value == name) {
+        let rest = &groups[at + 1..];
+        let end = rest
+            .iter()
+            .position(|g| g.code == 100 || g.code == 101)
+            .unwrap_or(rest.len());
+        &rest[..end]
+    } else {
+        let end = groups
+            .iter()
+            .position(|g| g.code == 101 || g.code == 100 && g.value == "AcDbXrecord")
+            .unwrap_or(groups.len());
+        &groups[..end]
+    }
+}
+fn text(groups: &[Group], kind: &str, feature: &mut DxfFeature) -> Result<(), String> {
+    let data = if kind == "ATTRIB" {
+        subclass(groups, "AcDbText")
+    } else {
+        groups
+    };
+    let attr = if kind == "ATTRIB" {
+        Some(subclass(groups, "AcDbAttribute"))
+    } else {
+        None
+    };
+    let layout = crate::dxf_text_metrics::Text {
+        content: field(data, 1).unwrap_or("").to_owned(),
+        insert: point(data, 10)?,
+        align_point: field(data, 11).map(|_| point(data, 11)).transpose()?,
+        height: number(data, 40).unwrap_or(2.5),
+        width: number(data, 41).unwrap_or(1.),
+        rotation: number(data, 50).unwrap_or(0.),
+        oblique: number(data, 51).unwrap_or(0.),
+        generation: u8::try_from(integer(data, 71, 0)?).map_err(|_| "Ongeldige TEXT-spiegeling")?,
+        halign: u8::try_from(integer(data, 72, 0)?).map_err(|_| "Ongeldige TEXT-uitlijning")?,
+        valign: u8::try_from(integer(
+            attr.unwrap_or(data),
+            if attr.is_some() { 74 } else { 73 },
+            0,
+        )?)
+        .map_err(|_| "Ongeldige TEXT-uitlijning")?,
+        normal: [
+            number(data, 210).unwrap_or(0.),
+            number(data, 220).unwrap_or(0.),
+            number(data, 230).unwrap_or(1.),
+        ],
+    };
+    feature.raw_text = layout.content.clone();
+    let attribute = if let Some(attr) = attr {
+        let extra = groups
+            .iter()
+            .position(|g| g.code == 101 || g.code == 100 && g.value == "AcDbXrecord")
+            .map_or_else(Vec::new, |at| {
+                groups[at..]
+                    .iter()
+                    .map(|g| crate::cad::Tag {
+                        code: g.code,
+                        value: g.value.to_string(),
+                    })
+                    .collect()
+            });
+        Some(Box::new(crate::cad_text::Attribute {
+            tag: field(attr, 2).ok_or("DXF ATTRIB mist tagnaam")?.into(),
+            flags: integer(attr, 70, 0)?,
+            field_length: integer(attr, 73, 0)?,
+            lock_position: attr
+                .iter()
+                .rev()
+                .find(|g| g.code == 280)
+                .is_some_and(|g| g.value.trim() == "1"),
+            attribute_type: if groups
+                .iter()
+                .any(|g| g.code == 100 && g.value == "AcDbAttribute")
+            {
+                u8::try_from(integer(attr, 71, 1)?).map_err(|_| "Ongeldig ATTRIB-type")?
+            } else {
+                1
+            },
+            extra,
+        }))
+    } else {
+        None
+    };
+    // Without subclasses a 71 is the R12 text-generation flag, not the
+    // R2018 attribute type (which is located in AcDbAttribute).
+    let source = crate::cad_text::Source {
+        layout,
+        style: field(data, 7).unwrap_or("Standard").into(),
+        font: String::new(),
+        big_font: String::new(),
+        contours: Default::default(),
+        attribute,
+    };
+    source.validate()?;
+    let cad = feature.cad.get_or_insert_with(Default::default);
+    if source
+        .attribute
+        .as_deref()
+        .is_some_and(|a| a.flags & 1 != 0)
+    {
+        cad.invisible = true;
+    }
+    cad.text = Some(Box::new(source));
+    Ok(())
 }
 
 /// Read MULTILEADER scopes instead of confusing the text/landing base point

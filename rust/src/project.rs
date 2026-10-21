@@ -123,7 +123,8 @@ impl NativeProject {
             for (key,block) in &overlay.blocks {
                 if *key!=block.name.to_lowercase(){return Err("Ongeldige opgeslagen CAD-bloknaam".into());}
                 crate::cad_geometry::finite(block.base)?;
-                for feature in &block.features {
+                for feature in block.features.iter().flat_map(|f|std::iter::once(f).chain(f.linked_attributes())) {
+                    if !feature.linked_attributes().is_empty()&&feature.entity_type!="INSERT" {return Err("Alleen INSERT mag ATTRIB bezitten".into());}
                     vertices(&feature.points)?;
                     if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
                     if let Some(cad)=feature.cad.as_deref(){
@@ -133,7 +134,8 @@ impl NativeProject {
                     }
                 }
             }
-            for feature in &overlay.features {
+            for feature in overlay.features.iter().flat_map(|f|std::iter::once(f).chain(f.linked_attributes())) {
+                if !feature.linked_attributes().is_empty()&&feature.entity_type!="INSERT" {return Err("Alleen INSERT mag ATTRIB bezitten".into());}
                 vertices(&feature.points)?;
                 if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
                 if let Some(cad)=feature.cad.as_deref(){

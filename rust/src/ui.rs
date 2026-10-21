@@ -1999,6 +1999,24 @@ mod project_lifecycle_tests {
     }
 
     #[test]
+    fn canvas_draws_linked_attributes_and_honors_their_own_visibility(){
+        let data=b"0\nSECTION\n2\nBLOCKS\n0\nBLOCK\n2\nB\n10\n0\n20\n0\n0\nENDBLK\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n0\nINSERT\n5\nA\n2\nB\n66\n1\n10\n10000\n20\n20000\n41\n-2\n42\n3\n0\nATTRIB\n5\nC\n2\nCODE\n1\nValue\n10\n2\n20\n3\n40\n2.5\n0\nSEQEND\n0\nENDSEC\n0\nEOF\n";
+        let dir=tempfile::tempdir().unwrap();let cancel=std::sync::atomic::AtomicBool::new(false);
+        let mut catalog=sleufbase_rust::dxf_fonts::Catalog::from_dirs(&[dir.path().to_owned()],&cancel).unwrap();
+        let mut overlay=sleufbase_rust::dxf_read::parse_dxf_bytes_with_catalog(data,std::path::Path::new("attributes.dxf"),&cancel,&mut catalog).unwrap();
+        overlay.features[0].cad.as_deref_mut().unwrap().linked_attributes[0].cad.as_deref_mut().unwrap().true_color=Some(0x12ab34);
+        overlay.rebuild_block_cache().unwrap();let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let mut render=|overlay:&DxfOverlay|{
+            let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
+                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            });output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count()
+        };
+        assert_eq!(render(&overlay),4);
+        overlay.features[0].cad.as_deref_mut().unwrap().linked_attributes[0].cad.as_deref_mut().unwrap().text.as_deref_mut().unwrap().attribute.as_deref_mut().unwrap().flags|=1;
+        overlay.refresh_block_visibility();assert_eq!(render(&overlay),0);
+    }
+
+    #[test]
     fn raster_pixels_load_asynchronously_and_stay_out_of_new_projects() {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");

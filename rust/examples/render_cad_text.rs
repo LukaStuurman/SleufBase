@@ -50,6 +50,7 @@ fn main() -> Result<(), String> {
             style: "Standard".into(),
             font: entry.font,
             big_font: String::new(),
+            attribute: None,
             contours: Default::default(),
         };
         renderer.prepare(&mut source)?;

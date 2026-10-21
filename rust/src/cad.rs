@@ -57,6 +57,8 @@ pub struct Tag {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Properties {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub linked_attributes: Vec<crate::dxf_read::DxfFeature>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<Box<crate::cad_text::Source>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -83,7 +85,35 @@ pub struct Properties {
     pub xdata: BTreeMap<String, Vec<Tag>>,
 }
 impl Properties {
+    pub fn is_hidden(&self) -> bool {
+        self.invisible
+            || self
+                .text
+                .as_deref()
+                .and_then(|t| t.attribute.as_deref())
+                .is_some_and(|a| a.flags & 1 != 0)
+    }
     pub fn validate(&self) -> Result<(), String> {
+        if self.linked_attributes.len() > 2_000_000 {
+            return Err("Te veel gekoppelde CAD-attributen".into());
+        }
+        for attribute in &self.linked_attributes {
+            if attribute.entity_type != "ATTRIB"
+                || attribute.cad.as_deref().is_none_or(|p| {
+                    !p.linked_attributes.is_empty()
+                        || p.placement.is_some()
+                        || p.text.as_deref().is_none_or(|t| t.attribute.is_none())
+                })
+            {
+                return Err("Ongeldige gekoppelde CAD-attribuutstructuur".into());
+            }
+            if let Some(cad) = attribute.cad.as_deref() {
+                cad.validate_geometry(attribute.points.len())?;
+            }
+            for p in &attribute.points {
+                crate::cad_geometry::finite(crate::cad_geometry::xyz(*p))?;
+            }
+        }
         if let Some(text) = &self.text {
             text.validate()?;
         }
@@ -141,6 +171,7 @@ impl Properties {
     }
     pub fn is_empty(&self) -> bool {
         self.placement.is_none()
+            && self.linked_attributes.is_empty()
             && self.text.is_none()
             && self.curve.is_none()
             && self.spline.is_none()

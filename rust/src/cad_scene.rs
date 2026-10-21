@@ -23,12 +23,23 @@ pub struct Block {
 enum Source {
     Model(usize),
     Block(Arc<Block>, usize),
+    ModelAttribute(usize, usize),
+    BlockAttribute(Arc<Block>, usize, usize),
 }
 impl Source {
     fn get<'a>(&'a self, overlay: &'a DxfOverlay) -> &'a DxfFeature {
         match self {
             Self::Model(i) => &overlay.features[*i],
             Self::Block(block, i) => &block.features[*i],
+            Self::ModelAttribute(i, a) => &overlay.features[*i].linked_attributes()[*a],
+            Self::BlockAttribute(block, i, a) => &block.features[*i].linked_attributes()[*a],
+        }
+    }
+    fn attribute(&self, index: usize) -> Result<Self, String> {
+        match self {
+            Self::Model(i) => Ok(Self::ModelAttribute(*i, index)),
+            Self::Block(block, i) => Ok(Self::BlockAttribute(block.clone(), *i, index)),
+            _ => Err("Een ATTRIB kan geen eigen ATTRIB bezitten".into()),
         }
     }
 }
@@ -86,6 +97,7 @@ struct Builder<'a> {
     stack: Vec<String>,
     layers: BTreeMap<String, Arc<str>>,
     cancel: &'a std::sync::atomic::AtomicBool,
+    warnings: BTreeSet<String>,
 }
 impl Builder<'_> {
     fn layer(&mut self, name: &str) -> Arc<str> {
@@ -185,8 +197,22 @@ impl Builder<'_> {
             });
         }
         let key = source.block_name.to_lowercase();
-        let Some(block) = self.overlay.blocks.get(&key) else {
-            return Err(format!("Blokdefinitie ontbreekt: {}", source.block_name));
+        let missing = !self.overlay.blocks.contains_key(&key);
+        let block = if let Some(block) = self.overlay.blocks.get(&key) {
+            block.clone()
+        } else {
+            let err = format!("Blokdefinitie ontbreekt: {}", source.block_name);
+            if source.linked_attributes().is_empty() {
+                return Err(err);
+            }
+            if self.warnings.len() < 100 {
+                self.warnings.insert(err);
+            }
+            Arc::new(Block {
+                name: source.block_name.clone(),
+                base: [0.; 3],
+                features: Vec::new(),
+            })
         };
         if self.stack.len() >= MAX_DEPTH || self.stack.contains(&key) {
             return Err(format!("Recursief of te diep CAD-blok: {}", block.name));
@@ -216,7 +242,8 @@ impl Builder<'_> {
         if self.attempts > MAX_INSTANCES {
             return Err("Te veel CAD-blokinstanties".into());
         }
-        let invisible = source.color_aci < 0 || source.cad.as_deref().is_some_and(|p| p.invisible);
+        let invisible =
+            source.color_aci < 0 || source.cad.as_deref().is_some_and(|p| p.is_hidden());
         self.stack.push(key);
         let rows = if placement.row_spacing == 0. {
             1
@@ -250,6 +277,45 @@ impl Builder<'_> {
                         Some(rgb),
                     )?;
                 }
+                if missing {
+                    let point = g::vertex(matrix.checked_point([0.; 3])?);
+                    self.append(RenderFeature {
+                        source: reference.clone(),
+                        points: vec![point, point],
+                        path_breaks: Box::default(),
+                        layer: layer.clone(),
+                        rgb,
+                        instance: Some(at),
+                    })?;
+                }
+                // ATTRIB geometry already lives outside this INSERT's local
+                // block space. Only the outer parent and the rotated, unscaled
+                // MINSERT grid offset apply. Translate the entire contour,
+                // including both FIT/ALIGNED endpoints (ezdxf 1.4.4 moves only
+                // insert and leaves align_point behind).
+                let (s, c) = placement.rotation.rem_euclid(360.).to_radians().sin_cos();
+                let x = f64::from(column) * placement.column_spacing;
+                let y = f64::from(row) * placement.row_spacing;
+                let offset = [c * x - s * y, s * x + c * y, 0.];
+                for (index, attribute) in source.linked_attributes().iter().enumerate() {
+                    let normal = attribute
+                        .cad
+                        .as_deref()
+                        .and_then(|p| p.text.as_deref())
+                        .map_or([0., 0., 1.], |t| t.layout.normal);
+                    let delta = Affine::ocs(normal)?.vector(offset);
+                    let mut shift = Affine::IDENTITY;
+                    for (i, value) in delta.into_iter().enumerate() {
+                        shift.0[i][3] = value;
+                    }
+                    self.visit(
+                        reference.attribute(index)?,
+                        parent.compose(shift)?,
+                        Some(at),
+                        Some(&layer),
+                        Some(rgb),
+                    )?;
+                }
             }
         }
         self.stack.pop();
@@ -265,10 +331,16 @@ impl DxfOverlay {
         cancel: &std::sync::atomic::AtomicBool,
     ) -> Result<(), String> {
         crate::input::check(cancel)?;
+        for feature in self.source_features() {
+            if !feature.linked_attributes().is_empty() && feature.entity_type != "INSERT" {
+                return Err("Alleen INSERT mag gekoppelde ATTRIB bevatten".into());
+            }
+            if let Some(cad) = feature.cad.as_deref() {
+                cad.validate_geometry(feature.points.len())?;
+            }
+        }
         let controls = self
-            .features
-            .iter()
-            .chain(self.blocks.values().flat_map(|b| b.features.iter()))
+            .source_features()
             .map(|f| {
                 f.cad
                     .as_deref()
@@ -287,9 +359,7 @@ impl DxfOverlay {
             g::finite(block.base)?;
         }
         let points = self
-            .features
-            .iter()
-            .chain(self.blocks.values().flat_map(|b| b.features.iter()))
+            .source_features()
             .map(|f| {
                 f.points.len().saturating_add(
                     f.cad
@@ -310,6 +380,7 @@ impl DxfOverlay {
             stack: Vec::new(),
             layers: BTreeMap::new(),
             cancel,
+            warnings: BTreeSet::new(),
         };
         let mut warnings: BTreeSet<_> = layer_warnings.into_iter().collect();
         for (index, source) in self.features.iter().enumerate() {
@@ -342,6 +413,7 @@ impl DxfOverlay {
                 })?;
             }
         }
+        warnings.extend(builder.warnings);
         self.expanded = Arc::new(builder.scene);
         self.block_warnings = warnings.into_iter().collect();
         self.refresh_block_visibility();
@@ -367,7 +439,7 @@ impl DxfOverlay {
     fn drawn<'a>(&'a self, feature: &'a RenderFeature) -> DrawRef<'a> {
         let source = feature.source.get(self);
         let visible = source.color_aci >= 0
-            && !source.cad.as_deref().is_some_and(|p| p.invisible)
+            && !source.cad.as_deref().is_some_and(|p| p.is_hidden())
             && self
                 .layers
                 .get(feature.layer.as_ref())

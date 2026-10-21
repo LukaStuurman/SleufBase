@@ -36,6 +36,7 @@ impl DxfOverlay {
             .features
             .iter()
             .chain(self.blocks.values().flat_map(|b| b.features.iter()))
+            .flat_map(|f| std::iter::once(f).chain(f.linked_attributes()))
         {
             if self.layers.contains_key(&source.layer) || aliases.contains_key(&source.layer) {
                 continue;

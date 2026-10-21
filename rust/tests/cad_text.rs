@@ -126,6 +126,7 @@ fn all_675_ttf_shp_shx_lff_and_monospace_vector_paths_match_independent_original
             style: "Standard".into(),
             font: case.font.clone(),
             big_font: String::new(),
+            attribute: None,
             contours: Default::default(),
         };
         renderer
@@ -395,6 +396,7 @@ fn invisible_glyph_programs_still_consume_the_drawing_work_budget() {
         style: "Standard".into(),
         font: "work.shp".into(),
         big_font: String::new(),
+        attribute: None,
         contours: Default::default(),
     };
     let err = renderer.prepare(&mut source).unwrap_err();

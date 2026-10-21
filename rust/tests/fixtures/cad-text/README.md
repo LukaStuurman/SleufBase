@@ -39,8 +39,9 @@ template-map stroke pipeline. Import discovers system and drawing-folder
 fonts; callers can supply a bounded catalog with extra support directories.
 Resolved contours are saved so reopening does not require those files.
 Vertical styles and auxiliary BIGFONT receive explicit partial-support
-warnings. The current display is vector outlines/strokes: TrueType fill,
-ATTRIB/ATTDEF drawing, MTEXT layout, full settings integration for import and
+warnings. The current display is vector outlines/strokes. Linked single-line ATTRIB now
+uses cad-attrib. TrueType fill, ATTDEF drawing, MTEXT layout, full settings
+integration for import and
 interactive AutoCAD/real-project acceptance remain open. Nothing here proves
 all CAD text or complete application parity. MIT notice for text2path is in
 the source distribution, `--licenses`, and Windows preview artifacts.

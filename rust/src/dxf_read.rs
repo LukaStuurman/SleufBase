@@ -58,8 +58,13 @@ pub struct DxfOverlay {
 }
 
 impl DxfOverlay {
+    /// Shared source records, including linked ATTRIB in their parent space.
+    pub(crate) fn source_features(&self)->impl Iterator<Item=&DxfFeature> {
+        self.features.iter().chain(self.blocks.values().flat_map(|b|b.features.iter()))
+            .flat_map(|f|std::iter::once(f).chain(f.linked_attributes()))
+    }
     pub fn feature_visible(&self,feature:&DxfFeature)->bool {
-        feature.color_aci>=0&&!feature.cad.as_deref().is_some_and(|p|p.invisible)
+        feature.color_aci>=0&&!feature.cad.as_deref().is_some_and(|p|p.is_hidden())
             &&self.resolve_layer(&feature.layer).is_none_or(|layer|layer.visible)
     }
     pub fn feature_rgb(&self,feature:&DxfFeature)->[u8;3] {
@@ -88,6 +93,9 @@ impl DxfOverlay {
 }
 
 impl DxfFeature {
+    pub fn linked_attributes(&self)->&[DxfFeature] {
+        self.cad.as_deref().map_or(&[],|p|p.linked_attributes.as_slice())
+    }
     pub fn details(&self,path:&Path)->BTreeMap<String,String> {
         let mut result=BTreeMap::from([
             ("Bestand".into(),path.file_name().unwrap_or_default().to_string_lossy().into_owned()),
@@ -99,6 +107,11 @@ impl DxfFeature {
                 result.insert("Tekst".into(),text.layout.content.clone());
                 result.insert("Tekststijl".into(),text.style.clone());
                 result.insert("Lettertype".into(),text.font.clone());
+                if let Some(attribute)=&text.attribute {
+                    result.insert("Attribuutnaam".into(),attribute.tag.clone());
+                    result.insert("Attribuutvlaggen".into(),attribute.flags.to_string());
+                    result.insert("Positie vergrendeld".into(),if attribute.lock_position {"Ja"}else{"Nee"}.into());
+                }
             }
             if let Some(mesh)=&cad.mesh {
                 result.insert("Meshvertices".into(),mesh.vertices.len().to_string());
