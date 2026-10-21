@@ -46,6 +46,7 @@ pub struct Options {
     pub paired: bool,
     pub project: String,
     pub drawn_by: String,
+    pub font_directories: Vec<PathBuf>,
     pub dpi: u32,
     pub scale: f64,
     pub background: BackgroundKind,
@@ -61,6 +62,7 @@ impl Default for Options {
             paired: true,
             project: String::new(),
             drawn_by: String::new(),
+            font_directories: Vec::new(),
             dpi: 150,
             scale: 225.,
             background: BackgroundKind::Blank,
@@ -158,6 +160,7 @@ pub fn build_with_cad(
     control: &Control,
 ) -> Result<template_export::Request, String> {
     control.check()?;
+    crate::dxf_fonts::Catalog::validate_dirs(&opts.font_directories)?;
     if !opts.template.is_file() {
         return Err("Kies een bestaand DXF-sjabloon".into());
     }
@@ -330,6 +333,7 @@ pub fn build_with_cad(
             paired: opts.paired,
             project: (!opts.project.trim().is_empty()).then(||opts.project.trim().to_owned()),
             drawn_by: opts.drawn_by.trim().to_owned(),
+            font_directories: opts.font_directories.clone(),
             protected_sources:jobs.iter().map(|d|d.source_path.clone())
                 .chain(rasters.iter().flat_map(|r|std::iter::once(r.path.clone()).chain(r.kickthemap_job_sidecar.clone())))
                 .chain(trenches.iter().filter_map(|t|t.source_path.clone()))

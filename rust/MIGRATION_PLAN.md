@@ -916,6 +916,50 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Oorspronkelijke fotoannotaties/virtuele maskers, overige CAD-/fontfamilies,
   volledige oude voorkeuren en interactieve AutoCAD-/projectacceptatie blijven
   open, naast alle eerdere globale releasevoorwaarden.
+- Native SHP/SHX-tekstmeting en projectvaste CAD-fontmappen (21 oktober 2026):
+  SHP, legacy SHX 1.0/1.1 en Unicode-programma's worden native ingelezen en
+  uitgevoerd voor de automatische profiel-/beeldgrenzen en AutoCAD-keuzegrip.
+  De interpreter ondersteunt alle gedefinieerde opdrachten, subtekens met
+  gedeelde pen/schaal/stack, octant-/fractionele bogen, bulges en verticale
+  voorwaarden. Opdracht-/puntbudgetten, recursie-/cycluscontrole, een vierdiepe
+  positiestack en annulering begrenzen foutieve fonts. Ook verplaatsingen zonder
+  groeiende puntlijst tellen mee in het werkbudget. Glyphprogramma's worden
+  gedeeld; tekstlengten gebruiken een beperkte advance-cache zonder alle
+  glyphcontouren vast te houden. Dit bewijst geen totale app-performance.
+  Beide exportvensters bieden Extra CAD-lettertypen; mappen worden in beide
+  projectvoorkeuren opgeslagen, teruggezet en aan de worker doorgegeven.
+  Manifestpaden worden relatief aan het manifest opgelost. Eigen folders
+  overschrijven dubbele systeemnamen; ontbrekende SHX/SHP-namen volgen de
+  oorspronkelijke txt/iso-fallbackvolgorde. Ook enkelvoudige exports beschermen
+  expliciet opgegeven fontbronnen tegen overschrijven.
+  Elf zelfgemaakte fonts leveren 2486 oorspronkelijke controletraces en 990
+  oorspronkelijke tekst-/uitlijningsgevallen, inclusief gebogen A/x/p,
+  Unicode-subtekens, blanco/ontbrekende glyphs, decimale fontkoppen, hexadecimale
+  glyphcodes, haakjes, commentaar en vervolgregels. Twee hashseeds produceren
+  dezelfde veertien fixturebestanden. Vier gerichte correcties behouden het
+  oude bewijs apart: penstand bij subtekens, opeenvolgende verticale voorwaarden,
+  ruwe legacy-fontkoppen en de eerste ontbrekende control-glyph die ondanks een
+  gecachete spatiebreedte een IndexError veroorzaakt. De laatste gebruikt nu
+  direct die oorspronkelijke fallbackbreedte. Acht verse runtime-fonts/120
+  tekstgevallen vergelijken de geoptimaliseerde executable met de oorspronkelijke
+  functies zonder opgeslagen verwachte uitvoer.
+  Zes echte gepaarde exports/zeventien paren/36 leaders vergelijken beide
+  richtingen volledig met losse exports en de oorspronkelijke grip-/grafiekcode.
+  Een scenario gebruikt daadwerkelijk een eigen SHX-profiellettertype. De
+  bestaande proxy blijft behouden; geen nieuwe auditreparatie is toegestaan.
+  De eerdere vijf samengestelde exports/acht profielen/26 PNGs, echte CLI,
+  vijf enkelvoudige workerexports/Excel en zeven containertekeningen/twaalf paren
+  slagen opnieuw. Ook 360 TTF-tekstgevallen/44 geometriegevallen/36 runtime-
+  fontgevallen/dertien samengestelde vakgroepen en vijftien systeemfontselecties
+  blijven gecontroleerd. Alle 386 Rust-tests (35 desktoptests), Clippy zonder
+  nieuwe waarschuwingen en de geoptimaliseerde app/auditdrivers slagen.
+  De ezdxf MIT-kennisgeving is opgenomen bij de bron, --licenses, CI-artifact en
+  portable ZIP; commerciële fonts worden niet meegeleverd. Windows CI herhaalt
+  de nieuwe referenties en runtime-/gepaarde controles. De drie Windows-runs
+  van de voorafgaande commit zijn geslaagd; de nieuwe run volgt na push.
+  LFF/BIGFONT, SHX-kaartweergave, overige CAD/MTEXT-/fontvarianten, resterende
+  oude instellingenmigratie en echte AutoCAD-/projectacceptatie blijven open.
+  Alle globale go/no-go-voorwaarden blijven verplicht.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

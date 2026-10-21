@@ -63,3 +63,65 @@ fn known_shape_fonts_are_not_silently_replaced_and_cancellation_is_immediate() {
         .resolve("missing.ttf", &AtomicBool::new(false))
         .is_ok());
 }
+#[test]
+fn actual_shape_fonts_fallback_order_family_and_duplicate_folder_priority() {
+    let first = tempfile::tempdir().unwrap();
+    let second = tempfile::tempdir().unwrap();
+    let cancel = AtomicBool::new(false);
+    let shp = include_bytes!("fixtures/stroke-font/fixture.shp");
+    let shx = include_bytes!("fixtures/stroke-font/fixture-1.0.shx");
+    for name in ["txt.shp", "iso.shp", "fixture.shp"] {
+        std::fs::write(first.path().join(name), shp).unwrap();
+    }
+    std::fs::write(first.path().join("fixture.shx"), shx).unwrap();
+    std::fs::write(
+        second.path().join("txt.shp"),
+        include_bytes!("fixtures/stroke-font/derived.shp"),
+    )
+    .unwrap();
+    std::fs::write(first.path().join("Arial.ttf"), FONT).unwrap();
+    let mut c = Catalog::from_dirs(
+        &[first.path().to_owned(), second.path().to_owned()],
+        &cancel,
+    )
+    .unwrap();
+    for name in ["missing.shx", "missing.shp"] {
+        assert_eq!(
+            c.selected_path(name),
+            Some(second.path().join("txt.shp").as_path())
+        );
+    }
+    assert_eq!(
+        c.selected_path("fixture"),
+        Some(first.path().join("fixture.shx").as_path())
+    );
+    assert_eq!(
+        c.selected_path("missing.ttf"),
+        Some(first.path().join("Arial.ttf").as_path())
+    );
+    for name in ["fixture", "fixture.shp", "missing.shx"] {
+        let mut f = c.resolve(name, &cancel).unwrap();
+        let e = f
+            .extent(
+                &Text {
+                    content: "Axp".into(),
+                    ..Default::default()
+                },
+                &cancel,
+            )
+            .unwrap();
+        assert!(e.width > 0. && e.width.is_finite());
+    }
+    // Real filesystem paths are protected export inputs, including fallback fonts.
+    assert!(c.source_paths().any(|p| p == second.path().join("txt.shp")));
+}
+#[test]
+fn support_folder_limit_excludes_the_builtin_system_folders() {
+    let dir = tempfile::tempdir().unwrap();
+    let folders = vec![dir.path().join("not-present"); 64];
+    assert!(Catalog::system_with_dirs(&folders, &AtomicBool::new(false)).is_ok());
+    assert!(
+        Catalog::system_with_dirs(&vec![dir.path().to_owned(); 65], &AtomicBool::new(false))
+            .is_err()
+    );
+}

@@ -2,6 +2,8 @@
 
 Deze map bevat de **native Rust-migratiepreview**, niet de huidige stabiele SleufBase-release.
 
+Laat de bijgeleverde `Pillow-LICENSE.txt` en `ezdxf-LICENSE.txt` bij de executable staan. De licenties zijn ook in de executable opvraagbaar met `--licenses`.
+
 ## Gebruik
 
 1. Pak de **hele** ZIP uit in een schrijfbare map op Windows 11 (bijvoorbeeld je documenten of een USB-schijf).

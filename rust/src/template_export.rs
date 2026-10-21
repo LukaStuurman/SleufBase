@@ -85,6 +85,8 @@ pub struct Settings {
     pub discipline_excel: bool,
     /// Keep both freshly rendered directions behind AutoCAD Versie.
     pub paired: bool,
+    /// Local CAD font folders, later folders override duplicate filenames.
+    pub font_directories: Vec<PathBuf>,
     /// Additional live project paths are never eligible for workbook replacement.
     #[serde(skip)]
     pub protected_sources: Vec<PathBuf>,
@@ -98,6 +100,7 @@ impl Default for Settings {
             label_gap: 18.,
             discipline_excel: false,
             paired: false,
+            font_directories: Vec::new(),
             protected_sources: Vec::new(),
         }
     }
@@ -170,6 +173,9 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
         }
     };
     resolve(&mut request.template);
+    for dir in &mut request.settings.font_directories {
+        resolve(dir);
+    }
     for slot in request.slots.iter_mut().flatten() {
         resolve(&mut slot.tiff_png);
         if let Some(source) = &mut slot.tiff_source {
@@ -550,11 +556,15 @@ pub fn export_with_datasets(
             }
         }
     }
-    let mut font_catalog = if request.settings.paired {
-        Some(crate::dxf_fonts::Catalog::system(control.flag())?)
-    } else {
-        None
-    };
+    let mut font_catalog =
+        if request.settings.paired || !request.settings.font_directories.is_empty() {
+            Some(crate::dxf_fonts::Catalog::system_with_dirs(
+                &request.settings.font_directories,
+                control.flag(),
+            )?)
+        } else {
+            None
+        };
     let font_paths = font_catalog
         .as_ref()
         .map(|c| c.source_paths().map(Path::to_owned).collect::<Vec<_>>())

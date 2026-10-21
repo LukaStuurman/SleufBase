@@ -367,6 +367,7 @@ pub fn request_with_bgt(
             paired: state.paired,
             project: Some(crate::python_values::trim(&state.project).into()),
             drawn_by: state.drawn_by.clone(),
+            font_directories: state.font_directories.clone(),
             label_gap: state.label_gap,
             ..Default::default()
         },

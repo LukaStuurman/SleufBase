@@ -33,6 +33,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
     assert!(!fixture.datasets.is_empty());
     let dir=tempfile::tempdir().unwrap();
     let mut options=Options {
+        font_directories:Vec::new(),
         paired:false,
         template:fixture.template.clone(),
         project:"Native projectport".into(), drawn_by:"Techbase".into(),

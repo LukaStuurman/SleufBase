@@ -28,6 +28,44 @@ fn request(name: &str) -> Request {
     }
     r
 }
+#[test]
+fn explicit_font_paths_are_manifest_relative_and_cannot_be_overwritten_by_export() {
+    let dir = tempfile::tempdir().unwrap();
+    let fonts = dir.path().join("CAD Fonts");
+    fs::create_dir(&fonts).unwrap();
+    let source = fonts.join("fixture.shp");
+    let bytes = include_bytes!("fixtures/stroke-font/fixture.shp");
+    fs::write(&source, bytes).unwrap();
+    let f: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/template-export/reference.json")).unwrap();
+    let mut value = f
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["name"] == "native-tiff")
+        .unwrap()["request"]
+        .clone();
+    value["settings"]["font_directories"] = serde_json::json!(["CAD Fonts"]);
+    let manifest = dir.path().join("input.json");
+    fs::write(&manifest, serde_json::to_vec(&value).unwrap()).unwrap();
+    let parsed = template_export::read_request(&manifest, &Control::default()).unwrap();
+    assert_eq!(parsed.settings.font_directories, vec![fonts.clone()]);
+    let mut r = request("native-tiff");
+    r.settings.paired = true;
+    r.settings.font_directories = vec![fonts];
+    for slot in r.slots.iter_mut().flatten() {
+        slot.tiff_png = PathBuf::new();
+        slot.map_png = PathBuf::new();
+        slot.map_source=Some(serde_json::from_value(serde_json::json!({"settings":{"dpi":40,"scale":225.},"background":{"kind":"solid","color":[255,255,255,255]}})).unwrap());
+    }
+    for paired in [false, true] {
+        r.settings.paired = paired;
+        let error = template_export::export(&source, &r, &Control::default()).unwrap_err();
+        assert!(error.contains("lettertype"), "{error}");
+    }
+    assert_eq!(fs::read(source).unwrap(), bytes);
+    assert_eq!(files(dir.path()).len(), 2);
+}
 fn files(root: &Path) -> Vec<(PathBuf, Vec<u8>)> {
     fn visit(root: &Path, result: &mut Vec<(PathBuf, Vec<u8>)>) {
         if !root.exists() {

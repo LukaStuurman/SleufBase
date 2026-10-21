@@ -16,6 +16,25 @@ pub(crate) struct Dialog {
     variant: String,
     scale: String,
 }
+/// Shared persistent CAD support folders for both template export routes.
+pub(crate) fn font_folders(ui: &mut egui::Ui, folders: &mut Vec<std::path::PathBuf>) {
+    egui::CollapsingHeader::new("Extra CAD-lettertypen").show(ui, |ui| {
+        ui.label("Voeg een map met SHX-, SHP- of TrueType-lettertypen toe. Deze keuze wordt bij het project bewaard.");
+        let mut remove = None;
+        for (i, folder) in folders.iter().enumerate() {
+            ui.horizontal(|ui| {
+                ui.label(folder.display().to_string());
+                if ui.small_button("Verwijderen").clicked() { remove = Some(i); }
+            });
+        }
+        if let Some(i) = remove { folders.remove(i); }
+        if ui.add_enabled(folders.len() < 64, egui::Button::new("Lettertypemap toevoegen…")).clicked() {
+            if let Some(folder) = rfd::FileDialog::new().set_title("Map met CAD-lettertypen").pick_folder() {
+                if !folders.contains(&folder) { folders.push(folder); }
+            }
+        }
+    });
+}
 impl Dialog {
     pub fn new(mut state: State, rasters: &[GeoTiffInfo], generation: u64) -> Self {
         let error = state.sync(rasters).err().unwrap_or_default();
@@ -193,6 +212,7 @@ pub(crate) fn show(
         });
 
         ui.label("De exportdatum wordt automatisch op ieder gebruikt blad ingevuld (dd-mm-jjjj).");
+        font_folders(ui, &mut d.state.font_directories);
 
         ui.horizontal_wrapped(|ui| {
             ui.label(d.state.template.as_ref().map_or_else(
@@ -399,8 +419,11 @@ pub(crate) fn show(
         ui.separator();
         ui.horizontal_wrapped(|ui| {
             ui.checkbox(&mut d.state.profiles, "Dwarsprofielen");
-            ui.checkbox(&mut d.state.paired,"Beide richtingen (Normaal / Reverse)");
-            ui.add_enabled(!d.state.paired,egui::Checkbox::new(&mut d.state.reverse,"Alleen omgekeerde richting"));
+            ui.checkbox(&mut d.state.paired, "Beide richtingen (Normaal / Reverse)");
+            ui.add_enabled(
+                !d.state.paired,
+                egui::Checkbox::new(&mut d.state.reverse, "Alleen omgekeerde richting"),
+            );
             ui.checkbox(&mut d.state.show_reference, "Referentiepunt");
             ui.checkbox(&mut d.state.avoid_collisions, "Labels uit elkaar plaatsen");
         });

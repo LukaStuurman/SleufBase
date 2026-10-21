@@ -25,7 +25,6 @@ struct Entry {
     style: String,
     weight: u16,
     width: u16,
-    shape: bool,
 }
 pub struct Catalog {
     entries: Vec<Entry>,
@@ -135,11 +134,15 @@ fn metadata(path: &Path, used: &mut usize) -> Result<Entry, String> {
         },
         weight,
         width,
-        shape: false,
     })
 }
 impl Catalog {
     pub fn system(cancel: &AtomicBool) -> Result<Self, String> {
+        Self::system_with_dirs(&[], cancel)
+    }
+    /// Explicit CAD support folders override matching system filenames.
+    pub fn system_with_dirs(extra: &[PathBuf], cancel: &AtomicBool) -> Result<Self, String> {
+        Self::validate_dirs(extra)?;
         #[cfg(windows)]
         let dirs = {
             let mut dirs = Vec::new();
@@ -165,9 +168,25 @@ impl Catalog {
             }
             dirs
         };
-        Self::from_dirs(&dirs, cancel)
+        let mut dirs = dirs;
+        dirs.extend_from_slice(extra);
+        Self::scan_dirs(&dirs, cancel)
+    }
+    pub fn validate_dirs(dirs: &[PathBuf]) -> Result<(), String> {
+        if dirs.len() > 64
+            || dirs
+                .iter()
+                .any(|p| p.as_os_str().is_empty() || p.as_os_str().len() > 32768)
+        {
+            return Err("Ongeldige of te veel lettertypemappen".into());
+        }
+        Ok(())
     }
     pub fn from_dirs(dirs: &[PathBuf], cancel: &AtomicBool) -> Result<Self, String> {
+        Self::validate_dirs(dirs)?;
+        Self::scan_dirs(dirs, cancel)
+    }
+    fn scan_dirs(dirs: &[PathBuf], cancel: &AtomicBool) -> Result<Self, String> {
         let mut result = Self {
             entries: Vec::new(),
             names: HashMap::new(),
@@ -238,7 +257,6 @@ impl Catalog {
                         _ => 5,
                     },
                     path: path.clone(),
-                    shape: true,
                 },
                 _ => continue,
             };
@@ -294,6 +312,14 @@ impl Catalog {
                 return Some(i);
             }
         }
+        if matches!(ext.as_str(), "shx" | "shp") {
+            if let Some(i) = ["txt.shx", "txt.shp", "iso.shx", "iso.shp"]
+                .iter()
+                .find_map(|n| self.names.get(*n).copied())
+            {
+                return Some(i);
+            }
+        }
         FALLBACKS
             .iter()
             .find_map(|name| self.names.get(&key(name)).copied())
@@ -317,9 +343,14 @@ impl Catalog {
             return Ok(Font::monospace());
         };
         let entry = &self.entries[i];
-        if entry.shape {
+        if entry
+            .path
+            .extension()
+            .and_then(|s| s.to_str())
+            .is_some_and(|s| s.eq_ignore_ascii_case("lff"))
+        {
             return Err(format!(
-                "Lettertype {} vraagt SHX/SHP/LFF-ondersteuning",
+                "Lettertype {} vraagt LFF-ondersteuning",
                 entry.path.display()
             ));
         }

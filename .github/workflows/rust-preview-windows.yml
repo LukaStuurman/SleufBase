@@ -46,7 +46,9 @@ jobs:
         run: cargo build --release --manifest-path rust/Cargo.toml
       - name: Bundle third-party notice
         shell: pwsh
-        run: Copy-Item -LiteralPath rust/third_party/Pillow-LICENSE.txt -Destination rust/target/release/Pillow-LICENSE.txt
+        run: |
+          Copy-Item -LiteralPath rust/third_party/Pillow-LICENSE.txt -Destination rust/target/release/Pillow-LICENSE.txt
+          Copy-Item -LiteralPath rust/third_party/ezdxf-LICENSE.txt -Destination rust/target/release/ezdxf-LICENSE.txt
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -424,11 +426,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/generate_dxf_text_metrics_fixtures.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_stroke_font_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/generate_template_extents_fixtures.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents
+          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents rust/tests/fixtures/stroke-font
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo build --release --manifest-path rust/Cargo.toml --example measure_template_extents
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_stroke_fonts.py rust/target/release/examples/measure_template_extents.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -542,6 +548,7 @@ jobs:
           path: |
             rust/target/release/sleufbase-rust.exe
             rust/target/release/Pillow-LICENSE.txt
+            rust/target/release/ezdxf-LICENSE.txt
           if-no-files-found: error
       - name: Package portable Rust Windows preview
         shell: pwsh
@@ -551,6 +558,7 @@ jobs:
           New-Item -ItemType Directory -Path $folder -Force | Out-Null
           Copy-Item -LiteralPath "rust/target/release/sleufbase-rust.exe" -Destination $folder -ErrorAction Stop
           Copy-Item -LiteralPath "rust/target/release/Pillow-LICENSE.txt" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/target/release/ezdxf-LICENSE.txt" -Destination $folder -ErrorAction Stop
           Copy-Item -LiteralPath "rust/PORTABLE.md" -Destination "$folder/README.md" -ErrorAction Stop
           Compress-Archive -Path "$folder/*" -DestinationPath $archive -CompressionLevel Optimal -Force
           $checksum = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()

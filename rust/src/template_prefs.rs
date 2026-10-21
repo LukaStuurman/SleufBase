@@ -3,7 +3,7 @@
 //! may reorder loaded jobs/rasters. Missing/ambiguous sources are never guessed.
 use crate::{
     geotiff::GeoTiffInfo, model::Dataset,
-    template_project::{self, BackgroundKind, Choice, Options, Source},
+    template_project::{self, BackgroundKind, Options, Source},
     virtual_trench::VirtualTrench,
 };
 use serde::{Deserialize,Serialize};
@@ -37,6 +37,8 @@ pub struct TemplatePreferences {
     pub paired:bool,
     pub project:String,
     pub drawn_by:String,
+    #[serde(default)]
+    pub font_directories:Vec<PathBuf>,
     pub dpi:u32,
     pub scale:f64,
     pub background:BackgroundKind,
@@ -69,12 +71,13 @@ impl TemplatePreferences {
             })
         }).collect();
         Self {template:opts.template.clone(),paired:opts.paired,project:opts.project.clone(),
-            drawn_by:opts.drawn_by.clone(),dpi:opts.dpi,scale:opts.scale,
+            drawn_by:opts.drawn_by.clone(),font_directories:opts.font_directories.clone(),dpi:opts.dpi,scale:opts.scale,
             background:opts.background,include_bgt:opts.include_bgt,
             include_cadastral:opts.include_cadastral,include_cad:opts.include_cad,
             choices}
     }
     pub fn validate(&self)->Result<(),String>{
+        crate::dxf_fonts::Catalog::validate_dirs(&self.font_directories)?;
         if self.choices.len()>20_000 {return Err("Te veel sjabloonvoorkeuren".into());}
         if self.project.len()>2048 || self.drawn_by.len()>2048
             || !self.scale.is_finite() || !(1. ..=100_000.).contains(&self.scale)
@@ -97,7 +100,7 @@ impl TemplatePreferences {
     {
         let mut options=Options {
             template:self.template.clone(),paired:self.paired,project:self.project.clone(),
-            drawn_by:self.drawn_by.clone(),dpi:self.dpi,scale:self.scale,
+            drawn_by:self.drawn_by.clone(),font_directories:self.font_directories.clone(),dpi:self.dpi,scale:self.scale,
             background:self.background,include_bgt:self.include_bgt,
             include_cadastral:self.include_cadastral,include_cad:self.include_cad,
             choices:template_project::suggest(jobs,rasters,trenches),

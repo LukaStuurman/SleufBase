@@ -17,7 +17,7 @@ pub struct Measurements {
     pub descender_height: f64,
 }
 impl Measurements {
-    fn scale(self, factor: f64) -> Self {
+    pub(crate) fn scale(self, factor: f64) -> Self {
         Self {
             baseline: self.baseline * factor,
             cap_height: self.cap_height * factor,
@@ -65,6 +65,7 @@ impl OutlineBuilder for ControlY {
 #[derive(Clone)]
 pub struct Font {
     ttf: Option<TrueType>,
+    stroke: Option<crate::stroke_font::Font>,
 }
 #[derive(Clone, Debug, serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
@@ -107,12 +108,24 @@ pub struct Extent {
 impl Font {
     pub fn source_bytes(&self) -> usize {
         self.ttf.as_ref().map_or(0, |f| f.data.len())
+            + self.stroke.as_ref().map_or(0, |f| f.source_bytes())
     }
     pub fn monospace() -> Self {
-        Self { ttf: None }
+        Self {
+            ttf: None,
+            stroke: None,
+        }
     }
     pub fn load(path: &Path, cancel: &AtomicBool) -> Result<Self, String> {
         let data = crate::input::read(path, 64 * 1024 * 1024, "DXF-lettertype", cancel)?;
+        let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+        if ext.eq_ignore_ascii_case("shp") || ext.eq_ignore_ascii_case("shx") {
+            let program = crate::stroke_font::Program::parse(&data, ext, cancel)?;
+            return Ok(Self {
+                ttf: None,
+                stroke: Some(crate::stroke_font::Font::new(program, cancel)?),
+            });
+        }
         let face = Face::parse(&data, 0).map_err(|e| format!("Ongeldig DXF-lettertype: {e:?}"))?;
         let bounds = |ch| {
             let mut pen = ControlY {
@@ -138,6 +151,7 @@ impl Font {
         }
         crate::input::check(cancel)?;
         Ok(Self {
+            stroke: None,
             ttf: Some(TrueType {
                 data: Arc::new(data),
                 measurements,
@@ -152,6 +166,9 @@ impl Font {
         width: f64,
         cancel: &AtomicBool,
     ) -> Result<(f64, Measurements), String> {
+        if let Some(stroke) = &mut self.stroke {
+            return stroke.measure(text, height, width, cancel);
+        }
         let Some(ttf) = &mut self.ttf else {
             return Ok((
                 text.chars().count() as f64 * height * width.abs(),

@@ -34,11 +34,32 @@ fn main() -> Result<(), String> {
         "virtual",
         "image-only",
         "extended",
+        "stroke-font",
     ] {
         let dir = out.join(name);
         std::fs::create_dir(&dir).map_err(|e| e.to_string())?;
         let mut value = base.clone();
         value["template"] = serde_json::json!(root.join("assets/cadastral_template.dxf"));
+        if name == "stroke-font" {
+            let fonts = dir.join("cad-fonts");
+            std::fs::create_dir(&fonts).map_err(|e| e.to_string())?;
+            std::fs::write(
+                fonts.join("fixture.shx"),
+                include_bytes!("../tests/fixtures/stroke-font/fixture-1.0.shx"),
+            )
+            .map_err(|e| e.to_string())?;
+            let source = std::fs::read_to_string(root.join("assets/cadastral_template.dxf"))
+                .map_err(|e| e.to_string())?;
+            if !source.contains("NLCS-ISO.ttf") {
+                return Err("Missing profile style font".into());
+            }
+            let template = dir.join("stroke-template.dxf");
+            // Change only this dev fixture's font references, retaining proxy/graph bytes.
+            std::fs::write(&template, source.replace("NLCS-ISO.ttf", "fixture.shx"))
+                .map_err(|e| e.to_string())?;
+            value["template"] = serde_json::json!(template);
+            value["settings"]["font_directories"] = serde_json::json!([fonts]);
+        }
         value["settings"]["project"] = serde_json::json!("Normaal / Reverse Ø 漢");
         value["settings"]["export_date"] = serde_json::json!([2026, 10, 20]);
         value["settings"]["discipline_excel"] = serde_json::json!(true);

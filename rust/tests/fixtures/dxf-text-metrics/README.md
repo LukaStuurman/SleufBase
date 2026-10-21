@@ -25,8 +25,9 @@ Coordinates use a comparison budget of `1e-12 + 32 * f64::EPSILON * magnitude`;
 this is an explicit floating-point comparison budget, not a claim of universal
 byte-identical text rendering. No font rasterization or CAD text display is
 implemented by this component. Windows font discovery and the paired-export UI are now connected through the
-real worker (see template-paired). SHX/SHP/LFF font parsing, other discovery/
-settings sources, MTEXT layout and interactive acceptance remain open.
+real worker (see template-paired). Native SHP/SHX metrics and explicit CAD support folders are now connected too
+(see stroke-font). LFF/BIGFONT, remaining settings migration, MTEXT layout and
+interactive acceptance remain open.
 
 `tools/generate_dxf_text_metrics_fixtures.py` reproduces the reference using
 Python 3.11, ezdxf 1.4.4 and FontTools 4.67.0. Set

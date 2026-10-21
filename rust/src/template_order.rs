@@ -42,6 +42,7 @@ pub struct State {
     pub rows: Vec<Row>,
     pub project: String,
     pub drawn_by: String,
+    pub font_directories: Vec<PathBuf>,
     pub template: Option<PathBuf>,
     pub profiles: bool,
     pub paired: bool,
@@ -59,6 +60,7 @@ impl Default for State {
             rows: Vec::new(),
             project: String::new(),
             drawn_by: String::new(),
+            font_directories: Vec::new(),
             template: None,
             profiles: true,
             paired: true,
@@ -310,6 +312,7 @@ impl State {
         Ok(state)
     }
     pub fn validate(&self) -> Result<(), String> {
+        crate::dxf_fonts::Catalog::validate_dirs(&self.font_directories)?;
         if self.rows.len() > 5000 {
             return Err("Maximaal 5000 sjabloonvakken".into());
         }

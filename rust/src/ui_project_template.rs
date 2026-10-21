@@ -109,6 +109,7 @@ impl SleufBaseApp {
                         });
                         ui.separator();
                         ui.heading("2. Kaarten en profielen");
+                        crate::template_dialog::font_folders(ui, &mut dialog.options.font_directories);
                         ui.checkbox(&mut dialog.options.paired,"Beide richtingen (Normaal / Reverse)");
                         if dialog.options.paired {ui.small("Kies na export in AutoCAD de gewenste richting met Versie.");}
                         ui.horizontal(|ui| {
