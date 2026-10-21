@@ -428,13 +428,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/generate_stroke_font_fixtures.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_lff_font_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/generate_template_extents_fixtures.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents rust/tests/fixtures/stroke-font
+          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents rust/tests/fixtures/stroke-font rust/tests/fixtures/lff-font
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo build --release --manifest-path rust/Cargo.toml --example measure_template_extents
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_stroke_fonts.py rust/target/release/examples/measure_template_extents.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_lff_fonts.py rust/target/release/examples/measure_template_extents.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

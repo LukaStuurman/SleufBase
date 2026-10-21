@@ -19,7 +19,7 @@ pub(crate) struct Dialog {
 /// Shared persistent CAD support folders for both template export routes.
 pub(crate) fn font_folders(ui: &mut egui::Ui, folders: &mut Vec<std::path::PathBuf>) {
     egui::CollapsingHeader::new("Extra CAD-lettertypen").show(ui, |ui| {
-        ui.label("Voeg een map met SHX-, SHP- of TrueType-lettertypen toe. Deze keuze wordt bij het project bewaard.");
+        ui.label("Voeg een map met SHX-, SHP-, LFF- of TrueType-lettertypen toe. Deze keuze wordt bij het project bewaard.");
         let mut remove = None;
         for (i, folder) in folders.iter().enumerate() {
             ui.horizontal(|ui| {

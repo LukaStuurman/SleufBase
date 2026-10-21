@@ -508,10 +508,10 @@ De CLI schakelt dit in met `settings.paired: true`. Daarvoor zijn een originele
 TIFF- of virtuele bron en `map_source` nodig; alleen een al georiënteerde PNG
 bevat onvoldoende gegevens om de andere richting opnieuw voor te bereiden.
 Windows-fontkeuze gebeurt lokaal op naam/familie/fallback. Beide exportvensters
-bieden **Extra CAD-lettertypen** om eigen SHX-/SHP-/TrueType-mappen te kiezen;
+bieden **Extra CAD-lettertypen** om eigen SHX-/SHP-/LFF-/TrueType-mappen te kiezen;
 deze mappen worden bij het project bewaard. De CLI gebruikt
 `settings.font_directories: ["CAD Fonts"]` (manifest-relatief). SHP/SHX 1.0/1.1
-en Unicode-programma’s leveren native tekstmaten voor de keuzegrip; er zijn
+en Unicode-programma’s en LibreCAD LFF leveren native tekstmaten voor de keuzegrip; er zijn
 geen commerciële fonts meegeleverd. Nieuwe fouten of
 annuleren behouden de vorige DXF en afbeeldingen; het discipline-overzicht telt
 ieder geselecteerd vak eenmaal. De
@@ -522,7 +522,7 @@ inhoud, beeldpixels, gekoppelde onderdelen en resterende grenzen.
 
 1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.
 2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows, StreetSmart en kaartreprojectie.
-3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, LFF/BIGFONT en SHX-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
+3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, BIGFONT/fallbackcompatibiliteit en SHX/LFF-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
 4. Resterende Python-toolset/kaartplaatsing en exacte rastermaskers voor virtuele sleuven/MarXact (native editor en eigen raster zijn aanwezig), volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
 5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.
 

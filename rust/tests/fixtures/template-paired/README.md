@@ -1,7 +1,7 @@
 # Complete native Normaal / Reverse exports
 
-`export_paired_templates` runs the real template exporter on six scenarios with
-seventeen selected slots in total. Each scenario writes a forward-only export,
+`export_paired_templates` runs the real template exporter on seven scenarios with
+twenty selected slots in total. Each scenario writes a forward-only export,
 a reverse-only export and a paired export from the same inputs. Cases include
 drawn/hidden profiles, photos on both panels with quarter-turn rotation, a native
 virtual raster, image-only slots, duplicate labels, reserved empty slots and an
@@ -33,12 +33,12 @@ font catalog for fifteen filename/family/case/fallback requests. Native indexing
 reads bounded SFNT name/OS2 tables, not all glyph data. Actual glyph bytes are
 shared and loaded on demand. The original fallback priority and directory
 precedence are retained. Native SHP/SHX programs now supply real glyph metrics;
-an additional real paired case uses a synthetic SHX profile font from an explicit
+additional real paired cases use synthetic SHX and LFF profile fonts from an explicit
 CAD support folder. The original graph oracle receives that same local font and
 checks the resulting grip. Both dialogs offer extra font folders, persist them
 with the project, and pass them to the worker. Relative manifest folders resolve
 beside the manifest. Font sources are protected against DXF and companion
-overwrite. LFF/BIGFONT and other settings migration remain open.
+overwrite. BIGFONT/error fallback compatibility and other settings migration remain open.
 
 Both native dialogs default to paired output and save this preference. Real egui
 worker regressions verify both directions, project name/local date, input-owner
@@ -46,6 +46,6 @@ restoration and save/export exclusion. Additional tests cancel or panic late,
 remove the donor, reject ambiguous pre-oriented PNG input and verify unchanged
 previous drawings/bundles. Existing single-direction oracle cases stay explicit.
 
-Further release work includes LFF/BIGFONT, SHX map display, other CAD/font types, original photo
+Further release work includes BIGFONT/error fallback compatibility, SHX/LFF map display, other CAD/font types, original photo
 annotations/virtual masks, complete settings migration and interactive AutoCAD
 acceptance. All global gates in `rust/PARITY.md` remain mandatory.

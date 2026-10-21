@@ -2,6 +2,9 @@ MIT License
 
 Copyright (c) 2020 Manfred Moitzi
 Copyright (c) 2022-2026 Manfred Moitzi (fonts/shapefile.py)
+Copyright (c) 2023 Manfred Moitzi (fonts/lff.py)
+Copyright (c) 2020-2024 Manfred Moitzi (path/tools.py)
+Copyright (c) 2010-2024 Manfred Moitzi (math/_bezier4p.py)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

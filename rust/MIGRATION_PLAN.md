@@ -960,6 +960,47 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   LFF/BIGFONT, SHX-kaartweergave, overige CAD/MTEXT-/fontvarianten, resterende
   oude instellingenmigratie en echte AutoCAD-/projectacceptatie blijven open.
   Alle globale go/no-go-voorwaarden blijven verplicht.
+- Native LibreCAD LFF-tekstmeting en gedeelde contouren (21 oktober 2026):
+  LFF is aangesloten op dezelfde lokale fontcatalogus, beide exportvensters en
+  de automatische profiel-/keuzegrip. Letter-/woordafstand, Unicode-/hex-ID's,
+  polylijnen met bestemmingbulges, lege contouren, ontbrekende glyphs en ouder-
+  overerving volgen het oorspronkelijke meetcontract. De ouder is een immutable
+  snapshot: latere herdefinitie van hetzelfde teken verandert bestaande kinderen
+  niet. Gedeelde oudernodes vermijden herhaald kopiëren van contourlijsten;
+  alleen maximaal 8192 advances worden gecachet. Een ouder met 2000 polylijnen en
+  1000 kinderen behoudt minder dan 512 KiB gemeten programmastructuur. Dat is geen
+  claim over totale proces-RAM of app-snelheid. Lege/single-point polylijnen
+  verbruiken werkbudget zonder tijdelijke padallocatie. Bestands-/definitie-/
+  vertex-/diepte-/puntbudgetten, tekstwerkbudget en annulering begrenzen invoer.
+  De oorspronkelijke fallback_lff()-fout wordt afzonderlijk bewezen: zelfs met
+  standard.lff ontbreekt de fallback, of txt.shx wordt als LFF gekozen. Native
+  code gebruikt de bedoelde standard/iso/simplex-prioriteit. Ongeldige of niet-
+  eindige fontdata geeft een duidelijke fout; overige fout-/BIGFONT-fallback-
+  compatibiliteit blijft nog te toetsen.
+  Zes originele testfonts leveren 71 oorspronkelijke controletraces en 360
+  tekst-/uitlijningsgevallen, inclusief gebogen A/x/p, Unicode-decimalen, hex-
+  prefixen, ongeldige velden, ontbrekende/lege glyphs, ouderredefinitie, spaties,
+  controltekens, alle vijftien uitlijningen, OCS, spiegeling en schuinhoek.
+  Twee hashseeds reproduceren alle zeven gegenereerde bestanden. Acht verse
+  runtime-fonts/120 gevallen toetsen de geoptimaliseerde executable zonder
+  opgeslagen verwachte uitvoer. De bestaande SHP/SHX-boogconstructie gebruikt
+  nu dezelfde cubic-kern; alle eerdere 2486 SHX-traces/990 tekstgevallen blijven
+  gelijk, inclusief lege bogen. De afzonderlijke padrepresentaties houden hun
+  eigen lege-padcontract (LFF NumpyPath versus SHX Path).
+  Zeven echte gepaarde exports/twintig paren/48 leaders vergelijken beide
+  richtingen, volledige geometrie/annotaties/beeldpixels en Excel. De
+  oorspronkelijke grip-/grafiekcode ontvangt hetzelfde werkelijke SHX- of
+  LFF-profiellettertype. Geen nieuwe auditreparatie; de bestaande proxy blijft
+  behouden. De eerdere samengestelde exports/CLI, workerexports/werkboeken,
+  tekst-/geometrie-/systeemfontproeven en donorgrafen slagen opnieuw.
+  Alle 392 Rust-tests (35 desktoptests), de laatste gerichte hercontrole,
+  Clippy zonder nieuwe waarschuwingen en de geoptimaliseerde app/auditdrivers
+  slagen. MIT-kennisgevingen voor LFF en gedeelde path/math-helpers zijn bewaard
+  en via --licenses gecontroleerd; CI herhaalt de nieuwe referenties en audits.
+  Alle drie Windows-runs van de voorafgaande SHX-commit zijn geslaagd.
+  BIGFONT/errorfallbacks, SHX/LFF-kaartweergave, brede CAD-/MTEXT-ondersteuning,
+  overige oorspronkelijke instellingen en echte CAD-/projectacceptatie blijven
+  open. De volledige oorspronkelijke go/no-go-lijst blijft vereist voor release.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

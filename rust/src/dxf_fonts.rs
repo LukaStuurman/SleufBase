@@ -320,6 +320,15 @@ impl Catalog {
                 return Some(i);
             }
         }
+        if ext == "lff" {
+            // Correct the old manager's accidental SHX list in fallback_lff().
+            if let Some(i) = ["standard.lff", "iso.lff", "simplex.lff"]
+                .iter()
+                .find_map(|n| self.names.get(*n).copied())
+            {
+                return Some(i);
+            }
+        }
         FALLBACKS
             .iter()
             .find_map(|name| self.names.get(&key(name)).copied())
@@ -343,17 +352,6 @@ impl Catalog {
             return Ok(Font::monospace());
         };
         let entry = &self.entries[i];
-        if entry
-            .path
-            .extension()
-            .and_then(|s| s.to_str())
-            .is_some_and(|s| s.eq_ignore_ascii_case("lff"))
-        {
-            return Err(format!(
-                "Lettertype {} vraagt LFF-ondersteuning",
-                entry.path.display()
-            ));
-        }
         if let Some(font) = self.loaded.get(&i) {
             return Ok(font.clone());
         }

@@ -34,7 +34,8 @@ glyph controls, recursion/cycles, stack depth and advance-cache entries. Bad
 fonts fail explicitly; they do not return plausible fabricated geometry.
 This implements SHP/SHX glyph geometry and horizontal fast text measurement
 for template selectors. It does not yet render SHX strokes in the map UI;
-BIGFONT, LFF and broader CAD/MTEXT coverage remain release gates.
+LFF metrics are now implemented separately (see lff-font). BIGFONT/error
+fallback compatibility, viewport text and broader CAD/MTEXT remain release gates.
 
 Protocol and measurements were ported from ezdxf's MIT-licensed shapefile
 module; retain `rust/third_party/ezdxf-LICENSE.txt`. Shape command specification:

@@ -424,55 +424,11 @@ impl Renderer<'_> {
     fn close(a: f64, b: f64, abs: f64) -> bool {
         (a - b).abs() <= abs.max(1e-9 * a.abs().max(b.abs()))
     }
-    fn span(start: f64, mut end: f64) -> f64 {
-        let tau = std::f64::consts::TAU;
-        if Self::close(start, end, 1e-15) {
-            return 0.;
-        }
-        let start = start.rem_euclid(tau);
-        if Self::close(start, end.rem_euclid(tau), 1e-15) {
-            return tau;
-        }
-        if !Self::close(end, tau, 1e-15) {
-            end = end.rem_euclid(tau);
-        }
-        if end < start {
-            end += tau;
-        }
-        end - start
-    }
     fn ellipse(&mut self, center: Point, radius: f64, start: f64, end: f64) -> Result<(), String> {
-        let span = Self::span(start, end);
-        if span.abs() < 1e-9 {
-            return Ok(());
-        }
-        // Keep the source's global-axis parameterization and segment rounding.
-        // Rotating a local basis changes quarter-boundary rounding and fast bounds.
-        let mut angle = start.rem_euclid(std::f64::consts::TAU);
-        let delta = (angle + span) - angle;
-        let count = (delta / std::f64::consts::PI * 2.).ceil().max(1.) as usize;
-        if count > 8 || !radius.is_finite() || radius <= 0. {
-            return Err("Ongeldige SHX-boog".into());
-        }
-        let step = delta / count as f64;
-        let k = 4. / 3. * (step / 4.).tan();
-        let transform = |p: Point| add(center, mul(p, radius));
-        let mut point = [angle.cos(), angle.sin()];
-        let mut curves = Vec::with_capacity(count);
-        for _ in 0..count {
-            let begin = point;
-            angle += step;
-            point = [angle.cos(), angle.sin()];
-            curves.push([
-                transform(begin),
-                transform(add(begin, [-begin[1] * k, begin[0] * k])),
-                transform(add(point, [point[1] * k, -point[0] * k])),
-                transform(point),
-            ]);
-        }
+        let mut curves = crate::stroke_curve::ellipse(center, radius, start, end)?;
         let close =
             |a: Point, b: Point| Self::close(a[0], b[0], 1e-12) && Self::close(a[1], b[1], 1e-12);
-        if close(self.at, curves.last().unwrap()[3]) {
+        if curves.last().is_some_and(|c| close(self.at, c[3])) {
             curves.reverse();
             for c in &mut curves {
                 c.reverse();

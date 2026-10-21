@@ -35,19 +35,26 @@ fn main() -> Result<(), String> {
         "image-only",
         "extended",
         "stroke-font",
+        "lff-font",
     ] {
         let dir = out.join(name);
         std::fs::create_dir(&dir).map_err(|e| e.to_string())?;
         let mut value = base.clone();
         value["template"] = serde_json::json!(root.join("assets/cadastral_template.dxf"));
-        if name == "stroke-font" {
+        if name == "stroke-font" || name == "lff-font" {
+            let file = if name == "lff-font" {
+                "fixture.lff"
+            } else {
+                "fixture.shx"
+            };
+            let data: &[u8] = if name == "lff-font" {
+                include_bytes!("../tests/fixtures/lff-font/polygons.lff")
+            } else {
+                include_bytes!("../tests/fixtures/stroke-font/fixture-1.0.shx")
+            };
             let fonts = dir.join("cad-fonts");
             std::fs::create_dir(&fonts).map_err(|e| e.to_string())?;
-            std::fs::write(
-                fonts.join("fixture.shx"),
-                include_bytes!("../tests/fixtures/stroke-font/fixture-1.0.shx"),
-            )
-            .map_err(|e| e.to_string())?;
+            std::fs::write(fonts.join(file), data).map_err(|e| e.to_string())?;
             let source = std::fs::read_to_string(root.join("assets/cadastral_template.dxf"))
                 .map_err(|e| e.to_string())?;
             if !source.contains("NLCS-ISO.ttf") {
@@ -55,7 +62,7 @@ fn main() -> Result<(), String> {
             }
             let template = dir.join("stroke-template.dxf");
             // Change only this dev fixture's font references, retaining proxy/graph bytes.
-            std::fs::write(&template, source.replace("NLCS-ISO.ttf", "fixture.shx"))
+            std::fs::write(&template, source.replace("NLCS-ISO.ttf", file))
                 .map_err(|e| e.to_string())?;
             value["template"] = serde_json::json!(template);
             value["settings"]["font_directories"] = serde_json::json!([fonts]);
