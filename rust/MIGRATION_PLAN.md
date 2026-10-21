@@ -1001,6 +1001,50 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   BIGFONT/errorfallbacks, SHX/LFF-kaartweergave, brede CAD-/MTEXT-ondersteuning,
   overige oorspronkelijke instellingen en echte CAD-/projectacceptatie blijven
   open. De volledige oorspronkelijke go/no-go-lijst blijft vereist voor release.
+- Oorspronkelijke fontfactory-terugval en correcte allocatietelling (21 oktober 2026):
+  De catalogus volgt nu ook de oorspronkelijke fase-afhankelijke terugval voor
+  niet-ondersteunde SHX/BIGFONT-programma's, niet-renderbare eerste glyphs en
+  ontbrekende bestanden. TrueType en daarna monospace worden uitsluitend volgens
+  die regels gekozen. Beschadigde ondersteunde SHX/LFF-data en een onbruikbare
+  standaard-TTF blijven fouten; de standaard kan niet naar zichzelf recursen.
+  Fontfouten hebben nu een getypeerde oorzaak: invalid, unsupported, unavailable,
+  limit of cancelled. Limieten en annuleren blijven fataal zonder stringmatching
+  of een stilzwijgend vervangend font. De gedeelde invoerlezer bewaart dezelfde
+  gebruikersfouten, met aanvullende getypeerde I/O-/limiet-/annuleerinformatie.
+  De werkelijke fontbytegrens wordt bij gebruik gecontroleerd; de metadata-index
+  leest alleen beperkte naam-/OS2-tabellen en slaat grote glyphdata niet voortijdig
+  over alsof het font ontbreekt. Tijdelijk verdwenen bestanden kunnen later
+  herstellen; succesvol geladen data blijft een gedeeld immutable snapshot.
+  De gemelde fontbron is na resolution het werkelijke vervangende bestand.
+  Een onterechte selectorfout is hersteld: 32 aliassen van één font van 9 MiB
+  telden als 288 MiB en overschreden het 256 MiB-budget. Gedeelde Arc-data telt nu
+  eenmaal; verschillende allocaties blijven afzonderlijk begrensd. Dit is een
+  concrete allocatiebudgetcorrectie, geen claim over totale app-RAM/snelheid.
+  Zeventien oorspronkelijke factoryscenario's/32 vragen vergelijken fonttype,
+  werkelijk backingbestand, advance, metingen en iedere TEXT-hoek. Hieronder
+  BIGFONT, onbekende SHX-handtekeningen, onbruikbare SHP-/TTF-glyphs, geen defaults,
+  fatale data, verdwenen bestanden tussen index en laden en bestaande caches na
+  verwijderen. Het bronbewijs kijkt naar het font in de glyphcache; aangevraagde
+  namen of de laatste cachelookup kunnen een ander bestand beschrijven.
+  Een oorspronkelijke TTF-fixture zonder outlines en alle bronverwachtingen
+  reproduceren byte voor byte met een andere hashseed. De geoptimaliseerde
+  measure_font_resolution-driver herhaalt dezelfde scenario's in eigen tijdelijke
+  mappen; de onafhankelijke Python-controle vergelijkt de complete uitvoer.
+  Getypeerde limiet-/annuleringsproeven en herstel zonder indexherbouw slagen.
+  Acht echte gepaarde exports/drieëntwintig paren/60 leaders vergelijken opnieuw
+  beide richtingen, geometrie, beelden, Excel en de oorspronkelijke grip-/
+  zichtbaarheidscode. De nieuwe BIGFONT-stijl wordt echt geïndexeerd; de bron-
+  factory levert dezelfde vervangende TrueType-data. Geen nieuwe auditreparaties.
+  Ook de eerdere samengestelde exports/CLI, workerexports/Excel, SHX/LFF- en
+  systeemfontproeven, profielgrenzen en donorgrafen slagen opnieuw.
+  Alle 396 Rust-tests (35 desktoptests), de gerichte eindcontrole, Clippy zonder
+  nieuwe waarschuwingen en de geoptimaliseerde app/auditdrivers slagen. Windows
+  CI reproduceert de factoryfixtures en controleert de driver naast de echte
+  gepaarde uitvoer. Alle drie Windows-runs van de voorafgaande LFF-commit slagen.
+  Verdere font-/vendor-/mutatiegevallen, viewporttekst/SHX/LFF-stroken, volledige
+  CAD-/MTEXT-/projectworkflows en echte acceptatie blijven open. BIGFONT-glyphs
+  worden niet geclaimd: deze terugval volgt juist de oorspronkelijke factory.
+  Alle oorspronkelijke globale go/no-go-voorwaarden blijven verplicht.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische

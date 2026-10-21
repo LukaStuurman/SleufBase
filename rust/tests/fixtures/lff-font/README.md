@@ -38,7 +38,7 @@ local LFF font and checks the automatic grip with the original code. CLI and bot
 native dialogs use the same local font catalog and saved support folders.
 
 Glyph metrics/controls are available for selectors; viewport stroke rendering,
-BIGFONT/error fallback compatibility, broader CAD/MTEXT and actual CAD application
+Further font/vendor variants, broader CAD/MTEXT and actual CAD application
 acceptance remain open. All global `rust/PARITY.md` release gates still apply.
 
 Protocol, path and metric semantics were ported from ezdxf's MIT-licensed LFF and

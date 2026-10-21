@@ -30,6 +30,7 @@ pub struct Catalog {
     entries: Vec<Entry>,
     names: HashMap<String, usize>,
     loaded: HashMap<usize, Font>,
+    resolved: HashMap<(usize, bool), Option<usize>>,
     loaded_bytes: usize,
     metadata_bytes: usize,
 }
@@ -66,9 +67,8 @@ fn u32be(data: &[u8], i: usize) -> u32 {
 fn metadata(path: &Path, used: &mut usize) -> Result<Entry, String> {
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let len = file.metadata().map_err(|e| e.to_string())?.len();
-    if len > 64 * 1024 * 1024 {
-        return Err("Lettertype is te groot".into());
-    }
+    // Index only small name/OS2 tables. The actual glyph-byte limit is checked
+    // on use, so an indexed oversized font cannot silently become a fallback.
     let header = part(&mut file, len, 0, 16, used)?;
     let offset = if &header[..4] == b"ttcf" {
         u64::from(u32be(&header, 12))
@@ -191,6 +191,7 @@ impl Catalog {
             entries: Vec::new(),
             names: HashMap::new(),
             loaded: HashMap::new(),
+            resolved: HashMap::new(),
             loaded_bytes: 0,
             metadata_bytes: 0,
         };
@@ -329,6 +330,9 @@ impl Catalog {
                 return Some(i);
             }
         }
+        self.ttf_fallback()
+    }
+    fn ttf_fallback(&self) -> Option<usize> {
         FALLBACKS
             .iter()
             .find_map(|name| self.names.get(&key(name)).copied())
@@ -337,8 +341,18 @@ impl Catalog {
         if request == "*monospace" {
             None
         } else {
-            self.select(request).map(|i| self.entries[i].path.as_path())
+            let i = self.select(request)?;
+            let exact = self.exact_lookup(request);
+            self.resolved
+                .get(&(i, exact))
+                .copied()
+                .unwrap_or(Some(i))
+                .map(|i| self.entries[i].path.as_path())
         }
+    }
+    fn exact_lookup(&self, request: &str) -> bool {
+        // A matched family recurses through its selected filename in make_font().
+        Path::new(request).extension().is_none() || self.names.contains_key(&key(request))
     }
     pub fn source_paths(&self) -> impl Iterator<Item = &Path> {
         self.entries.iter().map(|e| e.path.as_path())
@@ -351,17 +365,81 @@ impl Catalog {
         let Some(i) = self.select(request) else {
             return Ok(Font::monospace());
         };
+        let exact = self.exact_lookup(request);
+        self.resolved.remove(&(i, exact));
+        let result = self.resolve_file(i, exact, cancel).map_err(String::from)?;
+        input::check(cancel)?;
+        self.resolved.insert((i, exact), result.1);
+        Ok(result.0)
+    }
+    fn resolve_file(
+        &mut self,
+        i: usize,
+        exact: bool,
+        cancel: &AtomicBool,
+    ) -> Result<(Font, Option<usize>), crate::font_error::Error> {
+        use crate::font_error::{Error, Kind};
+        Error::check(cancel)?;
+        match self.load_file(i, cancel) {
+            Ok(f) => Ok((f, Some(i))),
+            Err(e) => {
+                let shape = self.entries[i]
+                    .path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .is_some_and(|s| {
+                        s.eq_ignore_ascii_case("shx") || s.eq_ignore_ascii_case("shp")
+                    });
+                let stroke = shape
+                    || self.entries[i]
+                        .path
+                        .extension()
+                        .and_then(|s| s.to_str())
+                        .is_some_and(|s| s.eq_ignore_ascii_case("lff"));
+                let fallback = ((shape || !stroke) && e.kind() == Kind::Unsupported)
+                    || (stroke && !exact && e.kind() == Kind::Unavailable);
+                if fallback {
+                    Error::check(cancel)?;
+                    if let Some(target) = self.ttf_fallback() {
+                        if target == i {
+                            return Err(e);
+                        }
+                        return match self.load_file(target, cancel) {
+                            Ok(f) => Ok((f, Some(target))),
+                            Err(e) if e.kind() == Kind::Unavailable => {
+                                Ok((Font::monospace(), None))
+                            }
+                            Err(e) => Err(e),
+                        };
+                    }
+                    return Ok((Font::monospace(), None));
+                }
+                if e.kind() == Kind::Unavailable {
+                    Ok((Font::monospace(), None))
+                } else {
+                    Err(e)
+                }
+            }
+        }
+    }
+    fn load_file(
+        &mut self,
+        i: usize,
+        cancel: &AtomicBool,
+    ) -> Result<Font, crate::font_error::Error> {
         let entry = &self.entries[i];
         if let Some(font) = self.loaded.get(&i) {
             return Ok(font.clone());
         }
-        let font = Font::load(&entry.path, cancel)?;
+        let font = Font::load_catalog(&entry.path, cancel)?;
         let loaded_bytes = self
             .loaded_bytes
             .checked_add(font.source_bytes())
-            .ok_or("Lettertypebudget overschreden")?;
+            .ok_or_else(|| crate::font_error::Error::limit("Lettertypebudget overschreden"))?;
         if loaded_bytes > 256 * 1024 * 1024 {
-            return Err("Lettertypebudget overschreden".into());
+            return Err(crate::font_error::Error::limit(
+                "Lettertypebudget overschreden",
+            ));
         }
         self.loaded_bytes = loaded_bytes;
         self.loaded.insert(i, font.clone());

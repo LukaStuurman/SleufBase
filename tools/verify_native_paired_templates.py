@@ -76,7 +76,7 @@ def original_graph(path,wrappers,doc,baseline_fixes):
 
 def main():
     out=Path(sys.argv[1]);total=0;profiles=0
-    for name in ['profiles','photos-no-draw','virtual','image-only','extended','stroke-font','lff-font']:
+    for name in ['profiles','photos-no-draw','virtual','image-only','extended','stroke-font','lff-font','bigfont-fallback']:
         folder=out/name;paired=ezdxf.readfile(folder/'paired.dxf')
         request=json.loads((folder/'paired-input.json').read_text(encoding='utf-8'))
         # The approved source contains one existing owner-0 proxy that ezdxf's
@@ -134,8 +134,16 @@ def main():
             original=fonts.font_manager.get_lff_glyph_cache
             with patch.object(fonts.font_manager,'get_lff_glyph_cache',side_effect=lambda font:cache if font.lower()=='fixture.lff' else original(font)):
                 original_graph(folder/'paired.dxf',wrappers,paired,baseline_fixes)
+        elif name=='bigfont-fallback':
+            from unittest.mock import patch
+            from ezdxf.fonts import fonts
+            from ezdxf.fonts.font_manager import FontManager
+            manager=FontManager();manager.build();manager.build([str(folder/'cad-fonts')],support_dirs=False)
+            assert manager.has_font('big.shx')
+            with patch.object(fonts,'font_manager',manager):
+                original_graph(folder/'paired.dxf',wrappers,paired,baseline_fixes)
         else:original_graph(folder/'paired.dxf',wrappers,paired,baseline_fixes)
         total+=len(wrappers)
-    print(f'7 real paired exports / {total} dynamic pairs: both directions match singles in complete geometry, linked attributes, image pixels and Excel; original promotion/grip metadata match, including actual SHX and LFF profile fonts, with no new audit repairs ({profiles} leaders)')
+    print(f'8 real paired exports / {total} dynamic pairs: both directions match singles in complete geometry, linked attributes, image pixels and Excel; original promotion/grip metadata match, including SHX/LFF fonts and BIGFONT factory fallback, with no new audit repairs ({profiles} leaders)')
 
 if __name__=='__main__':main()

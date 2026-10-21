@@ -36,18 +36,23 @@ fn main() -> Result<(), String> {
         "extended",
         "stroke-font",
         "lff-font",
+        "bigfont-fallback",
     ] {
         let dir = out.join(name);
         std::fs::create_dir(&dir).map_err(|e| e.to_string())?;
         let mut value = base.clone();
         value["template"] = serde_json::json!(root.join("assets/cadastral_template.dxf"));
-        if name == "stroke-font" || name == "lff-font" {
-            let file = if name == "lff-font" {
+        if name == "stroke-font" || name == "lff-font" || name == "bigfont-fallback" {
+            let file = if name == "bigfont-fallback" {
+                "big.shx"
+            } else if name == "lff-font" {
                 "fixture.lff"
             } else {
                 "fixture.shx"
             };
-            let data: &[u8] = if name == "lff-font" {
+            let data: &[u8] = if name == "bigfont-fallback" {
+                b"AutoCAD-86 bigfont 1.0\r\n\x1aOriginal fixture"
+            } else if name == "lff-font" {
                 include_bytes!("../tests/fixtures/lff-font/polygons.lff")
             } else {
                 include_bytes!("../tests/fixtures/stroke-font/fixture-1.0.shx")

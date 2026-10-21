@@ -107,6 +107,26 @@ pub struct Extent {
     pub corners: Option<[V3; 4]>,
 }
 impl Font {
+    pub fn kind(&self) -> &'static str {
+        if self.ttf.is_some() {
+            "TrueTypeFont"
+        } else if self.stroke.is_some() {
+            "ShapeFileFont"
+        } else if self.lff.is_some() {
+            "LibreCadFont"
+        } else {
+            "MonospaceFont"
+        }
+    }
+    pub(crate) fn source_id(&self) -> Option<(u8, usize)> {
+        if let Some(ttf) = &self.ttf {
+            Some((0, Arc::as_ptr(&ttf.data) as usize))
+        } else if let Some(stroke) = &self.stroke {
+            Some((1, stroke.source_id()))
+        } else {
+            self.lff.as_ref().map(|lff| (2, lff.source_id()))
+        }
+    }
     pub fn source_bytes(&self) -> usize {
         self.ttf.as_ref().map_or(0, |f| f.data.len())
             + self.stroke.as_ref().map_or(0, |f| f.source_bytes())
@@ -120,7 +140,13 @@ impl Font {
         }
     }
     pub fn load(path: &Path, cancel: &AtomicBool) -> Result<Self, String> {
-        let data = crate::input::read(path, 64 * 1024 * 1024, "DXF-lettertype", cancel)?;
+        Self::load_catalog(path, cancel).map_err(String::from)
+    }
+    pub(crate) fn load_catalog(
+        path: &Path,
+        cancel: &AtomicBool,
+    ) -> Result<Self, crate::font_error::Error> {
+        let data = crate::input::read_typed(path, 64 * 1024 * 1024, "DXF-lettertype", cancel)?;
         let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
         if ext.eq_ignore_ascii_case("lff") {
             let program = crate::lff_font::Program::parse(&data, cancel)?;
@@ -135,18 +161,27 @@ impl Font {
             return Ok(Self {
                 ttf: None,
                 lff: None,
-                stroke: Some(crate::stroke_font::Font::new(program, cancel)?),
+                stroke: Some(
+                    crate::stroke_font::Font::new(program, cancel)
+                        .map_err(crate::font_error::Error::shape_metrics)?,
+                ),
             });
         }
-        let face = Face::parse(&data, 0).map_err(|e| format!("Ongeldig DXF-lettertype: {e:?}"))?;
+        let face = Face::parse(&data, 0).map_err(|e| {
+            crate::font_error::Error::unavailable(format!("Ongeldig DXF-lettertype: {e:?}"))
+        })?;
         let bounds = |ch| {
             let mut pen = ControlY {
                 min: f64::INFINITY,
                 max: f64::NEG_INFINITY,
             };
             face.outline_glyph(face.glyph_index(ch).unwrap_or(GlyphId(0)), &mut pen)
-                .ok_or("DXF-lettertype mist meetbare A/x/p-glyphs")?;
-            Ok::<_, String>((pen.min, pen.max))
+                .ok_or_else(|| {
+                    crate::font_error::Error::unsupported(
+                        "DXF-lettertype mist meetbare A/x/p-glyphs",
+                    )
+                })?;
+            Ok::<_, crate::font_error::Error>((pen.min, pen.max))
         };
         let x = bounds('x')?;
         let a = bounds('A')?;
@@ -159,9 +194,11 @@ impl Font {
             descender_height: baseline - p.0,
         };
         if measurements.cap_height <= 0. {
-            return Err("DXF-lettertype heeft geen geldige kapitaalhoogte".into());
+            return Err(crate::font_error::Error::unsupported(
+                "DXF-lettertype heeft geen geldige kapitaalhoogte",
+            ));
         }
-        crate::input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok(Self {
             stroke: None,
             lff: None,
@@ -180,10 +217,14 @@ impl Font {
         cancel: &AtomicBool,
     ) -> Result<(f64, Measurements), String> {
         if let Some(lff) = &mut self.lff {
-            return lff.measure(text, height, width, cancel);
+            return lff
+                .measure(text, height, width, cancel)
+                .map_err(String::from);
         }
         if let Some(stroke) = &mut self.stroke {
-            return stroke.measure(text, height, width, cancel);
+            return stroke
+                .measure(text, height, width, cancel)
+                .map_err(String::from);
         }
         let Some(ttf) = &mut self.ttf else {
             return Ok((

@@ -1,0 +1,2251 @@
+{
+  "sources": {
+    "ttf": "../dxf-text-metrics/SleufBaseFixture.ttf",
+    "shx": "../stroke-font/fixture-1.0.shx",
+    "shp": "../stroke-font/fixture.shp",
+    "lff": "../lff-font/polygons.lff",
+    "no-outline": "no-outline.ttf"
+  },
+  "cases": [
+    {
+      "name": "all-valid",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "own.shx",
+          "source": "shx"
+        },
+        {
+          "name": "own.shp",
+          "source": "shp"
+        },
+        {
+          "name": "own.lff",
+          "source": "lff"
+        }
+      ],
+      "queries": [
+        {
+          "name": "Arial.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "own.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "own.shp",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "own.lff",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "*monospace",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "unknown.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "unknown.ext",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "ShapeFileFont",
+          "selected": "own.shx",
+          "extent": {
+            "width": 7.14285714285714,
+            "measurements": {
+              "baseline": -0.23809523809523808,
+              "cap_height": 2.5,
+              "x_height": 1.6666666666666665,
+              "descender_height": 0.5952380952380952
+            },
+            "corners": [
+              [
+                -21.924929174407442,
+                7.265319824245061,
+                -0.029675082543521025
+              ],
+              [
+                -15.043297193167282,
+                6.32635931573869,
+                -1.6975787372859947
+              ],
+              [
+                -15.562848694208316,
+                3.8213325069014625,
+                0.14562296895250237
+              ],
+              [
+                -22.444480675448478,
+                4.760293015407834,
+                1.8135266236949759
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "ShapeFileFont",
+          "selected": "own.shp",
+          "extent": {
+            "width": 7.14285714285714,
+            "measurements": {
+              "baseline": -0.23809523809523808,
+              "cap_height": 2.5,
+              "x_height": 1.6666666666666665,
+              "descender_height": 0.5952380952380952
+            },
+            "corners": [
+              [
+                -21.924929174407442,
+                7.265319824245061,
+                -0.029675082543521025
+              ],
+              [
+                -15.043297193167282,
+                6.32635931573869,
+                -1.6975787372859947
+              ],
+              [
+                -15.562848694208316,
+                3.8213325069014625,
+                0.14562296895250237
+              ],
+              [
+                -22.444480675448478,
+                4.760293015407834,
+                1.8135266236949759
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "LibreCadFont",
+          "selected": "own.lff",
+          "extent": {
+            "width": 5.673913043478261,
+            "measurements": {
+              "baseline": -0.21739130434782608,
+              "cap_height": 2.5,
+              "x_height": 1.5217391304347825,
+              "descender_height": 0.5434782608695652
+            },
+            "corners": [
+              [
+                -21.22988329534483,
+                7.127409139176532,
+                -0.1694165855187053
+              ],
+              [
+                -15.763473891116226,
+                6.381547900462991,
+                -1.4943122277858796
+              ],
+              [
+                -16.274337239965938,
+                3.9184111720411017,
+                0.3180667074452841
+              ],
+              [
+                -21.740746644194537,
+                4.66427241075464,
+                1.6429623497124586
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "bigfont-ttf",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "big.shx",
+          "text": "AutoCAD-86 bigfont 1.0\r\n\u001aOriginal fixture"
+        }
+      ],
+      "queries": [
+        {
+          "name": "big.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "BIG.SHX",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "big",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "unknown-shx-ttf",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "unknown.shx",
+          "text": "Original unknown SHX signature"
+        }
+      ],
+      "queries": [
+        {
+          "name": "unknown.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "bad-shape-metrics-ttf",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "bad.shp",
+          "text": "*0,4,own bad font\n21,5,0,0\n*65,3,A\n7,65,0\n*120,1,x\n0\n"
+        }
+      ],
+      "queries": [
+        {
+          "name": "bad.shp",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "bigfont-monospace",
+      "files": [
+        {
+          "name": "big.shx",
+          "text": "AutoCAD-86 bigfont 1.0\r\n\u001aOriginal fixture"
+        }
+      ],
+      "queries": [
+        {
+          "name": "big.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-everything",
+      "files": [],
+      "queries": [
+        {
+          "name": "missing.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "missing.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "missing.lff",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "unknown.ext",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "txt",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "malformed-known-shx",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "bad.shx",
+          "text": "AutoCAD-86 shapes 1.0\r\n\u001a"
+        }
+      ],
+      "queries": [
+        {
+          "name": "bad.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "error",
+          "legacy_error": "IndexError"
+        }
+      ]
+    },
+    {
+      "name": "bad-lff-remains-error",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "bad.lff",
+          "text": "#Name: Own bad LFF\n[0042]\n0,0;1,1"
+        }
+      ],
+      "queries": [
+        {
+          "name": "bad.lff",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "error",
+          "legacy_error": "UnsupportedFont"
+        }
+      ]
+    },
+    {
+      "name": "unrenderable-ttf",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "no-outline.ttf",
+          "source": "no-outline"
+        }
+      ],
+      "queries": [
+        {
+          "name": "no-outline.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "bad-default-ttf",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "no-outline"
+        }
+      ],
+      "queries": [
+        {
+          "name": "Arial.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "missing.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "error",
+          "legacy_error": "TTLibError"
+        },
+        {
+          "status": "error",
+          "legacy_error": "TTLibError"
+        }
+      ]
+    },
+    {
+      "name": "known-ttf-disappears",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "gone.ttf",
+          "source": "ttf"
+        }
+      ],
+      "queries": [
+        {
+          "name": "gone.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "gone.ttf"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "known-shx-disappears",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "gone.shx",
+          "source": "shx"
+        }
+      ],
+      "queries": [
+        {
+          "name": "gone.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "gone.shx"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-shx-fallback-disappears",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "txt.shx",
+          "source": "shx"
+        }
+      ],
+      "queries": [
+        {
+          "name": "missing.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "txt.shx"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-shx-fallback-bigfont",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "txt.shx",
+          "text": "AutoCAD-86 bigfont 1.0\r\n\u001aOriginal fixture"
+        }
+      ],
+      "queries": [
+        {
+          "name": "missing.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "known-lff-disappears",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "gone.lff",
+          "source": "lff"
+        }
+      ],
+      "queries": [
+        {
+          "name": "gone.lff",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "gone.lff"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "MonospaceFont",
+          "selected": null,
+          "extent": {
+            "width": 12.0,
+            "measurements": {
+              "baseline": 0,
+              "cap_height": 2.5,
+              "x_height": 1.665,
+              "descender_height": 0.8325
+            },
+            "corners": [
+              [
+                -24.269446885595485,
+                7.782670184550151,
+                0.40693058098243395
+              ],
+              [
+                -12.708305157112008,
+                6.205216530259447,
+                -2.3951475589849234
+              ],
+              [
+                -13.267682278982841,
+                3.5081697818063504,
+                -0.4106573527259145
+              ],
+              [
+                -24.828824007466316,
+                5.085623436097052,
+                2.391420787241443
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "loaded-ttf-survives-delete",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        }
+      ],
+      "queries": [
+        {
+          "name": "Arial.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "Arial.ttf",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "Arial.ttf"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "TrueTypeFont",
+          "selected": "Arial.ttf",
+          "extent": {
+            "width": 5.521111111111112,
+            "measurements": {
+              "baseline": -0.1388888888888889,
+              "cap_height": 2.5,
+              "x_height": 1.5,
+              "descender_height": 0.6944444444444444
+            },
+            "corners": [
+              [
+                -21.145637252013255,
+                7.241551198118682,
+                -0.2735933059239961
+              ],
+              [
+                -15.826441580824886,
+                6.515776456621412,
+                -1.5628087019886072
+              ],
+              [
+                -16.362645373565954,
+                3.930460326988118,
+                0.3394699820139442
+              ],
+              [
+                -21.681841044754325,
+                4.656235068485389,
+                1.6286853780785553
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "loaded-shx-survives-delete",
+      "files": [
+        {
+          "name": "Arial.ttf",
+          "source": "ttf"
+        },
+        {
+          "name": "own.shx",
+          "source": "shx"
+        }
+      ],
+      "queries": [
+        {
+          "name": "own.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": []
+        },
+        {
+          "name": "own.shx",
+          "text": {
+            "content": "Axp ?Ø",
+            "insert": [
+              2.5,
+              -3,
+              1
+            ],
+            "align_point": [
+              19,
+              3,
+              -2
+            ],
+            "height": 2.5,
+            "width": 0.8,
+            "rotation": 23,
+            "oblique": -11,
+            "halign": 1,
+            "valign": 2,
+            "generation": 2,
+            "normal": [
+              1,
+              2,
+              3
+            ]
+          },
+          "remove": [
+            "own.shx"
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "status": "ok",
+          "kind": "ShapeFileFont",
+          "selected": "own.shx",
+          "extent": {
+            "width": 7.14285714285714,
+            "measurements": {
+              "baseline": -0.23809523809523808,
+              "cap_height": 2.5,
+              "x_height": 1.6666666666666665,
+              "descender_height": 0.5952380952380952
+            },
+            "corners": [
+              [
+                -21.924929174407442,
+                7.265319824245061,
+                -0.029675082543521025
+              ],
+              [
+                -15.043297193167282,
+                6.32635931573869,
+                -1.6975787372859947
+              ],
+              [
+                -15.562848694208316,
+                3.8213325069014625,
+                0.14562296895250237
+              ],
+              [
+                -22.444480675448478,
+                4.760293015407834,
+                1.8135266236949759
+              ]
+            ]
+          }
+        },
+        {
+          "status": "ok",
+          "kind": "ShapeFileFont",
+          "selected": "own.shx",
+          "extent": {
+            "width": 7.14285714285714,
+            "measurements": {
+              "baseline": -0.23809523809523808,
+              "cap_height": 2.5,
+              "x_height": 1.6666666666666665,
+              "descender_height": 0.5952380952380952
+            },
+            "corners": [
+              [
+                -21.924929174407442,
+                7.265319824245061,
+                -0.029675082543521025
+              ],
+              [
+                -15.043297193167282,
+                6.32635931573869,
+                -1.6975787372859947
+              ],
+              [
+                -15.562848694208316,
+                3.8213325069014625,
+                0.14562296895250237
+              ],
+              [
+                -22.444480675448478,
+                4.760293015407834,
+                1.8135266236949759
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

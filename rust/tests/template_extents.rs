@@ -7,6 +7,49 @@ fn close(a: f64, b: f64) {
     );
 }
 #[test]
+fn thirty_two_aliases_count_one_shared_font_allocation_against_the_byte_budget() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("large.ttf");
+    std::fs::write(
+        &path,
+        include_bytes!("fixtures/dxf-text-metrics/SleufBaseFixture.ttf"),
+    )
+    .unwrap();
+    std::fs::OpenOptions::new()
+        .write(true)
+        .open(&path)
+        .unwrap()
+        .set_len(9 * 1024 * 1024)
+        .unwrap();
+    let cancel = AtomicBool::new(false);
+    let font = Font::load(&path, &cancel).unwrap();
+    assert!(font.source_bytes() * 32 > 256 * 1024 * 1024);
+    let mut source=String::from("0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1032\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nSTYLE\n70\n32\n");
+    for i in 0..32 {
+        source.push_str(&format!(
+            "0\nSTYLE\n5\n{:X}\n2\nF{i}\n3\nalias{i}.ttf\n",
+            0x100 + i
+        ));
+    }
+    source.push_str("0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n");
+    let mut ids = Vec::new();
+    for i in 0..32 {
+        ids.push(0x200 + i);
+        source.push_str(&format!(
+            "0\nTEXT\n5\n{:X}\n10\n{i}\n20\n0\n30\n0\n40\n1\n1\nAxp\n7\nF{i}\n",
+            0x200 + i
+        ));
+    }
+    source.push_str("0\nENDSEC\n0\nEOF\n");
+    let doc = Document::from_bytes(source.into_bytes(), &cancel).unwrap();
+    let index = Index::new(&doc, &cancel).unwrap();
+    let bounds = index
+        .bounds(&ids, &mut |_| Ok(font.clone()), &cancel)
+        .unwrap()
+        .unwrap();
+    assert!(bounds.max[0] > 31.);
+}
+#[test]
 fn original_profile_geometry_and_production_selector_positions_match() {
     let cancel = AtomicBool::new(false);
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));

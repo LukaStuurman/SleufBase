@@ -157,6 +157,7 @@ impl<'a> Index<'a> {
             resolve,
             fonts: HashMap::new(),
             font_bytes: 0,
+            font_sources: HashSet::new(),
             bounds: None,
             stack: HashSet::new(),
             count: 0,
@@ -205,6 +206,7 @@ struct Work<'a, 'b, F> {
     resolve: &'b mut F,
     fonts: HashMap<String, Font>,
     font_bytes: usize,
+    font_sources: HashSet<(u8, usize)>,
     bounds: Option<Bounds>,
     stack: HashSet<String>,
     count: usize,
@@ -303,12 +305,17 @@ impl<F: FnMut(&str) -> Result<Font, String>> Work<'_, '_, F> {
                         return Err("Te veel profiellettertypen".into());
                     }
                     let font = (self.resolve)(name)?;
-                    self.font_bytes = self
-                        .font_bytes
-                        .checked_add(font.source_bytes())
-                        .ok_or("Lettertypebudget overschreden")?;
-                    if self.font_bytes > 256 * 1024 * 1024 {
-                        return Err("Lettertypebudget overschreden".into());
+                    if font
+                        .source_id()
+                        .is_some_and(|id| self.font_sources.insert(id))
+                    {
+                        self.font_bytes = self
+                            .font_bytes
+                            .checked_add(font.source_bytes())
+                            .ok_or("Lettertypebudget overschreden")?;
+                        if self.font_bytes > 256 * 1024 * 1024 {
+                            return Err("Lettertypebudget overschreden".into());
+                        }
                     }
                     self.fonts.insert(name.to_owned(), font);
                 }

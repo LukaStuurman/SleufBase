@@ -33,6 +33,7 @@ pub mod template_export;
 pub mod template_variants;
 pub mod dxf_text_metrics;
 pub mod dxf_fonts;
+pub mod font_error;
 pub mod stroke_font;
 mod stroke_curve;
 pub mod lff_font;

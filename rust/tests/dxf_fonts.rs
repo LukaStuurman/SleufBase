@@ -50,12 +50,19 @@ fn filenames_family_prefix_fallback_and_duplicate_directory_priority() {
     }
 }
 #[test]
-fn known_shape_fonts_are_not_silently_replaced_and_cancellation_is_immediate() {
+fn unsupported_shape_formats_follow_the_original_fallback_and_cancellation_is_immediate() {
     let dir = tempfile::tempdir().unwrap();
     std::fs::write(dir.path().join("txt.shx"), b"fixture shape metadata only").unwrap();
     std::fs::write(dir.path().join("Arial.ttf"), FONT).unwrap();
     let mut c = Catalog::from_dirs(&[dir.path().to_owned()], &AtomicBool::new(false)).unwrap();
-    assert!(c.resolve("txt", &AtomicBool::new(false)).is_err());
+    assert_eq!(
+        c.resolve("txt", &AtomicBool::new(false)).unwrap().kind(),
+        "TrueTypeFont"
+    );
+    assert_eq!(
+        c.selected_path("txt"),
+        Some(dir.path().join("Arial.ttf").as_path())
+    );
     assert!(c.resolve("Arial.ttf", &AtomicBool::new(true)).is_err());
     assert!(Catalog::from_dirs(&[dir.path().to_owned()], &AtomicBool::new(true)).is_err());
     assert!(Catalog::from_dirs(&[], &AtomicBool::new(false))

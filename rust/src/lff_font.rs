@@ -3,7 +3,6 @@
 //! MIT; retain third_party/ezdxf-LICENSE.txt. Inherited contours are shared.
 use crate::{
     dxf_text_metrics::Measurements,
-    input,
     stroke_curve::{self, Point},
     stroke_font::Glyph,
 };
@@ -40,7 +39,7 @@ fn parsed(value: &str) -> Option<f64> {
     }
     value.parse().ok()
 }
-fn value(value: &str) -> Result<f64, String> {
+fn value(value: &str) -> Result<f64, crate::font_error::Error> {
     let n = parsed(value.strip_prefix('A').unwrap_or(value)).unwrap_or(0.);
     if !n.is_finite() {
         return Err("Niet-eindig LFF-coördinaat".into());
@@ -87,10 +86,10 @@ impl Program {
     pub fn codes(&self) -> impl Iterator<Item = u32> + '_ {
         self.glyphs.keys().copied()
     }
-    pub fn parse(data: &[u8], cancel: &AtomicBool) -> Result<Self, String> {
-        input::check(cancel)?;
+    pub fn parse(data: &[u8], cancel: &AtomicBool) -> Result<Self, crate::font_error::Error> {
+        crate::font_error::Error::check(cancel)?;
         if data.len() > 64 * 1024 * 1024 {
-            return Err("LFF-font is te groot".into());
+            return Err(crate::font_error::Error::limit("LFF-font is te groot"));
         }
         let text = std::str::from_utf8(data).map_err(|_| "LFF-font is geen UTF-8")?;
         let mut result = Self {
@@ -106,10 +105,10 @@ impl Program {
         let mut vertices = 0usize;
         for (i, line) in text.split('\n').enumerate() {
             if i >= 1_000_000 {
-                return Err("Te veel LFF-regels".into());
+                return Err(crate::font_error::Error::limit("Te veel LFF-regels"));
             }
             if i % 1024 == 0 {
-                input::check(cancel)?;
+                crate::font_error::Error::check(cancel)?;
             }
             let line = crate::python_values::trim(line);
             if let Some(comment) = line.strip_prefix('#') {
@@ -118,7 +117,9 @@ impl Program {
                     match crate::python_values::trim(key) {
                         "Name" => {
                             if val.len() > 1_048_576 {
-                                return Err("LFF-fontnaam is te lang".into());
+                                return Err(crate::font_error::Error::limit(
+                                    "LFF-fontnaam is te lang",
+                                ));
                             }
                             result.name = crate::python_values::trim(val).into();
                         }
@@ -146,7 +147,9 @@ impl Program {
                 lines.clear();
                 definitions += 1;
                 if definitions > 65536 {
-                    return Err("Te veel LFF-tekenprogramma's".into());
+                    return Err(crate::font_error::Error::limit(
+                        "Te veel LFF-tekenprogramma's",
+                    ));
                 }
                 current = code(line);
             } else if !line.is_empty() && current.is_some() {
@@ -161,7 +164,7 @@ impl Program {
         if result.glyphs.is_empty() {
             return Err("Leeg LFF-lettertype".into());
         }
-        input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok(result)
     }
     fn record(
@@ -170,7 +173,7 @@ impl Program {
         lines: &[&str],
         vertices: &mut usize,
         cancel: &AtomicBool,
-    ) -> Result<(), String> {
+    ) -> Result<(), crate::font_error::Error> {
         let Some(first) = lines.first() else {
             return Err("LFF-teken mist geometrie".into());
         };
@@ -190,19 +193,21 @@ impl Program {
         }
         let depth = parent.as_ref().map_or(1, |p| p.depth + 1);
         if depth > 64 {
-            return Err("LFF-overerving is te diep".into());
+            return Err(crate::font_error::Error::limit("LFF-overerving is te diep"));
         }
         let mut polylines = Vec::new();
         for line in data {
-            input::check(cancel)?;
+            crate::font_error::Error::check(cancel)?;
             let mut polyline = Vec::new();
             for token in line.split(';') {
                 *vertices += 1;
                 if vertices.is_multiple_of(1024) {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 if *vertices > 1_000_000 {
-                    return Err("LFF-vertexbudget overschreden".into());
+                    return Err(crate::font_error::Error::limit(
+                        "LFF-vertexbudget overschreden",
+                    ));
                 }
                 let mut parts = token.split(',');
                 let x = parts.next().unwrap();
@@ -220,7 +225,9 @@ impl Program {
         self.bytes +=
             std::mem::size_of::<Node>() + polylines.capacity() * std::mem::size_of::<Vec<Vertex>>();
         if self.bytes > 64 * 1024 * 1024 {
-            return Err("LFF-programmabudget overschreden".into());
+            return Err(crate::font_error::Error::limit(
+                "LFF-programmabudget overschreden",
+            ));
         }
         self.glyphs.insert(
             id,
@@ -235,11 +242,15 @@ impl Program {
     pub fn source_bytes(&self) -> usize {
         self.bytes
     }
-    pub fn render(&self, id: u32, cancel: &AtomicBool) -> Result<Glyph, String> {
+    pub fn render(&self, id: u32, cancel: &AtomicBool) -> Result<Glyph, crate::font_error::Error> {
         self.render_with_work(id, cancel).map(|r| r.0)
     }
-    fn render_with_work(&self, id: u32, cancel: &AtomicBool) -> Result<(Glyph, usize), String> {
-        input::check(cancel)?;
+    fn render_with_work(
+        &self,
+        id: u32,
+        cancel: &AtomicBool,
+    ) -> Result<(Glyph, usize), crate::font_error::Error> {
+        crate::font_error::Error::check(cancel)?;
         let mut node = self.glyphs.get(&id).ok_or("LFF-teken ontbreekt")?.as_ref();
         let mut chain = vec![node];
         while let Some(parent) = &node.parent {
@@ -252,10 +263,12 @@ impl Program {
             for polyline in &node.polylines {
                 work += 1;
                 if work.is_multiple_of(1024) {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 if work > 1_000_000 {
-                    return Err("LFF-teken overschrijdt werkbudget".into());
+                    return Err(crate::font_error::Error::limit(
+                        "LFF-teken overschrijdt werkbudget",
+                    ));
                 }
                 // Empty/single-point polylines never add commands in the source.
                 // Count them as work but avoid allocating a temporary path.
@@ -269,10 +282,12 @@ impl Program {
                 for pair in polyline.windows(2) {
                     work += 1;
                     if work.is_multiple_of(1024) {
-                        input::check(cancel)?;
+                        crate::font_error::Error::check(cancel)?;
                     }
                     if work > 1_000_000 {
-                        return Err("LFF-teken overschrijdt werkbudget".into());
+                        return Err(crate::font_error::Error::limit(
+                            "LFF-teken overschrijdt werkbudget",
+                        ));
                     }
                     let start = [pair[0][0], pair[0][1]];
                     let end = [pair[1][0], pair[1][1]];
@@ -286,7 +301,9 @@ impl Program {
                 if part.commands > 0 {
                     path.point(part.controls[0], true)?;
                     if path.controls.len() + part.controls.len() - 1 > 200_000 {
-                        return Err("LFF-teken overschrijdt puntbudget".into());
+                        return Err(crate::font_error::Error::limit(
+                            "LFF-teken overschrijdt puntbudget",
+                        ));
                     }
                     path.controls.extend_from_slice(&part.controls[1..]);
                     path.commands += part.commands;
@@ -295,7 +312,7 @@ impl Program {
                 }
             }
         }
-        input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok((
             Glyph {
                 controls: path.controls,
@@ -321,8 +338,11 @@ impl Path {
             last_move: false,
         }
     }
-    fn point(&mut self, p: Point, moving: bool) -> Result<(), String> {
-        if p.iter().any(|n| !n.is_finite()) || self.controls.len() >= 200_000 {
+    fn point(&mut self, p: Point, moving: bool) -> Result<(), crate::font_error::Error> {
+        if self.controls.len() >= 200_000 {
+            return Err(crate::font_error::Error::limit("Te grote LFF-geometrie"));
+        }
+        if p.iter().any(|n| !n.is_finite()) {
             return Err("Ongeldige of te grote LFF-geometrie".into());
         }
         if moving && self.commands == 0 {
@@ -340,7 +360,7 @@ impl Path {
     fn near(a: Point, b: Point, rel: f64, abs: f64) -> bool {
         (0..2).all(|i| (a[i] - b[i]).abs() <= abs.max(rel * a[i].abs().max(b[i].abs())))
     }
-    fn bulge(&mut self, start: Point, end: Point, b: f64) -> Result<(), String> {
+    fn bulge(&mut self, start: Point, end: Point, b: f64) -> Result<(), crate::font_error::Error> {
         if Self::near(start, end, 1e-10, 0.) {
             return Ok(());
         }
@@ -389,8 +409,13 @@ impl Path {
                 self.point(c[3], false)?;
                 continue;
             }
-            if self.controls.len() + 3 > 200_000 || c.iter().flatten().any(|v| !v.is_finite()) {
-                return Err("LFF-boog overschrijdt puntbudget".into());
+            if self.controls.len() + 3 > 200_000 {
+                return Err(crate::font_error::Error::limit(
+                    "LFF-boog overschrijdt puntbudget",
+                ));
+            }
+            if c.iter().flatten().any(|v| !v.is_finite()) {
+                return Err("Niet-eindige LFF-boog".into());
             }
             self.controls.extend_from_slice(&c[1..]);
             self.at = c[3];
@@ -400,7 +425,7 @@ impl Path {
         Ok(())
     }
 }
-fn range(points: &[Point]) -> Result<(Point, Point), String> {
+fn range(points: &[Point]) -> Result<(Point, Point), crate::font_error::Error> {
     let first = *points
         .first()
         .ok_or("LFF-font mist meetbare A/x/p-contouren")?;
@@ -414,7 +439,7 @@ fn range(points: &[Point]) -> Result<(Point, Point), String> {
     Ok((min, max))
 }
 impl Font {
-    pub fn new(program: Program, cancel: &AtomicBool) -> Result<Self, String> {
+    pub fn new(program: Program, cancel: &AtomicBool) -> Result<Self, crate::font_error::Error> {
         let a = program.render(65, cancel)?;
         let (min, max) = range(&a.controls)?;
         let start = a.controls[0];
@@ -475,20 +500,23 @@ impl Font {
     pub fn source_bytes(&self) -> usize {
         self.program.source_bytes()
     }
+    pub(crate) fn source_id(&self) -> usize {
+        Arc::as_ptr(&self.program) as usize
+    }
     pub fn measure(
         &mut self,
         text: &str,
         height: f64,
         width: f64,
         cancel: &AtomicBool,
-    ) -> Result<(f64, Measurements), String> {
+    ) -> Result<(f64, Measurements), crate::font_error::Error> {
         let factor = height / self.measurements.cap_height;
         let mut total = 0.;
         let mut work = 0usize;
         if !crate::python_values::trim(text).is_empty() {
             for (i, ch) in text.chars().enumerate() {
                 if i % 1024 == 0 {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 let id = ch as u32;
                 let advance = if id < 32 {
@@ -501,7 +529,9 @@ impl Font {
                     let (glyph, spent) = self.program.render_with_work(id, cancel)?;
                     work += spent;
                     if work > 20_000_000 {
-                        return Err("LFF-tekst overschrijdt werkbudget".into());
+                        return Err(crate::font_error::Error::limit(
+                            "LFF-tekst overschrijdt werkbudget",
+                        ));
                     }
                     let n = if glyph.commands == 0 {
                         0.

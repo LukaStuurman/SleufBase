@@ -522,7 +522,7 @@ inhoud, beeldpixels, gekoppelde onderdelen en resterende grenzen.
 
 1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.
 2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows, StreetSmart en kaartreprojectie.
-3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, BIGFONT/fallbackcompatibiliteit en SHX/LFF-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
+3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, verdere fontvarianten en SHX/LFF-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
 4. Resterende Python-toolset/kaartplaatsing en exacte rastermaskers voor virtuele sleuven/MarXact (native editor en eigen raster zijn aanwezig), volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
 5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.
 

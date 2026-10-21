@@ -2,7 +2,7 @@
 //! Protocol/metric semantics follow ezdxf 1.4.4 fonts/shapefile.py (MIT,
 //! Copyright Manfred Moitzi; see third_party/ezdxf-LICENSE.txt). Subshape pen
 //! state and consecutive vertical conditions follow Autodesk's specification.
-use crate::{dxf_text_metrics::Measurements, input};
+use crate::dxf_text_metrics::Measurements;
 use std::{
     collections::HashMap,
     sync::{atomic::AtomicBool, Arc},
@@ -35,7 +35,7 @@ struct Reader<'a> {
     at: usize,
 }
 impl<'a> Reader<'a> {
-    fn take(&mut self, n: usize) -> Result<&'a [u8], String> {
+    fn take(&mut self, n: usize) -> Result<&'a [u8], crate::font_error::Error> {
         let end = self.at.checked_add(n).ok_or("SHX-lengte loopt over")?;
         let b = self
             .data
@@ -44,15 +44,15 @@ impl<'a> Reader<'a> {
         self.at = end;
         Ok(b)
     }
-    fn byte(&mut self) -> Result<i32, String> {
+    fn byte(&mut self) -> Result<i32, crate::font_error::Error> {
         Ok(i32::from(self.take(1)?[0]))
     }
-    fn word(&mut self) -> Result<u32, String> {
+    fn word(&mut self) -> Result<u32, crate::font_error::Error> {
         Ok(u32::from(u16::from_le_bytes(
             self.take(2)?.try_into().unwrap(),
         )))
     }
-    fn string(&mut self) -> Result<&'a [u8], String> {
+    fn string(&mut self) -> Result<&'a [u8], crate::font_error::Error> {
         let len = self
             .data
             .get(self.at..)
@@ -62,20 +62,24 @@ impl<'a> Reader<'a> {
         self.take(1)?;
         Ok(name)
     }
-    fn signed(&mut self) -> Result<i32, String> {
+    fn signed(&mut self) -> Result<i32, crate::font_error::Error> {
         Ok(i32::from(self.take(1)?[0] as i8))
     }
-    fn octant(&mut self) -> Result<i32, String> {
+    fn octant(&mut self) -> Result<i32, crate::font_error::Error> {
         let b = self.byte()?;
         Ok(if b & 128 != 0 { -(b & 127) } else { b })
     }
 }
-fn binary_codes(bytes: &[u8], unicode: bool, cancel: &AtomicBool) -> Result<Vec<i32>, String> {
+fn binary_codes(
+    bytes: &[u8],
+    unicode: bool,
+    cancel: &AtomicBool,
+) -> Result<Vec<i32>, crate::font_error::Error> {
     let mut r = Reader { data: bytes, at: 0 };
     let mut out = Vec::new();
     loop {
         if out.len().is_multiple_of(1024) {
-            input::check(cancel)?;
+            crate::font_error::Error::check(cancel)?;
         }
         let code = r.byte()?;
         out.push(code);
@@ -87,10 +91,12 @@ fn binary_codes(bytes: &[u8], unicode: bool, cancel: &AtomicBool) -> Result<Vec<
             8 => out.extend([r.signed()?, r.signed()?]),
             9 | 13 => loop {
                 if out.len().is_multiple_of(1024) {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 if out.len() > 1_000_000 - 3 {
-                    return Err("Te groot SHX-tekenprogramma".into());
+                    return Err(crate::font_error::Error::limit(
+                        "Te groot SHX-tekenprogramma",
+                    ));
                 }
                 let (x, y) = (r.signed()?, r.signed()?);
                 out.extend([x, y]);
@@ -107,12 +113,14 @@ fn binary_codes(bytes: &[u8], unicode: bool, cancel: &AtomicBool) -> Result<Vec<
             _ => return Err("Onbekende SHX-opdracht".into()),
         }
         if out.len() > 1_000_000 {
-            return Err("Te groot SHX-tekenprogramma".into());
+            return Err(crate::font_error::Error::limit(
+                "Te groot SHX-tekenprogramma",
+            ));
         }
     }
     Ok(out)
 }
-fn number(token: &str) -> Result<i32, String> {
+fn number(token: &str) -> Result<i32, crate::font_error::Error> {
     let t = token.trim().trim_matches(['(', ')']).trim();
     let (negative, digits) = t.strip_prefix('-').map_or((false, t), |s| (true, s));
     let digits = digits.strip_prefix('+').unwrap_or(digits);
@@ -130,7 +138,7 @@ fn number(token: &str) -> Result<i32, String> {
         Ok(value)
     }
 }
-fn numbers(data: &[u8], cancel: &AtomicBool) -> Result<Vec<i32>, String> {
+fn numbers(data: &[u8], cancel: &AtomicBool) -> Result<Vec<i32>, crate::font_error::Error> {
     let text = std::str::from_utf8(data).map_err(|_| "SHP-codes zijn geen ASCII")?;
     let mut values = Vec::new();
     for token in text
@@ -138,20 +146,28 @@ fn numbers(data: &[u8], cancel: &AtomicBool) -> Result<Vec<i32>, String> {
         .filter(|s| !s.trim().trim_matches(['(', ')']).is_empty())
     {
         if values.len().is_multiple_of(1024) {
-            input::check(cancel)?;
+            crate::font_error::Error::check(cancel)?;
         }
         if values.len() >= 1_000_000 {
-            return Err("Te groot SHP-tekenprogramma".into());
+            return Err(crate::font_error::Error::limit(
+                "Te groot SHP-tekenprogramma",
+            ));
         }
         values.push(number(token)?);
     }
     Ok(values)
 }
 impl Program {
-    pub fn parse(data: &[u8], ext: &str, cancel: &AtomicBool) -> Result<Self, String> {
-        input::check(cancel)?;
+    pub fn parse(
+        data: &[u8],
+        ext: &str,
+        cancel: &AtomicBool,
+    ) -> Result<Self, crate::font_error::Error> {
+        crate::font_error::Error::check(cancel)?;
         if data.len() > 64 * 1024 * 1024 {
-            return Err("SHP/SHX-bestand is te groot".into());
+            return Err(crate::font_error::Error::limit(
+                "SHP/SHX-bestand is te groot",
+            ));
         }
         let mut result = Self {
             above: 0.,
@@ -164,10 +180,10 @@ impl Program {
             let mut lines = Vec::<Vec<u8>>::new();
             for (i, line) in data.split(|b| *b == b'\n').enumerate() {
                 if i >= 1_000_000 {
-                    return Err("Te veel SHP-regels".into());
+                    return Err(crate::font_error::Error::limit("Te veel SHP-regels"));
                 }
                 if i % 1024 == 0 {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 let line = line.split(|b| *b == b';').next().unwrap().trim_ascii();
                 if line.is_empty() {
@@ -190,7 +206,7 @@ impl Program {
             for line in lines {
                 if line.starts_with(b"*") {
                     if records.len() >= 65536 {
-                        return Err("Te veel SHP-definities".into());
+                        return Err(crate::font_error::Error::limit("Te veel SHP-definities"));
                     }
                     if let Some(h) = header.replace(line) {
                         records.push((h, std::mem::take(&mut body)));
@@ -203,9 +219,11 @@ impl Program {
                 records.push((h, body));
             }
             for (h, b) in records {
-                input::check(cancel)?;
+                crate::font_error::Error::check(cancel)?;
                 if h.starts_with(b"*BIGFONT") {
-                    return Err("BIGFONT is niet ondersteund".into());
+                    return Err(crate::font_error::Error::unsupported(
+                        "BIGFONT is niet ondersteund",
+                    ));
                 }
                 let spec = h.split(|c| *c == b',').next().unwrap();
                 if spec == b"*0" || spec == b"*UNIFONT" {
@@ -260,7 +278,7 @@ impl Program {
                     return Err("Ongeldige SHX-index".into());
                 }
                 for (id, len) in index {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                     let mut record = Reader {
                         data: r.take(len)?,
                         at: 0,
@@ -300,7 +318,7 @@ impl Program {
                     return Err("Ongeldige SHX UNIFONT-definitie".into());
                 }
                 while r.at < data.len() {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                     let id = r.word()?;
                     let size = r.word()? as usize;
                     let bytes = r.take(size)?;
@@ -309,7 +327,9 @@ impl Program {
                     result.insert(id, binary_codes(&bytes[record.at..], true, cancel)?)?;
                 }
             } else {
-                return Err("Onbekend of niet-ondersteund SHX-formaat (BIGFONT)".into());
+                return Err(crate::font_error::Error::unsupported(
+                    "Onbekend of niet-ondersteund SHX-formaat (BIGFONT)",
+                ));
             }
         } else {
             return Err("Onbekend stroke-fontformaat".into());
@@ -323,27 +343,33 @@ impl Program {
             .map(|c| c.capacity() * std::mem::size_of::<i32>())
             .sum::<usize>()
             + result.shapes.capacity() * std::mem::size_of::<(u32, Vec<i32>)>();
-        input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok(result)
     }
-    fn insert(&mut self, id: u32, codes: Vec<i32>) -> Result<(), String> {
-        if codes.is_empty()
-            || codes.last() != Some(&0)
-            || codes.len() > 1_000_000
-            || self.shapes.len() >= 65536
-        {
+    fn insert(&mut self, id: u32, codes: Vec<i32>) -> Result<(), crate::font_error::Error> {
+        if codes.len() > 1_000_000 || self.shapes.len() >= 65536 {
+            return Err(crate::font_error::Error::limit("Te groot tekenprogramma"));
+        }
+        if codes.is_empty() || codes.last() != Some(&0) {
             return Err("Ongeldig of te groot tekenprogramma".into());
         }
         let previous = self.shapes.get(&id).map_or(0, Vec::len);
         let count = self.code_count - previous + codes.len();
         if count > 4_000_000 {
-            return Err("SHX-lettertype overschrijdt opdrachtbudget".into());
+            return Err(crate::font_error::Error::limit(
+                "SHX-lettertype overschrijdt opdrachtbudget",
+            ));
         }
         self.code_count = count;
         self.shapes.insert(id, codes);
         Ok(())
     }
-    pub fn render(&self, id: u32, stacked: bool, cancel: &AtomicBool) -> Result<Glyph, String> {
+    pub fn render(
+        &self,
+        id: u32,
+        stacked: bool,
+        cancel: &AtomicBool,
+    ) -> Result<Glyph, crate::font_error::Error> {
         let mut r = Renderer {
             font: self,
             controls: vec![[0.; 2]],
@@ -359,7 +385,7 @@ impl Program {
             cancel,
         };
         r.run(id, false)?;
-        input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok(Glyph {
             controls: if r.commands == 0 {
                 Vec::new()
@@ -392,18 +418,23 @@ fn mul(a: Point, s: f64) -> Point {
     [a[0] * s, a[1] * s]
 }
 impl Renderer<'_> {
-    fn tick(&mut self) -> Result<(), String> {
+    fn tick(&mut self) -> Result<(), crate::font_error::Error> {
         self.steps += 1;
         if self.steps.is_multiple_of(1024) {
-            input::check(self.cancel)?;
+            crate::font_error::Error::check(self.cancel)?;
         }
         if self.steps > 1_000_000 {
-            return Err("SHX-opdrachtbudget overschreden".into());
+            return Err(crate::font_error::Error::limit(
+                "SHX-opdrachtbudget overschreden",
+            ));
         }
         Ok(())
     }
-    fn point(&mut self, p: Point, moving: bool) -> Result<(), String> {
-        if p.iter().any(|n| !n.is_finite()) || self.controls.len() >= 200_000 {
+    fn point(&mut self, p: Point, moving: bool) -> Result<(), crate::font_error::Error> {
+        if self.controls.len() >= 200_000 {
+            return Err(crate::font_error::Error::limit("Te grote SHX-geometrie"));
+        }
+        if p.iter().any(|n| !n.is_finite()) {
             return Err("Te grote of niet-eindige SHX-geometrie".into());
         }
         if moving && self.commands == 0 {
@@ -418,13 +449,19 @@ impl Renderer<'_> {
         self.at = p;
         Ok(())
     }
-    fn displacement(&mut self, x: f64, y: f64) -> Result<(), String> {
+    fn displacement(&mut self, x: f64, y: f64) -> Result<(), crate::font_error::Error> {
         self.point(add(self.at, [x * self.scale, y * self.scale]), !self.down)
     }
     fn close(a: f64, b: f64, abs: f64) -> bool {
         (a - b).abs() <= abs.max(1e-9 * a.abs().max(b.abs()))
     }
-    fn ellipse(&mut self, center: Point, radius: f64, start: f64, end: f64) -> Result<(), String> {
+    fn ellipse(
+        &mut self,
+        center: Point,
+        radius: f64,
+        start: f64,
+        end: f64,
+    ) -> Result<(), crate::font_error::Error> {
         let mut curves = crate::stroke_curve::ellipse(center, radius, start, end)?;
         let close =
             |a: Point, b: Point| Self::close(a[0], b[0], 1e-12) && Self::close(a[1], b[1], 1e-12);
@@ -446,8 +483,13 @@ impl Renderer<'_> {
                 continue;
             }
             for p in &c[1..] {
-                if p.iter().any(|n| !n.is_finite()) || self.controls.len() >= 200_000 {
-                    return Err("SHX-boog overschrijdt budget".into());
+                if self.controls.len() >= 200_000 {
+                    return Err(crate::font_error::Error::limit(
+                        "SHX-boog overschrijdt budget",
+                    ));
+                }
+                if p.iter().any(|n| !n.is_finite()) {
+                    return Err("Niet-eindige SHX-boog".into());
                 }
                 self.controls.push(*p);
             }
@@ -457,7 +499,13 @@ impl Renderer<'_> {
         }
         Ok(())
     }
-    fn radial(&mut self, r: f64, start: f64, end: f64, ccw: bool) -> Result<(), String> {
+    fn radial(
+        &mut self,
+        r: f64,
+        start: f64,
+        end: f64,
+        ccw: bool,
+    ) -> Result<(), crate::font_error::Error> {
         if r <= 0. || !r.is_finite() {
             return Err("Ongeldige SHX-boogstraal".into());
         }
@@ -472,7 +520,7 @@ impl Renderer<'_> {
             self.ellipse(center, r, end, start)
         }
     }
-    fn bulge(&mut self, x: i32, y: i32, b: i32) -> Result<(), String> {
+    fn bulge(&mut self, x: i32, y: i32, b: i32) -> Result<(), crate::font_error::Error> {
         if !(-127..=127).contains(&b) || !(-127..=127).contains(&x) || !(-127..=127).contains(&y) {
             return Err("Ongeldige SHX-bulge".into());
         }
@@ -498,8 +546,11 @@ impl Renderer<'_> {
         let to = (end[1] - center[1]).atan2(end[0] - center[0]);
         self.ellipse(center, radius, from, to)
     }
-    fn run(&mut self, id: u32, nested: bool) -> Result<(), String> {
-        if self.active.len() >= 32 || self.active.contains(&id) {
+    fn run(&mut self, id: u32, nested: bool) -> Result<(), crate::font_error::Error> {
+        if self.active.len() >= 32 {
+            return Err(crate::font_error::Error::limit("Te diepe SHX-subtekens"));
+        }
+        if self.active.contains(&id) {
             return Err("Cyclische of te diepe SHX-subtekens".into());
         }
         let codes = self
@@ -518,7 +569,7 @@ impl Renderer<'_> {
             self.tick()?;
             let code = codes[at];
             at += 1;
-            let arg = |at: &mut usize| -> Result<i32, String> {
+            let arg = |at: &mut usize| -> Result<i32, crate::font_error::Error> {
                 let v = *codes.get(*at).ok_or("Onvolledige SHX-opdracht")?;
                 *at += 1;
                 Ok(v)
@@ -685,7 +736,7 @@ impl Renderer<'_> {
         Ok(())
     }
 }
-fn range(points: &[Point]) -> Result<(Point, Point), String> {
+fn range(points: &[Point]) -> Result<(Point, Point), crate::font_error::Error> {
     let first = *points
         .first()
         .ok_or("SHX-font mist meetbare glyphgeometrie")?;
@@ -699,7 +750,7 @@ fn range(points: &[Point]) -> Result<(Point, Point), String> {
     Ok((min, max))
 }
 impl Font {
-    pub fn new(program: Program, cancel: &AtomicBool) -> Result<Self, String> {
+    pub fn new(program: Program, cancel: &AtomicBool) -> Result<Self, crate::font_error::Error> {
         let space = if program.shapes.contains_key(&32) {
             program.render(32, false, cancel)?.end[0]
         } else if program.shapes.contains_key(&65) {
@@ -756,7 +807,7 @@ impl Font {
             x_height: xmax[1] - xmin[1],
             descender_height: below,
         };
-        input::check(cancel)?;
+        crate::font_error::Error::check(cancel)?;
         Ok(Self {
             program: Arc::new(program),
             measurements,
@@ -768,19 +819,22 @@ impl Font {
     pub fn source_bytes(&self) -> usize {
         self.program.bytes
     }
+    pub(crate) fn source_id(&self) -> usize {
+        Arc::as_ptr(&self.program) as usize
+    }
     pub fn measure(
         &mut self,
         text: &str,
         height: f64,
         width: f64,
         cancel: &AtomicBool,
-    ) -> Result<(f64, Measurements), String> {
+    ) -> Result<(f64, Measurements), crate::font_error::Error> {
         let factor = height / self.measurements.cap_height;
         let mut advance = 0.;
         if !crate::python_values::trim(text).is_empty() {
             for (i, ch) in text.chars().enumerate() {
                 if i % 1024 == 0 {
-                    input::check(cancel)?;
+                    crate::font_error::Error::check(cancel)?;
                 }
                 let id = ch as u32;
                 let value = if id == 32 {
