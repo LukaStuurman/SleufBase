@@ -13,6 +13,10 @@ pub struct Glyph {
     pub controls: Vec<Point>,
     pub end: Point,
     pub commands: usize,
+    /// Parallel to the path commands: move (0), line (1), cubic (3).
+    /// The original metric oracle intentionally serializes only controls.
+    #[serde(skip)]
+    pub(crate) kinds: Vec<u8>,
 }
 #[derive(Debug)]
 pub struct Program {
@@ -370,11 +374,20 @@ impl Program {
         stacked: bool,
         cancel: &AtomicBool,
     ) -> Result<Glyph, crate::font_error::Error> {
+        self.render_with_work(id, stacked, cancel).map(|p| p.0)
+    }
+    fn render_with_work(
+        &self,
+        id: u32,
+        stacked: bool,
+        cancel: &AtomicBool,
+    ) -> Result<(Glyph, usize), crate::font_error::Error> {
         let mut r = Renderer {
             font: self,
             controls: vec![[0.; 2]],
             last_move: false,
             commands: 0,
+            kinds: Vec::new(),
             at: [0.; 2],
             scale: 1.,
             down: true,
@@ -386,15 +399,19 @@ impl Program {
         };
         r.run(id, false)?;
         crate::font_error::Error::check(cancel)?;
-        Ok(Glyph {
-            controls: if r.commands == 0 {
-                Vec::new()
-            } else {
-                r.controls
+        Ok((
+            Glyph {
+                controls: if r.commands == 0 {
+                    Vec::new()
+                } else {
+                    r.controls
+                },
+                end: r.at,
+                commands: r.commands,
+                kinds: r.kinds,
             },
-            end: r.at,
-            commands: r.commands,
-        })
+            r.steps,
+        ))
     }
 }
 struct Renderer<'a> {
@@ -402,6 +419,7 @@ struct Renderer<'a> {
     controls: Vec<Point>,
     last_move: bool,
     commands: usize,
+    kinds: Vec<u8>,
     at: Point,
     scale: f64,
     down: bool,
@@ -444,6 +462,7 @@ impl Renderer<'_> {
         } else {
             self.controls.push(p);
             self.commands += 1;
+            self.kinds.push(if moving { 0 } else { 1 });
         }
         self.last_move = moving;
         self.at = p;
@@ -494,6 +513,7 @@ impl Renderer<'_> {
                 self.controls.push(*p);
             }
             self.commands += 1;
+            self.kinds.push(3);
             self.last_move = false;
             self.at = c[3];
         }
@@ -776,6 +796,7 @@ impl Font {
             ],
             end,
             commands: 5,
+            kinds: vec![1, 1, 1, 1, 0],
         };
         let get = |id| {
             if program.shapes.contains_key(&id) {
@@ -821,6 +842,23 @@ impl Font {
     }
     pub(crate) fn source_id(&self) -> usize {
         Arc::as_ptr(&self.program) as usize
+    }
+    pub(crate) fn glyph(
+        &self,
+        ch: char,
+        cancel: &AtomicBool,
+    ) -> Result<(Option<Glyph>, f64, f64, usize), crate::font_error::Error> {
+        let id = ch as u32;
+        if id == 32 || id < 32 && !self.program.shapes.contains_key(&id) {
+            return Ok((None, self.space, self.measurements.cap_height, 0));
+        }
+        let (glyph, work) = if self.program.shapes.contains_key(&id) {
+            self.program.render_with_work(id, false, cancel)?
+        } else {
+            (self.tofu.clone(), 0)
+        };
+        let advance = glyph.end[0];
+        Ok((Some(glyph), advance, self.measurements.cap_height, work))
     }
     pub fn measure(
         &mut self,

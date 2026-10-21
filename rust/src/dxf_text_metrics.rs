@@ -68,7 +68,7 @@ pub struct Font {
     stroke: Option<crate::stroke_font::Font>,
     lff: Option<crate::lff_font::Font>,
 }
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Text {
     pub content: String,
@@ -209,7 +209,7 @@ impl Font {
             }),
         })
     }
-    fn measure(
+    pub(crate) fn measure(
         &mut self,
         text: &str,
         height: f64,
@@ -261,6 +261,131 @@ impl Font {
             }
         }
         Ok((advance * factor * width, ttf.measurements.scale(factor)))
+    }
+    /// One unkerned glyph in drawing units at cap-height one. The TrueType
+    /// renderer removes its measured baseline; CAD stroke fonts retain theirs.
+    pub(crate) fn glyph_path(
+        &self,
+        ch: char,
+        cancel: &AtomicBool,
+    ) -> Result<(crate::cad_text_path::Path, f64, usize), String> {
+        use crate::cad_text_path::Path;
+        crate::input::check(cancel)?;
+        if let Some(ttf) = &self.ttf {
+            struct Pen {
+                path: Path,
+                start: V3,
+                current: V3,
+                error: Option<String>,
+            }
+            impl Pen {
+                fn push(&mut self, kind: u8, points: &[V3]) {
+                    if self.error.is_none() {
+                        if let Err(err) = self.path.push(kind, points, 200_000) {
+                            self.error = Some(err);
+                        }
+                    }
+                    self.current = *points.last().unwrap();
+                }
+            }
+            impl OutlineBuilder for Pen {
+                fn move_to(&mut self, x: f32, y: f32) {
+                    self.start = [f64::from(x), f64::from(y), 0.];
+                    self.push(0, &[self.start]);
+                }
+                fn line_to(&mut self, x: f32, y: f32) {
+                    self.push(1, &[[f64::from(x), f64::from(y), 0.]]);
+                }
+                fn quad_to(&mut self, x: f32, y: f32, x1: f32, y1: f32) {
+                    self.push(
+                        2,
+                        &[
+                            [f64::from(x), f64::from(y), 0.],
+                            [f64::from(x1), f64::from(y1), 0.],
+                        ],
+                    );
+                }
+                fn curve_to(&mut self, x: f32, y: f32, x1: f32, y1: f32, x2: f32, y2: f32) {
+                    self.push(
+                        3,
+                        &[
+                            [f64::from(x), f64::from(y), 0.],
+                            [f64::from(x1), f64::from(y1), 0.],
+                            [f64::from(x2), f64::from(y2), 0.],
+                        ],
+                    );
+                }
+                fn close(&mut self) {
+                    if self.current != self.start {
+                        self.push(1, &[self.start]);
+                    }
+                }
+            }
+            let face =
+                Face::parse(&ttf.data, 0).map_err(|e| format!("Ongeldig DXF-lettertype: {e:?}"))?;
+            let id = face.glyph_index(ch).unwrap_or(GlyphId(0));
+            let mut pen = Pen {
+                path: Path::default(),
+                start: [0.; 3],
+                current: [0.; 3],
+                error: None,
+            };
+            face.outline_glyph(id, &mut pen);
+            if let Some(err) = pen.error {
+                return Err(err);
+            }
+            let factor = 1. / ttf.measurements.cap_height;
+            // FontTools' glyf drawing reconciles hmtx LSB with glyf.xMin.
+            // CFF outlines are already expressed in their drawing coordinates.
+            let offset = if face.tables().glyf.is_some() {
+                f64::from(face.glyph_hor_side_bearing(id).unwrap_or(0))
+                    - face
+                        .glyph_bounding_box(id)
+                        .map_or(0., |b| f64::from(b.x_min))
+            } else {
+                0.
+            };
+            pen.path.transform(Affine([
+                [factor, 0., 0., offset * factor],
+                [0., factor, 0., -ttf.measurements.baseline * factor],
+                [0., 0., 1., 0.],
+            ]))?;
+            crate::input::check(cancel)?;
+            let work = pen.path.kinds.len();
+            return Ok((
+                pen.path,
+                f64::from(face.glyph_hor_advance(id).unwrap_or(0)) * factor,
+                work,
+            ));
+        }
+        let (glyph, advance, cap, work) = if let Some(stroke) = &self.stroke {
+            stroke.glyph(ch, cancel).map_err(String::from)?
+        } else if let Some(lff) = &self.lff {
+            lff.glyph(ch, cancel).map_err(String::from)?
+        } else {
+            return Err("Monospace heeft geen afzonderlijke lettercontouren".into());
+        };
+        let mut path = Path::default();
+        if ch as u32 > 32 {
+            if let Some(glyph) = glyph.filter(|g| g.commands > 0) {
+                path.push(
+                    0,
+                    &[[glyph.controls[0][0] / cap, glyph.controls[0][1] / cap, 0.]],
+                    200_000,
+                )?;
+                let mut at = 1;
+                for kind in glyph.kinds {
+                    let n = usize::from(kind.max(1));
+                    let points: Vec<_> = glyph.controls[at..at + n]
+                        .iter()
+                        .map(|p| [p[0] / cap, p[1] / cap, 0.])
+                        .collect();
+                    path.push(kind, &points, 200_000)?;
+                    at += n;
+                }
+            }
+        }
+        Ok((path, advance / cap, work))
     }
     pub fn extent(&mut self, text: &Text, cancel: &AtomicBool) -> Result<Extent, String> {
         crate::input::check(cancel)?;

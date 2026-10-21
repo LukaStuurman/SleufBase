@@ -89,6 +89,8 @@ fn verify(overlay: &sleufbase_rust::dxf_read::DxfOverlay) {
     let mut count = 0;
     for index in indices {
         let drawing = overlay.inspect_feature(index).unwrap();
+        // TEXT now has its own font-independent oracle in cad_text.rs.
+        if drawing.source.entity_type=="TEXT" { assert!(!drawing.points.is_empty());continue; }
         let details = overlay.inspect_details(index).unwrap();
         let id = drawing.source.cad.as_deref().unwrap().xdata["SOURCE_ID"][0]
             .value
@@ -132,7 +134,7 @@ fn verify(overlay: &sleufbase_rust::dxf_read::DxfOverlay) {
         "{:?}",
         overlay.block_warnings
     );
-    assert!(overlay.warnings.iter().any(|w| w.starts_with("TEXT:")));
+    assert!(!overlay.warnings.iter().any(|w| w.starts_with("TEXT:")));
 }
 #[test]
 fn ascii_and_binary_nested_blocks_bulges_ellipse_and_wcs_geometry_match_ezdxf() {

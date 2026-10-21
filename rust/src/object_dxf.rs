@@ -858,8 +858,8 @@ mod tests {
         encode_plan(&mut windows, &plan, &[], None, &[], crate::RULES, &crlf).unwrap();
         assert_eq!(normal, windows);
         let doc = crate::dxf_read::parse_dxf_bytes(&windows, Path::new("windows.dxf")).unwrap();
-        assert_eq!(doc.features.len(), 1);
-        assert_eq!(doc.features[0].entity_type, "LINE");
+        assert_eq!(doc.features.iter().filter(|f|f.entity_type=="LINE").count(), 1);
+        assert_eq!(doc.features.iter().filter(|f|f.entity_type=="TEXT").count(), 1);
         assert!(std::str::from_utf8(&windows).unwrap().ends_with("0\nEOF\n"));
     }
 }

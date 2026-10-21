@@ -95,7 +95,7 @@ fn run_cli(args: &[String]) -> Result<(), String> {
 fn main() -> eframe::Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if !args.is_empty() {
-        if args[0]=="--licenses" {println!("Pillow 11.3.0 — affine rasterrotatie, bilineaire kaartresampling en alphacompositie\n{}\nezdxf 1.4.4 — SHP/SHX/LFF-protocol en fontmeetcontract (native Rust-port met correcties)\n{}",include_str!("../third_party/Pillow-LICENSE.txt"),include_str!("../third_party/ezdxf-LICENSE.txt"));return Ok(());}
+        if args[0]=="--licenses" {println!("Pillow 11.3.0 — affine rasterrotatie, bilineaire kaartresampling en alphacompositie\n{}\nezdxf 1.4.4 — SHP/SHX/LFF-protocol, fontmetingen en vector-tekstuitlijning (native Rust-port met correcties)\n{}",include_str!("../third_party/Pillow-LICENSE.txt"),include_str!("../third_party/ezdxf-LICENSE.txt"));return Ok(());}
         if ["-h", "--help", "help"].contains(&args[0].as_str()) {
             print_help();
             return Ok(());

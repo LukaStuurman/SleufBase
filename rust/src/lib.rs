@@ -32,6 +32,8 @@ pub mod template_setup;
 pub mod template_export;
 pub mod template_variants;
 pub mod dxf_text_metrics;
+pub mod cad_text_path;
+pub mod cad_text;
 pub mod dxf_fonts;
 pub mod font_error;
 pub mod stroke_font;

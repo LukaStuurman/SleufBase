@@ -95,6 +95,11 @@ impl DxfFeature {
             ("Laag".into(),self.layer.clone()),("Punten".into(),self.points.len().to_string()),
         ]);
         if let Some(cad)=self.cad.as_deref() {
+            if let Some(text)=&cad.text {
+                result.insert("Tekst".into(),text.layout.content.clone());
+                result.insert("Tekststijl".into(),text.style.clone());
+                result.insert("Lettertype".into(),text.font.clone());
+            }
             if let Some(mesh)=&cad.mesh {
                 result.insert("Meshvertices".into(),mesh.vertices.len().to_string());
                 result.insert("Meshvlakken".into(),mesh.faces.len().to_string());
@@ -116,13 +121,14 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
         return Err("Binaire DXF vereist een aparte decoder".into());
     }
     if text.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
-    parse_groups(dxf_tags::ascii(text),path,&crate::input::NEVER_CANCEL)
+    parse_groups(dxf_tags::ascii(text),path,&crate::input::NEVER_CANCEL,None)
 }
 
 struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize}
 struct Parser {
     entities:crate::dxf_entities::Entities,
     layers:BTreeMap<String,crate::cad::Layer>,
+    styles:BTreeMap<String,crate::cad_text::Style>,
     layer_keys:std::collections::BTreeSet<String>,
     blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
     block:Option<BlockStart>,
@@ -132,6 +138,13 @@ impl Parser {
         use crate::dxf_entities::{field,vertex};
         match section {
             "ENTITIES"=>self.entities.push(kind,groups)?,
+            "TABLES" if kind=="STYLE"=>{
+                let key=field(groups,2).ok_or("DXF STYLE mist naam")?.to_lowercase();
+                if self.styles.len()>=4096{return Err("Te veel DXF-tekststijlen".into());}
+                let flags=crate::dxf_entities::integer(groups,70,0)?;
+                let style=crate::cad_text::Style{font:field(groups,3).unwrap_or("txt").to_owned(),big_font:field(groups,4).unwrap_or("").to_owned(),vertical:flags&4!=0};
+                if self.styles.insert(key,style).is_some(){return Err("DXF bevat dubbele tekststijlen".into());}
+            }
             "TABLES" if kind=="LAYER"=>{
                 let name=field(groups,2).ok_or("DXF LAYER mist naam")?.to_owned();
                 if !self.layer_keys.insert(name.to_lowercase()){return Err("DXF bevat dubbele laagnamen (hoofdletterongevoelig)".into());}
@@ -168,8 +181,8 @@ impl Parser {
     }
 }
 
-fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<DxfOverlay,String>{
-    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None};
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:Option<&mut crate::dxf_fonts::Catalog>)->Result<DxfOverlay,String>{
+    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),styles:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None};
     let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
     let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;
     for (index,entry) in records.enumerate(){
@@ -204,7 +217,8 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
     let warnings=parser.entities.unsupported.iter().map(|(kind,count)|format!("{kind}: {count} entiteit(en) nog niet volledig weergegeven")).collect();
     let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,features:parser.entities.features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};
-    overlay.rebuild_block_cache()?;crate::input::check(cancel)?;Ok(overlay)
+    crate::cad_text::prepare_overlay(&mut overlay,&parser.styles,catalog,cancel)?;
+    overlay.rebuild_block_cache_with_cancel(cancel)?;crate::input::check(cancel)?;Ok(overlay)
 }
 
 /// ASCII and binary DXF share the same entity interpretation and limits.
@@ -212,13 +226,20 @@ pub fn parse_dxf_bytes(bytes:&[u8],path:&Path)->Result<DxfOverlay,String> {
     parse_dxf_bytes_with_cancel(bytes,path,&crate::input::NEVER_CANCEL)
 }
 pub fn parse_dxf_bytes_with_cancel(bytes:&[u8],path:&Path,cancel:&std::sync::atomic::AtomicBool)->Result<DxfOverlay,String>{
+    parse_dxf_bytes_fonts(bytes,path,cancel,None)
+}
+/// Explicit bounded font catalog for callers with CAD support directories.
+pub fn parse_dxf_bytes_with_catalog(bytes:&[u8],path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:&mut crate::dxf_fonts::Catalog)->Result<DxfOverlay,String>{
+    parse_dxf_bytes_fonts(bytes,path,cancel,Some(catalog))
+}
+fn parse_dxf_bytes_fonts(bytes:&[u8],path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:Option<&mut crate::dxf_fonts::Catalog>)->Result<DxfOverlay,String>{
     crate::input::check(cancel)?;
     if bytes.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
     if bytes.starts_with(b"AutoCAD Binary DXF") {
-        parse_groups(dxf_tags::Binary::new(bytes)?,path,cancel)
+        parse_groups(dxf_tags::Binary::new(bytes)?,path,cancel,catalog)
     } else {
         let text=dxf_tags::text(bytes)?;
-        parse_groups(dxf_tags::ascii(&text),path,cancel)
+        parse_groups(dxf_tags::ascii(&text),path,cancel,catalog)
     }
 }
 

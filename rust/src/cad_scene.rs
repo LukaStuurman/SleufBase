@@ -85,6 +85,7 @@ struct Builder<'a> {
     attempts: usize,
     stack: Vec<String>,
     layers: BTreeMap<String, Arc<str>>,
+    cancel: &'a std::sync::atomic::AtomicBool,
 }
 impl Builder<'_> {
     fn layer(&mut self, name: &str) -> Arc<str> {
@@ -132,6 +133,7 @@ impl Builder<'_> {
         parent_layer: Option<&str>,
         parent_rgb: Option<[u8; 3]>,
     ) -> Result<(), String> {
+        crate::input::check(self.cancel)?;
         let source = reference.get(self.overlay);
         let effective = if source.layer == "0" {
             parent_layer.unwrap_or(&source.layer)
@@ -143,7 +145,16 @@ impl Builder<'_> {
         let rgb = self.rgb(source, &layer, parent_rgb);
         if source.entity_type != "INSERT" {
             let (points, path_breaks) =
-                if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref()) {
+                if let Some(text) = source.cad.as_deref().and_then(|p| p.text.as_deref()) {
+                    let output = text.contours.flatten(
+                        parent,
+                        0.005,
+                        MAX_POINTS.saturating_sub(self.points),
+                        self.cancel,
+                    )?;
+                    (output.points, output.breaks.into_boxed_slice())
+                } else if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref())
+                {
                     let output =
                         spline.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?;
                     (output.points, output.breaks.into_boxed_slice())
@@ -247,6 +258,30 @@ impl Builder<'_> {
 }
 impl DxfOverlay {
     pub fn rebuild_block_cache(&mut self) -> Result<(), String> {
+        self.rebuild_block_cache_with_cancel(&crate::input::NEVER_CANCEL)
+    }
+    pub fn rebuild_block_cache_with_cancel(
+        &mut self,
+        cancel: &std::sync::atomic::AtomicBool,
+    ) -> Result<(), String> {
+        crate::input::check(cancel)?;
+        let controls = self
+            .features
+            .iter()
+            .chain(self.blocks.values().flat_map(|b| b.features.iter()))
+            .map(|f| {
+                f.cad
+                    .as_deref()
+                    .and_then(|p| p.text.as_deref())
+                    .map_or(0, |t| t.contours.points.len())
+            })
+            .try_fold(0usize, |used, n| {
+                used.checked_add(n)
+                    .filter(|&n| n <= crate::cad_text_path::MAX_CONTROLS)
+            });
+        if controls.is_none() {
+            return Err("CAD-bronnen overschrijden tekstbudget".into());
+        }
         let layer_warnings = self.rebuild_layer_aliases();
         for block in self.blocks.values() {
             g::finite(block.base)?;
@@ -274,6 +309,7 @@ impl DxfOverlay {
             attempts: 0,
             stack: Vec::new(),
             layers: BTreeMap::new(),
+            cancel,
         };
         let mut warnings: BTreeSet<_> = layer_warnings.into_iter().collect();
         for (index, source) in self.features.iter().enumerate() {
@@ -286,6 +322,7 @@ impl DxfOverlay {
             if let Err(err) =
                 builder.visit(Source::Model(index), Affine::IDENTITY, None, None, None)
             {
+                crate::input::check(cancel)?;
                 builder.scene.features.truncate(before);
                 builder.scene.instances.truncate(before_instances);
                 builder.points = points;

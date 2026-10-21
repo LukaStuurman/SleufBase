@@ -37,8 +37,8 @@ expected data. The real paired-export audit also changes the profile style to a
 local LFF font and checks the automatic grip with the original code. CLI and both
 native dialogs use the same local font catalog and saved support folders.
 
-Glyph metrics/controls are available for selectors; viewport stroke rendering,
-Further font/vendor variants, broader CAD/MTEXT and actual CAD application
+Glyph metrics/controls are available for selectors; viewport strokes are now
+connected through cad-text. Further font/vendor variants, full ATTRIB/MTEXT and actual CAD application
 acceptance remain open. All global `rust/PARITY.md` release gates still apply.
 
 Protocol, path and metric semantics were ported from ezdxf's MIT-licensed LFF and

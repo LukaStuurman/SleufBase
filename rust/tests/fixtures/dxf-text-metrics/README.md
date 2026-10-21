@@ -27,8 +27,9 @@ byte-identical text rendering. No font rasterization or CAD text display is
 implemented by this component. Windows font discovery and the paired-export UI are now connected through the
 real worker (see template-paired). Native SHP/SHX metrics and explicit CAD support folders are now connected too
 (see stroke-font). LFF metrics are also connected (see lff-font). Original BIGFONT/error factory fallbacks are also checked (see font-resolution).
-Remaining settings migration, viewport text/MTEXT layout and
-interactive acceptance remain open.
+Vector TEXT display now uses the separate cad-text component and the original
+text2path alignment contract. Remaining settings migration, fill/ATTRIB/MTEXT
+layout and interactive acceptance remain open.
 
 `tools/generate_dxf_text_metrics_fixtures.py` reproduces the reference using
 Python 3.11, ezdxf 1.4.4 and FontTools 4.67.0. Set

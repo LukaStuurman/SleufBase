@@ -83,6 +83,7 @@ impl NativeProject {
         if let Some(state)=&self.template_export{state.validate()?;}
         if let Some(settings)=&self.template_preferences {settings.validate()?;}
         let mut count = 0usize;
+        let mut text_controls=0usize;
         let mut vertices = |points: &[Vertex]| -> Result<(), String> {
             count = count
                 .checked_add(points.len())
@@ -125,13 +126,21 @@ impl NativeProject {
                 for feature in &block.features {
                     vertices(&feature.points)?;
                     if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
-                    if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
+                    if let Some(cad)=feature.cad.as_deref(){
+                        cad.validate_geometry(feature.points.len())?;
+                        text_controls=text_controls.saturating_add(cad.text.as_deref().map_or(0,|t|t.contours.points.len()));
+                        if text_controls>crate::cad_text_path::MAX_CONTROLS{return Err("Project overschrijdt CAD-tekstbudget".into());}
+                    }
                 }
             }
             for feature in &overlay.features {
                 vertices(&feature.points)?;
                 if let Some(mesh)=feature.cad.as_deref().and_then(|p|p.mesh.as_deref()){vertices(&mesh.vertices)?;}
-                if let Some(cad)=feature.cad.as_deref(){cad.validate_geometry(feature.points.len())?;}
+                if let Some(cad)=feature.cad.as_deref(){
+                    cad.validate_geometry(feature.points.len())?;
+                    text_controls=text_controls.saturating_add(cad.text.as_deref().map_or(0,|t|t.contours.points.len()));
+                    if text_controls>crate::cad_text_path::MAX_CONTROLS{return Err("Project overschrijdt CAD-tekstbudget".into());}
+                }
             }
         }
         for raster in &self.rasters {
@@ -215,7 +224,7 @@ pub fn read_project_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool
         for block in overlay.blocks.values_mut(){crate::cad_mesh::restore_features(&mut Arc::make_mut(block).features,&mut used,cancel)?;}
     }
     project.validate()?;
-    for overlay in &mut project.overlays {crate::input::check(cancel)?;overlay.rebuild_block_cache()?;}
+    for overlay in &mut project.overlays {crate::input::check(cancel)?;overlay.rebuild_block_cache_with_cancel(cancel)?;}
     crate::input::check(cancel)?;
     Ok(project)
 }

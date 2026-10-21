@@ -23,7 +23,8 @@ jobs:
   build-rust:
     name: Test and build Rust app
     runs-on: windows-latest
-    timeout-minutes: 35
+    # The complete audit set outgrew the former 35-minute cold-build limit.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -43,7 +44,9 @@ jobs:
         run: cargo clippy --manifest-path rust/Cargo.toml --all-targets
       - name: Build release
         shell: pwsh
-        run: cargo build --release --manifest-path rust/Cargo.toml
+        # Link audit drivers together instead of starting each new LTO link
+        # serially during the downstream audits. Every audit still runs.
+        run: cargo build --release --manifest-path rust/Cargo.toml --bins --examples --jobs 2
       - name: Bundle third-party notice
         shell: pwsh
         run: |
@@ -445,6 +448,19 @@ jobs:
           python tools/verify_native_lff_fonts.py rust/target/release/examples/measure_template_extents.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit vector CAD text and fresh font geometry
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_text_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-text
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example render_cad_text
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_text.py rust/target/release/examples/render_cad_text.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit real paired exports and system font selection
         shell: pwsh

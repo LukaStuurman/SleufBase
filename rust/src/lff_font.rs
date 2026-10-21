@@ -30,6 +30,7 @@ pub struct Font {
     program: Arc<Program>,
     measurements: Measurements,
     tofu_advance: f64,
+    tofu: Glyph,
     widths: HashMap<u32, f64>,
 }
 fn parsed(value: &str) -> Option<f64> {
@@ -307,6 +308,7 @@ impl Program {
                     }
                     path.controls.extend_from_slice(&part.controls[1..]);
                     path.commands += part.commands;
+                    path.kinds.extend(part.kinds);
                     path.at = part.at;
                     path.last_move = false;
                 }
@@ -318,6 +320,7 @@ impl Program {
                 controls: path.controls,
                 end: path.at,
                 commands: path.commands,
+                kinds: path.kinds,
             },
             work,
         ))
@@ -327,6 +330,7 @@ struct Path {
     controls: Vec<Point>,
     at: Point,
     commands: usize,
+    kinds: Vec<u8>,
     last_move: bool,
 }
 impl Path {
@@ -335,6 +339,7 @@ impl Path {
             controls: vec![[0.; 2]],
             at: [0.; 2],
             commands: 0,
+            kinds: Vec::new(),
             last_move: false,
         }
     }
@@ -352,6 +357,7 @@ impl Path {
         } else {
             self.controls.push(p);
             self.commands += 1;
+            self.kinds.push(if moving { 0 } else { 1 });
         }
         self.at = p;
         self.last_move = moving;
@@ -420,6 +426,7 @@ impl Path {
             self.controls.extend_from_slice(&c[1..]);
             self.at = c[3];
             self.commands += 1;
+            self.kinds.push(3);
             self.last_move = false;
         }
         Ok(())
@@ -456,6 +463,7 @@ impl Font {
             ],
             end: a.end,
             commands: 5,
+            kinds: vec![1, 1, 1, 1, 0],
         };
         let x = if program.glyphs.contains_key(&120) {
             program.render(120, cancel)?
@@ -494,6 +502,7 @@ impl Font {
             program: Arc::new(program),
             measurements,
             tofu_advance,
+            tofu,
             widths,
         })
     }
@@ -502,6 +511,36 @@ impl Font {
     }
     pub(crate) fn source_id(&self) -> usize {
         Arc::as_ptr(&self.program) as usize
+    }
+    pub(crate) fn glyph(
+        &self,
+        ch: char,
+        cancel: &AtomicBool,
+    ) -> Result<(Option<Glyph>, f64, f64, usize), crate::font_error::Error> {
+        let id = ch as u32;
+        if id <= 32 {
+            return Ok((
+                None,
+                if id == 32 {
+                    self.program.word_spacing
+                } else {
+                    0.
+                },
+                self.measurements.cap_height,
+                0,
+            ));
+        }
+        let (glyph, work) = if self.program.glyphs.contains_key(&id) {
+            self.program.render_with_work(id, cancel)?
+        } else {
+            (self.tofu.clone(), 0)
+        };
+        let advance = if glyph.commands == 0 {
+            0.
+        } else {
+            range(&glyph.controls)?.1[0] + self.program.letter_spacing
+        };
+        Ok((Some(glyph), advance, self.measurements.cap_height, work))
     }
     pub fn measure(
         &mut self,

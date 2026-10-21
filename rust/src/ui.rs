@@ -1978,6 +1978,27 @@ mod project_lifecycle_tests {
     }
 
     #[test]
+    fn canvas_draws_imported_text_contours_without_bridges_and_respects_visibility(){
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        let cancel=std::sync::atomic::AtomicBool::new(false);
+        let mut catalog=sleufbase_rust::dxf_fonts::Catalog::from_dirs(&[root.join("dxf-text-metrics"),root.join("stroke-font"),root.join("lff-font")],&cancel).unwrap();
+        let path=root.join("cad-text/text-ascii.dxf");
+        let mut overlay=sleufbase_rust::dxf_read::parse_dxf_bytes_with_catalog(&std::fs::read(&path).unwrap(),&path,&cancel,&mut catalog).unwrap();
+        overlay.features.retain(|f|f.entity_type=="TEXT");overlay.blocks.clear();
+        overlay.features[0].cad.as_mut().unwrap().true_color=Some(0x12ab34);overlay.rebuild_block_cache().unwrap();
+        let expected=overlay.rendered_features().map(|f|f.paths().map(|p|p.len().saturating_sub(1)).sum::<usize>()).sum::<usize>();
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let mut render=|overlay:&DxfOverlay|{
+            let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
+                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            });
+            output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count()
+        };
+        assert!(expected>10);assert_eq!(render(&overlay),expected);
+        overlay.visible=false;assert_eq!(render(&overlay),0);
+    }
+
+    #[test]
     fn raster_pixels_load_asynchronously_and_stay_out_of_new_projects() {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");

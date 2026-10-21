@@ -33,8 +33,9 @@ The native interpreter bounds source bytes, normalized program instructions,
 glyph controls, recursion/cycles, stack depth and advance-cache entries. Bad
 fonts fail explicitly; they do not return plausible fabricated geometry.
 This implements SHP/SHX glyph geometry and horizontal fast text measurement
-for template selectors. It does not yet render SHX strokes in the map UI;
-LFF metrics are now implemented separately (see lff-font). BIGFONT/error fallback routes are now checked separately (see font-resolution).
+for template selectors. Native SHX strokes are now connected to the map UI and
+template maps through cad-text; full ATTRIB/MTEXT and fill remain open.
+LFF metrics are implemented separately (see lff-font). BIGFONT/error fallback routes are now checked separately (see font-resolution).
 Viewport text, further font/vendor variants and broader CAD/MTEXT remain release gates.
 
 Protocol and measurements were ported from ezdxf's MIT-licensed shapefile

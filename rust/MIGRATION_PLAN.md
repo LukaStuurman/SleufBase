@@ -1045,6 +1045,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   CAD-/MTEXT-/projectworkflows en echte acceptatie blijven open. BIGFONT-glyphs
   worden niet geclaimd: deze terugval volgt juist de oorspronkelijke factory.
   Alle oorspronkelijke globale go/no-go-voorwaarden blijven verplicht.
+- Eenregelige CAD TEXT is nu op de echte canvas- en sjabloonkaartpaden aangesloten als native TTF/SHP/SHX/LFF-vectorcontouren. 675 oorspronkelijke teksten en 25 geneste/niet-uniforme OCS/MINSERT-instanties controleren iedere controlecoördinaat en WCS-koorden. Bronstijl/inhoud en font-onafhankelijke contouren overleven projectopslag zonder de fonts. Pen-up blijft gescheiden van inkt; fontcache, controles, punten en ook onzichtbaar interpreterwerk zijn begrensd. Echte egui-/kaartproeven, projectbehoud en annulering zijn toegevoegd. Negen verse fonts/270 runtimegevallen toetsen de geoptimaliseerde driver rechtstreeks. De eindcontrole telt 405 geslaagde Rust-tests, inclusief 36 desktoptests; Clippy voegt geen waarschuwingen toe. Vlakvulling, ATTRIB/ATTDEF/MTEXT, verticale/BIGFONT-glyphs, volledige importinstellingen en praktijkacceptatie blijven open. Zie tests/fixtures/cad-text. De Windows-preview overschreed aantoonbaar de oude 35-minutenlimiet; release/auditdrivers worden gezamenlijk gebouwd en de volledige controle krijgt 75 minuten, zonder audits te schrappen.
 - Volgende stappen: volledige templates/profielen en
   overige instellingen; tekst/ATTRIB-weergave,
   volledige meshoppervlakken, HATCH, dynamische
