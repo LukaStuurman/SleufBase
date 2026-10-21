@@ -13,6 +13,23 @@ use std::{
 struct Request {
     directories: Vec<PathBuf>,
     drawings: Vec<PathBuf>,
+    #[serde(default)]
+    summary: bool,
+}
+#[derive(Serialize)]
+struct Root<'a> {
+    kind: &'a str,
+    handle: &'a str,
+    points: Vec<[f64; 3]>,
+    attributes: usize,
+}
+#[derive(Serialize)]
+struct Summary<'a> {
+    roots: Vec<Root<'a>>,
+    bounds: Option<sleufbase_rust::Bounds>,
+    space_policy: sleufbase_rust::dxf_read::SpacePolicy,
+    warnings: &'a [String],
+    block_warnings: &'a [String],
 }
 #[derive(Serialize)]
 struct Node<'a> {
@@ -65,6 +82,40 @@ fn main() -> Result<(), String> {
             &cancel,
             &mut catalog,
         )?;
+        if input.summary {
+            let mut roots = Vec::new();
+            for source in &overlay.features {
+                points = points
+                    .checked_add(source.points.len())
+                    .filter(|&n| n <= 1_000_000)
+                    .ok_or("Scene audit point budget exceeded")?;
+                roots.push(Root {
+                    kind: &source.entity_type,
+                    handle: &source.handle,
+                    attributes: source.linked_attributes().len(),
+                    points: source
+                        .points
+                        .iter()
+                        .map(|p| [p.x, p.y, p.z.unwrap_or(0.)])
+                        .collect(),
+                });
+            }
+            if drawing > 0 {
+                out.write_all(b",").map_err(|e| e.to_string())?;
+            }
+            serde_json::to_writer(
+                &mut out,
+                &Summary {
+                    roots,
+                    bounds: overlay.bounds(),
+                    space_policy: overlay.space_policy,
+                    warnings: &overlay.warnings,
+                    block_warnings: &overlay.block_warnings,
+                },
+            )
+            .map_err(|e| e.to_string())?;
+            continue;
+        }
         let indices = overlay
             .features
             .iter()

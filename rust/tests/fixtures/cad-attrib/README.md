@@ -45,7 +45,8 @@ bidirectional curve/chord distances without saved expected output.
 
 This implements single-line linked ATTRIB contours. Embedded MTEXT is preserved
 with an explicit unsupported-layout warning and no fabricated fallback text.
-ATTDEF display, complete MTEXT, TrueType fill, space/layout selection, further
+Modelspace selection now uses cad-space. ATTDEF display, complete MTEXT,
+TrueType fill, full paper-layout viewing, further
 CAD/vendor variants and real AutoCAD/project acceptance remain open. The
 original global PARITY.md release gates still apply. MIT notices for the
 attribute/insert and text2path contracts ship in `--licenses` and artifacts.

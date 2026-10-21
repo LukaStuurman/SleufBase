@@ -383,6 +383,9 @@ impl DxfOverlay {
             warnings: BTreeSet::new(),
         };
         let mut warnings: BTreeSet<_> = layer_warnings.into_iter().collect();
+        if self.space_policy==crate::dxf_read::SpacePolicy::Legacy && self.source_features().next().is_some() {
+            warnings.insert("Herlaad de DXF-bron: deze oude CAD-kopie bevat geen model-/papierruimte-informatie.".into());
+        }
         for (index, source) in self.features.iter().enumerate() {
             if source.entity_type != "INSERT" {
                 continue;

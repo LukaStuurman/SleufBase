@@ -12,6 +12,11 @@ use std::sync::Arc;
 const MAX_DXF_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_ENTITIES: usize = 2_000_000;
 
+#[derive(Clone,Copy,Debug,Default,PartialEq,Eq,serde::Serialize,serde::Deserialize)]
+#[serde(rename_all="snake_case")]
+pub enum SpacePolicy {Modelspace,#[default] Explicit,Legacy}
+fn legacy_space()->SpacePolicy {SpacePolicy::Legacy}
+
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DxfFeature {
@@ -37,6 +42,9 @@ pub struct DxfOverlay {
     pub path: PathBuf,
     pub visible: bool,
     pub features: Vec<DxfFeature>,
+    /// Older cached overlays did not retain enough information to filter safely.
+    #[serde(default="legacy_space")]
+    pub space_policy:SpacePolicy,
     #[serde(default)]
     pub layers:BTreeMap<String,crate::cad::Layer>,
     #[serde(skip)]
@@ -134,10 +142,11 @@ pub fn parse_dxf(text: &str, path: &Path) -> Result<DxfOverlay, String> {
         return Err("Binaire DXF vereist een aparte decoder".into());
     }
     if text.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
-    parse_groups(dxf_tags::ascii(text),path,&crate::input::NEVER_CANCEL,None)
+    let spaces=crate::cad_space::Spaces::scan(dxf_tags::ascii(text),&crate::input::NEVER_CANCEL)?;
+    parse_groups(dxf_tags::ascii(text),path,&crate::input::NEVER_CANCEL,None,spaces)
 }
 
-struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize}
+struct BlockStart {name:String,base:crate::cad_geometry::V3,start:usize,paper:bool}
 struct Parser {
     entities:crate::dxf_entities::Entities,
     layers:BTreeMap<String,crate::cad::Layer>,
@@ -145,12 +154,23 @@ struct Parser {
     layer_keys:std::collections::BTreeSet<String>,
     blocks:BTreeMap<String,Arc<crate::cad_scene::Block>>,
     block:Option<BlockStart>,
+    layout_blocks:std::collections::BTreeSet<String>,
+    model:Vec<DxfFeature>,
+    spaces:crate::cad_space::Spaces,
+    skipped:crate::cad_space::Skipped,
 }
 impl Parser {
+    fn pending(&self)->bool {self.entities.pending()||self.skipped.pending()}
     fn flush(&mut self,section:&str,kind:&str,groups:&[Group])->Result<(),String>{
         use crate::dxf_entities::{field,vertex};
         match section {
-            "ENTITIES"=>self.entities.push(kind,groups)?,
+            "ENTITIES"=>{
+                // Child records follow the selected parent; their own owner/
+                // space flags must never move a VERTEX/ATTRIB to another space.
+                if self.entities.pending(){self.entities.push(kind,groups)?;}
+                else if self.skipped.pending()||self.spaces.is_paper(groups)? {self.skipped.push(kind,groups)?;}
+                else {self.entities.push(kind,groups)?;}
+            }
             "TABLES" if kind=="STYLE"=>{
                 let key=field(groups,2).ok_or("DXF STYLE mist naam")?.to_lowercase();
                 if self.styles.len()>=4096{return Err("Te veel DXF-tekststijlen".into());}
@@ -169,23 +189,27 @@ impl Parser {
             }
             "BLOCKS"=>match kind {
                 "BLOCK"=>{
-                    if self.block.is_some()||self.entities.pending(){return Err("DXF-blok mist ENDBLK/SEQEND".into());}
-                    let name=field(groups,2).ok_or("DXF BLOCK mist naam")?.to_owned();
+                    if self.block.is_some()||self.pending(){return Err("DXF-blok mist ENDBLK/SEQEND".into());}
+                    let name=crate::cad_space::block_name(groups)?.to_owned();
                     let base=vertex(groups,10,20,30).map(crate::cad_geometry::xyz).unwrap_or([0.;3]);
                     crate::cad_geometry::finite(base)?;
-                    self.block=Some(BlockStart{name,base,start:self.entities.features.len()});
+                    let paper=crate::cad_space::paper_block(&name);
+                    self.block=Some(BlockStart{name,base,start:self.entities.features.len(),paper});
                 }
                 "ENDBLK"=>{
-                    if self.entities.pending(){return Err("DXF-blok mist SEQEND".into());}
+                    if self.pending(){return Err("DXF-blok mist SEQEND".into());}
                     let block=self.block.take().ok_or("DXF ENDBLK zonder BLOCK")?;
                     let key=block.name.to_lowercase();
-                    if self.blocks.contains_key(&key){return Err("DXF bevat dubbele bloknamen".into());}
+                    let layout=block.paper||crate::cad_space::model_block(&block.name);
+                    let layout_key=if crate::cad_space::model_block(&block.name){"*model_space".to_owned()}else if block.name.eq_ignore_ascii_case("$Paper_Space"){"*paper_space".to_owned()}else{key.clone()};
+                    if self.blocks.contains_key(&key)||(layout&&!self.layout_blocks.insert(layout_key)){return Err("DXF bevat dubbele bloknamen".into());}
                     let features=self.entities.features.split_off(block.start);
-                    self.blocks.insert(key,Arc::new(crate::cad_scene::Block{name:block.name,base:block.base,features}));
+                    if crate::cad_space::model_block(&block.name){self.model.extend(features);}
+                    else if !block.paper {self.blocks.insert(key,Arc::new(crate::cad_scene::Block{name:block.name,base:block.base,features}));}
                 }
                 _=>{
-                    if self.block.is_none(){return Err("DXF-blokentiteit buiten BLOCK/ENDBLK".into());}
-                    self.entities.push(kind,groups)?;
+                    let block=self.block.as_ref().ok_or("DXF-blokentiteit buiten BLOCK/ENDBLK")?;
+                    if block.paper {self.skipped.push(kind,groups)?;}else{self.entities.push(kind,groups)?;}
                 }
             },
             _=>{}
@@ -194,10 +218,10 @@ impl Parser {
     }
 }
 
-fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:Option<&mut crate::dxf_fonts::Catalog>)->Result<DxfOverlay,String>{
-    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),styles:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None};
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:Option<&mut crate::dxf_fonts::Catalog>,spaces:crate::cad_space::Spaces)->Result<DxfOverlay,String>{
+    let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),styles:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None,layout_blocks:Default::default(),model:Vec::new(),spaces,skipped:Default::default()};
     let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
-    let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;
+    let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;let mut saw_tables=false;
     for (index,entry) in records.enumerate(){
         if index%1024==0{crate::input::check(cancel)?;}
         let entry=entry?;
@@ -213,7 +237,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
                 "ENDSEC"|"EOF"=>{
                     if entry.value=="EOF"{if open{return Err("DXF mist ENDSEC voor EOF".into());}eof=true;}
                     else{if !open||expect_section{return Err("Ongeldige DXF ENDSEC".into());}open=false;}
-                    if parser.entities.pending(){return Err("DXF-entiteit mist SEQEND".into());}
+                    if parser.pending(){return Err("DXF-entiteit mist SEQEND".into());}
                     if parser.block.is_some(){return Err("DXF-blok mist ENDBLK".into());}
                     kind.clear();section.clear();
                 }
@@ -221,6 +245,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
             }
         }else if expect_section&&entry.code==2{
             section=entry.value.to_ascii_uppercase();expect_section=false;saw_section=true;
+            if section=="TABLES" {if saw_tables{return Err("DXF bevat een dubbele TABLES-sectie".into());}saw_tables=true;}
         }else if !kind.is_empty(){
             if groups.len()>=1_000_000{return Err("DXF-entiteit heeft meer dan 1 miljoen velden".into());}
             groups.push(entry);
@@ -228,7 +253,8 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
     }
     if !saw_section||!eof||open||expect_section{return Err("DXF afgebroken: SECTION/ENDSEC/EOF ontbreekt".into());}
     let warnings=parser.entities.unsupported.iter().map(|(kind,count)|format!("{kind}: {count} entiteit(en) nog niet volledig weergegeven")).collect();
-    let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,features:parser.entities.features,layers:parser.layers,blocks:parser.blocks,
+    let mut features=parser.model;features.extend(parser.entities.features);
+    let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,space_policy:SpacePolicy::Modelspace,features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};
     crate::cad_text::prepare_overlay(&mut overlay,&parser.styles,catalog,cancel)?;
     overlay.rebuild_block_cache_with_cancel(cancel)?;crate::input::check(cancel)?;Ok(overlay)
@@ -249,10 +275,12 @@ fn parse_dxf_bytes_fonts(bytes:&[u8],path:&Path,cancel:&std::sync::atomic::Atomi
     crate::input::check(cancel)?;
     if bytes.len() as u64>MAX_DXF_BYTES {return Err("DXF bestand groter dan 256 MiB".into());}
     if bytes.starts_with(b"AutoCAD Binary DXF") {
-        parse_groups(dxf_tags::Binary::new(bytes)?,path,cancel,catalog)
+        let spaces=crate::cad_space::Spaces::scan(dxf_tags::Binary::new(bytes)?,cancel)?;
+        parse_groups(dxf_tags::Binary::new(bytes)?,path,cancel,catalog,spaces)
     } else {
         let text=dxf_tags::text(bytes)?;
-        parse_groups(dxf_tags::ascii(&text),path,cancel,catalog)
+        let spaces=crate::cad_space::Spaces::scan(dxf_tags::ascii(&text),cancel)?;
+        parse_groups(dxf_tags::ascii(&text),path,cancel,catalog,spaces)
     }
 }
 

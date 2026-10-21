@@ -2017,6 +2017,18 @@ mod project_lifecycle_tests {
     }
 
     #[test]
+    fn canvas_fits_and_paints_only_model_owned_geometry_even_when_space_flags_disagree(){
+        let data="0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nBLOCK_RECORD\n0\nBLOCK_RECORD\n5\nA\n2\n*Model_Space\n0\nBLOCK_RECORD\n5\nB\n2\n*Paper_Space\n0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n0\nLINE\n5\nF1\n330\nA\n100\nAcDbEntity\n67\n1\n420\n1223476\n100\nAcDbLine\n10\n0\n20\n0\n11\n10\n21\n10\n0\nLINE\n5\nF2\n330\nB\n100\nAcDbEntity\n67\n0\n420\n1223476\n100\nAcDbLine\n10\n1000000\n20\n1000000\n11\n1000010\n21\n1000010\n0\nENDSEC\n0\nEOF\n";
+        let overlay=sleufbase_rust::dxf_read::parse_dxf(data,std::path::Path::new("spaces.dxf")).unwrap();
+        assert_eq!(overlay.features.len(),1);assert_eq!(overlay.bounds().unwrap().max_x,10.);
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+        });
+        assert_eq!(output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count(),1);
+    }
+
+    #[test]
     fn raster_pixels_load_asynchronously_and_stay_out_of_new_projects() {
         let ctx=egui::Context::default();let mut app=SleufBaseApp::default();
         let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters");

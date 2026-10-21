@@ -568,7 +568,7 @@ impl Entities {
             || kind == "TEXT"
         {
             self.append(feature)?;
-            if kind == "INSERT" && field(groups, 66).is_some_and(|v| v.trim() == "1") {
+            if kind == "INSERT" && crate::cad_space::attributes_follow(groups)? {
                 self.insert = Some(self.features.len() - 1);
             }
         }

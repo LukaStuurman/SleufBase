@@ -44,6 +44,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
     invalid.push(p);
     let mut p = good.clone();
     p.overlays.push(DxfOverlay {
+        space_policy:Default::default(),
         path: "overlay.dxf".into(),
         visible: true,
         layers: Default::default(),

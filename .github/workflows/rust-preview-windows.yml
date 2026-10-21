@@ -475,6 +475,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_cad_attrib.py rust/target/release/examples/render_cad_scene.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit modelspace selection and excluded paper layouts
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_space_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-space
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example render_cad_scene
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_space.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit real paired exports and system font selection
         shell: pwsh
         env:
