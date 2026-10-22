@@ -34,6 +34,7 @@ pub mod template_variants;
 pub mod dxf_text_metrics;
 pub mod cad_text_path;
 pub mod cad_text;
+pub mod cad_mtext;
 mod cad_glyphs;
 pub mod mtext;
 pub mod mtext_plain;

@@ -483,6 +483,7 @@ impl Entities {
                 | "TRACE"
                 | "MESH"
                 | "TEXT"
+                | "MTEXT"
                 | "ATTDEF"
         ) {
             *self.unsupported.entry(kind.to_owned()).or_default() += 1;
@@ -491,6 +492,7 @@ impl Entities {
         let mut feature = common(groups, kind)?;
         match kind {
             "TEXT" | "ATTDEF" => text(groups, kind, &mut feature)?,
+            "MTEXT" => crate::cad_mtext::parse(groups, &mut feature)?,
             "LINE" => {
                 feature.points = vec![g::vertex(point(groups, 10)?), g::vertex(point(groups, 11)?)]
             }
@@ -567,6 +569,7 @@ impl Entities {
             || (kind == "POINT" && feature.points.len() == 1)
             || feature.cad.as_deref().is_some_and(|p| p.mesh.is_some())
             || kind == "TEXT"
+            || kind == "MTEXT"
             || kind == "ATTDEF"
         {
             self.append(feature)?;
