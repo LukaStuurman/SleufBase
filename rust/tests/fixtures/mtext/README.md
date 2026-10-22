@@ -44,14 +44,9 @@ atomically, refusing overwrite. Real probes exceed the 32 MiB input and 64 MiB
 output limits and confirm cleanup without publishing a partial file. The writer
 is buffered. It does not call Python from Rust.
 
-Remaining implementation: paragraph/line/column placement, justification,
-font metrics and per-run geometry/colors/decorations/backgrounds, OCS and
-attachment/transforms, standalone and embedded ATTRIB/ATTDEF source/project
-integration, canvas/maps and original/real-project acceptance. The desktop's
-existing unsupported MTEXT message remains appropriate until those are wired.
-This component does not satisfy the full MTEXT or global PARITY.md gates.
+The parser now feeds real font metrics, simple/complex layout and the ordinary
+CAD source/project/scene route. See [cad-mtext](../cad-mtext/README.md) for actual
+ASCII/binary import and independent geometry evidence. Full column/embedded
+sources, per-run colors, backgrounds/fills and real CAD acceptance remain open.
+This component does not satisfy full MTEXT or global PARITY.md gates.
 Original tools/text.py MIT notice is retained in source and `--licenses`.
-
-The complete local suite passes 430 Rust tests (39 desktop tests). Clippy adds
-no new warnings; the optimized app/driver build and tools/text.py --licenses
-notice are checked. Layout and production MTEXT integration remain open.

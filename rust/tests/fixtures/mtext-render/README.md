@@ -46,14 +46,13 @@ glyph controls/advances, varies formatting/anchors/tabs and compares the compile
 optimized engine against fresh original results. Its shared transport preserves
 decimal bits, limits input/output, writes atomically and refuses overwrite.
 
-This is a rendering component, not complete desktop MTEXT support. The separate
-simple-MTEXT wrapping route and automatic width estimation are now implemented
-and independently checked under [mtext-simple](../mtext-simple/README.md). DXF/embedded/source
-extraction, color/layer resolution, persistent project/scène/canvas wiring,
-background and TrueType fill, and representative CAD acceptance still need to
-be completed. Desktop MTEXT continues to be reported as unsupported until that
-integration is ready. The existing one-line TEXT pipeline now shares the raw
-glyph engine; all 675 original vector cases remain checked.
+The separate simple route and width estimator are checked under
+[mtext-simple](../mtext-simple/README.md). Ordinary DXF/STYLE source extraction,
+project persistence and the shared map scene are now connected and checked under
+[cad-mtext](../cad-mtext/README.md). Full column/embedded sources, per-run colors,
+background/TrueType fill and representative CAD acceptance remain open. The
+existing one-line TEXT pipeline shares the raw glyph engine; all 675 original
+vector cases remain checked. This is not full MTEXT or whole-product parity.
 
 Reproduce with Python 3.11, ezdxf 1.4.4 and FontTools 4.67.0:
 

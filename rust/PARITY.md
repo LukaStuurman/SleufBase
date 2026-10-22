@@ -50,8 +50,8 @@ De native MTEXT-opmaakkern is nu als eerste rendercomponent beschikbaar:
 Woorden/ruimtes, breuken, font-/kleur-/alinea-/tab-/decoratiewissels blijven
 behouden, met gedeelde snapshots, annulering en limieten. De gemeten-celplaatsing
 is hieronder aangevuld. De samengestelde font-/tekstgeometriekern staat hieronder;
-koppeling aan CAD-bronnen, projecten en
-kaartweergave blijven vereist. De huidige desktop meldt MTEXT nog als
+de gewone CAD-/project-/scènekoppeling staat hieronder; volledige kolom-/embedded-/kleur-
+en vlakvullingskoppeling blijft vereist. De huidige desktop meldt MTEXT nog als
 onvolledig. Zie tests/fixtures/mtext; alle onderstaande gates blijven verplicht.
 
 De volledige gemeten-celplaatsing is nu de tweede native MTEXT-kern:
@@ -60,7 +60,7 @@ alinea-/kolomvoortzetting, marges en negen ankers. 369 oorspronkelijke
 layoutgevallen/8747 primitieve onderdelen vergelijken alle posities en
 volgorde. Gedeelde celbereiken, een hergebruikte tabindex en kolomhoogtesommen
 vermijden herhaald kopiëren/doorlopen. De font-/parserbrug en glyphcurves zijn
-hieronder aangevuld. CAD-/project-/embedded-bronnen en echte kaartweergave blijven
+hieronder aangevuld. de gewone CAD-/project-/scènekoppeling is hieronder aangevuld; volledige embedded-/kolom-/kleuropmaak en acceptatie blijven
 noodzakelijke volgende stappen; volledige MTEXT is nog onvolledig. Zie tests/fixtures/mtext-layout.
 
 De complexe MTEXT-tekstroute verbindt nu parser, volledige fontbeschrijving,
@@ -69,8 +69,7 @@ echte woord-/spatiematen, celplaatsing en vectorcontouren/decoraties.
 50 afwijkende oude resultaten blijven expliciet bewaard bij correcties voor vet
 en tegenstrijdige fontkeuze tussen meten en tekenen. Gedeelde fontnamen, fysieke
 glyphs en tabarrays vermijden herhaald werk; 3000 alinea's delen 20.000 tabstops.
-De eenvoudige MTEXT-route en breedteschatting zijn hieronder aangevuld. DXF-/embedded-bronnen,
-kleur-/laag-/project-/scène-/kaartkoppeling, achtergronden/vlakvulling en echte
+De eenvoudige MTEXT-route, breedteschatting en gewone bron-/project-/scènekoppeling zijn hieronder aangevuld. Volledige embedded-/kolom-/kleuropmaak, achtergronden/vlakvulling en echte
 CAD-acceptatie blijven vereist. De desktop meldt MTEXT nog als onvolledig.
 Zie tests/fixtures/mtext-render; alle onderstaande gates blijven verplicht.
 
@@ -82,11 +81,22 @@ automatische breedte, witruimteterugval en kolomtelling. 21 oorspronkelijke
 SHX-crashes bij het eerste controleteken blijven als foutbewijs bewaard naast
 de correcte spatie-terugval. Een streaming meetlezer behoudt de oorspronkelijke
 onverschaalde optelvolgorde zonder telkens de hele regel te lezen.
-DXF-/STYLE-/kolom-/embedded-bronnen, kleur-/laag-/project-/kaartkoppeling en
-vlakvulling blijven vereist. De bronrouter moet niet-afbreekbare spaties via de
-complexe route verwerken; de oude eenvoudige router/decoder heeft daar een
+Gewone DXF-/STYLE-/project-/scènebronnen zijn hieronder gekoppeld. Volledige kolom-/embedded-/kleuropmaak en
+vlakvulling blijven vereist. De bronrouter verwerkt niet-afbreekbare spaties via de
+complexe route; de oude eenvoudige router/decoder had daar een
 bekende letterlijke-codeweergavefout. De desktop meldt MTEXT nog als onvolledig.
 Zie tests/fixtures/mtext-simple; alle onderstaande gates blijven verplicht.
+
+Gewone MTEXT is nu aangesloten op echte ASCII/binary DXF-invoer, STYLE-fonts,
+de afzonderlijke eenvoudige/geformatteerde routes, automatische fontbreedte,
+WCS/OCS-plaatsing, geneste blokken en opgeslagen projectcontouren.
+129 oorspronkelijke bronnen/1440 segmenten en 138 scène-instanties controleren
+invoer na DXF-opslaan/herlezen, spiegeling/rotatie, alle ankers, breedte/schuinte
+en rasterblokken. Vier letterlijke NBSP-codefouten hebben bewaarde oude contouren
+naast de gecorrigeerde router. Projectherstel werkt zonder fonts; ongeldige
+updates behouden eerder opgeslagen bytes. Uitgebreide kolom-/embedded-/STYLE-
+varianten, kleuren per tekstrun, achtergronden/frames, TTF-vlakvulling en echte
+CAD-/UI-acceptatie blijven open. Zie tests/fixtures/cad-mtext.
 
 ## Verplichte go/no-go voorwaarden
 

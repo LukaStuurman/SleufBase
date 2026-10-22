@@ -48,16 +48,13 @@ limits input/output, writes atomically and refuses overwrite. The corpus
 reproduces under a different hashseed. The oracle imports ezdxf using the empty
 private cache from the composed-MTEXT helper and never initializes SleufBase.
 
-This finishes the two **render components**, not standalone/embedded MTEXT in
-the desktop app. DXF/STYLE/column source extraction, colors/layers, persistent
-project/scène/canvas/map wiring, background/TrueType fills and real CAD acceptance
-remain required. The source adapter must route nonbreaking-space `\\~` content
-through the complex parser: the original permissive fast decoder can retain
-that code literally, so blindly copying the frontend's simple-route predicate
-would preserve another known display defect. The fast-decoder compatibility
-API remains exact for estimation/oracle purposes. Source-level routing and that
-correction must be tested when connecting the components. The source adapter
-must also resolve STYLE height/font inputs before calling the estimator.
+The two render components are now connected to ordinary DXF/STYLE source,
+project persistence and the shared map scene; see [cad-mtext](../cad-mtext/README.md).
+The source adapter routes escaped nonbreaking spaces through the complex parser
+and tests the four corrected cases against preserved original literal-code
+contours. The fast-decoder compatibility API remains exact for estimation/oracle
+purposes. Complete column/embedded sources, per-run colors, backgrounds/TrueType
+fill and real CAD/UI acceptance remain required for full parity.
 
 ```
 python tools/generate_mtext_simple_fixtures.py

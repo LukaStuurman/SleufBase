@@ -619,7 +619,7 @@ fn common(groups: &[Group], kind: &str) -> Result<DxfFeature, String> {
 /// Attribute text codes live in AcDbText, whereas flags/valign are in
 /// AcDbAttribute. R2018 repeats 71/72/11 after that subclass; never use them
 /// as text generation/alignment codes. R12 has no subclass markers.
-fn subclass<'a, 'b>(groups: &'a [Group<'b>], name: &str) -> &'a [Group<'b>] {
+pub(crate) fn subclass<'a, 'b>(groups: &'a [Group<'b>], name: &str) -> &'a [Group<'b>] {
     if let Some(at) = groups.iter().position(|g| g.code == 100 && g.value == name) {
         let rest = &groups[at + 1..];
         let end = rest

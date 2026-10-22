@@ -180,7 +180,7 @@ impl Parser {
                 let key=field(groups,2).ok_or("DXF STYLE mist naam")?.to_lowercase();
                 if self.styles.len()>=4096{return Err("Te veel DXF-tekststijlen".into());}
                 let flags=crate::dxf_entities::integer(groups,70,0)?;
-                let style=crate::cad_text::Style{font:field(groups,3).unwrap_or("txt").to_owned(),big_font:field(groups,4).unwrap_or("").to_owned(),vertical:flags&4!=0};
+                let style=crate::cad_text::Style{font:field(groups,3).unwrap_or("txt").to_owned(),big_font:field(groups,4).unwrap_or("").to_owned(),vertical:flags&4!=0,width:crate::dxf_entities::number(groups,41).filter(|v|*v>0.).unwrap_or(1.),oblique:crate::dxf_entities::number(groups,50).unwrap_or(0.)};
                 if self.styles.insert(key,style).is_some(){return Err("DXF bevat dubbele tekststijlen".into());}
             }
             "TABLES" if kind=="LAYER"=>{
@@ -262,7 +262,7 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
     let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,space_policy:SpacePolicy::Modelspace,features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};
     crate::cad_text::prepare_overlay(&mut overlay,&parser.styles,catalog.as_deref_mut(),cancel)?;
-    crate::cad_mtext::prepare_overlay(&mut overlay,&parser.styles,catalog.as_deref_mut(),cancel)?;
+    crate::cad_mtext::prepare_overlay(&mut overlay,&parser.styles,catalog,cancel)?;
     overlay.rebuild_block_cache_with_cancel(cancel)?;crate::input::check(cancel)?;Ok(overlay)
 }
 

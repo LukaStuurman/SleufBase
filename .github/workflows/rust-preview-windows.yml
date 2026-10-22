@@ -494,6 +494,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_mtext_simple.py rust/target/release/examples/render_mtext.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_cad_mtext_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_mtext.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit vector CAD text and fresh font geometry
         shell: pwsh
         env:

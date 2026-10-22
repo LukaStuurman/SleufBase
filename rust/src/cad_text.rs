@@ -93,11 +93,24 @@ impl Source {
         self.contours.validate()
     }
 }
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub(crate) struct Style {
     pub font: String,
     pub big_font: String,
     pub vertical: bool,
+    pub width: f64,
+    pub oblique: f64,
+}
+impl Default for Style {
+    fn default() -> Self {
+        Self {
+            font: String::new(),
+            big_font: String::new(),
+            vertical: false,
+            width: 1.,
+            oblique: 0.,
+        }
+    }
 }
 pub struct Renderer<'a> {
     catalog: &'a mut crate::dxf_fonts::Catalog,

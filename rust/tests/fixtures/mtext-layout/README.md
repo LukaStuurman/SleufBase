@@ -62,3 +62,9 @@ The optimized app/driver and tools/text_layout.py --licenses notice are checked.
 All 435 Rust tests (39 desktop tests) and the final Clippy report pass without
 new warnings. All three Windows runs for the preceding parser commit 0ca51fc
 passed. Full glyph/CAD/project/canvas acceptance remains required.
+
+Ordinary CAD/STYLE source, project persistence and the shared map scene are now
+connected to the font/render components; [cad-mtext](../cad-mtext/README.md)
+contains that integration evidence and its remaining column/embedded/color/fill
+limits. The older component checkpoint above does not describe the current
+integration status or remove any global release gate.

@@ -78,6 +78,7 @@ pub struct Renderer<'a> {
     fonts: Vec<Resolved>,
     names: HashMap<Arc<FontFace>, usize>,
     faces: HashMap<usize, (Arc<FontFace>, usize)>,
+    style_names: HashMap<String, Arc<FontFace>>,
     glyphs: Cache,
     controls: usize,
     cancel: &'a AtomicBool,
@@ -89,10 +90,56 @@ impl<'a> Renderer<'a> {
             fonts: Vec::new(),
             names: HashMap::new(),
             faces: HashMap::new(),
+            style_names: HashMap::new(),
             glyphs: Cache::default(),
             controls: 0,
             cancel,
         }
+    }
+    /// Resolve DXF STYLE through the original filename/shape-family factory,
+    /// then register that exact physical choice for both rendering routes.
+    pub(crate) fn style_face(&mut self, name: &str) -> Result<Arc<FontFace>, String> {
+        if name.len() > 32768 {
+            return Err("CAD-fontnaam is te lang".into());
+        }
+        crate::input::check(self.cancel)?;
+        if let Some(face) = self.style_names.get(name) {
+            return Ok(face.clone());
+        }
+        if self.style_names.len() >= 4096 {
+            return Err("Te veel MTEXT-fontnamen".into());
+        }
+        let font = self.catalog.resolve(name, self.cancel)?;
+        let selected = self
+            .catalog
+            .selected_path(name)
+            .and_then(|p| p.file_name())
+            .map(|p| p.to_string_lossy().into_owned());
+        let face = Arc::new(FontFace {
+            filename: Arc::from(selected.as_deref().unwrap_or("*monospace")),
+            family: Arc::from(selected.as_deref().unwrap_or("monospace")),
+            ..FontFace::default()
+        });
+        let i = if let Some((canonical, _)) = self.names.get_key_value(&face) {
+            let canonical = canonical.clone();
+            self.style_names.insert(name.to_owned(), canonical.clone());
+            return Ok(canonical);
+        } else {
+            if self.fonts.len() >= 4096 {
+                return Err("Te veel MTEXT-fontvarianten".into());
+            }
+            let i = self.fonts.len();
+            self.fonts.push(Resolved { font, selected });
+            self.names.insert(face.clone(), i);
+            i
+        };
+        if self.faces.len() >= 100_000 {
+            return Err("Te veel MTEXT-fontcontexten".into());
+        }
+        self.faces
+            .insert(Arc::as_ptr(&face) as usize, (face.clone(), i));
+        self.style_names.insert(name.to_owned(), face.clone());
+        Ok(face)
     }
     fn font(&mut self, face: &Arc<FontFace>) -> Result<usize, String> {
         crate::input::check(self.cancel)?;
