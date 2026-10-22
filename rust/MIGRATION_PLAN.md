@@ -43,6 +43,42 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 22 oktober 2026: oorspronkelijke locatiebediening
+
+- De echte oorspronkelijke menubedieningen zijn zonder appopstart vastgelegd in
+  tests/fixtures/workflows/original.json. WORKFLOW_PARITY.md koppelt de resterende
+  gebruikersacties aan native routes. De broncontrole onderscheidt de acht oude
+  DXF-kaartprimitieven van nieuwe native CAD-uitbreidingen; sjabloonbehoud blijft
+  een afzonderlijk ruimer contract. Alle bestaande releasevoorwaarden blijven open.
+- Locatiezoeken is gekoppeld aan de desktop: debounced PDOK-suggesties, RD/GPS,
+  Unicode-cijfers, Ctrl+L en pijl/Enter/Escape, oorspronkelijke typegebonden schaal,
+  tijdelijk markeren, lege-kaartnavigatie en luchtfoto. De werkelijke viewport na
+  verschuiven/zoomen bepaalt de volgende provideruitsnede. Zoekresultaten, marker
+  en focus worden bij projectwisseling gewist zonder de projectdata te wijzigen.
+- Eén client/worker houdt één actieve, één laatste wachtende en één gereedstaande
+  zoekopdracht bij. Duizend vervangingen, annulering en verouderde/gesloten resultaten
+  zijn gecontroleerd. Echte lokale HTTP-proeven toetsen statusretry en bodylimieten.
+  Een wachtende socket blijft begrensd door zijn 20-seconden-timeout.
+- 287 oorspronkelijke coördinatenvragen, alle 66 Unicode-14-cijferfamilies, 36
+  zoekantwoorden, twee reverse-antwoorden en zes kaartschalen zijn vastgelegd.
+  GPS gebruikt dezelfde gridloze zevenparameterprojectie met pure Rust; pyproj
+  bepaalt het onafhankelijke verwachte resultaat binnen 0,002 m voor navigatie.
+  Drie oude GPS-volgordefouten zijn bewaard naast de correctie. Echte egui-proeven
+  controleren lege kaart, schaal, verschuiving, toetsenbord en projectwisseling.
+- De volledige regressiereeks en gerichte eindcontroles dekken 466 geslaagde tests,
+  inclusief 44 desktoptests; Clippy heeft geen nieuwe waarschuwingen. De native
+  geoptimaliseerde app/locatiedriver zijn gebouwd. 375 verse coördinatenvragen en
+  38 providerantwoorden slagen met maximaal 0,000000159 m horizontaal verschil
+  tegenover de oorspronkelijke pyproj-route. De echte PDOK-search/reverse-proef
+  levert zes/één geldige resultaten. Beide referenties reproduceren bytegelijk
+  onder een andere hashseed. Dit vervangt geen volledige project-/praktijkacceptatie.
+- Cargo.lock legt nu de volledige dependencyset vast; Windows CI gebruikt --locked.
+  De native projectiebibliotheek heeft geen C/Python-runtime nodig. De bijbehorende
+  notices worden met EXE/portable preview meegeleverd en via --licenses getoond.
+- Reverse-lookup is geport; het oorspronkelijke TIFF-adressenoverzicht/kopiëren,
+  zelfstandige kaartexport, resterende menu's/voorkeuren, StreetSmart/AI, volledige
+  projectacceptatie en levering blijven nodig. Zie tests/fixtures/location.
+
 ## Voortgang 22 oktober 2026: gewone MTEXT-kleuren
 
 - Inline ACI/RGB-kleuren lopen nu van ASCII/binary DXF via opgeslagen contouren

@@ -4,6 +4,10 @@
 
 **Huidige status:** Rust v0.1.x is een migratie-preview, géén volledige port. Een groene Windows-build bewijst alleen dat de huidige Rust-subset compileert en haar eigen tests passeert.
 
+[WORKFLOW_PARITY.md](WORKFLOW_PARITY.md) koppelt de werkvolgorde aan het
+daadwerkelijke oorspronkelijke menu en de actieve bronhooks. Een statische
+inventaris is geen acceptatie; alle voorwaarden hieronder blijven verplicht.
+
 Het actieve profielcontract volgt de productie-opstart en
 `test_profile_leader_v0310_behavior.py`: attribuutblok + LEADER met
 botsingsvermijding. De optionele dynamische profielpatch wordt niet geladen.
@@ -13,6 +17,7 @@ zijn geen voorwaarde voor actieve productiepariteit.
 | Onderdeel | Bestaande Python-bron | Rust status | Acceptatie-eis voor volwaardige vervanging |
 |---|---|---|---|
 | Desktop UI, menu's, dialogs, shortcuts, selectie, zoom/pan, drag/drop | app.py, rounded_widgets.py, renderer.py | Basis kaartinteractie en opmerkingen; lokale invoer en GUI-DXF/Excel op afzonderlijke begrensde workers met voortgang/annuleren, eigendomsteruggave en uitgestelde projectacties, inclusief directe project-naar-sjabloonexport met per-vak bronkeuze, TIFF, BGT/Kadaster, profielen en DXF-bundel; overige GUI-workflows nog deels | Alle bedieningen, kaartinteracties en workflows hebben dezelfde gevolgen |
+| Locatie, adres-/RD-/GPS-zoeken en TIFF-adressen | location_search.py, app.py inline locatiezoeker, legacy locatie-/adresmethoden | Native PDOK-suggesties, RD/GPS, Unicode-cijfers, typegebonden schaal, tijdelijk markeren, toetsenbord/Ctrl+L, lege-kaartnavigatie en luchtfoto zijn aangesloten. Begrensde latest-query-worker onderdrukt verouderde/gesloten resultaten; brondata blijft ongewijzigd. Oorspronkelijke coördinaten/providerantwoorden en echte egui-kaart/keyboard worden vergeleken. Zevenparameterprojectie wordt met pyproj gecontroleerd; oorspronkelijke GPS-volgordefouten zijn bewaard naast de correctie. Reverse-client bestaat; TIFF-adressenoverzicht/kopiëren en begeleidende exports blijven open | Gelijkwaardig zoeken/navigeren, overzicht/kopieeracties, fout-/projectwisselgedrag en echte dienst-/gebruikersacceptatie |
 | Project openen, opslaan, metadata, herstel | app.py, models.py, autosave_* | Atomaire native v4-opslag met v1/v2/v3-lezen, strikte objectstructuren, bronblokken/curves en CAD-metadata; native Python v1-import van proefsleuven, raster/DXF en opmerkingen met compleet JSON-bronarchief; native sjabloonvoorkeuren (vakselectie, rasterpaden, volgorde en stijl) opgeslagen/hersteld; oorspronkelijke **Python** UI/sjablooninstellingen nog niet geheel toegepast, geen Python-formaatexport | Oud project laden/bewerken/opslaan zonder verlies; echte projecten en volledige workflows nog te testen |
 | Backups/autosave + crash recovery | autosave_backup_patch.py, autosave_restore_ui.py | Roterende Rust-backup en bestandskeuze voor herstel; herstel opent als nieuw project, regressies voor fout/annuleren/projectwissel | Onderbreking en restore-tests; hersteloverzicht en werkelijke crashacceptatie nog open |
 | GeoTIFF decoderen en weergeven | geotiff.py, renderer.py | Begrensde strip-/tegelpreview op achtergrondthread, adaptief RGBA-budget, 47 rasterfixtures (Pillow + expliciete samplecorrecties); Volledige exportdecodering zonder verkleining deelt kleuren/stroken/tegels; 45 oorspronkelijke pixelreferenties en alle pixels van 4097×4097 zijn getoetst. Volledige zoomresolutie/overviews/gesubsamplede YCbCr en overige varianten nog open | Alle kleurmodi, enorme TIFFs, pyramides, alpha en renderperformance |

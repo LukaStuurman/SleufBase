@@ -1,0 +1,45 @@
+# Oorspronkelijke gebruikersfuncties als werkvolgorde
+
+De volledige doelstelling en releasevoorwaarden staan in [PARITY.md](PARITY.md).
+Deze inventaris koppelt het werk nadrukkelijk aan bedieningen van de bestaande
+app. Componenttests en extra CAD-mogelijkheden zijn geen bewijs dat de volledige
+gebruikersworkflow af is.
+
+[Het oorspronkelijke menu](tests/fixtures/workflows/original.json) komt uit de
+hash-gecontroleerde Python 3.11-code van `KlicViewerApp._build_menu`, uitgevoerd
+met alleen nepwidgets en callbacknamen. De app, accounts en instellingen worden
+niet gestart. De drie aanvullende menu-hooks in `app.py` zijn statisch opgenomen.
+Opstartpatches in andere modules en niet-menu-interacties blijven afzonderlijk
+te controleren; deze inventaris pretendeert geen volledige acceptatie.
+
+| Bestaande bediening | Native koppeling en nog vereist |
+| --- | --- |
+| Project laden/opslaan/opslaan als | Native worker, gewijzigde-data-beveiliging en atomaire opslag; volledige Python-voorkeuren, terugschrijven en echte projectacceptatie blijven open |
+| Laad GeoTIFF(s), laad KLIC DXF, zoom naar alles | Native workers en kaart; volledige rastermodi/resoluties, rotatiebediening en praktijkacceptatie blijven open |
+| Locatie | Adres-/plaats-/wegzoeken, RD/GPS, suggesties, toetsenbord, tijdelijke markering, typegebonden schaal en luchtfoto zijn aangesloten; onafhankelijke coördinaat-/provider- en echte egui-proeven |
+| Toon TIFF-adressen | Reverse-client is geport; het oorspronkelijke overzicht en kopieeracties moeten nog worden aangesloten |
+| Export kaarten | Native kaart-/rasterexport is beschikbaar in sjabloonketens; volledige gelijkwaardige zelfstandige kaart-exportbediening blijft open |
+| Kadastrale export DXF | Native object-/extra-lagenexport en sjabloonpaden; volledige oorspronkelijke keuzecombinaties en praktijkacceptatie blijven open |
+| Proefsleuven sjabloon DXF | Beide native planners, profielen, Normaal/Reverse, datum/projectnaam en rasterbundels zijn aangesloten; oorspronkelijke fotoannotaties/maskers/logo/contact en volledige acceptatie blijven open |
+| Wis alle referentiepunten / laad alle beginpunten | Bestaande start-/referentiehelpers en native planners controleren; volledige gelijkwaardige kaartbediening blijft open |
+| Wis opmerkingen / wis alles | Projectacties en opmerkingen bestaan; alle oorspronkelijke losse acties en bevestigingen controleren |
+| KickTheMap inloggen/jobs/objectexport/browser/uitloggen | Native manager, geïsoleerde browser en downloads bestaan; alle echte provider-/fallback-/accountvarianten en gebruiksacceptatie blijven open |
+| StreetSmart inloggen/browser/uitloggen/selector | Nog niet native aangesloten |
+| Open instellingen | Native regels/autosave/exportopties bestaan; alle overige voorkeuren en behoud bij migratie blijven open |
+| Maaiveld via Gemma | AHN-hoogteproef bestaat; oorspronkelijke AI-/profielworkflow blijft open |
+
+De daadwerkelijke oorspronkelijke DXF-kaartadapter in `dxf.py` levert alleen
+LINE, LWPOLYLINE, POLYLINE, ARC, CIRCLE, ELLIPSE, SPLINE en INSERT-markeringen.
+TEXT/ATTRIB/MTEXT-contouren en mesh-randen in de native kaart zijn uitbreidingen
+boven die oorspronkelijke adapter. Sjabloonbehoud en het kopiëren van CAD-objecten
+vormen een afzonderlijk, ruimer contract en blijven onverminderd verplicht.
+Deze broncontrole bepaalt de werkvolgorde: ontbrekende bestaande gebruikersacties
+krijgen voorrang. Er zijn geen bestaande functies of releasevoorwaarden afgevinkt
+op grond van deze statische inventaris.
+
+Reproduceren zonder appopstart:
+
+```
+python tools/generate_workflow_contract.py
+git diff --exit-code -- rust/tests/fixtures/workflows/original.json
+```

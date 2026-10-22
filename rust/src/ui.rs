@@ -42,6 +42,8 @@ mod project_template_ui;
 mod trench_editing;
 #[path="ui_kickthemap_browser.rs"]
 mod kick_browser_ui;
+#[path="ui_location.rs"]
+mod location_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -76,6 +78,8 @@ enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf)
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    location:location_ui::Search,
+    navigation:location_ui::Navigation,
     file_loader:Option<sleufbase_rust::file_loader::FileLoader>,
     exporter:Option<sleufbase_rust::export_worker::Exporter>,
     export_intent:Option<exporting::ExportIntent>,
@@ -158,6 +162,8 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            location:Default::default(),
+            navigation:Default::default(),
             file_loader:None,
             exporter:None,
             export_intent:None,
@@ -255,6 +261,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.location.reset();self.navigation=Default::default();
         self.cancel_file_load();
         self.export_dialog=None;
         self.template_dialog=None;
@@ -443,6 +450,7 @@ impl SleufBaseApp {
     }
 
     fn current_bounds(&self)->Option<Bounds> {
+        if let Some(bounds)=self.navigation.bounds(){return Some(bounds);}
         let mut bounds=Bounds::from_datasets(&self.datasets);
         for raster in &self.geotiffs {bounds=union_bounds(bounds,Some(raster.bounds));}
         for overlay in self.overlays.iter().filter(|o|o.visible) {
@@ -966,7 +974,8 @@ fn canvas(
     osm_visible:bool,
     zoom:&mut f64,
     pan:&mut egui::Vec2,
-    rules:&[sleufbase_rust::Rule]
+    rules:&[sleufbase_rust::Rule],
+    mut navigation:Option<&mut location_ui::Navigation>
 ) {
     let desired=ui.available_size();
     let (rect,response)=ui.allocate_exact_size(desired,egui::Sense::click_and_drag());
@@ -999,6 +1008,8 @@ fn canvas(
             }));
         }
     }
+    let focus=navigation.as_ref().and_then(|n|n.focus);
+    let bounds=bounds.or_else(||focus.map(|f|Bounds{min_x:f.center[0]-1.,max_x:f.center[0]+1.,min_y:f.center[1]-1.,max_y:f.center[1]+1.}));
     let Some(bounds)=bounds else {
         painter.text(rect.center(),egui::Align2::CENTER_CENTER,
             "Open een lokaal KickTheMap JSON-, GeoTIFF- of DXF-bestand",
@@ -1019,10 +1030,14 @@ fn canvas(
     let height=(bounds.max_y-bounds.min_y).max(1.0);
     let screen_width=(rect.width()-56.0).max(1.0) as f64;
     let screen_height=(rect.height()-56.0).max(1.0) as f64;
-    let scale=(screen_width/width).min(screen_height/height) * *zoom;
-    let cx=(bounds.min_x+bounds.max_x)*0.5;
-    let cy=(bounds.min_y+bounds.max_y)*0.5;
+    let scale=focus.map_or_else(||(screen_width/width).min(screen_height/height),|f|1./f.meters_per_pixel) * *zoom;
+    let cx=focus.map_or((bounds.min_x+bounds.max_x)*0.5,|f|f.center[0]);
+    let cy=focus.map_or((bounds.min_y+bounds.max_y)*0.5,|f|f.center[1]);
     let center=rect.center()+*pan;
+    if let Some(nav)=navigation.as_deref_mut(){nav.viewport=Some(Bounds{
+        min_x:cx-f64::from(rect.width()/2.+pan.x)/scale,max_x:cx+f64::from(rect.width()/2.-pan.x)/scale,
+        min_y:cy-f64::from(rect.height()/2.-pan.y)/scale,max_y:cy+f64::from(rect.height()/2.+pan.y)/scale,
+    });}
     let project=|x:f64,y:f64|Pos2::new(
         center.x+((x-cx)*scale) as f32,
         center.y-((y-cy)*scale) as f32
@@ -1163,6 +1178,17 @@ fn canvas(
             }
         }
     }
+    if let Some(nav)=navigation.as_deref_mut(){
+        if let Some((point,started))=nav.marker{
+            let elapsed=started.elapsed();
+            if elapsed<Duration::from_secs(5){
+                let pos=project(point[0],point[1]);let phase=(elapsed.as_millis()/50%18)as f32;
+                painter.circle_stroke(pos,8.+phase*1.2,Stroke::new(if phase<9.{3.0_f32}else{2.0_f32},ORANGE));
+                painter.circle_filled(pos,4.,ORANGE);painter.circle_stroke(pos,4.,Stroke::new(2.0_f32,Color32::WHITE));
+                ui.ctx().request_repaint_after(Duration::from_millis(50));
+            }else{nav.marker=None;}
+        }
+    }
     if let Some(pos)=response.hover_pos() {
         let x=cx+f64::from(pos.x-center.x)/scale;
         let y=cy-f64::from(pos.y-center.y)/scale;
@@ -1170,10 +1196,11 @@ fn canvas(
             format!("X {:.3} / Y {:.3}",x,y),
             egui::FontId::monospace(12.0),INK);
     }
+    let display_bounds=navigation.as_ref().and_then(|n|n.viewport).unwrap_or(bounds);
     painter.text(rect.left_bottom()+egui::vec2(12.0,-12.0),
         egui::Align2::LEFT_BOTTOM,
         format!("X: {:.2} - {:.2}, Y: {:.2} - {:.2}; zoom {:.1}x",
-            bounds.min_x,bounds.max_x,bounds.min_y,bounds.max_y,zoom),
+            display_bounds.min_x,display_bounds.max_x,display_bounds.min_y,display_bounds.max_y,zoom),
         egui::FontId::monospace(11.0),Color32::DARK_GRAY);
     if osm_visible {
         painter.text(rect.right_bottom()+egui::vec2(-10.0,-10.0),egui::Align2::RIGHT_BOTTOM,
@@ -1219,6 +1246,8 @@ impl SleufBaseApp {
         self.poll_bgt();
         self.poll_cadastral();
         self.poll_ahn();
+        self.poll_location(ctx);
+        if ctx.input_mut(|i|i.consume_key(egui::Modifiers::CTRL,egui::Key::L)){self.open_location();}
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
@@ -1259,6 +1288,7 @@ impl SleufBaseApp {
                 }
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
+                if ui.button("Locatie zoeken").clicked() {self.open_location();}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.add_enabled(!self.osm_busy,egui::Button::new("OpenStreetMap")).clicked() {self.start_osm();}
@@ -1294,7 +1324,7 @@ impl SleufBaseApp {
                     if ui.button("Jobs en virtuele proefsleuven…").clicked() {self.open_project_template_dialog();ui.close_menu();}
                     if ui.button("Opgeslagen exportinvoer…").clicked() {self.open_template_dialog();ui.close_menu();}
                 });
-                if ui.button("Kaart terugzetten").clicked() {self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
+                if ui.button("Kaart terugzetten").clicked() {self.navigation=Default::default();self.location.needs_aerial=false;self.zoom=1.0;self.pan=egui::Vec2::ZERO;}
             });
             if !self.message.is_empty() {
                 ui.label(egui::RichText::new(&self.message).small().color(DARK));
@@ -1562,7 +1592,7 @@ impl SleufBaseApp {
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
                 self.osm_visible && self.osm_texture.is_some(),
-                &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules);
+                &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules,Some(&mut self.navigation));
         });
 
         if self.show_trench_dialog {
@@ -1600,6 +1630,7 @@ impl SleufBaseApp {
         }
 
 
+        self.show_location(ctx);
         if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
         if self.browser_ui.open {self.show_kickthemap_workspace(ctx);}
 
@@ -1871,7 +1902,7 @@ mod project_lifecycle_tests {
         let custom=[sleufbase_rust::Rule::new(vec!["water".into()],"CUSTOM".into(),6,"Andere naam".into())];
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|rules:&[sleufbase_rust::Rule]|ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,rules);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,std::slice::from_ref(&dataset),&[],&[],&[],&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,rules,None);});
         });
         let has_magenta=|output:egui::FullOutput|output.shapes.iter().any(|s|matches!(&s.shape,egui::Shape::Circle(c)if c.fill==aci_color(6)));
         assert!(has_magenta(render(&custom)));
@@ -1926,7 +1957,7 @@ mod project_lifecycle_tests {
         let mut render=|overlay:&DxfOverlay| {
             ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.0,600.0))),..Default::default()},|ctx|{
                 egui::CentralPanel::default().show(ctx,|ui|{
-                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
+                    canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);
                 });
             })
         };
@@ -1949,7 +1980,7 @@ mod project_lifecycle_tests {
         assert_eq!(overlay.features.len(),1);
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
             egui::CentralPanel::default().show(ctx,|ui|{
-                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);
+                canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);
             });
         });
         let edges:Vec<_>=output.shapes.iter().filter_map(|s|match &s.shape {
@@ -1971,7 +2002,7 @@ mod project_lifecycle_tests {
         overlay.rebuild_block_cache().unwrap();
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
         });
         let edges=output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count();
         assert_eq!(edges,2,"hidden edges and gaps must not be painted");
@@ -1990,7 +2021,7 @@ mod project_lifecycle_tests {
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|overlay:&DxfOverlay|{
             let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
             });
             output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count()
         };
@@ -2008,7 +2039,7 @@ mod project_lifecycle_tests {
         overlay.rebuild_block_cache().unwrap();let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|overlay:&DxfOverlay|{
             let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+                egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
             });output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count()
         };
         assert_eq!(render(&overlay),4);
@@ -2030,7 +2061,7 @@ mod project_lifecycle_tests {
         assert!(expected.contains_key(&[0,0,0])&&expected.contains_key(&[255,255,255]));assert_eq!(expected.len(),249);
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
         });
         let mut actual=std::collections::BTreeMap::<[u8;3],usize>::new();
         for shape in &output.shapes{if let egui::Shape::LineSegment{stroke,..}=&shape.shape{if stroke.width==1.6{*actual.entry([stroke.color.r(),stroke.color.g(),stroke.color.b()]).or_default()+=1;}}}
@@ -2044,7 +2075,7 @@ mod project_lifecycle_tests {
         assert_eq!(overlay.features.len(),1);assert_eq!(overlay.bounds().unwrap().max_x,10.);
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
         });
         assert_eq!(output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count(),1);
     }
@@ -2058,7 +2089,7 @@ mod project_lifecycle_tests {
         let expected=overlay.rendered_features().map(|f|f.paths().map(|p|p.len().saturating_sub(1)).sum::<usize>()).sum::<usize>();assert!(expected>0);
         let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
         let mut render=|overlay:&DxfOverlay|{let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(600.,400.))),..Default::default()},|ctx|{
-            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES,None);});
         });output.shapes.iter().filter(|s|matches!(&s.shape,egui::Shape::LineSegment{stroke,..}if stroke.color==Color32::from_rgb(0x12,0xab,0x34))).count()};
         assert_eq!(render(&overlay),expected);overlay.features[0].cad.as_mut().unwrap().text.as_mut().unwrap().attribute.as_mut().unwrap().flags|=1;assert_eq!(render(&overlay),0);
     }

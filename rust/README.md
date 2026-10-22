@@ -12,6 +12,7 @@ De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
 - Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
 - Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
+- Locatiezoeker met PDOK-adres-/plaats-/wegsuggesties, RD/GPS-invoer, Ctrl+L, toetsenbordkeuze en tijdelijke markering. Springen werkt ook zonder geladen bestanden; de oorspronkelijke schaal en PDOK-luchtfoto volgen de gekozen locatie. Zoeken gebruikt één begrensde achtergrondworker en overschrijft geen projectdata. Zie [de onafhankelijke locatiecontroles](tests/fixtures/location/README.md).
 - Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
 - Instelbare objectregels voor kaartkleuren, disciplineoverzicht, Excel en DXF; standaardvolgorde en kleuren uit Python.
 - Excel (.xlsx) export met oranje opmaak, vaste koprij, filter en totaalregel; gedeelde disciplinenamen tellen samen.

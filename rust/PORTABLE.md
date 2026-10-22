@@ -2,7 +2,7 @@
 
 Deze map bevat de **native Rust-migratiepreview**, niet de huidige stabiele SleufBase-release.
 
-Laat de bijgeleverde `Pillow-LICENSE.txt` en `ezdxf-LICENSE.txt` bij de executable staan. De licenties zijn ook in de executable opvraagbaar met `--licenses`.
+Laat de bijgeleverde `Pillow-LICENSE.txt`, `ezdxf-LICENSE.txt` en `proj4rs-NOTICES.txt` bij de executable staan. De licenties zijn ook in de executable opvraagbaar met `--licenses`.
 
 ## Gebruik
 
