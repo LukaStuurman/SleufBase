@@ -12,7 +12,8 @@ scene has 138 instances, including 12 descendants in mirrored, nonuniform nested
 grids. The project test removes its temporary font files before save/reopen;
 source contours and scene geometry survive. Invalid updates preserve prior
 project bytes. The ordinary drawing route inherits existing layer/visibility/
-base-color behavior; per-run color is still open.
+base-color behavior; [inline paints](../cad-mtext-paint/README.md) now separately
+check run colors throughout source, scene, project, canvas and template paths.
 
 Expected geometry comes from the actual **reloaded DXF**, not only the editor's
 in-memory entity. DXF saving can replace a rotation by a WCS direction, which
@@ -45,7 +46,7 @@ with the native 0.005 drawing-unit WCS budget. This also checks contour breaks,
 source content and nested instances. No SleufBase initialization, account or
 user settings are used. The oracle shares the private empty font-cache import.
 
-The ordinary source route is connected. Inline colors, backgrounds/frames,
+The ordinary source and inline-color routes are connected. Backgrounds/frames,
 TTF fills, complete column-source extraction, embedded multiline attributes,
 extended STYLE fonts, other vendor variants and real CAD/UI acceptance remain
 required for full parity. The current application reports those limitations;

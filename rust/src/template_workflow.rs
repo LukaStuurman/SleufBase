@@ -122,7 +122,7 @@ pub fn request_with_bgt(
             if !feature.visible {
                 continue;
             }
-            for path in feature.paths() {
+            for (path, rgb) in feature.painted_paths() {
                 if path.len() < 2 {
                     continue;
                 }
@@ -131,7 +131,6 @@ pub fn request_with_bgt(
                     return Err("Te veel CAD-punten voor de sjabloonexport".into());
                 }
                 let path = path.iter().map(|p| [p.x, p.y]).collect::<Vec<_>>();
-                let rgb = feature.rgb;
                 geometry.push(line(
                     "PROEFSLEUVEN_KADASTER",
                     path.clone(),

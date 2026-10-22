@@ -52,7 +52,7 @@ pub fn append_visible(
     for layer in layers.iter().filter(|l|l.visible) {
         for feature in layer.rendered_features() {
             if !feature.visible {continue;}
-            for path in feature.paths() {
+            for (path, rgb) in feature.painted_paths() {
                 for edge in path.windows(2) {
                     scanned=scanned.checked_add(2).ok_or("CAD-puntenbudget overschreden")?;
                     if scanned%4096==0 {control.check()?;}
@@ -69,7 +69,7 @@ pub fn append_visible(
                         }
                         output.push(Stroke {
                             points:vec![start,end],
-                            color:feature.rgb,
+                            color:rgb,
                             selected:false,
                             highlighted:false,
                         });

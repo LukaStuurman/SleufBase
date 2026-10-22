@@ -50,8 +50,8 @@ De native MTEXT-opmaakkern is nu als eerste rendercomponent beschikbaar:
 Woorden/ruimtes, breuken, font-/kleur-/alinea-/tab-/decoratiewissels blijven
 behouden, met gedeelde snapshots, annulering en limieten. De gemeten-celplaatsing
 is hieronder aangevuld. De samengestelde font-/tekstgeometriekern staat hieronder;
-de gewone CAD-/project-/scènekoppeling staat hieronder; volledige kolom-/embedded-/kleur-
-en vlakvullingskoppeling blijft vereist. De huidige desktop meldt MTEXT nog als
+de gewone CAD-/project-/scène- en inline-kleurkoppeling staan hieronder; volledige
+kolom-/embedded- en vlakvullingskoppeling blijft vereist. De huidige desktop meldt MTEXT nog als
 onvolledig. Zie tests/fixtures/mtext; alle onderstaande gates blijven verplicht.
 
 De volledige gemeten-celplaatsing is nu de tweede native MTEXT-kern:
@@ -60,7 +60,7 @@ alinea-/kolomvoortzetting, marges en negen ankers. 369 oorspronkelijke
 layoutgevallen/8747 primitieve onderdelen vergelijken alle posities en
 volgorde. Gedeelde celbereiken, een hergebruikte tabindex en kolomhoogtesommen
 vermijden herhaald kopiëren/doorlopen. De font-/parserbrug en glyphcurves zijn
-hieronder aangevuld. de gewone CAD-/project-/scènekoppeling is hieronder aangevuld; volledige embedded-/kolom-/kleuropmaak en acceptatie blijven
+hieronder aangevuld. De gewone CAD-/project-/scène- en kleurkoppeling zijn hieronder aangevuld; volledige embedded-/kolomopmaak en acceptatie blijven
 noodzakelijke volgende stappen; volledige MTEXT is nog onvolledig. Zie tests/fixtures/mtext-layout.
 
 De complexe MTEXT-tekstroute verbindt nu parser, volledige fontbeschrijving,
@@ -69,7 +69,7 @@ echte woord-/spatiematen, celplaatsing en vectorcontouren/decoraties.
 50 afwijkende oude resultaten blijven expliciet bewaard bij correcties voor vet
 en tegenstrijdige fontkeuze tussen meten en tekenen. Gedeelde fontnamen, fysieke
 glyphs en tabarrays vermijden herhaald werk; 3000 alinea's delen 20.000 tabstops.
-De eenvoudige MTEXT-route, breedteschatting en gewone bron-/project-/scènekoppeling zijn hieronder aangevuld. Volledige embedded-/kolom-/kleuropmaak, achtergronden/vlakvulling en echte
+De eenvoudige MTEXT-route, breedteschatting, gewone bron-/project-/scène- en kleurkoppeling zijn hieronder aangevuld. Volledige embedded-/kolomopmaak, achtergronden/vlakvulling en echte
 CAD-acceptatie blijven vereist. De desktop meldt MTEXT nog als onvolledig.
 Zie tests/fixtures/mtext-render; alle onderstaande gates blijven verplicht.
 
@@ -81,7 +81,7 @@ automatische breedte, witruimteterugval en kolomtelling. 21 oorspronkelijke
 SHX-crashes bij het eerste controleteken blijven als foutbewijs bewaard naast
 de correcte spatie-terugval. Een streaming meetlezer behoudt de oorspronkelijke
 onverschaalde optelvolgorde zonder telkens de hele regel te lezen.
-Gewone DXF-/STYLE-/project-/scènebronnen zijn hieronder gekoppeld. Volledige kolom-/embedded-/kleuropmaak en
+Gewone DXF-/STYLE-/project-/scènebronnen en inline kleuren zijn hieronder gekoppeld. Volledige kolom-/embedded-opmaak en
 vlakvulling blijven vereist. De bronrouter verwerkt niet-afbreekbare spaties via de
 complexe route; de oude eenvoudige router/decoder had daar een
 bekende letterlijke-codeweergavefout. De desktop meldt MTEXT nog als onvolledig.
@@ -95,8 +95,19 @@ invoer na DXF-opslaan/herlezen, spiegeling/rotatie, alle ankers, breedte/schuint
 en rasterblokken. Vier letterlijke NBSP-codefouten hebben bewaarde oude contouren
 naast de gecorrigeerde router. Projectherstel werkt zonder fonts; ongeldige
 updates behouden eerder opgeslagen bytes. Uitgebreide kolom-/embedded-/STYLE-
-varianten, kleuren per tekstrun, achtergronden/frames, TTF-vlakvulling en echte
+varianten, achtergronden/frames, TTF-vlakvulling en echte
 CAD-/UI-acceptatie blijven open. Zie tests/fixtures/cad-mtext.
+
+Kleuren per tekstrun zijn gekoppeld aan de gewone MTEXT-invoer, projectcontouren,
+geneste blokken, canvas en beide sjabloonkaartpaden. 141 oorspronkelijke instanties/
+1607 gekleurde contouren vergelijken alle 257 ACI-rollen, expliciet RGB/zwart/wit,
+groepsherstel, decoraties/breukstrepen en laag-/blokovererving. Gedeelde contouren
+blijven één selecteerbaar object per instantie; alleen kleine kleurgrenzen worden
+toegevoegd. Wereldtessellatie deelt punt-/curve-/annuleerlimieten over alle kleuren.
+Projectproeven zonder fonts, oude uniforme caches en behoud bij ongeldige bereiken
+zijn opgenomen. Echte canvasstreken, geknipte kaarten en geschreven DXF-kleuren
+worden vergeleken. Volledige achtergrond-/kolom-/embedded-/vulopmaak en werkelijke
+CAD-/projectacceptatie blijven vereist. Zie tests/fixtures/cad-mtext-paint.
 
 ## Verplichte go/no-go voorwaarden
 

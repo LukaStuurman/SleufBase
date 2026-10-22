@@ -1138,7 +1138,7 @@ fn canvas(
             if matches!(feature.source.entity_type.as_str(),"POINT"|"INSERT") {
                 if let Some(point)=feature.points.first(){painter.circle_filled(project(point.x,point.y),2.5,stroke.color);}
             }
-            for path in feature.paths() { for pair in path.windows(2) {
+            for (path,[r,g,b]) in feature.painted_paths() { let stroke=Stroke::new(1.6_f32,Color32::from_rgb(r,g,b)); for pair in path.windows(2) {
                 painter.line_segment([
                     project(pair[0].x,pair[0].y),
                     project(pair[1].x,pair[1].y)
@@ -2014,6 +2014,27 @@ mod project_lifecycle_tests {
         assert_eq!(render(&overlay),4);
         overlay.features[0].cad.as_deref_mut().unwrap().linked_attributes[0].cad.as_deref_mut().unwrap().text.as_deref_mut().unwrap().attribute.as_deref_mut().unwrap().flags|=1;
         overlay.refresh_block_visibility();assert_eq!(render(&overlay),0);
+    }
+
+    #[test]
+    fn canvas_paints_all_visible_mtext_run_colors_with_one_selectable_source_per_instance(){
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        let cancel=std::sync::atomic::AtomicBool::new(false);
+        let mut dirs=std::fs::read_dir(root.join("mtext-render/fonts")).unwrap().map(|p|p.unwrap().path()).collect::<Vec<_>>();dirs.sort();
+        let mut catalog=sleufbase_rust::dxf_fonts::Catalog::from_dirs(&dirs,&cancel).unwrap();
+        let path=root.join("cad-mtext-paint/paint-binary.dxf");
+        let overlay=sleufbase_rust::dxf_read::parse_dxf_bytes_with_catalog(&std::fs::read(&path).unwrap(),&path,&cancel,&mut catalog).unwrap();
+        assert_eq!(overlay.rendered_features().count(),141);
+        let mut expected=std::collections::BTreeMap::<[u8;3],usize>::new();
+        for draw in overlay.rendered_features().filter(|d|d.visible){for(path,rgb)in draw.painted_paths(){*expected.entry(rgb).or_default()+=path.len().saturating_sub(1);}}
+        assert!(expected.contains_key(&[0,0,0])&&expected.contains_key(&[255,255,255]));assert_eq!(expected.len(),249);
+        let ctx=egui::Context::default();let mut zoom=1.;let mut pan=egui::Vec2::ZERO;
+        let output=ctx.run(egui::RawInput{screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(800.,600.))),..Default::default()},|ctx|{
+            egui::CentralPanel::default().show(ctx,|ui|{canvas(ui,&[],&[],&[],std::slice::from_ref(&overlay),&[],&[],&[],None,&[],None,None,false,&mut zoom,&mut pan,RULES);});
+        });
+        let mut actual=std::collections::BTreeMap::<[u8;3],usize>::new();
+        for shape in &output.shapes{if let egui::Shape::LineSegment{stroke,..}=&shape.shape{if stroke.width==1.6{*actual.entry([stroke.color.r(),stroke.color.g(),stroke.color.b()]).or_default()+=1;}}}
+        assert_eq!(actual,expected);
     }
 
     #[test]

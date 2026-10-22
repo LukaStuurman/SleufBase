@@ -1,9 +1,9 @@
 //! Ordinary DXF MTEXT: retain source, prepare native vector contours and allow
-//! parent block transforms. Inline color/background and MTEXT-in-ATTRIB remain
+//! parent block transforms and inline colors. Background and MTEXT-in-ATTRIB remain
 //! separate parity tasks.
 use crate::{
     cad_geometry::{self as geo, Affine, V3},
-    cad_text_path::{Path, MAX_CONTROLS},
+    cad_text_path::{Flattened, Flattener, Path, MAX_CONTROLS},
     dxf_entities::{field, number, point},
     dxf_read::{DxfFeature, DxfOverlay},
     dxf_tags::Group,
@@ -12,6 +12,45 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", content = "value", rename_all = "snake_case")]
+pub enum Paint {
+    Entity,
+    Indexed(u16),
+    Rgb([u8; 3]),
+}
+impl Paint {
+    pub(crate) fn resolve(
+        self,
+        base: [u8; 3],
+        parent: Option<[u8; 3]>,
+        layer: Option<&crate::cad::Layer>,
+    ) -> [u8; 3] {
+        match self {
+            Self::Entity => base,
+            Self::Rgb(rgb) => rgb,
+            Self::Indexed(0) => parent.unwrap_or_else(|| crate::cad::display_rgb(0, None, layer)),
+            Self::Indexed(aci) => crate::cad::display_rgb(i32::from(aci), None, layer),
+        }
+    }
+    fn from_context(ctx: &Context, base: &Context) -> Self {
+        if ctx.aci == base.aci && ctx.rgb == base.rgb {
+            Self::Entity
+        } else if let Some(rgb) = ctx.rgb {
+            Self::Rgb(rgb)
+        } else {
+            Self::Indexed(ctx.aci)
+        }
+    }
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PaintRun {
+    pub end_kind: u32,
+    pub end_point: u32,
+    pub paint: Paint,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -27,6 +66,12 @@ pub struct Source {
     /// Preserve the R2018 embedded-column object for subsequent native support.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub extra: Vec<crate::cad::Tag>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paints: Vec<PaintRun>,
+    /// Derived source-space endpoints for the already stored root point cache.
+    /// Block instances keep their own endpoints after world-space subdivision.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub vertex_ends: Vec<u32>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -70,8 +115,126 @@ impl Source {
                 unit(d)?;
             }
         }
-        self.contours.validate()
+        self.contours.validate()?;
+        if self.paints.len() > 200_000 || self.paints.len() != self.vertex_ends.len() {
+            return Err("Ongeldige MTEXT-kleursegmenten".into());
+        }
+        let (mut kind, mut point, mut vertex) = (0usize, 0usize, 0u32);
+        for (run, &end) in self.paints.iter().zip(&self.vertex_ends) {
+            let k = run.end_kind as usize;
+            let p = run.end_point as usize;
+            if k <= kind
+                || k > self.contours.kinds.len()
+                || p <= point
+                || p > self.contours.points.len()
+                || self.contours.kinds[kind] != 0
+                || end <= vertex
+                || end > 10_000_000
+                || matches!(run.paint,Paint::Indexed(aci) if aci>256)
+            {
+                return Err("Ongeldig MTEXT-kleurbereik".into());
+            }
+            point += self.contours.kinds[kind..k]
+                .iter()
+                .map(|v| usize::from((*v).max(1)))
+                .sum::<usize>();
+            if point != p {
+                return Err("MTEXT-kleurgrens staat niet op een contourgrens".into());
+            }
+            kind = k;
+            vertex = end;
+        }
+        if !self.paints.is_empty()
+            && (kind != self.contours.kinds.len() || point != self.contours.points.len())
+        {
+            return Err("Onvolledige MTEXT-kleursegmenten".into());
+        }
+        Ok(())
     }
+    pub(crate) fn validate_vertices(&self, points: usize, breaks: &[usize]) -> Result<(), String> {
+        if let Some(&last) = self.vertex_ends.last() {
+            if last as usize != points
+                || self.vertex_ends[..self.vertex_ends.len() - 1]
+                    .iter()
+                    .any(|v| breaks.binary_search(&(*v as usize)).is_err())
+            {
+                return Err("MTEXT-kleurgrens past niet bij de opgeslagen punten".into());
+            }
+        }
+        Ok(())
+    }
+    pub(crate) fn flatten(
+        &self,
+        matrix: Affine,
+        budget: usize,
+        cancel: &AtomicBool,
+    ) -> Result<(Flattened, Box<[u32]>), String> {
+        flatten(&self.contours, &self.paints, matrix, budget, cancel)
+    }
+}
+fn flatten(
+    path: &Path,
+    runs: &[PaintRun],
+    matrix: Affine,
+    budget: usize,
+    cancel: &AtomicBool,
+) -> Result<(Flattened, Box<[u32]>), String> {
+    let mut builder = Flattener::new(matrix, 0.005, budget, cancel)?;
+    if runs.is_empty() {
+        builder.append(&path.kinds, &path.points)?;
+        return Ok((builder.finish()?, Box::default()));
+    }
+    let (mut k, mut p) = (0usize, 0usize);
+    let mut ends = Vec::with_capacity(runs.len());
+    for run in runs {
+        crate::input::check(cancel)?;
+        let nk = run.end_kind as usize;
+        let np = run.end_point as usize;
+        builder.append(
+            path.kinds
+                .get(k..nk)
+                .ok_or("Ongeldige MTEXT-kleurcontour")?,
+            path.points
+                .get(p..np)
+                .ok_or("Ongeldige MTEXT-kleurpunten")?,
+        )?;
+        ends.push(u32::try_from(builder.vertex_count()).map_err(|_| "Te veel MTEXT-kleurpunten")?);
+        k = nk;
+        p = np;
+    }
+    Ok((builder.finish()?, ends.into_boxed_slice()))
+}
+fn append(
+    path: &mut Path,
+    runs: &mut Vec<PaintRun>,
+    other: &Path,
+    paint: Paint,
+) -> Result<(), String> {
+    other.validate()?;
+    if other.kinds.iter().all(|k| *k == 0) {
+        return Ok(());
+    }
+    if path.points.len().saturating_add(other.points.len()) > MAX_CONTROLS {
+        return Err("CAD-tekst overschrijdt contourbudget".into());
+    }
+    // Preserve the first move at paint boundaries, including coincident ink.
+    // Contours remain stored once; spans only retain offsets and paint roles.
+    path.kinds.extend_from_slice(&other.kinds);
+    path.points.extend_from_slice(&other.points);
+    if runs.last().is_none_or(|r| r.paint != paint) {
+        if runs.len() >= 200_000 {
+            return Err("MTEXT overschrijdt kleursegmentbudget".into());
+        }
+        runs.push(PaintRun {
+            end_kind: 0,
+            end_point: 0,
+            paint,
+        });
+    }
+    let last = runs.last_mut().unwrap();
+    last.end_kind = path.kinds.len() as u32;
+    last.end_point = path.points.len() as u32;
+    Ok(())
 }
 fn unit(v: V3) -> Result<V3, String> {
     geo::finite(v)?;
@@ -145,11 +308,15 @@ pub(crate) fn parse(groups: &[Group<'_>], feature: &mut DxfFeature) -> Result<()
         cap_height: height,
         ..Context::default()
     };
-    initial.aci = if (1..=255).contains(&feature.color_aci) {
-        feature.color_aci as u16
-    } else {
-        7
-    };
+    initial.aci = u16::try_from(feature.color_aci.unsigned_abs())
+        .ok()
+        .filter(|n| *n <= 256)
+        .unwrap_or(7);
+    initial.rgb = feature
+        .cad
+        .as_deref()
+        .and_then(|p| p.true_color)
+        .map(|v| [(v >> 16) as u8, (v >> 8) as u8, v as u8]);
     let request = Request {
         content,
         initial,
@@ -185,6 +352,8 @@ pub(crate) fn parse(groups: &[Group<'_>], feature: &mut DxfFeature) -> Result<()
                     })
                     .collect()
             }),
+        paints: Vec::new(),
+        vertex_ends: Vec::new(),
     };
     source.validate()?;
     feature.raw_text = source.request.content.clone();
@@ -251,6 +420,7 @@ pub(crate) fn prepare_overlay(
         });
         source.validate()?;
         let mut path = Path::default();
+        let mut paints = Vec::new();
         // Keep ordinary MTEXT on the original simple route. Nonbreaking
         // spaces must use real NBSP cells: the old simple decoder can otherwise
         // display the literal code despite the frontend treating it as simple.
@@ -276,7 +446,7 @@ pub(crate) fn prepare_overlay(
                 direction: entity.direction,
             })?;
             for line in output.lines {
-                path.append(&line.contours, Affine::IDENTITY, MAX_CONTROLS)?;
+                append(&mut path, &mut paints, &line.contours, Paint::Entity)?;
             }
         } else {
             if let Some(entity) = source.entity.as_ref().filter(|e| e.width < 1e-6) {
@@ -291,6 +461,8 @@ pub(crate) fn prepare_overlay(
                 // Keep its source/empty ink rather than publishing guessed width.
                 if extent.width == 0. {
                     source.contours = path;
+                    source.paints.clear();
+                    source.vertex_ends.clear();
                     feature.points.clear();
                     cad.path_breaks.clear();
                     return Ok(());
@@ -298,22 +470,46 @@ pub(crate) fn prepare_overlay(
                 source.request.width = extent.width;
             }
             let output = renderer.render(source.request.clone())?;
+            let words = output.words;
             for draw in output.draws {
                 crate::input::check(cancel)?;
                 match draw {
-                    Draw::Text { contours, .. } => {
-                        path.append(&contours, Affine::IDENTITY, MAX_CONTROLS)?;
+                    Draw::Text { id, contours } => {
+                        let word = words.get(id as usize - 1).ok_or("MTEXT mist kleurwoord")?;
+                        append(
+                            &mut path,
+                            &mut paints,
+                            &contours,
+                            Paint::from_context(&word.context, &source.request.initial),
+                        )?;
                     }
-                    Draw::Line { start, end, .. } => {
-                        path.push(0, &[start], MAX_CONTROLS)?;
-                        path.push(1, &[end], MAX_CONTROLS)?;
+                    Draw::Line { id, start, end } => {
+                        let paint = if id == 0 {
+                            Paint::Entity
+                        } else {
+                            Paint::from_context(
+                                &words
+                                    .get(id as usize - 1)
+                                    .ok_or("MTEXT mist decoratiekleur")?
+                                    .context,
+                                &source.request.initial,
+                            )
+                        };
+                        let mut line = Path::default();
+                        line.push(0, &[start], MAX_CONTROLS)?;
+                        line.push(1, &[end], MAX_CONTROLS)?;
+                        append(&mut path, &mut paints, &line, paint)?;
                     }
                 }
             }
         }
-        let flat = path.flatten(
+        if paints.len() == 1 && paints[0].paint == Paint::Entity {
+            paints.clear();
+        }
+        let (flat, ends) = flatten(
+            &path,
+            &paints,
             Affine::IDENTITY,
-            0.005,
             10_000_000usize.saturating_sub(*total),
             cancel,
         )?;
@@ -322,6 +518,8 @@ pub(crate) fn prepare_overlay(
             .filter(|n| *n <= 10_000_000)
             .ok_or("Te veel CAD-MTEXT-contourpunten")?;
         source.contours = path;
+        source.paints = paints;
+        source.vertex_ends = ends.into_vec();
         feature.points = flat.points;
         cad.path_breaks = flat.breaks;
         Ok(())
@@ -335,7 +533,7 @@ pub(crate) fn prepare_overlay(
         prepare_one(feature, styles, &mut renderer, &mut points, cancel)?;
     }
     overlay.warnings.push(
-        "MTEXT: vectorcontouren zichtbaar; inline kleuren, achtergrond, kolom-/embedded-bronnen en vlakvulling nog niet volledig ondersteund".into()
+        "MTEXT: vectorcontouren met inline kleuren zichtbaar; achtergrond, kolom-/embedded-bronnen en vlakvulling nog niet volledig ondersteund".into()
     );
     Ok(())
 }

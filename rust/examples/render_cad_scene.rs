@@ -15,6 +15,8 @@ struct Request {
     drawings: Vec<PathBuf>,
     #[serde(default)]
     summary: bool,
+    #[serde(default)]
+    painted: bool,
 }
 #[derive(Serialize)]
 struct Root<'a> {
@@ -42,6 +44,8 @@ struct Node<'a> {
     attribute: Option<&'a Attribute>,
     content: &'a str,
     paths: Vec<Vec<[f64; 3]>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    colors: Option<Vec<[u8; 3]>>,
 }
 fn read(path: &Path, limit: u64) -> Result<Vec<u8>, String> {
     let mut bytes = Vec::new();
@@ -152,6 +156,12 @@ fn main() -> Result<(), String> {
                     .filter(|p| !p.is_empty())
                     .map(|p| p.iter().map(|p| [p.x, p.y, p.z.unwrap_or(0.)]).collect())
                     .collect(),
+                colors: input.painted.then(|| {
+                    draw.painted_paths()
+                        .filter(|(p, _)| !p.is_empty())
+                        .map(|(_, rgb)| rgb)
+                        .collect()
+                }),
             });
         }
         if drawing > 0 {

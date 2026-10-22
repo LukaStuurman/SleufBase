@@ -22,25 +22,7 @@ pub struct Flattened {
 }
 impl Path {
     pub fn validate(&self) -> Result<(), String> {
-        if self.points.len() > MAX_CONTROLS || self.kinds.len() > MAX_CONTROLS {
-            return Err("CAD-tekst overschrijdt contourbudget".into());
-        }
-        let mut used = 0usize;
-        for &kind in &self.kinds {
-            if kind > 3 || used == 0 && kind != 0 {
-                return Err("Ongeldige CAD-lettercontour".into());
-            }
-            used = used
-                .checked_add(usize::from(kind.max(1)))
-                .ok_or("CAD-contour loopt over")?;
-        }
-        if used != self.points.len() {
-            return Err("Onvolledige CAD-lettercontour".into());
-        }
-        for &p in &self.points {
-            g::finite(p)?;
-        }
-        Ok(())
+        validate_parts(&self.kinds, &self.points)
     }
     pub(crate) fn push(&mut self, kind: u8, points: &[V3], budget: usize) -> Result<(), String> {
         if self.points.len().saturating_add(points.len()) > budget.min(MAX_CONTROLS) {
@@ -95,17 +77,79 @@ impl Path {
         budget: usize,
         cancel: &AtomicBool,
     ) -> Result<Flattened, String> {
-        self.validate()?;
+        let mut builder = Flattener::new(matrix, tolerance, budget, cancel)?;
+        builder.append(&self.kinds, &self.points)?;
+        builder.finish()
+    }
+}
+fn validate_parts(kinds: &[u8], points: &[V3]) -> Result<(), String> {
+    if points.len() > MAX_CONTROLS || kinds.len() > MAX_CONTROLS {
+        return Err("CAD-tekst overschrijdt contourbudget".into());
+    }
+    let mut used = 0usize;
+    for &kind in kinds {
+        if kind > 3 || used == 0 && kind != 0 {
+            return Err("Ongeldige CAD-lettercontour".into());
+        }
+        used = used
+            .checked_add(usize::from(kind.max(1)))
+            .ok_or("CAD-contour loopt over")?;
+    }
+    if used != points.len() {
+        return Err("Onvolledige CAD-lettercontour".into());
+    }
+    for &p in points {
+        g::finite(p)?;
+    }
+    Ok(())
+}
+
+/// Append disjoint source slices directly into one bounded point buffer. Work
+/// is shared across all paint spans, so splitting cannot evade curve limits.
+pub(crate) struct Flattener<'a> {
+    out: Flattened,
+    work: usize,
+    matrix: Affine,
+    tolerance: f64,
+    budget: usize,
+    cancel: &'a AtomicBool,
+}
+impl<'a> Flattener<'a> {
+    pub fn new(
+        matrix: Affine,
+        tolerance: f64,
+        budget: usize,
+        cancel: &'a AtomicBool,
+    ) -> Result<Self, String> {
+        crate::input::check(cancel)?;
         if !tolerance.is_finite() || tolerance <= 0. {
             return Err("Ongeldige CAD-tekstnauwkeurigheid".into());
         }
-        let mut out = Flattened {
-            points: Vec::new(),
-            breaks: Vec::new(),
-        };
+        Ok(Self {
+            out: Flattened {
+                points: Vec::new(),
+                breaks: Vec::new(),
+            },
+            work: 0,
+            matrix,
+            tolerance,
+            budget,
+            cancel,
+        })
+    }
+    pub fn vertex_count(&self) -> usize {
+        self.out.points.len()
+    }
+    pub fn append(&mut self, kinds: &[u8], points: &[V3]) -> Result<(), String> {
+        validate_parts(kinds, points)?;
+        let matrix = self.matrix;
+        let tolerance = self.tolerance;
+        let budget = self.budget;
+        let cancel = self.cancel;
+        let out = &mut self.out;
+        let work = &mut self.work;
         let mut at = 0;
         let mut current = [0.; 3];
-        let mut work = 0usize;
         let emit = |out: &mut Flattened, p: V3| -> Result<(), String> {
             if out.points.len() >= budget {
                 return Err("CAD-tekst overschrijdt puntbudget".into());
@@ -113,7 +157,7 @@ impl Path {
             out.points.push(g::vertex(p));
             Ok(())
         };
-        for (index, &kind) in self.kinds.iter().enumerate() {
+        for (index, &kind) in kinds.iter().enumerate() {
             if index.is_multiple_of(1024) {
                 crate::input::check(cancel)?;
             }
@@ -121,7 +165,7 @@ impl Path {
             let mut p = [[0.; 3]; 4];
             p[0] = current;
             for i in 0..n {
-                p[i + 1] = matrix.checked_point(self.points[at + i])?;
+                p[i + 1] = matrix.checked_point(points[at + i])?;
             }
             at += n;
             if kind == 0 {
@@ -134,20 +178,20 @@ impl Path {
                 continue;
             }
             if out.points.is_empty() || out.breaks.last() == Some(&out.points.len()) {
-                emit(&mut out, current)?;
+                emit(out, current)?;
             }
             current = p[n];
             if kind == 1 {
-                emit(&mut out, current)?;
+                emit(out, current)?;
                 continue;
             }
             let mut stack = vec![(p, n, 0u8)];
             while let Some((p, n, depth)) = stack.pop() {
-                work += 1;
+                *work += 1;
                 if work.is_multiple_of(1024) {
                     crate::input::check(cancel)?;
                 }
-                if work > 20_000_000 {
+                if *work > 20_000_000 {
                     return Err("CAD-tekst overschrijdt curvebudget".into());
                 }
                 let chord = g::sub(p[n], p[0]);
@@ -162,7 +206,7 @@ impl Path {
                     g::length(g::sub(delta, g::scale(chord, t))) <= tolerance
                 });
                 if flat {
-                    emit(&mut out, p[n])?;
+                    emit(out, p[n])?;
                     continue;
                 }
                 if depth >= 32 {
@@ -184,10 +228,44 @@ impl Path {
                 stack.push((left, n, depth + 1));
             }
         }
-        // Trailing and consecutive pen-up moves never produce empty paths.
-        out.breaks.retain(|&b| b < out.points.len());
-        out.breaks.dedup();
-        crate::input::check(cancel)?;
-        Ok(out)
+        Ok(())
+    }
+    pub fn finish(mut self) -> Result<Flattened, String> {
+        self.out.breaks.retain(|&b| b < self.out.points.len());
+        self.out.breaks.dedup();
+        crate::input::check(self.cancel)?;
+        Ok(self.out)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::atomic::Ordering;
+    #[test]
+    fn disjoint_paint_spans_share_point_work_and_cancellation_budgets() {
+        let cancel = AtomicBool::new(false);
+        let points = [[0.; 3], [1., 0., 0.]];
+        let mut builder = Flattener::new(Affine::IDENTITY, 0.005, 3, &cancel).unwrap();
+        builder.append(&[0, 1], &points).unwrap();
+        assert!(builder
+            .append(&[0, 1], &points)
+            .unwrap_err()
+            .contains("puntbudget"));
+        let mut builder = Flattener::new(Affine::IDENTITY, 0.005, 100, &cancel).unwrap();
+        // Force the shared curve counter to its final permitted operation;
+        // flat curves avoid an expensive timing-dependent 20-million-step test.
+        builder.work = 19_999_999;
+        let quad = [[0.; 3], [0.5, 0., 0.], [1., 0., 0.]];
+        builder.append(&[0, 2], &quad).unwrap();
+        assert!(builder
+            .append(&[0, 2], &quad)
+            .unwrap_err()
+            .contains("curvebudget"));
+        let mut builder = Flattener::new(Affine::IDENTITY, 0.005, 100, &cancel).unwrap();
+        builder.append(&[0, 1], &points).unwrap();
+        cancel.store(true, Ordering::Relaxed);
+        assert!(builder.append(&[0, 1], &points).is_err());
+        assert!(builder.finish().is_err());
     }
 }

@@ -142,7 +142,7 @@ fn verify(overlay: &DxfOverlay) {
     assert!(overlay
         .warnings
         .iter()
-        .any(|w| w.contains("inline kleuren")));
+        .any(|w| w.contains("achtergrond")));
 }
 #[test]
 fn ascii_binary_real_import_uses_both_routes_style_width_oblique_and_automatic_font_width() {

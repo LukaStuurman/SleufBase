@@ -193,6 +193,7 @@ impl Properties {
     }
     pub fn validate_geometry(&self, points: usize) -> Result<(), String> {
         self.validate()?;
+        if let Some(mtext)=&self.mtext {mtext.validate_vertices(points,&self.path_breaks)?;}
         if self
             .path_breaks
             .last()

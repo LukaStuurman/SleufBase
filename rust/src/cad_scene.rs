@@ -58,6 +58,8 @@ pub struct RenderFeature {
     source: Source,
     pub points: Vec<crate::model::Vertex>,
     path_breaks: Box<[usize]>,
+    color_ends: Box<[u32]>,
+    parent_rgb: Option<[u8; 3]>,
     layer: Arc<str>,
     rgb: [u8; 3],
     instance: Option<usize>,
@@ -74,6 +76,14 @@ pub struct DrawRef<'a> {
     pub layer: &'a str,
     pub rgb: [u8; 3],
     pub visible: bool,
+    palette: Palette<'a>,
+}
+#[derive(Clone, Copy)]
+struct Palette<'a> {
+    runs: &'a [crate::cad_mtext::PaintRun],
+    ends: &'a [u32],
+    layer: Option<&'a crate::cad::Layer>,
+    parent: Option<[u8; 3]>,
 }
 impl<'a> DrawRef<'a> {
     pub fn paths(&self) -> impl Iterator<Item = &'a [crate::model::Vertex]> + '_ {
@@ -87,6 +97,30 @@ impl<'a> DrawRef<'a> {
                 start = end;
                 path
             })
+    }
+    /// Borrow the shared contours and resolve paints once per path. No geometry
+    /// or per-word metadata is allocated while panning or drawing an export.
+    pub fn painted_paths(
+        &self,
+    ) -> impl Iterator<Item = (&'a [crate::model::Vertex], [u8; 3])> + '_ {
+        let mut start = 0;
+        let mut run = 0;
+        self.paths().map(move |path| {
+            while self
+                .palette
+                .ends
+                .get(run)
+                .is_some_and(|&end| end as usize <= start)
+            {
+                run += 1;
+            }
+            let rgb = self.palette.runs.get(run).map_or(self.rgb, |r| {
+                r.paint
+                    .resolve(self.rgb, self.palette.parent, self.palette.layer)
+            });
+            start += path.len();
+            (path, rgb)
+        })
     }
 }
 struct Builder<'a> {
@@ -157,49 +191,58 @@ impl Builder<'_> {
         let layer = self.layer(effective);
         let rgb = self.rgb(source, &layer, parent_rgb);
         if source.entity_type != "INSERT" {
-            let (points, path_breaks) =
-                if let Some(text) = source.cad.as_deref().and_then(|p| p.text.as_deref()) {
-                    let output = text.contours.flatten(
-                        parent,
-                        0.005,
-                        MAX_POINTS.saturating_sub(self.points),
-                        self.cancel,
-                    )?;
-                    (output.points, output.breaks.into_boxed_slice())
-                } else if let Some(mtext) = source.cad.as_deref().and_then(|p| p.mtext.as_deref()) {
-                    let output = mtext.contours.flatten(
-                        parent,
-                        0.005,
-                        MAX_POINTS.saturating_sub(self.points),
-                        self.cancel,
-                    )?;
-                    (output.points, output.breaks.into_boxed_slice())
-                } else if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref())
-                {
-                    let output =
-                        spline.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?;
-                    (output.points, output.breaks.into_boxed_slice())
-                } else if let Some(curve) = source.cad.as_deref().and_then(|p| p.curve.as_deref()) {
-                    (
-                        curve.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?,
-                        Box::default(),
-                    )
-                } else {
-                    (
-                        source
-                            .points
-                            .iter()
-                            .map(|p| parent.checked_point(g::xyz(*p)).map(g::vertex))
-                            .collect::<Result<Vec<_>, _>>()?,
-                        source.cad.as_ref().map_or_else(Box::default, |p| {
-                            p.path_breaks.clone().into_boxed_slice()
-                        }),
-                    )
-                };
+            let (points, path_breaks, color_ends) = if let Some(text) =
+                source.cad.as_deref().and_then(|p| p.text.as_deref())
+            {
+                let output = text.contours.flatten(
+                    parent,
+                    0.005,
+                    MAX_POINTS.saturating_sub(self.points),
+                    self.cancel,
+                )?;
+                (
+                    output.points,
+                    output.breaks.into_boxed_slice(),
+                    Box::default(),
+                )
+            } else if let Some(mtext) = source.cad.as_deref().and_then(|p| p.mtext.as_deref()) {
+                let (output, ends) =
+                    mtext.flatten(parent, MAX_POINTS.saturating_sub(self.points), self.cancel)?;
+                (output.points, output.breaks.into_boxed_slice(), ends)
+            } else if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref()) {
+                let output =
+                    spline.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?;
+                (
+                    output.points,
+                    output.breaks.into_boxed_slice(),
+                    Box::default(),
+                )
+            } else if let Some(curve) = source.cad.as_deref().and_then(|p| p.curve.as_deref()) {
+                (
+                    curve.flatten(parent, 0.25, MAX_POINTS.saturating_sub(self.points))?,
+                    Box::default(),
+                    Box::default(),
+                )
+            } else {
+                (
+                    source
+                        .points
+                        .iter()
+                        .map(|p| parent.checked_point(g::xyz(*p)).map(g::vertex))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    source
+                        .cad
+                        .as_ref()
+                        .map_or_else(Box::default, |p| p.path_breaks.clone().into_boxed_slice()),
+                    Box::default(),
+                )
+            };
             return self.append(RenderFeature {
                 source: reference,
                 points,
                 path_breaks,
+                color_ends,
+                parent_rgb,
                 layer,
                 rgb,
                 instance,
@@ -315,6 +358,8 @@ impl Builder<'_> {
                         source: reference.clone(),
                         points: vec![point, point],
                         path_breaks: Box::default(),
+                        color_ends: Box::default(),
+                        parent_rgb,
                         layer: layer.clone(),
                         rgb,
                         instance: Some(at),
@@ -378,7 +423,12 @@ impl DxfOverlay {
                     .as_deref()
                     .and_then(|p| p.text.as_deref())
                     .map_or(0, |t| t.contours.points.len())
-                    .saturating_add(f.cad.as_deref().and_then(|p| p.mtext.as_deref()).map_or(0, |t| t.contours.points.len()))
+                    .saturating_add(
+                        f.cad
+                            .as_deref()
+                            .and_then(|p| p.mtext.as_deref())
+                            .map_or(0, |t| t.contours.points.len()),
+                    )
             })
             .try_fold(0usize, |used, n| {
                 used.checked_add(n)
@@ -446,6 +496,8 @@ impl DxfOverlay {
                     source: Source::Model(index),
                     points: source.points.clone(),
                     path_breaks: Box::default(),
+                    color_ends: Box::default(),
+                    parent_rgb: None,
                     layer,
                     rgb,
                     instance: None,
@@ -493,6 +545,16 @@ impl DxfOverlay {
             layer: &feature.layer,
             rgb: feature.rgb,
             visible,
+            palette: Palette {
+                runs: source
+                    .cad
+                    .as_deref()
+                    .and_then(|p| p.mtext.as_deref())
+                    .map_or(&[], |m| &m.paints),
+                ends: &feature.color_ends,
+                layer: self.layers.get(feature.layer.as_ref()),
+                parent: feature.parent_rgb,
+            },
         }
     }
     pub fn rendered_features(&self) -> impl Iterator<Item = DrawRef<'_>> {
@@ -509,6 +571,7 @@ impl DxfOverlay {
                 layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),
+                palette: self.root_palette(source),
             })
             .chain(self.expanded.features.iter().map(|f| self.drawn(f)))
     }
@@ -525,12 +588,22 @@ impl DxfOverlay {
                 layer: self.canonical_layer_name(&source.layer),
                 rgb: self.feature_rgb(source),
                 visible: self.feature_visible(source),
+                palette: self.root_palette(source),
             })
         } else {
             self.expanded
                 .features
                 .get(index - self.features.len())
                 .map(|f| self.drawn(f))
+        }
+    }
+    fn root_palette<'a>(&'a self, source: &'a DxfFeature) -> Palette<'a> {
+        let mtext = source.cad.as_deref().and_then(|p| p.mtext.as_deref());
+        Palette {
+            runs: mtext.map_or(&[], |m| &m.paints),
+            ends: mtext.map_or(&[], |m| &m.vertex_ends),
+            layer: self.layers.get(self.canonical_layer_name(&source.layer)),
+            parent: None,
         }
     }
     pub fn inspect_details(&self, index: usize) -> Option<BTreeMap<String, String>> {

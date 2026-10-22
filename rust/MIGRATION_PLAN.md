@@ -43,6 +43,34 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 22 oktober 2026: gewone MTEXT-kleuren
+
+- Inline ACI/RGB-kleuren lopen nu van ASCII/binary DXF via opgeslagen contouren
+  naar geneste blokken, canvas en beide sjabloonkaartpaden. Alle 257 ACI-rollen,
+  expliciet zwart/wit, groepsherstel, decoraties/breukstrepen en laag-/blokkleuren
+  worden op 141 oorspronkelijke instanties/1607 gekleurde contouren vergeleken.
+- Lettercontouren en bronmetadata blijven gedeeld. Kleine kleurgrenzen behouden
+  één selecteerbare bron per instantie; elke bloktransformatie berekent alleen
+  haar eigen puntgrenzen. Tekenen leent paden zonder tijdelijke geometriekopieën.
+  Alle segmenten delen dezelfde punt-/curve-/annuleerlimieten.
+- Projectopslag werkt zonder bronfonts. Oude uniforme caches blijven leesbaar;
+  ongeldige kleurbereiken vervangen geen bestaand project. Zichtbaarheid behoudt
+  gedeelde bron-/scènecaches. Echte egui-streken, geknipte sjabloonkaarten,
+  desktop-exportvoorbereiding en geschreven DXF-true-colors worden gecontroleerd.
+- De onafhankelijke oracle voert alleen de pure kleurfunctie uit dxf.py uit,
+  zonder pakketopstart, met de eerder vastgelegde zwart-/laag-/BYBLOCK-correcties.
+  Bronbestanden reproduceren bytegelijk onder een andere hashseed. De runtimeproef
+  wijzigt fysieke fontbytes en bronposities en gebruikt de geoptimaliseerde reader.
+  Twee verse ASCII/binary tekeningen vergelijken 282 instanties/3214 gekleurde
+  contouren; de eerdere 276 MTEXT-instanties en 270 TEXT-contourgevallen slagen
+  opnieuw. In totaal slagen 456 Rust-tests, inclusief 40 desktoptests; Clippy
+  voegt geen nieuwe waarschuwingen toe. De geoptimaliseerde app en drie betrokken
+  auditdrivers zijn gebouwd. Dit bewijst geen volledige product-/praktijkpariteit.
+  Zie tests/fixtures/cad-mtext-paint voor bewijs en resterende beperkingen.
+- Achtergronden/frames, volledige kolom-/embedded-/STYLE-bronnen, TTF-vlakvulling
+  en echte CAD-/project-/UI-acceptatie blijven open. Ook alle overige voorwaarden
+  in PARITY.md blijven vereist vóór overdracht als voltooide SleufBase-RUST.
+
 ## Voortgang 17â€“18 oktober 2026
 
 - MarXact-richting, automatische grensmiddens en absolute rotatie/reset geport.
