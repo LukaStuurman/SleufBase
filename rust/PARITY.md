@@ -45,6 +45,14 @@ zijn geen voorwaarde voor actieve productiepariteit.
 
 | Eenregelige CAD-attribuutdefinities | ezdxf addons/drawing/text.py, explode.py, DXF ATTDEF | Veldnamen worden getekend volgens de oorspronkelijke frontend; standaardwaarden/prompts blijven brondata. Normale blokdefinities worden vóór font-/contourwerk overgeslagen; de selectie wordt eenmaal per fysiek blok gedeeld. Acht R12–R2018 ASCII/binary tekeningen toetsen 442 definities en 602 scèneobjecten, projectbehoud zonder fonts en de echte canvas-/sjabloonkaart. Een proef met 2000 definities en 20.000 geneste gridcellen bewaart brondata eenmaal. Embedded MTEXT/multiline ATTDEF, vlakvulling en overige CAD/vendor-/projectacceptatie blijven open | Volledige attribuutopmaak en oorspronkelijke CAD-/projectacceptatie |
 
+De native MTEXT-opmaakkern is nu als eerste rendercomponent beschikbaar:
+976 oorspronkelijke gevallen vergelijken 3467 tokens en volledige opmaakstaten.
+Woorden/ruimtes, breuken, font-/kleur-/alinea-/tab-/decoratiewissels blijven
+behouden, met gedeelde snapshots, annulering en limieten. Regel-/kolomlayout,
+tekstgeometrie en koppeling aan standalone/embedded CAD-bronnen, projecten en
+kaartweergave blijven vereist. De huidige desktop meldt MTEXT nog als
+onvolledig. Zie tests/fixtures/mtext; alle onderstaande gates blijven verplicht.
+
 ## Verplichte go/no-go voorwaarden
 
 1. Elk onderdeel hierboven is daadwerkelijk geïmplementeerd; 'deels' telt niet als gereed.
