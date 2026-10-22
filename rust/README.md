@@ -3,6 +3,10 @@
 Dit is een aparte native Rust-desktopapp naast de bestaande SleufBase v0.3.62 (Python).
 De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
 
+De uiteindelijke zelfstandige Rust-port is bestemd voor
+[LukaStuurman/SleufBase-RUST](https://github.com/LukaStuurman/SleufBase-RUST).
+De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
+
 ## Wat er in deze preview zit
 
 - Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
@@ -325,7 +329,7 @@ Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releas
 - De cache deelt bronmetadata en blokdefinities tussen instanties en projectsnapshots. Geometrie en zichtbare kaartgrenzen worden opnieuw berekend bij bron-/laagwijziging, niet tijdens gewone frames. MarXact gebruikt de oorspronkelijke modelspace-entiteiten voor zijn meetpunten.
 - **Opnieuw laden** leest een DXF opnieuw; **Bron kiezen...** herstelt een verplaatst bronbestand. Zichtbaarheidskeuzes blijven behouden waar laagnamen overeenkomen. Bij een leesfout blijven de huidige overlay en onopgeslagen wijzigingen intact. Dit helpt oude projecten waarvan eerdere previews blokdefinities niet opsloegen; ontbrekende oorspronkelijke OCS-data kan niet uit oude punten worden terugberekend.
 - Een ezdxf 1.4.4-orakel vergelijkt 72 plaatsingen en 84 WCS-primitieven in ASCII en binary, inclusief geneste shear, schuine vlakken, negatieve schalen en dichte curvesamples. Projectherstel, gedeelde metadata voor 10.000 instanties, laagcache en beschadigde/recursieve/te grote blokken hebben regressietests. Generator: `python tools/generate_cad_scene_fixtures.py`.
-- Recursie, ontbrekende blokken, budgetoverschrijdingen en niet ondersteunde entiteitsoorten krijgen meldingen. TEXT en eenregelige attributen hebben contourweergave; volledige MTEXT-/attribuutopmaak, meshoppervlakken, HATCH, dynamische blokken en volledige lijnstijlen blijven open. De complexe MTEXT-kern verbindt nu opmaak, fontvarianten, echte tekstmaten, kolomplaatsing en lettercontouren; 167 fontkeuzes en 123 samengestelde gevallen controleren deze route. Vet/cursief gebruiken bij meten en tekenen hetzelfde font, met bewaarde oude foutresultaten. De eenvoudige MTEXT-route, bron-/project-/kaartkoppeling en vlakvulling zijn volgende vereisten. Zie [de MTEXT-fontcontroles](tests/fixtures/mtext-render/README.md). DXF-/projectinvoer loopt via de bestandsworker; dit is geen volledige CAD- of performanceacceptatie.
+- Recursie, ontbrekende blokken, budgetoverschrijdingen en niet ondersteunde entiteitsoorten krijgen meldingen. TEXT en eenregelige attributen hebben contourweergave; volledige MTEXT-/attribuutopmaak, meshoppervlakken, HATCH, dynamische blokken en volledige lijnstijlen blijven open. De complexe MTEXT-kern verbindt nu opmaak, fontvarianten, echte tekstmaten, kolomplaatsing en lettercontouren; 167 fontkeuzes en 123 samengestelde gevallen controleren deze route. Vet/cursief gebruiken bij meten en tekenen hetzelfde font, met bewaarde oude foutresultaten. De afzonderlijke eenvoudige MTEXT-route en breedteschatting zijn eveneens geport: 616 decodergevallen, 189 teksten/467 regels en 324 schattingen controleren oorspronkelijke afbreking, uitlijning en spatiegedrag. De bron-/project-/kaartkoppeling en vlakvulling blijven vereist. Zie ook [de eenvoudige MTEXT-controles](tests/fixtures/mtext-simple/README.md). Zie [de MTEXT-fontcontroles](tests/fixtures/mtext-render/README.md). DXF-/projectinvoer loopt via de bestandsworker; dit is geen volledige CAD- of performanceacceptatie.
 - Plaatsing volgt de Autodesk-definities voor [INSERT](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-28FA4CFB-9D5E-4880-9F11-36C97578252F.htm) en het [arbitrary-axis-algoritme](https://help.autodesk.com/cloudhelp/2020/ENU/AutoCAD-DXF/files/GUID-E19E5B42-0CC7-4EBA-B29F-5E1D595149EE.htm).
 
 ## CAD-vlakken en mesh-randen

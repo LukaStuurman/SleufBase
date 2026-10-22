@@ -36,6 +36,7 @@ pub mod cad_text_path;
 pub mod cad_text;
 mod cad_glyphs;
 pub mod mtext;
+pub mod mtext_plain;
 pub mod mtext_layout;
 pub mod mtext_render;
 mod cad_space;

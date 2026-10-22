@@ -542,6 +542,44 @@ impl Font {
         };
         Ok((Some(glyph), advance, self.measurements.cap_height, work))
     }
+    pub(crate) fn native_measurements(&self) -> Measurements {
+        self.measurements
+    }
+    pub(crate) fn advance(
+        &mut self,
+        ch: char,
+        work: &mut usize,
+        cancel: &AtomicBool,
+    ) -> Result<f64, crate::font_error::Error> {
+        let id = ch as u32;
+        let advance = if id < 32 {
+            0.
+        } else if id == 32 {
+            self.program.word_spacing
+        } else if let Some(n) = self.widths.get(&id) {
+            *n
+        } else if self.program.glyphs.contains_key(&id) {
+            let (glyph, spent) = self.program.render_with_work(id, cancel)?;
+            *work = work.saturating_add(spent);
+            if *work > 20_000_000 {
+                return Err(crate::font_error::Error::limit(
+                    "LFF-tekst overschrijdt werkbudget",
+                ));
+            }
+            let n = if glyph.commands == 0 {
+                0.
+            } else {
+                range(&glyph.controls)?.1[0] + self.program.letter_spacing
+            };
+            if self.widths.len() < 8192 {
+                self.widths.insert(id, n);
+            }
+            n
+        } else {
+            self.tofu_advance
+        };
+        Ok(advance)
+    }
     pub fn measure(
         &mut self,
         text: &str,
@@ -557,34 +595,7 @@ impl Font {
                 if i % 1024 == 0 {
                     crate::font_error::Error::check(cancel)?;
                 }
-                let id = ch as u32;
-                let advance = if id < 32 {
-                    0.
-                } else if id == 32 {
-                    self.program.word_spacing
-                } else if let Some(n) = self.widths.get(&id) {
-                    *n
-                } else if self.program.glyphs.contains_key(&id) {
-                    let (glyph, spent) = self.program.render_with_work(id, cancel)?;
-                    work += spent;
-                    if work > 20_000_000 {
-                        return Err(crate::font_error::Error::limit(
-                            "LFF-tekst overschrijdt werkbudget",
-                        ));
-                    }
-                    let n = if glyph.commands == 0 {
-                        0.
-                    } else {
-                        range(&glyph.controls)?.1[0] + self.program.letter_spacing
-                    };
-                    if self.widths.len() < 8192 {
-                        self.widths.insert(id, n);
-                    }
-                    n
-                } else {
-                    self.tofu_advance
-                };
-                total += advance;
+                total += self.advance(ch, &mut work, cancel)?;
             }
         }
         Ok((total * (factor * width), self.measurements.scale(factor)))

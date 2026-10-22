@@ -1,6 +1,6 @@
-//! Complex MTEXT: parse -> real font metrics -> cell layout -> vector contours.
-//! The simple-MTEXT route, DXF/source wiring, background fill and font fill are
-//! separate integration steps. No one-line escape stripping occurs here.
+//! MTEXT: separate simple wrapping and complex inline/column layout routes,
+//! real font metrics and vector contours. DXF/source wiring, background fill
+//! and font fill are separate integration steps. No one-line TEXT stripping.
 //! Layout adapter: ezdxf 1.4.4 render/abstract_mtext_renderer.py (2021-2025)
 //! and addons/drawing/mtext_complex.py (2021-2022), Manfred Moitzi, MIT.
 use crate::{
@@ -17,6 +17,8 @@ use std::{
     collections::HashMap,
     sync::{atomic::AtomicBool, Arc},
 };
+mod simple;
+pub use simple::{Estimate, EstimateRequest, SimpleLine, SimpleOutput, SimpleRequest};
 fn one() -> f64 {
     1.
 }

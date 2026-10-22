@@ -860,6 +860,42 @@ impl Font {
         let advance = glyph.end[0];
         Ok((Some(glyph), advance, self.measurements.cap_height, work))
     }
+    pub(crate) fn native_measurements(&self) -> Measurements {
+        self.measurements
+    }
+    pub(crate) fn advance(
+        &mut self,
+        ch: char,
+        work: &mut usize,
+        cancel: &AtomicBool,
+    ) -> Result<f64, crate::font_error::Error> {
+        let id = ch as u32;
+        let advance = if id == 32 {
+            self.space
+        } else if let Some(n) = self.widths.get(&id) {
+            *n
+        } else {
+            let n = if self.program.shapes.contains_key(&id) {
+                let (glyph, spent) = self.program.render_with_work(id, false, cancel)?;
+                *work = work.saturating_add(spent);
+                if *work > 20_000_000 {
+                    return Err(crate::font_error::Error::limit(
+                        "SHX-tekst overschrijdt werkbudget",
+                    ));
+                }
+                glyph.end[0]
+            } else if id < 32 {
+                self.space
+            } else {
+                self.tofu.end[0]
+            };
+            if self.widths.len() < 8192 {
+                self.widths.insert(id, n);
+            }
+            n
+        };
+        Ok(advance)
+    }
     pub fn measure(
         &mut self,
         text: &str,
@@ -869,30 +905,13 @@ impl Font {
     ) -> Result<(f64, Measurements), crate::font_error::Error> {
         let factor = height / self.measurements.cap_height;
         let mut advance = 0.;
+        let mut work = 0usize;
         if !crate::python_values::trim(text).is_empty() {
             for (i, ch) in text.chars().enumerate() {
                 if i % 1024 == 0 {
                     crate::font_error::Error::check(cancel)?;
                 }
-                let id = ch as u32;
-                let value = if id == 32 {
-                    self.space
-                } else if let Some(n) = self.widths.get(&id) {
-                    *n
-                } else {
-                    let n = if self.program.shapes.contains_key(&id) {
-                        self.program.render(id, false, cancel)?.end[0]
-                    } else if id < 32 {
-                        self.space
-                    } else {
-                        self.tofu.end[0]
-                    };
-                    if self.widths.len() < 8192 {
-                        self.widths.insert(id, n);
-                    }
-                    n
-                };
-                advance += value;
+                advance += self.advance(ch, &mut work, cancel)?;
             }
         }
         Ok((advance * (factor * width), self.measurements.scale(factor)))

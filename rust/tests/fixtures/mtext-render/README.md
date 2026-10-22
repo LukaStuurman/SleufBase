@@ -47,7 +47,8 @@ optimized engine against fresh original results. Its shared transport preserves
 decimal bits, limits input/output, writes atomically and refuses overwrite.
 
 This is a rendering component, not complete desktop MTEXT support. The separate
-simple-MTEXT wrapping route, automatic width estimation, DXF/embedded/source
+simple-MTEXT wrapping route and automatic width estimation are now implemented
+and independently checked under [mtext-simple](../mtext-simple/README.md). DXF/embedded/source
 extraction, color/layer resolution, persistent project/scène/canvas wiring,
 background and TrueType fill, and representative CAD acceptance still need to
 be completed. Desktop MTEXT continues to be reported as unsupported until that

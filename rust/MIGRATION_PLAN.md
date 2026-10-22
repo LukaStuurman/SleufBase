@@ -4,6 +4,13 @@ Doel: volledige functiepariteit, aantoonbaar betere prestaties waar mogelijk,
 en alle gevonden regressies herstellen. Geen claim van gegarandeerde bugloosheid.
 `PARITY.md` blijft de acceptatiechecklist; een compilatie is geen productacceptatie.
 
+Uiteindelijke bestemming op gebruikersverzoek: de zelfstandige Rust-port en
+uiteindelijke Rust-release gaan naar [LukaStuurman/SleufBase-RUST](https://github.com/LukaStuurman/SleufBase-RUST).
+Deze repository is op 22 oktober 2026 gecontroleerd: er waren nog geen branches
+of tags. De huidige migratietak bewaart het ontwikkelwerk en de oorspronkelijke
+Python-referenties. Overdracht/publicatie vervangt geen van de volledige
+functie-, integriteits-, migratie-, praktijk- of leveringsvoorwaarden hieronder.
+
 Aanvullende gebruikerswens: projectnaam invoeren in het DXF-sjabloonexportvenster
 en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
 

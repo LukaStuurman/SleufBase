@@ -69,10 +69,24 @@ echte woord-/spatiematen, celplaatsing en vectorcontouren/decoraties.
 50 afwijkende oude resultaten blijven expliciet bewaard bij correcties voor vet
 en tegenstrijdige fontkeuze tussen meten en tekenen. Gedeelde fontnamen, fysieke
 glyphs en tabarrays vermijden herhaald werk; 3000 alinea's delen 20.000 tabstops.
-De eenvoudige MTEXT-route, automatische breedte, DXF-/embedded-bronnen,
+De eenvoudige MTEXT-route en breedteschatting zijn hieronder aangevuld. DXF-/embedded-bronnen,
 kleur-/laag-/project-/scène-/kaartkoppeling, achtergronden/vlakvulling en echte
 CAD-acceptatie blijven vereist. De desktop meldt MTEXT nog als onvolledig.
 Zie tests/fixtures/mtext-render; alle onderstaande gates blijven verplicht.
+
+De afzonderlijke eenvoudige MTEXT-route behoudt nu de oorspronkelijke
+snelle decoder, regelafbreking, witruimte, negen ankers en vectorplaatsing.
+616 decodergevallen en 189 teksten/467 regels controleren ook de direct
+aangrenzende breedtegrenzen; 324 oorspronkelijke inhoudsschattingen toetsen
+automatische breedte, witruimteterugval en kolomtelling. 21 oorspronkelijke
+SHX-crashes bij het eerste controleteken blijven als foutbewijs bewaard naast
+de correcte spatie-terugval. Een streaming meetlezer behoudt de oorspronkelijke
+onverschaalde optelvolgorde zonder telkens de hele regel te lezen.
+DXF-/STYLE-/kolom-/embedded-bronnen, kleur-/laag-/project-/kaartkoppeling en
+vlakvulling blijven vereist. De bronrouter moet niet-afbreekbare spaties via de
+complexe route verwerken; de oude eenvoudige router/decoder heeft daar een
+bekende letterlijke-codeweergavefout. De desktop meldt MTEXT nog als onvolledig.
+Zie tests/fixtures/mtext-simple; alle onderstaande gates blijven verplicht.
 
 ## Verplichte go/no-go voorwaarden
 

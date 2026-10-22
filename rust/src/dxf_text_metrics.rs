@@ -68,6 +68,85 @@ pub struct Font {
     stroke: Option<crate::stroke_font::Font>,
     lff: Option<crate::lff_font::Font>,
 }
+/// Streaming, unscaled advances preserve each font's original addition order.
+/// The wrapping caller can checkpoint a line without rescanning its prefix.
+pub(crate) enum AdvanceReader<'a> {
+    TrueType {
+        face: Box<Face<'a>>,
+        advances: &'a mut HashMap<char, u16>,
+        factor: f64,
+    },
+    Stroke {
+        font: &'a mut crate::stroke_font::Font,
+        factor: f64,
+    },
+    Lff {
+        font: &'a mut crate::lff_font::Font,
+        factor: f64,
+    },
+    Mono {
+        factor: f64,
+    },
+}
+impl AdvanceReader<'_> {
+    pub fn append(
+        &mut self,
+        text: &str,
+        mut total: f64,
+        work: &mut usize,
+        cancel: &AtomicBool,
+    ) -> Result<f64, String> {
+        for ch in text.chars() {
+            *work = work.saturating_add(1);
+            if work.is_multiple_of(256) {
+                crate::input::check(cancel)?;
+            }
+            let advance = match self {
+                Self::TrueType { face, advances, .. } => {
+                    let value = if let Some(value) = advances.get(&ch) {
+                        *value
+                    } else {
+                        let value = face
+                            .glyph_hor_advance(face.glyph_index(ch).unwrap_or(GlyphId(0)))
+                            .unwrap_or(0);
+                        if advances.len() < 8192 {
+                            advances.insert(ch, value);
+                        }
+                        value
+                    };
+                    f64::from(value)
+                }
+                Self::Stroke { font, .. } => {
+                    font.advance(ch, work, cancel).map_err(String::from)?
+                }
+                Self::Lff { font, .. } => font.advance(ch, work, cancel).map_err(String::from)?,
+                Self::Mono { .. } => 1.,
+            };
+            if *work > 20_000_000 {
+                return Err("MTEXT overschrijdt meetwerkbudget".into());
+            }
+            total += advance;
+            if !total.is_finite() {
+                return Err("MTEXT-tekstlengte valt buiten getalbereik".into());
+            }
+        }
+        Ok(total)
+    }
+    pub fn width(&self, total: f64) -> Result<f64, String> {
+        let factor = match self {
+            Self::TrueType { factor, .. }
+            | Self::Stroke { factor, .. }
+            | Self::Lff { factor, .. }
+            | Self::Mono { factor } => *factor,
+        };
+        let width = total * factor;
+        if width.is_finite() {
+            Ok(width)
+        } else {
+            Err("MTEXT-tekstbreedte valt buiten getalbereik".into())
+        }
+    }
+}
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Text {
@@ -107,6 +186,24 @@ pub struct Extent {
     pub corners: Option<[V3; 4]>,
 }
 impl Font {
+    pub(crate) fn advance_reader(&mut self, height: f64) -> Result<AdvanceReader<'_>, String> {
+        if let Some(f) = &mut self.ttf {
+            return Ok(AdvanceReader::TrueType {
+                face: Box::new(Face::parse(&f.data, 0).map_err(|e| e.to_string())?),
+                advances: &mut f.advances,
+                factor: 1. / f.measurements.cap_height * height,
+            });
+        }
+        if let Some(font) = &mut self.stroke {
+            let factor = height / font.native_measurements().cap_height;
+            return Ok(AdvanceReader::Stroke { font, factor });
+        }
+        if let Some(font) = &mut self.lff {
+            let factor = height / font.native_measurements().cap_height;
+            return Ok(AdvanceReader::Lff { font, factor });
+        }
+        Ok(AdvanceReader::Mono { factor: height })
+    }
     pub fn kind(&self) -> &'static str {
         if self.ttf.is_some() {
             "TrueTypeFont"
