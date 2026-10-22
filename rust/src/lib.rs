@@ -90,6 +90,8 @@ pub mod pdok_wms;
 pub mod location_search;
 mod latest_job;
 pub mod raster_addresses;
+pub mod raster_points;
+pub mod profile_context;
 pub mod osm_tiles;
 pub mod jobs_cache;
 pub mod kickthemap_live;

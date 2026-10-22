@@ -23,7 +23,7 @@ fn fixture() -> (template_export::Request, GeoTiffInfo) {
         path: base.join(&input.0.path), width: 100, height: 100,
         transform: input.0.transform, bounds: input.1, epsg:Some(28992),
         kickthemap_job_id:Some(9),kickthemap_job_title:String::new(),
-        kickthemap_job_sidecar:None,
+        kickthemap_job_sidecar:None,metadata:Default::default(),
     };
     (prepared,geotiff)
 }

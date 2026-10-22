@@ -273,7 +273,7 @@ fn desktop_template_preparation_and_written_dxf_preserve_each_path_true_color() 
             epsg: Some(28992),
             kickthemap_job_id: None,
             kickthemap_job_title: String::new(),
-            kickthemap_job_sidecar: None,
+            kickthemap_job_sidecar: None,metadata:Default::default(),
         }],
         ..Default::default()
     };

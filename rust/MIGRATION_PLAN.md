@@ -49,6 +49,45 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 22 oktober 2026: begin- en referentiepunten
+
+- De GeoTIFF-lijst selecteert nu de laag voor referentie plaatsen/verplaatsen,
+  gemeten beginpunt kiezen, alle referenties wissen en alle gekoppelde
+  KickTheMap-beginpunten laden. Werkelijke kaartklikken gebruiken de bestaande
+  viewporttransformatie, inclusief zoomen, verschuiven en rasterrotatie.
+- Oorspronkelijke punthelpers worden zonder appopstart op synthetische invoer
+  uitgevoerd: 96 gevallen en 384 klikselecties, inclusief Unicode-markernamen,
+  ontbrekende Z, samenvallende punten en de grens van 0,5 m. Beide sjabloonplanners
+  ontvangen de huidige bronpunten; oude vakmetadata kan ze niet overschrijven.
+- Raw RD-punten en overige metadata blijven in het project. Oude native projecten
+  zonder dit veld blijven leesbaar; Python-import past de laagmetadata toe en
+  lost het lokale objectdatapad op. Hele wijzigingsbatches worden vooraf op
+  bronidentiteit, coördinatenstelsel en metadata gecontroleerd. Een fout wijzigt
+  geen eerder punt. Wissen verwijdert ook verouderde vaksnapshots.
+- De oorspronkelijke BRT-wegmiddellijnen en BGT-terreinranden zijn aangesloten,
+  met dezelfde RD-vraag, uitsnedemarge, geometrievolgorde en paginering.
+  48 oorspronkelijke batches/96 requests reproduceren bytegelijk. Begrensde
+  reads, gedeelde verbindingen, annulering, veilige vervolg-URL's en een gedeelde
+  24-entry-/2-miljoen-puntencache voorkomen onbegrensd ophalen/kopiëren.
+  Een openbare live proef levert 20 wegpaden/91 punten en 72 terreinranden/1337
+  punten in RD; herhalen deelt dezelfde cachegeometrie zonder nieuwe aanvraag.
+- Bulkvoorbereiding gebruikt geladen of lokale objectdata, of de bestaande
+  ingelogde downloadwachtrij in groepen van maximaal 500 jobs. Er blijft maximaal
+  één lokaal gedecodeerde dataset staan. Metadata is begrensd op 2 MiB per laag
+  en 16 MiB per project/export. Bij bronuitval volgt een melding en de
+  oorspronkelijke richtingsterugval; de gebruiker kan offline werken.
+- Echte egui-/workerproeven controleren klikselectie, bronallocaties,
+  annulering, projectwissels en geen wijziging bij fouten. De volledige reeks
+  slaagt met 498 tests, inclusief 53 desktoptests. De geoptimaliseerde app en
+  puntdriver bouwen; 129 verse oorspronkelijke gevallen/516 selecties en 62
+  volledige contextbatches slagen binnen 0,00000002 m tegen die driver.
+  Zes echte workerexports met 14 blijvende PNGs en zes Excel-overzichten slagen
+  bij onafhankelijk herlezen. Het gekozen punt overrult bewust verouderde
+  vakmetadata; alle 52 geschreven profielobjecten en alle TIFF-pixels komen
+  overeen met de oorspronkelijke uitvoer. Datum/projectnaam blijven correct.
+  Virtuele referentiebewerking, volledige legacy-instellingen, accountvarianten
+  en praktijk-/releaseacceptatie blijven open volgens PARITY.md.
+
 ## Voortgang 22 oktober 2026: zelfstandige kaartenexport
 
 - De oorspronkelijke menuactie Export kaarten heeft nu een eigen native venster:

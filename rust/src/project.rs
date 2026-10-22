@@ -145,7 +145,11 @@ impl NativeProject {
                 }
             }
         }
+        let mut metadata_bytes=0usize;
         for raster in &self.rasters {
+            let bytes=crate::raster_points::validate_metadata(&raster.metadata)?;
+            metadata_bytes=metadata_bytes.saturating_add(bytes);
+            if metadata_bytes>16*1024*1024{return Err("Te veel laagmetadata in project".into());}
             if u64::from(raster.width) * u64::from(raster.height)
                 > crate::geotiff::MAX_GEOTIFF_PIXELS
             {

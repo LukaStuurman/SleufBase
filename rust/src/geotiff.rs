@@ -24,6 +24,8 @@ pub struct GeoTiffInfo {
     pub kickthemap_job_id: Option<u64>,
     pub kickthemap_job_title: String,
     pub kickthemap_job_sidecar: Option<PathBuf>,
+    #[serde(default,skip_serializing_if="Value::is_null")]
+    pub metadata:Value,
 }
 
 pub fn from_tags(
@@ -114,6 +116,7 @@ pub fn read_geotiff_metadata(path: &Path) -> Result<GeoTiffInfo, String> {
         kickthemap_job_id:sidecar.as_ref().map(|p|p.0),
         kickthemap_job_title:sidecar.as_ref().map(|p|p.1.clone()).unwrap_or_default(),
         kickthemap_job_sidecar:sidecar.map(|p|p.2),
+        metadata:Value::Null,
     })
 }
 

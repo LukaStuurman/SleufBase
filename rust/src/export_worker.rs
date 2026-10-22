@@ -28,6 +28,8 @@ pub enum Kind {
     Xlsx,
     Template,
     Maps,
+    StartPoints,
+    StartCandidates,
 }
 pub struct Request {
     pub kind: Kind,
@@ -39,9 +41,13 @@ pub struct Request {
     pub template: Option<Box<crate::template_order::State>>,
     pub discipline_excel: bool,
     pub maps: Option<crate::map_batch::Settings>,
+    pub point_target:Option<PathBuf>,
+    pub point_network:bool,
 }
 #[derive(Debug)]
 pub struct Exported {
+    pub point_updates:Vec<crate::raster_points::Update>,
+    pub point_candidates:Option<(PathBuf,Vec<crate::raster_points::Candidate>)>,
     pub skipped: Vec<String>,
     pub companion: Option<PathBuf>,
     pub warnings: Vec<String>,
@@ -70,10 +76,19 @@ pub struct Exporter {
 #[doc(hidden)]
 pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<Exported, String> {
     control.check()?;
+    if request.kind==Kind::StartCandidates{
+        let path=request.point_target.as_deref().ok_or("Geen proefsleuf voor beginpuntkeuze")?;
+        let (rows,warnings)=crate::raster_points::prepare_candidates_online(inputs,path,&request.rules,control,request.point_network)?;
+        return Ok(Exported{point_updates:Vec::new(),point_candidates:Some((path.to_owned(),rows)),skipped:Vec::new(),companion:None,warnings});
+    }
+    if request.kind==Kind::StartPoints{
+        let (point_updates,warnings)=crate::raster_points::prepare_online(inputs,&request.rules,control,request.point_network)?;
+        return Ok(Exported{point_updates,point_candidates:None,skipped:Vec::new(),companion:None,warnings});
+    }
     if request.kind == Kind::Maps {
         let settings=request.maps.as_ref().ok_or("Kaartinstellingen ontbreken")?;
         let paths=crate::map_batch::export(&request.path,settings,inputs,control)?;
-        return Ok(Exported{skipped:Vec::new(),companion:None,
+        return Ok(Exported{point_updates:Vec::new(),point_candidates:None,skipped:Vec::new(),companion:None,
             warnings:vec![format!("{} kaart(en) geëxporteerd.",paths.len())]});
     }
     if request.kind == Kind::Template {
@@ -90,6 +105,8 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
             control,
         )?;
         return Ok(Exported {
+            point_updates:Vec::new(),
+            point_candidates:None,
             skipped: Vec::new(),
             companion: exported.companion,
             warnings: exported.warnings,
@@ -138,9 +155,11 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
             &request.rules,
             control,
         )?,
-        Kind::Template | Kind::Maps => unreachable!("handled before object selection"),
+        Kind::Template | Kind::Maps | Kind::StartPoints | Kind::StartCandidates => unreachable!("handled before object selection"),
     }
     Ok(Exported {
+        point_updates:Vec::new(),
+        point_candidates:None,
         skipped: prepared.skipped,
         companion: None,
         warnings: Vec::new(),
@@ -281,7 +300,7 @@ mod tests {
             extra_layers: false,
             options: Default::default(),
             template: None,
-            maps: None,
+            maps: None,point_target:None,point_network:false,
             discipline_excel: false,
         }
     }

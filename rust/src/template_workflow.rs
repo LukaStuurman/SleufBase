@@ -214,6 +214,7 @@ pub fn request_with_bgt(
         }
     }
     let mut slots = Vec::new();
+    let mut metadata_bytes=0usize;
     let mut surface_cache = HashMap::<[u64; 4], Arc<Vec<crate::bgt_surface::Feature>>>::new();
     let mut surface_points = 0usize;
     let mut surface_count = 0usize;
@@ -302,6 +303,9 @@ pub fn request_with_bgt(
         } else {
             None
         };
+        let metadata=crate::raster_points::effective(raster,&row.metadata);
+        metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&metadata)?);
+        if metadata_bytes>16*1024*1024{return Err("Te veel profielmetadata voor één export".into());}
         slots.push(Some(Slot {
             bounds: b,
             title: format!("Proefsleuf {}", label.strip_prefix("PS").unwrap_or(&label)),
@@ -327,7 +331,8 @@ pub fn request_with_bgt(
             profile: dataset.map(|dataset| Profile {
                 dataset,
                 draw: state.profiles,
-                metadata: row.metadata.clone(),
+                forced_start:crate::raster_points::start_in(&metadata),
+                metadata,
                 reverse: state.reverse,
                 marker_diameter: state.marker_diameter,
                 manual_scale: row.scale,

@@ -58,7 +58,7 @@ fn main() -> Result<(), String> {
             epsg: Some(28992),
             kickthemap_job_id: Some(1),
             kickthemap_job_title: "PS1".into(),
-            kickthemap_job_sidecar: None,
+            kickthemap_job_sidecar: None,metadata:Default::default(),
         }],
         comments: vec![sleufbase_rust::project::Comment {
             x: 2.,
@@ -105,7 +105,11 @@ fn main() -> Result<(), String> {
         ("image-only", false, false, false),
         ("ordered-variants", false, true, true),
         ("missing-measurements", false, false, false),
+        ("selected-points", false, true, false),
     ] {
+        inputs.rasters[0].metadata = if name == "selected-points" {
+            serde_json::json!({"template_cross_section_start_point":{"x":10.,"y":0.},"template_reference_point":{"x":3.,"y":2.},"notes":"keep"})
+        } else { serde_json::Value::Null };
         inputs.rasters[0].kickthemap_job_id = Some(if name == "missing-measurements" {
             999
         } else {
@@ -124,6 +128,9 @@ fn main() -> Result<(), String> {
         state.sync(&inputs.rasters)?;
         state.rows[0].number = "12".into();
         state.rows[0].address = Some("Adres:\\PTeststraat 12".into());
+        if name == "selected-points" {
+            state.rows[0].metadata=serde_json::json!({"template_cross_section_start_point":{"x":0.,"y":0.},"template_reference_point":{"x":99.,"y":99.}});
+        }
         if duplicates {
             let mut second = state.rows[0].clone();
             second.variant = "AUTO".into();
@@ -144,7 +151,7 @@ fn main() -> Result<(), String> {
                     options: Default::default(),
                     template: Some(Box::new(state.clone())),
                     discipline_excel: true,
-                    maps: None,
+                    maps: None,point_target:None,point_network:false,
                 },
             )
             .map_err(|e| e.message.clone())?;

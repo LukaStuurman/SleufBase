@@ -229,6 +229,12 @@ fn import_value_with_cancel(original:Value,source:&Path,cancel:&std::sync::atomi
                 match read_geotiff_metadata(&path) {
                     Ok(mut raster)=>{
                         let metadata=&item["metadata"];
+                        raster.metadata=metadata.clone();
+                        crate::raster_points::validate_metadata(&raster.metadata)?;
+                        if let Some(path)=raster.metadata.get("kickthemap_job_features_path").and_then(Value::as_str).filter(|p|!p.is_empty()){
+                            let resolved=asset_path(source,path);
+                            raster.metadata["kickthemap_job_features_path"]=Value::String(resolved.to_string_lossy().into_owned());
+                        }
                         if let Some(matrix)=metadata.get("base_transform_matrix") {
                             let m=matrix.as_array().filter(|m|m.len()==9).ok_or("Ongeldige basisrastermatrix")?;
                             raster.transform=GeoTransform{a:number(m.first(),"matrix a")?,b:number(m.get(1),"matrix b")?,c:number(m.get(2),"matrix c")?,

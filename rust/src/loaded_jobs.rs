@@ -92,7 +92,7 @@ mod tests {
             transform:GeoTransform{a:1.,b:0.,c:0.,d:0.,e:-1.,f:0.},
             bounds:Bounds{min_x:0.,min_y:-1.,max_x:1.,max_y:0.},
             epsg:Some(28992),kickthemap_job_id:Some(99),
-            kickthemap_job_title:"PS99".into(),kickthemap_job_sidecar:None
+            kickthemap_job_title:"PS99".into(),kickthemap_job_sidecar:None,metadata:Default::default()
         };
         assert_eq!(active_rust_job_ids(&[dataset],&[raster])
             .into_iter().collect::<Vec<_>>(),vec![42,99]);

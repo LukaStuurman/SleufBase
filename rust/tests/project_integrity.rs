@@ -103,7 +103,7 @@ fn invalid_persisted_geometry_never_replaces_previous_project() {
         epsg: Some(28992),
         kickthemap_job_id: None,
         kickthemap_job_title: String::new(),
-        kickthemap_job_sidecar: None,
+        kickthemap_job_sidecar: None,metadata:Default::default(),
     });
     invalid.push(p);
     for p in invalid {

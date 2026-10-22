@@ -150,7 +150,7 @@ mod tests {
             transform:GeoTransform{a:1.,b:0.,c:154999.,d:0.,e:-1.,f:463010.},
             bounds:Bounds{min_x:154999.,min_y:462994.,max_x:155015.,max_y:463010.},
             epsg:Some(28992),kickthemap_job_id:None,kickthemap_job_title:String::new(),
-            kickthemap_job_sidecar:None}
+            kickthemap_job_sidecar:None,metadata:Default::default()}
     }
     #[test]
     fn stable_identity_restores_sheet_order_and_moved_raster_indices() {

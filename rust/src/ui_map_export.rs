@@ -36,7 +36,7 @@ impl SleufBaseApp {
             options: Default::default(),
             template: None,
             discipline_excel: false,
-            maps: Some(settings),
+            maps: Some(settings),point_target:None,point_network:false,
         };
         let started = self.start_export(request, false);
         if started {
@@ -116,7 +116,7 @@ mod tests {
                 epsg: Some(28992),
                 kickthemap_job_id: None,
                 kickthemap_job_title: String::new(),
-                kickthemap_job_sidecar: None,
+                kickthemap_job_sidecar: None,metadata:Default::default(),
             }],
             ..Default::default()
         };
@@ -165,6 +165,8 @@ mod tests {
                 gate.recv_timeout(Duration::from_secs(5)).unwrap();
                 assert!(control.is_cancelled());
                 Ok(Exported {
+                    point_updates:Vec::new(),
+                    point_candidates:None,
                     skipped: Vec::new(),
                     companion: None,
                     warnings: Vec::new(),

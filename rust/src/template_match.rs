@@ -124,7 +124,7 @@ mod tests {
             path:PathBuf::new(),width:400,height:100,epsg:Some(28992),
             bounds:Bounds{min_x,min_y:462990.,max_x:min_x+50.,max_y:463010.},
             transform:GeoTransform{a:1.,b:0.,c:min_x,d:0.,e:-1.,f:463010.},
-            kickthemap_job_id:id,kickthemap_job_title:String::new(),kickthemap_job_sidecar:None,
+            kickthemap_job_id:id,kickthemap_job_title:String::new(),kickthemap_job_sidecar:None,metadata:Default::default(),
         }
     }
     fn job(id:u64,x:f64)->Dataset {

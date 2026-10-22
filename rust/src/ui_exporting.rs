@@ -77,7 +77,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: Some(Box::new(state.clone())),
-            maps: None,
+            maps: None,point_target:None,point_network:false,
             discipline_excel: self.migrated_settings.template_auto_export_discipline_excel,
         };
         if self.start_export(request, false) {
@@ -120,6 +120,10 @@ impl SleufBaseApp {
         self.comments = inputs.comments;
     }
     pub(super) fn start_export(&mut self, request: Request, overlay: bool) -> bool {
+        if self.live_busy||self.browser_ui.batch_mode||!self.browser_ui.downloaded_json.is_empty()||!self.browser_ui.downloaded_tiffs.is_empty(){
+            self.message="Rond eerst de lopende downloads en het inladen af".into();return false;
+        }
+        if self.raster_points.pending_generation.is_some(){self.message="Beginpunten worden voorbereid; rond die taak eerst af".into();return false;}
         if self.export_intent.is_some() || self.template_job.is_some() {
             self.message = "Er loopt al een export".into();
             return false;
@@ -175,7 +179,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: None,
-            maps: None,
+            maps: None,point_target:None,point_network:false,
             discipline_excel: false,
         };
         self.start_export(request, false);
@@ -196,7 +200,7 @@ impl SleufBaseApp {
             extra_layers: dialog.extra_layers,
             options: dialog.options(),
             template: None,
-            maps: None,
+            maps: None,point_target:None,point_network:false,
             discipline_excel: false,
         };
         self.start_export(request, action.overlay);
@@ -223,6 +227,7 @@ impl SleufBaseApp {
         };
         match ready.result {
             Ok(exported) => {
+                if matches!(intent.kind,Kind::StartPoints|Kind::StartCandidates){self.finish_point_task(intent.kind,exported);}else{
                 if intent.kind == Kind::Dxf {
                     self.export_dialog = None;
                 }
@@ -245,9 +250,10 @@ impl SleufBaseApp {
                     intent.path.display(),
                     report_notice(exported.companion.as_deref(), &exported.warnings)
                 );
+                }
             }
             Err(error) => {
-                self.message = format!("Export niet opgeslagen; projectgegevens behouden: {error}");
+                self.message = if matches!(intent.kind,Kind::StartPoints|Kind::StartCandidates){format!("Beginpunten niet gewijzigd: {error}")}else{format!("Export niet opgeslagen; projectgegevens behouden: {error}")};
                 if intent.kind == Kind::Dxf {
                     if let Some(dialog) = self.export_dialog.as_mut() {
                         dialog.error = error.clone();
@@ -274,7 +280,7 @@ impl SleufBaseApp {
             .map(|c| (c.progress(), c.can_cancel(), c.is_cancelled()));
         let mut cancel = ctx.input(|i| i.key_pressed(egui::Key::Escape));
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Exporteren");
+            ui.heading(if self.export_intent.as_ref().is_some_and(|i|matches!(i.kind,Kind::StartPoints|Kind::StartCandidates)){"Beginpunten voorbereiden"}else{"Exporteren"});
             ui.label(format!("Project: {}", self.project_name));
             if let Some(intent) = &self.export_intent {
                 ui.label(intent.path.display().to_string());
@@ -370,7 +376,7 @@ mod tests {
                 epsg: Some(28992),
                 kickthemap_job_id: Some(1),
                 kickthemap_job_title: "PS1".into(),
-                kickthemap_job_sidecar: None,
+                kickthemap_job_sidecar: None,metadata:Default::default(),
             }],
             raster_textures: vec![None],
             raster_errors: vec![None],

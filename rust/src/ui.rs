@@ -48,6 +48,8 @@ mod location_ui;
 mod tiff_address_ui;
 #[path="ui_map_export.rs"]
 mod map_export_ui;
+#[path="ui_raster_points.rs"]
+mod raster_point_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -82,6 +84,7 @@ enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf)
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    raster_points:raster_point_ui::State,
     map_export_open:bool,
     tiff_addresses:tiff_address_ui::Dialog,
     location:location_ui::Search,
@@ -168,6 +171,7 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            raster_points:Default::default(),
             map_export_open:false,
             tiff_addresses:Default::default(),
             location:Default::default(),
@@ -269,6 +273,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.raster_points=Default::default();
         self.map_export_open=false;
         self.tiff_addresses.reset();
         self.location.reset();self.navigation=Default::default();
@@ -986,7 +991,7 @@ fn canvas(
     pan:&mut egui::Vec2,
     rules:&[sleufbase_rust::Rule],
     mut navigation:Option<&mut location_ui::Navigation>
-) {
+) -> Option<raster_point_ui::View> {
     let desired=ui.available_size();
     let (rect,response)=ui.allocate_exact_size(desired,egui::Sense::click_and_drag());
     let painter=ui.painter_at(rect);
@@ -1024,7 +1029,7 @@ fn canvas(
         painter.text(rect.center(),egui::Align2::CENTER_CENTER,
             "Open een lokaal KickTheMap JSON-, GeoTIFF- of DXF-bestand",
             egui::FontId::proportional(17.0),INK);
-        return;
+        return None;
     };
 
     if response.hovered() {
@@ -1216,6 +1221,8 @@ fn canvas(
         painter.text(rect.right_bottom()+egui::vec2(-10.0,-10.0),egui::Align2::RIGHT_BOTTOM,
             "© OpenStreetMap contributors",egui::FontId::proportional(12.0),INK);
     }
+    Some(raster_point_ui::View{painter,rect,center,origin:[cx,cy],scale,
+        clicked:response.clicked().then(||response.interact_pointer_pos()).flatten()})
 }
 
 impl eframe::App for SleufBaseApp {
@@ -1257,6 +1264,7 @@ impl SleufBaseApp {
         self.poll_cadastral();
         self.poll_ahn();
         self.poll_location(ctx);
+        self.poll_point_downloads();
         self.poll_tiff_addresses(ctx);
         if ctx.input_mut(|i|i.consume_key(egui::Modifiers::CTRL,egui::Key::L)){self.open_location();}
         ctx.request_repaint_after(Duration::from_secs(1));
@@ -1431,7 +1439,9 @@ impl SleufBaseApp {
             ui.heading("GeoTIFF-bestanden");
             egui::ScrollArea::vertical().max_height(130.0).show(ui,|ui|{
                 for (index,info) in self.geotiffs.iter().enumerate() {
-                    ui.label(info.path.file_name().and_then(|s|s.to_str()).unwrap_or("TIFF"));
+                    if ui.selectable_label(self.raster_points.selected.as_ref()==Some(&info.path),info.path.file_name().and_then(|s|s.to_str()).unwrap_or("TIFF")).clicked(){
+                        self.raster_points.selected=Some(info.path.clone());self.raster_points.mode=None;self.raster_points.rows.clear();
+                    }
                     ui.small(format!("{}x{}, EPSG {}, job {}",
                         info.width,info.height,
                         info.epsg.map(|v|v.to_string()).unwrap_or_else(||"?".into()),
@@ -1445,6 +1455,7 @@ impl SleufBaseApp {
             });
             ui.separator();
 
+            self.show_point_controls(ui);
             if let Some(cache)=&self.jobs_cache {
                 ui.separator();
                 ui.heading("KickTheMap jobs (offline cache)");
@@ -1600,12 +1611,13 @@ impl SleufBaseApp {
             ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, OpenStreetMap, BGT en Kadaster (preview).");
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
-            canvas(ui,selected,&self.geotiffs,&self.raster_textures,
+            let view=canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
                 self.osm_visible && self.osm_texture.is_some(),
                 &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules,Some(&mut self.navigation));
+            if let Some(view)=view{self.handle_raster_points(&view);}
         });
 
         if self.show_trench_dialog {

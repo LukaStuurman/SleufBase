@@ -49,7 +49,7 @@ fn inputs() -> Inputs {
             epsg: Some(28992),
             kickthemap_job_id: Some(1),
             kickthemap_job_title: "PS1".into(),
-            kickthemap_job_sidecar: None,
+            kickthemap_job_sidecar: None,metadata:Default::default(),
         }],
         ..Default::default()
     }
@@ -75,7 +75,7 @@ fn request(path: PathBuf, state: State) -> Request {
         extra_layers: false,
         options: Default::default(),
         template: Some(Box::new(state)),
-        maps: None,
+        maps: None,point_target:None,point_network:false,
         discipline_excel: false,
     }
 }

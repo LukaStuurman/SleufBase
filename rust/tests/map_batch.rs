@@ -27,7 +27,7 @@ fn raster(case: &Value) -> GeoTiffInfo {
         epsg: Some(28992),
         kickthemap_job_id: None,
         kickthemap_job_title: String::new(),
-        kickthemap_job_sidecar: None,
+        kickthemap_job_sidecar: None,metadata:Default::default(),
     }
 }
 fn fonts() -> Paths {
@@ -55,7 +55,7 @@ fn request(path: &Path, settings: Settings) -> Request {
         options: Default::default(),
         template: None,
         discipline_excel: false,
-        maps: Some(settings),
+        maps: Some(settings),point_target:None,point_network:false,
     }
 }
 #[test]

@@ -96,7 +96,7 @@ impl Profile<'_> {
 fn same(a: Vertex, b: Vertex) -> bool {
     (a.x - b.x).abs() <= 1e-6 && (a.y - b.y).abs() <= 1e-6
 }
-fn numeric(s: &str) -> bool {
+pub(crate) fn numeric(s: &str) -> bool {
     !s.is_empty()
         && s.chars().all(|c| {
             let n = c as u32;
@@ -284,7 +284,7 @@ fn position(f: &Feature, cancel: &AtomicBool) -> Result<Option<Vertex>, String> 
     Ok(previous)
 }
 
-fn path_projection(
+pub(crate) fn path_projection(
     p: XY,
     paths: &[Vec<XY>],
     perpendicular: bool,

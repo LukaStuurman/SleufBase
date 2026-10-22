@@ -191,6 +191,7 @@ pub fn build_with_cad(
             }
         }
     }
+    let mut metadata_bytes=0usize;
     for choice in enabled {
         control.check()?;
         crate::template_photo::validate(&choice.photos)?;
@@ -228,7 +229,7 @@ pub fn build_with_cad(
         let (dataset, forced_start, axis, extra_polyline) = match choice.source {
             Source::Job(i) => {
                 let job = jobs.get(i).ok_or("Job bestaat niet meer in dit project")?;
-                (job.clone(), None, None, Vec::new())
+                (job.clone(), raster.and_then(|r|crate::raster_points::start_in(&r.metadata)), None, Vec::new())
             }
             Source::Virtual(i) => {
                 let trench = trenches.get(i).ok_or("Virtuele proefsleuf bestaat niet meer")?;
@@ -297,6 +298,9 @@ pub fn build_with_cad(
             }
         }
         let local_index = datasets.len();
+        let metadata=if choice.profile{raster.map_or(serde_json::Value::Null,|r|r.metadata.clone())}else{serde_json::Value::Null};
+        metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&metadata)?);
+        if metadata_bytes>16*1024*1024{return Err("Te veel profielmetadata voor één export".into());}
         datasets.push(dataset);
         slots.push(Some(Slot {
             bounds, label: format!("PS{:03}", local_index + 1),
@@ -319,6 +323,7 @@ pub fn build_with_cad(
             }),
             profile: choice.profile.then_some(Profile {
                 dataset: local_index, forced_start, reverse: choice.reverse,
+                metadata,
                 ..Profile::default()
             }),
             photos:choice.photos.clone(),
@@ -359,7 +364,7 @@ mod tests {
             transform:GeoTransform{a:0.05,b:0.,c:154999.,d:0.,e:-0.05,f:463001.},
             bounds:Bounds{min_x:154999.,min_y:462996.,max_x:155004.,max_y:463001.},
             epsg:Some(28992),kickthemap_job_id:id,kickthemap_job_title:String::new(),
-            kickthemap_job_sidecar:None}
+            kickthemap_job_sidecar:None,metadata:Default::default()}
     }
     #[test]
     fn exact_job_id_matching_and_ambiguity_are_not_guessed() {

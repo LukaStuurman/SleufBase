@@ -150,6 +150,7 @@ impl SleufBaseApp {
         outcomes: Vec<FileOutcome>,
         ctx: &egui::Context,
     ) {
+        self.raster_points.mode=None;self.raster_points.rows.clear();
         if let LoadPurpose::Project(action) = purpose {
             let Some(outcome) = outcomes.into_iter().next() else {
                 self.message = "Geen projectgegevens ontvangen; huidige gegevens behouden.".into();

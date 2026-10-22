@@ -1,4 +1,5 @@
 use serde_json::{json, Value};
+use std::path::PathBuf;
 use sleufbase_rust::{
     geo::GeoTransform,
     legacy_project::{import_value, read_legacy_project},
@@ -73,12 +74,22 @@ fn relative_assets_rotation_job_identity_and_dxf_visibility_are_restored() {
     image.write_data(&[100u8; 24]).unwrap();
     drop(encoder);
     std::fs::write(assets.join("context.dxf"),"0\nSECTION\n2\nENTITIES\n0\nLINE\n8\nCABLE\n10\n168000\n20\n401000\n11\n168004\n21\n401002\n0\nENDSEC\n0\nEOF\n").unwrap();
-    let project = import_value(fixture(), &dir.path().join("PS42.klicproject")).unwrap();
+    let mut legacy=fixture();
+    legacy["tiffs"][1]["metadata"]["template_reference_point"]=json!({"x":168001.,"y":401001.});
+    legacy["tiffs"][1]["metadata"]["template_cross_section_start_point"]=json!({"x":168000.,"y":401000.});
+    legacy["tiffs"][1]["metadata"]["kickthemap_job_features_path"]=json!("assets/reference_jobFeatures.json");
+    legacy["tiffs"][1]["metadata"]["keep"]=json!({"unknown":[1,2,3]});
+    let project = import_value(legacy.clone(), &dir.path().join("PS42.klicproject")).unwrap();
     assert_eq!(project.rasters.len(), 1);
     assert_eq!(project.overlays.len(), 1);
     assert!(!project.overlays[0].visible);
     let raster = &project.rasters[0];
     assert_eq!(raster.kickthemap_job_id, Some(456));
+    assert_eq!(sleufbase_rust::raster_points::stored(raster,sleufbase_rust::raster_points::REFERENCE),Some([168001.,401001.]));
+    assert_eq!(sleufbase_rust::raster_points::stored(raster,sleufbase_rust::raster_points::START),Some([168000.,401000.]));
+    assert_eq!(raster.metadata["keep"],legacy["tiffs"][1]["metadata"]["keep"]);
+    assert_eq!(PathBuf::from(raster.metadata["kickthemap_job_features_path"].as_str().unwrap()),assets.join("reference_jobFeatures.json"));
+    assert_eq!(project.legacy_archive.as_ref().unwrap().original.as_ref(),&legacy);
     let expected = GeoTransform {
         a: 1.0,
         b: 0.0,
