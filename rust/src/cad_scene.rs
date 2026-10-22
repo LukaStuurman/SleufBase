@@ -166,6 +166,14 @@ impl Builder<'_> {
                         self.cancel,
                     )?;
                     (output.points, output.breaks.into_boxed_slice())
+                } else if let Some(mtext) = source.cad.as_deref().and_then(|p| p.mtext.as_deref()) {
+                    let output = mtext.contours.flatten(
+                        parent,
+                        0.005,
+                        MAX_POINTS.saturating_sub(self.points),
+                        self.cancel,
+                    )?;
+                    (output.points, output.breaks.into_boxed_slice())
                 } else if let Some(spline) = source.cad.as_deref().and_then(|p| p.spline.as_deref())
                 {
                     let output =
@@ -370,6 +378,7 @@ impl DxfOverlay {
                     .as_deref()
                     .and_then(|p| p.text.as_deref())
                     .map_or(0, |t| t.contours.points.len())
+                    .saturating_add(f.cad.as_deref().and_then(|p| p.mtext.as_deref()).map_or(0, |t| t.contours.points.len()))
             })
             .try_fold(0usize, |used, n| {
                 used.checked_add(n)

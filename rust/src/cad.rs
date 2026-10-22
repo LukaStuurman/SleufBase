@@ -62,6 +62,8 @@ pub struct Properties {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub text: Option<Box<crate::cad_text::Source>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mtext: Option<Box<crate::cad_mtext::Source>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub placement: Option<Box<crate::cad_geometry::Placement>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub curve: Option<Box<crate::cad_geometry::CurvePath>>,
@@ -117,6 +119,9 @@ impl Properties {
         if let Some(text) = &self.text {
             text.validate()?;
         }
+        if let Some(mtext) = &self.mtext {
+            mtext.validate()?;
+        }
         if let Some(placement) = &self.placement {
             placement.validate()?;
         }
@@ -133,6 +138,7 @@ impl Properties {
             + usize::from(self.curve.is_some())
             + usize::from(self.mesh.is_some())
             + usize::from(self.text.is_some())
+            + usize::from(self.mtext.is_some())
             > 1
         {
             return Err("CAD-object bevat meerdere geometriebeschrijvingen".into());
@@ -173,6 +179,7 @@ impl Properties {
         self.placement.is_none()
             && self.linked_attributes.is_empty()
             && self.text.is_none()
+            && self.mtext.is_none()
             && self.curve.is_none()
             && self.spline.is_none()
             && self.mesh.is_none()

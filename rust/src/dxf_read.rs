@@ -122,6 +122,10 @@ impl DxfFeature {
                     result.insert("Positie vergrendeld".into(),if attribute.lock_position {"Ja"}else{"Nee"}.into());
                 }
             }
+            if let Some(mtext)=&cad.mtext {
+                result.insert("Tekst".into(),mtext.request.content.clone());
+                result.insert("Tekststijl".into(),mtext.style.clone());
+            }
             if let Some(mesh)=&cad.mesh {
                 result.insert("Meshvertices".into(),mesh.vertices.len().to_string());
                 result.insert("Meshvlakken".into(),mesh.faces.len().to_string());
@@ -219,7 +223,7 @@ impl Parser {
     }
 }
 
-fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool,catalog:Option<&mut crate::dxf_fonts::Catalog>,spaces:crate::cad_space::Spaces)->Result<DxfOverlay,String>{
+fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&Path,cancel:&std::sync::atomic::AtomicBool,mut catalog:Option<&mut crate::dxf_fonts::Catalog>,spaces:crate::cad_space::Spaces)->Result<DxfOverlay,String>{
     let mut parser=Parser{entities:Default::default(),layers:BTreeMap::new(),styles:BTreeMap::new(),layer_keys:Default::default(),blocks:BTreeMap::new(),block:None,layout_blocks:Default::default(),model:Vec::new(),spaces,skipped:Default::default()};
     let mut kind=String::new();let mut groups=Vec::new();let mut section=String::new();
     let mut saw_section=false;let mut expect_section=false;let mut open=false;let mut eof=false;let mut saw_tables=false;
@@ -257,7 +261,8 @@ fn parse_groups<'a>(records:impl Iterator<Item=Result<Group<'a>,String>>,path:&P
     let mut features=parser.model;features.extend(parser.entities.features);
     let mut overlay=DxfOverlay{path:path.to_owned(),visible:true,space_policy:SpacePolicy::Modelspace,features,layers:parser.layers,blocks:parser.blocks,
         warnings,..Default::default()};
-    crate::cad_text::prepare_overlay(&mut overlay,&parser.styles,catalog,cancel)?;
+    crate::cad_text::prepare_overlay(&mut overlay,&parser.styles,catalog.as_deref_mut(),cancel)?;
+    crate::cad_mtext::prepare_overlay(&mut overlay,&parser.styles,catalog.as_deref_mut(),cancel)?;
     overlay.rebuild_block_cache_with_cancel(cancel)?;crate::input::check(cancel)?;Ok(overlay)
 }
 
