@@ -133,10 +133,8 @@ impl SleufBaseApp {
                 let inputs = worker_owned.lock().expect("project export ownership lock")
                     .take().expect("project inputs already owned by another worker");
                 let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    let mut request = sleufbase_rust::template_project::build_with_cad(
-                        &options, &inputs.datasets, &inputs.rasters, &inputs.trenches,
-                        &inputs.bgt, inputs.cadastral.as_ref(), &inputs.overlays,
-                        &rules, &task_control,
+                    let mut request = sleufbase_rust::template_project::build_from_inputs(
+                        &options, &inputs, &rules, &task_control,
                     )?;
                     request.settings.discipline_excel=discipline_excel;
                     request.settings.protected_sources.extend(inputs.protected_paths.iter().cloned());

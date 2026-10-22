@@ -29,17 +29,18 @@ export are still open.
 
 `export_template_workflows` uses the production desktop worker and embedded
 template for normal, reversed, image-only, ordered-variant, missing-data and
-selected-start/reference exports. The
+selected-start/reference and TIFF-comment exports. The
 independent ezdxf/Pillow verifier checks actual project/date/drawn-by/title
 values, comments, annotation handles, blank slots and durable raster dimensions.
 The template is embedded in the standalone executable; no source-checkout path
 is required. Earlier prepared export/map oracles remain separate checks.
 
-The worker passes six independent readbacks (14 PNGs and six automatic XLSX
+The worker passes seven independent readbacks (16 PNGs and seven automatic XLSX
 companions), including visible CAD geometry/colors. Source start/reference points
 override stale slot metadata; the complete 52-entity profile and all prepared TIFF
-pixels match the actual original exporter. The combined 498 Rust tests include
-53 desktop tests. Export targets that alias loaded measurements, CAD, TIFF/sidecars, the
+pixels match the actual original exporter. Free-map, TIFF and separate slot
+notes use original filtering/order/deduplication, including an internal tab. The
+combined 505 Rust tests include 57 desktop tests. Export targets that alias loaded measurements, CAD, TIFF/sidecars, the
 template or current project/import container are rejected before network/assets.
 
 This is the native ordering/export path. Paired normal/reverse publication,

@@ -159,7 +159,28 @@ pub fn build_with_cad(
     rules: &[Rule],
     control: &Control,
 ) -> Result<template_export::Request, String> {
+    build_sources(opts,Sources{jobs,rasters,trenches,bgt,cadastral,cad,comments:&[]},rules,control)
+}
+/// Include the app's free-map and per-TIFF notes in both job and virtual slots.
+/// All source vectors remain borrowed from the worker-owned project.
+pub fn build_from_inputs(
+    opts: &Options,
+    inputs: &crate::export_worker::Inputs,
+    rules: &[Rule],
+    control: &Control,
+) -> Result<template_export::Request, String> {
+    build_sources(opts,Sources{jobs:&inputs.datasets,rasters:&inputs.rasters,trenches:&inputs.trenches,bgt:&inputs.bgt,cadastral:inputs.cadastral.as_ref(),cad:&inputs.overlays,comments:&inputs.comments},rules,control)
+}
+struct Sources<'a>{
+    jobs:&'a [Dataset],rasters:&'a [GeoTiffInfo],trenches:&'a [VirtualTrench],
+    bgt:&'a [BgtLayer],cadastral:Option<&'a CadastralLayer>,cad:&'a [DxfOverlay],comments:&'a [crate::project::Comment],
+}
+fn build_sources(
+    opts:&Options,sources:Sources<'_>,rules:&[Rule],control:&Control,
+) -> Result<template_export::Request, String> {
+    let Sources{jobs,rasters,trenches,bgt,cadastral,cad,comments}=sources;
     control.check()?;
+    let all_comments=crate::map_comments::combined(comments,rasters)?;
     crate::dxf_fonts::Catalog::validate_dirs(&opts.font_directories)?;
     if !opts.template.is_file() {
         return Err("Kies een bestaand DXF-sjabloon".into());
@@ -252,7 +273,7 @@ pub fn build_with_cad(
             dataset.title.clone()
         } else { choice.title.trim().to_owned() };
         if label.is_empty() || label.chars().any(char::is_control) || label.len() > 256
-            || choice.comments.chars().any(|c| c.is_control() && c != '\n')
+            || choice.comments.chars().any(|c| c.is_control() && !matches!(c,'\n'|'\r'|'\t'|'\u{b}'|'\u{c}'|'\u{1c}'..='\u{1e}'))
             || choice.comments.len() > 4096
         {
             return Err("Ongeldige proefsleuftitel of opmerking".into());
@@ -304,7 +325,7 @@ pub fn build_with_cad(
         datasets.push(dataset);
         slots.push(Some(Slot {
             bounds, label: format!("PS{:03}", local_index + 1),
-            title: label.clone(), address: None, comments: choice.comments.clone(),
+            title: label.clone(), address: None, comments: crate::template_workflow::comments(bounds,&all_comments,&choice.comments),
             report_dataset:Some(local_index), report_label:Some(label),
             tiff_png: PathBuf::new(),
             tiff_source: raster.map(|raster|template_raster::Source {

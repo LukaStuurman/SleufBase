@@ -96,6 +96,7 @@ pub fn request_with_bgt(
     control.check()?;
     state.validate()?;
     let labels = state.labels()?;
+    let all_comments=crate::map_comments::combined(&inputs.comments,&inputs.rasters)?;
     if !labels.iter().any(Option::is_some) {
         return Err("Kies minimaal één proefsleuf voor de sjabloonexport".into());
     }
@@ -311,7 +312,7 @@ pub fn request_with_bgt(
             title: format!("Proefsleuf {}", label.strip_prefix("PS").unwrap_or(&label)),
             label,
             address: row.address.clone(),
-            comments: comments(b, &inputs.comments, &row.comments),
+            comments: comments(b, &all_comments, &row.comments),
             tiff_png: Default::default(),
             tiff_source: Some(source),
             virtual_source: None,

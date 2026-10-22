@@ -494,6 +494,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_raster_points.py rust/target/release/examples/resolve_raster_points.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native map comments and clear actions
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_map_action_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/map-actions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_map_actions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_map_actions.py rust/target/release/examples/resolve_map_actions.exe rust/target/release/sleufbase-rust.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native MTEXT parser and immutable format state
         shell: pwsh
         env:

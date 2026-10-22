@@ -423,6 +423,7 @@ mod tests {
     fn project_template_worker_moves_rasters_cad_comments_and_blocks_all_other_exports() {
         use sleufbase_rust::template_project::{BackgroundKind, Choice, Options, Source};
         let mut app = template_app();
+        app.geotiffs[0].metadata=serde_json::json!({"tiff_comment_text":"TIFF-opmerking Ø\nbehouden"});
         app.comments.push(Comment {
             x: 1.,
             y: 2.,
@@ -486,6 +487,8 @@ mod tests {
         }
         assert!(out.exists(), "{}", app.message);
         let drawing=sleufbase_rust::dxf_document::Document::load(&out,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+        let output_notes=drawing.records().filter(|r|r.kind()=="MTEXT").filter_map(|r|r.first(1).map(str::to_owned)).collect::<Vec<_>>();
+        assert_eq!(output_notes.iter().filter(|s|s.as_str()=="Opmerkingen:\\PBehouden\\PTIFF-opmerking Ø").count(),1,"Map and TIFF notes must reach the paired export's shared comments: {output_notes:?}");
         assert_eq!(drawing.records().filter(|r|r.kind()=="BLOCKVISIBILITYPARAMETER" && r.first(301)==Some("Versie")).count(),1);
         assert!(app.template_preferences.as_ref().unwrap().paired);
 

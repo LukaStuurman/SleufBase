@@ -51,6 +51,14 @@ def workbook(path,name):
     if name=='ordered-variants':rows.extend([None,('PS12B',0)])
     expected,_=original_signature(original['rules'],original['datasets'],rows)
     assert signature(path)==expected,(name,'automatic workbook differs from original')
+
+def original_comments(name):
+    from generate_object_export_fixtures import reference
+    ref=reference();models=importlib.import_module(ref.__package__+'.models');exporter=importlib.import_module(ref.__package__+'.cadastral_export').CadastralDxfExporter(wfs_client=None)
+    comments=[models.MapComment(x=2.,y=3.,text='Grondwater\n grondwater\nStraße\nSTRASSE')]
+    if name=='tiff-comments':
+        comments.extend([models.MapComment(x=4.,y=3.,text='TIFF Ø\n grondwater\nExtra\tdetail'),models.MapComment(x=4.,y=3.,text='Extra slot\nTIFF Ø')])
+    return exporter._template_comments_text(SimpleNamespace(bounds=models.Bounds(0.,0.,8.,6.)),comments)
 def main():
     out=Path(sys.argv[1]);audit=json.loads((out/'audit.json').read_text(encoding='utf-8'));start=datetime.fromtimestamp((out/'started.txt').stat().st_mtime).date();end=datetime.fromtimestamp((out/'audit.json').stat().st_mtime).date();dates={(start+timedelta(days=i)).strftime('%d-%m-%Y') for i in range((end-start).days+1)}
     baseline=ezdxf.readfile(ROOT/'assets/cadastral_template.dxf');base_profiles=len([e for e in baseline.modelspace() if e.dxf.layer=='X-XX-AL-PROFIELBALK-SD'])
@@ -61,7 +69,7 @@ def main():
         actual_dates=[text for tag,text in values if tag=='DATUM1'];assert actual_dates and len(set(actual_dates))==1 and set(actual_dates)<=dates,actual_dates
         assert ('TEKENAAR1','Native test') in values
         texts=[str(e.dxf.text) for e in doc.modelspace().query('TEXT')]+[str(e.text) for e in doc.modelspace().query('MTEXT')]
-        assert 'Proefsleuf 12' in texts;assert texts.count('Opmerkingen:\\PGrondwater\\PStraße')==(2 if case['name']=='ordered-variants' else 1)
+        assert 'Proefsleuf 12' in texts;assert texts.count(original_comments(case['name']))==(2 if case['name']=='ordered-variants' else 1)
         if case['name']=='ordered-variants':assert 'Proefsleuf 12B' in texts
         leaders=list(doc.modelspace().query('LEADER'))
         profile_objects=len([e for e in doc.modelspace() if e.dxf.layer=='X-XX-AL-PROFIELBALK-SD']);assert (profile_objects>base_profiles) if case['draw'] else (profile_objects==base_profiles)
@@ -80,5 +88,5 @@ def main():
         if case['name']=='selected-points':selected_points(doc,images)
         workbook(path.with_suffix('.xlsx'),case['name'])
         print(case['name'],': native worker titles/date/project, DXF ownership/annotations and',len(images),'durable PNGs passed')
-    assert [c['name'] for c in audit]==['normal','reverse','image-only','ordered-variants','missing-measurements','selected-points']
+    assert [c['name'] for c in audit]==['normal','reverse','image-only','ordered-variants','missing-measurements','selected-points','tiff-comments']
 if __name__=='__main__':main()

@@ -737,9 +737,9 @@ impl Document {
         }))
     }
     /// Replace DXF-formatted TEXT/ATTRIB/ATTDEF/MTEXT, keeping all other tags.
-    /// Use MTEXT escapes (e.g. \P); raw newline/control characters are rejected.
+    /// Use MTEXT escapes (e.g. \P); MTEXT tabs are valid, raw line endings are not.
     pub fn replace_text(&mut self, id: &str, text: &str) -> Result<(), String> {
-        if text.len() > MAX_TEXT || text.chars().any(char::is_control) {
+        if text.len() > MAX_TEXT {
             return Err("Ongeldige of te lange DXF-tekst".into());
         }
         let index = *self
@@ -749,6 +749,9 @@ impl Document {
         let record = &self.records[index];
         let kind = self.source[record.kind.clone()].trim();
         let mtext = kind == "MTEXT";
+        if text.chars().any(|c|c.is_control()&&!(mtext&&c=='\t')) {
+            return Err("Ongeldige of te lange DXF-tekst".into());
+        }
         if !mtext && !matches!(kind, "TEXT" | "ATTRIB" | "ATTDEF") {
             return Err("DXF-record is geen bewerkbare tekst".into());
         }

@@ -50,6 +50,8 @@ mod tiff_address_ui;
 mod map_export_ui;
 #[path="ui_raster_points.rs"]
 mod raster_point_ui;
+#[path="ui_map_actions.rs"]
+mod map_actions_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -79,11 +81,12 @@ impl TrenchForm {
 
 
 #[derive(Clone,Debug,PartialEq)]
-enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf), Close }
+enum ProjectAction { New, ClearLayers, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf), Close }
 
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    tiff_comment_editor:Option<map_actions_ui::TiffCommentEditor>,
     raster_points:raster_point_ui::State,
     map_export_open:bool,
     tiff_addresses:tiff_address_ui::Dialog,
@@ -171,6 +174,7 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            tiff_comment_editor:None,
             raster_points:Default::default(),
             map_export_open:false,
             tiff_addresses:Default::default(),
@@ -273,6 +277,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.tiff_comment_editor=None;
         self.raster_points=Default::default();
         self.map_export_open=false;
         self.tiff_addresses.reset();
@@ -334,6 +339,7 @@ impl SleufBaseApp {
     fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
         if self.defer_action_for_export(&action)||self.defer_action_for_template(&action){return;}
         match action {
+            ProjectAction::ClearLayers=>self.clear_map_layers(ctx),
             ProjectAction::New=>{
                 self.apply_project(NativeProject::default(),None,false,Vec::new(),ctx);
                 self.message="Nieuw leeg Rust-project".into();
@@ -1307,6 +1313,7 @@ impl SleufBaseApp {
                 }
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
+                self.show_map_actions(ui,ctx);
                 if ui.button("Locatie zoeken").clicked() {self.open_location();}
                 if ui.button("TIFF-adressen").clicked() {self.open_tiff_addresses();}
                 if ui.button("Export kaarten").clicked() {self.open_map_export();}
@@ -1456,6 +1463,7 @@ impl SleufBaseApp {
             ui.separator();
 
             self.show_point_controls(ui);
+            self.show_tiff_comment_controls(ui);
             if let Some(cache)=&self.jobs_cache {
                 ui.separator();
                 ui.heading("KickTheMap jobs (offline cache)");
@@ -1658,6 +1666,7 @@ impl SleufBaseApp {
         self.show_location(ctx);
         self.show_tiff_addresses(ctx);
         self.show_map_export(ctx);
+        self.show_tiff_comment_editor(ctx);
         if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
         if self.browser_ui.open {self.show_kickthemap_workspace(ctx);}
 

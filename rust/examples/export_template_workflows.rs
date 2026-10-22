@@ -106,9 +106,12 @@ fn main() -> Result<(), String> {
         ("ordered-variants", false, true, true),
         ("missing-measurements", false, false, false),
         ("selected-points", false, true, false),
+        ("tiff-comments", false, true, false),
     ] {
         inputs.rasters[0].metadata = if name == "selected-points" {
             serde_json::json!({"template_cross_section_start_point":{"x":10.,"y":0.},"template_reference_point":{"x":3.,"y":2.},"notes":"keep"})
+        } else if name=="tiff-comments" {
+            serde_json::json!({"tiff_comment_text":"TIFF Ø\n grondwater\nExtra\tdetail"})
         } else { serde_json::Value::Null };
         inputs.rasters[0].kickthemap_job_id = Some(if name == "missing-measurements" {
             999
@@ -131,6 +134,7 @@ fn main() -> Result<(), String> {
         if name == "selected-points" {
             state.rows[0].metadata=serde_json::json!({"template_cross_section_start_point":{"x":0.,"y":0.},"template_reference_point":{"x":99.,"y":99.}});
         }
+        if name=="tiff-comments" {state.rows[0].comments="Extra slot\nTIFF Ø".into();}
         if duplicates {
             let mut second = state.rows[0].clone();
             second.variant = "AUTO".into();

@@ -49,6 +49,48 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 22 oktober 2026: kaartacties en TIFF-opmerkingen
+
+- Kaartacties biedt nu de oorspronkelijke Wis opmerkingen en Wis alles.
+  Wissen van opmerkingen omvat vrije kaartnotities én opgeslagen TIFF-notities;
+  lagen en begin-/referentiepunten blijven behouden. Een no-op maakt het project
+  niet gewijzigd. Aan de geselecteerde TIFF zit een meerregelige editor met
+  opslaan, verwijderen en annuleren/Escape.
+- Wis alles leegt geladen objecten, TIFFs, CAD, virtuele sleuven, BGT/Kadaster,
+  notities, selectie en exportvolgorde. Projectnaam/opslaglocatie, instellingen,
+  aanmelding/jobs en oorspronkelijke bestanden blijven behouden; het lege project
+  is een wijziging die kan worden opgeslagen. Het oorspronkelijke JSON-archief
+  blijft als herkomstbewijs bestaan. Lopende exportworkers geven hun brondata
+  terug vóór wissen; de bestaande onopgeslagen-werkdialoog blijft gelden.
+  Generatie-/annuleerbewaking voorkomt hervullen door oude achtergrondresultaten.
+- Beide sjabloonroutes combineren kaartnotities en TIFF-notities bij het echte
+  affine beeldmiddelpunt, in de oorspronkelijke volgorde, met ruimtelijke filtering
+  en regel-/casefold-deduplicatie. Afzonderlijke vakspecifieke exportnotities volgen
+  daarna. Tekst wordt eenmaal per export voorbereid; grote losse kaartnotities
+  worden vóór kopiëren begrensd en TIFF-strings worden verplaatst. Limieten zijn
+  64 KiB voor nieuwe TIFF-notities en 16 MiB/100.000 gecombineerde exportnotities.
+- 54 oorspronkelijke edit-/annuleer-/wisbatches met 162 TIFF-notities en de echte
+  werkruimte-reset worden zonder app, instellingen of accounts vastgelegd.
+  Echte egui-klik-/Escapeproeven controleren editor/menu en behoud van brondata;
+  projectopslag, bewaarde bestandsbytes, late resultaten en workerannulering worden
+  afzonderlijk gecontroleerd. Geschreven projectuitvoer controleert de gedeelde
+  opmerkingen van de gepaarde Normaal/Reverse-export.
+- De uitvoercontrole vond dat geldige tabs binnen MTEXT-opmerkingen door Rust
+  werden afgewezen. De oude executable reproduceert de fout; ezdxf schrijft en
+  leest dezelfde tekst wel. MTEXT accepteert nu tabs, ook bij Unicode-chunkgrenzen;
+  ruwe regeleinden/NUL en tabs in eenregelige velden blijven ongeldig.
+  De volledige reeks slaagt met 505 tests (57 desktoptests), gevolgd door 76
+  gerichte eindcontroles en Clippy zonder nieuwe meldingen. De geoptimaliseerde
+  app en twee drivers bouwen. 73 verse oorspronkelijke batches/219 notities
+  slagen tegen de driver; echte CLI-proeven bewaren tabs in enkelvoudige en
+  gepaarde uitvoer, met CAD-audit en bescherming van eerdere bestanden.
+  Zeven echte workerexports leveren 16 blijvende PNGs en zeven Excel-overzichten;
+  oorspronkelijke notitietekst, datum/projectnaam en bestaande profiel-/beeld-
+  vergelijkingen slagen. De referentie reproduceert bytegelijk met een andere
+  Python-hashseed.
+  Vrije opmerkingen bewerken/slepen op de kaart, volledige legacy-instellingen
+  en echte UI-/project-/releaseacceptatie blijven open volgens PARITY.md.
+
 ## Voortgang 22 oktober 2026: begin- en referentiepunten
 
 - De GeoTIFF-lijst selecteert nu de laag voor referentie plaatsen/verplaatsen,

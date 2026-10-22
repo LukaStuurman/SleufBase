@@ -27,9 +27,11 @@ fn text_edits_keep_opaque_data_and_cannot_inject_tags() {
         let bytes = source(nl);
         let mut doc = Document::from_bytes(bytes, &AtomicBool::new(false)).unwrap();
         doc.replace_text("a", "Profiel Ø α").unwrap();
-        let text = "漢😀".repeat(333) + "\\Ptekst";
+        let text = "漢😀".repeat(125) + "\t" + &"漢😀".repeat(208) + "\\Ptekst\t";
         doc.replace_text("B", &text).unwrap();
         assert!(doc.replace_text("B", "bad\n0\nEOF").is_err());
+        assert!(doc.replace_text("B", "bad\0field").is_err());
+        assert!(doc.replace_text("A", "bad\tfield").is_err());
         assert!(doc.replace_text("B", &"x".repeat(1024 * 1024 + 1)).is_err());
         assert!(doc.replace_text("C", "wrong type").is_err());
         doc.replace_text("a", "Finale tekst").unwrap();
