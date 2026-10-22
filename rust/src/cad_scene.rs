@@ -96,6 +96,7 @@ struct Builder<'a> {
     attempts: usize,
     stack: Vec<String>,
     layers: BTreeMap<String, Arc<str>>,
+    block_items: BTreeMap<usize, Option<Arc<[usize]>>>,
     cancel: &'a std::sync::atomic::AtomicBool,
     warnings: BTreeSet<String>,
 }
@@ -244,6 +245,28 @@ impl Builder<'_> {
         }
         let invisible =
             source.color_aci < 0 || source.cad.as_deref().is_some_and(|p| p.is_hidden());
+        // Filter definitions once per physical source block, not once per
+        // MINSERT cell/nested reference. None keeps ordinary blocks allocation
+        // free. Overlay/scene Arcs retain these identities for this builder.
+        let block_id = Arc::as_ptr(&block) as usize;
+        let items = if let Some(cached) = self.block_items.get(&block_id) {
+            cached.clone()
+        } else {
+            let mut selected: Option<Vec<usize>> = None;
+            for (i, feature) in block.features.iter().enumerate() {
+                if i.is_multiple_of(1024) {
+                    crate::input::check(self.cancel)?;
+                }
+                if feature.entity_type == "ATTDEF" {
+                    selected.get_or_insert_with(|| (0..i).collect());
+                } else if let Some(indices) = &mut selected {
+                    indices.push(i);
+                }
+            }
+            let selected = selected.map(Arc::<[usize]>::from);
+            self.block_items.insert(block_id, selected.clone());
+            selected
+        };
         self.stack.push(key);
         let rows = if placement.row_spacing == 0. {
             1
@@ -268,7 +291,8 @@ impl Builder<'_> {
                     row,
                     column,
                 });
-                for index in 0..block.features.len() {
+                for item in 0..items.as_ref().map_or(block.features.len(), |v| v.len()) {
+                    let index = items.as_ref().map_or(item, |v| v[item]);
                     self.visit(
                         Source::Block(block.clone(), index),
                         matrix,
@@ -379,11 +403,14 @@ impl DxfOverlay {
             attempts: 0,
             stack: Vec::new(),
             layers: BTreeMap::new(),
+            block_items: BTreeMap::new(),
             cancel,
             warnings: BTreeSet::new(),
         };
         let mut warnings: BTreeSet<_> = layer_warnings.into_iter().collect();
-        if self.space_policy==crate::dxf_read::SpacePolicy::Legacy && self.source_features().next().is_some() {
+        if self.space_policy == crate::dxf_read::SpacePolicy::Legacy
+            && self.source_features().next().is_some()
+        {
             warnings.insert("Herlaad de DXF-bron: deze oude CAD-kopie bevat geen model-/papierruimte-informatie.".into());
         }
         for (index, source) in self.features.iter().enumerate() {

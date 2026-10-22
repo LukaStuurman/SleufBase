@@ -117,6 +117,7 @@ impl DxfFeature {
                 result.insert("Lettertype".into(),text.font.clone());
                 if let Some(attribute)=&text.attribute {
                     result.insert("Attribuutnaam".into(),attribute.tag.clone());
+                    if let Some(prompt)=&attribute.prompt {result.insert("Invoerprompt".into(),prompt.clone());}
                     result.insert("Attribuutvlaggen".into(),attribute.flags.to_string());
                     result.insert("Positie vergrendeld".into(),if attribute.lock_position {"Ja"}else{"Nee"}.into());
                 }

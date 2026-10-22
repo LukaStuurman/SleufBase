@@ -1,5 +1,7 @@
 //! One-line DXF TEXT source and native vector contours. Alignment follows
 //! ezdxf 1.4.4 addons/text2path.py (MIT, Manfred Moitzi); not fast-bbox corners.
+//! ATTDEF tag selection follows addons/drawing/text.py (MIT, Matthew Broadway,
+//! Copyright 2020-2023; see third_party/ezdxf-LICENSE.txt).
 use crate::{
     cad_geometry::{self as g, Affine},
     cad_text_path::{Path, MAX_CONTROLS},
@@ -27,6 +29,9 @@ pub struct Source {
 #[serde(deny_unknown_fields)]
 pub struct Attribute {
     pub tag: String,
+    /// Present for ATTDEF; the default value remains in Source.layout.content.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prompt: Option<String>,
     pub flags: u32,
     pub field_length: u32,
     pub lock_position: bool,
@@ -45,6 +50,7 @@ impl Attribute {
     }
     fn validate(&self) -> Result<(), String> {
         if self.tag.len() > 1_048_576
+            || self.prompt.as_ref().is_some_and(|p| p.len() > 1_048_576)
             || self.flags > 65535
             || self.field_length > 65535
             || !matches!(self.attribute_type, 1 | 2 | 4)
@@ -116,6 +122,9 @@ impl<'a> Renderer<'a> {
         }
     }
     pub fn prepare(&mut self, source: &mut Source) -> Result<(), String> {
+        self.prepare_as(source, false)
+    }
+    fn prepare_as(&mut self, source: &mut Source, definition: bool) -> Result<(), String> {
         source.validate()?;
         crate::input::check(self.cancel)?;
         if source
@@ -126,7 +135,15 @@ impl<'a> Renderer<'a> {
             source.contours = Path::default();
             return Ok(());
         }
-        let content = metrics::plain_text(&source.layout.content);
+        let content = metrics::plain_text(if definition {
+            &source
+                .attribute
+                .as_deref()
+                .ok_or("ATTDEF mist attribuutgegevens")?
+                .tag
+        } else {
+            &source.layout.content
+        });
         if content.is_empty() {
             source.contours = Path::default();
             return Ok(());
@@ -318,6 +335,7 @@ pub(crate) fn prepare_overlay(
         points: &mut usize,
         warnings: &mut std::collections::BTreeSet<String>,
         cancel: &AtomicBool,
+        in_block: bool,
     ) -> Result<(), String> {
         crate::input::check(cancel)?;
         let Some(cad) = feature.cad.as_deref_mut() else {
@@ -326,22 +344,33 @@ pub(crate) fn prepare_overlay(
         let Some(text) = cad.text.as_deref_mut() else {
             return Ok(());
         };
-        if text.attribute.as_deref().is_some_and(Attribute::multiline) && warnings.len() < 100 {
-            warnings.insert("ATTRIB: ingebouwde MTEXT bewaard; opmaak nog niet weergegeven".into());
-        }
         if let Some(style) = styles.get(&text.style.to_lowercase()) {
             text.font = style.font.clone();
             text.big_font = style.big_font.clone();
-            if style.vertical && warnings.len() < 100 {
+            if style.vertical
+                && !(in_block && feature.entity_type == "ATTDEF")
+                && warnings.len() < 100
+            {
                 warnings.insert("TEXT: verticale tekststijl nog niet toegepast".into());
             }
         } else {
             text.font = "txt".into();
         }
+        // The original virtual-entity route excludes ATTDEF from INSERTs.
+        // Preserve its source/style without resolving fonts or preparing ink.
+        if in_block && feature.entity_type == "ATTDEF" {
+            return Ok(());
+        }
+        if text.attribute.as_deref().is_some_and(Attribute::multiline) && warnings.len() < 100 {
+            warnings.insert(format!(
+                "{}: ingebouwde MTEXT bewaard; opmaak nog niet weergegeven",
+                feature.entity_type
+            ));
+        }
         if !text.big_font.is_empty() && warnings.len() < 100 {
             warnings.insert("TEXT: aanvullend BIGFONT nog niet toegepast".into());
         }
-        renderer.prepare(text)?;
+        renderer.prepare_as(text, feature.entity_type == "ATTDEF")?;
         let flattened = text.contours.flatten(
             Affine::IDENTITY,
             0.005,
@@ -353,11 +382,12 @@ pub(crate) fn prepare_overlay(
         cad.path_breaks = flattened.breaks;
         Ok(())
     }
-    for feature in overlay.features.iter_mut().chain(
+    for (feature, in_block) in overlay.features.iter_mut().map(|f| (f, false)).chain(
         overlay
             .blocks
             .values_mut()
-            .flat_map(|b| Arc::make_mut(b).features.iter_mut()),
+            .flat_map(|b| Arc::make_mut(b).features.iter_mut())
+            .map(|f| (f, true)),
     ) {
         prepare_one(
             feature,
@@ -366,6 +396,7 @@ pub(crate) fn prepare_overlay(
             &mut points,
             &mut warnings,
             cancel,
+            in_block,
         )?;
         if let Some(cad) = feature.cad.as_deref_mut() {
             for attribute in &mut cad.linked_attributes {
@@ -376,6 +407,7 @@ pub(crate) fn prepare_overlay(
                     &mut points,
                     &mut warnings,
                     cancel,
+                    false,
                 )?;
             }
         }

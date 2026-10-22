@@ -1,0 +1,28 @@
+{
+  "definitions": 10000,
+  "grid_cells": 20000,
+  "scene_nodes": 20000,
+  "scene_sha256": "783d58f24e9f85c99c59bae0496b212d5e3f8933c720f7f6296cfebaf88d8177",
+  "before_samples_seconds": [
+    0.5913755999645218,
+    0.6067437999881804,
+    0.6097792000509799
+  ],
+  "after_samples_seconds": [
+    0.11968199990224093,
+    0.11682049999944866,
+    0.12338830006774515
+  ],
+  "before_median_seconds": 0.6067437999881804,
+  "after_median_seconds": 0.11968199990224093,
+  "before_over_after": 5.069632864455666,
+  "driver_sha256": [
+    "d30f6b428993bdd1dc2eed0380077cce04489264cbe42e89abc97c87164b7edb",
+    "8e4878d049f47668f9c5e10c2f1ceba921fe0da041dd6d7fc7af9e910c10b2da"
+  ],
+  "date": "2026-10-22",
+  "scope": "Synthetic native DXF reader + scene + JSON-output component; not total application performance",
+  "build": "Rust 1.99.1 stable-x86_64-pc-windows-gnu, release thin LTO, codegen-units=1",
+  "baseline": "Same ATTDEF implementation with block_items index selection removed; per-instance ATTDEF filtering restored in isolated source copy",
+  "sampling": "One warmup per variant; three measured samples each with alternating order; identical scene bytes required"
+}

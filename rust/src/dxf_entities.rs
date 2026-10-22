@@ -483,13 +483,14 @@ impl Entities {
                 | "TRACE"
                 | "MESH"
                 | "TEXT"
+                | "ATTDEF"
         ) {
             *self.unsupported.entry(kind.to_owned()).or_default() += 1;
             return Ok(());
         }
         let mut feature = common(groups, kind)?;
         match kind {
-            "TEXT" => text(groups, kind, &mut feature)?,
+            "TEXT" | "ATTDEF" => text(groups, kind, &mut feature)?,
             "LINE" => {
                 feature.points = vec![g::vertex(point(groups, 10)?), g::vertex(point(groups, 11)?)]
             }
@@ -566,6 +567,7 @@ impl Entities {
             || (kind == "POINT" && feature.points.len() == 1)
             || feature.cad.as_deref().is_some_and(|p| p.mesh.is_some())
             || kind == "TEXT"
+            || kind == "ATTDEF"
         {
             self.append(feature)?;
             if kind == "INSERT" && crate::cad_space::attributes_follow(groups)? {
@@ -631,13 +633,19 @@ fn subclass<'a, 'b>(groups: &'a [Group<'b>], name: &str) -> &'a [Group<'b>] {
     }
 }
 fn text(groups: &[Group], kind: &str, feature: &mut DxfFeature) -> Result<(), String> {
-    let data = if kind == "ATTRIB" {
+    let attribute_class = if kind == "ATTDEF" {
+        "AcDbAttributeDefinition"
+    } else {
+        "AcDbAttribute"
+    };
+    let attributed = matches!(kind, "ATTRIB" | "ATTDEF");
+    let data = if attributed {
         subclass(groups, "AcDbText")
     } else {
         groups
     };
-    let attr = if kind == "ATTRIB" {
-        Some(subclass(groups, "AcDbAttribute"))
+    let attr = if attributed {
+        Some(subclass(groups, attribute_class))
     } else {
         None
     };
@@ -679,6 +687,7 @@ fn text(groups: &[Group], kind: &str, feature: &mut DxfFeature) -> Result<(), St
             });
         Some(Box::new(crate::cad_text::Attribute {
             tag: field(attr, 2).ok_or("DXF ATTRIB mist tagnaam")?.into(),
+            prompt: (kind == "ATTDEF").then(|| field(attr, 3).unwrap_or("").to_owned()),
             flags: integer(attr, 70, 0)?,
             field_length: integer(attr, 73, 0)?,
             lock_position: attr
@@ -688,7 +697,7 @@ fn text(groups: &[Group], kind: &str, feature: &mut DxfFeature) -> Result<(), St
                 .is_some_and(|g| g.value.trim() == "1"),
             attribute_type: if groups
                 .iter()
-                .any(|g| g.code == 100 && g.value == "AcDbAttribute")
+                .any(|g| g.code == 100 && g.value == attribute_class)
             {
                 u8::try_from(integer(attr, 71, 1)?).map_err(|_| "Ongeldig ATTRIB-type")?
             } else {
