@@ -29,6 +29,7 @@ def main():
             r['initial']['cap_height']*=1.+n%7*.13
             r['initial']['font_face']['family']=f'Fresh Font {n%17}'
             r['initial']['rgb']=[(n+23)%256,(n+37)%256,(n+61)%256]
+            r['initial']['paragraph']['tab_stops']=[1.3*(1+n%5*.07),'c2.5','r3']
     expected=[evaluate(r) for r in cases]
     with TemporaryDirectory(prefix='SleufBase-mtext-runtime-') as temp:
         root=Path(temp);source=root/'input.json';target=root/'actual.json'

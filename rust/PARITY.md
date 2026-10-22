@@ -48,10 +48,19 @@ zijn geen voorwaarde voor actieve productiepariteit.
 De native MTEXT-opmaakkern is nu als eerste rendercomponent beschikbaar:
 976 oorspronkelijke gevallen vergelijken 3467 tokens en volledige opmaakstaten.
 Woorden/ruimtes, breuken, font-/kleur-/alinea-/tab-/decoratiewissels blijven
-behouden, met gedeelde snapshots, annulering en limieten. Regel-/kolomlayout,
-tekstgeometrie en koppeling aan standalone/embedded CAD-bronnen, projecten en
+behouden, met gedeelde snapshots, annulering en limieten. De gemeten-celplaatsing
+is hieronder aangevuld. Fontmetingen/tekstgeometrie en koppeling aan CAD-bronnen, projecten en
 kaartweergave blijven vereist. De huidige desktop meldt MTEXT nog als
 onvolledig. Zie tests/fixtures/mtext; alle onderstaande gates blijven verplicht.
+
+De volledige gemeten-celplaatsing is nu de tweede native MTEXT-kern:
+regelafbreking/uitlijning, tablocks, begrensde lijm, breuken/decoraties,
+alinea-/kolomvoortzetting, marges en negen ankers. 369 oorspronkelijke
+layoutgevallen/8747 primitieve onderdelen vergelijken alle posities en
+volgorde. Gedeelde celbereiken, een hergebruikte tabindex en kolomhoogtesommen
+vermijden herhaald kopiëren/doorlopen. De font-/parserbrug, glyphcurves,
+CAD-/project-/embedded-bronnen en echte kaartweergave blijven noodzakelijke
+volgende stappen; volledige MTEXT is nog onvolledig. Zie tests/fixtures/mtext-layout.
 
 ## Verplichte go/no-go voorwaarden
 
