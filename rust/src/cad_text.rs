@@ -99,14 +99,11 @@ pub(crate) struct Style {
     pub big_font: String,
     pub vertical: bool,
 }
-type Glyph = (Path, f64);
 pub struct Renderer<'a> {
     catalog: &'a mut crate::dxf_fonts::Catalog,
     fonts: HashMap<String, Font>,
-    glyphs: HashMap<((u8, usize), char), Arc<Glyph>>,
-    cache_bytes: usize,
+    glyphs: crate::cad_glyphs::Cache,
     controls: usize,
-    work: usize,
     cancel: &'a AtomicBool,
 }
 impl<'a> Renderer<'a> {
@@ -114,10 +111,8 @@ impl<'a> Renderer<'a> {
         Self {
             catalog,
             fonts: HashMap::new(),
-            glyphs: HashMap::new(),
-            cache_bytes: 0,
+            glyphs: crate::cad_glyphs::Cache::default(),
             controls: 0,
-            work: 0,
             cancel,
         }
     }
@@ -159,65 +154,10 @@ impl<'a> Renderer<'a> {
         }
         let font = self.fonts.get_mut(&source.font).unwrap();
         let (_, fm) = font.measure("", source.layout.height, 1., self.cancel)?;
-        let mut path = Path::default();
         let available = MAX_CONTROLS.saturating_sub(self.controls);
-        let height = source.layout.height;
-        if font.kind() == "MonospaceFont" {
-            let w = content.chars().count() as f64 * height;
-            for (i, p) in [
-                [0., 0., 0.],
-                [w, 0., 0.],
-                [w, height, 0.],
-                [0., height, 0.],
-                [0., 0., 0.],
-            ]
-            .into_iter()
-            .enumerate()
-            {
-                path.push(if i == 0 { 0 } else { 1 }, &[p], available)?;
-            }
-        } else {
-            let id = font.source_id().ok_or("CAD-font mist bronidentiteit")?;
-            let mut offset = 0.;
-            for (i, ch) in content.chars().enumerate() {
-                self.work += 1;
-                if i.is_multiple_of(256) {
-                    crate::input::check(self.cancel)?;
-                }
-                let key = (id, ch);
-                let glyph = if let Some(g) = self.glyphs.get(&key) {
-                    g.clone()
-                } else {
-                    let (path, advance, work) = font.glyph_path(ch, self.cancel)?;
-                    self.work = self.work.saturating_add(work);
-                    let glyph = Arc::new((path, advance));
-                    let bytes = glyph.0.points.len() * 24 + glyph.0.kinds.len() + 128;
-                    if self.cache_bytes.saturating_add(bytes) <= 8 * 1024 * 1024
-                        && self.glyphs.len() < 8192
-                    {
-                        self.cache_bytes += bytes;
-                        self.glyphs.insert(key, glyph.clone());
-                    }
-                    glyph
-                };
-                if self.work > 20_000_000 {
-                    return Err("CAD-tekst overschrijdt glyph-werkbudget".into());
-                }
-                path.append(
-                    &glyph.0,
-                    Affine([
-                        [height, 0., 0., offset],
-                        [0., height, 0., 0.],
-                        [0., 0., 1., 0.],
-                    ]),
-                    available,
-                )?;
-                offset += glyph.1 * height;
-                if !offset.is_finite() {
-                    return Err("CAD-tekstlengte valt buiten getalbereik".into());
-                }
-            }
-        }
+        let mut path =
+            self.glyphs
+                .text(font, &content, source.layout.height, available, self.cancel)?;
         // An empty/space-only outline has no alignment box and no ink.
         if path.kinds.iter().all(|&k| k == 0) {
             source.contours = Path::default();

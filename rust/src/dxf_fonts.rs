@@ -21,6 +21,7 @@ const FALLBACKS: [&str; 7] = [
 #[derive(Debug)]
 struct Entry {
     path: PathBuf,
+    // Normalized once at indexing, never allocated again for each candidate.
     family: String,
     style: String,
     weight: u16,
@@ -126,12 +127,8 @@ fn metadata(path: &Path, used: &mut usize) -> Result<Entry, String> {
     let style = style.unwrap_or_default();
     Ok(Entry {
         path: path.to_owned(),
-        family: family.unwrap_or_default(),
-        style: if style == "Book" {
-            "Regular".into()
-        } else {
-            style
-        },
+        family: key(&family.unwrap_or_default()),
+        style: key(if style == "Book" { "Regular" } else { &style }),
         weight,
         width,
     })
@@ -295,14 +292,12 @@ impl Catalog {
                 .entries
                 .iter()
                 .enumerate()
-                .filter(|(_, e)| key(&e.family).starts_with(family))
+                .filter(|(_, e)| e.family.starts_with(family))
                 .collect::<Vec<_>>();
-            let has_shape = candidates
-                .iter()
-                .any(|(_, e)| key(&e.style).contains(".shx"));
+            let has_shape = candidates.iter().any(|(_, e)| e.style.contains(".shx"));
             if let Some((i, _)) = candidates
                 .into_iter()
-                .filter(|(_, e)| !has_shape || key(&e.style).contains(".shx"))
+                .filter(|(_, e)| !has_shape || e.style.contains(".shx"))
                 .min_by_key(|(_, e)| (e.weight.abs_diff(400), e.width.abs_diff(5)))
             {
                 return Some(i);
@@ -336,6 +331,76 @@ impl Catalog {
         FALLBACKS
             .iter()
             .find_map(|name| self.names.get(&key(name)).copied())
+    }
+    // The complete FontFace route differs from make_font(family): style is a
+    // substring filter, then weight/italic/width decide, with stable scan-order
+    // ties. A known filename wins even when all other face fields disagree.
+    fn select_face(&self, face: &crate::mtext::FontFace) -> Option<usize> {
+        if let Some(&i) = self.names.get(&key(&face.filename)) {
+            return Some(i);
+        }
+        let family = key(match face.family.as_ref() {
+            "serif" => "DejaVu Serif",
+            "sans-serif" => "DejaVu Sans",
+            "monospace" => "DejaVu Sans Mono",
+            family => family,
+        });
+        let style = key(&face.style);
+        let italic = style.contains("italic");
+        let mut best = None;
+        let mut best_style = None;
+        for (i, e) in self.entries.iter().enumerate() {
+            if !e.family.starts_with(&family) {
+                continue;
+            }
+            let entry_style = &e.style;
+            let score = (
+                e.weight.abs_diff(face.weight),
+                entry_style.contains("italic") != italic,
+                e.width.abs_diff(u16::from(face.width)),
+            );
+            if best.is_none_or(|(_, old)| score < old) {
+                best = Some((i, score));
+            }
+            if entry_style.contains(&style) && best_style.is_none_or(|(_, old)| score < old) {
+                best_style = Some((i, score));
+            }
+        }
+        best_style
+            .or(best)
+            .map(|(i, _)| i)
+            .or_else(|| self.ttf_fallback())
+    }
+    pub fn selected_face_path(&self, face: &crate::mtext::FontFace) -> Option<&Path> {
+        let i = self.select_face(face)?;
+        self.resolved
+            .get(&(i, true))
+            .copied()
+            .unwrap_or(Some(i))
+            .map(|i| self.entries[i].path.as_path())
+    }
+    /// Select the complete family/style/weight/width descriptor before loading
+    /// through the existing exact-filename factory and shared byte budget.
+    pub fn resolve_face(
+        &mut self,
+        face: &crate::mtext::FontFace,
+        cancel: &AtomicBool,
+    ) -> Result<Font, String> {
+        input::check(cancel)?;
+        if [&face.filename, &face.family, &face.style]
+            .iter()
+            .any(|s| s.len() > 32768)
+        {
+            return Err("CAD-fontbeschrijving is te lang".into());
+        }
+        let Some(i) = self.select_face(face) else {
+            return Ok(Font::monospace());
+        };
+        self.resolved.remove(&(i, true));
+        let result = self.resolve_file(i, true, cancel).map_err(String::from)?;
+        input::check(cancel)?;
+        self.resolved.insert((i, true), result.1);
+        Ok(result.0)
     }
     pub fn selected_path(&self, request: &str) -> Option<&Path> {
         if request == "*monospace" {

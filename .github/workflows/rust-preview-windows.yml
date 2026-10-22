@@ -475,6 +475,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_mtext_layout.py rust/target/release/examples/layout_mtext.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit composed MTEXT fonts, metrics and vector geometry
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_mtext_render_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/mtext-render
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --manifest-path rust/Cargo.toml --example render_mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_mtext_render.py rust/target/release/examples/render_mtext.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit vector CAD text and fresh font geometry
         shell: pwsh
         env:

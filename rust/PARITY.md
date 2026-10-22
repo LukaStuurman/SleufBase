@@ -49,7 +49,8 @@ De native MTEXT-opmaakkern is nu als eerste rendercomponent beschikbaar:
 976 oorspronkelijke gevallen vergelijken 3467 tokens en volledige opmaakstaten.
 Woorden/ruimtes, breuken, font-/kleur-/alinea-/tab-/decoratiewissels blijven
 behouden, met gedeelde snapshots, annulering en limieten. De gemeten-celplaatsing
-is hieronder aangevuld. Fontmetingen/tekstgeometrie en koppeling aan CAD-bronnen, projecten en
+is hieronder aangevuld. De samengestelde font-/tekstgeometriekern staat hieronder;
+koppeling aan CAD-bronnen, projecten en
 kaartweergave blijven vereist. De huidige desktop meldt MTEXT nog als
 onvolledig. Zie tests/fixtures/mtext; alle onderstaande gates blijven verplicht.
 
@@ -58,9 +59,20 @@ regelafbreking/uitlijning, tablocks, begrensde lijm, breuken/decoraties,
 alinea-/kolomvoortzetting, marges en negen ankers. 369 oorspronkelijke
 layoutgevallen/8747 primitieve onderdelen vergelijken alle posities en
 volgorde. Gedeelde celbereiken, een hergebruikte tabindex en kolomhoogtesommen
-vermijden herhaald kopiëren/doorlopen. De font-/parserbrug, glyphcurves,
-CAD-/project-/embedded-bronnen en echte kaartweergave blijven noodzakelijke
-volgende stappen; volledige MTEXT is nog onvolledig. Zie tests/fixtures/mtext-layout.
+vermijden herhaald kopiëren/doorlopen. De font-/parserbrug en glyphcurves zijn
+hieronder aangevuld. CAD-/project-/embedded-bronnen en echte kaartweergave blijven
+noodzakelijke volgende stappen; volledige MTEXT is nog onvolledig. Zie tests/fixtures/mtext-layout.
+
+De complexe MTEXT-tekstroute verbindt nu parser, volledige fontbeschrijving,
+echte woord-/spatiematen, celplaatsing en vectorcontouren/decoraties.
+167 oorspronkelijke fontkeuzes en 123 samengestelde teksten controleren de keten;
+50 afwijkende oude resultaten blijven expliciet bewaard bij correcties voor vet
+en tegenstrijdige fontkeuze tussen meten en tekenen. Gedeelde fontnamen, fysieke
+glyphs en tabarrays vermijden herhaald werk; 3000 alinea's delen 20.000 tabstops.
+De eenvoudige MTEXT-route, automatische breedte, DXF-/embedded-bronnen,
+kleur-/laag-/project-/scène-/kaartkoppeling, achtergronden/vlakvulling en echte
+CAD-acceptatie blijven vereist. De desktop meldt MTEXT nog als onvolledig.
+Zie tests/fixtures/mtext-render; alle onderstaande gates blijven verplicht.
 
 ## Verplichte go/no-go voorwaarden
 

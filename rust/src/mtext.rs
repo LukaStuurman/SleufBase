@@ -33,7 +33,7 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FontFace {
     pub filename: Arc<str>,
