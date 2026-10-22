@@ -188,12 +188,25 @@ pub fn composite(
 /// White-mask and force-opacity contract of DXF template MapExporter.
 pub fn paint(
     destination: &mut RgbaImage,
-    mut source: RgbaImage,
+    source: RgbaImage,
     transform: GeoTransform,
     layout: &Layout,
     cancel: &AtomicBool,
 ) -> Result<(), String> {
+    paint_with_opacity(destination,source,transform,layout,1.,cancel)
+}
+pub fn paint_with_opacity(
+    destination: &mut RgbaImage,
+    mut source: RgbaImage,
+    transform: GeoTransform,
+    layout: &Layout,
+    opacity:f64,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
     input::check(cancel)?;
+    if !opacity.is_finite() || !(0.0..=1.0).contains(&opacity) {
+        return Err("Ongeldige TIFF-dekking".into());
+    }
     if destination.dimensions() != (layout.map_size[0], layout.map_size[1])
         || layout.map_size.contains(&0)
         || [
@@ -265,6 +278,8 @@ pub fn paint(
         }
         if p[0].min(p[1]).min(p[2]) >= 245 {
             p[3] = 0;
+        } else if opacity<1. {
+            p[3]=(f64::from(p[3])*opacity) as u8;
         }
     }
     if transform.b.abs() <= 1e-9 && transform.d.abs() <= 1e-9 {

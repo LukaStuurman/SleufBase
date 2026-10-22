@@ -14,6 +14,7 @@ De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
 - Locatiezoeker met PDOK-adres-/plaats-/wegsuggesties, RD/GPS-invoer, Ctrl+L, toetsenbordkeuze en tijdelijke markering. Springen werkt ook zonder geladen bestanden; de oorspronkelijke schaal en PDOK-luchtfoto volgen de gekozen locatie. Zoeken gebruikt één begrensde achtergrondworker en overschrijft geen projectdata. Zie [de onafhankelijke locatiecontroles](tests/fixtures/location/README.md).
 - Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
+- **Export kaarten** maakt afzonderlijke A4-PNGs van alle geladen TIFFs, met instelbare DPI/schaal, PDOK/OSM/offline achtergrond, optionele zichtbare CAD-lagen en oorspronkelijke 70% TIFF-dekking. Dubbele bestandsnamen krijgen volgnummers; late tekenfouten laten eerdere uitvoer intact. De bestaande exportworker geeft voortgang/annulering en alle bronnen terug. Kadaster als kaartachtergrond en volledige provider-/rasterbediening blijven open. Zie [de zelfstandige kaartcontroles](tests/fixtures/map-batch/README.md).
 - TIFF-adressenoverzicht met oorspronkelijke bronvolgorde, adres/afstand, kopiëren met of zonder bestandsnaam, vernieuwen en annuleren. Eén hergebruikte achtergrondworker houdt de kaart bedienbaar; projectwisseling onderdrukt oude resultaten en rasterpixels worden niet gekopieerd. Zie [de oorspronkelijke rij- en clipboardcontroles](tests/fixtures/raster-addresses/README.md).
 - Instelbare objectregels voor kaartkleuren, disciplineoverzicht, Excel en DXF; standaardvolgorde en kleuren uit Python.
 - Excel (.xlsx) export met oranje opmaak, vaste koprij, filter en totaalregel; gedeelde disciplinenamen tellen samen.
@@ -531,7 +532,7 @@ inhoud, beeldpixels, gekoppelde onderdelen en resterende grenzen.
 ## Wat nog ontbreekt
 
 1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.
-2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows, StreetSmart en kaartreprojectie.
+2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows en kaartreprojectie.
 3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, verdere fontvarianten en SHX/LFF-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
 4. Resterende Python-toolset/kaartplaatsing en exacte rastermaskers voor virtuele sleuven/MarXact (native editor en eigen raster zijn aanwezig), volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
 5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.

@@ -144,6 +144,7 @@ fn main() -> Result<(), String> {
                     options: Default::default(),
                     template: Some(Box::new(state.clone())),
                     discipline_excel: true,
+                    maps: None,
                 },
             )
             .map_err(|e| e.message.clone())?;

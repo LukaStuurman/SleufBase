@@ -77,6 +77,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: Some(Box::new(state.clone())),
+            maps: None,
             discipline_excel: self.migrated_settings.template_auto_export_discipline_excel,
         };
         if self.start_export(request, false) {
@@ -118,7 +119,7 @@ impl SleufBaseApp {
         self.overlays = inputs.overlays;
         self.comments = inputs.comments;
     }
-    fn start_export(&mut self, request: Request, overlay: bool) -> bool {
+    pub(super) fn start_export(&mut self, request: Request, overlay: bool) -> bool {
         if self.export_intent.is_some() || self.template_job.is_some() {
             self.message = "Er loopt al een export".into();
             return false;
@@ -174,6 +175,7 @@ impl SleufBaseApp {
             extra_layers: false,
             options: self.migrated_settings.object_dxf_options(),
             template: None,
+            maps: None,
             discipline_excel: false,
         };
         self.start_export(request, false);
@@ -194,6 +196,7 @@ impl SleufBaseApp {
             extra_layers: dialog.extra_layers,
             options: dialog.options(),
             template: None,
+            maps: None,
             discipline_excel: false,
         };
         self.start_export(request, action.overlay);
@@ -281,7 +284,7 @@ impl SleufBaseApp {
                     "Annuleren wordt afgerond…"
                 } else {
                     match stage {
-                        Stage::Preparing => "Objecten verzamelen…",
+                        Stage::Preparing => "Export voorbereiden…",
                         Stage::Planning => "Geometrie en rapport voorbereiden…",
                         Stage::Writing => "Bestand schrijven…",
                         Stage::Publishing => "Bestand definitief opslaan…",

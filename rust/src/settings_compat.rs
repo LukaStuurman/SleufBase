@@ -12,6 +12,8 @@ use tempfile::NamedTempFile;
 
 #[derive(Clone,Debug,Serialize,Deserialize,PartialEq)]
 pub struct MigratedSettings {
+    #[serde(default)]
+    pub map_export:crate::map_batch::Settings,
     #[serde(default="default_label_gap")]
     pub dxf_label_gap:f64,
     #[serde(default="crate::rule_settings::defaults")]
@@ -25,6 +27,7 @@ pub struct MigratedSettings {
 impl Default for MigratedSettings {
     fn default()->Self {
         Self {
+            map_export:Default::default(),
             dxf_label_gap:default_label_gap(),
             object_rules:crate::rule_settings::defaults(),
             template_auto_fill_bgt_fysiek_voorkomen:true,
@@ -44,6 +47,7 @@ impl MigratedSettings {
         crate::object_dxf::Options{label_gap:self.dxf_label_gap,..Default::default()}
     }
     fn validate(&self)->Result<(),String> {
+        self.map_export.validate()?;
         crate::rule_settings::validate(&self.object_rules)?;
         if !self.dxf_label_gap.is_finite() || !(0.0..=100.).contains(&self.dxf_label_gap) {
             return Err("DXF-labelafstand moet tussen 0 en 100 meter liggen".into());
@@ -97,6 +101,13 @@ pub fn from_legacy_json(content:&str)->Result<MigratedSettings,String> {
         .map_err(|e|format!("Instellingen JSON ongeldig: {e}"))?;
     let obj=value.as_object().ok_or("Instellingen moeten een JSON-object zijn")?;
     Ok(MigratedSettings{
+        map_export:crate::map_batch::Settings{
+            background:obj.get("map_export_background_source").and_then(Value::as_str)
+                .filter(|s|matches!(*s,"pdok"|"osm"|"cadastral"))
+                .unwrap_or("pdok").to_owned(),
+            include_cad:boolean(obj.get("include_klic_in_map_exports"),false),
+            ..Default::default()
+        },
         dxf_label_gap:label_gap(obj.get("dxf_label_gap")),
         object_rules:crate::rule_settings::from_legacy(obj.get("kickthemap_object_layer_rules"))?,
         template_auto_fill_bgt_fysiek_voorkomen:boolean(

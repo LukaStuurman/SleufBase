@@ -107,6 +107,9 @@ fn check_bounds(b: Bounds, width: u32, height: u32) -> Result<(), String> {
     {
         return Err("OSM-kaart overschrijdt het rasterbudget".into());
     }
+    check_extent(b)
+}
+fn check_extent(b:Bounds)->Result<(),String>{
     if ![b.min_x, b.min_y, b.max_x, b.max_y].iter().all(|n| n.is_finite())
         || b.min_x >= b.max_x || b.min_y >= b.max_y
         || b.min_x < -50_000.0 || b.max_x > 350_000.0
@@ -118,6 +121,9 @@ fn check_bounds(b: Bounds, width: u32, height: u32) -> Result<(), String> {
 }
 fn grid_for(b: Bounds, width: u32, height: u32) -> Result<Grid, String> {
     check_bounds(b, width, height)?;
+    choose_grid(b,width,height)
+}
+fn choose_grid(b:Bounds,width:u32,height:u32)->Result<Grid,String>{
     let (center_lat, _) = rd_to_wgs84((b.min_x + b.max_x) * 0.5, (b.min_y + b.max_y) * 0.5);
     let meters_per_pixel = ((b.max_x - b.min_x) / f64::from(width))
         .max((b.max_y - b.min_y) / f64::from(height));
@@ -260,6 +266,20 @@ pub fn request_map_with_cancel(bounds: Bounds, width: u32, height: u32,
     cache_dir: &Path, cancel: &AtomicBool) -> Result<OsmRaster, String>
 {
     let grid = grid_for(bounds, width, height)?;
+    request_grid(bounds,width,height,grid,cache_dir,cancel)
+}
+/// Full export resolution, still at most 24 on-demand server tiles. Desktop
+/// preview budgets stay unchanged; no extra network area is prefetched.
+pub fn request_export_map_with_cancel(bounds:Bounds,width:u32,height:u32,cache_dir:&Path,cancel:&AtomicBool)->Result<OsmRaster,String>{
+    input::check(cancel)?;
+    if width==0||height==0||width>10_000||height>10_000||u64::from(width)*u64::from(height)>50_000_000{
+        return Err("OSM-exportkaart overschrijdt het rasterbudget".into());
+    }
+    check_extent(bounds)?;
+    let grid=choose_grid(bounds,width,height)?;
+    request_grid(bounds,width,height,grid,cache_dir,cancel)
+}
+fn request_grid(bounds:Bounds,width:u32,height:u32,grid:Grid,cache_dir:&Path,cancel:&AtomicBool)->Result<OsmRaster,String>{
     input::check(cancel)?;
     let client = reqwest::blocking::Client::builder()
         .timeout(Duration::from_secs(15))
@@ -283,6 +303,22 @@ pub fn request_map_with_cancel(bounds: Bounds, width: u32, height: u32,
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn full_a4_export_reuses_cached_tiles_beyond_desktop_preview_budget(){
+        let bounds=Bounds{min_x:154980.,min_y:462980.,max_x:155040.,max_y:463020.};
+        let [width,height]=[3344,2316];
+        assert!(check_bounds(bounds,width,height).is_err());
+        let grid=choose_grid(bounds,width,height).unwrap();assert!(grid.count()<=MAX_TILES);
+        let dir=tempfile::tempdir().unwrap();let color=[29,44,61,255];
+        let image=image::DynamicImage::ImageRgba8(RgbaImage::from_pixel(256,256,image::Rgba(color)));
+        let mut png=Vec::new();image.write_to(&mut std::io::Cursor::new(&mut png),ImageFormat::Png).unwrap();
+        for id in grid.ids(){store(&id.path(dir.path()),&png);}
+        let map=request_export_map_with_cancel(bounds,width,height,dir.path(),&AtomicBool::new(false)).unwrap();
+        assert!(!map.stale_cache);assert_eq!(map.rgba.len(),width as usize*height as usize*4);
+        assert!(map.rgba.as_chunks::<4>().0.iter().all(|p|*p==color));
+        assert!(request_export_map_with_cancel(bounds,10001,1,dir.path(),&AtomicBool::new(false)).is_err());
+        assert!(request_export_map_with_cancel(bounds,width,height,dir.path(),&AtomicBool::new(true)).is_err());
+    }
     #[test]
     fn rd_reference_and_zoom_tile_are_finite() {
         let (lat, lon) = rd_to_wgs84(155_000.0, 463_000.0);

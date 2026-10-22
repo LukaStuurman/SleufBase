@@ -27,6 +27,7 @@ pub enum Kind {
     Dxf,
     Xlsx,
     Template,
+    Maps,
 }
 pub struct Request {
     pub kind: Kind,
@@ -37,6 +38,7 @@ pub struct Request {
     pub options: Options,
     pub template: Option<Box<crate::template_order::State>>,
     pub discipline_excel: bool,
+    pub maps: Option<crate::map_batch::Settings>,
 }
 #[derive(Debug)]
 pub struct Exported {
@@ -68,6 +70,12 @@ pub struct Exporter {
 #[doc(hidden)]
 pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<Exported, String> {
     control.check()?;
+    if request.kind == Kind::Maps {
+        let settings=request.maps.as_ref().ok_or("Kaartinstellingen ontbreken")?;
+        let paths=crate::map_batch::export(&request.path,settings,inputs,control)?;
+        return Ok(Exported{skipped:Vec::new(),companion:None,
+            warnings:vec![format!("{} kaart(en) geëxporteerd.",paths.len())]});
+    }
     if request.kind == Kind::Template {
         let state = request
             .template
@@ -130,7 +138,7 @@ pub fn process(inputs: &Inputs, request: &Request, control: &Control) -> Result<
             &request.rules,
             control,
         )?,
-        Kind::Template => unreachable!("handled before object selection"),
+        Kind::Template | Kind::Maps => unreachable!("handled before object selection"),
     }
     Ok(Exported {
         skipped: prepared.skipped,
@@ -273,6 +281,7 @@ mod tests {
             extra_layers: false,
             options: Default::default(),
             template: None,
+            maps: None,
             discipline_excel: false,
         }
     }

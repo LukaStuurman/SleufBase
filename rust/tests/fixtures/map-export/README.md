@@ -40,6 +40,9 @@ offline tests verify all pixels across six tiles, errors and cancellation.
 Map preparation is connected to template CLI/publication and the native ordering
 dialog/worker. Photo/virtual assets, background-provider/cache parity, exact CAD text rendering
 and real-project acceptance remain open in the global PARITY checklist.
+Standalone Export kaarten now uses the same renderer with the original 70% TIFF
+opacity and RGB/DPI PNG output; see [batch/UI/rollback checks](../map-batch/README.md).
+Template maps keep their opaque default.
 
 Local verification: 297 Rust tests, release audit with 66,667 exact RGBA pixels
 and 53,095 additional CLI map-interior pixels; two byte-identical regenerations

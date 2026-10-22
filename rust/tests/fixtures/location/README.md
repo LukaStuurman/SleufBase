@@ -55,4 +55,4 @@ Use Python 3.11 and pyproj 3.7.1 for the independent oracle. Set
 changes the random seed and generates new coordinate/service documents.
 Reverse lookup now also drives the native TIFF-address overview and its original
 clipboard actions; see [the batch and UI checks](../raster-addresses/README.md).
-Standalone map export, StreetSmart and full settings/project acceptance remain open.
+Remaining standalone map providers and full settings/project acceptance remain open.

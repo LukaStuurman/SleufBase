@@ -89,6 +89,26 @@ pub(crate) fn line(
         *budget = budget
             .checked_sub(cost)
             .ok_or("Kaartlijnen overschrijden het tekenbudget")?;
+        // Pillow's even-width axis-aligned strokes lie on the positive side
+        // when drawn forwards, negative side backwards. They have flat ends;
+        // a square brush at every Bresenham point extends and shifts the line.
+        if dx>0 && dy==0 || dx==0 && dy<0 {
+            let forward=if dx>0{x<ex}else{y<ey};
+            let low=if forward{-((width as i32-1)/2)}else{-(width as i32/2)};
+            let high=low+width as i32-1;
+            if dx>0 {
+                for px in x.min(ex)..=x.max(ex){
+                    if px%256==0{crate::input::check(cancel)?;}
+                    for offset in low..=high{pixel(image,px,y+offset,color,false);}
+                }
+            }else{
+                for py in y.min(ey)..=y.max(ey){
+                    if py%256==0{crate::input::check(cancel)?;}
+                    for offset in low..=high{pixel(image,x+offset,py,color,false);}
+                }
+            }
+            continue;
+        }
         let low = -(width as i32 / 2);
         let high = low + width as i32 - 1;
         let mut steps = 0u32;
@@ -190,6 +210,17 @@ fn clip(a: [f64; 2], b: [f64; 2], bounds: [f64; 4]) -> Option<[[f64; 2]; 2]> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn original_pillow_even_odd_and_reversed_axis_strokes_have_exact_pixels(){
+        let cases:serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/map-batch/axis-strokes.json")).unwrap();
+        for case in cases.as_array().unwrap(){
+            let mut image=RgbaImage::new(20,20);
+            let points:Vec<[f64;2]>=serde_json::from_value(case["points"].clone()).unwrap();
+            line(&mut image,&points,case["width"].as_u64().unwrap() as u32,[19,70,130,190],&AtomicBool::new(false),&mut 100_000).unwrap();
+            let actual=(0..20).flat_map(|y|(0..20).map(move |x|[x,y])).filter(|p|image.get_pixel(p[0],p[1])[3]>0).collect::<Vec<_>>();
+            assert_eq!(serde_json::to_value(actual).unwrap(),case["pixels"],"{case}");
+        }
+    }
     #[test]
     fn huge_lines_are_clipped_and_work_or_cancellation_limits_precede_drawing() {
         let mut image = RgbaImage::new(64, 32);

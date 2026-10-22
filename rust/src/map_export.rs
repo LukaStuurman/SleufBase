@@ -45,6 +45,8 @@ pub struct Source {
     /// By default use tiff above, or the slot's unrotated full-resolution TIFF.
     /// An image-only/vector map must explicitly opt out rather than omit a TIFF.
     pub include_tiff: bool,
+    /// Template maps default to opaque TIFFs; standalone maps retain 70%.
+    pub tiff_opacity: f64,
     pub overlays: Arc<Vec<Stroke>>,
     pub attribution: Option<String>,
     /// Already in displayed RD coordinates. None inherits the measured profile.
@@ -58,6 +60,7 @@ impl Default for Source {
             background: Background::default(),
             tiff: None,
             include_tiff: true,
+            tiff_opacity: 1.,
             overlays: Arc::new(Vec::new()),
             attribution: None,
             reference: None,
@@ -97,6 +100,9 @@ impl Source {
         result
     }
     fn validate(&self) -> Result<(), String> {
+        if !self.tiff_opacity.is_finite() || !(0.0..=1.0).contains(&self.tiff_opacity) {
+            return Err("Ongeldige TIFF-dekking voor kaartuitvoer".into());
+        }
         if self.overlays.len() > 200_000
             || self.overlays.iter().map(|s| s.points.len()).sum::<usize>() > 2_000_000
         {
@@ -298,7 +304,7 @@ impl Renderer {
                     )
                 }
             };
-            map_raster::paint(&mut map, image, transform, &layout, cancel)?;
+            map_raster::paint_with_opacity(&mut map, image, transform, &layout, source.tiff_opacity, cancel)?;
         }
         overlays(&mut map, source, &layout, cancel)?;
         let mut image = crate::raster_rotation::allocate(layout.page_size[0], layout.page_size[1])?;

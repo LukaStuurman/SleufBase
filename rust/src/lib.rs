@@ -62,6 +62,7 @@ pub mod map_text;
 pub mod map_page;
 pub mod map_raster;
 pub mod map_export;
+pub mod map_batch;
 pub mod template_pages;
 pub mod cad;
 mod cad_layers;

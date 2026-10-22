@@ -46,7 +46,7 @@ fn main() -> Result<(), String> {
                     rules: RULES.to_vec(),
                     extra_layers: false,
                     options: case.options,
-                    template:None,discipline_excel:false,
+                    template:None,discipline_excel:false,maps:None,
                 },
             )?;
             continue;
@@ -126,7 +126,7 @@ fn main() -> Result<(), String> {
                 rules: RULES.to_vec(),
                 extra_layers: true,
                 options: Default::default(),
-                template:None,discipline_excel:false,
+                template:None,discipline_excel:false,maps:None,
             },
         )?;
     } else {

@@ -75,6 +75,7 @@ fn request(path: PathBuf, state: State) -> Request {
         extra_layers: false,
         options: Default::default(),
         template: Some(Box::new(state)),
+        maps: None,
         discipline_excel: false,
     }
 }

@@ -14,6 +14,12 @@ functie-, integriteits-, migratie-, praktijk- of leveringsvoorwaarden hieronder.
 Aanvullende gebruikerswens: projectnaam invoeren in het DXF-sjabloonexportvenster
 en automatisch de lokale exportdatum op ieder gebruikt blad invullen.
 
+Scopewijziging op gebruikersverzoek van 22 oktober 2026: de Cyclomedia-
+kaartachtergrond en het StreetSmart-streetviewvenster vervallen voor de Rust-versie.
+Ze tellen niet meer mee als ontbrekende functies of releasevoorwaarden. Oude
+achtergrondvoorkeuren worden bij migratie naar de standaard PDOK omgezet;
+oorspronkelijke Python-referenties blijven als bewijs ongewijzigd.
+
 Broncontrole van het **actieve** exportcontract: `__init__.py` installeert V9,
 maar niet `template_dynamic_profile_leader_patch`. De expliciete regressies in
 `tests/test_profile_leader_v0310_behavior.py` vereisen de oorspronkelijke
@@ -35,13 +41,58 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
    Geometrische vergelijkingen met Python en echte CAD-bestanden zijn vereist.
 4. **Raster en kaarten**: begrensde strip-/tegeldecodering, kleur/alpha/hoogte,
    pyramides, WMS/WMTS/OSM en offline caches; ruimtelijke juistheid en geheugen meten.
-5. **Externe diensten**: KickTheMap browserauth/herstel/fallbacks, StreetSmart,
+5. **Externe diensten**: KickTheMap browserauth/herstel/fallbacks,
    AHN-profielen en AI-workflows. Native netwerkcode met lokale foutscenario-tests;
    accountgebonden acceptatie apart aantonen met een beschikbare sessie.
 6. **Dagelijkse bediening en instellingen**: alle menu's, shortcuts, drag/drop,
    objectbewerking, disciplines/Excel, configuratie en foutmeldingen.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
+
+## Voortgang 22 oktober 2026: zelfstandige kaartenexport
+
+- De oorspronkelijke menuactie Export kaarten heeft nu een eigen native venster:
+  alle geladen TIFFs in bronvolgorde, A4-PNG, schaal/DPI, PDOK/OSM/offline,
+  zichtbare CAD-keuze, voortgang/annulering en opgeslagen/migreerbare voorkeuren.
+  De bestaande exportworker neemt de echte bronvectors in eigendom en geeft ze
+  terug voordat een uitgestelde projectwisseling doorgaat. Export wijzigt het
+  project niet. De Kadaster-keuze blijft herkenbaar bewaard maar is
+  nog niet uitvoerbaar; volledige provider/cache-/rasterbediening blijft open.
+- De zelfstandige oorspronkelijke route gebruikt maximaal 70% TIFF-dekking;
+  sjabloonkaarten behouden 100%. RGB wordt per rij geschreven met echte pHYs-
+  resolutie, zonder tweede volledige RGB-pagina. Zes oorspronkelijke PNGs met
+  verschillende DPI/schaal/affine ligging leveren 2400 pixelreferenties.
+- De oorspronkelijke fout met gelijke TIFF-stammen is apart bewaard: twee bronnen
+  overschrijven hetzelfde PNG-bestand. Native uitvoer gebruikt unieke namen, ook
+  bij Windows-hoofdletterbotsingen; bestaande legacy-PDFs worden behouden.
+- Alle pagina's worden voorbereid/geflusht voordat eerdere PNGs worden vervangen.
+  Late tekenfouten, annulering en bronpadconflicten behouden eerdere uitvoer.
+  Publicatiefouten draaien eerdere vervangingen terug. Bij een mislukte terugzetactie
+  blijven oorspronkelijke bytes en een bestemmingsmanifest in een gemelde herstelmap.
+  Dit bewijst geen crash-atomaire publicatie van meerdere losse bestanden.
+- De onafhankelijke pixelcontrole vond een één-pixelverschuiving en verlengde
+  uiteinden bij even brede rechte kaartlijnen. De correctie volgt tekenrichting
+  en Pillow-pixelgrenzen; twintig afzonderlijke oorspronkelijke strookmaskers
+  controleren even/oneven breedtes en omgekeerde lijnen.
+- De review vond ook dat de bestaande OSM-previewlimiet een standaard 300-DPI-
+  export zou afwijzen. De aparte exportopdracht gebruikt nu het begrensde
+  paginabudget en dezelfde maximaal 24 opgevraagde tegels; de previewlimiet
+  blijft staan. Een volledige 3344×2316-kaart wordt uit een eigen tijdelijke
+  tegelcache opgebouwd en op alle pixels gecontroleerd, zonder netwerkverkeer.
+- Zie tests/fixtures/map-batch voor oorspronkelijke uitvoercontracten,
+  echte GUI-/worker-/CAD-/projectwisselproeven en geoptimaliseerde runtime-audit.
+  De volledige regressiereeks slaagt na de scopewijziging met 487 tests,
+  inclusief 49 desktoptests; de oorspronkelijke template-/kaarttests slagen mee.
+  De geoptimaliseerde app en beide kaartdrivers bouwen. Zes verse pagina's met
+  gewijzigde TIFF-pixels/hoeken en 2400 nieuwe pixels slagen tegen de echte driver.
+  De bestaande audit slaagt opnieuw voor 66.667 exacte RGBA-pixels, twaalf
+  tekenplannen, 41.915 virtuele kaartpixels en 53.095 pixels van de echte
+  sjabloon-CLI met profiel/datum/projectnaam. De live PDOK-kaartproef met een oude
+  Cyclomedia-voorkeur levert via de nieuwe migratie een RGB/DPI-A4-PNG; 140.570
+  pixels verschillen van dezelfde witte offline kaart. De nieuwe referenties
+  reproduceren bytegelijk met een andere Python-hashseed.
+  Volledige instellingen, diensten, echte projecten en uiteindelijke levering
+  blijven vereist volgens PARITY.md.
 
 ## Voortgang 22 oktober 2026: TIFF-adressenoverzicht
 
@@ -66,7 +117,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   Een echte PDOK-batch voor twee openbare proefcoördinaten levert beide adressen in
   bronvolgorde. De nieuwe referentie reproduceert bytegelijk met een andere hashseed.
   Zie tests/fixtures/raster-addresses voor de afzonderlijke contracten en audits.
-- Zelfstandige kaartexport, resterende menu's/voorkeuren, StreetSmart/AI,
+- Zelfstandige kaartexport, resterende menu's/voorkeuren, AI,
   volledige project-/praktijkacceptatie en levering blijven vereist.
 
 ## Voortgang 22 oktober 2026: oorspronkelijke locatiebediening
@@ -103,7 +154,7 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   notices worden met EXE/portable preview meegeleverd en via --licenses getoond.
 - Reverse-lookup is geport en is inmiddels gekoppeld aan TIFF-adressen/kopiëren
   (zie de voortgang hierboven). Zelfstandige kaartexport, resterende menu's/
-  voorkeuren, StreetSmart/AI, volledige projectacceptatie en levering blijven nodig.
+  voorkeuren, AI, volledige projectacceptatie en levering blijven nodig.
   Zie tests/fixtures/location.
 
 ## Voortgang 22 oktober 2026: gewone MTEXT-kleuren

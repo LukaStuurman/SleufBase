@@ -18,13 +18,13 @@ te controleren; deze inventaris pretendeert geen volledige acceptatie.
 | Laad GeoTIFF(s), laad KLIC DXF, zoom naar alles | Native workers en kaart; volledige rastermodi/resoluties, rotatiebediening en praktijkacceptatie blijven open |
 | Locatie | Adres-/plaats-/wegzoeken, RD/GPS, suggesties, toetsenbord, tijdelijke markering, typegebonden schaal en luchtfoto zijn aangesloten; onafhankelijke coördinaat-/provider- en echte egui-proeven |
 | Toon TIFF-adressen | Native overzicht met bronvolgorde, eerste adres/afstand, fout-/leegmeldingen, voortgang/annulering, vernieuwen en beide oorspronkelijke kopieeracties; oorspronkelijke rij-/clipboardcontracten en echte GeoTIFF-/egui-/projectwisselproeven controleren de koppeling |
-| Export kaarten | Native kaart-/rasterexport is beschikbaar in sjabloonketens; volledige gelijkwaardige zelfstandige kaart-exportbediening blijft open |
+| Export kaarten | Zelfstandig exportvenster voor alle geladen TIFFs, oorspronkelijke A4/RGB/DPI/70%-dekking, PDOK/OSM/offline, CAD-keuze, voortgang/annulering, hergebruikte worker en bronteruggave; dubbele namen en late fouten beschermd. De oorspronkelijke Kadaster-providerkeuze blijft bewaard maar is nog niet uitvoerbaar; volledige provider/cache-/rasterbediening en praktijkacceptatie blijven open |
 | Kadastrale export DXF | Native object-/extra-lagenexport en sjabloonpaden; volledige oorspronkelijke keuzecombinaties en praktijkacceptatie blijven open |
 | Proefsleuven sjabloon DXF | Beide native planners, profielen, Normaal/Reverse, datum/projectnaam en rasterbundels zijn aangesloten; oorspronkelijke fotoannotaties/maskers/logo/contact en volledige acceptatie blijven open |
 | Wis alle referentiepunten / laad alle beginpunten | Bestaande start-/referentiehelpers en native planners controleren; volledige gelijkwaardige kaartbediening blijft open |
 | Wis opmerkingen / wis alles | Projectacties en opmerkingen bestaan; alle oorspronkelijke losse acties en bevestigingen controleren |
 | KickTheMap inloggen/jobs/objectexport/browser/uitloggen | Native manager, geïsoleerde browser en downloads bestaan; alle echte provider-/fallback-/accountvarianten en gebruiksacceptatie blijven open |
-| StreetSmart inloggen/browser/uitloggen/selector | Nog niet native aangesloten |
+| StreetSmart inloggen/browser/uitloggen/selector | Op gebruikersverzoek van 22 oktober 2026 vervallen voor Rust; geen venster of port vereist |
 | Open instellingen | Native regels/autosave/exportopties bestaan; alle overige voorkeuren en behoud bij migratie blijven open |
 | Maaiveld via Gemma | AHN-hoogteproef bestaat; oorspronkelijke AI-/profielworkflow blijft open |
 
