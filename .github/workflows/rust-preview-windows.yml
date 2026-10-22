@@ -465,6 +465,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_location.py rust/target/release/examples/search_location.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_raster_address_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/raster-addresses
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_raster_addresses.py rust/target/release/examples/search_location.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native MTEXT parser and immutable format state
         shell: pwsh
         env:

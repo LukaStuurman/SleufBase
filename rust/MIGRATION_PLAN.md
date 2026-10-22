@@ -43,6 +43,32 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 22 oktober 2026: TIFF-adressenoverzicht
+
+- Het oorspronkelijke overzicht is aangesloten op geladen GeoTIFFs: bestandsnaam,
+  eerste adres en afstand, lege/foutregels, selectie en beide kopieeracties.
+  Vernieuwen, voortgang en annuleren lopen buiten de kaartbediening. Alleen
+  bronmetadata gaat naar de worker; rasterpixels en projectgegevens blijven staan.
+- Locatiezoeken en adresbatches delen een begrensde werkverdeler, met per workflow
+  één hergebruikte worker/client. Vervanging onderdrukt de volledige oude batch;
+  sluiten en projectwisseling kunnen geen verouderde regels/status publiceren.
+  Rij-/tekstlimieten en een controle op expliciete niet-RD-projecties begrenzen invoer.
+- 48 oorspronkelijke regels en 144 oorspronkelijke clipboardacties controleren
+  Unicode, dubbele namen, lege/mislukte aanvragen en afstandafronding. Echte egui-
+  proeven controleren clipboardcommando's, projectwisseling en de providercoördinaten
+  van een daadwerkelijk geladen GeoTIFF zonder bron- of pixelkopieën.
+- De volledige regressiereeks slaagt met 473 tests, inclusief 47 desktoptests.
+  Het Windows HTTP-testservertje herstelt nu expliciet blokkerend lezen op een
+  geaccepteerde socket; de eerder timingafhankelijke test slaagt in de volledige reeks.
+  Clippy levert geen nieuwe waarschuwingen en de geoptimaliseerde app/driver bouwen.
+  De driver vergelijkt 81 verse complete adresregels met 243 oorspronkelijke
+  clipboardcontracten; de bestaande 375 coördinaten-/38 providerproeven slagen opnieuw.
+  Een echte PDOK-batch voor twee openbare proefcoördinaten levert beide adressen in
+  bronvolgorde. De nieuwe referentie reproduceert bytegelijk met een andere hashseed.
+  Zie tests/fixtures/raster-addresses voor de afzonderlijke contracten en audits.
+- Zelfstandige kaartexport, resterende menu's/voorkeuren, StreetSmart/AI,
+  volledige project-/praktijkacceptatie en levering blijven vereist.
+
 ## Voortgang 22 oktober 2026: oorspronkelijke locatiebediening
 
 - De echte oorspronkelijke menubedieningen zijn zonder appopstart vastgelegd in
@@ -75,9 +101,10 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 - Cargo.lock legt nu de volledige dependencyset vast; Windows CI gebruikt --locked.
   De native projectiebibliotheek heeft geen C/Python-runtime nodig. De bijbehorende
   notices worden met EXE/portable preview meegeleverd en via --licenses getoond.
-- Reverse-lookup is geport; het oorspronkelijke TIFF-adressenoverzicht/kopiëren,
-  zelfstandige kaartexport, resterende menu's/voorkeuren, StreetSmart/AI, volledige
-  projectacceptatie en levering blijven nodig. Zie tests/fixtures/location.
+- Reverse-lookup is geport en is inmiddels gekoppeld aan TIFF-adressen/kopiëren
+  (zie de voortgang hierboven). Zelfstandige kaartexport, resterende menu's/
+  voorkeuren, StreetSmart/AI, volledige projectacceptatie en levering blijven nodig.
+  Zie tests/fixtures/location.
 
 ## Voortgang 22 oktober 2026: gewone MTEXT-kleuren
 

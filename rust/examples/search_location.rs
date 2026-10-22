@@ -3,7 +3,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sleufbase_rust::location_search::{self as location, Client};
-use std::sync::atomic::AtomicBool;
+use sleufbase_rust::{location_search::ReverseLocation, raster_addresses};
+use std::sync::atomic::{AtomicBool, AtomicUsize};
 #[path = "support/atomic_json.rs"]
 mod atomic_json;
 #[derive(Deserialize)]
@@ -23,6 +24,21 @@ enum Request {
         rows: i32,
         payload: Option<Value>,
     },
+    RasterAddresses {
+        sources: Vec<raster_addresses::Source>,
+        replies: Option<Vec<Reply>>,
+    },
+}
+#[derive(Deserialize)]
+#[serde(
+    tag = "kind",
+    content = "value",
+    rename_all = "snake_case",
+    deny_unknown_fields
+)]
+enum Reply {
+    Rows(Vec<ReverseLocation>),
+    Error(String),
 }
 fn serialize(value: impl Serialize) -> Result<Value, String> {
     serde_json::to_value(value).map_err(|e| e.to_string())
@@ -67,6 +83,28 @@ fn main() -> Result<(), String> {
                     }
                     client.as_ref().unwrap().reverse(x, y, rows, &cancel)?
                 };
+                serialize(results)
+            }
+            Request::RasterAddresses { sources, replies } => {
+                let mut replies = replies.map(|r| r.into_iter());
+                let results = raster_addresses::lookup(
+                    sources,
+                    &cancel,
+                    &AtomicUsize::new(0),
+                    |x, y, cancel| {
+                        if let Some(replies) = &mut replies {
+                            match replies.next().ok_or("Missing address audit reply")? {
+                                Reply::Rows(rows) => Ok(rows),
+                                Reply::Error(error) => Err(error),
+                            }
+                        } else {
+                            if client.is_none() {
+                                client = Some(Client::new()?);
+                            }
+                            client.as_ref().unwrap().reverse(x, y, 1, cancel)
+                        }
+                    },
+                )?;
                 serialize(results)
             }
         })();

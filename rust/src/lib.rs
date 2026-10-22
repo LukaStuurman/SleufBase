@@ -87,6 +87,8 @@ pub mod profile_leader_donor;
 pub mod profile_leaders;
 pub mod pdok_wms;
 pub mod location_search;
+mod latest_job;
+pub mod raster_addresses;
 pub mod osm_tiles;
 pub mod jobs_cache;
 pub mod kickthemap_live;

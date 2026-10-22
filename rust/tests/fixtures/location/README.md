@@ -53,5 +53,6 @@ python tools/verify_native_location.py rust/target/release/examples/search_locat
 Use Python 3.11 and pyproj 3.7.1 for the independent oracle. Set
 `SLEUFBASE_LOCATION_FIXTURES` to reproduce in another directory. The runtime audit
 changes the random seed and generates new coordinate/service documents.
-Reverse lookup is ready for the remaining TIFF-address overview/template tasks;
-those UI workflows, StreetSmart and full settings/project acceptance remain open.
+Reverse lookup now also drives the native TIFF-address overview and its original
+clipboard actions; see [the batch and UI checks](../raster-addresses/README.md).
+Standalone map export, StreetSmart and full settings/project acceptance remain open.

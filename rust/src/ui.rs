@@ -44,6 +44,8 @@ mod trench_editing;
 mod kick_browser_ui;
 #[path="ui_location.rs"]
 mod location_ui;
+#[path="ui_tiff_addresses.rs"]
+mod tiff_address_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -78,6 +80,7 @@ enum ProjectAction { New, Open(PathBuf), Restore(PathBuf), ImportPython(PathBuf)
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    tiff_addresses:tiff_address_ui::Dialog,
     location:location_ui::Search,
     navigation:location_ui::Navigation,
     file_loader:Option<sleufbase_rust::file_loader::FileLoader>,
@@ -162,6 +165,7 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            tiff_addresses:Default::default(),
             location:Default::default(),
             navigation:Default::default(),
             file_loader:None,
@@ -261,6 +265,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.tiff_addresses.reset();
         self.location.reset();self.navigation=Default::default();
         self.cancel_file_load();
         self.export_dialog=None;
@@ -1247,6 +1252,7 @@ impl SleufBaseApp {
         self.poll_cadastral();
         self.poll_ahn();
         self.poll_location(ctx);
+        self.poll_tiff_addresses(ctx);
         if ctx.input_mut(|i|i.consume_key(egui::Modifiers::CTRL,egui::Key::L)){self.open_location();}
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
@@ -1289,6 +1295,7 @@ impl SleufBaseApp {
                 if ui.button("Virtuele proefsleuf").clicked() {self.show_trench_dialog=true;}
                 if ui.button("Opmerking plaatsen").clicked() {self.show_comment_dialog=true;}
                 if ui.button("Locatie zoeken").clicked() {self.open_location();}
+                if ui.button("TIFF-adressen").clicked() {self.open_tiff_addresses();}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.add_enabled(!self.osm_busy,egui::Button::new("OpenStreetMap")).clicked() {self.start_osm();}
@@ -1631,6 +1638,7 @@ impl SleufBaseApp {
 
 
         self.show_location(ctx);
+        self.show_tiff_addresses(ctx);
         if self.trench_editor.is_some() {self.show_virtual_editor(ctx);}
         if self.browser_ui.open {self.show_kickthemap_workspace(ctx);}
 

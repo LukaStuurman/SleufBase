@@ -17,7 +17,7 @@ te controleren; deze inventaris pretendeert geen volledige acceptatie.
 | Project laden/opslaan/opslaan als | Native worker, gewijzigde-data-beveiliging en atomaire opslag; volledige Python-voorkeuren, terugschrijven en echte projectacceptatie blijven open |
 | Laad GeoTIFF(s), laad KLIC DXF, zoom naar alles | Native workers en kaart; volledige rastermodi/resoluties, rotatiebediening en praktijkacceptatie blijven open |
 | Locatie | Adres-/plaats-/wegzoeken, RD/GPS, suggesties, toetsenbord, tijdelijke markering, typegebonden schaal en luchtfoto zijn aangesloten; onafhankelijke coördinaat-/provider- en echte egui-proeven |
-| Toon TIFF-adressen | Reverse-client is geport; het oorspronkelijke overzicht en kopieeracties moeten nog worden aangesloten |
+| Toon TIFF-adressen | Native overzicht met bronvolgorde, eerste adres/afstand, fout-/leegmeldingen, voortgang/annulering, vernieuwen en beide oorspronkelijke kopieeracties; oorspronkelijke rij-/clipboardcontracten en echte GeoTIFF-/egui-/projectwisselproeven controleren de koppeling |
 | Export kaarten | Native kaart-/rasterexport is beschikbaar in sjabloonketens; volledige gelijkwaardige zelfstandige kaart-exportbediening blijft open |
 | Kadastrale export DXF | Native object-/extra-lagenexport en sjabloonpaden; volledige oorspronkelijke keuzecombinaties en praktijkacceptatie blijven open |
 | Proefsleuven sjabloon DXF | Beide native planners, profielen, Normaal/Reverse, datum/projectnaam en rasterbundels zijn aangesloten; oorspronkelijke fotoannotaties/maskers/logo/contact en volledige acceptatie blijven open |
