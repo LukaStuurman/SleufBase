@@ -20,7 +20,7 @@ pub struct Settings {
     pub dpi: u32,
     pub scale: f64,
     pub include_cad: bool,
-    /// Supported backgrounds and the remaining cadastral migration choice.
+    /// Supported native standalone map backgrounds.
     #[serde(deserialize_with = "read_background")]
     pub background: String,
 }
@@ -274,9 +274,6 @@ pub fn export_with(
     if inputs.rasters.len() > 5000 {
         return Err("Te veel kaarten voor één export".into());
     }
-    if settings.background == "cadastral" {
-        return Err("Deze oorspronkelijke kaartprovider is nog niet beschikbaar in de Rust-export. Kies een andere achtergrond.".into());
-    }
     for raster in &inputs.rasters {
         if raster.epsg.is_some_and(|e| e != 28992) {
             return Err("Kaartuitvoer vereist RD (EPSG:28992)".into());
@@ -325,6 +322,8 @@ pub fn export_with(
         }
         let background = if settings.background == "white" {
             Background::Solid { color: [255; 4] }
+        } else if settings.background == "cadastral" {
+            Background::Cadastral
         } else if settings.background == "osm" {
             let map = crate::osm_tiles::request_export_map_with_cancel(
                 layout.bounds,
@@ -352,6 +351,8 @@ pub fn export_with(
             fonts: fonts.clone(),
             attribution: Some(if settings.background == "osm" {
                 "(c) OpenStreetMap contributors".into()
+            } else if settings.background == "cadastral" {
+                "Kadastrale kaart: Kadaster / PDOK".into()
             } else {
                 String::new()
             }),

@@ -58,10 +58,11 @@ impl SleufBaseApp {
             let settings=&mut self.migrated_settings.map_export;
             egui::ComboBox::from_label("Achtergrond").selected_text(match settings.background.as_str(){
                 "pdok"=>"PDOK luchtfoto","osm"=>"OpenStreetMap","white"=>"Wit (zonder internet)",
-                "cadastral"=>"Kadaster (nog niet beschikbaar)",_=>"Onbekend"
+                "cadastral"=>"Kadaster",_=>"Onbekend"
             }).show_ui(ui,|ui|{
                 ui.selectable_value(&mut settings.background,"pdok".into(),"PDOK luchtfoto");
                 ui.selectable_value(&mut settings.background,"osm".into(),"OpenStreetMap");
+                ui.selectable_value(&mut settings.background,"cadastral".into(),"Kadaster");
                 ui.selectable_value(&mut settings.background,"white".into(),"Wit (zonder internet)");
             });
             ui.checkbox(&mut settings.include_cad,"Zichtbare CAD-lagen meenemen");
@@ -151,6 +152,35 @@ mod tests {
         assert_eq!(fs::read(&app.geotiffs[0].path).unwrap(), before);
         assert!(dir.path().join("input-0_kaart.png").is_file());
         assert!(app.message.contains("1 kaart(en)"));
+    }
+    #[test]
+    fn actual_kadaster_choice_reaches_the_existing_source_owning_export_worker() {
+        use sleufbase_rust::export_worker::{Exported,Exporter};
+        let ctx=egui::Context::default();let mut app=app();app.open_map_export();
+        let frame=|app:&mut SleufBaseApp,events|ctx.run(egui::RawInput{
+            screen_rect:Some(egui::Rect::from_min_size(Pos2::ZERO,egui::vec2(1024.,768.))),events,..Default::default()
+        },|ctx|app.show_map_export(ctx));
+        let _=frame(&mut app,Vec::new());let output=frame(&mut app,Vec::new());
+        let text_pos=|output:&egui::FullOutput,text:&str|output.shapes.iter()
+            .find(|s|matches!(&s.shape,egui::Shape::Text(t) if t.galley.text()==text))
+            .unwrap_or_else(||panic!("Missing map choice {text}")).shape.visual_bounding_rect().center();
+        let click=|app:&mut SleufBaseApp,pos|{
+            for pressed in [true,false]{let _=frame(app,vec![egui::Event::PointerMoved(pos),egui::Event::PointerButton{pos,button:egui::PointerButton::Primary,pressed,modifiers:Default::default()}]);}
+        };
+        click(&mut app,text_pos(&output,"Wit (zonder internet)"));let popup=frame(&mut app,Vec::new());
+        assert!(!popup.shapes.iter().any(|s|matches!(&s.shape,egui::Shape::Text(t) if t.galley.text().contains("Cyclomedia"))));
+        click(&mut app,text_pos(&popup,"Kadaster"));assert_eq!(app.migrated_settings.map_export.background,"cadastral");
+        let (sent,received)=mpsc::channel();
+        app.exporter=Some(Exporter::with_processor(move |_,request,_|{
+            sent.send(request.maps.as_ref().unwrap().background.clone()).unwrap();
+            Ok(Exported{point_updates:Vec::new(),point_candidates:None,skipped:Vec::new(),companion:None,warnings:Vec::new()})
+        }).unwrap());
+        let dir=tempfile::tempdir().unwrap();let sources=app.geotiffs.as_ptr();
+        assert!(app.start_maps_export(dir.path().to_owned()));
+        assert_eq!(received.recv_timeout(Duration::from_secs(5)).unwrap(),"cadastral");
+        let until=Instant::now()+Duration::from_secs(5);
+        while app.export_intent.is_some(){app.poll_export_jobs(&ctx);assert!(Instant::now()<until);std::thread::sleep(Duration::from_millis(2));}
+        assert_eq!(app.geotiffs.as_ptr(),sources);
     }
     #[test]
     fn project_switch_cancels_map_work_before_replacing_source_ownership() {

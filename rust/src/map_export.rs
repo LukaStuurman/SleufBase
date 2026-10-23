@@ -17,6 +17,7 @@ use std::{
 #[derive(Clone, Debug, Default, serde::Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Background {
+    Cadastral,
     Solid {
         color: [u8; 4],
     },
@@ -129,6 +130,7 @@ impl Source {
 #[derive(Default)]
 pub struct Renderer {
     fonts: Option<(Option<Paths>, Fonts)>,
+    cadastral: Option<crate::cadastral_tiles::Client>,
 }
 /// A slot may supply either an actual GeoTIFF or its native virtual RD raster.
 /// Both use the same affine sampler, without temporary TIFF files or copies.
@@ -144,8 +146,17 @@ fn background(
     source: &Background,
     layout: &Layout,
     cancel: &AtomicBool,
+    cadastral: &mut Option<crate::cadastral_tiles::Client>,
 ) -> Result<RgbaImage, String> {
     match source {
+        Background::Cadastral => {
+            if cadastral.is_none() {
+                *cadastral = Some(crate::cadastral_tiles::Client::new(
+                    crate::project::app_data_directory().join("cadastral-tiles"),
+                )?);
+            }
+            cadastral.as_ref().unwrap().request(layout.bounds, layout.map_size, cancel)
+        }
         Background::Solid { color } => {
             let mut image =
                 crate::raster_rotation::allocate(layout.map_size[0], layout.map_size[1])?;
@@ -279,7 +290,11 @@ impl Renderer {
         let attribution = source
             .attribution
             .as_deref()
-            .or_else(|| matches!(source.background, Background::Pdok).then_some("Luchtfoto: PDOK"));
+            .or(match source.background {
+                Background::Pdok => Some("Luchtfoto: PDOK"),
+                Background::Cadastral => Some("Kadastrale kaart: Kadaster / PDOK"),
+                _ => None,
+            });
         let operations = map_page::plan(
             &layout,
             attribution,
@@ -287,7 +302,7 @@ impl Renderer {
             &mut |t, s, b| fonts.measure(t, s, b),
             cancel,
         )?;
-        let mut map = background(&source.background, &layout, cancel)?;
+        let mut map = background(&source.background, &layout, cancel, &mut self.cadastral)?;
         if let Some(tiff) = tiff {
             let (image, transform) = match tiff {
                 Raster::Tiff(tiff) => {

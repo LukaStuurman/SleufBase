@@ -68,8 +68,7 @@ pub fn wgs84_to_rd(lat: f64, lon: f64) -> Result<[f64; 2], String> {
     static PROJECTIONS: OnceLock<Result<(Proj, Proj), String>> = OnceLock::new();
     let (from,to)=PROJECTIONS.get_or_init(||{
         let from=Proj::from_proj_string("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs").map_err(|e|e.to_string())?;
-        let to=Proj::from_proj_string(concat!("+proj=sterea +lat_0=52.1561605555556 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m ",
-            "+towgs84=565.4171,50.3319,465.5524,-0.398957388243134,0.343987817378283,-1.87740163998045,4.0725 +no_defs")).map_err(|e|e.to_string())?;
+        let to=Proj::from_proj_string(crate::rd_projection::RD).map_err(|e|e.to_string())?;
         Ok((from,to))
     }).as_ref().map_err(Clone::clone)?;
     let mut point = (lon.to_radians(), lat.to_radians(), 0.);

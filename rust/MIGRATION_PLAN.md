@@ -49,6 +49,44 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 23 oktober 2026: Kadaster-achtergrond in kaartexport
+
+- De oorspronkelijke Kadaster-keuze is daadwerkelijk uitvoerbaar in Export kaarten.
+  Echte egui-klikken kiezen de achtergrond en sturen deze door de bestaande worker;
+  geladen bronallocaties blijven behouden. Instellingenimport/-opslag herkent de
+  reeds bestaande keuze zonder credentials of nieuwe accounts.
+- De oorspronkelijke pure WMTS-methoden leveren RD→3857-hoekpunten, zoom 0–22,
+  tegelvolgorde/REST-suffix, crop, alpha en Pillow-bilineaire verkleining. 28
+  verzoeken bevatten 27 bruikbare volledige beeldreferenties en één bewaard oud
+  leeg-crop-beeld. Rust weigert die lege uitsnede vóór download. Wereldprojectie
+  vergelijkt binnen 0,000002 m; integeruitsnede en alle pixels moeten exact zijn.
+- Tegels gaan direct naar de crop; er ontstaat geen volledig mozaïek plus tweede
+  cropkopie. Vier gelijktijdige downloads delen HTTP-verbindingen, zeven dagen
+  atomaire schijfcache en 32 gedeelde RGBA-tegels (8 MiB). De oorspronkelijke
+  kwaliteit wordt niet naar het lagere OSM-previewtegelbudget teruggebracht.
+- Lokale HTTP-proeven controleren retries, corrupte/te grote/verkeerd bemeten
+  antwoorden, cachehits zonder beeldkopie, verlopen cachebehoud en vier werkelijke
+  gelijktijdige requests. Een mislukte/verlopen-only tegel stopt de export; oude
+  uitvoer blijft door de bestaande volledige-batchpublicatie beschermd.
+- De actuele officiële PDOK-URL is gecontroleerd via GetCapabilities: dezelfde
+  Kadastralekaart-/EPSG:3857-/00–22-indeling op brk-kadastrale-kaart/wmts/v5_0.
+  Bronvermelding blijft zichtbaar. Onafhankelijke runtimeproeven draaien met eigen
+  synthetische tegels en geïsoleerde AppData; CI heeft geen livedienst nodig.
+- Alle 518 Rust-tests, inclusief 62 desktoptests, slagen; 15 gerichte eindproeven
+  en Clippy zonder nieuwe waarschuwingen controleren de laatste opschoning.
+  De geoptimaliseerde app en beide Kadaster-/kaartexportdrivers bouwen en de
+  volledige verse uitvoercontrole slaagt ook na de laatste opschoning.
+  Alle 29 canonieke JSON-/PNG-bestanden reproduceren bytegelijk. De verse runtime-
+  reeks controleert 43 plannen/148.474 RGBA-pixels en weigert de bewaarde oude lege
+  crop. Drie echte A4/RGB/DPI-exports vergelijken 1800 achtergrond-/TIFF-pixels;
+  een netwerkfout op een latere locatie behoudt alle eerdere uitvoerbytes. Een
+  optionele live proef vergelijkt vier actuele PDOK-tegels/49.152 pixels volledig
+  met de oorspronkelijke compositor; netwerkloze cacheherhaling wijzigt geen
+  cachebytes of timestamps.
+- Volledige overige provider-/cache-/rasterpariteit, virtuele gereedschappen,
+  instellingen, echte projecten, prestaties en levering/overdracht blijven vereist.
+  Cyclomedia en StreetSmart blijven op gebruikersverzoek buiten Rust-scope.
+
 ## Voortgang 23 oktober 2026: TIFF-draaibediening en bereikbare knoppen
 
 - De geselecteerde GeoTIFF heeft oorspronkelijke links-/rechts-/eigen-hoek-/reset-

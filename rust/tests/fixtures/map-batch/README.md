@@ -16,14 +16,15 @@ for duplicates, including Windows case collisions. Long/unsafe stems are shorten
 and cleaned. Existing legacy PDFs are retained instead of deleted as a side effect.
 
 The desktop Export kaarten action exports all loaded TIFFs in source order, with
-PDOK, OpenStreetMap or a white offline background, configurable DPI/scale, visible
+PDOK, OpenStreetMap, Kadaster or a white offline background, configurable DPI/scale, visible
 CAD inclusion, progress/cancellation and remembered settings. Original provider
-and KLIC preferences migrate without credentials. The unsupported cadastral
-choice remains explicit and is rejected, rather than silently changed to PDOK.
+and KLIC preferences migrate without credentials. The cadastral choice now uses
+the original WMTS grid/crop/bilinear path; see [cadastral-tiles](../cadastral-tiles/README.md) for independent
+complete image, cache/network and actual standalone export comparisons.
 Cyclomedia backgrounds and the StreetSmart streetview window were removed from
 the Rust scope at the user's explicit request on 22 October 2026. Old Cyclomedia
 background preferences migrate to the default PDOK; no native window/provider is required.
-Cadastral maps and full provider/cache/opacity-control acceptance remain open.
+Full provider/cache/opacity-control and real-project acceptance remain open.
 
 The existing export worker owns and returns the actual loaded source allocations,
 including after errors and project-switch cancellation. No full RGB page copy is

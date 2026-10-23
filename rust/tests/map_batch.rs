@@ -225,10 +225,17 @@ fn real_shared_worker_returns_sources_after_map_success_and_failure() {
         ..Default::default()
     };
     let pointer = input.rasters.as_ptr();
+    let original_path = input.rasters[0].path.clone();
     let mut input = Some(input);
-    for background in ["white", "cadastral", "white"] {
-        let mut settings = settings(&data["cases"][0]);
-        settings.background = background.into();
+    for fail in [false, true, false] {
+        // Kadaster is now supported; exercise a genuine late source error
+        // without contacting any live provider or persistent application cache.
+        input.as_mut().unwrap().rasters[0].path = if fail {
+            dir.path().join("missing-source.tiff")
+        } else {
+            original_path.clone()
+        };
+        let settings = settings(&data["cases"][0]);
         worker
             .start(input.take().unwrap(), request(dir.path(), settings))
             .unwrap();
@@ -241,7 +248,7 @@ fn real_shared_worker_returns_sources_after_map_success_and_failure() {
             std::thread::sleep(Duration::from_millis(2));
         };
         assert_eq!(ready.inputs.rasters.as_ptr(), pointer);
-        assert_eq!(ready.result.is_ok(), background == "white");
+        assert_eq!(ready.result.is_ok(), !fail);
         input = Some(ready.inputs);
     }
 }
