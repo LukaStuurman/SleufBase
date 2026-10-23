@@ -235,13 +235,18 @@ fn import_value_with_cancel(original:Value,source:&Path,cancel:&std::sync::atomi
                             let resolved=asset_path(source,path);
                             raster.metadata["kickthemap_job_features_path"]=Value::String(resolved.to_string_lossy().into_owned());
                         }
-                        if let Some(matrix)=metadata.get("base_transform_matrix") {
-                            let m=matrix.as_array().filter(|m|m.len()==9).ok_or("Ongeldige basisrastermatrix")?;
-                            raster.transform=GeoTransform{a:number(m.first(),"matrix a")?,b:number(m.get(1),"matrix b")?,c:number(m.get(2),"matrix c")?,
-                                d:number(m.get(3),"matrix d")?,e:number(m.get(4),"matrix e")?,f:number(m.get(5),"matrix f")?};
-                        }
                         let angle=metadata.get("rotation_degrees").map(|v|number(Some(v),"rasterrotatie")).transpose()?.unwrap_or(0.0);
-                        raster.transform=raster.transform.rotate_degrees(angle,raster.width,raster.height)?;
+                        if angle.abs()>=1e-9 {
+                            if let Some(matrix)=metadata.get("base_transform_matrix") {
+                                let m=matrix.as_array().filter(|m|m.len()==9).ok_or("Ongeldige basisrastermatrix")?;
+                                raster.transform=GeoTransform{a:number(m.first(),"matrix a")?,b:number(m.get(1),"matrix b")?,c:number(m.get(2),"matrix c")?,
+                                    d:number(m.get(3),"matrix d")?,e:number(m.get(4),"matrix e")?,f:number(m.get(5),"matrix f")?};
+                            }
+                            if raster.metadata.get(crate::geotiff_rotation::BASE).is_none(){raster.metadata[crate::geotiff_rotation::BASE]=crate::geotiff_rotation::matrix(raster.transform);}
+                            let angle=crate::geotiff_rotation::normalize(angle)?;
+                            raster.metadata[crate::geotiff_rotation::ANGLE]=serde_json::json!(angle);
+                            if angle!=0.{raster.transform=raster.transform.rotate_degrees(angle,raster.width,raster.height)?;}
+                        }
                         raster.bounds=raster.transform.bounds(raster.width,raster.height)?;
                         if let Ok(id)=text(metadata.get("kickthemap_job_id")).parse::<u64>() {raster.kickthemap_job_id=(id>0).then_some(id);}
                         let title=text(metadata.get("kickthemap_job_title"));if !title.is_empty(){raster.kickthemap_job_title=title;}

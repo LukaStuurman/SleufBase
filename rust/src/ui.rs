@@ -52,6 +52,8 @@ mod map_export_ui;
 mod raster_point_ui;
 #[path="ui_map_actions.rs"]
 mod map_actions_ui;
+#[path="ui_raster_rotation.rs"]
+mod raster_rotation_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -86,6 +88,7 @@ enum ProjectAction { New, ClearLayers, Open(PathBuf), Restore(PathBuf), ImportPy
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    raster_rotation:raster_rotation_ui::State,
     tiff_comment_editor:Option<map_actions_ui::TiffCommentEditor>,
     raster_points:raster_point_ui::State,
     map_export_open:bool,
@@ -174,6 +177,7 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            raster_rotation:Default::default(),
             tiff_comment_editor:None,
             raster_points:Default::default(),
             map_export_open:false,
@@ -277,6 +281,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.raster_rotation=Default::default();
         self.tiff_comment_editor=None;
         self.raster_points=Default::default();
         self.map_export_open=false;
@@ -1045,7 +1050,7 @@ fn canvas(
                 .clamp(0.05,300.0);
         }
     }
-    if response.dragged() {*pan+=response.drag_delta();}
+    if response.dragged()&&(!navigation.as_ref().is_some_and(|n|n.pointer_tool)||response.dragged_by(egui::PointerButton::Middle)) {*pan+=response.drag_delta();}
 
     let width=(bounds.max_x-bounds.min_x).max(1.0);
     let height=(bounds.max_y-bounds.min_y).max(1.0);
@@ -1228,7 +1233,7 @@ fn canvas(
             "© OpenStreetMap contributors",egui::FontId::proportional(12.0),INK);
     }
     Some(raster_point_ui::View{painter,rect,center,origin:[cx,cy],scale,
-        clicked:response.clicked().then(||response.interact_pointer_pos()).flatten()})
+        clicked:response.clicked().then(||response.interact_pointer_pos()).flatten(),response})
 }
 
 impl eframe::App for SleufBaseApp {
@@ -1276,7 +1281,7 @@ impl SleufBaseApp {
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
             ui.add_space(8.0);
-            ui.horizontal(|ui|{
+            ui.horizontal_wrapped(|ui|{
                 ui.colored_label(DARK,egui::RichText::new("TECHBASE").strong().size(19.0));
                 ui.separator();
                 ui.label(egui::RichText::new("SleufBase Rust").strong().size(18.0));
@@ -1300,7 +1305,7 @@ impl SleufBaseApp {
                     }
                 }
             });
-            ui.horizontal(|ui|{
+            ui.horizontal_wrapped(|ui|{
                 if ui.button("Open jobFeatures.json").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
                         .add_filter("KickTheMap JSON",&["json"]).pick_files()
@@ -1464,6 +1469,7 @@ impl SleufBaseApp {
 
             self.show_point_controls(ui);
             self.show_tiff_comment_controls(ui);
+            self.show_raster_rotation_controls(ui);
             if let Some(cache)=&self.jobs_cache {
                 ui.separator();
                 ui.heading("KickTheMap jobs (offline cache)");
@@ -1619,13 +1625,14 @@ impl SleufBaseApp {
             ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, OpenStreetMap, BGT en Kadaster (preview).");
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
+            self.navigation.pointer_tool=self.raster_rotation.active();
             let view=canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
                 self.osm_visible && self.osm_texture.is_some(),
                 &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules,Some(&mut self.navigation));
-            if let Some(view)=view{self.handle_raster_points(&view);}
+            if let Some(view)=view{self.handle_raster_rotation(&view);self.handle_raster_points(&view);}
         });
 
         if self.show_trench_dialog {

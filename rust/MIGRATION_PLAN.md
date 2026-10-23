@@ -49,6 +49,43 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 23 oktober 2026: TIFF-draaibediening en bereikbare knoppen
+
+- De geselecteerde GeoTIFF heeft oorspronkelijke links-/rechts-/eigen-hoek-/reset-
+  acties en interactieve ringbediening. Positieve hoeken draaien linksom en een
+  decimale komma wordt herkend. Hoeken normaliseren zoals Python; onbekende of
+  niet-eindige invoer wijzigt geen brondata. Grote metadata blijft begrensd.
+- De originele affine basis blijft in metadata; iedere absolute hoek rekent daar
+  opnieuw vanaf. Pixels/texturen en raw begin-/referentiepunten worden niet
+  gekopieerd of veranderd. Python-import bewaart de basis en normaliseert volle
+  omwentelingen. Eerdere native imports zonder basis herstellen deze eenmalig uit
+  de werkelijke transformatie en bestaande hoek, zodat reset niet dubbel draait.
+- De ring gebruikt de oorspronkelijke afmetingen/hitregels. Openen centreert de
+  gekozen TIFF en houdt de ring bereikbaar; daarna blijft de camera stabiel tijdens
+  draaien. Links slepen draait, midden slepen blijft pannen. Escape/rechtsklik
+  sluit de bediening met behoud van de ingestelde hoek. Nieuwe projecten/bronnen
+  sluiten oude modi en camerasnapshots. Presetacties behouden de huidige camera.
+- Hash-gecontroleerde oorspronkelijke functies leveren 36 ketens/252 absolute
+  transformaties, 1764 pixel-hitbeslissingen/schermhoeken en 144 echte oorspronkelijke
+  pointerbewegingen, plus zeven exacte randvragen. Wereld/hoek vergelijken op
+  0,00000002 m/graden en schermgeometrie op 0,000002 px. Integer muiscoördinaten
+  volgen Tk; de losse hoekhelper krijgt dezelfde expliciete invoercentra.
+- Echte egui-gebeurtenissen toetsen drukken/slepen/loslaten, Escape, middenpannen,
+  bron-/texture-identiteit en puntbehoud. 2000 cycli bouwen geen drift op. Native/
+  Python-opslag, oude-basisreparatie en behoud bij fouten worden gecontroleerd.
+  De twee kopbalken lopen nu om; alle benoemde acties vallen bij 900/1200/1500 px
+  binnen hun zichtbare clip. Overige virtuele kaarttools, volledige instellingen,
+  rastervarianten, echte projecten en levering blijven vereist volgens PARITY.md.
+- Alle 511 Rust-tests (61 desktoptests) slagen; de laatste 67 gerichte controles
+  toetsen ook middenpannen en legacy-import. Clippy geeft geen nieuwe waarschuwingen
+  en de geoptimaliseerde app/auditdrivers bouwen. Een verse oorspronkelijke reeks
+  met 53 ketens/371 transformaties/2597 hits en hoeken/212 pointerbewegingen slaagt.
+  Acht echte workerexports leveren 18 PNGs en acht automatische XLSX-bestanden;
+  de nieuwe 37,5°-TIFF met gekozen punten heeft hetzelfde complete 52-objectenprofiel
+  en alle dezelfde voorbereide TIFF-pixels als de oorspronkelijke exporter.
+  Canonieke referenties worden bytegelijk gereproduceerd. Ook de gerichte migratie-
+  proef bevestigt dat de vervallen Cyclomedia-keuze geen Rust-provider terugbrengt.
+
 ## Voortgang 22 oktober 2026: kaartacties en TIFF-opmerkingen
 
 - Kaartacties biedt nu de oorspronkelijke Wis opmerkingen en Wis alles.

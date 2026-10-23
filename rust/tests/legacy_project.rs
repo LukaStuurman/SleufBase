@@ -103,6 +103,7 @@ fn relative_assets_rotation_job_identity_and_dxf_visibility_are_restored() {
     close(raster.transform.a, expected.a);
     close(raster.transform.c, expected.c);
     close(raster.transform.f, expected.f);
+    assert_eq!(raster.metadata["base_transform_matrix"],json!([1.,0.,168000.,0.,-1.,401002.,0.,0.,1.]));
     assert_eq!(project.legacy_archive.as_ref().unwrap().notices.len(), 1);
     // A saved base transform overrides the original TIFF transform, just as Python does.
     let mut original = fixture();
@@ -120,6 +121,11 @@ fn relative_assets_rotation_job_identity_and_dxf_visibility_are_restored() {
     .rotate_degrees(15.0, 4, 2)
     .unwrap();
     close(project.rasters[0].transform.c, expected.c);
+    let mut revolution=fixture();revolution["tiffs"][1]["metadata"]["rotation_degrees"]=json!(720.);
+    let normalized=import_value(revolution.clone(),&dir.path().join("PS42.klicproject")).unwrap();
+    assert_eq!(normalized.rasters[0].metadata["rotation_degrees"],json!(0.));
+    assert_eq!(normalized.rasters[0].transform,GeoTransform{a:1.,b:0.,c:168000.,d:0.,e:-1.,f:401002.});
+    assert_eq!(normalized.legacy_archive.as_ref().unwrap().original.as_ref(),&revolution);
 }
 
 #[test]

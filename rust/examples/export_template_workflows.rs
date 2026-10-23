@@ -107,12 +107,14 @@ fn main() -> Result<(), String> {
         ("missing-measurements", false, false, false),
         ("selected-points", false, true, false),
         ("tiff-comments", false, true, false),
+        ("rotated-tiff", false, true, false),
     ] {
-        inputs.rasters[0].metadata = if name == "selected-points" {
+        inputs.rasters[0].metadata = if matches!(name,"selected-points"|"rotated-tiff") {
             serde_json::json!({"template_cross_section_start_point":{"x":10.,"y":0.},"template_reference_point":{"x":3.,"y":2.},"notes":"keep"})
         } else if name=="tiff-comments" {
             serde_json::json!({"tiff_comment_text":"TIFF Ø\n grondwater\nExtra\tdetail"})
         } else { serde_json::Value::Null };
+        if name=="rotated-tiff" {sleufbase_rust::geotiff_rotation::set(&mut inputs.rasters[0],37.5)?;}
         inputs.rasters[0].kickthemap_job_id = Some(if name == "missing-measurements" {
             999
         } else {

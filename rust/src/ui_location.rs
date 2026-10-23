@@ -88,6 +88,7 @@ pub(super) struct Focus {
 }
 #[derive(Default)]
 pub(super) struct Navigation {
+    pub pointer_tool:bool,
     pub focus: Option<Focus>,
     pub viewport: Option<Bounds>,
     pub marker: Option<([f64; 2], Instant)>,

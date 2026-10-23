@@ -10,6 +10,7 @@ pub mod geo;
 pub mod geotiff;
 pub mod loaded_jobs;
 pub mod map_comments;
+pub mod geotiff_rotation;
 pub mod raster;
 pub mod raster_loader;
 pub mod file_loader;

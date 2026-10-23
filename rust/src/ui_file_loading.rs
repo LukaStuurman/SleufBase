@@ -151,6 +151,7 @@ impl SleufBaseApp {
         ctx: &egui::Context,
     ) {
         self.raster_points.mode=None;self.raster_points.rows.clear();
+        self.raster_rotation=Default::default();
         if let LoadPurpose::Project(action) = purpose {
             let Some(outcome) = outcomes.into_iter().next() else {
                 self.message = "Geen projectgegevens ontvangen; huidige gegevens behouden.".into();

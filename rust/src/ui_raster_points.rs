@@ -31,6 +31,7 @@ impl Default for State {
     }
 }
 pub(super) struct View {
+    pub response:egui::Response,
     pub painter: egui::Painter,
     pub rect: egui::Rect,
     pub center: Pos2,
@@ -69,10 +70,12 @@ impl SleufBaseApp {
             ui.small("Selecteer hierboven een GeoTIFF. Punten worden bij het project bewaard en in sjablonen gebruikt.");
             let target=self.raster_points.selected.is_some();
             if ui.add_enabled(target,egui::Button::new(if self.raster_points.mode==Some(Mode::Reference){"Referentie sluiten"}else{"Referentiepunt plaatsen"})).clicked(){
+                self.stop_raster_rotation();
                 self.raster_points.mode=if self.raster_points.mode==Some(Mode::Reference){None}else{Some(Mode::Reference)};
                 self.message="Klik op de kaart om het referentiepunt te plaatsen of te verplaatsen.".into();
             }
             if ui.add_enabled(target,egui::Button::new(if self.raster_points.mode==Some(Mode::Start){"Beginpunt sluiten"}else{"Beginpunt kiezen"})).clicked(){
+                self.stop_raster_rotation();
                 if self.raster_points.mode==Some(Mode::Start){self.raster_points.mode=None;}else if let Some(path)=self.raster_points.selected.clone(){self.start_point_task(Some(path));}
             }
             if ui.button("Wis alle referentiepunten").clicked(){self.clear_raster_references();}
