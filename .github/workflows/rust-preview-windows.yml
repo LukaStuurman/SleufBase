@@ -533,6 +533,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_geotiff_rotation.py rust/target/release/examples/resolve_geotiff_rotation.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit virtual map actions and written reference profiles
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          VIRTUAL_MAP_DIR: ${{ runner.temp }}/SleufBase-virtual-map
+        run: |
+          python tools/generate_virtual_map_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/virtual-map
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_virtual_map --example export_virtual_map
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_virtual_map.exe "$env:VIRTUAL_MAP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_virtual_map.py rust/target/release/examples/resolve_virtual_map.exe "$env:VIRTUAL_MAP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native MTEXT parser and immutable format state
         shell: pwsh
         env:

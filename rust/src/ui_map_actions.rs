@@ -190,9 +190,10 @@ impl SleufBaseApp {
         }
     }
     pub(super) fn clear_map_comments(&mut self) {
-        match map_comments::clear(&mut self.comments, &mut self.geotiffs) {
+        match map_comments::clear_all(&mut self.comments, &mut self.geotiffs, &mut self.virtual_trenches) {
             Ok(count) => {
                 self.dirty |= count > 0;
+                self.clear_virtual_editor_metadata(map_comments::KEY,None);
                 self.tiff_comment_editor = None;
                 self.show_comment_dialog = false;
                 self.message = if count == 0 {

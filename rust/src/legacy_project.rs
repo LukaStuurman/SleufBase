@@ -183,6 +183,14 @@ fn virtual_trench(item: &Value, source: &Path, index: usize) -> Result<VirtualTr
                 .unwrap_or(0.0),
         });
     }
+    if let Some(metadata)=metadata.as_object() {
+        let mut active=metadata.clone();
+        // Geometry already lives in typed source vectors; the complete original
+        // payload (including unknown fields) remains in the import archive.
+        active.remove("virtual_trench_payload");
+        active.remove("marxact_boundary_3d");
+        trench.metadata=Value::Object(active);
+    }
     trench.validate()?;
     Ok(trench)
 }

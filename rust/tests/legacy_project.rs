@@ -15,6 +15,15 @@ fn close(a: f64, b: f64) {
 }
 
 #[test]
+fn virtual_reference_metadata_is_active_without_duplicating_geometry_or_losing_the_original(){
+    let mut legacy=fixture();let item=legacy["tiffs"].as_array_mut().unwrap().iter_mut().find(|v|v["type"]=="virtual_trench").unwrap();
+    item["metadata"]["template_reference_point"]=json!({"x":100.25,"y":200.75});item["metadata"]["rotation_degrees"]=json!(37.5);item["metadata"]["unknown_layer_option"]=json!({"preserve":"Ø"});
+    let dir=tempfile::tempdir().unwrap();let project=import_value(legacy.clone(),&dir.path().join("original.klicproject")).unwrap();let trench=&project.virtual_trenches[0];
+    assert_eq!(trench.metadata["template_reference_point"],json!({"x":100.25,"y":200.75}));assert!(trench.metadata.get("virtual_trench_payload").is_none());assert!(trench.metadata.get("marxact_boundary_3d").is_none());assert!(!trench.boundary_3d.is_empty());assert!(sleufbase_rust::virtual_map::reference(trench).unwrap().is_some());
+    let native=dir.path().join("native.json");save_project(&native,&project).unwrap();let restored=read_project(&native).unwrap();assert_eq!(restored.virtual_trenches[0].metadata,trench.metadata);assert_eq!(restored.legacy_archive.as_ref().unwrap().original.as_ref(),&legacy);
+}
+
+#[test]
 fn original_python_serializer_fixture_imports_and_preserves_all_metadata() {
     let dir = tempfile::tempdir().unwrap();
     let source = dir.path().join("PS42.klicproject");

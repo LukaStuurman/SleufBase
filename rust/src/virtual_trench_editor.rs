@@ -1,6 +1,7 @@
 //! Non-destructive editor operations for native and imported virtual trenches.
-//! Measured MarXact boundaries remain immutable unless the operator explicitly
-//! creates a separate, manually editable copy.
+//! Axis/width edits protect measured MarXact geometry; structural edits use a
+//! separate manual copy. Explicit whole-layer map moves translate all geometry
+//! and the alignment baseline together without rewriting source files.
 use crate::{
     model::Vertex,
     virtual_trench::{TrenchPoint, VirtualTrench},
@@ -218,12 +219,17 @@ pub fn export_tabular(t:&VirtualTrench)->Result<String,String> {
 }
 /// Preserve measured 3D original; create a standalone editable derivative.
 pub fn manual_copy(original:&VirtualTrench,suffix:&str)->Result<VirtualTrench,String> {
+    let reference=crate::virtual_map::reference(original)?;
     let mut copy=original.clone();
     copy.label=format!("{} {}",original.label,suffix).trim().to_owned();
     copy.boundary_3d.clear();
     copy.alignment=None;
     copy.source_path=None;
     copy.job_id=0;
+    if let Some(metadata)=copy.metadata.as_object_mut(){
+        for key in ["rotation_degrees","base_transform_matrix","kickthemap_job_id","kickthemap_job_title","kickthemap_job_features_path"]{metadata.remove(key);}
+        if let Some([x,y])=reference{metadata.insert(crate::raster_points::REFERENCE.into(),serde_json::json!({"x":x,"y":y}));}
+    }
     check(&copy)?;
     Ok(copy)
 }

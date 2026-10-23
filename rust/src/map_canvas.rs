@@ -42,19 +42,7 @@ pub(crate) fn rect(image: &mut RgbaImage, b: [f64; 4], fill: Color) {
         }
     }
 }
-pub(crate) fn ellipse(image: &mut RgbaImage, b: [f64; 4], fill: Color) {
-    let cx = (b[0] + b[2]) / 2.;
-    let cy = (b[1] + b[3]) / 2.;
-    let rx = ((b[2] - b[0]) / 2.).max(0.5);
-    let ry = ((b[3] - b[1]) / 2.).max(0.5);
-    for y in (b[1] as i32).max(0)..=(b[3] as i32).min(image.height() as i32 - 1) {
-        for x in (b[0] as i32).max(0)..=(b[2] as i32).min(image.width() as i32 - 1) {
-            if ((x as f64 - cx) / rx).powi(2) + ((y as f64 - cy) / ry).powi(2) <= 1. {
-                pixel(image, x, y, fill, false);
-            }
-        }
-    }
-}
+pub(crate) use crate::map_ellipse::draw as ellipse;
 pub(crate) fn line(
     image: &mut RgbaImage,
     points: &[[f64; 2]],

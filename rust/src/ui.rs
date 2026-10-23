@@ -54,6 +54,8 @@ mod raster_point_ui;
 mod map_actions_ui;
 #[path="ui_raster_rotation.rs"]
 mod raster_rotation_ui;
+#[path="ui_virtual_map.rs"]
+mod virtual_map_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -88,6 +90,7 @@ enum ProjectAction { New, ClearLayers, Open(PathBuf), Restore(PathBuf), ImportPy
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    virtual_map:virtual_map_ui::State,
     raster_rotation:raster_rotation_ui::State,
     tiff_comment_editor:Option<map_actions_ui::TiffCommentEditor>,
     raster_points:raster_point_ui::State,
@@ -178,6 +181,7 @@ impl Default for SleufBaseApp {
         };
         Self {
             raster_rotation:Default::default(),
+            virtual_map:Default::default(),
             tiff_comment_editor:None,
             raster_points:Default::default(),
             map_export_open:false,
@@ -281,6 +285,7 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.virtual_map=Default::default();
         self.raster_rotation=Default::default();
         self.tiff_comment_editor=None;
         self.raster_points=Default::default();
@@ -319,6 +324,7 @@ impl SleufBaseApp {
         self.bgt_layers=doc.bgt_layers; self.cadastral=doc.cadastral;
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
         self.trench_markers=markers;
+        self.refresh_virtual_references();
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
         self.template_preferences=doc.template_preferences;
@@ -1492,10 +1498,10 @@ impl SleufBaseApp {
             let mut edit_virtual = None;
             for (index,trench) in self.virtual_trenches.iter_mut().enumerate() {
                 ui.horizontal(|ui|{
-                    ui.label(format!("{} ({:.2} m, {} objecten{})",
+                    if ui.selectable_label(self.virtual_map.selected==Some(index),format!("{} ({:.2} m, {} objecten{})",
                         trench.label,trench.length(),trench.objects.len(),
                         if trench.boundary_3d.is_empty() {""} else {", MarXact 3D"}
-                    ));
+                    )).clicked(){self.virtual_map.selected=Some(index);}
                     if ui.small_button("Bewerken").clicked(){edit_virtual=Some(index);}
                 });
                 if !trench.boundary_3d.is_empty() {
@@ -1520,6 +1526,7 @@ impl SleufBaseApp {
                 }
             }
             if let Some(index)=edit_virtual {self.open_virtual_editor(index);}
+            self.show_virtual_map_controls(ui);
             ui.separator();
             ui.heading("Kaartopmerkingen");
             let mut remove_comment=None;
@@ -1619,20 +1626,21 @@ impl SleufBaseApp {
         if self.file_intent.is_some(){self.show_file_loading(ctx);return;}
         if self.trench_markers.len()!=self.virtual_trenches.len() {
             self.trench_markers=self.virtual_trenches.iter().map(sleufbase_rust::cross_section::markers).collect();
+            self.refresh_virtual_references();
         }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.heading("Kaart");
             ui.label("Zoom met scrollwiel, sleep om te verschuiven. GeoTIFF, DXF, PDOK, OpenStreetMap, BGT en Kadaster (preview).");
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
-            self.navigation.pointer_tool=self.raster_rotation.active();
+            self.navigation.pointer_tool=self.raster_rotation.active()||self.virtual_map.captures();
             let view=canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
                 self.osm_visible && self.osm_texture.is_some(),
                 &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules,Some(&mut self.navigation));
-            if let Some(view)=view{self.handle_raster_rotation(&view);self.handle_raster_points(&view);}
+            if let Some(view)=view{self.handle_raster_rotation(&view);self.handle_raster_points(&view);self.handle_virtual_map(&view);}
         });
 
         if self.show_trench_dialog {

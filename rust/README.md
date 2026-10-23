@@ -10,6 +10,7 @@ De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
 ## Wat er in deze preview zit
 
 - Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
+- Virtuele proefsleuven op de echte kaart tekenen, selecteren, als geheel verplaatsen en voorzien van een blijvend referentiepunt. Twee drukken kiezen begin/eind; korte sleuven worden geweigerd. Midden slepen blijft pannen; Escape/rechtsklik annuleert. Gemeten rand en uitlijningsbasis bewegen mee zonder bronbestanden of Z-waarden te wijzigen. Referenties/notities blijven in projecten en sjablonen, ook zonder profieltekening. De overige punt-/kopie-/dekbandtools, automatische AHN-hoogten en volledige rastermaskers blijven open. Zie [de oorspronkelijke kaart-/uitvoercontroles](tests/fixtures/virtual-map/README.md).
 - Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
 - Locatiezoeker met PDOK-adres-/plaats-/wegsuggesties, RD/GPS-invoer, Ctrl+L, toetsenbordkeuze en tijdelijke markering. Springen werkt ook zonder geladen bestanden; de oorspronkelijke schaal en PDOK-luchtfoto volgen de gekozen locatie. Zoeken gebruikt één begrensde achtergrondworker en overschrijft geen projectdata. Zie [de onafhankelijke locatiecontroles](tests/fixtures/location/README.md).

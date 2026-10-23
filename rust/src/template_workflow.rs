@@ -96,7 +96,7 @@ pub fn request_with_bgt(
     control.check()?;
     state.validate()?;
     let labels = state.labels()?;
-    let all_comments=crate::map_comments::combined(&inputs.comments,&inputs.rasters)?;
+    let all_comments=crate::map_comments::combined_all(&inputs.comments,&inputs.rasters,&inputs.trenches)?;
     if !labels.iter().any(Option::is_some) {
         return Err("Kies minimaal één proefsleuf voor de sjabloonexport".into());
     }

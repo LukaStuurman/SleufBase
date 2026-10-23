@@ -180,7 +180,7 @@ fn build_sources(
 ) -> Result<template_export::Request, String> {
     let Sources{jobs,rasters,trenches,bgt,cadastral,cad,comments}=sources;
     control.check()?;
-    let all_comments=crate::map_comments::combined(comments,rasters)?;
+    let all_comments=crate::map_comments::combined_all(comments,rasters,trenches)?;
     crate::dxf_fonts::Catalog::validate_dirs(&opts.font_directories)?;
     if !opts.template.is_file() {
         return Err("Kies een bestaand DXF-sjabloon".into());
@@ -319,7 +319,12 @@ fn build_sources(
             }
         }
         let local_index = datasets.len();
-        let metadata=if choice.profile{raster.map_or(serde_json::Value::Null,|r|r.metadata.clone())}else{serde_json::Value::Null};
+        let virtual_metadata=match choice.source{Source::Virtual(i)=>Some(&trenches[i]).filter(|t|t.metadata.is_object()),_=>None};
+        let map_reference=if let Some(t)=virtual_metadata{crate::virtual_map::reference(t)?}else{
+            raster.and_then(|r|crate::raster_points::stored(r,crate::raster_points::REFERENCE).map(|p|(r,p)))
+                .map(|(r,p)|crate::raster_points::display(r,p)).transpose()?
+        };
+        let metadata=if choice.profile{virtual_metadata.map_or_else(||raster.map_or(serde_json::Value::Null,|r|r.metadata.clone()),|t|t.metadata.clone())}else{serde_json::Value::Null};
         metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&metadata)?);
         if metadata_bytes>16*1024*1024{return Err("Te veel profielmetadata voor één export".into());}
         datasets.push(dataset);
@@ -340,7 +345,7 @@ fn build_sources(
                     BackgroundKind::Blank => Background::Solid { color: [250,250,250,255] },
                     BackgroundKind::Pdok => Background::Pdok,
                 },
-                overlays: overlays.into(), ..MapSource::default()
+                overlays: overlays.into(), reference:map_reference, ..MapSource::default()
             }),
             profile: choice.profile.then_some(Profile {
                 dataset: local_index, forced_start, reverse: choice.reverse,

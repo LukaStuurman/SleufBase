@@ -152,6 +152,8 @@ impl SleufBaseApp {
     ) {
         self.raster_points.mode=None;self.raster_points.rows.clear();
         self.raster_rotation=Default::default();
+        self.virtual_map=Default::default();
+        self.refresh_virtual_references();
         if let LoadPurpose::Project(action) = purpose {
             let Some(outcome) = outcomes.into_iter().next() else {
                 self.message = "Geen projectgegevens ontvangen; huidige gegevens behouden.".into();
@@ -269,6 +271,7 @@ impl SleufBaseApp {
                 )),
             }
         }
+        if matches!(purpose, LoadPurpose::MarXact) { self.refresh_virtual_references(); }
         if added > 0 {
             self.dirty = true;
             if matches!(purpose, LoadPurpose::GeoTiffs) {

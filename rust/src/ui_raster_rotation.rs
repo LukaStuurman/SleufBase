@@ -79,6 +79,7 @@ impl SleufBaseApp {
         self.rotate_raster(path, angle, true);
     }
     fn start_raster_rotation(&mut self, path: PathBuf) {
+        self.cancel_virtual_map();
         if self.geotiffs.iter().filter(|r| r.path == path).count() != 1 {
             self.message = "Kies één unieke TIFF-bron".into();
             return;

@@ -301,6 +301,22 @@ mod tests {
     use std::time::Instant;
 
     #[test]
+    fn actual_project_worker_keeps_virtual_reference_notes_and_returns_source_allocations(){
+        use sleufbase_rust::{virtual_map,virtual_trench::VirtualTrench,template_project::{Options,Choice,Source}};
+        let data:serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/virtual-map/reference.json")).unwrap();
+        let mut t:VirtualTrench=serde_json::from_value(data["cases"][1]["source"].clone()).unwrap();let p=[t.start.x+1.1,t.start.y+0.4];virtual_map::set_reference(&mut t,p).unwrap();
+        let metadata=t.metadata.clone();let mut app=SleufBaseApp{virtual_trenches:vec![t],..Default::default()};
+        let pointer=app.virtual_trenches.as_ptr();let objects=app.virtual_trenches[0].objects.as_ptr();
+        let dir=tempfile::tempdir().unwrap();let output=dir.path().join("virtual.dxf");
+        let options=Options{template:PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../assets/cadastral_template.dxf"),paired:false,dpi:96,include_bgt:false,include_cadastral:false,include_cad:false,choices:vec![Choice{source:Source::Virtual(0),raster:None,include:true,title:"PS12".into(),profile:true,reverse:false,comments:String::new(),photos:Vec::new()}],..Default::default()};
+        app.start_project_template_export(options,output.clone());assert!(app.template_job.is_some());assert!(app.virtual_trenches.is_empty());
+        let ctx=egui::Context::default();let until=Instant::now()+Duration::from_secs(30);
+        while app.template_job.is_some(){app.poll_template_job(&ctx);assert!(Instant::now()<until);std::thread::sleep(Duration::from_millis(2));}
+        assert_eq!(app.virtual_trenches.as_ptr(),pointer);assert_eq!(app.virtual_trenches[0].objects.as_ptr(),objects);assert_eq!(app.virtual_trenches[0].metadata,metadata);assert!(output.is_file(),"{}",app.message);
+        let doc=sleufbase_rust::dxf_document::Document::load(&output,&std::sync::atomic::AtomicBool::new(false)).unwrap();assert!(doc.records().any(|r|r.kind()=="LEADER"));assert!(doc.records().any(|r|r.kind()=="MTEXT"&&r.first(1).is_some_and(|s|s.contains("Bronnotitie"))));
+    }
+
+    #[test]
     fn existing_output_is_never_overwritten_by_desktop_template_action() {
         let dir = tempfile::tempdir().unwrap();
         let manifest = dir.path().join("input.json");

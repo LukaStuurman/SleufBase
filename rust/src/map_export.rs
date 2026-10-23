@@ -228,14 +228,14 @@ fn overlays(
             let [x, y] = points[0];
             let radius = (width + 2).max(4) as f64;
             let mut circle =
-                |r: f64, c| map_canvas::ellipse(image, [x - r, y - r, x + r, y + r], c);
+                |r: f64, c| map_canvas::ellipse(image, [x - r, y - r, x + r, y + r], c, None, cancel, &mut budget);
             if stroke.highlighted {
-                circle(radius + 4., [0, 160, 255, 105]);
+                circle(radius + 4., [0, 160, 255, 105])?;
             }
             if stroke.selected {
-                circle(radius + 3., [255, 215, 0, 215]);
+                circle(radius + 3., [255, 215, 0, 215])?;
             }
-            circle(radius, color);
+            circle(radius, color)?;
         }
     }
     Ok(())

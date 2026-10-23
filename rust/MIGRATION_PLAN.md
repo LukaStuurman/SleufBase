@@ -49,6 +49,53 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 23 oktober 2026: virtuele kaartplaatsing en referenties
+
+- Nieuwe virtuele sleuven kunnen met twee drukken op de echte kaart worden
+  geplaatst; te korte invoer houdt de eindpuntmodus open. Selectie, bronvolgorde-
+  ties, oorspronkelijke automatische naamgeving en een rechtsklikmenu zijn
+  aangesloten. Verplaatsen gebruikt de oorspronkelijke bevestigende klik en
+  bewaart de camera. Midden slepen blijft pannen; Escape/rechtsklik annuleert
+  een nog niet bevestigde handeling. Na aanmaak opent de bestaande staged editor.
+  Onbekende hoogtes blijven leeg; automatische AHN-aanvulling blijft open.
+- Hash-gevalideerde oorspronkelijke functies leveren 32 ketens/288 selecties,
+  raw/display-referenties, alle punt-XYZ, originele naamregels en creatiebeslissingen.
+  De 0,5 m-grens, Unicode-14-cijfers, speciale I/S-caseregels, gaten in nummering
+  en zeer grote nummerachtervoegsels worden meegenomen. Verse runtime-invoer
+  gebruikt 47 ketens/423 selecties; numerieke coördinaten vergelijken op 2e-8 m.
+- Een oorspronkelijke fout is apart bewaard: bij bewegen blijft een gemeten
+  3D-rand achter. Native bewegen vertaalt punten, rand en automatische
+  uitlijningsbasis samen, na volledige resultaatvalidatie. Z, bronbestanden,
+  raw referenties, overige metadata en bestaande vectors blijven behouden.
+  Per muisframe worden geen volledige sleuven of grote metadata gekopieerd.
+- Optionele virtuele laagmetadata wordt projectvast bewaard. Python-import
+  activeert niet-geometrische metadata zonder payload/grens te dupliceren; het
+  complete oorspronkelijke archief blijft ongewijzigd. De 2 MiB-laag- en
+  gezamenlijke 16 MiB-projectlimieten gelden ook voor virtuele metadata.
+- Referenties gaan mee naar profiel én kaart, ook in beeld-only-export. Bronkeuzes
+  hebben voorrang op oude snapshots. Beide planners combineren ook virtuele
+  notities; globale wisacties nemen die mee. Wisacties actualiseren een open
+  editordraft zodat Opslaan geen gewiste referentie/notitie terugzet. Handmatige
+  kopieën houden de zichtbare referentie zonder oude rotatie-/jobkoppeling.
+- De ellipsaudit legt 192 oorspronkelijke fill/outline-gevallen vast: alle
+  589.824 RGBA-pixels vergelijken exact, inclusief de 22 px-referentiecirkel,
+  subpixel-/afgeknipte grenzen en nul-/brede lijnen. De oude analytische
+  benadering is vervangen door begrensde Pillow-scanlines met annuleerbaarheid
+  en een tekenbudget; er wordt geen volledig kaartmasker aangemaakt.
+- Projectopenen, nieuwe MarXact-import en verwijderen houden de cache van
+  virtuele referentiemarkeringen bij, ook met vooraf berekende profielmarkers.
+- Alle 531 Rust-tests (69 desktoptests), Clippy zonder nieuwe categorieën en
+  geoptimaliseerde app/drivers slagen. Verse oorspronkelijke invoer vergelijkt
+  47 ketens/423 hits. Drie echte handmatige/gemeten/beeld-only-DXFs vergelijken
+  118 complete profielentiteiten, zes PNGs met exacte referentieringen, drie
+  oorspronkelijke Excel-werkmappen en notitie-/lokale datum-/projectvelden.
+  Beide JSON-referenties zijn onafhankelijk bytegelijk opnieuw opgebouwd.
+  De visuele controle toont nog de oorspronkelijke te grote legenda bij lage
+  uitvoerresolutie; die verbetering blijft afzonderlijk open. Alle resterende
+  go/no-go-voorwaarden blijven vereist.
+  Punt-/eindbewerking op kaart, kopierichting, dekbandprikken, AHN-/kleuren-/
+  maskergedrag, overige instellingen en praktijk-/leveringsacceptatie blijven open.
+
 ## Voortgang 23 oktober 2026: Kadaster-achtergrond in kaartexport
 
 - De oorspronkelijke Kadaster-keuze is daadwerkelijk uitvoerbaar in Export kaarten.

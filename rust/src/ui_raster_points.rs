@@ -70,11 +70,13 @@ impl SleufBaseApp {
             ui.small("Selecteer hierboven een GeoTIFF. Punten worden bij het project bewaard en in sjablonen gebruikt.");
             let target=self.raster_points.selected.is_some();
             if ui.add_enabled(target,egui::Button::new(if self.raster_points.mode==Some(Mode::Reference){"Referentie sluiten"}else{"Referentiepunt plaatsen"})).clicked(){
+                self.cancel_virtual_map();
                 self.stop_raster_rotation();
                 self.raster_points.mode=if self.raster_points.mode==Some(Mode::Reference){None}else{Some(Mode::Reference)};
                 self.message="Klik op de kaart om het referentiepunt te plaatsen of te verplaatsen.".into();
             }
             if ui.add_enabled(target,egui::Button::new(if self.raster_points.mode==Some(Mode::Start){"Beginpunt sluiten"}else{"Beginpunt kiezen"})).clicked(){
+                self.cancel_virtual_map();
                 self.stop_raster_rotation();
                 if self.raster_points.mode==Some(Mode::Start){self.raster_points.mode=None;}else if let Some(path)=self.raster_points.selected.clone(){self.start_point_task(Some(path));}
             }
@@ -89,6 +91,10 @@ impl SleufBaseApp {
         });
     }
     pub(super) fn clear_raster_references(&mut self) {
+        let virtual_removed=self.virtual_trenches.iter_mut().filter(|t|t.metadata.get(points::REFERENCE).is_some()).count();
+        for t in &mut self.virtual_trenches{sleufbase_rust::virtual_map::clear_reference(t);}
+        self.clear_virtual_editor_metadata(points::REFERENCE,None);
+        if virtual_removed>0{self.trench_markers.clear();}
         let mut removed = self
             .geotiffs
             .iter()
@@ -114,11 +120,11 @@ impl SleufBaseApp {
                 }
             }
         }
-        self.dirty |= !removed.is_empty();
-        self.message = if removed.is_empty() {
+        self.dirty |= !removed.is_empty() || virtual_removed>0;
+        self.message = if removed.is_empty() && virtual_removed==0 {
             "Geen referentiepunten om te wissen.".into()
         } else {
-            format!("{} referentiepunt(en) gewist.", removed.len())
+            format!("{} referentiepunt(en) gewist.", removed.len()+virtual_removed)
         };
     }
     fn start_point_task(&mut self, target: Option<PathBuf>) -> bool {

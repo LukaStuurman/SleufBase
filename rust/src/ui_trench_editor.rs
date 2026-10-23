@@ -18,6 +18,21 @@ struct ObjectForm {
     elevation:f64,
     has_elevation:bool,
 }
+
+#[cfg(test)]
+mod metadata_tests {
+    use super::*;
+    #[test]
+    fn clearing_source_references_and_notes_cannot_be_undone_by_saving_an_open_draft(){
+        let mut t=VirtualTrench::new("Test".into(),Vertex{x:155000.,y:463000.,z:Some(2.)},Vertex{x:155010.,y:463000.,z:Some(2.)},0.6).unwrap();
+        t.metadata=serde_json::json!({"template_reference_point":{"x":155001.,"y":463001.},"tiff_comment_text":"Note","keep":"Ø"});
+        let mut app=SleufBaseApp{virtual_trenches:vec![t],..Default::default()};app.open_virtual_editor(0);
+        app.trench_editor.as_mut().unwrap().add_or_replace().unwrap();
+        app.clear_raster_references();app.clear_map_comments();
+        let next=app.trench_editor.take().unwrap().build().unwrap();
+        assert_eq!(next.objects.len(),1);assert_eq!(next.metadata["keep"],"Ø");assert!(next.metadata.get("template_reference_point").is_none());assert!(next.metadata.get("tiff_comment_text").is_none());
+    }
+}
 impl Default for ObjectForm {
     fn default()->Self {
         Self {
@@ -187,7 +202,13 @@ impl Editor {
     }
 }
 impl SleufBaseApp {
+    pub(super) fn clear_virtual_editor_metadata(&mut self,key:&str,index:Option<usize>){
+        if let Some(editor)=self.trench_editor.as_mut().filter(|e|index.is_none_or(|i|i==e.index)){
+            for t in [&mut editor.original,&mut editor.draft]{if let Some(m)=t.metadata.as_object_mut(){m.remove(key);}}
+        }
+    }
     pub(super) fn open_virtual_editor(&mut self,index:usize) {
+        self.cancel_virtual_map();
         if self.export_intent.is_some() || self.template_job.is_some()
             || self.file_intent.is_some() {
             self.message="Rond de lopende laad- of exporttaak eerst af".into();
@@ -474,6 +495,7 @@ impl SleufBaseApp {
                 Action::Remove=>{
                     self.virtual_trenches.remove(editor.index);
                     self.trench_markers.clear();
+                    self.refresh_virtual_references();
                     self.dirty=true;
                     self.message="Virtuele proefsleuf verwijderd".into();
                     return;

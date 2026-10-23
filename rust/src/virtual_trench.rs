@@ -40,7 +40,8 @@ pub struct VirtualTrench {
     pub dekband_rows:Vec<Dekband>,
     #[serde(default)]
     pub source_path:Option<PathBuf>,
-    /// Original measured 3D MarXact boundary; empty for manually drawn trenches.
+    /// Measured 3D MarXact boundary in its current map placement. Source files
+    /// stay unchanged; empty for manually drawn trenches.
     #[serde(default)]
     pub boundary_3d:Vec<Vertex>,
     /// Automatic axis baseline and absolute manual correction. Absent in older previews.
@@ -48,6 +49,9 @@ pub struct VirtualTrench {
     pub alignment:Option<crate::marxact_alignment::MarXactAlignment>,
     #[serde(default)]
     pub job_id:u64,
+    /// Active layer metadata, including original raw RD reference points.
+    #[serde(default,skip_serializing_if="serde_json::Value::is_null")]
+    pub metadata:serde_json::Value,
 }
 
 // Numerically equal chainages (including -0/+0) keep their source order.
@@ -58,13 +62,14 @@ impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
             label,width_meters:width,start,end,
-            objects:Vec::new(),dekband_rows:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0
+            objects:Vec::new(),dekband_rows:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0,metadata:Default::default()
         };
         result.validate()?;
         Ok(result)
     }
 
     pub fn validate(&self) -> Result<(),String> {
+        crate::raster_points::validate_metadata(&self.metadata)?;
         if let Some(alignment)=&self.alignment {alignment.validate()?;}
         if !self.width_meters.is_finite() || self.width_meters<0.1 {
             return Err("Een virtuele proefsleuf moet minstens 0,1 m breed zijn".into());

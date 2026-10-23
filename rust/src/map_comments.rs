@@ -53,6 +53,9 @@ pub fn clear(comments: &mut Vec<Comment>, rasters: &mut [GeoTiffInfo]) -> Result
 /// The original app appends each TIFF note at its actual affine image centre.
 /// This vector is prepared once per export, never once per slot or canvas frame.
 pub fn combined(comments: &[Comment], rasters: &[GeoTiffInfo]) -> Result<Vec<Comment>, String> {
+    combined_all(comments,rasters,&[])
+}
+pub fn combined_all(comments:&[Comment],rasters:&[GeoTiffInfo],trenches:&[crate::virtual_trench::VirtualTrench])->Result<Vec<Comment>,String>{
     let mut result = Vec::new();
     let mut bytes = 0usize;
     let mut push = |x: f64, y: f64, text: Cow<'_, str>| -> Result<(), String> {
@@ -86,5 +89,20 @@ pub fn combined(comments: &[Comment], rasters: &[GeoTiffInfo]) -> Result<Vec<Com
             push(x, y, Cow::Owned(text))?;
         }
     }
+    for trench in trenches {
+        let text=text(&trench.metadata)?;
+        if !text.is_empty(){
+            let [x,y]=crate::virtual_map::raster_center(trench);
+            push(x,y,Cow::Owned(text))?;
+        }
+    }
     Ok(result)
+}
+
+pub fn clear_all(comments:&mut Vec<Comment>,rasters:&mut[GeoTiffInfo],trenches:&mut[crate::virtual_trench::VirtualTrench])->Result<usize,String>{
+    let mut indices=Vec::new();
+    for (i,trench) in trenches.iter().enumerate(){if !text(&trench.metadata)?.is_empty(){indices.push(i);}}
+    let count=clear(comments,rasters)?+indices.len();
+    for i in indices{trenches[i].metadata.as_object_mut().unwrap().remove(KEY);}
+    Ok(count)
 }

@@ -486,14 +486,14 @@ pub fn plan(
     }
     Ok(ops)
 }
-fn rounded_rect(image: &mut RgbaImage, b: [f64; 4], radius: f64, fill: [u8; 4]) {
+fn rounded_rect(image: &mut RgbaImage, b: [f64; 4], radius: f64, fill: [u8; 4], cancel: &AtomicBool, budget: &mut u64) -> Result<(), String> {
     let r = radius
         .min((b[2] - b[0]) / 2.)
         .min((b[3] - b[1]) / 2.)
         .max(0.);
     if r == 0. {
         canvas::rect(image, b, fill);
-        return;
+        return Ok(());
     }
     canvas::rect(image, [b[0] + r, b[1], b[2] - r, b[3]], fill);
     canvas::rect(image, [b[0], b[1] + r, b[2], b[3] - r], fill);
@@ -503,8 +503,9 @@ fn rounded_rect(image: &mut RgbaImage, b: [f64; 4], radius: f64, fill: [u8; 4]) 
         (b[0], b[3] - 2. * r),
         (b[2] - 2. * r, b[3] - 2. * r),
     ] {
-        canvas::ellipse(image, [x, y, x + 2. * r, y + 2. * r], fill);
+        canvas::ellipse(image, [x, y, x + 2. * r, y + 2. * r], fill, None, cancel, budget)?;
     }
+    Ok(())
 }
 pub(crate) fn draw(
     image: &mut RgbaImage,
@@ -531,15 +532,15 @@ pub(crate) fn draw(
             } => {
                 if let Some(c) = fill {
                     if let Some(c) = outline {
-                        rounded_rect(image, *bounds, *radius, *c);
+                        rounded_rect(image, *bounds, *radius, *c, cancel, &mut budget)?;
                     }
                     let d = if outline.is_some() { *width as f64 } else { 0. };
                     rounded_rect(
                         image,
                         [bounds[0] + d, bounds[1] + d, bounds[2] - d, bounds[3] - d],
                         (*radius - d).max(0.),
-                        *c,
-                    );
+                        *c, cancel, &mut budget,
+                    )?;
                 } else if let Some(c) = outline {
                     let [l, t, r, b] = *bounds;
                     let w = *width as f64;
@@ -555,13 +556,8 @@ pub(crate) fn draw(
                 outline,
                 width,
             } => {
-                canvas::ellipse(image, *bounds, *outline);
-                let d = *width as f64;
-                canvas::ellipse(
-                    image,
-                    [bounds[0] + d, bounds[1] + d, bounds[2] - d, bounds[3] - d],
-                    *fill,
-                );
+                canvas::ellipse(image, *bounds, *fill, None, cancel, &mut budget)?;
+                canvas::ellipse(image, *bounds, *outline, Some(*width), cancel, &mut budget)?;
             }
             Op::Text {
                 position,
