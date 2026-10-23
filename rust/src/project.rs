@@ -147,7 +147,7 @@ impl NativeProject {
         }
         let mut metadata_bytes=0usize;
         for trench in &self.virtual_trenches {
-            metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&trench.metadata)?);
+            metadata_bytes=metadata_bytes.saturating_add(trench.point_metadata_bytes()?);
         }
         if metadata_bytes>16*1024*1024{return Err("Te veel laagmetadata in project".into());}
         for raster in &self.rasters {

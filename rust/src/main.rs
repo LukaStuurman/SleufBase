@@ -2,6 +2,7 @@ mod ui;
 mod rule_editor;
 mod export_dialog;
 mod template_dialog;
+mod ui_preferences;
 
 use sleufbase_rust::{
     load_job_features, write_xlsx,
@@ -19,6 +20,7 @@ fn print_help() {
     println!("sleufbase-rust.exe --marxact uitvoer.json meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting.dxf [extra.dxf ...]");
     println!("sleufbase-rust.exe --import-python uitvoer.json project.klicproject");
+    println!("sleufbase-rust.exe --export-python nieuw.klicproject Rust-project.json");
     println!("Optioneel vóór de opdracht: --settings Rust-instellingen.json");
     println!("Licenties van overgenomen onderdelen: --licenses");
     println!("Bestaande uitvoerbestanden worden niet overschreven.");
@@ -51,6 +53,14 @@ fn run_cli(args: &[String]) -> Result<(), String> {
         save_project_new(&output,&project)?;
         println!("Python-project geïmporteerd naar {}",output.display());
         for notice in &project.legacy_archive.as_ref().unwrap().notices {println!("Melding: {notice}");}
+        return Ok(());
+    }
+    if args[0]=="--export-python" {
+        if args.len()!=3 {return Err("Gebruik --export-python nieuw.klicproject Rust-project.json".into());}
+        let project=sleufbase_rust::project::read_project(&PathBuf::from(&args[2]))?;
+        let ui=sleufbase_rust::legacy_project::ProjectUiState::from_project(&project)?.unwrap_or_default();
+        sleufbase_rust::legacy_project::write_legacy_project(&project,&output,&ui,&std::sync::atomic::AtomicBool::new(false))?;
+        println!("Nieuw Python-project opgeslagen naar {}",output.display());
         return Ok(());
     }
     if matches!(args[0].as_str(),"--marxact"|"--marxact-dxf") {

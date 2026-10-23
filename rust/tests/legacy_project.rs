@@ -15,6 +15,94 @@ fn close(a: f64, b: f64) {
 }
 
 #[test]
+fn python_exchange_preserves_existing_assets_that_import_could_not_read(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();std::fs::create_dir(dir.path().join("assets")).unwrap();
+    std::fs::write(dir.path().join("assets/reference.tiff"),b"not a TIFF").unwrap();
+    std::fs::write(dir.path().join("assets/context.dxf"),b"not a DXF").unwrap();
+    let project=import_value(fixture(),&dir.path().join("source.klicproject")).unwrap();
+    assert!(project.rasters.is_empty());assert!(project.overlays.is_empty());
+    let out=legacy_payload(&project,&ProjectUiState::default()).unwrap();
+    assert_eq!(out["tiffs"].as_array().unwrap().len(),2);assert_eq!(out["dxfs"].as_array().unwrap().len(),1);
+    assert_eq!(PathBuf::from(out["tiffs"][1]["path"].as_str().unwrap()),dir.path().join("assets/reference.tiff"));
+}
+
+#[test]
+fn python_exchange_remaps_archived_layer_selection_after_reordering(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();let source=dir.path().join("source.klicproject");
+    let mut raw=fixture();raw["tiffs"].as_array_mut().unwrap().swap(0,1);
+    raw["ui"]["selected_tiff_index"]=json!(1);
+    let project=import_value(raw.clone(),&source).unwrap();
+    let ui=ProjectUiState::from_project(&project).unwrap().unwrap();assert_eq!(ui.selected_tiff_index,Some(0));
+    let out=legacy_payload(&project,&ui).unwrap();assert_eq!(out["tiffs"][0]["type"],"virtual_trench");
+    raw["ui"]["selected_tiff_index"]=json!(99);let project=import_value(raw,&source).unwrap();
+    assert_eq!(ProjectUiState::from_project(&project).unwrap().unwrap().selected_tiff_index,None);
+}
+
+#[test]
+fn python_exchange_does_not_resurrect_removed_alignment(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();
+    let mut project=import_value(fixture(),&dir.path().join("source.klicproject")).unwrap();
+    assert!(project.virtual_trenches[0].alignment.is_some());
+    project.virtual_trenches[0].alignment=None;
+    let out=legacy_payload(&project,&ProjectUiState::default()).unwrap();
+    for key in ["marxact_alignment_auto_start","marxact_alignment_auto_end","marxact_alignment_auto_width","marxact_alignment_rotation_degrees"]{assert!(out["tiffs"][0]["metadata"].get(key).is_none());}
+    let restored=import_value(out,&dir.path().join("roundtrip.klicproject")).unwrap();
+    // Python boundary geometry supplies a fresh default alignment basis.
+    assert_eq!(restored.virtual_trenches[0].alignment.as_ref().unwrap().rotation_degrees,0.);
+}
+
+#[test]
+fn python_exchange_keeps_unknown_fields_after_native_edit_and_never_overwrites(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload,write_legacy_project};
+    let dir=tempfile::tempdir().unwrap();let source=dir.path().join("original.klicproject");std::fs::write(&source,FIXTURE).unwrap();
+    let mut project=read_legacy_project(&source).unwrap();let mut ui=ProjectUiState::from_project(&project).unwrap().unwrap();
+    assert_eq!(ui.center_x,168002.);assert_eq!(ui.selected_tiff_index,Some(0));
+    project.name="Bewerkt project Ø".into();let trench=&mut project.virtual_trenches[0];trench.label="Hernoemde sleuf".into();trench.objects[0].object_name="Gewijzigd object".into();trench.objects[0].position.z=Some(4.5);ui.center_x+=100.;
+    let payload=legacy_payload(&project,&ui).unwrap();assert_eq!(payload["project_name"],"Bewerkt project Ø");assert_eq!(payload["template_export_settings"],fixture()["template_export_settings"]);assert_eq!(payload["tiffs"][0]["metadata"]["custom_metadata"],fixture()["tiffs"][0]["metadata"]["custom_metadata"]);
+    let p=&payload["tiffs"][0]["metadata"]["virtual_trench_payload"]["points"][1];assert_eq!(p["custom_object_metadata"],json!({"keep":true}));assert_eq!(p["object_name"],"Gewijzigd object");assert_eq!(p["z"],4.5);
+    assert!(payload["tiffs"][0]["metadata"].get("_sleufbase_python_tiff_index").is_none());
+    let path=dir.path().join("export.klicproject");write_legacy_project(&project,&path,&ui,&std::sync::atomic::AtomicBool::new(false)).unwrap();
+    let restored=read_legacy_project(&path).unwrap();assert_eq!(restored.virtual_trenches[0].objects[0].position.z,Some(4.5));assert_eq!(restored.virtual_trenches[0].objects[0].metadata["custom_object_metadata"],json!({"keep":true}));assert_eq!(restored.comments[0].text,project.comments[0].text);
+    assert!(write_legacy_project(&project,&source,&ui,&std::sync::atomic::AtomicBool::new(false)).is_err());assert_eq!(std::fs::read_to_string(source).unwrap(),FIXTURE);
+    assert!(write_legacy_project(&project,&dir.path().join("cancel.klicproject"),&ui,&std::sync::atomic::AtomicBool::new(true)).is_err());assert!(!dir.path().join("cancel.klicproject").exists());
+}
+
+#[test]
+fn python_exchange_rejects_duplicate_provenance_and_preserves_missing_asset_links(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();let source=dir.path().join("PS42.klicproject");let mut project=import_value(fixture(),&source).unwrap();
+    let payload=legacy_payload(&project,&ProjectUiState::default()).unwrap();assert_eq!(std::path::PathBuf::from(payload["tiffs"][1]["path"].as_str().unwrap()),dir.path().join("assets/reference.tiff"));assert_eq!(std::path::PathBuf::from(payload["dxfs"][0]["path"].as_str().unwrap()),dir.path().join("assets/context.dxf"));
+    project.virtual_trenches.push(project.virtual_trenches[0].clone());assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap_err().contains("dubbelzinnig"));
+}
+
+#[test]
+fn manual_copy_is_a_new_exchange_layer_and_keeps_its_unknown_point_fields(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();let source=dir.path().join("source.klicproject");
+    let mut project=import_value(fixture(),&source).unwrap();
+    let copy=sleufbase_rust::virtual_trench_editor::manual_copy(&project.virtual_trenches[0],"kopie").unwrap();
+    assert!(copy.metadata.get("_sleufbase_python_tiff_index").is_none());
+    project.virtual_trenches.push(copy);
+    let payload=legacy_payload(&project,&ProjectUiState::default()).unwrap();
+    assert_eq!(payload["tiffs"][1]["metadata"]["virtual_trench_payload"]["points"][1]["custom_object_metadata"],serde_json::json!({"keep":true}));
+    let restored=import_value(payload,&dir.path().join("roundtrip.klicproject")).unwrap();
+    assert_eq!(restored.virtual_trenches.len(),2);assert!(restored.virtual_trenches[1].alignment.is_none());
+}
+
+#[test]
+fn python_exchange_preserves_unknown_ui_and_loaded_dxf_fields(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();std::fs::create_dir(dir.path().join("assets")).unwrap();
+    std::fs::write(dir.path().join("assets/context.dxf"),"0\nSECTION\n2\nENTITIES\n0\nLINE\n8\nCABLE\n10\n168000\n20\n401000\n11\n168004\n21\n401002\n0\nENDSEC\n0\nEOF\n").unwrap();
+    let mut raw=fixture();raw["ui"]["future_ui_option"]=json!({"keep":[1,"Ø"]});raw["dxfs"][0]["future_style"]=json!({"colors":[1,2,3]});
+    let mut project=import_value(raw.clone(),&dir.path().join("source.klicproject")).unwrap();assert_eq!(project.overlays.len(),1);project.overlays[0].visible=true;
+    let mut ui=ProjectUiState::from_project(&project).unwrap().unwrap();ui.opacity_percent=35.;let out=legacy_payload(&project,&ui).unwrap();assert_eq!(out["ui"]["future_ui_option"],raw["ui"]["future_ui_option"]);assert_eq!(out["ui"]["opacity_percent"],35.);assert_eq!(out["dxfs"][0]["future_style"],raw["dxfs"][0]["future_style"]);assert_eq!(out["dxfs"][0]["visible"],true);
+}
+
+#[test]
 fn virtual_reference_metadata_is_active_without_duplicating_geometry_or_losing_the_original(){
     let mut legacy=fixture();let item=legacy["tiffs"].as_array_mut().unwrap().iter_mut().find(|v|v["type"]=="virtual_trench").unwrap();
     item["metadata"]["template_reference_point"]=json!({"x":100.25,"y":200.75});item["metadata"]["rotation_degrees"]=json!(37.5);item["metadata"]["unknown_layer_option"]=json!({"preserve":"Ø"});
@@ -158,6 +246,14 @@ fn conversion_cli_is_standalone_and_never_overwrites_the_source_or_output() {
         String::from_utf8_lossy(&result.stderr)
     );
     assert_eq!(read_project(&output).unwrap().virtual_trenches.len(), 1);
+    let exported=dir.path().join("roundtrip.klicproject");
+    let export=||std::process::Command::new(env!("CARGO_BIN_EXE_sleufbase-rust")).arg("--export-python").arg(&exported).arg(&output).output().unwrap();
+    let result=export();assert!(result.status.success(),"{}",String::from_utf8_lossy(&result.stderr));
+    let exported_bytes=std::fs::read(&exported).unwrap();
+    let restored=read_legacy_project(&exported).unwrap();
+    assert_eq!(restored.virtual_trenches[0].objects[0].metadata["custom_object_metadata"],json!({"keep":true}));
+    assert_eq!(restored.comments[0].text,"Controleer diepte – café");
+    assert!(!export().status.success());assert_eq!(std::fs::read(&exported).unwrap(),exported_bytes);
     let bytes = std::fs::read(&output).unwrap();
     assert!(!run().status.success());
     assert_eq!(std::fs::read(&output).unwrap(), bytes);
@@ -189,4 +285,34 @@ fn malformed_geometry_and_unrecognized_versions_fail_explicitly() {
     let p = import_value(value, &source).unwrap();
     assert_eq!(p.virtual_trenches[0].boundary_3d.len(), 4);
     assert_eq!(p.comments[0].text, "  exact text\n ");
+}
+
+#[test]
+fn python_exchange_roundtrips_active_dekbands_and_rejects_ambiguous_extra_metadata(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let dir=tempfile::tempdir().unwrap();let source=dir.path().join("source.klicproject");
+    let mut raw=fixture();raw["tiffs"][0]["metadata"]["template_dekband_lines"]=json!([
+        {"start_chainage":0.5,"end_chainage":3.,"start_depth":0.2,"end_depth":0.7,"source_name":"Band Ø","display_rgb":[12,34,56],"future_band":{"preserve":true}}
+    ]);
+    let mut project=import_value(raw,&source).unwrap();
+    assert_eq!(project.virtual_trenches[0].dekband_rows[0].end_depth,0.7);
+    assert_eq!(project.virtual_trenches[0].dekband_rows[0].display_rgb,Some([12,34,56]));
+    let out=legacy_payload(&project,&ProjectUiState::default()).unwrap();
+    assert_eq!(out["tiffs"][0]["metadata"]["template_dekband_lines"][0]["future_band"],json!({"preserve":true}));
+    project.virtual_trenches[0].dekband_rows[0].start_depth=0.4;
+    assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap_err().contains("onbekende metadata"));
+    project.virtual_trenches[0].metadata["template_dekband_lines"][0].as_object_mut().unwrap().remove("future_band");
+    let out=legacy_payload(&project,&ProjectUiState::default()).unwrap();
+    assert_eq!(out["tiffs"][0]["metadata"]["template_dekband_lines"][0]["start_depth"],0.4);
+    let restored=import_value(out,&source).unwrap();assert_eq!(restored.virtual_trenches[0].dekband_rows[0].start_depth,0.4);
+    project.virtual_trenches[0].dekband_rows.clear();
+    assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap()["tiffs"][0]["metadata"].get("template_dekband_lines").is_none());
+}
+
+#[test]
+fn python_exchange_rejects_native_template_preferences_instead_of_exporting_stale_archive(){
+    use sleufbase_rust::legacy_project::{ProjectUiState,legacy_payload};
+    let mut project=sleufbase_rust::project::NativeProject::default();
+    project.template_export=Some(sleufbase_rust::template_order::State::default());
+    assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap_err().contains("Rust-sjabloonvoorkeuren"));
 }

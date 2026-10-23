@@ -9,8 +9,10 @@ De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
 
 ## Wat er in deze preview zit
 
+Nieuw: logo’s/contactherstel, volledige oorspronkelijke virtuele pixelmaskers/kleuren, dekbandprofielen per richting en niet-geheime profielvoorkeuren. `--export-python nieuw.klicproject native.json` biedt een expliciete beperkte terugconverter; niet verliesvrij ondersteunde gegevens worden geweigerd. [Contracten en beperkingen](tests/fixtures/native-port-contracts.md).
+
 - Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
-- Virtuele proefsleuven op de echte kaart tekenen, selecteren, als geheel verplaatsen en voorzien van een blijvend referentiepunt. Twee drukken kiezen begin/eind; korte sleuven worden geweigerd. Midden slepen blijft pannen; Escape/rechtsklik annuleert. Gemeten rand en uitlijningsbasis bewegen mee zonder bronbestanden of Z-waarden te wijzigen. Referenties/notities blijven in projecten en sjablonen, ook zonder profieltekening. De overige punt-/kopie-/dekbandtools, automatische AHN-hoogten en volledige rastermaskers blijven open. Zie [de oorspronkelijke kaart-/uitvoercontroles](tests/fixtures/virtual-map/README.md).
+- Virtuele proefsleuven op de echte kaart tekenen, selecteren, als geheel verplaatsen en voorzien van een blijvend referentiepunt. Twee drukken kiezen begin/eind; korte sleuven worden geweigerd. Midden slepen blijft pannen; Escape/rechtsklik annuleert. Gemeten rand en uitlijningsbasis bewegen mee zonder bronbestanden of Z-waarden te wijzigen. Referenties/notities blijven in projecten en sjablonen, ook zonder profieltekening. Puntselectie/snapping, asbewerking, richtingskopieën en dekbanddieptes zijn toegevoegd. Oorspronkelijke maskers en puntkleuren worden op alle pixels vergeleken; AHN aanvullen kan annuleerbaar in het concept. Automatische verversing bij alle kaartacties, Gemma/AI en praktijkacceptatie blijven open. Zie ook [de nieuwe contracten](tests/fixtures/native-port-contracts.md). Zie [de oorspronkelijke kaart-/uitvoercontroles](tests/fixtures/virtual-map/README.md).
 - Op kaarten met een referentielegenda schalen tekst, noordpijl en symbolen mee met de uitvoerresolutie, zodat lage-DPI-kaarten leesbaar blijven. Rasterligging en meetcoördinaten blijven behouden.
 - Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
 - Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
@@ -538,8 +540,8 @@ inhoud, beeldpixels, gekoppelde onderdelen en resterende grenzen.
 
 1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.
 2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows en kaartreprojectie.
-3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, verdere fontvarianten en SHX/LFF-kaartweergave, logo-/contactherstel, overige fotoannotaties, bloktypen en praktijkacceptatie.
-4. Resterende Python-toolset/kaartplaatsing en exacte rastermaskers voor virtuele sleuven/MarXact (native editor en eigen raster zijn aanwezig), volledige compatibiliteit met Python-projectopslag (v1-import is aanwezig), migratie van bestaande instellingen en volledig back-upherstel.
+3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, verdere fontvarianten en SHX/LFF-kaartweergave, overige bloktypen en praktijkacceptatie. Logo-/contactherstel en PDF/DGN/DWF-underlays zijn toegevoegd; native werkfoto’s blijven een optionele uitbreiding.
+4. Resterende oorspronkelijke kaartbedieningen en automatische AHN/AI-workflow voor virtuele sleuven/MarXact, volledige compatibiliteit met Python-projectopslag (expliciete import en beperkte terugconverter zijn aanwezig), migratie van alle instellingen en volledig back-upherstel.
 5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.
 
 ## Aanpak voor vervolgmigratie

@@ -73,7 +73,7 @@ fn main() -> Result<(), String> {
         vertex(4., 1., 12.),
         vertex(0., 1., 13.),
     ];
-    trench.add_object(TrenchPoint {
+    trench.add_object(TrenchPoint {metadata:Default::default(),
         role: "object".into(),
         object_name: "Water".into(),
         source_name: "water".into(),

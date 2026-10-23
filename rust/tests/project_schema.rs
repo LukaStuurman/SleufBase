@@ -70,7 +70,7 @@ fn every_native_project_object_rejects_unknown_fields() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters/gray16.tiff");
     unknown(read_geotiff_metadata(&path).unwrap());
     unknown(VirtualTrench::new("PS1".into(), p, q, 1.).unwrap());
-    unknown(TrenchPoint {
+    unknown(TrenchPoint {metadata:Default::default(),
         role: "object".into(),
         object_name: "water".into(),
         source_name: "water".into(),

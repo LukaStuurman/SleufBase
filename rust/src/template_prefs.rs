@@ -32,6 +32,10 @@ fn default_paired()->bool{true}
 #[derive(Clone,Debug,Serialize,Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TemplatePreferences {
+    #[serde(default)]
+    pub profile_style:crate::settings_compat::ProfilePreferences,
+    #[serde(default,skip_serializing_if="crate::template_branding::Logos::is_empty")]
+    pub logos:crate::template_branding::Logos,
     pub template:PathBuf,
     #[serde(default="default_paired")]
     pub paired:bool,
@@ -71,12 +75,15 @@ impl TemplatePreferences {
             })
         }).collect();
         Self {template:opts.template.clone(),paired:opts.paired,project:opts.project.clone(),
+            profile_style:opts.profile_style.clone(),
+            logos:opts.logos.clone(),
             drawn_by:opts.drawn_by.clone(),font_directories:opts.font_directories.clone(),dpi:opts.dpi,scale:opts.scale,
             background:opts.background,include_bgt:opts.include_bgt,
             include_cadastral:opts.include_cadastral,include_cad:opts.include_cad,
             choices}
     }
     pub fn validate(&self)->Result<(),String>{
+        self.profile_style.validate()?;
         crate::dxf_fonts::Catalog::validate_dirs(&self.font_directories)?;
         if self.choices.len()>20_000 {return Err("Te veel sjabloonvoorkeuren".into());}
         if self.project.len()>2048 || self.drawn_by.len()>2048
@@ -99,6 +106,8 @@ impl TemplatePreferences {
         trenches:&[VirtualTrench])->Options
     {
         let mut options=Options {
+            profile_style:self.profile_style.clone(),
+            logos:self.logos.clone(),
             template:self.template.clone(),paired:self.paired,project:self.project.clone(),
             drawn_by:self.drawn_by.clone(),font_directories:self.font_directories.clone(),dpi:self.dpi,scale:self.scale,
             background:self.background,include_bgt:self.include_bgt,
@@ -158,6 +167,8 @@ mod tests {
         let rasters=[raster("one.tif"),raster("two.tif")];
         let mut original=Options {choices:template_project::suggest(&jobs,&rasters,&[]),
             include_cad:false,..Default::default()};
+        original.profile_style=crate::settings_compat::ProfilePreferences{marker_diameter:0.07,show_reference:false,use_custom_maaiveld:false,auto_fill_bgt:false,avoid_collisions:false,clip_markers:true,diameter_prefix:"DN".into()};
+        original.logos=crate::template_branding::Logos{techbase:Some("company.png".into()),client:Some("client.jpg".into())};
         original.choices.swap(0,1);
         original.choices[0].raster=Some(1);
         original.choices[0].title="Custom PS2".into();
@@ -174,6 +185,7 @@ mod tests {
         assert!(prefs.validate().is_ok());
         let next=prefs.restore(&[jobs[1].clone(),jobs[0].clone()],
             &[rasters[1].clone(),rasters[0].clone()],&[]);
+        assert_eq!(next.profile_style,original.profile_style);assert_eq!(next.logos,original.logos);
         assert_eq!(next.choices[0].title,"Custom PS2");
         assert_eq!(next.choices[0].raster,Some(0));
         assert!(next.choices[0].reverse);
@@ -182,10 +194,12 @@ mod tests {
         assert_eq!(next.choices[0].photos[0].area,crate::template_photo::Area::Map);
         assert_eq!(next.choices[0].photos[0].path,PathBuf::from("site-photo.png"));
         let mut legacy:serde_json::Value=serde_json::from_str(&encoded).unwrap();
+        legacy.as_object_mut().unwrap().remove("profile_style");legacy.as_object_mut().unwrap().remove("logos");
         for choice in legacy["choices"].as_array_mut().unwrap() {
             choice.as_object_mut().unwrap().remove("photos");
         }
         let older:TemplatePreferences=serde_json::from_value(legacy).unwrap();
+        assert_eq!(older.profile_style,Default::default());assert!(older.logos.is_empty());
         assert!(older.restore(&jobs,&rasters,&[]).choices.iter().all(|x|x.photos.is_empty()));
         assert_eq!(next.choices[1].raster,Some(1));
         assert!(!next.choices[1].include);

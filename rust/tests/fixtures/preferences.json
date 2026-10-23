@@ -1,0 +1,1169 @@
+{
+  "cases": [
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": null,
+        "template_include_cross_sections": null,
+        "template_generate_reverse_cross_section_sheet": null,
+        "template_show_profile_direction": null,
+        "template_enable_maaiveld_edit_points": null,
+        "template_avoid_multileader_collisions": null,
+        "template_clip_cross_section_markers_to_profile": null,
+        "cadastral_template_path": null,
+        "template_client_logo_path": null,
+        "template_cross_section_diameter_text": null,
+        "dxf_centerline_color": null,
+        "dxf_label_color": null,
+        "dxf_trench_export_mode": null,
+        "template_client_logo_preset": null,
+        "template_cross_section_marker_diameter": null
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": false,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": false,
+        "template_enable_maaiveld_edit_points": false,
+        "template_avoid_multileader_collisions": false,
+        "template_clip_cross_section_markers_to_profile": false,
+        "cadastral_template_path": false,
+        "template_client_logo_path": false,
+        "template_cross_section_diameter_text": false,
+        "dxf_centerline_color": false,
+        "dxf_label_color": false,
+        "dxf_trench_export_mode": false,
+        "template_client_logo_preset": false,
+        "template_cross_section_marker_diameter": false
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": false,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": false,
+        "template_enable_maaiveld_edit_points": false,
+        "template_avoid_multileader_collisions": false,
+        "template_clip_cross_section_markers_to_profile": false,
+        "cadastral_template_path": "False",
+        "template_client_logo_path": "False",
+        "template_cross_section_diameter_text": "False",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.005
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": true,
+        "template_client_logo_path": true,
+        "template_cross_section_diameter_text": true,
+        "dxf_centerline_color": true,
+        "dxf_label_color": true,
+        "dxf_trench_export_mode": true,
+        "template_client_logo_preset": true,
+        "template_cross_section_marker_diameter": true
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "True",
+        "template_client_logo_path": "True",
+        "template_cross_section_diameter_text": "True",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": 0,
+        "template_include_cross_sections": 0,
+        "template_generate_reverse_cross_section_sheet": 0,
+        "template_show_profile_direction": 0,
+        "template_enable_maaiveld_edit_points": 0,
+        "template_avoid_multileader_collisions": 0,
+        "template_clip_cross_section_markers_to_profile": 0,
+        "cadastral_template_path": 0,
+        "template_client_logo_path": 0,
+        "template_cross_section_diameter_text": 0,
+        "dxf_centerline_color": 0,
+        "dxf_label_color": 0,
+        "dxf_trench_export_mode": 0,
+        "template_client_logo_preset": 0,
+        "template_cross_section_marker_diameter": 0
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": false,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": false,
+        "template_enable_maaiveld_edit_points": false,
+        "template_avoid_multileader_collisions": false,
+        "template_clip_cross_section_markers_to_profile": false,
+        "cadastral_template_path": "0",
+        "template_client_logo_path": "0",
+        "template_cross_section_diameter_text": "0",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.005
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": 1,
+        "template_include_cross_sections": 1,
+        "template_generate_reverse_cross_section_sheet": 1,
+        "template_show_profile_direction": 1,
+        "template_enable_maaiveld_edit_points": 1,
+        "template_avoid_multileader_collisions": 1,
+        "template_clip_cross_section_markers_to_profile": 1,
+        "cadastral_template_path": 1,
+        "template_client_logo_path": 1,
+        "template_cross_section_diameter_text": 1,
+        "dxf_centerline_color": 1,
+        "dxf_label_color": 1,
+        "dxf_trench_export_mode": 1,
+        "template_client_logo_preset": 1,
+        "template_cross_section_marker_diameter": 1
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "1",
+        "template_client_logo_path": "1",
+        "template_cross_section_diameter_text": "1",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": -2,
+        "template_include_cross_sections": -2,
+        "template_generate_reverse_cross_section_sheet": -2,
+        "template_show_profile_direction": -2,
+        "template_enable_maaiveld_edit_points": -2,
+        "template_avoid_multileader_collisions": -2,
+        "template_clip_cross_section_markers_to_profile": -2,
+        "cadastral_template_path": -2,
+        "template_client_logo_path": -2,
+        "template_cross_section_diameter_text": -2,
+        "dxf_centerline_color": -2,
+        "dxf_label_color": -2,
+        "dxf_trench_export_mode": -2,
+        "template_client_logo_preset": -2,
+        "template_cross_section_marker_diameter": -2
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "-2",
+        "template_client_logo_path": "-2",
+        "template_cross_section_diameter_text": "-2",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.005
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": 0.25,
+        "template_include_cross_sections": 0.25,
+        "template_generate_reverse_cross_section_sheet": 0.25,
+        "template_show_profile_direction": 0.25,
+        "template_enable_maaiveld_edit_points": 0.25,
+        "template_avoid_multileader_collisions": 0.25,
+        "template_clip_cross_section_markers_to_profile": 0.25,
+        "cadastral_template_path": 0.25,
+        "template_client_logo_path": 0.25,
+        "template_cross_section_diameter_text": 0.25,
+        "dxf_centerline_color": 0.25,
+        "dxf_label_color": 0.25,
+        "dxf_trench_export_mode": 0.25,
+        "template_client_logo_preset": 0.25,
+        "template_cross_section_marker_diameter": 0.25
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "0.25",
+        "template_client_logo_path": "0.25",
+        "template_cross_section_diameter_text": "0.25",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": " ON ",
+        "template_include_cross_sections": " ON ",
+        "template_generate_reverse_cross_section_sheet": " ON ",
+        "template_show_profile_direction": " ON ",
+        "template_enable_maaiveld_edit_points": " ON ",
+        "template_avoid_multileader_collisions": " ON ",
+        "template_clip_cross_section_markers_to_profile": " ON ",
+        "cadastral_template_path": " ON ",
+        "template_client_logo_path": " ON ",
+        "template_cross_section_diameter_text": " ON ",
+        "dxf_centerline_color": " ON ",
+        "dxf_label_color": " ON ",
+        "dxf_trench_export_mode": " ON ",
+        "template_client_logo_preset": " ON ",
+        "template_cross_section_marker_diameter": " ON "
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "ON",
+        "template_client_logo_path": "ON",
+        "template_cross_section_diameter_text": "ON",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "off",
+        "template_include_cross_sections": "off",
+        "template_generate_reverse_cross_section_sheet": "off",
+        "template_show_profile_direction": "off",
+        "template_enable_maaiveld_edit_points": "off",
+        "template_avoid_multileader_collisions": "off",
+        "template_clip_cross_section_markers_to_profile": "off",
+        "cadastral_template_path": "off",
+        "template_client_logo_path": "off",
+        "template_cross_section_diameter_text": "off",
+        "dxf_centerline_color": "off",
+        "dxf_label_color": "off",
+        "dxf_trench_export_mode": "off",
+        "template_client_logo_preset": "off",
+        "template_cross_section_marker_diameter": "off"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": false,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": false,
+        "template_enable_maaiveld_edit_points": false,
+        "template_avoid_multileader_collisions": false,
+        "template_clip_cross_section_markers_to_profile": false,
+        "cadastral_template_path": "off",
+        "template_client_logo_path": "off",
+        "template_cross_section_diameter_text": "off",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "aan",
+        "template_include_cross_sections": "aan",
+        "template_generate_reverse_cross_section_sheet": "aan",
+        "template_show_profile_direction": "aan",
+        "template_enable_maaiveld_edit_points": "aan",
+        "template_avoid_multileader_collisions": "aan",
+        "template_clip_cross_section_markers_to_profile": "aan",
+        "cadastral_template_path": "aan",
+        "template_client_logo_path": "aan",
+        "template_cross_section_diameter_text": "aan",
+        "dxf_centerline_color": "aan",
+        "dxf_label_color": "aan",
+        "dxf_trench_export_mode": "aan",
+        "template_client_logo_preset": "aan",
+        "template_cross_section_marker_diameter": "aan"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "aan",
+        "template_client_logo_path": "aan",
+        "template_cross_section_diameter_text": "aan",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "uit",
+        "template_include_cross_sections": "uit",
+        "template_generate_reverse_cross_section_sheet": "uit",
+        "template_show_profile_direction": "uit",
+        "template_enable_maaiveld_edit_points": "uit",
+        "template_avoid_multileader_collisions": "uit",
+        "template_clip_cross_section_markers_to_profile": "uit",
+        "cadastral_template_path": "uit",
+        "template_client_logo_path": "uit",
+        "template_cross_section_diameter_text": "uit",
+        "dxf_centerline_color": "uit",
+        "dxf_label_color": "uit",
+        "dxf_trench_export_mode": "uit",
+        "template_client_logo_preset": "uit",
+        "template_cross_section_marker_diameter": "uit"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "uit",
+        "template_client_logo_path": "uit",
+        "template_cross_section_diameter_text": "uit",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "yes",
+        "template_include_cross_sections": "yes",
+        "template_generate_reverse_cross_section_sheet": "yes",
+        "template_show_profile_direction": "yes",
+        "template_enable_maaiveld_edit_points": "yes",
+        "template_avoid_multileader_collisions": "yes",
+        "template_clip_cross_section_markers_to_profile": "yes",
+        "cadastral_template_path": "yes",
+        "template_client_logo_path": "yes",
+        "template_cross_section_diameter_text": "yes",
+        "dxf_centerline_color": "yes",
+        "dxf_label_color": "yes",
+        "dxf_trench_export_mode": "yes",
+        "template_client_logo_preset": "yes",
+        "template_cross_section_marker_diameter": "yes"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": true,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": true,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "yes",
+        "template_client_logo_path": "yes",
+        "template_cross_section_diameter_text": "yes",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "nee",
+        "template_include_cross_sections": "nee",
+        "template_generate_reverse_cross_section_sheet": "nee",
+        "template_show_profile_direction": "nee",
+        "template_enable_maaiveld_edit_points": "nee",
+        "template_avoid_multileader_collisions": "nee",
+        "template_clip_cross_section_markers_to_profile": "nee",
+        "cadastral_template_path": "nee",
+        "template_client_logo_path": "nee",
+        "template_cross_section_diameter_text": "nee",
+        "dxf_centerline_color": "nee",
+        "dxf_label_color": "nee",
+        "dxf_trench_export_mode": "nee",
+        "template_client_logo_preset": "nee",
+        "template_cross_section_marker_diameter": "nee"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": false,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": false,
+        "template_enable_maaiveld_edit_points": false,
+        "template_avoid_multileader_collisions": false,
+        "template_clip_cross_section_markers_to_profile": false,
+        "cadastral_template_path": "nee",
+        "template_client_logo_path": "nee",
+        "template_cross_section_diameter_text": "nee",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "  Polygon ",
+        "template_include_cross_sections": "  Polygon ",
+        "template_generate_reverse_cross_section_sheet": "  Polygon ",
+        "template_show_profile_direction": "  Polygon ",
+        "template_enable_maaiveld_edit_points": "  Polygon ",
+        "template_avoid_multileader_collisions": "  Polygon ",
+        "template_clip_cross_section_markers_to_profile": "  Polygon ",
+        "cadastral_template_path": "  Polygon ",
+        "template_client_logo_path": "  Polygon ",
+        "template_cross_section_diameter_text": "  Polygon ",
+        "dxf_centerline_color": "  Polygon ",
+        "dxf_label_color": "  Polygon ",
+        "dxf_trench_export_mode": "  Polygon ",
+        "template_client_logo_preset": "  Polygon ",
+        "template_cross_section_marker_diameter": "  Polygon "
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "Polygon",
+        "template_client_logo_path": "Polygon",
+        "template_cross_section_diameter_text": "Polygon",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "polygon",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "custom",
+        "template_include_cross_sections": "custom",
+        "template_generate_reverse_cross_section_sheet": "custom",
+        "template_show_profile_direction": "custom",
+        "template_enable_maaiveld_edit_points": "custom",
+        "template_avoid_multileader_collisions": "custom",
+        "template_clip_cross_section_markers_to_profile": "custom",
+        "cadastral_template_path": "custom",
+        "template_client_logo_path": "custom",
+        "template_cross_section_diameter_text": "custom",
+        "dxf_centerline_color": "custom",
+        "dxf_label_color": "custom",
+        "dxf_trench_export_mode": "custom",
+        "template_client_logo_preset": "custom",
+        "template_cross_section_marker_diameter": "custom"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "custom",
+        "template_client_logo_path": "custom",
+        "template_cross_section_diameter_text": "custom",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "custom",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": " #ab90cd ",
+        "template_include_cross_sections": " #ab90cd ",
+        "template_generate_reverse_cross_section_sheet": " #ab90cd ",
+        "template_show_profile_direction": " #ab90cd ",
+        "template_enable_maaiveld_edit_points": " #ab90cd ",
+        "template_avoid_multileader_collisions": " #ab90cd ",
+        "template_clip_cross_section_markers_to_profile": " #ab90cd ",
+        "cadastral_template_path": " #ab90cd ",
+        "template_client_logo_path": " #ab90cd ",
+        "template_cross_section_diameter_text": " #ab90cd ",
+        "dxf_centerline_color": " #ab90cd ",
+        "dxf_label_color": " #ab90cd ",
+        "dxf_trench_export_mode": " #ab90cd ",
+        "template_client_logo_preset": " #ab90cd ",
+        "template_cross_section_marker_diameter": " #ab90cd "
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "#ab90cd",
+        "template_client_logo_path": "#ab90cd",
+        "template_cross_section_diameter_text": "#ab90cd",
+        "dxf_centerline_color": "#AB90CD",
+        "dxf_label_color": "#AB90CD",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "bad",
+        "template_include_cross_sections": "bad",
+        "template_generate_reverse_cross_section_sheet": "bad",
+        "template_show_profile_direction": "bad",
+        "template_enable_maaiveld_edit_points": "bad",
+        "template_avoid_multileader_collisions": "bad",
+        "template_clip_cross_section_markers_to_profile": "bad",
+        "cadastral_template_path": "bad",
+        "template_client_logo_path": "bad",
+        "template_cross_section_diameter_text": "bad",
+        "dxf_centerline_color": "bad",
+        "dxf_label_color": "bad",
+        "dxf_trench_export_mode": "bad",
+        "template_client_logo_preset": "bad",
+        "template_cross_section_marker_diameter": "bad"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "bad",
+        "template_client_logo_path": "bad",
+        "template_cross_section_diameter_text": "bad",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "0.005",
+        "template_include_cross_sections": "0.005",
+        "template_generate_reverse_cross_section_sheet": "0.005",
+        "template_show_profile_direction": "0.005",
+        "template_enable_maaiveld_edit_points": "0.005",
+        "template_avoid_multileader_collisions": "0.005",
+        "template_clip_cross_section_markers_to_profile": "0.005",
+        "cadastral_template_path": "0.005",
+        "template_client_logo_path": "0.005",
+        "template_cross_section_diameter_text": "0.005",
+        "dxf_centerline_color": "0.005",
+        "dxf_label_color": "0.005",
+        "dxf_trench_export_mode": "0.005",
+        "template_client_logo_preset": "0.005",
+        "template_cross_section_marker_diameter": "0.005"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "0.005",
+        "template_client_logo_path": "0.005",
+        "template_cross_section_diameter_text": "0.005",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.005
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "0.9",
+        "template_include_cross_sections": "0.9",
+        "template_generate_reverse_cross_section_sheet": "0.9",
+        "template_show_profile_direction": "0.9",
+        "template_enable_maaiveld_edit_points": "0.9",
+        "template_avoid_multileader_collisions": "0.9",
+        "template_clip_cross_section_markers_to_profile": "0.9",
+        "cadastral_template_path": "0.9",
+        "template_client_logo_path": "0.9",
+        "template_cross_section_diameter_text": "0.9",
+        "dxf_centerline_color": "0.9",
+        "dxf_label_color": "0.9",
+        "dxf_trench_export_mode": "0.9",
+        "template_client_logo_preset": "0.9",
+        "template_cross_section_marker_diameter": "0.9"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "0.9",
+        "template_client_logo_path": "0.9",
+        "template_cross_section_diameter_text": "0.9",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "inf",
+        "template_include_cross_sections": "inf",
+        "template_generate_reverse_cross_section_sheet": "inf",
+        "template_show_profile_direction": "inf",
+        "template_enable_maaiveld_edit_points": "inf",
+        "template_avoid_multileader_collisions": "inf",
+        "template_clip_cross_section_markers_to_profile": "inf",
+        "cadastral_template_path": "inf",
+        "template_client_logo_path": "inf",
+        "template_cross_section_diameter_text": "inf",
+        "dxf_centerline_color": "inf",
+        "dxf_label_color": "inf",
+        "dxf_trench_export_mode": "inf",
+        "template_client_logo_preset": "inf",
+        "template_cross_section_marker_diameter": "inf"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "inf",
+        "template_client_logo_path": "inf",
+        "template_cross_section_diameter_text": "inf",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "nan",
+        "template_include_cross_sections": "nan",
+        "template_generate_reverse_cross_section_sheet": "nan",
+        "template_show_profile_direction": "nan",
+        "template_enable_maaiveld_edit_points": "nan",
+        "template_avoid_multileader_collisions": "nan",
+        "template_clip_cross_section_markers_to_profile": "nan",
+        "cadastral_template_path": "nan",
+        "template_client_logo_path": "nan",
+        "template_cross_section_diameter_text": "nan",
+        "dxf_centerline_color": "nan",
+        "dxf_label_color": "nan",
+        "dxf_trench_export_mode": "nan",
+        "template_client_logo_preset": "nan",
+        "template_cross_section_marker_diameter": "nan"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "nan",
+        "template_client_logo_path": "nan",
+        "template_cross_section_diameter_text": "nan",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "٣.٠",
+        "template_include_cross_sections": "٣.٠",
+        "template_generate_reverse_cross_section_sheet": "٣.٠",
+        "template_show_profile_direction": "٣.٠",
+        "template_enable_maaiveld_edit_points": "٣.٠",
+        "template_avoid_multileader_collisions": "٣.٠",
+        "template_clip_cross_section_markers_to_profile": "٣.٠",
+        "cadastral_template_path": "٣.٠",
+        "template_client_logo_path": "٣.٠",
+        "template_cross_section_diameter_text": "٣.٠",
+        "dxf_centerline_color": "٣.٠",
+        "dxf_label_color": "٣.٠",
+        "dxf_trench_export_mode": "٣.٠",
+        "template_client_logo_preset": "٣.٠",
+        "template_cross_section_marker_diameter": "٣.٠"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "٣.٠",
+        "template_client_logo_path": "٣.٠",
+        "template_cross_section_diameter_text": "٣.٠",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.2
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": [],
+        "template_include_cross_sections": [],
+        "template_generate_reverse_cross_section_sheet": [],
+        "template_show_profile_direction": [],
+        "template_enable_maaiveld_edit_points": [],
+        "template_avoid_multileader_collisions": [],
+        "template_clip_cross_section_markers_to_profile": [],
+        "cadastral_template_path": [],
+        "template_client_logo_path": [],
+        "template_cross_section_diameter_text": [],
+        "dxf_centerline_color": [],
+        "dxf_label_color": [],
+        "dxf_trench_export_mode": [],
+        "template_client_logo_preset": [],
+        "template_cross_section_marker_diameter": []
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "[]",
+        "template_client_logo_path": "[]",
+        "template_cross_section_diameter_text": "[]",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": {},
+        "template_include_cross_sections": {},
+        "template_generate_reverse_cross_section_sheet": {},
+        "template_show_profile_direction": {},
+        "template_enable_maaiveld_edit_points": {},
+        "template_avoid_multileader_collisions": {},
+        "template_clip_cross_section_markers_to_profile": {},
+        "cadastral_template_path": {},
+        "template_client_logo_path": {},
+        "template_cross_section_diameter_text": {},
+        "dxf_centerline_color": {},
+        "dxf_label_color": {},
+        "dxf_trench_export_mode": {},
+        "template_client_logo_preset": {},
+        "template_cross_section_marker_diameter": {}
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "{}",
+        "template_client_logo_path": "{}",
+        "template_cross_section_diameter_text": "{}",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "include_tiffs_in_dxf_export": "\u001ctest\u001f",
+        "template_include_cross_sections": "\u001ctest\u001f",
+        "template_generate_reverse_cross_section_sheet": "\u001ctest\u001f",
+        "template_show_profile_direction": "\u001ctest\u001f",
+        "template_enable_maaiveld_edit_points": "\u001ctest\u001f",
+        "template_avoid_multileader_collisions": "\u001ctest\u001f",
+        "template_clip_cross_section_markers_to_profile": "\u001ctest\u001f",
+        "cadastral_template_path": "\u001ctest\u001f",
+        "template_client_logo_path": "\u001ctest\u001f",
+        "template_cross_section_diameter_text": "\u001ctest\u001f",
+        "dxf_centerline_color": "\u001ctest\u001f",
+        "dxf_label_color": "\u001ctest\u001f",
+        "dxf_trench_export_mode": "\u001ctest\u001f",
+        "template_client_logo_preset": "\u001ctest\u001f",
+        "template_cross_section_marker_diameter": "\u001ctest\u001f"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "test",
+        "template_client_logo_path": "test",
+        "template_cross_section_diameter_text": "test",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "centerline",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "brabant_water",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "brabant_water",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "enexis",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "enexis",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "wml",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "wml",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "hurkmans",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "hurkmans",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "hanab",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "hanab",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "bgm",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "bgm",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "apk",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "apk",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    },
+    {
+      "raw": {
+        "template_client_logo_preset": "custom",
+        "dxf_trench_export_mode": "none"
+      },
+      "expected": {
+        "include_tiffs_in_dxf_export": false,
+        "template_include_cross_sections": true,
+        "template_generate_reverse_cross_section_sheet": false,
+        "template_show_profile_direction": true,
+        "template_enable_maaiveld_edit_points": true,
+        "template_avoid_multileader_collisions": true,
+        "template_clip_cross_section_markers_to_profile": true,
+        "cadastral_template_path": "",
+        "template_client_logo_path": "",
+        "template_cross_section_diameter_text": "",
+        "dxf_centerline_color": "#000000",
+        "dxf_label_color": "#000000",
+        "dxf_trench_export_mode": "none",
+        "template_client_logo_preset": "custom",
+        "template_cross_section_marker_diameter": 0.02
+      }
+    }
+  ],
+  "choices": [
+    {
+      "raw": [],
+      "expected": []
+    },
+    {
+      "raw": [
+        " Straße ",
+        "STRASSE",
+        "é",
+        123,
+        true,
+        null,
+        0,
+        false,
+        {},
+        [],
+        {
+          "a": 1
+        }
+      ],
+      "expected": [
+        "Straße",
+        "é",
+        "123",
+        "True",
+        "{'a': 1}"
+      ]
+    },
+    {
+      "raw": [
+        "A",
+        "a",
+        "\u001cB\u001f",
+        "B"
+      ],
+      "expected": [
+        "A",
+        "B"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "raw": {
+        " Straße ": "Water",
+        "STRASSE": "Gas",
+        " A\u001cB ": " X ",
+        "Empty": null,
+        "Numeric": 123
+      },
+      "expected": {
+        "Straße": "Water",
+        "A B": "X",
+        "Numeric": "123"
+      }
+    }
+  ]
+}

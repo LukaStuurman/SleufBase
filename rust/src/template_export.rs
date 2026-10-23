@@ -76,6 +76,7 @@ pub struct Slot {
 #[derive(serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Settings {
+    pub logos: crate::template_branding::Logos,
     pub project: Option<String>,
     pub drawn_by: String,
     /// Year, month, day. None captures the Windows local date once per export.
@@ -94,6 +95,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            logos: Default::default(),
             project: None,
             drawn_by: String::new(),
             export_date: None,
@@ -105,10 +107,12 @@ impl Default for Settings {
         }
     }
 }
-#[derive(serde::Deserialize)]
+#[derive(Clone,serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Profile {
     pub dataset: usize,
+    /// Full virtual profile source, independent of the selected TIFF pane.
+    pub virtual_trench: Option<crate::virtual_trench::VirtualTrench>,
     pub draw: bool,
     pub metadata: serde_json::Value,
     pub forced_start: Option<profile::XY>,
@@ -126,6 +130,7 @@ impl Default for Profile {
     fn default() -> Self {
         Self {
             dataset: 0,
+            virtual_trench: None,
             draw: true,
             metadata: serde_json::Value::Null,
             forced_start: None,
@@ -173,10 +178,15 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
         }
     };
     resolve(&mut request.template);
+    for logo in [&mut request.settings.logos.techbase, &mut request.settings.logos.client].into_iter().flatten() {
+        resolve(logo);
+    }
     for dir in &mut request.settings.font_directories {
         resolve(dir);
     }
     for slot in request.slots.iter_mut().flatten() {
+        if let Some(source)=&mut slot.virtual_source {if let Some(path)=&mut source.trench.source_path {resolve(path);}}
+        if let Some(trench)=slot.profile.as_mut().and_then(|p|p.virtual_trench.as_mut()) {if let Some(path)=&mut trench.source_path {resolve(path);}}
         resolve(&mut slot.tiff_png);
         if let Some(source) = &mut slot.tiff_source {
             resolve(&mut source.path);
@@ -252,7 +262,7 @@ struct ProfileContext<'a> {
 }
 fn build_profile<'a>(
     request: &'a Request,
-    datasets: &'a [Dataset],
+    datasets: &[Dataset],
     options: &Profile,
     reverse_override: Option<bool>,
     cancel: &std::sync::atomic::AtomicBool,
@@ -275,6 +285,41 @@ fn build_profile<'a>(
         },
         cancel,
     )
+}
+/// Deck bands are declared in the chosen profile direction and use the base
+/// profile's marker-expanded surface. Keep this dataset local to one direction;
+/// the original project/report dataset remains the measured points only.
+fn virtual_profile_dataset(
+    request:&Request,
+    datasets:&[Dataset],
+    options:&Profile,
+    fallback:Option<&crate::virtual_trench::VirtualTrench>,
+    reverse_override:Option<bool>,
+    cancel:&std::sync::atomic::AtomicBool,
+)->Result<Option<(Dataset,Profile)>,String>{
+    let Some(trench)=options.virtual_trench.as_ref().or(fallback) else{return Ok(None)};
+    trench.validate()?;
+    let original=datasets.get(options.dataset).ok_or("Profiel verwijst naar een ontbrekende dataset")?;
+    let reverse=reverse_override.unwrap_or(options.reverse);
+    let endpoint=if reverse{trench.end}else{trench.start};
+    let mut dataset=trench.to_base_dataset_with_cancel(original.job_id,true,cancel)?;
+    // Avoid cloning the complete virtual source for every direction.
+    let mut effective=Profile {
+        dataset:options.dataset, virtual_trench:None, draw:options.draw,
+        metadata:options.metadata.clone(),forced_start:options.forced_start,
+        reverse:options.reverse,marker_diameter:options.marker_diameter,
+        manual_scale:options.manual_scale,show_reference:options.show_reference,
+        use_custom_maaiveld:options.use_custom_maaiveld,auto_fill_bgt:options.auto_fill_bgt,
+        avoid_collisions:options.avoid_collisions,clip_markers:options.clip_markers,
+        diameter_prefix:options.diameter_prefix.clone(),
+    };
+    effective.dataset=0;
+    effective.reverse=reverse;
+    effective.forced_start=Some([endpoint.x,endpoint.y]);
+    if let Some(base)=build_profile(request,std::slice::from_ref(&dataset),&effective,None,cancel)?{
+        trench.append_dekband_for_profile(&mut dataset,&base,cancel)?;
+    }
+    Ok(Some((dataset,effective)))
 }
 fn draw_profile(
     doc: &mut Document,
@@ -604,7 +649,12 @@ pub fn export_with_datasets(
         control.flag(),
         &mut progress,
     )?;
+    let logos_per_page=usize::from(request.settings.logos.techbase.is_some())+usize::from(request.settings.logos.client.is_some());
+    if estimated_images.saturating_add(prepared.pages.len().saturating_mul(logos_per_page))>10_000 {
+        return Err("Sjabloonrasters en logo's overschrijden samen het afbeeldingsbudget".into());
+    }
     control.set_stage(Stage::Planning);
+    crate::template_branding::restore_contact(&mut doc, control.flag())?;
     template_geometry::add(&mut doc, &request.layers, &request.geometry, control.flag())?;
     let templates = if request
         .slots
@@ -624,6 +674,20 @@ pub fn export_with_datasets(
     let mut profiles = 0;
     let mut filled_slots = 0;
     let mut total: u64 = 0;
+    let mut logo_assets: [Option<PathBuf>; 2] = [None, None];
+    for (index, source) in [&request.settings.logos.techbase, &request.settings.logos.client].into_iter().enumerate() {
+        if let Some(source) = source {
+            if index == 1 && request.settings.logos.techbase.as_ref() == Some(source) {
+                logo_assets[1] = logo_assets[0].clone();
+                continue;
+            }
+            let destination = tx.asset_path(if index == 0 { "techbase-logo.png" } else { "client-logo.png" })?;
+            let bytes = crate::template_branding::prepare_logo(source, &destination, control)?;
+            total = total.checked_add(bytes).ok_or("Te veel logo-afbeeldingsdata")?;
+            if total > 2 * 1024 * 1024 * 1024 { return Err("Afbeeldingen overschrijden het exportbudget".into()); }
+            logo_assets[index] = Some(destination);
+        }
+    }
     let mut map_renderer = crate::map_export::Renderer::default();
     for (index, (source, target)) in request.slots.iter().zip(&prepared.slots).enumerate() {
         progress(&format!("Proefsleufvak {} invullen", index + 1));
@@ -666,10 +730,14 @@ pub fn export_with_datasets(
                 ""
             };
             let group = (index * directions + direction) * 2;
-            let measured = slot
-                .profile
-                .as_ref()
-                .map(|p| build_profile(request, datasets, p, reverse_override, control.flag()))
+            let local_profile=slot.profile.as_ref()
+                .map(|p|virtual_profile_dataset(request,datasets,p,slot.virtual_source.as_ref().map(|s|&s.trench),reverse_override,control.flag()))
+                .transpose()?.flatten();
+            let direction_datasets=local_profile.as_ref()
+                .map_or(datasets,|(dataset,_)|std::slice::from_ref(dataset));
+            let direction_options=local_profile.as_ref().map(|(_,p)|p).or(slot.profile.as_ref());
+            let measured = direction_options
+                .map(|p| build_profile(request, direction_datasets, p, reverse_override, control.flag()))
                 .transpose()?
                 .flatten();
             for (role, path, bounds, inset, preserve_aspect) in [
@@ -846,7 +914,7 @@ pub fn export_with_datasets(
                 }
             }
             if let (Some(options), Some(measured)) =
-                (slot.profile.as_ref().filter(|p| p.draw), &measured)
+                (direction_options.filter(|p| p.draw), &measured)
             {
                 if local_surfaces.is_none() {
                     local_surfaces = slot
@@ -869,7 +937,7 @@ pub fn export_with_datasets(
                     &mut doc,
                     &ProfileContext {
                         templates: templates.as_ref().unwrap(),
-                        datasets,
+                        datasets:direction_datasets,
                         surfaces: local_surfaces.as_ref().unwrap_or(&surfaces),
                     },
                     slot,
@@ -885,6 +953,9 @@ pub fn export_with_datasets(
     }
     progress("Afbeeldingen koppelen");
     control.check()?;
+    let logo_layouts = prepared.pages.iter().map(|page| page.layout.clone()).collect::<Vec<_>>();
+    images.extend(crate::template_branding::images(&doc, &logo_layouts,
+        logo_assets[0].as_deref(), logo_assets[1].as_deref(), control.flag())?);
     template_images::add_images(&mut doc, &images, control.flag())?;
     if profiles > 0 || request.settings.paired {
         let (indexed, mut parents) = order_slot_entities(
@@ -978,4 +1049,47 @@ pub fn export_with_datasets(
         companion,
         warnings,
     })
+}
+
+#[cfg(test)]
+mod virtual_profile_tests {
+    use super::*;
+    #[test]
+    fn each_paired_direction_injects_original_bands_after_base_profile_without_mutating_reports(){
+        let fixtures:serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/template-export/reference.json")).unwrap();
+        let value=fixtures.as_array().unwrap().iter().find(|v|v["name"]=="native-tiff").unwrap()["request"].clone();
+        let mut request:Request=serde_json::from_value(value).unwrap();
+        request.rules=crate::RULES.to_vec();
+        let oracle:serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/dekband/reference.json")).unwrap();
+        let cancel=std::sync::atomic::AtomicBool::new(false);
+        for measured in [false,true]{
+            for selected_reverse in [false,true]{
+                for override_reverse in [None,Some(false),Some(true)]{
+                    let reverse=override_reverse.unwrap_or(selected_reverse);
+                    let case=&oracle["cases"][usize::from(reverse)];
+                    let mut trench:crate::virtual_trench::VirtualTrench=serde_json::from_value(case["source"].clone()).unwrap();
+                    if measured {trench.boundary_3d=vec![trench.start,trench.end,crate::Vertex{x:trench.end.x+1.,..trench.end}];}
+                    let dataset=trench.to_base_dataset_with_cancel(0,true,&cancel).unwrap();
+                    let before=serde_json::to_vec(&dataset).unwrap();
+                    let options=Profile{dataset:0,virtual_trench:Some(trench.clone()),reverse:selected_reverse,marker_diameter:0.1,..Default::default()};
+                    let (local,effective)=virtual_profile_dataset(&request,std::slice::from_ref(&dataset),&options,None,override_reverse,&cancel).unwrap().unwrap();
+                    assert_eq!(serde_json::to_vec(&dataset).unwrap(),before);
+                    assert_eq!(dataset.features.len(),2,"report dataset must contain measured points only");
+                    let expected=case["expected"].as_array().unwrap();
+                    let lines=&local.features[2..];assert_eq!(lines.len(),expected.len());
+                    for (line,row) in lines.iter().zip(expected){
+                        assert_eq!(line.object_name,row["object_name"].as_str().unwrap());
+                        let crate::Geometry::Polyline(points)=&line.geometry else{panic!("missing deck band")};
+                        for (p,e) in points.iter().zip(row["geometry"]["Polyline"].as_array().unwrap()){
+                            for (key,value) in [("x",p.x),("y",p.y),("z",p.z.unwrap())]{assert!((value-e[key].as_f64().unwrap()).abs()<1e-9,"{key}: {value} != {}",e[key]);}
+                        }
+                    }
+                    let profile=build_profile(&request,std::slice::from_ref(&local),&effective,override_reverse,&cancel).unwrap().unwrap();
+                    let start=if reverse{trench.end}else{trench.start};
+                    assert_eq!((profile.start.x,profile.start.y,profile.start.z),(start.x,start.y,start.z));
+                    assert!(profile.points.iter().all(|p|p.feature_index<local.features.len()));
+                }
+            }
+        }
+    }
 }

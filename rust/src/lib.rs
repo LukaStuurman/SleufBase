@@ -54,6 +54,7 @@ pub mod template_order;
 pub mod template_workflow;
 pub mod template_project;
 pub mod template_photo;
+pub mod template_branding;
 pub mod template_prefs;
 pub mod template_cad;
 pub mod template_match;

@@ -50,7 +50,7 @@ fn markers_preserve_depth_and_adapt_to_measured_local_width() {
     ];
     t.objects = [-1.5, 1.5]
         .into_iter()
-        .map(|x| TrenchPoint {
+        .map(|x| TrenchPoint {metadata:Default::default(),
             role: "object".into(),
             object_name: "pipe".into(),
             source_name: "water".into(),

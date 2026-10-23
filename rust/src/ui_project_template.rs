@@ -2,6 +2,19 @@
 use super::*;
 use sleufbase_rust::template_project::{self, BackgroundKind, Options, Source};
 
+fn configure_options(mut options:Options,settings:&MigratedSettings,saved:Option<&sleufbase_rust::template_prefs::TemplatePreferences>,jobs:&[Dataset],rasters:&[GeoTiffInfo],trenches:&[VirtualTrench])->Options{
+    let preferences=&settings.export_preferences;
+    options.template=preferences.cadastral_template_path.clone().into();
+    options.profile_style=sleufbase_rust::settings_compat::ProfilePreferences::from_settings(settings);
+    options.logos=crate::ui_preferences::logos(preferences);
+    // template_reverse_patch.py:412 always includes both variants, starting
+    // normally. The archived legacy reverse-sheet flag must not flip the base.
+    for choice in &mut options.choices{choice.profile=preferences.template_include_cross_sections;}
+    if let Some(saved)=saved{return saved.restore(jobs,rasters,trenches);}
+    options.include_bgt=true;
+    options
+}
+
 pub(super) struct Dialog {
     pub options: Options,
     pub output: Option<PathBuf>,
@@ -13,18 +26,14 @@ pub(super) struct Dialog {
 }
 impl Dialog {
     fn new(app: &SleufBaseApp) -> Self {
-        let mut options = Options {
+        let options = Options {
             project: app.project_name.clone(),
             choices: template_project::suggest(
                 &app.datasets, &app.geotiffs, &app.virtual_trenches),
             ..Options::default()
         };
-        if let Some(saved)=&app.template_preferences {
-            options=saved.restore(&app.datasets,&app.geotiffs,&app.virtual_trenches);
-        }
-        // Do not silently reuse stale project-specific settings from another
-        // project. Users explicitly select the desired CAD template each time.
-        if app.template_preferences.is_none() {options.include_bgt = true;}
+        // Saved project choices override the user's general export defaults.
+        let options=configure_options(options,&app.migrated_settings,app.template_preferences.as_ref(),&app.datasets,&app.geotiffs,&app.virtual_trenches);
         let automatic=options.choices.iter().map(|choice| match choice.source {
             Source::Job(i) => sleufbase_rust::template_match::for_job(&app.datasets[i], &app.geotiffs),
             Source::Virtual(i) => sleufbase_rust::template_match::for_trench(&app.virtual_trenches[i], &app.geotiffs),
@@ -110,6 +119,7 @@ impl SleufBaseApp {
                         ui.separator();
                         ui.heading("2. Kaarten en profielen");
                         crate::template_dialog::font_folders(ui, &mut dialog.options.font_directories);
+                        crate::template_dialog::logos(ui,&mut dialog.options.logos);
                         ui.checkbox(&mut dialog.options.paired,"Beide richtingen (Normaal / Reverse)");
                         if dialog.options.paired {ui.small("Kies na export in AutoCAD de gewenste richting met Versie.");}
                         ui.horizontal(|ui| {
@@ -313,5 +323,44 @@ impl SleufBaseApp {
             self.project_template_dialog = None;
             self.start_project_template_export(options, output);
         }
+    }
+}
+
+#[cfg(test)]
+mod preference_tests {
+    use super::*;
+    fn settings()->MigratedSettings {
+        let mut settings=MigratedSettings::default();
+        let p=&mut settings.export_preferences;
+        p.cadastral_template_path="general.dxf".into();
+        p.template_client_logo_preset="custom".into();p.template_client_logo_path="general-logo.png".into();
+        p.template_include_cross_sections=false;p.template_generate_reverse_cross_section_sheet=true;
+        p.template_cross_section_marker_diameter=0.075;p.template_show_profile_direction=false;
+        p.template_cross_section_diameter_text="diam".into();settings
+    }
+    fn jobs()->Vec<Dataset>{vec![Dataset{job_id:42,title:"PS42".into(),source_path:"PS42.json".into(),features:Vec::new()}]}
+    #[test]
+    fn project_dialog_applies_global_export_preferences_to_new_choices(){
+        let jobs=jobs();let settings=settings();
+        let options=Options{choices:template_project::suggest(&jobs,&[],&[]),..Default::default()};
+        let configured=configure_options(options,&settings,None,&jobs,&[],&[]);
+        assert_eq!(configured.template,PathBuf::from("general.dxf"));
+        assert_eq!(configured.logos.client,Some(PathBuf::from("general-logo.png")));
+        assert_eq!(configured.profile_style.marker_diameter,0.075);assert!(!configured.profile_style.show_reference);
+        assert_eq!(configured.profile_style.diameter_prefix,"diam");
+        assert!(!configured.choices[0].profile);assert!(!configured.choices[0].reverse);assert!(configured.paired);
+    }
+    #[test]
+    fn project_dialog_restores_saved_choices_ahead_of_general_defaults(){
+        let jobs=jobs();let settings=settings();
+        let mut saved_options=Options{template:"project.dxf".into(),choices:template_project::suggest(&jobs,&[],&[]),..Default::default()};
+        saved_options.profile_style.marker_diameter=0.03;
+        saved_options.logos.client=Some("project-logo.png".into());saved_options.include_bgt=false;
+        let saved=sleufbase_rust::template_prefs::TemplatePreferences::capture(&saved_options,&jobs,&[],&[]);
+        let configured=configure_options(Options::default(),&settings,Some(&saved),&jobs,&[],&[]);
+        assert_eq!(configured.template,PathBuf::from("project.dxf"));
+        assert_eq!(configured.logos.client,Some(PathBuf::from("project-logo.png")));
+        assert_eq!(configured.profile_style.marker_diameter,0.03);assert!(!configured.include_bgt);
+        assert!(configured.choices[0].profile);assert!(!configured.choices[0].reverse);
     }
 }

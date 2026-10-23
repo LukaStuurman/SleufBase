@@ -9,6 +9,8 @@ use std::{
 
 pub(crate) fn input_paths<'a>(request: &'a Request, datasets: &'a [Dataset]) -> Vec<&'a Path> {
     let mut sources = vec![request.template.as_path()];
+    sources.extend(request.settings.logos.techbase.as_deref());
+    sources.extend(request.settings.logos.client.as_deref());
     sources.extend(
         request
             .settings
@@ -25,6 +27,9 @@ pub(crate) fn input_paths<'a>(request: &'a Request, datasets: &'a [Dataset]) -> 
         }
         if let Some(v) = &slot.virtual_source {
             sources.extend(v.trench.source_path.as_deref());
+        }
+        if let Some(trench)=slot.profile.as_ref().and_then(|p|p.virtual_trench.as_ref()) {
+            sources.extend(trench.source_path.as_deref());
         }
         sources.extend(slot.photos.iter().map(|p| p.path.as_path()));
         if let Some(map) = &slot.map_source {

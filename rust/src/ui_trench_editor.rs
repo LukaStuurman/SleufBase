@@ -6,6 +6,8 @@ use sleufbase_rust::{
     virtual_trench_editor as edit,
 };
 use egui::Vec2;
+#[path="ui_trench_ahn.rs"]
+mod ahn_fill;
 
 #[derive(Clone)]
 struct ObjectForm {
@@ -54,7 +56,7 @@ impl ObjectForm {
         }
     }
     fn to_object(&self,trench:&VirtualTrench)->Result<TrenchPoint,String> {
-        Ok(TrenchPoint {
+        Ok(TrenchPoint {metadata:Default::default(),
             role:self.role.clone(),object_name:self.name.clone(),
             source_name:self.source.clone(),
             attributes:self.attributes.clone(),
@@ -64,8 +66,8 @@ impl ObjectForm {
     }
 }
 
-#[derive(Clone)]
 pub(super) struct Editor {
+    ahn_job:Option<ahn_fill::Job>,
     pub index:usize,
     original:VirtualTrench,
     draft:VirtualTrench,
@@ -85,6 +87,8 @@ pub(super) struct Editor {
     dekband_end:f64,
     dekband_name:String,
     dekband_rgb:[u8;3],
+    dekband_start_depth:f64,
+    dekband_end_depth:f64,
 }
 #[derive(Clone, Copy)]
 enum Action {Save,Copy,Remove}
@@ -92,6 +96,7 @@ enum Action {Save,Copy,Remove}
 impl Editor {
     fn new(index:usize,source:&VirtualTrench)->Self {
         Self{
+            ahn_job:None,
             index,original:source.clone(),draft:source.clone(),
             label:source.label.clone(),start:source.start,
             end:source.end,width:source.width_meters,
@@ -99,6 +104,7 @@ impl Editor {
             confirm_delete:false,error:String::new(),paste:String::new(),notice:String::new(),shift_x:0.,shift_y:0.,
             dekband_start:0.,dekband_end:source.length(),
             dekband_name:"Dekband".into(),dekband_rgb:[17,24,39],
+            dekband_start_depth:0.,dekband_end_depth:0.,
         }
     }
     fn build(&self)->Result<VirtualTrench,String> {
@@ -109,7 +115,18 @@ impl Editor {
     }
     fn add_or_replace(&mut self)->Result<(),String> {
         let mut next=self.build()?;
-        let object=self.object.to_object(&next)?;
+        let mut object=self.object.to_object(&next)?;
+        if let Some(old)=self.selected.and_then(|i|next.objects.get(i)){
+            object.metadata=old.metadata.clone();
+            if object.position.z!=old.position.z {
+                let meta=object.metadata.as_object_mut();
+                if let Some(meta)=meta {
+                    meta.remove("sleufbase_depth_meters");
+                    meta.insert("surface_mode".into(),serde_json::json!("manual"));
+                    meta.insert("surface_status".into(),serde_json::json!("manual"));
+                }
+            }
+        }
         edit::replace_object(&mut next,self.selected,object)?;
         // The axis still belongs to the form, but the edited objects are
         // stored as RD world coordinates and will survive later translations.
@@ -221,6 +238,7 @@ impl SleufBaseApp {
     pub(super) fn show_virtual_editor(&mut self,ctx:&egui::Context) {
         let Some(mut editor)=self.trench_editor.take() else{return};
         if editor.index>=self.virtual_trenches.len() {return;}
+        editor.poll_ahn();
         let mut open=true;
         let mut action=None;
         egui::Window::new("Virtuele proefsleuf en meetobjecten bewerken")
@@ -228,6 +246,8 @@ impl SleufBaseApp {
             .default_height(650.)
             .resizable(true).show(ctx,|ui|{
                 egui::ScrollArea::vertical().max_height(660.).show(ui,|ui|{
+                    editor.ahn_controls(ui,ctx);
+                    ui.add_enabled_ui(editor.ahn_job.is_none(),|ui|{
                     let measured=edit::is_measured(&editor.original);
                     ui.heading("Proefsleuf");
                     ui.horizontal(|ui|{
@@ -256,6 +276,8 @@ impl SleufBaseApp {
                             ui.add(egui::DragValue::new(&mut editor.width).range(0.1..=100.).speed(0.05));
                         });
                         ui.horizontal(|ui|{
+                            let old_start=editor.start.z;
+                            let old_end=editor.end.z;
                             let mut has_begin=editor.start.z.is_some();
                             let mut begin_z=editor.start.z.unwrap_or(0.);
                             ui.checkbox(&mut has_begin,"Beginhoogte Z");
@@ -266,6 +288,8 @@ impl SleufBaseApp {
                             ui.checkbox(&mut has_end,"Eindhoogte Z");
                             ui.add_enabled(has_end,egui::DragValue::new(&mut end_z).speed(0.05));
                             editor.end.z=has_end.then_some(end_z);
+                            if old_start!=editor.start.z {editor.mark_endpoint_height(true);}
+                            if old_end!=editor.end.z {editor.mark_endpoint_height(false);}
                         });
                         if ui.button("Begin- en eindpunt omkeren").clicked() {
                             match editor.build() {
@@ -319,9 +343,12 @@ impl SleufBaseApp {
                         ui.horizontal(|ui|{
                             ui.label("Kleur");
                             ui.color_edit_button_srgb(&mut editor.dekband_rgb);
+                            ui.label("Diepte begin/eind (m)");
+                            ui.add(egui::DragValue::new(&mut editor.dekband_start_depth).range(0.0..=1000.).speed(0.05));
+                            ui.add(egui::DragValue::new(&mut editor.dekband_end_depth).range(0.0..=1000.).speed(0.05));
                             if ui.add_enabled(editor.draft.dekband_rows.len()<10_000,
                                 egui::Button::new("Voeg dekband toe")).clicked() {
-                                let segment=sleufbase_rust::virtual_trench::Dekband{
+                                let segment=sleufbase_rust::virtual_trench::Dekband{start_depth:editor.dekband_start_depth,end_depth:editor.dekband_end_depth,
                                     start_chainage:editor.dekband_start,
                                     end_chainage:editor.dekband_end,
                                     source_name:editor.dekband_name.clone(),
@@ -347,6 +374,9 @@ impl SleufBaseApp {
                                         ui.add(egui::DragValue::new(&mut band.start_chainage).speed(0.05));
                                         ui.label("–");
                                         ui.add(egui::DragValue::new(&mut band.end_chainage).speed(0.05));
+                                        ui.label("Diepte");
+                                        ui.add(egui::DragValue::new(&mut band.start_depth).range(0.0..=1000.).speed(0.05));
+                                        ui.add(egui::DragValue::new(&mut band.end_depth).range(0.0..=1000.).speed(0.05));
                                         ui.text_edit_singleline(&mut band.source_name);
                                         let rgb=band.display_rgb.get_or_insert([17,24,39]);
                                         ui.color_edit_button_srgb(rgb);
@@ -462,6 +492,7 @@ impl SleufBaseApp {
                             if ui.button("Annuleren").clicked(){editor.confirm_delete=false;}
                         });
                     }
+                    });
                 });
             });
         if let Some(cmd)=action {
@@ -509,6 +540,18 @@ impl SleufBaseApp {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn renaming_keeps_start_depth_but_editing_z_protects_manual_measurement(){
+        let mut trench=VirtualTrench::new("PS1".into(),Vertex{x:155000.,y:463000.,z:Some(5.)},Vertex{x:155010.,y:463000.,z:Some(5.)},0.6).unwrap();
+        trench.objects.push(TrenchPoint{role:"object".into(),object_name:"LS".into(),source_name:"LS".into(),position:Vertex{x:155002.,y:463000.,z:Some(4.)},attributes:Default::default(),metadata:serde_json::json!({"surface_mode":"start","surface_z":5.,"sleufbase_depth_meters":1.,"point_id":"source-1"})});
+        let mut editor=Editor::new(0,&trench);editor.selected=Some(0);editor.object=ObjectForm::from_object(&trench,&trench.objects[0]);editor.object.name="Hernoemd".into();
+        editor.add_or_replace().unwrap();assert_eq!(editor.draft.objects[0].metadata["sleufbase_depth_meters"],1.);assert_eq!(editor.draft.objects[0].metadata["surface_mode"],"start");
+        editor.selected=Some(0);editor.object=ObjectForm::from_object(&editor.draft,&editor.draft.objects[0]);editor.object.elevation=3.25;editor.add_or_replace().unwrap();
+        assert_eq!(editor.draft.objects[0].metadata["surface_mode"],"manual");assert_eq!(editor.draft.objects[0].metadata["point_id"],"source-1");
+        editor.draft.start_metadata=serde_json::json!({"surface_mode":"auto"});
+        sleufbase_rust::virtual_map::apply_surface_height(&mut editor.draft,sleufbase_rust::virtual_map::MapPoint::Start,Some(8.)).unwrap();
+        assert_eq!(editor.draft.objects[0].position.z,Some(3.25));
+    }
     #[test]
     fn dialog_stages_edits_without_changing_live_project_until_commit() {
         let mut app=SleufBaseApp::default();

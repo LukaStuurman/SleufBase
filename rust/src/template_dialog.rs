@@ -16,6 +16,20 @@ pub(crate) struct Dialog {
     variant: String,
     scale: String,
 }
+pub(crate) fn logos(ui:&mut egui::Ui, logos:&mut sleufbase_rust::template_branding::Logos) {
+    ui.collapsing("Logo's op de bladen",|ui| {
+        for (label,path) in [("Techbase-logo",&mut logos.techbase),("Opdrachtgeverlogo",&mut logos.client)] {
+            ui.horizontal(|ui| {
+                ui.label(label);
+                if ui.button("Kiezen…").clicked() {
+                    if let Some(chosen)=rfd::FileDialog::new().add_filter("Afbeeldingen",&["png","jpg","jpeg"]).pick_file() {*path=Some(chosen);}
+                }
+                if path.is_some() && ui.small_button("Verwijderen").clicked() {*path=None;}
+            });
+            if let Some(path)=path {ui.small(path.display().to_string());}
+        }
+    });
+}
 /// Shared persistent CAD support folders for both template export routes.
 pub(crate) fn font_folders(ui: &mut egui::Ui, folders: &mut Vec<std::path::PathBuf>) {
     egui::CollapsingHeader::new("Extra CAD-lettertypen").show(ui, |ui| {
@@ -213,6 +227,7 @@ pub(crate) fn show(
 
         ui.label("De exportdatum wordt automatisch op ieder gebruikt blad ingevuld (dd-mm-jjjj).");
         font_folders(ui, &mut d.state.font_directories);
+        logos(ui, &mut d.state.logos);
 
         ui.horizontal_wrapped(|ui| {
             ui.label(d.state.template.as_ref().map_or_else(

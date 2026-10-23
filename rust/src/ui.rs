@@ -1721,7 +1721,8 @@ impl SleufBaseApp {
             let mut show=self.show_settings_dialog;
             let mut save=false;
             egui::Window::new("SleufBase Rust-instellingen")
-                .open(&mut show).resizable(false).show(ctx,|ui|{
+                .open(&mut show).resizable(true).default_width(620.).show(ctx,|ui|{
+                egui::ScrollArea::vertical().max_height(620.).show(ui,|ui|{
                 ui.strong("SleufBase-instellingen");
                 if ui.button("Objectregels en disciplinekleuren").clicked() {
                     self.rule_editor=Some(crate::rule_editor::Editor::new(&self.migrated_settings.object_rules));
@@ -1735,6 +1736,7 @@ impl SleufBaseApp {
                 ui.checkbox(&mut self.migrated_settings.template_auto_export_discipline_excel,
                     "Automatisch discipline-Excel naast sjabloon-DXF");
                 ui.small("Het overzicht volgt dezelfde PS-namen en volgorde. Bij vervangen blijft de vorige Excel-versie in de exportmap bewaard.");
+                crate::ui_preferences::fields(ui,&mut self.migrated_settings.export_preferences);
                 ui.separator();
                 ui.checkbox(&mut self.backup_settings.enabled,"Automatische projectback-ups");
                 ui.horizontal(|ui|{
@@ -1749,6 +1751,7 @@ impl SleufBaseApp {
                 });
                 ui.label(format!("{} extra materiaalkeuzes",self.migrated_settings.kickthemap_material_choices.len()));
                 if ui.button("Instellingen opslaan").clicked() {save=true;}
+                });
             });
             self.show_settings_dialog=show;
             if save {

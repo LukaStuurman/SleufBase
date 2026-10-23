@@ -52,7 +52,7 @@ fn trench(case: &Case) -> VirtualTrench {
     t.boundary_3d = points;
     t.objects = objects
         .into_iter()
-        .map(|position| TrenchPoint {
+        .map(|position| TrenchPoint {metadata:Default::default(),
             position,
             role: "object".into(),
             object_name: "LS".into(),

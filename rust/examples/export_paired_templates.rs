@@ -112,7 +112,7 @@ fn main() -> Result<(), String> {
                 },
                 0.6,
             )?;
-            trench.objects.push(TrenchPoint {
+            trench.objects.push(TrenchPoint {metadata:serde_json::json!({"display_rgb":[14,179,220],"point_id":"water-colored"}),
                 role: "water".into(),
                 object_name: "Water".into(),
                 source_name: "Water".into(),
@@ -123,6 +123,28 @@ fn main() -> Result<(), String> {
                 },
                 attributes: Default::default(),
             });
+            trench.objects.push(TrenchPoint {
+                metadata:serde_json::json!({"display_rgb":[221,41,87],"point_id":"ls-colored"}),
+                role:"object".into(),object_name:"LS Ø".into(),source_name:"ls".into(),
+                position:Vertex{x:2.7,y:1.4,z:Some(-0.9)},attributes:Default::default(),
+            });
+            // Deliberately retain declaration order for profile labels while
+            // raster rendering sorts the clipped bands. Unequal depths and
+            // sloping ground distinguish a true reverse rebuild from a mirror.
+            trench.dekband_rows=vec![
+                sleufbase_rust::virtual_trench::Dekband{
+                    start_chainage:3.,end_chainage:8.4,start_depth:0.17,end_depth:0.63,
+                    source_name:"Dekband".into(),display_rgb:Some([242,117,21]),
+                },
+                sleufbase_rust::virtual_trench::Dekband{
+                    start_chainage:-1.2,end_chainage:12.3,start_depth:0.51,end_depth:0.09,
+                    source_name:"Betondekband Ø".into(),display_rgb:Some([35,199,81]),
+                },
+                sleufbase_rust::virtual_trench::Dekband{
+                    start_chainage:3.,end_chainage:6.1,start_depth:0.28,end_depth:0.44,
+                    source_name:"Beschermband".into(),display_rgb:Some([137,61,211]),
+                },
+            ];
             value["datasets"] = serde_json::json!([trench.to_dataset(trench.job_id, true)]);
             let bounds = sleufbase_rust::virtual_raster::layout(&trench, 1.)?.bounds;
             for slot in value["slots"]
@@ -137,6 +159,9 @@ fn main() -> Result<(), String> {
                 slot["bounds"] = serde_json::to_value(bounds).map_err(|e| e.to_string())?;
                 slot["profile"]["dataset"] = serde_json::json!(0);
                 slot["profile"]["forced_start"] = serde_json::json!([0., 0.]);
+                // Exercise backwards-compatible manifests: the virtual source
+                // lives solely on the TIFF pane, without the newer profile key.
+                slot["profile"].as_object_mut().unwrap().remove("virtual_trench");
             }
         }
         if name == "extended" {

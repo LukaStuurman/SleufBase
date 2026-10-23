@@ -33,6 +33,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
     assert!(!fixture.datasets.is_empty());
     let dir=tempfile::tempdir().unwrap();
     let mut options=Options {
+        logos:Default::default(),profile_style:Default::default(),
         font_directories:Vec::new(),
         paired:false,
         template:fixture.template.clone(),
@@ -76,8 +77,12 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     let start=sleufbase_rust::Vertex{x:x-half_width,y,z:Some(-1.)};
     let end=sleufbase_rust::Vertex{x:x+half_width,y,z:Some(-1.)};
     let tiff_bounds=tiff.bounds;
-    let trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
+    let mut trench=sleufbase_rust::virtual_trench::VirtualTrench::new(
         "PS-virtual".into(),start,end,0.6).unwrap();
+    trench.dekband_rows.push(sleufbase_rust::virtual_trench::Dekband{
+        start_chainage:0.,end_chainage:half_width,start_depth:0.2,end_depth:0.8,
+        source_name:"Band".into(),display_rgb:Some([20,30,40]),
+    });
     let opts=Options {
         paired:false,
         template:fixture.template,
@@ -92,6 +97,9 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
     assert_eq!(request.slots.len(),1);
     assert_eq!(request.datasets.len(),1);
     let slot=request.slots[0].as_ref().unwrap();
+    assert!(slot.virtual_source.is_none(),"selected GeoTIFF remains the raster source");
+    assert_eq!(slot.profile.as_ref().unwrap().virtual_trench.as_ref().unwrap().dekband_rows.len(),1,"profile retains its virtual source even with a selected GeoTIFF");
+    assert_eq!(request.datasets[0].features.len(),2,"declared bands are injected per profile direction and excluded from report counts");
     assert_eq!(slot.profile.as_ref().unwrap().forced_start,Some([start.x,start.y]));
     assert_eq!(slot.tiff_source.as_ref().unwrap().axis,Some([
         [start.x,start.y],[end.x,end.y]
@@ -209,7 +217,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
         Vertex{x:155000.,y:463000.,z:Some(-1.0)},
         Vertex{x:155008.,y:463000.,z:Some(-1.2)},0.6,
     ).unwrap();
-    trench.objects.push(TrenchPoint{
+    trench.objects.push(TrenchPoint{metadata:Default::default(),
         role:"water".into(),object_name:"Waterleiding".into(),
         source_name:"WATER".into(),
         position:Vertex{x:155003.,y:463000.,z:Some(-1.5)},
@@ -248,7 +256,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
     let synthetic=image::open(photo).unwrap().to_rgba8();
     assert!(synthetic.pixels().any(|p|p[3]==0));
     assert!(synthetic.pixels().any(|p|p[0]==0&&p[3]==255));
-    assert!(synthetic.pixels().any(|p|p[2]==229&&p[3]>=235));
+    assert!(synthetic.pixels().any(|p|p[2]==235&&p[3]>=235));
     assert!(export.published.assets.join("slot00001_kaart.png").is_file());
     let doc=sleufbase_rust::dxf_document::Document::load(
         &output,&std::sync::atomic::AtomicBool::new(false)).unwrap();

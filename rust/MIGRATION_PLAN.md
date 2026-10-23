@@ -30,6 +30,39 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 
 ## Volgorde en bewijs
 
+Aanvulling 23 oktober 2026: drie agents hebben op medium gewerkt aan de zes
+werkpakketten, gevolgd door centrale review en integratie. Puntselectie/snapping,
+asbewerking, richtingskopieën, dekbanddieptes, oorspronkelijke rastermaskers en
+puntkleuren zijn uitgebreid. AHN gebruikt een gedeelde begrensde cache en een
+annuleerbare conceptactie in de editor. Profielvoorkeuren en logo's zijn op beide
+sjabloonroutes aangesloten; adresreparatie en PDF/DGN/DWF-underlaykopieën volgen
+de oorspronkelijke export. De expliciete Python-terugconverter behoudt onbekende
+velden en weigert nog niet verliesvrij ondersteunde gegevens.
+
+De centrale review corrigeerde onder meer dekbandinterpolatie op de werkelijk
+markeruitgebreide profielas, afzonderlijke Normaal/Reverse-inhoud, meetpunten
+zonder extra dekbandobjecten in disciplineoverzichten, handmatig gewijzigde
+Z-hoogtes, oude reversevoorkeuren en dubbel gebruikte laagherkomst bij kopieën.
+De actieve Python-reversepatch neemt beide richtingen op; de verouderde voorkeur
+mag de normale basisrichting niet omdraaien. Zie
+[de aanvullende contracten](tests/fixtures/native-port-contracts.md).
+
+Gecontroleerd: 572 Rust-tests op alle targets; Clippy en de desktop-/driverbuild
+afgerond. Acht generators leverden 124 bytegelijke verse referentiebestanden.
+Alle 26.495.653 oorspronkelijke rasterpixels slagen. Onafhankelijke readback van
+echte DXF's vergelijkt 14 logo's, 60 underlays en 804 geschreven virtuele
+profielentiteiten, normaal en reverse in losse én gepaarde uitvoer. Acht gepaarde
+exports met 23 dynamische paren behouden geometrie, gekoppelde attributen,
+afbeeldingspixels, Excel en de oorspronkelijke CAD-metadata. Het portable pakket
+neemt de acht standaardlogo's mee; de nieuwe referenties/readbacks staan ook in CI.
+
+Deze uitbreiding sluit geen heel werkpakket of releasevoorwaarde af. Volledige
+project-/UI-conversie, overige kadastrale exportkeuzes, automatische AHN- en
+Gemma/AI-workflows, alle dienstvarianten, CAD-/praktijkacceptatie en levering
+blijven open. Optionele native werkfoto's blijven behouden; in de onderzochte
+actieve oorspronkelijke sjabloonroute is geen afzonderlijk fotoannotatiecontract
+aangetroffen. Dit vervangt geen acceptatie van de overige oorspronkelijke route.
+
 1. **Gegevensintegriteit en projectlevenscyclus**: atomair opslaan/exporteren,
    harde invoerlimieten, volledige geometrievalidatie, onopgeslagen werk beschermen,
    oude achtergrondresultaten isoleren bij projectwissels, hersteltesten.

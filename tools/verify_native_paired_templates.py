@@ -1,6 +1,6 @@
 """Paired worker output: both single-direction contents/pixels and original CAD graph."""
 from pathlib import Path
-import hashlib,json,re,sys,tempfile
+import copy,hashlib,importlib,json,re,sys,tempfile
 import ezdxf
 from PIL import Image
 from generate_template_page_fixtures import entity
@@ -74,8 +74,70 @@ def original_graph(path,wrappers,doc,baseline_fixes):
         oracle=Path(temp)/'original.dxf';dv._write_pairs(oracle,dv._flatten_records(records),newline=nl,had_bom=bom)
         compare(snapshot(path,wrappers,baseline_fixes),snapshot(oracle,wrappers,baseline_fixes),'original graph/grip '+path.parent.name)
 
+def original_virtual_profiles(folder,paired):
+    """Compare actual single and paired entities to the original full writer.
+
+    Build the original base dataset independently from the source trench, then
+    let the original exporter choose the axis, inject its declared deck bands,
+    rebuild the profile and write every frame/marker/label/LEADER entity.
+    """
+    from dataclasses import replace
+    from generate_object_export_fixtures import reference
+    from verify_native_profile_leaders import full_signature
+    ref=reference();pkg=ref.__package__
+    models=importlib.import_module(pkg+'.models');vt=importlib.import_module(pkg+'.virtual_trench')
+    module=importlib.import_module(pkg+'.cadastral_export')
+    importlib.import_module(pkg+'.dxf_template_pipeline_v9_patch').install_dxf_template_pipeline_v9_patch()
+    exporter=module.CadastralDxfExporter(wfs_client=None)
+    original_add_template_cross_section=exporter._add_template_cross_section
+    _,_,dynamic,_,_=modules();count=0
+    for mode,suffix in [('normal','_NORMAAL_CONTENT'),('reverse','_REVERSE_CONTENT')]:
+        request=json.loads((folder/(mode+'-input.json')).read_text(encoding='utf-8'))
+        rules=tuple(ref.ObjectLayerRule(tuple(r['keywords']),r['target_layer'],r['color_aci'],r['label']) for r in request['rules'])
+        native=ezdxf.readfile(folder/(mode+'.dxf'));groups=single_groups(native)
+        for i,slot in enumerate(request['slots']):
+            if slot is None or slot.get('profile') is None:continue
+            options=slot['profile'];trench=slot['virtual_source']['trench']
+            assert not options.get('virtual_trench'),'fixture must exercise TIFF-source fallback'
+            assert len(trench['dekband_rows'])==3,'fixture must include overlapping asymmetric bands'
+            points=[dict(trench['start'],role='start',object_name='Beginpunt',source_name='PUNT'),dict(trench['end'],role='end',object_name='Eindpunt',source_name='PUNT')]
+            for obj in trench['objects']:
+                attrs=obj['attributes'];points.append(dict(obj['position'],**obj.get('metadata',{}),role=obj['role'],object_name=obj['object_name'],source_name=obj['source_name'],attribute_1=attrs[0],attribute_2=attrs[1],attribute_3=attrs[2]))
+            metadata=copy.deepcopy(options.get('metadata') or {})
+            metadata[vt.VIRTUAL_TRENCH_METADATA_KEY]=dict(points=points,width_meters=trench['width_meters'])
+            metadata[vt.TEMPLATE_DEKBAND_METADATA_KEY]=copy.deepcopy(trench['dekband_rows'])
+            layer=models.GeoTiffLayer(Path(trench['label']+'.tif'),Image.new('RGBA',(1,1)),models.GeoTransform(1,0,0,0,-1,1),models.Bounds(**slot['bounds']),28992,metadata=metadata)
+            try:
+                base=vt.build_virtual_trench_dataset(layer);assert base is not None and not base.polylines
+                reverse=mode=='reverse';start=trench['end'] if reverse else trench['start']
+                base=replace(base,cross_section_start_xy=(start['x'],start['y']))
+                marker=max(.005,options.get('marker_diameter',.02))
+                base_profile=exporter._build_template_cross_section_profile(base,rules,[],[],marker,reverse)
+                assert base_profile is not None
+                dataset=exporter._dataset_with_template_dekbanden(layer,base,rules,[],[],marker,reverse)
+                assert len(dataset.polylines)==3
+                profile=exporter._build_template_cross_section_profile(dataset,rules,[],[],marker,reverse)
+                assert profile is not None
+                original=ezdxf.readfile(request['template']);exporter._setup_text_styles(original)
+                target=exporter._detect_template_slots(original)[i];baseline={e.dxf.handle for e in original.modelspace()}
+                original_add_template_cross_section(original,original.modelspace(),target,layer,slot['label'],profile,options.get('show_reference',True),options.get('use_custom_maaiveld',True),[],options.get('avoid_collisions',True),options.get('clip_markers',False),marker,options.get('manual_scale'),options.get('diameter_prefix','Ø').strip() or 'Ø')
+                with tempfile.TemporaryDirectory(prefix='SleufBase-original-virtual-profile-') as temp:
+                    path=Path(temp)/'original.dxf';original.saveas(path);original=ezdxf.readfile(path)
+                wanted=[full_signature(e) for e in original.modelspace() if e.dxf.handle not in baseline]
+                assert wanted and any(e['kind']=='LEADER' for e in wanted)
+                singles=[full_signature(e) for e in groups[i+1] if e.dxftype()!='IMAGE']
+                wrapper=dynamic.dynamic_block_name(slot['label'],i+1)
+                state=next(e for e in paired.blocks.get(wrapper).query('INSERT') if e.dxf.name.endswith(suffix))
+                paired_entities=[full_signature(e) for e in paired.blocks.get(state.dxf.name) if e.dxftype()!='IMAGE']
+                wanted=json.loads(json.dumps(wanted))
+                compare(json.loads(json.dumps(singles)),wanted,f'original virtual/{mode}/single/slot{i+1}')
+                compare(json.loads(json.dumps(paired_entities)),wanted,f'original virtual/{mode}/paired/slot{i+1}')
+                count+=len(wanted)*2
+            finally:layer.image.close()
+    return count
+
 def main():
-    out=Path(sys.argv[1]);total=0;profiles=0
+    out=Path(sys.argv[1]);total=0;profiles=0;original_virtual_entities=0
     for name in ['profiles','photos-no-draw','virtual','image-only','extended','stroke-font','lff-font','bigfont-fallback']:
         folder=out/name;paired=ezdxf.readfile(folder/'paired.dxf')
         request=json.loads((folder/'paired-input.json').read_text(encoding='utf-8'))
@@ -120,6 +182,7 @@ def main():
                                     datetime.fromisoformat(node.text.replace('Z','+00:00'));node.text='{timestamp}'
                         left,right=(ET.tostring(root) for root in roots)
                     assert left==right,(name,mode,member)
+        if name=='virtual':original_virtual_entities=original_virtual_profiles(folder,paired)
         if name=='stroke-font':
             from unittest.mock import patch
             from ezdxf.fonts import fonts,shapefile
@@ -145,5 +208,7 @@ def main():
         else:original_graph(folder/'paired.dxf',wrappers,paired,baseline_fixes)
         total+=len(wrappers)
     print(f'8 real paired exports / {total} dynamic pairs: both directions match singles in complete geometry, linked attributes, image pixels and Excel; original promotion/grip metadata match, including SHX/LFF fonts and BIGFONT factory fallback, with no new audit repairs ({profiles} leaders)')
+    assert original_virtual_entities>0
+    print(f'{original_virtual_entities} complete written virtual-profile entities independently match the original base-axis/deck-band/full-writer pipeline in normal and reverse, for singles and paired states')
 
 if __name__=='__main__':main()

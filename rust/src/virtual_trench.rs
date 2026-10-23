@@ -10,6 +10,8 @@ pub const DEFAULT_WIDTH_METERS:f64=0.6;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TrenchPoint {
+    #[serde(default,skip_serializing_if="serde_json::Value::is_null")]
+    pub metadata:serde_json::Value,
     pub role:String,
     pub object_name:String,
     pub source_name:String,
@@ -23,6 +25,10 @@ pub struct TrenchPoint {
 pub struct Dekband {
     pub start_chainage:f64,
     pub end_chainage:f64,
+    #[serde(default)]
+    pub start_depth:f64,
+    #[serde(default)]
+    pub end_depth:f64,
     pub source_name:String,
     #[serde(default)]
     pub display_rgb:Option<[u8;3]>,
@@ -34,6 +40,10 @@ pub struct VirtualTrench {
     pub width_meters:f64,
     pub start:Vertex,
     pub end:Vertex,
+    #[serde(default,skip_serializing_if="serde_json::Value::is_null")]
+    pub start_metadata:serde_json::Value,
+    #[serde(default,skip_serializing_if="serde_json::Value::is_null")]
+    pub end_metadata:serde_json::Value,
     #[serde(default)]
     pub objects:Vec<TrenchPoint>,
     #[serde(default)]
@@ -61,7 +71,7 @@ fn chainage_order(a:f64,b:f64)->std::cmp::Ordering {a.partial_cmp(&b).unwrap_or_
 impl VirtualTrench {
     pub fn new(label:String,start:Vertex,end:Vertex,width:f64) -> Result<Self,String> {
         let result=Self {
-            label,width_meters:width,start,end,
+            label,width_meters:width,start,end,start_metadata:Default::default(),end_metadata:Default::default(),
             objects:Vec::new(),dekband_rows:Vec::new(),source_path:None,boundary_3d:Vec::new(),alignment:None,job_id:0,metadata:Default::default()
         };
         result.validate()?;
@@ -69,7 +79,7 @@ impl VirtualTrench {
     }
 
     pub fn validate(&self) -> Result<(),String> {
-        crate::raster_points::validate_metadata(&self.metadata)?;
+        self.point_metadata_bytes()?;
         if let Some(alignment)=&self.alignment {alignment.validate()?;}
         if !self.width_meters.is_finite() || self.width_meters<0.1 {
             return Err("Een virtuele proefsleuf moet minstens 0,1 m breed zijn".into());
@@ -90,6 +100,7 @@ impl VirtualTrench {
         if self.dekband_rows.len()>10_000 {return Err("Te veel dekbandsegmenten".into());}
         for row in &self.dekband_rows {
             if !row.start_chainage.is_finite() || !row.end_chainage.is_finite()
+                || !row.start_depth.is_finite() || !row.end_depth.is_finite() || row.start_depth<0. || row.end_depth<0.
                 || row.end_chainage <= row.start_chainage+1e-6
                 || row.source_name.len()>256 || row.source_name.chars().any(char::is_control)
             {return Err("Dekband heeft ongeldige kettingmaten of omschrijving".into());}
@@ -98,6 +109,15 @@ impl VirtualTrench {
             return Err("Begin- en eindpunt van proefsleuf vallen samen".into());
         }
         Ok(())
+    }
+
+    pub fn point_metadata_bytes(&self)->Result<usize,String>{
+        let mut bytes=0_usize;
+        for metadata in std::iter::once(&self.metadata).chain([&self.start_metadata,&self.end_metadata]).chain(self.objects.iter().map(|o|&o.metadata)){
+            bytes=bytes.saturating_add(crate::raster_points::validate_metadata(metadata)?);
+            if bytes>2*1024*1024{return Err("Virtuele laag- en puntmetadata is groter dan 2 MB".into());}
+        }
+        Ok(bytes)
     }
 
     pub fn length(&self)->f64 {
@@ -170,6 +190,20 @@ impl VirtualTrench {
         self.to_dataset_with_cancel(job_id,include_endpoints,&crate::input::NEVER_CANCEL).expect("uncancelled virtual job")
     }
     pub(crate) fn to_dataset_with_cancel(&self,job_id:u64,include_endpoints:bool,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String> {
+        self.to_base_dataset_with_cancel(job_id,include_endpoints,cancel)
+    }
+    /// Geometry-only dataset with bands on the measured axis. Template exports
+    /// use `to_base_dataset_with_cancel` and `append_dekband_for_profile` instead
+    /// because their marker-expanded axis also controls surface interpolation.
+    pub fn to_dataset_with_direction(&self,job_id:u64,include_endpoints:bool,reverse:bool,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String> {
+        let mut dataset=self.to_base_dataset_with_cancel(job_id,include_endpoints,cancel)?;
+        let (a,b)=if reverse{(self.end,self.start)}else{(self.start,self.end)};
+        self.append_dekband_on_axis(&mut dataset,a,b,self.length(),cancel)?;
+        Ok(dataset)
+    }
+    /// Base points only. Template exporters must build the chosen base profile
+    /// before injecting deck bands: endpoint markers can extend its axis.
+    pub fn to_base_dataset_with_cancel(&self,job_id:u64,include_endpoints:bool,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String> {
         crate::input::check(cancel)?;
         let mut features=Vec::with_capacity(self.objects.len()+if include_endpoints{2}else{0});
         for (index,object) in self.objects.iter().enumerate() {
@@ -199,6 +233,27 @@ impl VirtualTrench {
             features
         })
     }
+    /// Match the original exporter, including its marker-expanded profile axis
+    /// and chosen direction. Call once on a base dataset before the final build.
+    pub fn append_dekband_for_profile(&self,dataset:&mut Dataset,profile:&crate::profile::Profile<'_>,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
+        self.append_dekband_on_axis(dataset,profile.start,profile.end,profile.axis_length,cancel)
+    }
+    fn append_dekband_on_axis(&self,dataset:&mut Dataset,a:Vertex,b:Vertex,length:f64,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
+        crate::input::check(cancel)?;
+        if length<=1e-9{return Ok(());}
+        let mut bands=Vec::with_capacity(self.dekband_rows.len());
+        for (index,row) in self.dekband_rows.iter().enumerate(){
+            if index%256==0{crate::input::check(cancel)?;}
+            let start=row.start_chainage.clamp(0.,length);let end=row.end_chainage.clamp(0.,length);
+            if (end-start).abs()<=1e-6{continue;}
+            let vertex=|along:f64,depth:f64|{let ratio=along/length;let surface=a.z.unwrap_or(0.)+(b.z.unwrap_or(0.)-a.z.unwrap_or(0.))*ratio;Vertex{x:a.x+(b.x-a.x)*ratio,y:a.y+(b.y-a.y)*ratio,z:Some(surface-depth)}};
+            let source=crate::python_values::trim(&row.source_name);let source=if source.is_empty(){"Dekband"}else{source};
+            bands.push(Feature{object_name:if crate::python_values::casefold(source)=="dekband"{format!("Dekband {}",index+1)}else{source.into()},source_name:source.into(),geometry:Geometry::Polyline(vec![vertex(start,row.start_depth),vertex(end,row.end_depth)]),attributes:[String::new(),String::new(),"dekband".into()]});
+        }
+        crate::input::check(cancel)?;
+        dataset.features.extend(bands);
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -225,7 +280,7 @@ mod tests {
     fn sortable_objects_and_dataset() {
         let mut t=trench();
         for x in [8.0,2.0] {
-            t.add_object(TrenchPoint {
+            t.add_object(TrenchPoint {metadata:Default::default(),
                 role:String::new(),object_name:"LS".into(),source_name:"ls".into(),
                 position:Vertex{x,y:0.0,z:None},attributes:Default::default()
             }).unwrap();

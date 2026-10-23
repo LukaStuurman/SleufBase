@@ -117,6 +117,12 @@ zijn opgenomen. Echte canvasstreken, geknipte kaarten en geschreven DXF-kleuren
 worden vergeleken. Volledige achtergrond-/kolom-/embedded-/vulopmaak en werkelijke
 CAD-/projectacceptatie blijven vereist. Zie tests/fixtures/cad-mtext-paint.
 
+## Aanvulling kaart-/sjabloon-/uitwisselingscontracten, 23 oktober 2026
+
+De historische componentbeschrijvingen hierboven krijgen de volgende aanvulling: puntselectie/snapping, asbewerking, richtingskopie, dekbanddieptes, oorspronkelijke virtuele maskers/puntkleuren, logo-/contactherstel, PDF/DGN/DWF-underlaykopieën en profielvoorkeuren zijn aangesloten. AHN aanvullen werkt annuleerbaar in een concept met behoud van objectdieptes en handmatige/gemeten hoogtes. De beperkte expliciete Python-terugconverter behoudt onbekende metadata; niet verliesvrij ondersteunde gegevens geven een fout. Zie [de aanvullende referenties en beperkingen](tests/fixtures/native-port-contracts.md).
+
+De daadwerkelijke oorspronkelijke Gemma/AI-workflow, automatische AHN-verversing bij alle kaartbewerkingen, volledige project-/UI-conversie, overige kadastrale exportkeuzes, alle echte dienstvarianten en praktijkacceptatie blijven open. De native foto-strip blijft een uitbreiding; bij controle van de actieve oorspronkelijke export en opstartpatches is geen afzonderlijk fotoannotatie-exportcontract aangetroffen. Dit sluit de overige oorspronkelijke functies of de onderstaande releasevoorwaarden niet af.
+
 ## Verplichte go/no-go voorwaarden
 
 1. Elk onderdeel hierboven is daadwerkelijk geïmplementeerd; 'deels' telt niet als gereed.

@@ -257,3 +257,133 @@ pub fn pick(
     }
     best
 }
+
+/// Stable identity while a map gesture owns its source; objects keep source
+/// order when only their position changes, avoiding index changes mid-gesture.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MapPoint { Start, End, Object(usize) }
+pub fn position(t: &VirtualTrench, target: MapPoint) -> Option<Vertex> {
+    match target { MapPoint::Start=>Some(t.start),MapPoint::End=>Some(t.end),MapPoint::Object(i)=>t.objects.get(i).map(|p|p.position) }
+}
+pub fn pick_point(t:&VirtualTrench,p:[f64;2],mpp:f64,tolerance:f64)->Option<MapPoint>{
+    point(p).ok()?;
+    if !mpp.is_finite() || mpp<=0. || !tolerance.is_finite(){return None;}
+    let limit=(10.*mpp).max(tolerance).min(3.);
+    let mut points=vec![MapPoint::Start,MapPoint::End];
+    points.extend((0..t.objects.len()).map(MapPoint::Object));
+    points.sort_by(|a,b|t.chainage(position(t,*a).unwrap()).partial_cmp(&t.chainage(position(t,*b).unwrap())).unwrap_or(std::cmp::Ordering::Equal));
+    let mut nearest=None;let mut distance=f64::INFINITY;
+    for target in points {
+        let v=position(t,target)?;let d=(v.x-p[0]).hypot(v.y-p[1]);
+        if d<=limit && d<distance {nearest=Some(target);distance=d;}
+    }
+    nearest
+}
+/// Original axis transform: normalized along-axis coordinates scale with the
+/// new length, while signed perpendicular distances remain measured metres.
+pub fn transform_axis(t:&mut VirtualTrench,start:[f64;2],end:[f64;2])->Result<bool,String>{
+    crate::virtual_trench_editor::check(t)?;point(start)?;point(end)?;
+    if crate::virtual_trench_editor::is_measured(t){return Err("Maak een handmatige kopie voordat u de gemeten meetas verandert".into());}
+    let length=(end[0]-start[0]).hypot(end[1]-start[1]);
+    if length<0.5 {return Err("Zet begin- en eindpunt minstens 0,5 m uit elkaar".into());}
+    if start==[t.start.x,t.start.y] && end==[t.end.x,t.end.y]{return Ok(false);}
+    let old_length=t.length();let ux=(end[0]-start[0])/length;let uy=(end[1]-start[1])/length;
+    let result=|p:Vertex|->Result<Vertex,String>{
+        let (along,offset)=crate::virtual_trench_editor::coordinates(t,p);
+        let along=along/old_length*length;
+        let p=Vertex{x:start[0]+ux*along-uy*offset,y:start[1]+uy*along+ux*offset,z:p.z};
+        point([p.x,p.y])?;Ok(p)
+    };
+    // Validate all coordinates before applying; no partially changed layer on
+    // a bad map point and no allocation of a full second source/metadata copy.
+    let points=t.objects.iter().map(|p|result(p.position)).collect::<Result<Vec<_>,_>>()?;
+    t.start.x=start[0];t.start.y=start[1];t.end.x=end[0];t.end.y=end[1];
+    for (object,p) in t.objects.iter_mut().zip(points){object.position=p;}
+    Ok(true)
+}
+pub fn move_point(t:&mut VirtualTrench,target:MapPoint,p:[f64;2])->Result<bool,String>{
+    point(p)?;crate::virtual_trench_editor::check(t)?;
+    match target {
+        MapPoint::Start=>transform_axis(t,p,[t.end.x,t.end.y]),
+        MapPoint::End=>transform_axis(t,[t.start.x,t.start.y],p),
+        MapPoint::Object(i)=>{
+            let (x,y,_,_)=t.project(Vertex{x:p[0],y:p[1],z:None});
+            let object=t.objects.get_mut(i).ok_or("Meetpunt bestaat niet meer")?;
+            let changed=object.position.x!=x || object.position.y!=y;
+            object.position.x=x;object.position.y=y;Ok(changed)
+        }
+    }
+}
+pub fn copy_target_end(t:&VirtualTrench,start:[f64;2],direction:[f64;2])->Result<[f64;2],String>{
+    point(start)?;point(direction)?;t.validate()?;
+    let dx=direction[0]-start[0];let dy=direction[1]-start[1];let length=dx.hypot(dy);
+    if length<=1e-9{return Err("Kies een richting vanaf het nieuwe beginpunt".into());}
+    let scale=t.length()/length;let end=[start[0]+dx*scale,start[1]+dy*scale];point(end)?;Ok(end)
+}
+pub fn copy_in_direction(t:&VirtualTrench,label:String,start:[f64;2],direction:[f64;2])->Result<VirtualTrench,String>{
+    let end=copy_target_end(t,start,direction)?;
+    let mut copy=crate::virtual_trench_editor::manual_copy(t,"")?;
+    copy.label=label;transform_axis(&mut copy,start,end)?;
+    // This is a new map layer: old references and annotations describe the old
+    // location, so preserve the full source but do not transplant those points.
+    for key in [raster_points::REFERENCE,crate::map_comments::KEY]{
+        if let Some(meta)=copy.metadata.as_object_mut(){meta.remove(key);}
+    }
+    crate::virtual_trench_editor::check(&copy)?;Ok(copy)
+}
+pub fn add_dekband(t:&mut VirtualTrench,a:[f64;2],b:[f64;2],source_name:String,rgb:Option<[u8;3]>)->Result<bool,String>{
+    add_dekband_with_depth(t,a,b,source_name,rgb,0.,0.)
+}
+pub fn add_dekband_with_depth(t:&mut VirtualTrench,a:[f64;2],b:[f64;2],source_name:String,rgb:Option<[u8;3]>,a_depth:f64,b_depth:f64)->Result<bool,String>{
+    point(a)?;point(b)?;crate::virtual_trench_editor::check(t)?;
+    if t.dekband_rows.len()>=10_000{return Err("Maximumaantal dekbandsegmenten bereikt".into());}
+    if source_name.len()>256 || source_name.chars().any(char::is_control){return Err("Ongeldige dekbandomschrijving".into());}
+    if [a_depth,b_depth].iter().any(|d|!d.is_finite()||*d<0.||*d>1e6){return Err("Ongeldige dekbanddiepte".into());}
+    let along=|p:[f64;2]| t.project(Vertex{x:p[0],y:p[1],z:None}).2;
+    let (a,b)=(along(a),along(b));let start=a.min(b);let end=a.max(b);
+    if end<=start+1e-6{return Err("Prik twee verschillende kettingmaten voor de dekband".into());}
+    let(start_depth,end_depth)=if a<=b{(a_depth,b_depth)}else{(b_depth,a_depth)};
+    t.dekband_rows.push(crate::virtual_trench::Dekband{start_chainage:start,end_chainage:end,start_depth,end_depth,source_name,display_rgb:rgb});
+    Ok(true)
+}
+
+pub fn point_depth(metadata:&serde_json::Value,z:Option<f64>)->f64{
+    crate::python_values::number(metadata.get("sleufbase_depth_meters"))
+        .or_else(||crate::python_values::number(metadata.get("surface_z")).zip(z).map(|(surface,z)|surface-z))
+        .filter(|d|d.is_finite()).unwrap_or(0.)
+}
+/// Apply an asynchronous original endpoint AHN response. Imported measured or
+/// explicit manual points retain their elevations; only original auto endpoints
+/// and objects explicitly attached to start ground level participate.
+pub fn apply_surface_height(t:&mut VirtualTrench,target:MapPoint,height:Option<f64>)->Result<bool,String>{
+    crate::virtual_trench_editor::check(t)?;
+    if height.is_some_and(|v|!v.is_finite()||v.abs()>1e6){return Err("Ongeldige AHN-hoogte".into());}
+    let (p,old_meta)=match target{MapPoint::Start=>(t.start,&t.start_metadata),MapPoint::End=>(t.end,&t.end_metadata),MapPoint::Object(_)=>return Err("Meetobjecten volgen het beginmaaiveld; AHN hoort bij de eindpunten".into())};
+    let mode=old_meta.get("surface_mode").and_then(|v|v.as_str()).unwrap_or("");
+    if mode!="auto" && (!mode.is_empty() || p.z.is_some() || crate::virtual_trench_editor::is_measured(t)){return Ok(false);}
+    let mut meta=old_meta.as_object().cloned().unwrap_or_default();
+    meta.insert("surface_mode".into(),json!("auto"));meta.insert("surface_status".into(),json!(if height.is_some(){"resolved"}else{"unavailable"}));
+    let depth=point_depth(old_meta,p.z);let next_z=height.map(|z|z-depth).or(p.z);
+    if let Some(z)=height{meta.insert("surface_z".into(),json!(z));}
+    let next_meta=serde_json::Value::Object(meta);
+    let mut updates=Vec::new();let mut bytes=t.point_metadata_bytes()? as i64;
+    let size=|meta:&serde_json::Value|crate::raster_points::validate_metadata(meta).map(|b|b as i64);
+    bytes+=size(&next_meta)?-size(old_meta)?;
+    if target==MapPoint::Start {
+        if let Some(surface)=height {
+            for (i,object) in t.objects.iter().enumerate(){
+                if object.metadata.get("surface_mode").and_then(|v|v.as_str())!=Some("start"){continue;}
+                let depth=point_depth(&object.metadata,object.position.z);
+                let mut meta=object.metadata.as_object().cloned().unwrap_or_default();
+                meta.insert("surface_z".into(),json!(surface));meta.insert("surface_status".into(),json!("start"));
+                let meta=serde_json::Value::Object(meta);bytes+=size(&meta)?-size(&object.metadata)?;
+                updates.push((i,surface-depth,meta));
+            }
+        }
+    }
+    if bytes>2*1024*1024{return Err("AHN-puntmetadata overschrijdt het laagbudget".into());}
+    let changed=p.z!=next_z||*old_meta!=next_meta||updates.iter().any(|(i,z,m)|t.objects[*i].position.z!=Some(*z)||t.objects[*i].metadata!=*m);
+    match target{MapPoint::Start=>{t.start.z=next_z;t.start_metadata=next_meta;},MapPoint::End=>{t.end.z=next_z;t.end_metadata=next_meta;},_=>unreachable!()}
+    for (i,z,meta) in updates{t.objects[i].position.z=Some(z);t.objects[i].metadata=meta;}
+    Ok(changed)
+}

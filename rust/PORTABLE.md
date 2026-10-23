@@ -4,6 +4,10 @@ Deze map bevat de **native Rust-migratiepreview**, niet de huidige stabiele Sleu
 
 Laat de bijgeleverde `Pillow-LICENSE.txt`, `ezdxf-LICENSE.txt` en `proj4rs-NOTICES.txt` bij de executable staan. De licenties zijn ook in de executable opvraagbaar met `--licenses`.
 
+Laat ook de map `assets/template_logos` naast de executable staan voor de
+standaard Techbase- en opdrachtgeverlogo's in de sjabloonexport. Eigen PNG- en
+JPEG-logo's kunnen in het exportvenster worden gekozen.
+
 ## Gebruik
 
 1. Pak de **hele** ZIP uit in een schrijfbare map op Windows 11 (bijvoorbeeld je documenten of een USB-schijf).

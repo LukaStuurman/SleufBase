@@ -186,7 +186,7 @@ pub fn parse_overlay_with_cancel(overlay:&DxfOverlay,mappings:&std::collections:
         let resolved=mappings.iter().find(|(key,_)|normalize_name(key)==normalized)
             .map(|(_,v)|v.as_str()).unwrap_or(mapping_name);
         let z=leader.and_then(|l|l.height).or(point.z);
-        boundaries[index].objects.push(TrenchPoint{
+        boundaries[index].objects.push(TrenchPoint{metadata:Default::default(),
             role:"object".into(),
             object_name:if name.is_empty(){mapping_name.to_owned()}else{name.clone()},
             source_name:resolved.to_owned(),

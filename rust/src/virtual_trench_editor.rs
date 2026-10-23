@@ -123,8 +123,10 @@ pub fn reverse_axis(t:&mut VirtualTrench)->Result<(),String>{
     }
     let mut next=t.clone();
     std::mem::swap(&mut next.start,&mut next.end);
+    std::mem::swap(&mut next.start_metadata,&mut next.end_metadata);
     let length=next.length();
     for row in &mut next.dekband_rows {
+        std::mem::swap(&mut row.start_depth,&mut row.end_depth);
         let old_start=row.start_chainage;
         row.start_chainage=length-row.end_chainage;
         row.end_chainage=length-old_start;
@@ -182,7 +184,7 @@ pub fn import_tabular(t:&mut VirtualTrench,source:&str)->Result<usize,String> {
         for (i,value) in cols.iter().skip(6).enumerate() {
             if i<3 {attributes[i]=(*value).to_owned();}
         }
-        new_objects.push(TrenchPoint {
+        new_objects.push(TrenchPoint {metadata:Default::default(),
             role:cols[0].to_owned(),object_name:cols[1].to_owned(),
             source_name:cols[2].to_owned(),
             position:position(t,chainage,offset,z)?,
@@ -227,7 +229,7 @@ pub fn manual_copy(original:&VirtualTrench,suffix:&str)->Result<VirtualTrench,St
     copy.source_path=None;
     copy.job_id=0;
     if let Some(metadata)=copy.metadata.as_object_mut(){
-        for key in ["rotation_degrees","base_transform_matrix","kickthemap_job_id","kickthemap_job_title","kickthemap_job_features_path"]{metadata.remove(key);}
+        for key in ["rotation_degrees","base_transform_matrix","kickthemap_job_id","kickthemap_job_title","kickthemap_job_features_path","_sleufbase_python_tiff_index"]{metadata.remove(key);}
         if let Some([x,y])=reference{metadata.insert(crate::raster_points::REFERENCE.into(),serde_json::json!({"x":x,"y":y}));}
     }
     check(&copy)?;
@@ -244,7 +246,7 @@ mod tests {
     }
     fn sample_object(chain:f64,offset:f64)->TrenchPoint {
         let p=position(&trench(),chain,offset,Some(-1.25)).unwrap();
-        TrenchPoint {
+        TrenchPoint {metadata:Default::default(),
             role:"leiding".into(),object_name:"LS".into(),
             source_name:"A".into(),position:p,attributes:Default::default()
         }
@@ -272,7 +274,7 @@ mod tests {
         let end=t.end;
         assert!(edit_axis(&mut t,"".into(),start,end,0.6).is_err());
         assert_eq!(serde_json::to_vec(&t).unwrap(),original);
-        assert!(replace_object(&mut t,None,TrenchPoint {
+        assert!(replace_object(&mut t,None,TrenchPoint {metadata:Default::default(),
             object_name:"A".into(),source_name:"B".into(),role:"C".into(),
             position:Vertex{x:f64::NAN,y:0.,z:None},
             attributes:Default::default(),
@@ -323,7 +325,10 @@ mod tests {
     #[test]
     fn reverse_axis_preserves_geographic_dekband_segment_and_old_projects() {
         let mut t=trench();
-        t.dekband_rows.push(crate::virtual_trench::Dekband{
+        t.start_metadata=serde_json::json!({"surface_mode":"auto","surface_z":4.,"point_id":"start"});
+        t.end_metadata=serde_json::json!({"surface_mode":"manual","surface_z":5.,"point_id":"end"});
+        let original=serde_json::to_value(&t).unwrap();
+        t.dekband_rows.push(crate::virtual_trench::Dekband{start_depth:0.2,end_depth:0.7,
             start_chainage:1.,end_chainage:3.,
             source_name:"LS dekband".into(),display_rgb:Some([12,34,56]),
         });
@@ -338,6 +343,9 @@ mod tests {
         assert_eq!(t.dekband_rows[0].start_chainage,7.);
         assert_eq!(t.dekband_rows[0].end_chainage,9.);
         assert_eq!(t.dekband_rows[0].display_rgb,Some([12,34,56]));
+        assert_eq!((t.dekband_rows[0].start_depth,t.dekband_rows[0].end_depth),(0.7,0.2));
+        assert_eq!(t.start_metadata,original["end_metadata"]);
+        assert_eq!(t.end_metadata,original["start_metadata"]);
     }
     #[test]
     fn add_edit_delete_sort_and_shift_objects() {

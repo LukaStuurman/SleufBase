@@ -42,6 +42,8 @@ pub enum BackgroundKind {
     Pdok,
 }
 pub struct Options {
+    pub profile_style: crate::settings_compat::ProfilePreferences,
+    pub logos: crate::template_branding::Logos,
     pub template: PathBuf,
     pub paired: bool,
     pub project: String,
@@ -58,7 +60,9 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
+            profile_style: Default::default(),
             template: PathBuf::new(),
+            logos: Default::default(),
             paired: true,
             project: String::new(),
             drawn_by: String::new(),
@@ -182,6 +186,7 @@ fn build_sources(
     control.check()?;
     let all_comments=crate::map_comments::combined_all(comments,rasters,trenches)?;
     crate::dxf_fonts::Catalog::validate_dirs(&opts.font_directories)?;
+    opts.profile_style.validate()?;
     if !opts.template.is_file() {
         return Err("Kies een bestaand DXF-sjabloon".into());
     }
@@ -263,7 +268,7 @@ fn build_sources(
                 }
                 let outline = trench.measured_boundary().into_iter()
                     .map(|(x,y)| [x,y]).collect::<Vec<_>>();
-                (trench.to_dataset(trench.job_id, true),
+                (trench.to_base_dataset_with_cancel(trench.job_id, true, control.flag())?,
                     Some([trench.start.x, trench.start.y]),
                     Some([[trench.start.x,trench.start.y],[trench.end.x,trench.end.y]]),
                     outline)
@@ -349,7 +354,15 @@ fn build_sources(
             }),
             profile: choice.profile.then_some(Profile {
                 dataset: local_index, forced_start, reverse: choice.reverse,
+                virtual_trench:match choice.source{Source::Virtual(i)=>Some(trenches[i].clone()),_=>None},
                 metadata,
+                marker_diameter: opts.profile_style.marker_diameter,
+                show_reference: opts.profile_style.show_reference,
+                use_custom_maaiveld: opts.profile_style.use_custom_maaiveld,
+                auto_fill_bgt: opts.profile_style.auto_fill_bgt,
+                avoid_collisions: opts.profile_style.avoid_collisions,
+                clip_markers: opts.profile_style.clip_markers,
+                diameter_prefix: opts.profile_style.diameter_prefix.clone(),
                 ..Profile::default()
             }),
             photos:choice.photos.clone(),
@@ -361,6 +374,7 @@ fn build_sources(
         rules: rules.to_vec(), roads, terrain_boundaries: terrain,
         surfaces: Vec::new(), layers: Vec::new(), geometry: Vec::new(),
         settings: template_export::Settings {
+            logos: opts.logos.clone(),
             paired: opts.paired,
             project: (!opts.project.trim().is_empty()).then(||opts.project.trim().to_owned()),
             drawn_by: opts.drawn_by.trim().to_owned(),

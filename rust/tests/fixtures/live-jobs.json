@@ -1,0 +1,193 @@
+{
+  "source_sha256": "bbd99ced4f3ede3eccc7552fc8813d99a246a1ab804ff9aa213248a3a315097d",
+  "cases": [
+    {
+      "raw": {
+        "data": [
+          {
+            "Id": 12,
+            "AboutProject": "PS12",
+            "address_road": "Road",
+            "address_number": 0,
+            "address": {
+              "number": 4,
+              "postcode": "1234 AB",
+              "town": "Town",
+              "district": "District",
+              "region": "Region",
+              "country": "NL"
+            },
+            "can_download_cloud": true
+          }
+        ]
+      },
+      "expected": {
+        "job_id": 12,
+        "title": "PS12",
+        "address": "Road 4, 1234 AB Town, District, Region, NL",
+        "municipality": "-",
+        "coordinates": "-",
+        "client_date": "",
+        "status": 0,
+        "prefix": "",
+        "downloadable": true
+      }
+    },
+    {
+      "raw": {
+        "data": [
+          {
+            "id": "13",
+            "name": "PS13",
+            "Download": "1",
+            "address": {
+              "road": "Straat",
+              "number": "3",
+              "postcode": "1000 AA",
+              "town": "Dorp",
+              "region": "Provincie"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "job_id": 13,
+        "title": "PS13",
+        "address": "Straat 3, 1000 AA Dorp, Provincie",
+        "municipality": "-",
+        "coordinates": "-",
+        "client_date": "",
+        "status": 0,
+        "prefix": "",
+        "downloadable": false
+      }
+    },
+    {
+      "raw": {
+        "data": [
+          {
+            "Id": 14,
+            "AboutProject": "Numeric",
+            "Download": 0.5,
+            "coordinates": [
+              1,
+              2
+            ],
+            "municipality": true
+          }
+        ]
+      },
+      "expected": {
+        "job_id": 14,
+        "title": "Numeric",
+        "address": "-",
+        "municipality": "True",
+        "coordinates": "[1, 2]",
+        "client_date": "",
+        "status": 0,
+        "prefix": "",
+        "downloadable": true
+      }
+    },
+    {
+      "raw": {
+        "data": [
+          {
+            "Id": 15,
+            "AboutProject": " Zero ",
+            "x": 0,
+            "y": 0,
+            "address_country": "NL",
+            "can_download_cloud": "true",
+            "status": -1
+          }
+        ]
+      },
+      "expected": {
+        "job_id": 15,
+        "title": "Zero",
+        "address": "NL",
+        "municipality": "-",
+        "coordinates": "0, 0",
+        "client_date": "",
+        "status": -1,
+        "prefix": "",
+        "downloadable": true
+      }
+    },
+    {
+      "raw": {
+        "data": [
+          {
+            "Id": 16,
+            "name": "Missing",
+            "address": null,
+            "status": "3",
+            "s3_root_dir": "new-storage-layout/job16"
+          }
+        ]
+      },
+      "expected": {
+        "job_id": 16,
+        "title": "Missing",
+        "address": "-",
+        "municipality": "-",
+        "coordinates": "-",
+        "client_date": "",
+        "status": 3,
+        "prefix": "new-storage-layout/job16",
+        "downloadable": false
+      }
+    }
+  ],
+  "inline": [
+    {
+      "html": "<script>var projects = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>let projectList = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>const project_data = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>window.jobs = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>window . jobData = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>var jobs = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": 42
+    },
+    {
+      "html": "<script>notprojects = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": null
+    },
+    {
+      "html": "<script>$projects = [{\"Id\":42,\"AboutProject\":\"Quote \\\" [bracket]\"}];</script>",
+      "expected": null
+    },
+    {
+      "html": "var projects=null; const job_list=[{\"Id\":42}]",
+      "expected": 42
+    },
+    {
+      "html": "var projects=[{broken];",
+      "expected": null
+    },
+    {
+      "html": "no project data",
+      "expected": null
+    },
+    {
+      "html": "var projects=[];var jobs=[{\"Id\":42}]",
+      "expected": 0
+    }
+  ]
+}

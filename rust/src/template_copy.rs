@@ -141,7 +141,7 @@ pub(crate) struct Copies<'a> {
     doc: &'a Document,
     pub next: u64,
     pub objects: String,
-    pub image_reactors: HashMap<u64, Vec<u64>>,
+    pub definition_reactors: HashMap<u64, Vec<u64>>,
     count: usize,
     cancel: &'a AtomicBool,
 }
@@ -154,7 +154,7 @@ impl<'a> Copies<'a> {
             doc,
             next,
             objects: String::new(),
-            image_reactors: HashMap::new(),
+            definition_reactors: HashMap::new(),
             count: 0,
             cancel,
         }
@@ -229,9 +229,6 @@ impl<'a> Copies<'a> {
             "DIMENSION"
                 | "ACAD_PROXY_ENTITY"
                 | "ACAD_TABLE"
-                | "PDFUNDERLAY"
-                | "DGNUNDERLAY"
-                | "DWFUNDERLAY"
         ) {
             return Err(format!(
                 "Zelfstandig kopiëren van {} wordt nog niet ondersteund",
@@ -262,10 +259,27 @@ impl<'a> Copies<'a> {
             let reactor = self.allocate()?;
             scope_set(&mut copied, "AcDbRasterImage", 360, format!("{reactor:X}"))?;
             write!(self.objects,"0\nIMAGEDEF_REACTOR\n5\n{reactor:X}\n330\n{handle:X}\n100\nAcDbRasterImageDefReactor\n90\n2\n330\n{handle:X}\n").unwrap();
-            self.image_reactors
+            self.definition_reactors
                 .entry(definition)
                 .or_default()
                 .push(reactor);
+        }
+        // Underlays share their document definition, just as ezdxf's copy_data
+        // does. Binding a new copy adds its entity handle to that definition's
+        // reactors; omitting this leaves a one-way reference after readback.
+        if matches!(r.kind(), "PDFUNDERLAY" | "DGNUNDERLAY" | "DWFUNDERLAY") {
+            let definition = id(first(&copied, 340).ok_or("Underlaydefinitie ontbreekt")?)?;
+            let def = self.doc.by_handle(&format!("{definition:X}"))?
+                .ok_or("Underlaydefinitie ontbreekt")?;
+            let expected = match r.kind() {
+                "PDFUNDERLAY" => "PDFDEFINITION",
+                "DGNUNDERLAY" => "DGNDEFINITION",
+                _ => "DWFDEFINITION",
+            };
+            if def.kind() != expected || def.section() != Some("OBJECTS") {
+                return Err("Ongeldige gedeelde underlaydefinitie".into());
+            }
+            self.definition_reactors.entry(definition).or_default().push(handle);
         }
         Ok((handle, copied))
     }
@@ -279,11 +293,11 @@ impl<'a> Copies<'a> {
                 text: self.objects.clone(),
             });
         }
-        for (&handle, reactors) in &self.image_reactors {
+        for (&handle, reactors) in &self.definition_reactors {
             let r = self
                 .doc
                 .by_handle(&format!("{handle:X}"))?
-                .ok_or("Afbeeldingsdefinitie ontbreekt")?;
+                .ok_or("Gedeelde raster-/underlaydefinitie ontbreekt")?;
             let mut t = tags(r);
             let mut group = false;
             let mut at = None;

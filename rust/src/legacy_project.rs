@@ -15,6 +15,9 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
+#[path="legacy_exchange.rs"]
+mod exchange;
+pub use exchange::{ProjectUiState,legacy_payload,write_legacy_project};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -119,6 +122,9 @@ fn virtual_trench(item: &Value, source: &Path, index: usize) -> Result<VirtualTr
         0.6
     };
     let mut trench = VirtualTrench::new(name, xyz(&points[start])?, xyz(&points[end])?, width)?;
+    trench.dekband_rows=dekband_rows(metadata)?;
+    trench.start_metadata=points[start].clone();
+    trench.end_metadata=points[end].clone();
     trench.job_id = text(metadata.get("kickthemap_job_id"))
         .parse::<u64>()
         .unwrap_or(0);
@@ -146,6 +152,7 @@ fn virtual_trench(item: &Value, source: &Path, index: usize) -> Result<VirtualTr
                 text(p.get("attribute_2")),
                 text(p.get("attribute_3")),
             ],
+            metadata:p.clone(),
         });
     }
     if let Some(boundary) = payload
@@ -189,10 +196,24 @@ fn virtual_trench(item: &Value, source: &Path, index: usize) -> Result<VirtualTr
         // payload (including unknown fields) remains in the import archive.
         active.remove("virtual_trench_payload");
         active.remove("marxact_boundary_3d");
+        active.insert("_sleufbase_python_tiff_index".into(),serde_json::json!(index));
         trench.metadata=Value::Object(active);
     }
     trench.validate()?;
     Ok(trench)
+}
+
+fn dekband_rows(metadata:&Value)->Result<Vec<crate::virtual_trench::Dekband>,String>{
+    items(metadata,"template_dekband_lines")?.iter().map(|row|{
+        let mut start=number(row.get("start_chainage"),"dekband begin")?;
+        let mut end=number(row.get("end_chainage"),"dekband einde")?;
+        let mut start_depth=row.get("start_depth").map(|v|number(Some(v),"dekband begindiepte")).transpose()?.unwrap_or(0.).max(0.);
+        let mut end_depth=row.get("end_depth").map(|v|number(Some(v),"dekband einddiepte")).transpose()?.unwrap_or(start_depth).max(0.);
+        if end<start{std::mem::swap(&mut start,&mut end);std::mem::swap(&mut start_depth,&mut end_depth);}
+        let mut source_name=text(row.get("source_name"));if source_name.is_empty(){source_name=text(row.get("label"));}if source_name.is_empty(){source_name="Dekband".into();}
+        let display_rgb=row.get("display_rgb").filter(|v|!v.is_null()).map(|v|serde_json::from_value(v.clone()).map_err(|e|format!("Dekbandkleur: {e}"))).transpose()?;
+        Ok(crate::virtual_trench::Dekband{start_chainage:start,end_chainage:end,start_depth,end_depth,source_name,display_rgb})
+    }).collect()
 }
 
 pub fn read_legacy_project(source: &Path) -> Result<NativeProject, String> {

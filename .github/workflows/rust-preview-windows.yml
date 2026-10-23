@@ -53,6 +53,8 @@ jobs:
           Copy-Item -LiteralPath rust/third_party/Pillow-LICENSE.txt -Destination rust/target/release/Pillow-LICENSE.txt
           Copy-Item -LiteralPath rust/third_party/ezdxf-LICENSE.txt -Destination rust/target/release/ezdxf-LICENSE.txt
           Copy-Item -LiteralPath rust/third_party/proj4rs-NOTICES.txt -Destination rust/target/release/proj4rs-NOTICES.txt
+          New-Item -ItemType Directory -Path rust/target/release/assets -Force | Out-Null
+          Copy-Item -LiteralPath assets/template_logos -Destination rust/target/release/assets -Recurse -Force -ErrorAction Stop
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -549,6 +551,27 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_virtual_map.py rust/target/release/examples/resolve_virtual_map.exe "$env:VIRTUAL_MAP_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit virtual tools AHN preferences and template branding
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          BRANDING_AUDIT_DIR: ${{ runner.temp }}/SleufBase-template-branding
+          UNDERLAY_AUDIT_DIR: ${{ runner.temp }}/SleufBase-template-underlays
+        run: |
+          foreach ($generator in @('generate_ahn_fixtures.py', 'generate_dekband_fixtures.py', 'generate_virtual_tool_fixtures.py', 'generate_virtual_raster_fixtures.py', 'generate_preferences_fixture.py', 'generate_live_jobs_fixture.py', 'generate_template_branding_fixtures.py', 'generate_template_underlay_fixtures.py')) {
+            python "tools/$generator"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          git diff --exit-code -- rust/tests/fixtures/ahn rust/tests/fixtures/dekband rust/tests/fixtures/virtual-tools rust/tests/fixtures/virtual-raster rust/tests/fixtures/preferences.json rust/tests/fixtures/live-jobs.json rust/tests/fixtures/template-branding rust/tests/fixtures/template-underlays
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_branding.exe "$env:BRANDING_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_branding.py "$env:BRANDING_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_underlays.exe "$env:UNDERLAY_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_underlays.py "$env:UNDERLAY_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native MTEXT parser and immutable format state
         shell: pwsh
         env:
@@ -770,6 +793,7 @@ jobs:
             rust/target/release/Pillow-LICENSE.txt
             rust/target/release/ezdxf-LICENSE.txt
             rust/target/release/proj4rs-NOTICES.txt
+            rust/target/release/assets/template_logos
           if-no-files-found: error
       - name: Package portable Rust Windows preview
         shell: pwsh
@@ -782,6 +806,8 @@ jobs:
           Copy-Item -LiteralPath "rust/target/release/ezdxf-LICENSE.txt" -Destination $folder -ErrorAction Stop
           Copy-Item -LiteralPath "rust/target/release/proj4rs-NOTICES.txt" -Destination $folder -ErrorAction Stop
           Copy-Item -LiteralPath "rust/PORTABLE.md" -Destination "$folder/README.md" -ErrorAction Stop
+          New-Item -ItemType Directory -Path "$folder/assets" -Force | Out-Null
+          Copy-Item -LiteralPath "rust/target/release/assets/template_logos" -Destination "$folder/assets" -Recurse -Force -ErrorAction Stop
           Compress-Archive -Path "$folder/*" -DestinationPath $archive -CompressionLevel Optimal -Force
           $checksum = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "rust/dist/SleufBase-Rust-portable-preview.sha256" -Value "$checksum  SleufBase-Rust-portable-preview.zip" -Encoding ascii

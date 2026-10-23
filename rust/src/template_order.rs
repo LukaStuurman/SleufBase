@@ -39,6 +39,8 @@ impl Default for Row {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct State {
+    #[serde(skip_serializing_if="crate::template_branding::Logos::is_empty")]
+    pub logos: crate::template_branding::Logos,
     pub rows: Vec<Row>,
     pub project: String,
     pub drawn_by: String,
@@ -52,12 +54,16 @@ pub struct State {
     pub show_reference: bool,
     pub avoid_collisions: bool,
     pub marker_diameter: f64,
+    pub use_custom_maaiveld: bool,
+    pub clip_markers: bool,
+    pub diameter_prefix: String,
     pub label_gap: f64,
 }
 impl Default for State {
     fn default() -> Self {
         Self {
             rows: Vec::new(),
+            logos: Default::default(),
             project: String::new(),
             drawn_by: String::new(),
             font_directories: Vec::new(),
@@ -70,6 +76,9 @@ impl Default for State {
             show_reference: true,
             avoid_collisions: true,
             marker_diameter: 0.02,
+            use_custom_maaiveld: true,
+            clip_markers: false,
+            diameter_prefix: "Ø".into(),
             label_gap: 18.,
         }
     }
@@ -313,6 +322,7 @@ impl State {
     }
     pub fn validate(&self) -> Result<(), String> {
         crate::dxf_fonts::Catalog::validate_dirs(&self.font_directories)?;
+        if self.diameter_prefix.len()>32768 {return Err("Diametertekst is te lang".into());}
         if self.rows.len() > 5000 {
             return Err("Maximaal 5000 sjabloonvakken".into());
         }

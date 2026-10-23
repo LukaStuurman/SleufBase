@@ -44,7 +44,7 @@ fn virtual_job_exports_stably_order_objects_between_endpoints_and_use_the_trench
             items.reverse();
         }
         for f in items {
-            let object = TrenchPoint {
+            let object = TrenchPoint {metadata:Default::default(),
                 role: "object".into(),
                 object_name: f.object_name.clone(),
                 source_name: f.source_name.clone(),

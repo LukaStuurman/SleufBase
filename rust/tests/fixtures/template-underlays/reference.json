@@ -1,0 +1,2899 @@
+[
+  {
+    "required": 9,
+    "expected": [
+      {
+        "layout": "Layout1",
+        "entities": []
+      },
+      {
+        "layout": "bLaD1",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad2",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "required": 17,
+    "expected": [
+      {
+        "layout": "Layout1",
+        "entities": []
+      },
+      {
+        "layout": "bLaD1",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad2",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad3",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "required": 33,
+    "expected": [
+      {
+        "layout": "Layout1",
+        "entities": []
+      },
+      {
+        "layout": "bLaD1",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad2",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad3",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad4",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      },
+      {
+        "layout": "Blad5",
+        "entities": [
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 1,
+              "insert": [
+                10.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "PDFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 40,
+              "fade": 10,
+              "flags": 3,
+              "insert": [
+                10.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 37.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "PDFDEFINITION",
+              "filename": "document.pdf",
+              "name": "1"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 1,
+              "insert": [
+                23.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DGNUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 47,
+              "fade": 13,
+              "flags": 3,
+              "insert": [
+                23.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 82.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DGNDEFINITION",
+              "filename": "document.dgn",
+              "name": "2"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 1,
+              "insert": [
+                36.0,
+                20.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 1.25,
+              "scale_y": -0.75,
+              "scale_z": 1.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          },
+          {
+            "kind": "DWFUNDERLAY",
+            "attrs": {
+              "layer": "KADER",
+              "contrast": 54,
+              "fade": 16,
+              "flags": 3,
+              "insert": [
+                36.0,
+                27.0,
+                3.0
+              ],
+              "rotation": 127.5,
+              "paperspace": 1,
+              "scale_x": 2.25,
+              "scale_y": -1.75,
+              "scale_z": 2.25,
+              "extrusion": [
+                0.3,
+                0.4,
+                1.0
+              ]
+            },
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                0,
+                6
+              ]
+            ],
+            "definition": {
+              "kind": "DWFDEFINITION",
+              "filename": "document.dwf",
+              "name": "3"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -75,6 +75,12 @@ pub fn boxes(tiff:Bounds,map:Bounds,photos:&[Photo])->Result<Vec<Bounds>,String>
     Ok(result.into_iter().map(|(_,b)|b).collect())
 }
 pub fn prepare(photo:&Photo,dest:&Path,control:&Control)->Result<u64,String>{
+    prepare_image(photo,dest,control,true)
+}
+pub(crate) fn prepare_logo(source:&Path,dest:&Path,control:&Control)->Result<u64,String>{
+    prepare_image(&Photo{path:source.to_owned(),turns:0,area:Area::Tiff},dest,control,false)
+}
+fn prepare_image(photo:&Photo,dest:&Path,control:&Control,limit_size:bool)->Result<u64,String>{
     control.check()?;
     validate(std::slice::from_ref(photo))?;
     let mut reader=ImageReader::open(&photo.path).map_err(|e|e.to_string())?
@@ -95,7 +101,7 @@ pub fn prepare(photo:&Photo,dest:&Path,control:&Control)->Result<u64,String>{
         1=>decoded.rotate90(),2=>decoded.rotate180(),3=>decoded.rotate270(),_=>decoded,
     };
     let longest=decoded.width().max(decoded.height());
-    if longest>1800 {
+    if limit_size && longest>1800 {
         let scale=1800./longest as f64;
         decoded=decoded.resize(
             (decoded.width() as f64*scale).round().max(1.) as u32,

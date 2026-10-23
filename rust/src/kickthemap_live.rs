@@ -76,11 +76,7 @@ fn first_string<'a>(obj: &'a Value, names: &[&str]) -> Option<&'a str> {
     None
 }
 fn value_text(value: Option<&Value>) -> String {
-    match value {
-        Some(Value::String(s)) => s.trim().to_owned(),
-        Some(Value::Number(n)) => n.to_string(),
-        _ => String::new()
-    }
+    value.filter(|v|!v.is_null()).and_then(|v|crate::python_values::string(Some(v)).ok()).map(|s|crate::python_values::trim(&s).to_owned()).unwrap_or_default()
 }
 fn field_text(obj: &Value, names: &[&str]) -> String {
     for name in names {
@@ -105,34 +101,26 @@ fn as_i32(value: Option<&Value>) -> i32 {
 }
 fn as_bool(value: Option<&Value>) -> bool {
     match value {
-        Some(Value::Bool(v)) => *v,
-        Some(Value::Number(n)) => n.as_i64().is_some_and(|v| v != 0),
-        Some(Value::String(s)) => s.trim().eq_ignore_ascii_case("true") || s.trim() == "1",
-        _ => false
+        Some(Value::String(s)) => crate::python_values::trim(s).eq_ignore_ascii_case("true"),
+        Some(v)=>crate::python_values::truth(v),None=>false,
     }
 }
 fn job_address(obj: &Value) -> String {
     let nested = &obj["address"];
+    let part=|key:&str| {
+        value_text(obj.get(format!("address_{key}").as_str()).filter(|v|crate::python_values::truth(v)).or_else(||nested.get(key).filter(|v|crate::python_values::truth(v))))
+    };
     let rows = [
         [
-            field_text(obj, &["address_road"]).trim().to_owned(),
-            field_text(obj, &["address_number"]).trim().to_owned()
+            part("road"),part("number")
         ].iter().filter(|v| !v.is_empty()).cloned().collect::<Vec<_>>().join(" "),
         [
-            field_text(obj, &["address_postcode"]),
-            field_text(obj, &["address_town"])
+            part("postcode"),part("town")
         ].iter().filter(|v| !v.is_empty()).cloned().collect::<Vec<_>>().join(" "),
-        field_text(obj, &["address_district"]),
-        field_text(obj, &["address_region"]),
-        field_text(obj, &["address_country"])
+        part("district"),part("region"),part("country")
     ];
-    let mut address = rows.into_iter().filter(|v| !v.is_empty())
+    let address = rows.into_iter().filter(|v| !v.is_empty())
         .collect::<Vec<_>>().join(", ");
-    if address.is_empty() && nested.is_object() {
-        address = ["road", "number", "postcode", "town"].into_iter()
-            .map(|k| value_text(nested.get(k)))
-            .filter(|s| !s.is_empty()).collect::<Vec<_>>().join(" ");
-    }
     if address.is_empty() { "-".into() } else { address }
 }
 fn coordinates(obj: &Value) -> String {
@@ -204,11 +192,25 @@ pub fn parse_live_jobs(payload: &str) -> Result<Vec<Job>, String> {
     Ok(result)
 }
 
+/// Parse the original inline-array fallback without executing page scripts.
+pub fn parse_inline_jobs(html:&str)->Result<Vec<Job>,String>{
+    if html.len() as u64>MAX_HTML{return Err("KickTheMap-pagina is te groot".into());}
+    for name in ["projects","projectList","project_list","projectData","project_data","jobs","jobList","job_list","jobData","job_data"]{
+        let expression=Regex::new(&format!(r"(?i)(?:^|[^\w$])(?:(?:var|let|const)\s+)?(?:window\s*\.\s*)?{}\s*=",regex::escape(name))).map_err(|e|e.to_string())?;
+        for hit in expression.find_iter(html){
+            let tail=html[hit.end()..].trim_start();if !tail.starts_with('['){continue;}
+            if let Some(Ok(value))=serde_json::Deserializer::from_str(tail).into_iter::<Value>().next(){if value.is_array(){return parse_live_jobs(&value.to_string());}}
+        }
+    }
+    Err("KickTheMap-pagina bevat geen geldige ingebedde projectlijst".into())
+}
+
 /// Session cookies are private to this in-memory reqwest client and never
 /// written to disk or exported. The caller should drop it on logout.
 pub struct KickTheMapLiveClient {
     client: Client,
-    csrf: String
+    csrf: String,
+    api_origin:String,
 }
 
 impl KickTheMapLiveClient {
@@ -250,7 +252,7 @@ impl KickTheMapLiveClient {
         }
         let csrf = html_token(&homepage,"meta","csrf-token")
             .ok_or("KickTheMap sessie bevat geen CSRF-token")?;
-        Ok(Self{client,csrf})
+        Ok(Self{client,csrf,api_origin:ORIGIN.into()})
     }
 
     /// Adopt cookies only from the Edge profile launched by this Rust process.
@@ -292,15 +294,38 @@ impl KickTheMapLiveClient {
         }
         let csrf=html_token(&page,"meta","csrf-token")
             .ok_or("KickTheMap-browser heeft geen actieve CSRF-sessie")?;
-        Ok(Self{client,csrf})
+        Ok(Self{client,csrf,api_origin:ORIGIN.into()})
     }
 
     pub fn fetch_jobs(&mut self) -> Result<Vec<Job>, String> {
-        for attempt in 0..3 {
-            if attempt>0 {
-                thread::sleep(Duration::from_millis(if attempt==1 {500} else {1500}));
+        self.fetch_jobs_with_cancel(&crate::input::NEVER_CANCEL)
+    }
+    /// The worker can stop retries/backoff immediately; a request already in
+    /// flight remains bounded by the established client timeout.
+    pub fn fetch_jobs_with_cancel(&mut self,cancel:&std::sync::atomic::AtomicBool)->Result<Vec<Job>,String>{
+        let api=self.fetch_jobs_api_with_cancel(cancel);
+        match api {
+            Ok(jobs)=>Ok(jobs),Err(error)=>{
+                crate::input::check(cancel)?;
+                if error.contains("sessie verlopen"){return Err(error);}
+                let fallback=(||{
+                    let home=self.client.get(format!("{}/",self.api_origin)).send().map_err(|e|format!("KickTheMap-pagina ophalen: {e}"))?.error_for_status().map_err(|e|format!("KickTheMap-pagina: {e}"))?;
+                    let html=response_text(home,MAX_HTML)?;crate::input::check(cancel)?;
+                    if login_page(&html){return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());}
+                    if let Some(csrf)=html_token(&html,"meta","csrf-token"){self.csrf=csrf;}
+                    parse_inline_jobs(&html)
+                })();
+                fallback.map_err(|fallback:String|format!("{error}; {fallback}"))
             }
-            let response = self.client.post(format!("{ORIGIN}/jobs/get-user-jobs"))
+        }
+    }
+    fn fetch_jobs_api_with_cancel(&mut self,cancel:&std::sync::atomic::AtomicBool)->Result<Vec<Job>,String>{
+        for attempt in 0..3 {
+            crate::input::check(cancel)?;
+            if attempt>0 {
+                for _ in 0..if attempt==1 {25}else{75}{crate::input::check(cancel)?;thread::sleep(Duration::from_millis(20));}
+            }
+            let response = self.client.post(format!("{}/jobs/get-user-jobs",self.api_origin))
                 .header(header::ACCEPT,"application/json")
                 .header("X-CSRF-TOKEN",self.csrf.as_str())
                 .json(&serde_json::json!({}))
@@ -310,24 +335,26 @@ impl KickTheMapLiveClient {
                     let status=response.status();
                     if [StatusCode::UNAUTHORIZED,StatusCode::FORBIDDEN,StatusCode::from_u16(419).unwrap()].contains(&status) {
                         if attempt==0 {
-                            if let Ok(home)=self.client.get(format!("{ORIGIN}/")).send() {
-                                if let Ok(html)=response_text(home,MAX_HTML) {
+                            if let Ok(home)=self.client.get(format!("{}/",self.api_origin)).send() {
+                                if home.status().is_success(){if let Ok(html)=response_text(home,MAX_HTML) {
+                                    if login_page(&html){return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());}
                                     if let Some(csrf)=html_token(&html,"meta","csrf-token") {
                                         self.csrf=csrf;
                                         continue;
                                     }
-                                }
+                                }}
                             }
                         }
                         return Err(format!("KickTheMap-sessie verlopen (HTTP {status})"));
                     }
-                    if status.is_server_error() || status==StatusCode::TOO_MANY_REQUESTS {
+                    if status.is_server_error() || matches!(status.as_u16(),408|425|429) {
                         continue;
                     }
                     if !status.is_success() {
                         return Err(format!("KickTheMap jobs API HTTP {status}"));
                     }
                     let body=response_text(response,MAX_JOBS_JSON)?;
+                    crate::input::check(cancel)?;
                     return parse_live_jobs(&body);
                 }
                 Err(err) if attempt==2 => {
@@ -370,6 +397,61 @@ mod tests {
         assert_eq!(parse_live_jobs(r#"{"jobs":[]}"#).unwrap().len(),0);
         assert!(parse_live_jobs(r#"{"jobs":[{"unknown":"abc"}]}"#).is_err());
         assert!(parse_live_jobs(r#"{"status":false,"data":[]}"#).is_err());
+    }
+    #[test]
+    fn live_job_fields_match_original_pure_parser(){
+        let fixture:Value=serde_json::from_str(include_str!("../tests/fixtures/live-jobs.json")).unwrap();
+        for case in fixture["cases"].as_array().unwrap(){let jobs=parse_live_jobs(&case["raw"].to_string()).unwrap();let j=&jobs[0];
+            assert_eq!(serde_json::json!({"job_id":j.job_id,"title":j.title,"address":j.address,"municipality":j.municipality,"coordinates":j.coordinates,"client_date":j.client_date,"status":j.status,"prefix":j.prefix,"downloadable":j.downloadable}),case["expected"],"{}",case["raw"]);
+        }
+        for case in fixture["inline"].as_array().unwrap(){let result=parse_inline_jobs(case["html"].as_str().unwrap());match case["expected"].as_u64(){Some(0)=>assert!(result.unwrap().is_empty()),Some(id)=>assert_eq!(result.unwrap()[0].job_id,id),None=>assert!(result.is_err())};}
+    }
+    fn scripted(responses:Vec<(u16,&'static str)>)->(KickTheMapLiveClient,std::sync::mpsc::Receiver<String>,std::thread::JoinHandle<()>) {
+        use std::net::TcpListener;
+        use std::io::{Read,Write};
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();let origin=format!("http://{}",listener.local_addr().unwrap());
+        let (tx,rx)=std::sync::mpsc::channel();
+        let handle=std::thread::spawn(move||for (status,body) in responses{
+            let (mut socket,_)=listener.accept().unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();
+            let mut request=Vec::new();let mut buffer=[0u8;4096];loop{let n=socket.read(&mut buffer).unwrap();if n==0{break;}request.extend_from_slice(&buffer[..n]);if let Some(end)=request.windows(4).position(|w|w==b"\r\n\r\n"){
+                let headers=String::from_utf8_lossy(&request[..end]).to_lowercase();let length=headers.lines().find_map(|l|l.strip_prefix("content-length:").and_then(|n|n.trim().parse::<usize>().ok())).unwrap_or(0);if request.len()>=end+4+length{break;}
+            }}
+            let _=tx.send(String::from_utf8(request).unwrap());
+            write!(socket,"HTTP/1.1 {status} Test\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len()).unwrap();
+        });
+        let client=Client::builder().redirect(redirect::Policy::none()).timeout(Duration::from_secs(3)).build().unwrap();
+        (KickTheMapLiveClient{client,csrf:"old-token".into(),api_origin:origin},rx,handle)
+    }
+    #[test]
+    fn actual_http_refreshes_expired_csrf_then_retries_with_new_token(){
+        let (mut client,requests,server)=scripted(vec![(419,"expired"),(200,"<meta name='csrf-token' content='fresh-token'>"),(200,r#"{"data":[{"Id":12,"AboutProject":"PS12","Download":true}]}"#)]);
+        let jobs=client.fetch_jobs().unwrap();assert_eq!(jobs[0].job_id,12);server.join().unwrap();
+        let requests=requests.try_iter().collect::<Vec<_>>();assert_eq!(requests.len(),3);assert!(requests[0].to_lowercase().contains("x-csrf-token: old-token"));assert!(requests[1].starts_with("GET / "));assert!(requests[2].to_lowercase().contains("x-csrf-token: fresh-token"));
+    }
+    #[test]
+    fn actual_http_rejects_logged_out_session_and_malformed_jobs(){
+        let (mut client,_,server)=scripted(vec![(401,"expired"),(200,"<input name=\"password\"><meta name='csrf-token' content='login-token'>")]);
+        assert!(client.fetch_jobs().unwrap_err().contains("opnieuw inloggen"));server.join().unwrap();
+        let (mut client,_,server)=scripted(vec![(200,"<html>unavailable</html>")]);assert!(client.fetch_jobs().is_err());server.join().unwrap();
+    }
+    #[test]
+    fn actual_http_retries_transient_statuses_before_returning_jobs(){
+        let (mut client,requests,server)=scripted(vec![(429,"rate limited"),(503,"temporarily unavailable"),(200,r#"{"data":[{"Id":19}]}"#)]);
+        assert_eq!(client.fetch_jobs().unwrap()[0].job_id,19);server.join().unwrap();
+        let requests=requests.try_iter().collect::<Vec<_>>();assert_eq!(requests.len(),3);
+        assert!(requests.iter().all(|request|request.starts_with("POST /jobs/get-user-jobs ")));
+    }
+    #[test]
+    fn cancellation_interrupts_retry_backoff_before_second_http_request(){
+        let (mut client,requests,server)=scripted(vec![(503,"temporarily unavailable")]);
+        let cancelled=std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));let trigger=cancelled.clone();
+        let cancel=std::thread::spawn(move||{requests.recv_timeout(Duration::from_secs(3)).unwrap();trigger.store(true,std::sync::atomic::Ordering::Relaxed);});
+        assert!(client.fetch_jobs_with_cancel(&cancelled).unwrap_err().contains("geannuleerd"));cancel.join().unwrap();server.join().unwrap();
+    }
+    #[test]
+    fn actual_http_recovers_jobs_from_inline_page_when_api_is_unavailable(){
+        let (mut client,requests,server)=scripted(vec![(404,"endpoint missing"),(200,r#"<meta name='csrf-token' content='fresh'><script>window.jobData=[{"Id":42,"AboutProject":"PS42"}];</script>"#)]);
+        assert_eq!(client.fetch_jobs().unwrap()[0].job_id,42);server.join().unwrap();assert_eq!(requests.try_iter().count(),2);
     }
 }
 
@@ -537,7 +619,7 @@ impl KickTheMapLiveClient {
         let mut signed=None;
         for mode in ["multipart","form","json"] {
             check()?;
-            let mut request=self.client.post(format!("{ORIGIN}/jobs/get-file-url"))
+            let mut request=self.client.post(format!("{}/jobs/get-file-url",self.api_origin))
                 .header("X-CSRF-TOKEN",self.csrf.as_str());
             request=match mode {
                 "multipart"=>{

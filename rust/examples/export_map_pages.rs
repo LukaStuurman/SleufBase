@@ -109,7 +109,7 @@ fn main() -> Result<(), String> {
     )?;
     trench
         .objects
-        .push(sleufbase_rust::virtual_trench::TrenchPoint {
+        .push(sleufbase_rust::virtual_trench::TrenchPoint {metadata:Default::default(),
             role: "water".into(),
             object_name: "Waterleiding".into(),
             source_name: "WATER".into(),

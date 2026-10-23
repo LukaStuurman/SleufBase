@@ -39,14 +39,14 @@ impl SleufBaseApp {
         let state =
             self.template_state
                 .clone()
-                .unwrap_or_else(|| sleufbase_rust::template_order::State {
+                .unwrap_or_else(|| {let mut state=sleufbase_rust::template_order::State {
                     project: self.project_name.clone(),
                     auto_bgt: self
                         .migrated_settings
                         .template_auto_fill_bgt_fysiek_voorkomen,
                     label_gap: self.migrated_settings.dxf_label_gap,
                     ..Default::default()
-                });
+                };crate::ui_preferences::apply_order_defaults(&mut state,&self.migrated_settings);state});
         self.template_dialog = None;
         self.project_template_dialog = None;
         self.template_order_dialog = Some(crate::template_dialog::Dialog::new(

@@ -336,6 +336,9 @@ pub fn request_with_bgt(
                 metadata,
                 reverse: state.reverse,
                 marker_diameter: state.marker_diameter,
+                use_custom_maaiveld: state.use_custom_maaiveld,
+                clip_markers: state.clip_markers,
+                diameter_prefix: state.diameter_prefix.clone(),
                 manual_scale: row.scale,
                 show_reference: state.show_reference,
                 avoid_collisions: state.avoid_collisions,
@@ -369,6 +372,7 @@ pub fn request_with_bgt(
         layers,
         geometry,
         settings: template_export::Settings {
+            logos: state.logos.clone(),
             paired: state.paired,
             project: Some(crate::python_values::trim(&state.project).into()),
             drawn_by: state.drawn_by.clone(),
