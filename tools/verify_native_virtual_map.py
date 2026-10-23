@@ -59,9 +59,11 @@ def exports(directory):
         map_path=next(p for p in images if p.name.endswith('_kaart.png'))
         renderer=exp.MapExporter(None,None,dpi=96,scale=225);bounds=renderer._determine_map_bounds(layer.bounds);transform=models.ViewportTransform(bounds,renderer.map_width_px,renderer.map_height_px)
         sx,sy=transform.world_to_screen(*world);sx+=82;sy+=82
-        # The exact original reference ring must appear even in image-only
-        # virtual export. Compare its black outline away from other page text.
-        mask=Image.new('L',(renderer.page_width_px,renderer.page_height_px));draw=ImageDraw.Draw(mask);draw.ellipse((sx-11,sy-11,sx+11,sy+11),outline=255,width=4)
+        # The original 22px/300-DPI ring has a constant physical size, including
+        # image-only export. Native fixes the old fixed-pixel low-DPI layout.
+        # Original Pillow supplies the expected outline at the corrected size.
+        scale=renderer.page_width_px/3508;rx=11*renderer.map_width_px/round(renderer.map_width_px/scale);ry=11*renderer.map_height_px/round(renderer.map_height_px/scale)
+        mask=Image.new('L',(renderer.page_width_px,renderer.page_height_px));draw=ImageDraw.Draw(mask);draw.ellipse((sx-rx,sy-ry,sx+rx,sy+ry),outline=255,width=max(1,round(4*scale)))
         with Image.open(map_path) as image:
             assert image.size==mask.size
             for y in range(max(0,int(sy)-12),min(image.height,int(sy)+13)):

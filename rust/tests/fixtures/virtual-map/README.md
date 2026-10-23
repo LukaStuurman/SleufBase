@@ -65,11 +65,13 @@ Rendering has cancellation, checked traversal/pixel budgets and no full-page
 mask. The adaptation uses the existing `third_party/Pillow-LICENSE.txt`; source:
 https://raw.githubusercontent.com/python-pillow/Pillow/11.3.0/src/libImaging/Draw.c.
 Both JSON fixtures reproduce byte-for-byte outside the build directory.
-All 531 Rust tests (69 desktop tests), release app/drivers and Clippy without
+All 533 Rust tests (69 desktop tests), release app/drivers and Clippy without
 new warning categories pass. The release readback verifies 3 DXFs / 118 complete
 profile entities / 6 PNGs / 3 workbooks, including actual reference rings.
-Visual inspection also preserves evidence of the original oversized legend at
-low export DPI; that layout improvement remains separate. Virtual raster
+Visual inspection exposed the original oversized low-DPI legend. The native
+resolution-aware annotation adapter corrects that layout; the original twelve
+page plans remain preserved as evidence. The runtime ring oracle uses original
+Pillow at the corrected physical symbol size. Virtual raster
 masks/colors are not declared fully equivalent by this geometry/reference audit.
 
 ```

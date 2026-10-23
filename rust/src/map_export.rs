@@ -295,7 +295,7 @@ impl Renderer {
                 Background::Cadastral => Some("Kadastrale kaart: Kadaster / PDOK"),
                 _ => None,
             });
-        let operations = map_page::plan(
+        let operations = crate::map_annotations::plan(
             &layout,
             attribution,
             source.reference.or(profile_reference),

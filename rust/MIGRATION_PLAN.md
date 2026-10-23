@@ -49,6 +49,31 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 7. **Prestaties en levering**: herhaalbare datasets en benchmarks met tijd/geheugen,
    Windows portable/installer/update/rollback, daadwerkelijke acceptatie en signing.
 
+## Voortgang 23 oktober 2026: leesbare kaartlegenda bij alle uitvoerresoluties
+
+- De oorspronkelijke vaste pixelmaten lieten de legenda bij 96 DPI het grootste
+  deel van de kaart bedekken en met de noordpijl overlappen. De oorspronkelijke
+  twaalf tekenplannen blijven als bronbewijs behouden; de productieroute schaalt
+  nu op pagina’s met referentielegenda de tekst, symbolen en lijndiktes naar
+  hun fysieke uitvoergrootte. Pagina’s zonder legenda houden hun bestaande
+  opmaak; de oorspronkelijke 2.400 zelfstandige pixelreferenties blijven gelden.
+- Meting gebruikt het werkelijke uitvoerlettertype en de werkelijke grootte.
+  Alleen de tekenopdrachten worden aangepast, zonder extra hoge-resolutiepagina
+  of kaartmasker. Rasterpixels, kaartviewport, affine brontransformaties en
+  meetgegevens blijven behouden. Gescheiden X/Y-verhoudingen voorkomen dat
+  afronding van beeldafmetingen RD-referenties verschuift.
+- Zeven resoluties van 30 tot 600 DPI controleren passende legenda's, gescheiden
+  noordpijlen, een vaste geplande fysieke referentiediameter (0,006 mm tolerantie) en
+  referentieplaatsing binnen 1e-8 schermpixel. Op 300 DPI blijven alle originele
+  tekenopdrachten exact gelijk. Alle 533 Rust-tests (69 desktoptests), Clippy
+  zonder nieuwe categorieën en de geoptimaliseerde app/auditdrivers slagen.
+- De herhaalde releaseaudit controleert drie DXFs/118 volledige oorspronkelijke
+  profielentiteiten, zes PNGs en drie Excel-werkmappen, inclusief Pillow-ringen
+  op de gecorrigeerde grootte en lokale datum-/projectvelden. Zes verse
+  zelfstandige pagina’s/2.400 pixels, 66.667 rasterpixels, 41.915 virtuele
+  kaartpixels en 53.095 pixels van de werkelijke sjabloon-CLI blijven gelijk
+  aan de oorspronkelijke painter. De 96-DPI-kaart is visueel nagekeken.
+
 ## Voortgang 23 oktober 2026: virtuele kaartplaatsing en referenties
 
 - Nieuwe virtuele sleuven kunnen met twee drukken op de echte kaart worden
@@ -90,9 +115,9 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
   118 complete profielentiteiten, zes PNGs met exacte referentieringen, drie
   oorspronkelijke Excel-werkmappen en notitie-/lokale datum-/projectvelden.
   Beide JSON-referenties zijn onafhankelijk bytegelijk opnieuw opgebouwd.
-  De visuele controle toont nog de oorspronkelijke te grote legenda bij lage
-  uitvoerresolutie; die verbetering blijft afzonderlijk open. Alle resterende
-  go/no-go-voorwaarden blijven vereist.
+  De visuele controle vond de oorspronkelijke te grote legenda bij lage DPI;
+  de afzonderlijke resolutiecorrectie hierboven behandelt die fout. Alle
+  resterende go/no-go-voorwaarden blijven vereist.
   Punt-/eindbewerking op kaart, kopierichting, dekbandprikken, AHN-/kleuren-/
   maskergedrag, overige instellingen en praktijk-/leveringsacceptatie blijven open.
 

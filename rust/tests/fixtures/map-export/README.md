@@ -19,9 +19,25 @@ has its complete license alongside it; production uses Windows Segoe UI/Arial.
   they do not assert that Hack covers every script or that font fallback exists.
 - 32 original FreeType font bounds are retained next to native measurements.
   Native ab_glyph outlines are unhinted; HarfBuzz shaping and bidi/script runs
-  replace Pillow's Windows basic layout. Glyph hinting/contours and primitive
-  line joins/ellipse edge pixels are **not** claimed identical to Pillow.
+  replace Pillow's Windows basic layout. Glyph hinting/contours and general
+  line joins are **not** claimed identical to Pillow.
+  Ellipse fill/outline pixels now have a separate 192-case exact Pillow audit;
+  see [virtual references and ellipse proof](../virtual-map/README.md).
   The original and native 300-DPI pages were visually reviewed.
+
+Reference-legend pages now scale their physical text/symbol/stroke sizes across
+30–600 DPI. Pages without a legend retain their original operation list,
+including all 2,400 standalone source pixel references. The source's fixed-pixel 96-DPI legend covered most of the map and
+overlapped the north arrow; that old behavior remains in the twelve original
+page plans. `map_annotations` adapts the same planner without changing raster
+pixels, the map viewport, affine transforms or world coordinates. It measures
+the actual output-size fonts and transforms the operation list in place; it
+never renders an intermediate high-resolution page. At 300 DPI every operation
+remains exactly the original plan. Native-font checks at 30/72/96/150/200/300/600
+DPI require the legend to fit, the arrow to stay outside it, constant planned physical
+reference diameter (within 0.006mm) and RD placement within 1e-8 screen pixels.
+Actual low-DPI virtual DXFs retain complete original profile/XLSX comparisons;
+Pillow independently checks the reference outlines at their corrected sizes.
 
 `export_map_pages` writes a fresh audit directory. The Python verifier independently
 checks every raster byte and page-plan field. With a native app binary it also
@@ -66,3 +82,11 @@ interior pixels, separately from font/annotation contours. Native tests compare
 an explicitly tagged physical RGBA TIFF with the same raster, reverse direction,
 explicit map-source precedence and include_tiff=false. This proves placement
 and compositing, not complete original virtual-mask drawing parity.
+
+The annotation correction passes all 533 Rust tests (69 desktop), release
+app/drivers and Clippy without new categories. Release readback repeats 66,667
+raster pixels / 41,915 virtual-map pixels / 53,095 actual CLI interior pixels;
+six fresh standalone pages retain 2,400 source samples. Three reference DXFs
+retain 118 complete original profile entities, six PNGs, three original XLSX
+signatures and the date/project fields. Actual 96-DPI output was visually
+reviewed with a fitting legend and a separate north arrow.

@@ -63,6 +63,7 @@ mod map_canvas;
 mod map_ellipse;
 pub mod map_text;
 pub mod map_page;
+pub mod map_annotations;
 pub mod map_raster;
 pub mod map_export;
 pub mod map_batch;

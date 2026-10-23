@@ -17,6 +17,50 @@ fn image(name: &str) -> RgbaImage {
 fn decoded<T: serde::de::DeserializeOwned>(v: &Value) -> T {
     serde_json::from_value(v.clone()).unwrap()
 }
+
+#[test]
+fn export_annotations_fit_low_resolution_pages_and_keep_exact_rd_positions() {
+    use sleufbase_rust::{map_annotations, Bounds};
+    let cancel = AtomicBool::new(false);
+    let mut fonts = map_text::Fonts::load(Some(&font_paths()), &cancel).unwrap();
+    let reference = [155012.345, 463007.123];
+    for dpi in [30, 72, 96, 150, 200, 300, 600] {
+        let layout = map_page::layout(Bounds { min_x:155000., min_y:463000., max_x:155030., max_y:463020. }, map_page::Settings { dpi, scale:225. }).unwrap();
+        let ops = map_annotations::plan(&layout, Some("Bron: PDOK ©"), Some(reference), &mut |t,s,b| fonts.measure(t,s,b), &cancel).unwrap();
+        let ring = ops.iter().find_map(|op| match op { map_page::Op::Ellipse { bounds, .. } => Some(bounds), _=>None }).unwrap();
+        let screen = layout.screen(reference);
+        assert!(((ring[0]+ring[2])/2. - (screen[0]+layout.origin[0])).abs()<1e-8);
+        assert!(((ring[1]+ring[3])/2. - (screen[1]+layout.origin[1])).abs()<1e-8);
+        // Original 22px diameter at 300 DPI is 1.863mm on every output page.
+        assert!(((ring[2]-ring[0])*25.4/f64::from(dpi)-22.*25.4/300.).abs()<0.006);
+        let title = ops.iter().position(|op| matches!(op,map_page::Op::Text{text,..} if text=="Legenda")).unwrap();
+        let legend = ops[..title].iter().rev().find_map(|op|match op { map_page::Op::Rect{bounds,..}=>Some(bounds),_=>None }).unwrap();
+        assert!(legend[0]>=layout.origin[0] && legend[1]>=layout.origin[1], "{dpi} DPI: {legend:?}");
+        assert!(legend[2]<=layout.origin[0]+f64::from(layout.map_size[0])+1e-8);
+        assert!(legend[3]<=layout.origin[1]+f64::from(layout.map_size[1])+1e-8);
+        assert!((legend[3]-legend[1])<f64::from(layout.map_size[1])*0.55);
+        if dpi>=72 { assert!((legend[2]-legend[0])<f64::from(layout.map_size[0])*0.4); }
+        let north = ops.iter().find_map(|op|match op {map_page::Op::Polygon{points,..} if points.len()==4=>Some(points),_=>None}).unwrap();
+        assert!(north.iter().all(|p|p[0]<legend[0]), "north arrow overlaps legend at {dpi} DPI");
+        if dpi==300 {
+            let original = map_page::plan(&layout,Some("Bron: PDOK ©"),Some(reference),&mut |t,s,b|fonts.measure(t,s,b),&cancel).unwrap();
+            assert_eq!(serde_json::to_value(&ops).unwrap(),serde_json::to_value(&original).unwrap());
+        }
+        let plain = sleufbase_rust::map_annotations::plan(&layout,Some("Bron: PDOK ©"),None,&mut |t,s,b|fonts.measure(t,s,b),&cancel).unwrap();
+        let original = map_page::plan(&layout,Some("Bron: PDOK ©"),None,&mut |t,s,b|fonts.measure(t,s,b),&cancel).unwrap();
+        assert_eq!(serde_json::to_value(plain).unwrap(),serde_json::to_value(original).unwrap());
+    }
+}
+
+#[test]
+fn annotation_only_changes_keep_raster_layout_and_cancellation_contracts() {
+    let cancel = AtomicBool::new(true);
+    let layout = map_page::layout(sleufbase_rust::Bounds { min_x:0.,min_y:0.,max_x:30.,max_y:20. },map_page::Settings{dpi:96,scale:225.}).unwrap();
+    assert!(sleufbase_rust::map_annotations::plan(&layout,None,Some([10.,10.]),&mut |_,_,_|panic!("cancelled before fonts"),&cancel).is_err());
+    let mut invalid = layout;
+    invalid.page_size[0]=u32::MAX;
+    assert!(sleufbase_rust::map_annotations::plan(&invalid,None,None,&mut |_,_,_|panic!("invalid before fonts"),&cancel).is_err());
+}
 fn pixels(actual: &RgbaImage, expected: &RgbaImage, name: &str) {
     assert_eq!(actual.dimensions(), expected.dimensions(), "{name}");
     if let Some((i, (a, b))) = actual
