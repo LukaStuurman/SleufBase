@@ -16,7 +16,15 @@ impl Default for ProjectUiState {
     fn default()->Self{Self{center_x:155000.,center_y:463000.,meters_per_pixel:1.,opacity_percent:80.,use_background:true,background_source:"PDOK luchtfoto".into(),selected_tiff_index:None,selected_dxf_index:None}}
 }
 impl ProjectUiState {
+    pub fn from_archive(project:&NativeProject)->Result<Option<Self>,String>{
+        project.legacy_archive.as_ref().and_then(|a|a.original.get("ui")).map(|v|{
+            let known=serde_json::to_value(Self::default()).map_err(|e|e.to_string())?;
+            let fields=v.as_object().ok_or("Python-kaartvoorkeuren zijn geen object")?.iter().filter(|(k,_)|known.get(k.as_str()).is_some()).map(|(k,v)|(k.clone(),v.clone())).collect::<Map<_,_>>();
+            let out:Self=serde_json::from_value(fields.into()).map_err(|e|format!("Python-kaartvoorkeuren: {e}"))?;out.validate()?;Ok(out)
+        }).transpose()
+    }
     pub fn from_project(project:&NativeProject)->Result<Option<Self>,String>{
+        if let Some(view)=&project.view{return view.for_export(project).map(Some);}
         project.legacy_archive.as_ref().and_then(|a|a.original.get("ui")).map(|v|{
             let known=serde_json::to_value(Self::default()).map_err(|e|e.to_string())?;
             let fields=v.as_object().ok_or("Python-kaartvoorkeuren zijn geen object")?.iter().filter(|(k,_)|known.get(k.as_str()).is_some()).map(|(k,v)|(k.clone(),v.clone())).collect::<Map<_,_>>();
@@ -120,7 +128,7 @@ pub fn legacy_payload(project:&NativeProject,ui:&ProjectUiState)->Result<Value,S
 fn legacy_payload_with_cancel(project:&NativeProject,ui:&ProjectUiState,cancel:&AtomicBool)->Result<Value,String>{
     crate::input::check(cancel)?;
     project.validate()?;ui.validate()?;
-    if project.template_preferences.is_some()||project.template_export.is_some(){return Err("Python-projectexport ondersteunt de gewijzigde Rust-sjabloonvoorkeuren en slotvolgorde nog niet verliesvrij; bewaar dit project als Rust-project".into());}
+    if project.template_preferences.is_some()||project.template_export.is_some()||project.project_settings.is_some(){return Err("Python-projectexport ondersteunt de gewijzigde Rust-sjabloonvoorkeuren en slotvolgorde nog niet verliesvrij; bewaar dit project als Rust-project".into());}
     if !project.datasets.is_empty()||!project.bgt_layers.is_empty()||project.cadastral.is_some(){return Err("Python-projectexport ondersteunt nog geen losse jobdatasets/BGT/Kadasterlagen; sla deze gegevens eerst in het Rust-project op".into());}
     let archive=project.legacy_archive.as_ref();
     let mut output=archive.map(|a|object(&a.original)).unwrap_or_default();
@@ -137,6 +145,15 @@ fn legacy_payload_with_cancel(project:&NativeProject,ui:&ProjectUiState,cancel:&
     }
     let source=archive.map(|a|a.source_path.as_path()).unwrap_or(Path::new("."));
     for raster in &project.rasters {
+        crate::input::check(cancel)?;
+        // The original Python loader calls set_geotiff_layer_rotation only
+        // for a nonzero saved angle; at zero it ignores base_transform_matrix.
+        // A changed native affine then needs a new georeferenced TIFF asset.
+        if crate::geotiff_rotation::angle(raster).abs()<1e-9{
+            let disk=read_geotiff_metadata(&raster.path).map_err(|e|format!("Python-export kan rasterbron {} niet controleren: {e}",raster.path.display()))?;
+            let a=raster.transform;let b=disk.transform;
+            if [a.a-b.a,a.b-b.b,a.c-b.c,a.d-b.d,a.e-b.e,a.f-b.f].iter().any(|v|v.abs()>1e-8){return Err("Python-projectexport kan een gewijzigde rastertransformatie zonder rotatie niet verliesvrij opslaan; exporteer eerst een nieuw gegeorefereerd TIFF-bestand".into());}
+        }
         crate::input::check(cancel)?;
         let old=original.into_iter().flatten().enumerate().find(|(_,v)|v["path"].as_str().is_some_and(|p|asset_path(source,p)==raster.path));
         let mut entry=old.map(|(_,v)|object(v)).unwrap_or_default();if let Some((i,_))=old{used.insert(i);}
@@ -168,10 +185,39 @@ fn legacy_payload_with_cancel(project:&NativeProject,ui:&ProjectUiState,cancel:&
     crate::input::check(cancel)?;Ok(output.into())
 }
 pub fn write_legacy_project(project:&NativeProject,path:&Path,ui:&ProjectUiState,cancel:&AtomicBool)->Result<(),String>{
+    write_legacy_project_checked(project,path,ui,cancel,||crate::input::check(cancel))
+}
+pub fn write_legacy_project_controlled(project:&NativeProject,path:&Path,ui:&ProjectUiState,control:&crate::export_control::Control)->Result<(),String>{
+    write_legacy_project_checked(project,path,ui,control.flag(),||control.begin_publish())
+}
+fn write_legacy_project_checked(project:&NativeProject,path:&Path,ui:&ProjectUiState,cancel:&AtomicBool,before_publish:impl FnOnce()->Result<(),String>)->Result<(),String>{
     crate::input::check(cancel)?;
     if path.extension().and_then(|e|e.to_str()).is_none_or(|e|!e.eq_ignore_ascii_case("klicproject")){return Err("Kies een nieuw .klicproject-bestand voor Python-export".into());}
     let payload=legacy_payload_with_cancel(project,ui,cancel)?;
-    let bytes=serde_json::to_vec_pretty(&payload).map_err(|e|e.to_string())?;
-    if bytes.len() as u64>=MAX_PROJECT_BYTES{return Err("Python-project is groter dan 128 MiB".into());}
-    crate::storage::atomic_write_checked(path,false,|file|{file.write_all(&bytes).and_then(|_|file.write_all(b"\n")).map_err(|e|e.to_string())},||crate::input::check(cancel))
+    crate::storage::atomic_write_checked(path,false,|file|{
+        let mut writer=ProjectWriter{out:std::io::BufWriter::new(file),cancel,written:0};
+        serde_json::to_writer_pretty(&mut writer,&payload).map_err(|e|e.to_string())?;
+        writer.write_all(b"\n").and_then(|_|writer.flush()).map_err(|e|e.to_string())
+    },before_publish)
+}
+struct ProjectWriter<'a,W>{out:W,cancel:&'a AtomicBool,written:u64}
+impl<W:Write> Write for ProjectWriter<'_,W>{
+    fn write(&mut self,bytes:&[u8])->std::io::Result<usize>{
+        crate::input::check(self.cancel).map_err(std::io::Error::other)?;
+        if (bytes.len() as u64)>MAX_PROJECT_BYTES.saturating_sub(self.written){return Err(std::io::Error::other("Python-project is groter dan 128 MiB"));}
+        let written=self.out.write(bytes)?;self.written+=written as u64;Ok(written)
+    }
+    fn flush(&mut self)->std::io::Result<()>{crate::input::check(self.cancel).map_err(std::io::Error::other)?;self.out.flush()}
+}
+
+#[cfg(test)]
+mod writer_tests {
+    use super::*;
+    #[test]
+    fn json_budget_includes_newline_and_cancel_stops_serialization(){
+        let cancel=AtomicBool::new(false);let mut writer=ProjectWriter{out:Vec::new(),cancel:&cancel,written:MAX_PROJECT_BYTES-1};
+        writer.write_all(b"x").unwrap();assert!(writer.write_all(b"\n").is_err());
+        let cancel=AtomicBool::new(true);let mut writer=ProjectWriter{out:Vec::new(),cancel:&cancel,written:0};
+        assert!(serde_json::to_writer_pretty(&mut writer,&json!({"data":[1,2,3]})).is_err());assert!(writer.out.is_empty());
+    }
 }

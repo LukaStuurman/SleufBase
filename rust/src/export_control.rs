@@ -36,6 +36,9 @@ impl Default for Control {
     }
 }
 impl Control {
+    /// Observe cooperative cancellation in external worker adapters. Request
+    /// cancellation through `cancel()` so the publication gate remains atomic.
+    pub fn cancellation_flag(&self)->&std::sync::atomic::AtomicBool{self.flag()}
     pub fn detail(&self) -> String {
         self.detail.lock().map(|s| s.clone()).unwrap_or_default()
     }

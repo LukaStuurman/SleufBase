@@ -214,6 +214,32 @@ pub struct KickTheMapLiveClient {
 }
 
 impl KickTheMapLiveClient {
+    fn request_download_url(&mut self,fields:&[(&str,String)],cancel:&std::sync::atomic::AtomicBool)->Result<Option<reqwest::Url>,String>{
+        for mode in ["multipart","form","json"]{
+            for auth_attempt in 0..2{
+                crate::input::check(cancel)?;
+                let mut request=self.client.post(format!("{}/jobs/get-file-url",self.api_origin)).header("X-CSRF-TOKEN",self.csrf.as_str());
+                request=match mode{
+                    "multipart"=>{let mut form=reqwest::blocking::multipart::Form::new();for (key,value) in fields{form=form.text((*key).to_owned(),value.clone());}request.multipart(form)},
+                    "form"=>request.form(fields),
+                    _=>request.json(&fields.iter().map(|(key,value)|((*key).to_owned(),value.clone())).collect::<std::collections::BTreeMap<_,_>>()),
+                };
+                let response=match request.send(){Ok(response)=>response,Err(_)=>break};
+                crate::input::check(cancel)?;
+                if [401,403,419].contains(&response.status().as_u16()){
+                    if auth_attempt>0{return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());}
+                    let home=self.client.get(format!("{}/",self.api_origin)).send().map_err(|e|format!("KickTheMap-sessie vernieuwen: {e}"))?.error_for_status().map_err(|_|"KickTheMap-sessie verlopen; opnieuw inloggen".to_owned())?;
+                    let html=response_text(home,MAX_HTML)?;crate::input::check(cancel)?;
+                    if login_page(&html){return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());}
+                    self.csrf=html_token(&html,"meta","csrf-token").ok_or("KickTheMap-sessie verlopen; geen vernieuwd CSRF-token")?;
+                    continue;
+                }
+                if response.status().is_success(){if let Ok(text)=response_text(response,512*1024){if let Ok(url)=extract_signed_url(&text){return Ok(Some(url));}}}
+                break;
+            }
+        }
+        crate::input::check(cancel)?;Ok(None)
+    }
     pub fn login(email: &str, password: &str) -> Result<Self, String> {
         if email.trim().is_empty() || password.is_empty() {
             return Err("E-mailadres en wachtwoord zijn verplicht".into());
@@ -423,6 +449,27 @@ mod tests {
         (KickTheMapLiveClient{client,csrf:"old-token".into(),api_origin:origin},rx,handle)
     }
     #[test]
+    fn download_link_refreshes_csrf_and_retries_same_request_mode(){
+        let (mut client,requests,server)=scripted(vec![(419,"expired"),(200,"<meta name='csrf-token' content='download-fresh'>"),(200,r#"{"status":true,"data":{"url":"https://s3.amazonaws.com/test/file"}}"#)]);
+        let fields=[("projectId","42".into()),("folder","ortho".into())];
+        let url=client.request_download_url(&fields,&std::sync::atomic::AtomicBool::new(false)).unwrap().unwrap();assert_eq!(url.as_str(),"https://s3.amazonaws.com/test/file");server.join().unwrap();
+        let requests=requests.try_iter().collect::<Vec<_>>();assert_eq!(requests.len(),3);assert!(requests[0].starts_with("POST /jobs/get-file-url "));assert!(requests[1].starts_with("GET / "));assert!(requests[2].starts_with("POST /jobs/get-file-url "));
+        assert!(requests[0].to_lowercase().contains("multipart/form-data"));assert!(requests[2].to_lowercase().contains("multipart/form-data"));assert!(requests[2].to_lowercase().contains("x-csrf-token: download-fresh"));
+    }
+    #[test]
+    fn download_link_keeps_encoding_fallback_after_refresh_refactor(){
+        let (mut client,requests,server)=scripted(vec![(415,"no multipart"),(415,"no form"),(200,r#"{"status":true,"data":{"url":"https://s3.amazonaws.com/test/file"}}"#)]);
+        let fields=[("projectId","42".into()),("folder","ortho".into())];
+        assert!(client.request_download_url(&fields,&std::sync::atomic::AtomicBool::new(false)).unwrap().is_some());server.join().unwrap();
+        let requests=requests.try_iter().map(|request|request.to_lowercase()).collect::<Vec<_>>();assert_eq!(requests.len(),3);
+        assert!(requests[0].contains("multipart/form-data"));assert!(requests[1].contains("application/x-www-form-urlencoded"));assert!(requests[2].contains("application/json"));assert!(requests[2].contains(r#""projectid":"42""#));
+    }
+    #[test]
+    fn download_link_does_not_retry_other_modes_after_confirmed_logout(){
+        let (mut client,requests,server)=scripted(vec![(403,"expired"),(200,"<input name=\"password\">")]);
+        assert!(client.request_download_url(&[("projectId","42".into())],&std::sync::atomic::AtomicBool::new(false)).unwrap_err().contains("opnieuw inloggen"));server.join().unwrap();assert_eq!(requests.try_iter().count(),2);
+    }
+    #[test]
     fn actual_http_refreshes_expired_csrf_then_retries_with_new_token(){
         let (mut client,requests,server)=scripted(vec![(419,"expired"),(200,"<meta name='csrf-token' content='fresh-token'>"),(200,r#"{"data":[{"Id":12,"AboutProject":"PS12","Download":true}]}"#)]);
         let jobs=client.fetch_jobs().unwrap();assert_eq!(jobs[0].job_id,12);server.join().unwrap();
@@ -616,35 +663,7 @@ impl KickTheMapLiveClient {
             ("fileName",remote),
             ("exportName",export_name)
         ];
-        let mut signed=None;
-        for mode in ["multipart","form","json"] {
-            check()?;
-            let mut request=self.client.post(format!("{}/jobs/get-file-url",self.api_origin))
-                .header("X-CSRF-TOKEN",self.csrf.as_str());
-            request=match mode {
-                "multipart"=>{
-                    let mut form=reqwest::blocking::multipart::Form::new();
-                    for (key,value) in &fields {form=form.text((*key).to_owned(),value.clone());}
-                    request.multipart(form)
-                }
-                "form"=>request.form(&fields),
-                _=>request.json(&fields.iter().map(|(k,v)|((*k).to_owned(),v.clone()))
-                    .collect::<std::collections::BTreeMap<_,_>>())
-            };
-            let response=match request.send() {
-                Ok(response)=>response,
-                Err(_)=>continue
-            };
-            if [401,403,419].contains(&response.status().as_u16()) {
-                return Err("KickTheMap-sessie verlopen; opnieuw inloggen".into());
-            }
-            if !response.status().is_success() {continue;}
-            if let Ok(text)=response_text(response,512*1024) {
-                if let Ok(url)=extract_signed_url(&text) {
-                    signed=Some(url);break;
-                }
-            }
-        }
+        let signed=self.request_download_url(&fields,cancel)?;
         let signed=match signed {
             Some(url)=>url,
             None=>{

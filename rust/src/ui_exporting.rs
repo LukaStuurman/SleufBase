@@ -36,17 +36,16 @@ impl SleufBaseApp {
             self.message = "Laad eerst GeoTIFF-proefsleuven voor de sjabloonexport".into();
             return;
         }
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
         let state =
             self.template_state
                 .clone()
                 .unwrap_or_else(|| {let mut state=sleufbase_rust::template_order::State {
                     project: self.project_name.clone(),
-                    auto_bgt: self
-                        .migrated_settings
-                        .template_auto_fill_bgt_fysiek_voorkomen,
-                    label_gap: self.migrated_settings.dxf_label_gap,
+                    auto_bgt: settings.template_auto_fill_bgt_fysiek_voorkomen,
+                    label_gap: settings.dxf_label_gap,
                     ..Default::default()
-                };crate::ui_preferences::apply_order_defaults(&mut state,&self.migrated_settings);state});
+                };crate::ui_preferences::apply_order_defaults(&mut state,&settings);state});
         self.template_dialog = None;
         self.project_template_dialog = None;
         self.template_order_dialog = Some(crate::template_dialog::Dialog::new(
@@ -60,6 +59,7 @@ impl SleufBaseApp {
         path: PathBuf,
         state: sleufbase_rust::template_order::State,
     ) {
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
         let state = match state.confirmed() {
             Ok(state) => state,
             Err(e) => {
@@ -73,12 +73,12 @@ impl SleufBaseApp {
             kind: Kind::Template,
             path,
             selection: sleufbase_rust::object_selection::Selection::all(0, 0),
-            rules: self.migrated_settings.object_rules.clone(),
+            rules: settings.object_rules.clone(),
             extra_layers: false,
-            options: self.migrated_settings.object_dxf_options(),
+            options: settings.object_dxf_options(),
             template: Some(Box::new(state.clone())),
             maps: None,point_target:None,point_network:false,
-            discipline_excel: self.migrated_settings.template_auto_export_discipline_excel,
+            discipline_excel: settings.template_auto_export_discipline_excel,
         };
         if self.start_export(request, false) {
             self.template_state = Some(state);
@@ -120,6 +120,7 @@ impl SleufBaseApp {
         self.comments = inputs.comments;
     }
     pub(super) fn start_export(&mut self, request: Request, overlay: bool) -> bool {
+        if self.project_sources_owned(){self.message="Wacht tot de lopende taak is afgerond".into();return false;}
         if self.live_busy||self.browser_ui.batch_mode||!self.browser_ui.downloaded_json.is_empty()||!self.browser_ui.downloaded_tiffs.is_empty(){
             self.message="Rond eerst de lopende downloads en het inladen af".into();return false;
         }
@@ -168,6 +169,7 @@ impl SleufBaseApp {
         }
     }
     pub(super) fn start_excel_export(&mut self, path: PathBuf) {
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
         let request = Request {
             kind: Kind::Xlsx,
             path,
@@ -175,9 +177,9 @@ impl SleufBaseApp {
                 self.datasets.len(),
                 self.virtual_trenches.len(),
             ),
-            rules: self.migrated_settings.object_rules.clone(),
+            rules: settings.object_rules.clone(),
             extra_layers: false,
-            options: self.migrated_settings.object_dxf_options(),
+            options: settings.object_dxf_options(),
             template: None,
             maps: None,point_target:None,point_network:false,
             discipline_excel: false,
@@ -192,11 +194,12 @@ impl SleufBaseApp {
         let Some(dialog) = self.export_dialog.as_ref() else {
             return;
         };
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
         let request = Request {
             kind: Kind::Dxf,
             path,
             selection: dialog.selection.clone(),
-            rules: self.migrated_settings.object_rules.clone(),
+            rules: settings.object_rules.clone(),
             extra_layers: dialog.extra_layers,
             options: dialog.options(),
             template: None,

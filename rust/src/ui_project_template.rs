@@ -4,6 +4,7 @@ use sleufbase_rust::template_project::{self, BackgroundKind, Options, Source};
 
 fn configure_options(mut options:Options,settings:&MigratedSettings,saved:Option<&sleufbase_rust::template_prefs::TemplatePreferences>,jobs:&[Dataset],rasters:&[GeoTiffInfo],trenches:&[VirtualTrench])->Options{
     let preferences=&settings.export_preferences;
+    options.overview_settings=sleufbase_rust::cadastral_overview::Settings::from_settings(settings).expect("validated project export settings");
     options.template=preferences.cadastral_template_path.clone().into();
     options.profile_style=sleufbase_rust::settings_compat::ProfilePreferences::from_settings(settings);
     options.logos=crate::ui_preferences::logos(preferences);
@@ -25,7 +26,7 @@ pub(super) struct Dialog {
     trenches:Vec<(u64,String)>,
 }
 impl Dialog {
-    fn new(app: &SleufBaseApp) -> Self {
+    fn new(app: &SleufBaseApp,settings:&MigratedSettings) -> Self {
         let options = Options {
             project: app.project_name.clone(),
             choices: template_project::suggest(
@@ -33,7 +34,7 @@ impl Dialog {
             ..Options::default()
         };
         // Saved project choices override the user's general export defaults.
-        let options=configure_options(options,&app.migrated_settings,app.template_preferences.as_ref(),&app.datasets,&app.geotiffs,&app.virtual_trenches);
+        let options=configure_options(options,settings,app.template_preferences.as_ref(),&app.datasets,&app.geotiffs,&app.virtual_trenches);
         let automatic=options.choices.iter().map(|choice| match choice.source {
             Source::Job(i) => sleufbase_rust::template_match::for_job(&app.datasets[i], &app.geotiffs),
             Source::Virtual(i) => sleufbase_rust::template_match::for_trench(&app.virtual_trenches[i], &app.geotiffs),
@@ -66,7 +67,7 @@ impl SleufBaseApp {
         }
         self.template_dialog = None;
         self.template_order_dialog = None;
-        self.project_template_dialog = Some(Dialog::new(self));
+        match self.project_export_settings(){Ok(settings)=>self.project_template_dialog=Some(Dialog::new(self,&settings)),Err(error)=>self.message=error}
     }
     pub(super) fn show_project_template_dialog(&mut self, ctx: &egui::Context) {
         // Choices contain vector indices. Never let removed/reordered sources

@@ -1,0 +1,263 @@
+{
+  "parse": [
+    {
+      "raw": "{\"1\":\"  Maaiveld: -2,31 N.A.P.  \",\"2\":\"INVULLEN\",\"3\":\"steen\"}",
+      "expected": {
+        "1": "Maaiveld: -2,31 N.A.P.",
+        "2": "INVULLEN",
+        "3": "steen"
+      }
+    },
+    {
+      "raw": "```JSON\n{\"1\":0,\"2\":false,\"3\":[1,true,null]}\n```",
+      "expected": {
+        "1": "INVULLEN",
+        "2": "INVULLEN",
+        "3": "[1, True, None]"
+      }
+    },
+    {
+      "raw": "tekst {\"1\":5,\"2\":{\"a\":true},\"3\":\"\"} einde",
+      "expected": {
+        "1": "5",
+        "2": "{'a': True}",
+        "3": "INVULLEN"
+      }
+    },
+    {
+      "raw": "{}",
+      "expected": {
+        "1": "INVULLEN",
+        "2": "INVULLEN",
+        "3": "INVULLEN"
+      }
+    },
+    {
+      "raw": "{\"1\":\"\\u001c\\u00a0 tekst \\u001f\"}",
+      "expected": {
+        "1": "tekst",
+        "2": "INVULLEN",
+        "3": "INVULLEN"
+      }
+    },
+    {
+      "raw": "[]",
+      "error": true
+    },
+    {
+      "raw": "not json",
+      "error": true
+    },
+    {
+      "raw": "{\"1\":\"goed\"} trailing",
+      "error": true
+    }
+  ],
+  "protocol": {
+    "url": "http://localhost:9876/v1/chat/completions",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer test-key"
+    },
+    "json": {
+      "model": "gemma-fixture",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "Lees de afbeelding van een proefsleuf. Er staan drie witte genummerde markers op: 1 = begin, 2 = midden, 3 = einde. Bepaal per marker het maaiveld/N.A.P.-niveau dat bij die plek hoort. Geef alleen geldig JSON terug met exact deze vorm: {\"1\":\"Maaiveld: 0.00 N.A.P.\",\"2\":\"Maaiveld: 0.00 N.A.P.\",\"3\":\"Maaiveld: 0.00 N.A.P.\"}. Gebruik een komma als decimaalteken alleen als die zo in de afbeelding staat; anders punt. Als je een waarde niet betrouwbaar kunt bepalen, zet dan INVULLEN."
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": "PNG_DATA_URL"
+              }
+            }
+          ]
+        }
+      ],
+      "temperature": 0,
+      "max_tokens": 256
+    },
+    "timeout": 17
+  },
+  "response": {
+    "text_by_key": {
+      "1": "a",
+      "2": "b",
+      "3": "c"
+    },
+    "raw_response": "{\"1\":\"a\",\"2\":\"b\",\"3\":\"c\"}"
+  },
+  "layout": [
+    {
+      "layer": {
+        "min_x": 0,
+        "min_y": 0,
+        "max_x": 10,
+        "max_y": 4
+      },
+      "points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "size": [
+        1400,
+        1000
+      ],
+      "expected": {
+        "min_x": -2.0,
+        "min_y": -3.0,
+        "max_x": 12.0,
+        "max_y": 7.0
+      }
+    },
+    {
+      "layer": {
+        "min_x": 155000,
+        "min_y": 463000,
+        "max_x": 155020,
+        "max_y": 463010
+      },
+      "points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 154998,
+          "y": 463002
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 155010,
+          "y": 463005
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 155030,
+          "y": 463007
+        }
+      ],
+      "size": [
+        1000,
+        1400
+      ],
+      "expected": {
+        "min_x": 154992.24,
+        "min_y": 462974.53599999996,
+        "max_x": 155035.76,
+        "max_y": 463035.46400000004
+      }
+    }
+  ],
+  "launches": [
+    {
+      "overrides": {},
+      "args": [
+        "serve",
+        "ciocan/gemma-4-E4B-it-W4A16",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--served-model-name",
+        "ciocan/gemma-4-E4B-it-W4A16",
+        "--max-model-len",
+        "4096",
+        "--dtype",
+        "half",
+        "--gpu-memory-utilization",
+        "0.78",
+        "--cpu-offload-gb",
+        "4",
+        "--max-num-seqs",
+        "1",
+        "--safetensors-load-strategy",
+        "lazy",
+        "--trust-remote-code",
+        "--quantization",
+        "gptq",
+        "--enforce-eager"
+      ],
+      "env": {
+        "HF_HOME": "ROOT\\.tools\\vllm\\hf_home",
+        "HUGGINGFACE_HUB_CACHE": "ROOT\\.tools\\vllm\\hf_home\\hub",
+        "TRANSFORMERS_CACHE": "ROOT\\.tools\\vllm\\hf_home\\transformers",
+        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+      }
+    },
+    {
+      "overrides": {
+        "SLEUFBASE_VLLM_MODEL": "test/AWQ",
+        "SLEUFBASE_VLLM_ENFORCE_EAGER": "nee",
+        "SLEUFBASE_VLLM_EXTRA_ARGS": "  --seed 7  --disable-log-requests ",
+        "SLEUFBASE_VLLM_DTYPE": "float16",
+        "SLEUFBASE_VLLM_QUANTIZATION": "custom"
+      },
+      "args": [
+        "serve",
+        "test/AWQ",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--served-model-name",
+        "test/AWQ",
+        "--max-model-len",
+        "4096",
+        "--dtype",
+        "float16",
+        "--gpu-memory-utilization",
+        "0.78",
+        "--cpu-offload-gb",
+        "4",
+        "--max-num-seqs",
+        "1",
+        "--safetensors-load-strategy",
+        "lazy",
+        "--trust-remote-code",
+        "--quantization",
+        "custom",
+        "--seed",
+        "7",
+        "--disable-log-requests"
+      ],
+      "env": {
+        "SLEUFBASE_VLLM_MODEL": "test/AWQ",
+        "SLEUFBASE_VLLM_ENFORCE_EAGER": "nee",
+        "SLEUFBASE_VLLM_EXTRA_ARGS": "  --seed 7  --disable-log-requests ",
+        "SLEUFBASE_VLLM_DTYPE": "float16",
+        "SLEUFBASE_VLLM_QUANTIZATION": "custom",
+        "HF_HOME": "ROOT\\.tools\\vllm\\hf_home",
+        "HUGGINGFACE_HUB_CACHE": "ROOT\\.tools\\vllm\\hf_home\\hub",
+        "TRANSFORMERS_CACHE": "ROOT\\.tools\\vllm\\hf_home\\transformers",
+        "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+      }
+    }
+  ]
+}

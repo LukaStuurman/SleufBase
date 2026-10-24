@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub const FORMAT_VERSION: u32 = 4;
+pub const FORMAT_VERSION: u32 = 5;
 pub const MAX_PROJECT_BYTES: u64 = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,6 +33,10 @@ pub struct NativeProject {
     pub format: String,
     pub version: u32,
     pub name: String,
+    #[serde(default,skip_serializing_if="Option::is_none")]
+    pub view:Option<crate::project_view::ProjectView>,
+    #[serde(default,skip_serializing_if="Option::is_none")]
+    pub project_settings:Option<crate::settings_compat::MigratedSettings>,
     pub datasets: Vec<Dataset>,
     pub rasters: Vec<GeoTiffInfo>,
     pub overlays: Vec<DxfOverlay>,
@@ -57,6 +61,8 @@ impl Default for NativeProject {
             format: "sleufbase-native-rust".into(),
             version: FORMAT_VERSION,
             name: "Naamloos project".into(),
+            view:None,
+            project_settings:None,
             datasets: Vec::new(),
             rasters: Vec::new(),
             overlays: Vec::new(),
@@ -80,6 +86,8 @@ impl NativeProject {
             return Err(format!("Niet ondersteunde projectversie {}", self.version));
         }
         if let Some(archive)=&self.legacy_archive {archive.validate()?;}
+        if let Some(view)=&self.view{view.validate()?;}
+        if let Some(settings)=&self.project_settings{settings.validate()?;}
         if let Some(state)=&self.template_export{state.validate()?;}
         if let Some(settings)=&self.template_preferences {settings.validate()?;}
         let mut count = 0usize;
@@ -227,7 +235,9 @@ pub fn read_project_with_cancel(path:&Path,cancel:&std::sync::atomic::AtomicBool
     crate::input::check(cancel)?;
     // V3 stores source block/curve definitions separately from derived WCS
     // caches. V1/V2 remain readable; opening never rewrites their source bytes.
-    if matches!(project.version,1..=3) {project.version=FORMAT_VERSION;}
+    if matches!(project.version,1..=4) {project.version=FORMAT_VERSION;}
+    if project.view.is_none(){project.view=crate::project_view::ProjectView::from_legacy(&project)?;}
+    if let Some(view)=&mut project.view{view.normalize_removed_provider();}
     let mut used=0;
     for overlay in &mut project.overlays {
         crate::cad_mesh::restore_features(&mut overlay.features,&mut used,cancel)?;

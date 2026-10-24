@@ -518,6 +518,7 @@ impl SleufBaseApp {
                             self.message="Handmatige kopie gemaakt; de originele MarXact-meting is behouden".into();
                             self.trench_editor=Some(Editor::new(self.virtual_trenches.len()-1,
                                 self.virtual_trenches.last().unwrap()));
+                            self.trench_editor.as_mut().unwrap().start_automatic_ahn();
                             return;
                         },
                         Err(e)=>editor.error=e,

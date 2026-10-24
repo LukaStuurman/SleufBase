@@ -22,7 +22,7 @@ impl SleufBaseApp {
             self.message = "Laad eerst minimaal een GeoTIFF-bestand.".into();
             return false;
         }
-        let settings = self.migrated_settings.map_export.clone();
+        let settings = match self.project_export_settings(){Ok(settings)=>settings.map_export,Err(error)=>{self.message=error;return false;}};
         if let Err(error) = settings.validate() {
             self.message = error;
             return false;
@@ -55,7 +55,8 @@ impl SleufBaseApp {
         egui::Window::new("Export kaarten").id(egui::Id::new("standalone-map-export"))
             .open(&mut open).default_width(520.).show(ctx,|ui|{
             ui.label(format!("{} GeoTIFF(s) als afzonderlijke A4-kaarten",names.len()));
-            let settings=&mut self.migrated_settings.map_export;
+            let settings=match &mut self.project_settings{Some(settings)=>&mut settings.map_export,None=>&mut self.migrated_settings.map_export};
+            let previous=settings.clone();
             egui::ComboBox::from_label("Achtergrond").selected_text(match settings.background.as_str(){
                 "pdok"=>"PDOK luchtfoto","osm"=>"OpenStreetMap","white"=>"Wit (zonder internet)",
                 "cadastral"=>"Kadaster",_=>"Onbekend"
@@ -71,16 +72,18 @@ impl SleufBaseApp {
             egui::ScrollArea::vertical().max_height(160.).show(ui,|ui|{for name in &names{ui.label(name);}});
             ui.small("Bestaande PNGs met deze namen worden vervangen nadat alle kaarten zijn voorbereid. Dubbele bronnamen krijgen een volgnummer.");
             ui.horizontal(|ui|{save=ui.button("Instellingen onthouden").clicked();export=ui.button("Kies exportmap…").clicked();});
+            if *settings!=previous&&self.project_settings.is_some(){self.dirty=true;}
         });
         self.map_export_open = open;
         if save {
-            self.message = match settings_compat::save_rust_settings(
+            if self.project_settings.is_some(){self.dirty=true;self.message="Kaartinstellingen in het project gewijzigd. Sla het project op om ze te bewaren.".into();}
+            else{self.message = match settings_compat::save_rust_settings(
                 &project::app_data_directory().join("settings.json"),
                 &self.migrated_settings,
             ) {
                 Ok(()) => "Kaartinstellingen opgeslagen".into(),
                 Err(e) => format!("Kaartinstellingen niet opgeslagen: {e}"),
-            };
+            };}
         }
         if export {
             if let Some(directory) = rfd::FileDialog::new()

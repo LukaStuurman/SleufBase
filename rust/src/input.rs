@@ -42,7 +42,7 @@ pub(crate) fn read_typed(
 ) -> Result<Vec<u8>, ReadFailure> {
     check(cancel).map_err(ReadFailure::Cancelled)?;
     let mut file =
-        File::open(path).map_err(|e| ReadFailure::Io(format!("{label} niet bereikbaar: {e}")))?;
+        File::open(path).map_err(|e| ReadFailure::Io(format!("{label} niet bereikbaar ({}): {e}",path.display())))?;
     if file
         .metadata()
         .map_err(|e| ReadFailure::Io(e.to_string()))?

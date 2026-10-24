@@ -33,6 +33,7 @@ fn real_template_pipeline_can_export_from_a_loaded_project_without_manifest_or_n
     assert!(!fixture.datasets.is_empty());
     let dir=tempfile::tempdir().unwrap();
     let mut options=Options {
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         logos:Default::default(),profile_style:Default::default(),
         font_directories:Vec::new(),
         paired:false,
@@ -84,6 +85,7 @@ fn virtual_trench_keeps_measured_start_and_selected_source() {
         source_name:"Band".into(),display_rgb:Some([20,30,40]),
     });
     let opts=Options {
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         paired:false,
         template:fixture.template,
         choices:vec![Choice {source:Source::Virtual(0),raster:Some(0),
@@ -132,6 +134,7 @@ fn exported_project_map_includes_clipped_visible_cad_lines_and_permanent_rasters
         raw_text:String::new(),block_name:String::new(),closed:None,cad:None,
     });
     let options=Options {
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         paired:false,
         template: source.template.clone(),
         dpi:96,scale:225.,
@@ -175,6 +178,7 @@ fn template_photos_are_persistently_bundled_without_replacing_tiff_or_map() {
     pixels.put_pixel(0,0,image::Rgba([255,10,20,255]));
     pixels.save(&photo).unwrap();
     let options=Options {
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         paired:false,
         template:reference.template,
         include_bgt:false,include_cadastral:false,include_cad:false,
@@ -225,6 +229,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
     });
     let dir=tempfile::tempdir().unwrap();
     let options=Options {
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         paired:false,
         template:reference.template,
         include_bgt:false,include_cadastral:false,include_cad:false,
@@ -275,6 +280,7 @@ fn virtual_marxact_sheet_exports_full_png_and_profile_source_without_external_ge
 fn real_job_still_requires_geotiff_but_virtual_job_does_not(){
     let (reference,_)=fixture();
     let opts=Options{
+        overview_settings:sleufbase_rust::cadastral_overview::template_defaults(),
         template:reference.template,
         choices:vec![Choice{source:Source::Job(0),raster:None,include:true,
             title:"Echte KickTheMap-job".into(),profile:false,reverse:false,

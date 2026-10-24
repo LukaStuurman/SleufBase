@@ -56,6 +56,12 @@ mod map_actions_ui;
 mod raster_rotation_ui;
 #[path="ui_virtual_map.rs"]
 mod virtual_map_ui;
+#[path="ui_project_view.rs"]
+mod project_view_ui;
+#[path="ui_ai_maaiveld.rs"]
+mod ai_maaiveld_ui;
+#[path="ui_cadastral_overview.rs"]
+mod cadastral_overview_ui;
 
 const ORANGE: Color32 = Color32::from_rgb(249, 115, 22);
 const DARK: Color32 = Color32::from_rgb(194, 65, 12);
@@ -90,6 +96,14 @@ enum ProjectAction { New, ClearLayers, Open(PathBuf), Restore(PathBuf), ImportPy
 struct DxfSelection {overlay:usize,feature:usize,details:Vec<(String,String)>}
 
 pub struct SleufBaseApp {
+    overview_ui:cadastral_overview_ui::State,
+    ai_maaiveld_ui:ai_maaiveld_ui::State,
+    project_view:sleufbase_rust::project_view::ProjectView,
+    project_settings:Option<MigratedSettings>,
+    project_exchange:Option<sleufbase_rust::project_exchange_worker::Worker>,
+    exchange_deferred:Option<ProjectAction>,
+    background_restore_pending:bool,
+    pdok_source:pdok_wms::Source,
     virtual_map:virtual_map_ui::State,
     raster_rotation:raster_rotation_ui::State,
     tiff_comment_editor:Option<map_actions_ui::TiffCommentEditor>,
@@ -180,6 +194,10 @@ impl Default for SleufBaseApp {
             Err(error)=>(MigratedSettings::default(),format!("Instellingen niet geladen: {error}"))
         };
         Self {
+            overview_ui:Default::default(),
+            ai_maaiveld_ui:Default::default(),
+            project_view:Default::default(),project_settings:None,project_exchange:None,exchange_deferred:None,
+            background_restore_pending:false,pdok_source:pdok_wms::Source::Aerial,
             raster_rotation:Default::default(),
             virtual_map:Default::default(),
             tiff_comment_editor:None,
@@ -267,8 +285,10 @@ impl Default for SleufBaseApp {
 }
 
 impl SleufBaseApp {
+    fn project_sources_owned(&self)->bool{self.project_exchange_busy()||self.ai_maaiveld_ui.owns_sources()||self.overview_ui.busy()}
     fn snapshot(&self) -> NativeProject {
         NativeProject {
+            view:Some(self.project_view.clone()),project_settings:self.project_settings.clone(),
             name:self.project_name.clone(),
             legacy_archive:self.legacy_archive.clone(),
             template_preferences:self.template_preferences.clone(),
@@ -285,6 +305,8 @@ impl SleufBaseApp {
     }
 
     fn clear_project_requests(&mut self) {
+        self.overview_ui=Default::default();
+        self.ai_maaiveld_ui=Default::default();
         self.virtual_map=Default::default();
         self.raster_rotation=Default::default();
         self.tiff_comment_editor=None;
@@ -317,6 +339,10 @@ impl SleufBaseApp {
 
     fn apply_project(&mut self,doc:NativeProject,path:Option<PathBuf>,restored:bool,markers:Vec<Vec<sleufbase_rust::cross_section::Marker>>,_ctx:&egui::Context) {
         self.clear_project_requests();
+        let view=doc.view.clone().unwrap_or_default();
+        self.project_view=view;
+        self.background_restore_pending=self.project_view.use_background&&self.project_view.camera.is_some();
+        self.project_settings=doc.project_settings;
         self.datasets=doc.datasets; self.geotiffs=doc.rasters;
         self.template_state=doc.template_export;
         self.raster_textures=vec![None;self.geotiffs.len()]; self.overlays=doc.overlays;
@@ -325,6 +351,8 @@ impl SleufBaseApp {
         self.virtual_trenches=doc.virtual_trenches; self.comments=doc.comments;
         self.trench_markers=markers;
         self.refresh_virtual_references();
+        self.apply_view_selection();
+        project_view_ui::restore_camera(&self.project_view,&mut self.navigation,&mut self.zoom,&mut self.pan);
         self.project_name=doc.name; self.project_path=path;
         self.legacy_archive=doc.legacy_archive;
         self.template_preferences=doc.template_preferences;
@@ -334,6 +362,7 @@ impl SleufBaseApp {
     }
 
     fn request_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        if self.defer_for_project_exchange(&action)||self.defer_for_ai(&action)||self.defer_for_overview(&action){return;}
         if self.defer_action_for_export(&action)||self.defer_action_for_template(&action){return;}
         if self.pending_project_action.is_some() {return;}
         self.cancel_file_load();
@@ -348,6 +377,7 @@ impl SleufBaseApp {
     }
 
     fn execute_project_action(&mut self,action:ProjectAction,ctx:&egui::Context) {
+        if self.defer_for_project_exchange(&action)||self.defer_for_ai(&action)||self.defer_for_overview(&action){return;}
         if self.defer_action_for_export(&action)||self.defer_action_for_template(&action){return;}
         match action {
             ProjectAction::ClearLayers=>self.clear_map_layers(ctx),
@@ -398,6 +428,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_file(&mut self, save_as: bool) -> bool {
+        if self.project_sources_owned(){self.message="Wacht tot de lopende taak is afgerond".into();return false;}
         if self.export_intent.is_some() || self.template_job.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         let path = if !save_as {
             self.project_path.clone()
@@ -410,6 +441,7 @@ impl SleufBaseApp {
     }
 
     fn save_project_to_path(&mut self,path:PathBuf) -> bool {
+        if self.project_sources_owned(){self.message="Wacht tot de lopende taak is afgerond".into();return false;}
         if self.export_intent.is_some() || self.template_job.is_some(){self.message="Wacht tot de export is afgerond".into();return false;}
         match save_project(&path,&self.snapshot()) {
             Ok(())=>{
@@ -422,6 +454,7 @@ impl SleufBaseApp {
     }
 
     fn try_autosave(&mut self) {
+        if self.project_sources_owned(){return;}
         if self.export_intent.is_some() || self.template_job.is_some(){return;}
         if self.file_intent.is_some(){return;}
         if !self.backup_settings.enabled ||
@@ -458,6 +491,9 @@ impl SleufBaseApp {
     }
 
     fn select_dxf(&mut self,overlay:usize,feature:usize) {
+        if let Some(layer)=self.overlays.get(overlay){
+            if self.project_view.selected_dxf.as_ref()!=Some(&layer.path){self.project_view.selected_dxf=Some(layer.path.clone());self.dirty=true;}
+        }
         self.dxf_selection=self.overlays.get(overlay).and_then(|o|o.inspect_details(feature).map(|details|
             DxfSelection{overlay,feature,details:details.into_iter().collect()}
         ));
@@ -644,6 +680,9 @@ impl SleufBaseApp {
     }
 
     fn start_pdok(&mut self) {
+        self.start_pdok_source(pdok_wms::Source::Aerial);
+    }
+    fn start_pdok_source(&mut self,source:pdok_wms::Source) {
         if self.pdok_busy {return;}
         if self.geotiffs.iter().any(|i|i.epsg.is_some_and(|epsg|epsg!=28992)) {
             self.message="PDOK luchtfoto is RD (EPSG:28992). Transformeer afwijkende GeoTIFF eerst.".into();
@@ -656,9 +695,13 @@ impl SleufBaseApp {
         let (sender,receiver)=mpsc::channel();
         self.pdok_rx=Some(receiver);
         self.pdok_busy=true;
-        self.message="PDOK-luchtfoto wordt rechtstreeks vanuit Rust geladen".into();
+        self.pdok_source=source;
+        self.dirty|=!self.project_view.use_background||self.project_view.provider()!=if source==pdok_wms::Source::Cadastral{sleufbase_rust::project_view::BackgroundProvider::Cadastral}else{sleufbase_rust::project_view::BackgroundProvider::PdokAerial};
+        self.project_view.use_background=true;
+        self.project_view.background_source=if source==pdok_wms::Source::Cadastral{"PDOK kadastrale kaart"}else{"PDOK Luchtfoto NL actueel (8 cm, deels 5 cm)"}.into();
+        self.message="PDOK-kaartachtergrond ophalen…".into();
         std::thread::spawn(move||{
-            let result=pdok_wms::request_map(bounds,1200,900);
+            let result=pdok_wms::request_map_for_with_cancel(source,bounds,1200,900,&std::sync::atomic::AtomicBool::new(false));
             let _=sender.send(result);
         });
     }
@@ -676,12 +719,12 @@ impl SleufBaseApp {
                 self.pdok_busy=false;
                 self.pdok_rx=None;
                 self.osm_visible=false;
-                self.message="PDOK-luchtfoto geladen".into();
+                self.message="PDOK-kaartachtergrond geladen".into();
             }
             Some(Ok(Err(err)))=>{
                 self.pdok_busy=false;
                 self.pdok_rx=None;
-                self.message=format!("PDOK-luchtfoto mislukt: {err}");
+                self.message=format!("PDOK-kaartachtergrond mislukt: {err}");
             }
             Some(Err(TryRecvError::Disconnected))=>{
                 self.pdok_busy=false;
@@ -707,6 +750,8 @@ impl SleufBaseApp {
         let (sender,receiver)=mpsc::channel();
         self.osm_rx=Some(receiver);
         self.osm_busy=true;
+        self.dirty|=!self.project_view.use_background||self.project_view.provider()!=sleufbase_rust::project_view::BackgroundProvider::OpenStreetMap;
+        self.project_view.use_background=true;self.project_view.background_source="OpenStreetMap".into();
         self.message="OpenStreetMap-tegels worden geladen (lokaal 7 dagen gecachet)".into();
         let cache=project::app_data_directory().join("osm-tiles");
         std::thread::spawn(move||{
@@ -964,7 +1009,8 @@ impl SleufBaseApp {
 
     fn save_dxf(&mut self) {
         if self.export_intent.is_some(){self.message="Er loopt al een export".into();return;}
-        self.export_dialog=Some(crate::export_dialog::Dialog::new(self.datasets.len(),self.virtual_trenches.len(),self.migrated_settings.dxf_label_gap,self.project_generation));
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
+        self.export_dialog=Some(crate::export_dialog::Dialog::new(self.datasets.len(),self.virtual_trenches.len(),settings.dxf_label_gap,self.project_generation));
     }
 
 }
@@ -1076,7 +1122,7 @@ fn canvas(
     );
     painter.add(egui::Shape::rect_filled(rect,0.0,Color32::TRANSPARENT));
 
-    if let (Some(texture),Some(b))=(pdok_texture,pdok_bounds) {
+    if let (Some(texture),Some(b))=(pdok_texture.filter(|_|navigation.as_ref().and_then(|n|n.show_background).unwrap_or(true)),pdok_bounds) {
         let mut mesh=egui::Mesh::with_texture(texture.id());
         for (x,y,u,v) in [
             (b.min_x,b.max_y,0.0f32,0.0f32),
@@ -1103,7 +1149,7 @@ fn canvas(
             for (col,row,u,v) in corners {
                 let (x,y)=raster.transform.pixel_to_world(col,row);
                 mesh.vertices.push(egui::epaint::Vertex {
-                    pos:project(x,y),uv:Pos2::new(u,v),color:Color32::WHITE,
+                    pos:project(x,y),uv:Pos2::new(u,v),color:Color32::from_white_alpha((navigation.as_ref().and_then(|n|n.raster_opacity).unwrap_or(1.).clamp(0.,1.)*255.).floor() as u8),
                 });
             }
             mesh.indices.extend_from_slice(&[0,1,2,0,2,3]);
@@ -1247,6 +1293,30 @@ impl eframe::App for SleufBaseApp {
 }
 impl SleufBaseApp {
     fn render(&mut self,ctx:&egui::Context) {
+        if self.overview_ui.busy(){
+            if ctx.input(|i|i.viewport().close_requested()){
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.defer_for_overview(&ProjectAction::Close);
+            }
+            self.poll_cadastral_overview(ctx);
+            if self.overview_ui.busy(){self.show_cadastral_overview(ctx);return;}
+        }
+        if self.ai_maaiveld_ui.busy(){
+            if ctx.input(|i|i.viewport().close_requested()){
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.defer_for_ai(&ProjectAction::Close);
+            }
+            self.poll_ai_maaiveld(ctx);
+            if self.ai_maaiveld_ui.busy(){self.show_ai_maaiveld(ctx);return;}
+        }
+        if self.project_exchange.as_ref().is_some_and(|w|w.is_busy()) {
+            if ctx.input(|i|i.viewport().close_requested()) {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.defer_for_project_exchange(&ProjectAction::Close);
+            }
+            self.poll_project_exchange(ctx);
+            if let Some(worker)=self.project_exchange.as_ref().filter(|w|w.is_busy()) {project_view_ui::export_progress(ctx,worker);return;}
+        }
         if self.template_job.is_some() {
             if ctx.input(|i|i.viewport().close_requested()) {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
@@ -1280,9 +1350,15 @@ impl SleufBaseApp {
         self.poll_bgt();
         self.poll_cadastral();
         self.poll_ahn();
+        #[cfg(not(test))]
+        if self.background_restore_pending {self.request_selected_background();}
         self.poll_location(ctx);
         self.poll_point_downloads();
         self.poll_tiff_addresses(ctx);
+        self.show_ai_maaiveld(ctx);
+        if self.ai_maaiveld_ui.busy(){return;}
+        self.show_cadastral_overview(ctx);
+        if self.overview_ui.busy(){return;}
         if ctx.input_mut(|i|i.consume_key(egui::Modifiers::CTRL,egui::Key::L)){self.open_location();}
         ctx.request_repaint_after(Duration::from_secs(1));
         egui::TopBottomPanel::top("header").show(ctx,|ui|{
@@ -1310,7 +1386,9 @@ impl SleufBaseApp {
                         self.request_project_action(ProjectAction::ImportPython(path),ctx);
                     }
                 }
+                if ui.button("Export Python-project").clicked(){self.choose_python_project_export();}
             });
+            self.show_project_view_controls(ui);
             ui.horizontal_wrapped(|ui|{
                 if ui.button("Open jobFeatures.json").clicked() {
                     if let Some(files)=rfd::FileDialog::new()
@@ -1327,12 +1405,14 @@ impl SleufBaseApp {
                 self.show_map_actions(ui,ctx);
                 if ui.button("Locatie zoeken").clicked() {self.open_location();}
                 if ui.button("TIFF-adressen").clicked() {self.open_tiff_addresses();}
+                if ui.button("Maaiveld via Gemma").clicked(){self.open_ai_maaiveld();}
                 if ui.button("Export kaarten").clicked() {self.open_map_export();}
+                if ui.button("Kadastrale DXF exporteren").clicked(){self.open_cadastral_overview();}
                 if ui.button("Offline KickTheMap jobs").clicked() {self.open_cached_jobs();}
                 if ui.add_enabled(!self.pdok_busy,egui::Button::new("PDOK luchtfoto")).clicked() {self.start_pdok();}
                 if ui.add_enabled(!self.osm_busy,egui::Button::new("OpenStreetMap")).clicked() {self.start_osm();}
-                if self.osm_texture.is_some() && ui.selectable_label(self.osm_visible,"OSM tonen").clicked() {self.osm_visible=true;}
-                if self.pdok_texture.is_some() && ui.selectable_label(!self.osm_visible,"PDOK tonen").clicked() {self.osm_visible=false;}
+                if self.osm_texture.is_some() && ui.selectable_label(self.osm_visible,"OSM tonen").clicked() {self.osm_visible=true;self.project_view.use_background=true;self.project_view.background_source="OpenStreetMap".into();self.dirty=true;}
+                if self.pdok_texture.is_some() && ui.selectable_label(!self.osm_visible,"PDOK tonen").clicked() {self.osm_visible=false;self.project_view.use_background=true;self.project_view.background_source=if self.pdok_source==pdok_wms::Source::Cadastral{"PDOK kadastrale kaart"}else{"PDOK Luchtfoto NL actueel (8 cm, deels 5 cm)"}.into();self.dirty=true;}
                 if ui.add_enabled(!self.bgt_busy,egui::Button::new("BGT wegdelen")).clicked() {
                     self.start_bgt(BgtKind::Wegdeel);
                 }
@@ -1613,10 +1693,11 @@ impl SleufBaseApp {
             ui.separator();
             if let Some(ds)=self.selected.and_then(|i|self.datasets.get(i)) {
                 ui.strong(&ds.title);
-                let summary=sleufbase_rust::summarize(ds,&self.migrated_settings.object_rules);
+                let rules=&self.project_settings.as_ref().unwrap_or(&self.migrated_settings).object_rules;
+                let summary=sleufbase_rust::summarize(ds,rules);
                 ui.label(format!("Job-ID {}, {} objecten, {} disciplines",
                     ds.job_id,ds.features.len(),summary.distinct_count()));
-                for (rule,count) in self.migrated_settings.object_rules.iter().zip(summary.counts.iter()) {
+                for (rule,count) in rules.iter().zip(summary.counts.iter()) {
                     if *count>0 {ui.label(format!("{}: {}",rule.display_label(),count));}
                 }
             }
@@ -1634,13 +1715,22 @@ impl SleufBaseApp {
             let selected:&[Dataset]=self.selected.and_then(|i|self.datasets.get(i))
                 .map(std::slice::from_ref).unwrap_or(&[]);
             self.navigation.pointer_tool=self.raster_rotation.active()||self.virtual_map.captures();
+            self.navigation.raster_opacity=Some((self.project_view.opacity_percent/100.) as f32);
+            self.navigation.show_background=Some(self.project_view.use_background);
             let view=canvas(ui,selected,&self.geotiffs,&self.raster_textures,
                 &self.overlays,&self.virtual_trenches,&self.trench_markers,&self.bgt_layers,self.cadastral.as_ref(),&self.comments,
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_texture.as_ref()} else {self.pdok_texture.as_ref()},
                 if self.osm_visible && self.osm_texture.is_some() {self.osm_bounds} else {self.pdok_bounds},
                 self.osm_visible && self.osm_texture.is_some(),
-                &mut self.zoom,&mut self.pan,&self.migrated_settings.object_rules,Some(&mut self.navigation));
-            if let Some(view)=view{self.handle_raster_rotation(&view);self.handle_raster_points(&view);self.handle_virtual_map(&view);}
+                &mut self.zoom,&mut self.pan,&self.project_settings.as_ref().unwrap_or(&self.migrated_settings).object_rules,Some(&mut self.navigation));
+            if let Some(view)=view{
+                let camera=project_view_ui::capture_camera(&view);
+                if self.project_view.camera.as_ref()!=Some(&camera)&&(view.response.dragged()||(view.response.hovered()&&ui.input(|i|i.smooth_scroll_delta.y!=0.))){self.dirty=true;}
+                self.project_view.camera=Some(camera);
+                let old_virtual=self.virtual_map.selected;let old_raster=self.raster_points.selected.clone();
+                self.handle_raster_rotation(&view);self.handle_raster_points(&view);self.handle_virtual_map(&view);
+                self.update_view_selection(old_virtual,old_raster.as_deref());
+            }
         });
 
         if self.show_trench_dialog {
@@ -1973,7 +2063,7 @@ mod project_lifecycle_tests {
         let details=&app.dxf_selection.as_ref().unwrap().details;
         assert!(details.iter().any(|(key,value)|key=="Attribuut Code"&&value=="PS 42"));
         assert!(details.iter().any(|(key,value)|key=="XDATA MEASUREMENTS"&&value.contains("ID-42")));
-        assert!(!app.dirty);
+        assert!(app.dirty);assert_eq!(app.project_view.selected_dxf,Some(path));
         app.execute_project_action(ProjectAction::New,&ctx);
         assert!(app.dxf_selection.is_none());
     }

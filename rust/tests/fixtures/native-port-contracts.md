@@ -51,9 +51,87 @@ bestand. Onbekende metadata, ontbrekende/onleesbare bronverwijzingen en
 oorspronkelijke puntvelden blijven behouden. Dubbelzinnige herkomst of een niet
 verliesvrij ondersteunde bron geeft een fout. Losse jobdatasets, BGT/Kadaster en
 gewijzigde Rust-sjabloonvoorkeuren/slotvolgorde zijn nog niet terug te converteren.
-Camera-/selectiegegevens worden voor uitwisseling bewaard; volledige toepassing
-van die voorkeuren op de native kaart blijft afzonderlijk werk.
+De native kaart bewaart en herstelt deze camera- en selectiegegevens; de onderstaande contracten onderscheiden dit van praktijkacceptatie.
 
 Lokale HTTP-proeven dekken CSRF-verversing, sessieverlies, retries, annulering en
 ingebedde joblijsten. Echte accounts, praktijkprojecten en AutoCAD-acceptatie
 blijven verplicht volgens `rust/PARITY.md`.
+
+## Projectweergave en Python-projectexport
+
+Het native projectformaat is versie **5**. Bestanden uit versies 1 tot en met 4
+worden bij openen opgewaardeerd in het geheugen; hun oorspronkelijke bytes worden
+niet herschreven. `rust/tests/project_view.rs`, `project_schema.rs`,
+`cad_properties.rs` en `template_order.rs` toetsen deze compatibiliteit en het
+weigeren van onbekende native velden.
+
+`ProjectView` bewaart de zichtbare wereldcoördinaten van het kaartmidden, meters
+per schermpixel, TIFF-dekking, achtergrond aan/uit, bron en geselecteerde lagen.
+TIFF-/sleufselectie gebruikt bronpad of sleufidentiteit; DXF-selectie gebruikt het
+bronpad. Oorspronkelijke Python-indices worden vóór de splitsing in native
+raster- en sleuflijsten opgelost. Ze zijn afzonderlijk beschikbaar via
+`ProjectUiState::from_archive`; exportindices verwijzen naar de daadwerkelijke
+exportvolgorde. Dubbele of ontbrekende identiteiten kiezen geen andere laag.
+Bekende oude Cyclomedia-voorkeuren worden actief naar PDOK omgezet; het originele
+archief blijft ongewijzigd. Werkelijk onbekende bronnen blijven herkenbaar en
+worden niet stil als PDOK geladen.
+
+Projectvoorkeuren overschrijven alleen opgeslagen velden; ontbrekende velden
+behouden de algemene gebruikersvoorkeur. Projectgebonden instellingen en
+opgeslagen sjabloonkeuzes krijgen voorrang zonder algemene instellingenbestanden
+te wijzigen. De UI-proeven in `ui_project_view.rs` gebruiken geen automatisch
+netwerkverkeer. Ze toetsen onder andere selectie in echte widgets,
+weergaveherstel, de wachtrij voor sluiten tijdens export en het blokkeren van
+opslaan zolang de worker eigenaar is van de brongegevens.
+
+De Python-exportworker verplaatst grote bronvectoren en geeft dezelfde
+allocaties terug bij succes, fout, annulering of opgevangen paniek. Export maakt
+uitsluitend een nieuw `.klicproject`. JSON wordt gecontroleerd naar een tijdelijk
+bestand gestreamd, met maximaal 128 MiB inclusief de afsluitende newline. De
+publicatiegrens laat annulering en publiceren niet allebei winnen. Tests in
+`project_exchange_worker.rs`, `legacy_project.rs` en de writer-module toetsen dit;
+de CLI-proef importeert, exporteert en importeert opnieuw, inclusief bescherming
+van bron en bestaande uitvoer.
+
+Losse jobdatasets, actieve BGT/Kadastergegevens en gewijzigde native
+sjablooninstellingen/slotvolgorde blijven een expliciete conversiefout. Een
+gewijzigde rastertransformatie zonder rotatie wordt eveneens geweigerd: de
+originele Python-loader negeert de opgeslagen basismatrix bij een nulhoek.
+Onbekende dekbandvelden blijven behouden bij een unieke ongewijzigde koppeling;
+een gewijzigde of dubbelzinnige koppeling wordt geweigerd. Dit voorkomt dat een
+ogenschijnlijk geslaagde conversie actuele gegevens stil laat verdwijnen.
+
+## Annulering van Kadaster en BGT
+
+`fetch_cadastral_with_cancel` en `request_bgt_with_cancel` behouden de bestaande
+wrappers. Annulering wordt gecontroleerd bij wachten op een verzoek, tussen
+pagina's en tegels, tijdens retries en wachttijden en bij verwerking van
+features/paden. Een vastgelopen HTTP-header of antwoordbody houdt de caller niet
+vast: die controleert annulering tijdens het wachten met stappen van 20 ms.
+
+Kadaster, BGT en de AI-kaart-/profiel-/Gemma-aanvragen delen maximaal **vier** achtergrondverzoeken. Een reeds lopend
+socketverzoek kan na annulering nog maximaal de ingestelde HTTP-timeout van
+**45 seconden** voor Kadaster/BGT of standaard **180 seconden** voor Gemma voortbestaan; de caller wacht daar niet op. Ook wachten op een
+vrij verzoekslot is annuleerbaar. Antwoordpagina's blijven begrensd op 24 MiB;
+veilige vervolg-URL's, paginalimieten en geometriebudgetten blijven gelden.
+
+Lokale HTTP-proeven in `cadastral.rs` en `bgt.rs` controleren geblokkeerde bodies,
+annulering vóór een tweede retry, normale WFS-paginering en ontdubbeling, herstel
+na een tijdelijke BGT-fout en weigering van onveilige vervolg-URL's. De
+annuleringsgrens is één seconde tegenover een drie seconden geblokkeerde
+nepserver; deze marge voorkomt afhankelijkheid van exacte planning in een zware
+testrun. De testclients gebruiken uitsluitend localhost en omzeilen proxies.
+
+De originele standalone overzichtsexport haalt verse Kadaster-lijnen én labels
+op binnen de gezamenlijke TIFF-uitsnede met marge
+`max(60, min(180, grootste_spanwijdte * 0.35))` meter. Optionele verse BGT-wegdelen
+gebruiken dezelfde uitsnede en de laag `BGT_WEGDEEL`; deze optie staat oorspronkelijk
+standaard uit. Alleen geladen gegevens gebruiken is een afzonderlijke expliciete
+offlinekeuze. Grenzen van de ondersteunde aanvraaggrootte blijven zichtbare fouten.
+
+Deze contracten bewijzen lokaal gedrag en vergelijking met oorspronkelijke
+functies. Zij bewijzen geen recente beschikbaarheid van PDOK, werking met echte
+KickTheMap-accounts, pixelpariteit van iedere achtergrondroute of correcte
+praktijkuitvoer in AutoCAD. De Kadaster-WMS-bron gebruikt het oorspronkelijke
+exportendpoint; de oorspronkelijke kaartpreview gebruikte WMTS. Live acceptatie
+met representatieve projecten blijft afzonderlijk nodig.

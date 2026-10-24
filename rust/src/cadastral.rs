@@ -12,6 +12,7 @@ use std::collections::HashSet;
 use std::io::Read;
 use std::thread;
 use std::time::Duration;
+use std::sync::{Arc,atomic::{AtomicBool,AtomicUsize,Ordering},mpsc};
 
 const ENDPOINT:&str="https://service.pdok.nl/kadaster/kadastralekaart/wfs/v5_0";
 const DIRECT_LIMIT:f64=700.0;
@@ -21,6 +22,20 @@ const MAX_TILES:usize=100;
 const MAX_PAGE_COUNT:usize=100;
 const MAX_FEATURES:usize=150_000;
 const MAX_BYTES:u64=24*1024*1024;
+static ACTIVE_REQUESTS:AtomicUsize=AtomicUsize::new(0);
+struct RequestPermit;
+impl Drop for RequestPermit{fn drop(&mut self){ACTIVE_REQUESTS.fetch_sub(1,Ordering::AcqRel);}}
+struct CancelRequest(Arc<AtomicBool>);
+impl Drop for CancelRequest{fn drop(&mut self){self.0.store(true,Ordering::Release);}}
+/// At most four bounded HTTP tasks may outlive their cancelled callers. The
+/// caller never waits for a blocked socket; queued callers remain cancellable.
+pub(crate) fn cancellable_request<T:Send+'static>(cancel:&AtomicBool,task:impl FnOnce(Arc<AtomicBool>)->T+Send+'static)->Result<T,String>{
+    loop{crate::input::check(cancel)?;let active=ACTIVE_REQUESTS.load(Ordering::Acquire);if active<4&&ACTIVE_REQUESTS.compare_exchange_weak(active,active+1,Ordering::AcqRel,Ordering::Acquire).is_ok(){break;}thread::sleep(Duration::from_millis(20));}
+    let permit=RequestPermit;let request_cancel=Arc::new(AtomicBool::new(false));let stop=CancelRequest(request_cancel.clone());let(tx,rx)=mpsc::sync_channel(1);
+    thread::Builder::new().name("sleufbase-pdok-request".into()).spawn(move||{let _permit=permit;let result=task(request_cancel);let _=tx.send(result);}).map_err(|e|format!("PDOK-verzoek starten: {e}"))?;
+    loop{crate::input::check(cancel)?;match rx.recv_timeout(Duration::from_millis(20)){Ok(result)=>{crate::input::check(cancel)?;drop(stop);return Ok(result)},Err(mpsc::RecvTimeoutError::Timeout)=>{},Err(mpsc::RecvTimeoutError::Disconnected)=>return Err("PDOK-verzoek onverwacht gestopt".into())}}
+}
+pub(crate) fn cancel_sleep(cancel:&AtomicBool,duration:Duration)->Result<(),String>{let until=std::time::Instant::now()+duration;loop{crate::input::check(cancel)?;let remaining=until.saturating_duration_since(std::time::Instant::now());if remaining.is_zero(){return Ok(());}thread::sleep(remaining.min(Duration::from_millis(20)));}}
 
 #[derive(Copy,Clone,Debug,Serialize,Deserialize,PartialEq,Eq)]
 pub enum CadastralKind { Perceel,KadastraleGrens,Bebouwing,OpenbareRuimteNaam,Nummeraanduidingreeks }
@@ -158,61 +173,48 @@ pub fn feature_label(feature:&Value,kind:CadastralKind)->Option<CadLabel> {
         text:text.to_owned(),position:(x,y),rotation
     })
 }
-fn fetch_kind(client:&Client,kind:CadastralKind,tiles:&[Bounds])
-    ->Result<Vec<Value>,String>
-{
-    let mut all=Vec::new();
-    let mut seen=HashSet::new();
-    for bounds in tiles {
-        let mut index=0;
-        for page in 0..MAX_PAGE_COUNT {
-            let url=build_url(kind,*bounds,index)?;
-            let mut response=None;
-            let mut problem=String::new();
-            for attempt in 0..3 {
-                match client.get(url.clone()).send() {
-                    Ok(res) if res.status().is_success() =>{
-                        response=Some(res);break;
-                    }
-                    Ok(res)=>problem=format!("WFS HTTP {}",res.status()),
-                    Err(e)=>problem=e.to_string(),
+#[derive(Debug)]
+enum PageError {Retry(String),Fatal(String)}
+fn request_features(client:&Client,url:Url,cancel:&AtomicBool)->Result<Result<Vec<Value>,PageError>,String>{
+    let client=client.clone();
+    cancellable_request(cancel,move|stop|{
+        crate::input::check(&stop).map_err(PageError::Fatal)?;
+        let response=client.get(url).send().map_err(|e|PageError::Retry(e.to_string()))?;
+        if !response.status().is_success(){return Err(PageError::Retry(format!("WFS HTTP {}",response.status())));}
+        if response.content_length().is_some_and(|len|len>MAX_BYTES){return Err(PageError::Fatal("Kadaster WFS-pagina te groot".into()));}
+        let mut reader=response.take(MAX_BYTES+1);let mut bytes=Vec::new();let mut chunk=[0u8;65536];
+        loop{crate::input::check(&stop).map_err(PageError::Fatal)?;let n=reader.read(&mut chunk).map_err(|e|PageError::Fatal(e.to_string()))?;if n==0{break;}bytes.extend_from_slice(&chunk[..n]);if bytes.len() as u64>MAX_BYTES{return Err(PageError::Fatal("Kadaster WFS-pagina te groot".into()));}}
+        crate::input::check(&stop).map_err(PageError::Fatal)?;
+        let body=String::from_utf8(bytes).map_err(|_|PageError::Fatal("Kadaster WFS stuurde geen UTF-8".into()))?;
+        let values=parse_features(&body).map_err(PageError::Fatal)?;crate::input::check(&stop).map_err(PageError::Fatal)?;Ok(values)
+    })
+}
+fn fetch_kind(client:&Client,kind:CadastralKind,tiles:&[Bounds],cancel:&AtomicBool,endpoint:&str)->Result<Vec<Value>,String>{
+    let mut all=Vec::new();let mut seen=HashSet::new();
+    for bounds in tiles{
+        crate::input::check(cancel)?;let mut index=0;
+        for page in 0..MAX_PAGE_COUNT{
+            crate::input::check(cancel)?;let mut url=build_url(kind,*bounds,index)?;
+            if endpoint!=ENDPOINT{let mut local=Url::parse(endpoint).map_err(|e|e.to_string())?;local.set_query(url.query());url=local;}
+            let mut values=None;let mut problem=String::new();
+            for attempt in 0..3{
+                match request_features(client,url.clone(),cancel)?{
+                    Ok(page)=>{values=Some(page);break;},Err(PageError::Fatal(error))=>return Err(error),Err(PageError::Retry(error))=>problem=error,
                 }
-                if attempt<2{thread::sleep(Duration::from_millis(700*(attempt+1)));}
+                if attempt<2{cancel_sleep(cancel,Duration::from_millis(700*(attempt+1)))?;}
             }
-            let Some(response)=response else {
-                return Err(format!("{}: {problem}",kind.feature_type()));
-            };
-            if response.content_length().is_some_and(|len|len>MAX_BYTES){
-                return Err("Kadaster WFS-pagina te groot".into());
-            }
-            let mut bytes=Vec::new();
-            response.take(MAX_BYTES+1).read_to_end(&mut bytes)
-                .map_err(|e|e.to_string())?;
-            if bytes.len() as u64>MAX_BYTES {
-                return Err("Kadaster WFS-pagina te groot".into());
-            }
-            let body=String::from_utf8(bytes)
-                .map_err(|_|"Kadaster WFS stuurde geen UTF-8".to_owned())?;
-            let values=parse_features(&body)?;
-            let received=values.len();
-            for value in values {
-                let key=value.get("id").and_then(Value::as_str)
-                    .map(str::to_owned).unwrap_or_else(||value.to_string());
-                if seen.insert(key){all.push(value);}
-                if all.len()>MAX_FEATURES {
-                    return Err("Te veel kadastrale features in kaartgebied".into());
-                }
-            }
-            if received<1000{break;}
-            if page+1==MAX_PAGE_COUNT {
-                return Err("Kadaster WFS heeft paginalimiet bereikt".into());
-            }
-            index+=1000;
+            let values=values.ok_or_else(||format!("{}: {problem}",kind.feature_type()))?;let received=values.len();
+            for value in values{crate::input::check(cancel)?;let key=value.get("id").and_then(Value::as_str).map(str::to_owned).unwrap_or_else(||value.to_string());if seen.insert(key){all.push(value);}if all.len()>MAX_FEATURES{return Err("Te veel kadastrale features in kaartgebied".into());}}
+            if received<1000{break;}if page+1==MAX_PAGE_COUNT{return Err("Kadaster WFS heeft paginalimiet bereikt".into());}index+=1000;
         }
     }
-    Ok(all)
+    crate::input::check(cancel)?;Ok(all)
 }
 pub fn fetch_cadastral(bounds:Bounds)->Result<CadastralLayer,String>{
+    fetch_cadastral_with_cancel(bounds,&crate::input::NEVER_CANCEL)
+}
+pub fn fetch_cadastral_with_cancel(bounds:Bounds,cancel:&AtomicBool)->Result<CadastralLayer,String>{
+    crate::input::check(cancel)?;
     let bounds_tiles=tiles(bounds)?;
     let client=Client::builder()
         .timeout(Duration::from_secs(45))
@@ -222,12 +224,14 @@ pub fn fetch_cadastral(bounds:Bounds)->Result<CadastralLayer,String>{
     let mut linework=Vec::new();
     let mut labels=Vec::new();
     for kind in CadastralKind::all() {
-        let features=fetch_kind(&client,kind,&bounds_tiles)?;
+        crate::input::check(cancel)?;
+        let features=fetch_kind(&client,kind,&bounds_tiles,cancel,ENDPOINT)?;
         if kind.is_label() {
-            labels.extend(features.iter().filter_map(|v|feature_label(v,kind)));
+            for feature in &features{crate::input::check(cancel)?;if let Some(label)=feature_label(feature,kind){labels.push(label);}}
         }else{
             let mut paths=Vec::new();
             for feature in &features {
+                crate::input::check(cancel)?;
                 if let Some(geometry)=feature.get("geometry"){
                     paths.extend(geometry_paths(geometry));
                 }
@@ -237,7 +241,7 @@ pub fn fetch_cadastral(bounds:Bounds)->Result<CadastralLayer,String>{
             }
         }
     }
-    Ok(CadastralLayer{visible:true,bounds,linework,labels})
+    crate::input::check(cancel)?;Ok(CadastralLayer{visible:true,bounds,linework,labels})
 }
 #[cfg(test)]
 mod tests{
@@ -270,4 +274,47 @@ mod tests{
         assert_eq!(label.rotation,35.0);
         assert!(parse_features("{}").is_err());
     }
+}
+
+
+#[cfg(test)]
+pub(crate) mod http_test {
+    use std::{io::{Read,Write},net::TcpListener,sync::mpsc,time::Duration};
+    pub fn scripted(responses:Vec<(u16,String)>)->(String,mpsc::Receiver<String>,std::thread::JoinHandle<()>){
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();let url=format!("http://{}",listener.local_addr().unwrap());let(tx,rx)=mpsc::channel();
+        let server=std::thread::spawn(move||for(status,body)in responses{
+            let(mut socket,_)=listener.accept().unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();let mut request=Vec::new();let mut data=[0u8;4096];loop{let n=socket.read(&mut data).unwrap();if n==0{break;}request.extend_from_slice(&data[..n]);if request.windows(4).any(|w|w==b"\r\n\r\n"){break;}}
+            let _=tx.send(String::from_utf8(request).unwrap());let _=write!(socket,"HTTP/1.1 {status} Test\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len());
+        });(url,rx,server)
+    }
+    pub fn stalled_body()->(String,mpsc::Receiver<()>,mpsc::Sender<()>,std::thread::JoinHandle<()>){
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();let url=format!("http://{}",listener.local_addr().unwrap());let(tx,rx)=mpsc::channel();let(release,wait)=mpsc::channel();
+        let server=std::thread::spawn(move||{let(mut socket,_)=listener.accept().unwrap();socket.set_read_timeout(Some(Duration::from_secs(3))).unwrap();let mut buffer=[0u8;4096];let _=socket.read(&mut buffer);let body=r#"{"features":[]}"#;write!(socket,"HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).unwrap();let _=tx.send(());let _=wait.recv_timeout(Duration::from_secs(3));let _=socket.write_all(body.as_bytes());});(url,rx,release,server)
+    }
+}
+#[cfg(test)]
+mod cancellation_tests{
+    use super::*;
+    fn bounds()->Bounds{Bounds{min_x:168000.,min_y:400000.,max_x:168040.,max_y:400030.}}
+    fn client()->Client{Client::builder().no_proxy().timeout(Duration::from_secs(3)).redirect(redirect::Policy::none()).build().unwrap()}
+    #[test]
+    fn cancellation_returns_before_stalled_response_body_and_no_partial_layer(){
+        let(url,started,release,server)=http_test::stalled_body();let cancel=Arc::new(AtomicBool::new(false));let trigger=cancel.clone();
+        let cancelling=thread::spawn(move||{started.recv_timeout(Duration::from_secs(3)).unwrap();trigger.store(true,Ordering::Release);});
+        let start=std::time::Instant::now();let result=fetch_kind(&client(),CadastralKind::Perceel,&[bounds()],&cancel,&url);let elapsed=start.elapsed();
+        assert!(result.unwrap_err().contains("geannuleerd"));assert!(elapsed<Duration::from_secs(1),"cancellation took {elapsed:?}");release.send(()).unwrap();server.join().unwrap();cancelling.join().unwrap();
+    }
+    #[test]
+    fn pagination_preserves_start_index_and_deduplicates_page_overlap(){
+        let features=(0..1000).map(|i|serde_json::json!({"id":format!("p{i}")})).collect::<Vec<_>>();
+        let(url,requests,server)=http_test::scripted(vec![(200,serde_json::json!({"features":features}).to_string()),(200,r#"{"features":[{"id":"p0"}]}"#.into())]);
+        let rows=fetch_kind(&client(),CadastralKind::Perceel,&[bounds()],&AtomicBool::new(false),&url).unwrap();assert_eq!(rows.len(),1000);server.join().unwrap();let requests=requests.try_iter().collect::<Vec<_>>();assert_eq!(requests.len(),2);assert!(requests[0].contains("startIndex=0"));assert!(requests[1].contains("startIndex=1000"));
+    }
+    #[test]
+    fn cancellation_interrupts_retry_backoff_before_second_http_request(){
+        let(url,requests,server)=http_test::scripted(vec![(503,"temporary".into())]);let cancel=Arc::new(AtomicBool::new(false));let trigger=cancel.clone();let cancelling=thread::spawn(move||{requests.recv_timeout(Duration::from_secs(3)).unwrap();trigger.store(true,Ordering::Release);});
+        let start=std::time::Instant::now();assert!(fetch_kind(&client(),CadastralKind::Perceel,&[bounds()],&cancel,&url).unwrap_err().contains("geannuleerd"));assert!(start.elapsed()<Duration::from_secs(1));server.join().unwrap();cancelling.join().unwrap();
+    }
+    #[test]
+    fn pre_cancelled_public_wrapper_never_starts_network(){assert!(fetch_cadastral_with_cancel(bounds(),&AtomicBool::new(true)).unwrap_err().contains("geannuleerd"));}
 }

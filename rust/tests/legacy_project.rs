@@ -316,3 +316,12 @@ fn python_exchange_rejects_native_template_preferences_instead_of_exporting_stal
     project.template_export=Some(sleufbase_rust::template_order::State::default());
     assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap_err().contains("Rust-sjabloonvoorkeuren"));
 }
+
+#[test]
+fn python_exchange_rejects_zero_angle_native_affine_that_python_would_ignore(){
+    use sleufbase_rust::{legacy_project::{legacy_payload,ProjectUiState},geotiff::read_geotiff_metadata,project::NativeProject};
+    let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/rasters/gray16.tiff");
+    let mut raster=read_geotiff_metadata(&path).unwrap();raster.transform.c+=25.;raster.bounds=raster.transform.bounds(raster.width,raster.height).unwrap();
+    let project=NativeProject{rasters:vec![raster],..Default::default()};
+    assert!(legacy_payload(&project,&ProjectUiState::default()).unwrap_err().contains("rastertransformatie zonder rotatie"));
+}

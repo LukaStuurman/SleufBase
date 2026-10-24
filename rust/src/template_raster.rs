@@ -305,11 +305,12 @@ struct CheckedPng<'a, W> {
     out: W,
     cancel: &'a AtomicBool,
     bytes: u64,
+    limit: u64,
 }
 impl<W: std::io::Write> std::io::Write for CheckedPng<'_, W> {
     fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
         input::check(self.cancel).map_err(std::io::Error::other)?;
-        if self.bytes.saturating_add(data.len() as u64) > 256 * 1024 * 1024 {
+        if self.bytes.saturating_add(data.len() as u64) > self.limit {
             return Err(std::io::Error::other(
                 "Voorbereide PNG overschrijdt het bestandsbudget",
             ));
@@ -333,6 +334,15 @@ pub(crate) fn save_image(
     path: &Path,
     cancel: &AtomicBool,
 ) -> Result<(), String> {
+    save_image_bounded(image,path,cancel,256*1024*1024).map(|_|())
+}
+/// The remaining shared bundle quota also bounds the actual encoded stream.
+pub(crate) fn save_image_bounded(
+    image: &RgbaImage,
+    path: &Path,
+    cancel: &AtomicBool,
+    remaining: u64,
+) -> Result<u64, String> {
     use image::{
         codecs::png::{CompressionType, FilterType, PngEncoder},
         ImageEncoder,
@@ -346,6 +356,7 @@ pub(crate) fn save_image(
                 out: file,
                 cancel,
                 bytes: 0,
+                limit: remaining.min(256*1024*1024),
             };
             PngEncoder::new_with_quality(writer, CompressionType::Fast, FilterType::Adaptive)
                 .write_image(
@@ -357,5 +368,6 @@ pub(crate) fn save_image(
                 .map_err(|e| e.to_string())
         },
         || input::check(cancel),
-    )
+    )?;
+    std::fs::metadata(path).map(|m|m.len()).map_err(|e|e.to_string())
 }

@@ -92,6 +92,7 @@ impl ExportPreferences {
 }
 
 #[derive(Clone,Debug,Serialize,Deserialize,PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct MigratedSettings {
     #[serde(default)]
     pub export_preferences:ExportPreferences,
@@ -130,7 +131,7 @@ impl MigratedSettings {
     pub fn object_dxf_options(&self)->crate::object_dxf::Options {
         crate::object_dxf::Options{label_gap:self.dxf_label_gap,..Default::default()}
     }
-    fn validate(&self)->Result<(),String> {
+    pub fn validate(&self)->Result<(),String> {
         self.export_preferences.validate()?;
         self.map_export.validate()?;
         crate::rule_settings::validate(&self.object_rules)?;
@@ -208,6 +209,26 @@ pub fn from_legacy_json(content:&str)->Result<MigratedSettings,String> {
         marxact_name_mappings:normalize_mappings(obj.get("marxact_name_mappings"))
     })
 }
+/// Apply only preferences actually present in a Python project's settings
+/// payload. This never writes the user's general settings or reads accounts.
+pub fn with_project_overrides(base:&MigratedSettings,payload:&Value)->Result<MigratedSettings,String>{
+    let source=payload.as_object().ok_or("Projectvoorkeuren moeten een JSON-object zijn")?;
+    let mut out=base.clone();
+    let mut preferences=serde_json::to_value(&base.export_preferences).map_err(|e|e.to_string())?;
+    let fields=preferences.as_object_mut().unwrap();
+    for (key,value) in source{if fields.contains_key(key){fields.insert(key.clone(),value.clone());}}
+    out.export_preferences=ExportPreferences::from_legacy(&preferences);
+    if let Some(value)=source.get("dxf_label_gap"){out.dxf_label_gap=label_gap(Some(value));}
+    if let Some(value)=source.get("include_klic_in_map_exports"){out.map_export.include_cad=boolean(Some(value),out.map_export.include_cad);}
+    if let Some(value)=source.get("map_export_background_source"){
+        let background=value.as_str().ok_or("Projectachtergrondbron is geen tekst")?;
+        let background=if crate::project_view::BackgroundProvider::from_label(background)==crate::project_view::BackgroundProvider::Cyclomedia{"pdok"}else{background};
+        if !matches!(background,"pdok"|"osm"|"cadastral"){return Err(format!("Projectachtergrondbron {background} wordt nog niet ondersteund voor kaartuitvoer"));}
+        out.map_export.background=background.into();
+    }
+    if let Some(value)=source.get("kickthemap_object_layer_rules"){out.object_rules=crate::rule_settings::from_legacy(Some(value))?;}
+    out.validate()?;Ok(out)
+}
 pub fn import_legacy_file(path:&Path)->Result<MigratedSettings,String> {
     let body=crate::input::read(path,2*1024*1024,"Instellingenbestand",&crate::input::NEVER_CANCEL)?;
     from_legacy_json(std::str::from_utf8(&body).map_err(|e|e.to_string())?)
@@ -273,5 +294,20 @@ mod tests {
         assert!(from_legacy_json("[]").is_err());
         assert!(from_legacy_json("invalid").is_err());
         assert_eq!(MigratedSettings::default().kickthemap_profile_extra_choices.len(),0);
+    }
+}
+
+#[cfg(test)]
+mod project_override_tests{
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn project_preferences_override_present_fields_and_keep_user_defaults_private(){
+        let mut base=MigratedSettings::default();base.export_preferences.template_client_logo_preset="custom".into();base.export_preferences.template_client_logo_path="user.png".into();base.export_preferences.template_cross_section_marker_diameter=0.05;base.dxf_label_gap=8.;base.kickthemap_material_choices=vec!["user material".into()];
+        let out=with_project_overrides(&base,&json!({"template_cross_section_marker_diameter":0.08,"template_show_profile_direction":false,"map_export_background_source":"osm","include_klic_in_map_exports":true,"password":"never copy"})).unwrap();
+        assert_eq!(out.export_preferences.template_cross_section_marker_diameter,0.08);assert!(!out.export_preferences.template_show_profile_direction);assert_eq!(out.export_preferences.template_client_logo_path,"user.png");assert_eq!(out.dxf_label_gap,8.);assert_eq!(out.map_export.background,"osm");assert!(out.map_export.include_cad);assert_eq!(out.kickthemap_material_choices,base.kickthemap_material_choices);
+        assert_eq!(base.export_preferences.template_cross_section_marker_diameter,0.05);assert!(!serde_json::to_string(&out).unwrap().contains("never copy"));
+        assert_eq!(with_project_overrides(&base,&json!({"map_export_background_source":"cyclomedia_aerial"})).unwrap().map_export.background,"pdok");
+        assert!(with_project_overrides(&base,&json!({"map_export_background_source":"future-provider"})).unwrap_err().contains("nog niet ondersteund"));
     }
 }

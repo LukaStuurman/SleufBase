@@ -88,7 +88,7 @@ fn multi_selection_moves_whole_rows_without_reversing_blocks() {
     }
 }
 #[test]
-fn project_v4_roundtrips_order_metadata_and_reads_v1_v2_v3_without_rewriting_sources() {
+fn project_v5_roundtrips_order_metadata_and_reads_v1_through_v4_without_rewriting_sources() {
     let temp = tempfile::tempdir().unwrap();
     let path = temp.path().join("project.json");
     let state = State {
@@ -110,16 +110,16 @@ fn project_v4_roundtrips_order_metadata_and_reads_v1_v2_v3_without_rewriting_sou
     };
     project::save_project(&path, &p).unwrap();
     let loaded = project::read_project(&path).unwrap();
-    assert_eq!(loaded.version, 4);
+    assert_eq!(loaded.version, project::FORMAT_VERSION);
     assert_eq!(loaded.template_export, Some(state));
-    for version in [1, 2, 3] {
+    for version in [1, 2, 3, 4] {
         let mut v = serde_json::to_value(&p).unwrap();
         v["version"] = version.into();
         v.as_object_mut().unwrap().remove("template_export");
         let bytes = serde_json::to_vec(&v).unwrap();
         std::fs::write(&path, &bytes).unwrap();
         let loaded = project::read_project(&path).unwrap();
-        assert_eq!(loaded.version, 4);
+        assert_eq!(loaded.version, project::FORMAT_VERSION);
         assert!(loaded.template_export.is_none());
         assert_eq!(std::fs::read(&path).unwrap(), bytes);
     }

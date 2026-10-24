@@ -93,6 +93,7 @@ impl SleufBaseApp {
         options: sleufbase_rust::template_project::Options,
         output: PathBuf,
     ) {
+        if self.project_sources_owned(){self.message="Wacht tot de lopende taak is afgerond".into();return;}
         if self.export_intent.is_some() || self.file_intent.is_some()
             || self.template_job.is_some() || self.pending_project_action.is_some()
         {
@@ -113,6 +114,7 @@ impl SleufBaseApp {
             self.message = "Selecteer minimaal één proefsleufvak".into();
             return;
         }
+        let settings=match self.project_export_settings(){Ok(settings)=>settings,Err(error)=>{self.message=error;return;}};
         let saved=sleufbase_rust::template_prefs::TemplatePreferences::capture(
             &options,&self.datasets,&self.geotiffs,&self.virtual_trenches
         );
@@ -121,8 +123,8 @@ impl SleufBaseApp {
         let inputs = self.take_export_inputs();
         let owned = Arc::new(std::sync::Mutex::new(Some(inputs)));
         let worker_owned = Arc::clone(&owned);
-        let rules = self.migrated_settings.object_rules.clone();
-        let discipline_excel=self.migrated_settings.template_auto_export_discipline_excel;
+        let rules = settings.object_rules;
+        let discipline_excel=settings.template_auto_export_discipline_excel;
         let (tx, rx) = mpsc::channel();
         let control = Arc::new(Control::default());
         let task_control = Arc::clone(&control);

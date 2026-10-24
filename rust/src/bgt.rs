@@ -129,31 +129,42 @@ pub fn build_url(kind:BgtKind,bounds:Bounds)->Result<Url,String>{
         .append_pair("limit","1500");
     Ok(url)
 }
-pub fn request_bgt(kind:BgtKind,bounds:Bounds)->Result<BgtLayer,String>{
-    let mut url=build_url(kind,bounds)?;
-    let client=Client::builder()
-        .timeout(Duration::from_secs(45))
-        .redirect(redirect::Policy::none())
-        .user_agent("SleufBase-Rust/0.1")
-        .build().map_err(|e|e.to_string())?;
+#[derive(Debug)]
+enum PageError{Retry(String),Fatal(String)}
+fn fetch_page(client:&Client,url:Url,cancel:&std::sync::atomic::AtomicBool)->Result<(Vec<Vec<(f64,f64)>>,Option<String>),String>{
+    let mut problem=String::new();
+    for attempt in 0..3{
+        let client=client.clone();let url=url.clone();
+        let result=crate::cadastral::cancellable_request(cancel,move|stop|{
+            crate::input::check(&stop).map_err(PageError::Fatal)?;
+            let response=client.get(url).send().map_err(|e|PageError::Retry(format!("PDOK BGT ophalen: {e}")))?;
+            if !response.status().is_success(){return Err(PageError::Retry(format!("PDOK BGT HTTP: {}",response.status())));}
+            if response.content_length().is_some_and(|n|n>MAX_RESPONSE_BYTES){return Err(PageError::Fatal("BGT-pagina is te groot".into()));}
+            let mut reader=response.take(MAX_RESPONSE_BYTES+1);let mut data=Vec::new();let mut chunk=[0u8;65536];
+            loop{crate::input::check(&stop).map_err(PageError::Fatal)?;let n=reader.read(&mut chunk).map_err(|e|PageError::Fatal(e.to_string()))?;if n==0{break;}data.extend_from_slice(&chunk[..n]);if data.len() as u64>MAX_RESPONSE_BYTES{return Err(PageError::Fatal("BGT-pagina is te groot".into()));}}
+            crate::input::check(&stop).map_err(PageError::Fatal)?;
+            let content=String::from_utf8(data).map_err(|_|PageError::Fatal("Ongeldige PDOK UTF-8".into()))?;let result=parse_page(&content).map_err(PageError::Fatal)?;crate::input::check(&stop).map_err(PageError::Fatal)?;Ok(result)
+        })?;
+        match result{Ok(page)=>return Ok(page),Err(PageError::Fatal(error))=>return Err(error),Err(PageError::Retry(error))=>problem=error}
+        if attempt<2{crate::cadastral::cancel_sleep(cancel,Duration::from_millis(700*(attempt+1)))?;}
+    }
+    Err(problem)
+}
+pub fn request_bgt(kind:BgtKind,bounds:Bounds)->Result<BgtLayer,String>{request_bgt_with_cancel(kind,bounds,&crate::input::NEVER_CANCEL)}
+pub fn request_bgt_with_cancel(kind:BgtKind,bounds:Bounds,cancel:&std::sync::atomic::AtomicBool)->Result<BgtLayer,String>{
+    crate::input::check(cancel)?;let url=build_url(kind,bounds)?;
+    let client=Client::builder().timeout(Duration::from_secs(45)).redirect(redirect::Policy::none()).user_agent("SleufBase-Rust/0.1").build().map_err(|e|e.to_string())?;
+    request_bgt_using(kind,bounds,cancel,&client,url)
+}
+fn request_bgt_using(kind:BgtKind,bounds:Bounds,cancel:&std::sync::atomic::AtomicBool,client:&Client,mut url:Url)->Result<BgtLayer,String>{
     let mut paths=Vec::new();
     let mut visited=HashSet::new();
     for _ in 0..MAX_PAGES {
+        crate::input::check(cancel)?;
         if !visited.insert(url.to_string()){
             return Err("BGT API herhaalt dezelfde vervolgpagina".into());
         }
-        let mut response=client.get(url.clone()).send()
-            .map_err(|e|format!("PDOK BGT ophalen: {e}"))?
-            .error_for_status().map_err(|e|format!("PDOK BGT HTTP: {e}"))?;
-        if response.content_length().is_some_and(|n|n>MAX_RESPONSE_BYTES){
-            return Err("BGT-pagina is te groot".into());
-        }
-        let mut data=Vec::new();
-        response.take(MAX_RESPONSE_BYTES+1).read_to_end(&mut data)
-            .map_err(|e|e.to_string())?;
-        if data.len() as u64>MAX_RESPONSE_BYTES {return Err("BGT-pagina is te groot".into());}
-        let content=String::from_utf8(data).map_err(|_|"Ongeldige PDOK UTF-8".to_string())?;
-        let (parts,next)=parse_page(&content)?;
+        let (parts,next)=fetch_page(client,url.clone(),cancel)?;
         paths.extend(parts);
         if paths.len()>MAX_PATHS {
             return Err("Te veel BGT-lijnen in deze uitsnede".into());
@@ -163,16 +174,19 @@ pub fn request_bgt(kind:BgtKind,bounds:Bounds)->Result<BgtLayer,String>{
             None=> {
                 if kind==BgtKind::Wegdeel {
                     let mut seen=HashSet::new();
-                    paths.retain(|p|{
+                    let mut unique=Vec::new();
+                    for p in paths{
+                        crate::input::check(cancel)?;
                         let rounded:Vec<_>=p.iter().map(|(x,y)|
                             ((*x*1000.0).round() as i64,(*y*1000.0).round() as i64)
                         ).collect();
                         let reverse:Vec<_>=rounded.iter().rev().copied().collect();
                         let key=if rounded<reverse {rounded}else{reverse};
-                        seen.insert(key)
-                    });
+                        if seen.insert(key){unique.push(p);}
+                    }
+                    paths=unique;
                 }
-                return Ok(BgtLayer{kind,bounds,visible:true,paths});
+                crate::input::check(cancel)?;return Ok(BgtLayer{kind,bounds,visible:true,paths});
             }
         }
     }
@@ -209,5 +223,37 @@ mod tests{
         assert_eq!(paths[0],vec![(1.,2.),(3.,4.)]);
         assert_eq!(next.as_deref(),Some("?offset=2"));
         assert!(parse_page("{}").is_err());
+    }
+}
+
+
+#[cfg(test)]
+mod cancellation_tests{
+    use super::*;
+    use std::sync::{Arc,atomic::{AtomicBool,Ordering}};
+    fn bounds()->Bounds{Bounds{min_x:168000.,min_y:400000.,max_x:168040.,max_y:400030.}}
+    fn client()->Client{Client::builder().no_proxy().timeout(Duration::from_secs(3)).redirect(redirect::Policy::none()).build().unwrap()}
+    #[test]
+    fn cancellation_returns_before_stalled_bgt_body_and_no_partial_result(){
+        let(url,started,release,server)=crate::cadastral::http_test::stalled_body();let cancel=Arc::new(AtomicBool::new(false));let trigger=cancel.clone();
+        let cancelling=std::thread::spawn(move||{started.recv_timeout(Duration::from_secs(3)).unwrap();trigger.store(true,Ordering::Release);});
+        let start=std::time::Instant::now();let result=request_bgt_using(BgtKind::Wegdeel,bounds(),&cancel,&client(),Url::parse(&url).unwrap());let elapsed=start.elapsed();
+        assert!(result.unwrap_err().contains("geannuleerd"));assert!(elapsed<Duration::from_secs(1),"cancellation took {elapsed:?}");release.send(()).unwrap();server.join().unwrap();cancelling.join().unwrap();
+    }
+    #[test]
+    fn bgt_retries_transient_http_then_preserves_geometry(){
+        let(url,requests,server)=crate::cadastral::http_test::scripted(vec![(503,"temporary".into()),(200,r#"{"features":[{"geometry":{"type":"LineString","coordinates":[[1,2],[3,4]]}}]}"#.into())]);
+        let result=request_bgt_using(BgtKind::Wegdeel,bounds(),&AtomicBool::new(false),&client(),Url::parse(&url).unwrap()).unwrap();assert_eq!(result.paths,vec![vec![(1.,2.),(3.,4.)]]);server.join().unwrap();assert_eq!(requests.try_iter().count(),2);
+    }
+    #[test]
+    fn cancellation_stops_bgt_retry_backoff_and_pre_cancelled_wrapper(){
+        let(url,requests,server)=crate::cadastral::http_test::scripted(vec![(503,"temporary".into())]);let cancel=Arc::new(AtomicBool::new(false));let trigger=cancel.clone();let cancelling=std::thread::spawn(move||{requests.recv_timeout(Duration::from_secs(3)).unwrap();trigger.store(true,Ordering::Release);});
+        let start=std::time::Instant::now();assert!(request_bgt_using(BgtKind::Wegdeel,bounds(),&cancel,&client(),Url::parse(&url).unwrap()).unwrap_err().contains("geannuleerd"));assert!(start.elapsed()<Duration::from_secs(1));server.join().unwrap();cancelling.join().unwrap();
+        assert!(request_bgt_with_cancel(BgtKind::Wegdeel,bounds(),&AtomicBool::new(true)).unwrap_err().contains("geannuleerd"));
+    }
+    #[test]
+    fn untrusted_pagination_is_rejected_before_followup_request(){
+        let(url,requests,server)=crate::cadastral::http_test::scripted(vec![(200,r#"{"features":[],"links":[{"rel":"next","href":"http://untrusted.invalid/next"}]}"#.into())]);
+        assert!(request_bgt_using(BgtKind::Wegdeel,bounds(),&AtomicBool::new(false),&client(),Url::parse(&url).unwrap()).unwrap_err().contains("onveilige bestemming"));server.join().unwrap();assert_eq!(requests.try_iter().count(),1);
     }
 }

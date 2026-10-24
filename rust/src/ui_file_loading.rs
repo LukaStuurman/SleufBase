@@ -27,6 +27,7 @@ impl SleufBaseApp {
         self.file_intent = None;
     }
     fn start_file_load(&mut self, purpose: LoadPurpose, kind: FileKind, paths: Vec<PathBuf>) {
+        if self.project_sources_owned(){self.message="Wacht tot de lopende taak is afgerond".into();return;}
         if self.export_intent.is_some(){self.message="Wacht tot de export is afgerond voordat je bestanden laadt".into();return;}
         self.cancel_file_load();
         if paths.is_empty() {

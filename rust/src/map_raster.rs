@@ -197,12 +197,23 @@ pub fn paint(
 }
 pub fn paint_with_opacity(
     destination: &mut RgbaImage,
-    mut source: RgbaImage,
+    source: RgbaImage,
     transform: GeoTransform,
     layout: &Layout,
     opacity:f64,
     cancel: &AtomicBool,
 ) -> Result<(), String> {
+    paint_inner(destination,source,transform,layout,opacity,true,cancel)
+}
+/// Original interactive MapRenderer semantics used for Gemma's input scene:
+/// white TIFF pixels retain their actual alpha instead of becoming a DXF mask.
+pub fn paint_scene(destination:&mut RgbaImage,source:RgbaImage,transform:GeoTransform,layout:&Layout,opacity:f64,cancel:&AtomicBool)->Result<(),String>{
+    paint_inner(destination,source,transform,layout,opacity,false,cancel)
+}
+fn paint_inner(
+    destination:&mut RgbaImage,mut source:RgbaImage,transform:GeoTransform,
+    layout:&Layout,opacity:f64,remove_white:bool,cancel:&AtomicBool,
+)->Result<(),String>{
     input::check(cancel)?;
     if !opacity.is_finite() || !(0.0..=1.0).contains(&opacity) {
         return Err("Ongeldige TIFF-dekking".into());
@@ -276,7 +287,7 @@ pub fn paint_with_opacity(
         if i % 16384 == 0 {
             input::check(cancel)?;
         }
-        if p[0].min(p[1]).min(p[2]) >= 245 {
+        if remove_white && p[0].min(p[1]).min(p[2]) >= 245 {
             p[3] = 0;
         } else if opacity<1. {
             p[3]=(f64::from(p[3])*opacity) as u8;

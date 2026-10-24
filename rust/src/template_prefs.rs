@@ -32,6 +32,8 @@ fn default_paired()->bool{true}
 #[derive(Clone,Debug,Serialize,Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TemplatePreferences {
+    #[serde(default="crate::cadastral_overview::template_defaults")]
+    pub overview_settings:crate::cadastral_overview::Settings,
     #[serde(default)]
     pub profile_style:crate::settings_compat::ProfilePreferences,
     #[serde(default,skip_serializing_if="crate::template_branding::Logos::is_empty")]
@@ -75,6 +77,7 @@ impl TemplatePreferences {
             })
         }).collect();
         Self {template:opts.template.clone(),paired:opts.paired,project:opts.project.clone(),
+            overview_settings:opts.overview_settings.clone(),
             profile_style:opts.profile_style.clone(),
             logos:opts.logos.clone(),
             drawn_by:opts.drawn_by.clone(),font_directories:opts.font_directories.clone(),dpi:opts.dpi,scale:opts.scale,
@@ -106,6 +109,7 @@ impl TemplatePreferences {
         trenches:&[VirtualTrench])->Options
     {
         let mut options=Options {
+            overview_settings:self.overview_settings.clone(),
             profile_style:self.profile_style.clone(),
             logos:self.logos.clone(),
             template:self.template.clone(),paired:self.paired,project:self.project.clone(),

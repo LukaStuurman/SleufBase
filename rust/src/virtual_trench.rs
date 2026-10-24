@@ -198,7 +198,7 @@ impl VirtualTrench {
     pub fn to_dataset_with_direction(&self,job_id:u64,include_endpoints:bool,reverse:bool,cancel:&std::sync::atomic::AtomicBool)->Result<Dataset,String> {
         let mut dataset=self.to_base_dataset_with_cancel(job_id,include_endpoints,cancel)?;
         let (a,b)=if reverse{(self.end,self.start)}else{(self.start,self.end)};
-        self.append_dekband_on_axis(&mut dataset,a,b,self.length(),cancel)?;
+        Self::append_dekband_on_axis(&self.dekband_rows,&mut dataset,a,b,self.length(),cancel)?;
         Ok(dataset)
     }
     /// Base points only. Template exporters must build the chosen base profile
@@ -236,13 +236,13 @@ impl VirtualTrench {
     /// Match the original exporter, including its marker-expanded profile axis
     /// and chosen direction. Call once on a base dataset before the final build.
     pub fn append_dekband_for_profile(&self,dataset:&mut Dataset,profile:&crate::profile::Profile<'_>,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
-        self.append_dekband_on_axis(dataset,profile.start,profile.end,profile.axis_length,cancel)
+        append_dekband_rows_for_profile(&self.dekband_rows,dataset,profile,cancel)
     }
-    fn append_dekband_on_axis(&self,dataset:&mut Dataset,a:Vertex,b:Vertex,length:f64,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
+    fn append_dekband_on_axis(rows:&[Dekband],dataset:&mut Dataset,a:Vertex,b:Vertex,length:f64,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
         crate::input::check(cancel)?;
         if length<=1e-9{return Ok(());}
-        let mut bands=Vec::with_capacity(self.dekband_rows.len());
-        for (index,row) in self.dekband_rows.iter().enumerate(){
+        let mut bands=Vec::with_capacity(rows.len());
+        for (index,row) in rows.iter().enumerate(){
             if index%256==0{crate::input::check(cancel)?;}
             let start=row.start_chainage.clamp(0.,length);let end=row.end_chainage.clamp(0.,length);
             if (end-start).abs()<=1e-6{continue;}
@@ -254,6 +254,28 @@ impl VirtualTrench {
         dataset.features.extend(bands);
         Ok(())
     }
+}
+
+/// The same injection applies to a physical TIFF's declared template bands.
+pub fn append_dekband_rows_for_profile(rows:&[Dekband],dataset:&mut Dataset,profile:&crate::profile::Profile<'_>,cancel:&std::sync::atomic::AtomicBool)->Result<(),String>{
+    VirtualTrench::append_dekband_on_axis(rows,dataset,profile.start,profile.end,profile.axis_length,cancel)
+}
+
+/// Original `_template_dekband_rows`: preserve declaration order, swap depths
+/// with reversed chainages, and default a missing end depth to the start depth.
+pub fn dekband_rows_from_metadata(metadata:&serde_json::Value)->Vec<Dekband>{
+    let Some(rows)=metadata.get("template_dekband_lines").and_then(serde_json::Value::as_array)else{return Vec::new()};
+    rows.iter().take(10_000).filter_map(|row|{
+        let mut start=crate::python_values::number(row.get("start_chainage"))?;let mut end=crate::python_values::number(row.get("end_chainage"))?;
+        let mut start_depth=if let Some(value)=row.get("start_depth"){crate::python_values::number(Some(value))?}else{0.}.max(0.);
+        let mut end_depth=if let Some(value)=row.get("end_depth"){crate::python_values::number(Some(value))?}else{start_depth}.max(0.);
+        if ![start,end,start_depth,end_depth].iter().all(|v|v.is_finite())||(end-start).abs()<=1e-6{return None;}
+        if end<start{std::mem::swap(&mut start,&mut end);std::mem::swap(&mut start_depth,&mut end_depth);}
+        let name=row.get("source_name").filter(|v|crate::python_values::truth(v)).or_else(||row.get("label").filter(|v|crate::python_values::truth(v)));
+        let name=crate::python_values::string(name).ok()?;let name=crate::python_values::trim(&name);let name=if name.is_empty(){"Dekband"}else{name};
+        if name.len()>256||name.chars().any(char::is_control){return None;}
+        Some(Dekband{start_chainage:start,end_chainage:end,start_depth,end_depth,source_name:name.into(),display_rgb:crate::virtual_raster::display_rgb(row)})
+    }).collect()
 }
 
 #[cfg(test)]

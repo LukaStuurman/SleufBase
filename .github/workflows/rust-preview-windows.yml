@@ -572,6 +572,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/verify_native_template_underlays.py "$env:UNDERLAY_AUDIT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit Gemma contracts and cadastral overview exports
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          OVERVIEW_AUDIT_DIR: ${{ runner.temp }}/SleufBase-cadastral-overview
+        run: |
+          foreach ($generator in @('generate_ai_maaiveld_fixtures.py', 'generate_ai_profile_fixtures.py', 'generate_cadastral_overview_fixtures.py')) {
+            python "tools/$generator"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          git diff --exit-code -- rust/tests/fixtures/ai-maaiveld rust/tests/fixtures/ai-profile rust/tests/fixtures/cadastral-overview rust/src/cadastral_overview_base.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_cadastral_overview.exe "$env:OVERVIEW_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cadastral_overview.py "$env:OVERVIEW_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Independently audit native MTEXT parser and immutable format state
         shell: pwsh
         env:

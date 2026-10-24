@@ -11,6 +11,13 @@ use std::{
 };
 
 const PDOK_WMS_URL: &str = "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0";
+const CADASTRAL_WMS_URL:&str="https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0";
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub enum Source {Aerial,Cadastral}
+impl Source {
+    fn endpoint(self)->&'static str{match self{Self::Aerial=>PDOK_WMS_URL,Self::Cadastral=>CADASTRAL_WMS_URL}}
+    fn layer(self)->&'static str{match self{Self::Aerial=>"Actueel_orthoHR",Self::Cadastral=>"Kadastralekaart"}}
+}
 const MAX_RESPONSE_BYTES: usize = 24 * 1024 * 1024;
 const MAX_OUTPUT_PIXELS: u64 = 2_048 * 2_048;
 
@@ -43,14 +50,17 @@ fn validate(bounds: Bounds, width: u32, height: u32) -> Result<(), String> {
 }
 
 pub fn build_wms_url(bounds: Bounds, width: u32, height: u32) -> Result<reqwest::Url, String> {
+    build_wms_url_for(Source::Aerial,bounds,width,height)
+}
+pub fn build_wms_url_for(source:Source,bounds: Bounds, width: u32, height: u32) -> Result<reqwest::Url, String> {
     validate(bounds, width, height)?;
-    let mut url = reqwest::Url::parse(PDOK_WMS_URL).map_err(|e| e.to_string())?;
+    let mut url = reqwest::Url::parse(source.endpoint()).map_err(|e| e.to_string())?;
     {
         let mut query = url.query_pairs_mut();
         query.append_pair("SERVICE", "WMS");
         query.append_pair("VERSION", "1.1.1");
         query.append_pair("REQUEST", "GetMap");
-        query.append_pair("LAYERS", "Actueel_orthoHR");
+        query.append_pair("LAYERS", source.layer());
         query.append_pair("STYLES", "");
         query.append_pair("FORMAT", "image/png");
         query.append_pair("TRANSPARENT", "FALSE");
@@ -96,8 +106,11 @@ pub fn request_map_with_cancel(
     height: u32,
     cancel: &AtomicBool,
 ) -> Result<PdokRaster, String> {
+    request_map_for_with_cancel(Source::Aerial,bounds,width,height,cancel)
+}
+pub fn request_map_for_with_cancel(source:Source,bounds:Bounds,width:u32,height:u32,cancel:&AtomicBool)->Result<PdokRaster,String>{
     crate::input::check(cancel)?;
-    let url = build_wms_url(bounds, width, height)?;
+    let url = build_wms_url_for(source,bounds, width, height)?;
     static CLIENT: OnceLock<Result<reqwest::blocking::Client, String>> = OnceLock::new();
     let client = CLIENT
         .get_or_init(|| {
@@ -173,8 +186,11 @@ pub fn request_tiled(
     height: u32,
     cancel: &AtomicBool,
 ) -> Result<image::RgbaImage, String> {
+    request_tiled_for(Source::Aerial,bounds,width,height,cancel)
+}
+pub fn request_tiled_for(source:Source,bounds:Bounds,width:u32,height:u32,cancel:&AtomicBool)->Result<image::RgbaImage,String>{
     tiled(bounds, width, height, cancel, |b, w, h| {
-        request_map_with_cancel(b, w, h, cancel)
+        request_map_for_with_cancel(source,b, w, h, cancel)
     })
 }
 fn tiled(
@@ -232,6 +248,15 @@ fn tiled(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn cadastral_source_uses_original_fixed_endpoint_layer_and_rd_parameters(){
+        let bounds=Bounds{min_x:100.,min_y:200.,max_x:300.,max_y:400.};
+        let url=build_wms_url_for(Source::Cadastral,bounds,512,384).unwrap();
+        assert_eq!(url.as_str().split('?').next().unwrap(),CADASTRAL_WMS_URL);
+        let query:std::collections::HashMap<_,_>=url.query_pairs().collect();
+        assert_eq!(query["LAYERS"],"Kadastralekaart");assert_eq!(query["SRS"],"EPSG:28992");assert_eq!(query["BBOX"],"100,200,300,400");
+        assert!(request_map_for_with_cancel(Source::Cadastral,bounds,512,384,&AtomicBool::new(true)).unwrap_err().contains("geannuleerd"));
+    }
     #[test]
     fn pdok_url_matches_legacy_parameters() {
         let b = Bounds {

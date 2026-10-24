@@ -14,12 +14,26 @@ fn client()->Result<ahn::AhnClient,String>{
     static CLIENT:OnceLock<Result<ahn::AhnClient,String>>=OnceLock::new();
     CLIENT.get_or_init(ahn::AhnClient::new).clone()
 }
+#[cfg(test)]
 fn eligible(point:Vertex,metadata:&serde_json::Value)->bool{
-    match metadata.get("surface_mode").and_then(|v|v.as_str()) {
-        Some("auto")=>true,None|Some("")=>point.z.is_none(),_=>false,
+    match virtual_map::point_surface_mode(metadata).as_str() {
+        "auto"=>true,""=>point.z.is_none(),_=>false,
     }
 }
 impl Editor {
+    /// Opening a newly placed/copied concept schedules both eligible endpoints;
+    /// project data changes only when the user saves the draft.
+    pub(crate) fn start_automatic_ahn(&mut self){
+        #[cfg(not(test))]
+        if let Ok(draft)=self.build(){if ahn::eligible_endpoints(&draft).iter().any(|v|*v){if let Err(error)=self.start_ahn(){self.error=error;}}}
+    }
+    pub(crate) fn receive_map_ahn(&mut self,axis:[Vertex;2],metadata:[serde_json::Value;2],heights:[Option<Option<f64>>;2])->Result<bool,String>{
+        if axis!=[self.start,self.end]||metadata!=[self.draft.start_metadata.clone(),self.draft.end_metadata.clone()]{return Ok(false);}
+        let mut candidate=self.build()?;
+        for (target,height) in [MapPoint::Start,MapPoint::End].into_iter().zip(heights){if let Some(height)=height{virtual_map::apply_surface_height(&mut candidate,target,height)?;}}
+        edit::check(&candidate)?;self.start=candidate.start;self.end=candidate.end;self.draft=candidate;
+        self.notice="AHN-hoogtes ontvangen. Klik op Opslaan in project om het concept te bewaren.".into();Ok(true)
+    }
     pub(super) fn mark_endpoint_height(&mut self,start:bool){
         let(point,metadata)=if start{(self.start,&mut self.draft.start_metadata)}else{(self.end,&mut self.draft.end_metadata)};
         if !metadata.is_object(){*metadata=serde_json::json!({});}
@@ -29,14 +43,17 @@ impl Editor {
         object.insert("surface_status".into(),serde_json::json!(if point.z.is_some(){"manual"}else{"pending"}));
     }
     fn start_ahn(&mut self)->Result<(),String>{
+        let client=client()?;
+        self.start_ahn_with(move|point,cancel|client.ground_level(point.x,point.y,cancel))
+    }
+    fn start_ahn_with(&mut self,fetch:impl Fn(Vertex,&AtomicBool)->Result<Option<f64>,String>+Send+'static)->Result<(),String>{
         if self.ahn_job.is_some(){return Ok(());}
         let draft=self.build()?;
         if edit::is_measured(&draft){return Err("Gemeten MarXact-hoogtes blijven behouden".into());}
         let axis=[draft.start,draft.end];
         let metadata=[draft.start_metadata.clone(),draft.end_metadata.clone()];
-        let wanted=[eligible(axis[0],&metadata[0]),eligible(axis[1],&metadata[1])];
+        let wanted=ahn::eligible_endpoints(&draft);
         if !wanted.iter().any(|v|*v){return Err("Beide hoogtes zijn handmatig ingevuld; maak een hoogte leeg om AHN te gebruiken".into());}
-        let client=client()?;
         let cancel=Arc::new(AtomicBool::new(false));let worker_cancel=cancel.clone();
         let(tx,rx)=mpsc::channel();
         std::thread::Builder::new().name("sleufbase-ahn".into()).spawn(move||{
@@ -44,7 +61,7 @@ impl Editor {
                 let mut heights=[None,None];
                 for i in 0..2 {
                     if worker_cancel.load(Ordering::Relaxed){return Err("AHN-aanvulling geannuleerd".into());}
-                    if wanted[i]{heights[i]=Some(client.ground_level(axis[i].x,axis[i].y,&worker_cancel)?);}
+                    if wanted[i]{heights[i]=Some(fetch(axis[i],&worker_cancel)?);}
                 }
                 Ok(heights)
             })();
@@ -122,5 +139,18 @@ mod tests {
         let mut editor=draft();editor.start.z=Some(8.);editor.mark_endpoint_height(true);
         assert!(!eligible(editor.start,&editor.draft.start_metadata));
         let _tx=pending(&mut editor);let cancel=editor.ahn_job.as_ref().unwrap().cancel.clone();drop(editor);assert!(cancel.load(Ordering::Relaxed));
+    }
+    #[test]
+    fn automatic_draft_worker_requests_both_endpoints_and_stays_a_concept(){
+        let mut editor=draft();let original=serde_json::to_vec(&editor.original).unwrap();
+        let start=editor.start;let end=editor.end;
+        let calls=Arc::new(std::sync::Mutex::new(Vec::new()));let worker_calls=calls.clone();
+        editor.start_ahn_with(move|p,_|{worker_calls.lock().unwrap().push(p);Ok(Some(if p.x==start.x{4.}else{6.}))}).unwrap();
+        let deadline=Instant::now()+Duration::from_secs(2);
+        while editor.ahn_job.is_some(){assert!(Instant::now()<deadline);editor.poll_ahn();std::thread::yield_now();}
+        assert_eq!(*calls.lock().unwrap(),vec![start,end]);assert_eq!((editor.start.z,editor.end.z),(Some(4.),Some(6.)));assert_eq!(editor.draft.objects[0].position.z,Some(3.));assert_eq!(serde_json::to_vec(&editor.original).unwrap(),original);
+        let axis=[editor.start,editor.end];let metadata=[editor.draft.start_metadata.clone(),editor.draft.end_metadata.clone()];
+        assert!(editor.receive_map_ahn(axis,metadata.clone(),[Some(Some(5.)),Some(Some(7.))]).unwrap());assert_eq!(editor.start.z,Some(5.));
+        assert!(!editor.receive_map_ahn(axis,metadata,[Some(Some(99.)),None]).unwrap());assert_eq!(editor.start.z,Some(5.));assert_eq!(serde_json::to_vec(&editor.original).unwrap(),original);
     }
 }

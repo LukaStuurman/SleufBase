@@ -88,6 +88,8 @@ pub(super) struct Focus {
 }
 #[derive(Default)]
 pub(super) struct Navigation {
+    pub raster_opacity:Option<f32>,
+    pub show_background:Option<bool>,
     pub pointer_tool:bool,
     pub focus: Option<Focus>,
     pub viewport: Option<Bounds>,

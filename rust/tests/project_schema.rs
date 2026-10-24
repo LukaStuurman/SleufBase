@@ -111,6 +111,8 @@ fn every_native_project_object_rejects_unknown_fields() {
         notices: vec![],
     });
     unknown(NativeProject::default());
+    unknown(sleufbase_rust::project_view::ProjectView::default());
+    unknown(sleufbase_rust::project_view::Camera{center:[1.,2.],meters_per_pixel:0.05});
     use sleufbase_rust::cad_geometry::{ArcCurve, CurvePath, Placement};
     unknown(Placement {
         insert: [0.; 3],
@@ -166,4 +168,14 @@ fn original_python_json_remains_an_open_lossless_archive_inside_strict_native_sc
     let decoded: NativeProject = serde_json::from_value(value).unwrap();
     decoded.validate().unwrap();
     assert_eq!(decoded.legacy_archive.unwrap().original.as_ref(), &original);
+}
+
+#[test]
+fn unknown_native_project_settings_are_rejected_without_rewriting_the_source(){
+    let dir=tempfile::tempdir().unwrap();let path=dir.path().join("future-project.json");
+    let mut value=serde_json::to_value(NativeProject{project_settings:Some(Default::default()),..Default::default()}).unwrap();
+    value["project_settings"]["future_native_setting"]=json!({"must_not_disappear":true});
+    let bytes=serde_json::to_vec(&value).unwrap();std::fs::write(&path,&bytes).unwrap();
+    let error=sleufbase_rust::project::read_project(&path).unwrap_err();assert!(error.contains("future_native_setting"),"{error}");
+    assert_eq!(std::fs::read(path).unwrap(),bytes);
 }

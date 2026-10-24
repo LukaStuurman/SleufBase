@@ -42,6 +42,7 @@ pub enum BackgroundKind {
     Pdok,
 }
 pub struct Options {
+    pub overview_settings: crate::cadastral_overview::Settings,
     pub profile_style: crate::settings_compat::ProfilePreferences,
     pub logos: crate::template_branding::Logos,
     pub template: PathBuf,
@@ -60,6 +61,7 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
+            overview_settings: crate::cadastral_overview::template_defaults(),
             profile_style: Default::default(),
             template: PathBuf::new(),
             logos: Default::default(),
@@ -201,6 +203,7 @@ fn build_sources(
     let mut seen = HashSet::new();
     let mut datasets = Vec::with_capacity(enabled.len());
     let mut slots = Vec::with_capacity(enabled.len());
+    let mut overview_layers=Vec::with_capacity(enabled.len());
     // Full BGT geometry is retained once per export; only visible source lines
     // needed near a slot become map overlays.
     let mut roads: Vec<Vec<crate::profile::XY>> = Vec::new();
@@ -333,6 +336,12 @@ fn build_sources(
         metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&metadata)?);
         if metadata_bytes>16*1024*1024{return Err("Te veel profielmetadata voor één export".into());}
         datasets.push(dataset);
+        let overview_layer=if let Some(r)=raster {
+            crate::cadastral_overview::Layer{path:r.path.clone(),transform:r.transform,bounds:r.bounds,metadata:r.metadata.clone(),virtual_trench:None}
+        }else{let source=virtual_source.as_ref().ok_or("Virtuele overzichtsbron ontbreekt")?;let layout=crate::virtual_raster::layout(&source.trench,source.quality)?;
+            crate::cadastral_overview::Layer{path:PathBuf::from(format!("{}.tiff",source.trench.label)),transform:layout.transform(),bounds:layout.bounds,metadata:source.trench.metadata.clone(),virtual_trench:Some(source.trench.clone())}
+        };
+        overview_layers.push(overview_layer);
         slots.push(Some(Slot {
             bounds, label: format!("PS{:03}", local_index + 1),
             title: label.clone(), address: None, comments: crate::template_workflow::comments(bounds,&all_comments,&choice.comments),
@@ -370,6 +379,12 @@ fn build_sources(
         }));
     }
     Ok(template_export::Request {
+        overview:Some(crate::cadastral_overview::Request{
+            layers:overview_layers,
+            linework:if opts.include_cadastral{cadastral.filter(|c|c.visible).map_or_else(Vec::new,|c|c.linework.clone())}else{Vec::new()},
+            labels:if opts.include_cadastral{cadastral.filter(|c|c.visible).map_or_else(Vec::new,|c|c.labels.clone())}else{Vec::new()},
+            settings:opts.overview_settings.clone(),
+        }),
         template: opts.template.clone(), slots, datasets,
         rules: rules.to_vec(), roads, terrain_boundaries: terrain,
         surfaces: Vec::new(), layers: Vec::new(), geometry: Vec::new(),

@@ -6,6 +6,9 @@ use eframe::egui;
 
 pub(super) fn fields(ui:&mut egui::Ui,preferences:&mut ExportPreferences){
     ui.collapsing("DXF- en sjabloonvoorkeuren",|ui|{
+        egui::ComboBox::from_label("Proefsleuven in kadastraal overzicht").selected_text(match preferences.dxf_trench_export_mode.as_str(){"centerline"=>"Hartlijn","none"=>"Geen",_=>"Vlak"}).show_ui(ui,|ui|{for(key,label)in[("centerline","Hartlijn"),("polygon","Vlak"),("none","Geen")]{ui.selectable_value(&mut preferences.dxf_trench_export_mode,key.into(),label);}});
+        ui.checkbox(&mut preferences.include_tiffs_in_dxf_export,"TIFF-afbeeldingen in kadastrale DXF opnemen");
+        for(label,value)in[("Hartlijnkleur",&mut preferences.dxf_centerline_color),("Labelkleur",&mut preferences.dxf_label_color)]{ui.horizontal(|ui|{ui.label(label);ui.text_edit_singleline(value);});}
         ui.horizontal(|ui|{ui.label("Standaard DXF-sjabloon");ui.text_edit_singleline(&mut preferences.cadastral_template_path);if ui.button("Kiezen…").clicked(){if let Some(path)=rfd::FileDialog::new().add_filter("AutoCAD DXF",&["dxf"]).pick_file(){preferences.cadastral_template_path=path.to_string_lossy().into_owned();}}});
         ui.checkbox(&mut preferences.template_include_cross_sections,"Dwarsprofielen opnemen");
         ui.checkbox(&mut preferences.template_show_profile_direction,"Profielrichting en referentie tonen");
@@ -33,6 +36,7 @@ pub(super) fn logos(preferences:&ExportPreferences)->Logos{
     };Logos{techbase,client}
 }
 pub(super) fn apply_order_defaults(state:&mut sleufbase_rust::template_order::State,settings:&MigratedSettings){
+    state.overview_settings=sleufbase_rust::cadastral_overview::Settings::from_settings(settings).expect("validated project export settings");
     let p=&settings.export_preferences;state.template=(!p.cadastral_template_path.is_empty()).then(||p.cadastral_template_path.clone().into());
     state.profiles=p.template_include_cross_sections;
     // template_reverse_patch.py:412 always includes both variants, starting

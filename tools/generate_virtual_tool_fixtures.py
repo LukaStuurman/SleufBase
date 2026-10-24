@@ -38,6 +38,10 @@ def main():
         for i in range(5):
             along=length*(i+1)/6;offset=rng.uniform(-.8,.8)
             points.append(dict(point_id=f'p{i}',role='object',object_name=f'Punt {i}',source_name='Kabel Ø',x=x+math.cos(angle)*along-math.sin(angle)*offset,y=y+math.sin(angle)*along+math.cos(angle)*offset,z=surface-rng.uniform(-.2,2),surface_z=surface,surface_mode='start',surface_status='start'))
+        if n==1:
+            points[0]['surface_mode']='\x1c AuTo \x1f'
+            points[2]['surface_mode']='  START\t'
+            points[3]['surface_mode']='\x1cStart '
         a=app();source=native(copy.deepcopy(points));l=layer(points)
         target_start=(x+rng.uniform(-10,10),y+rng.uniform(-10,10));direction=(target_start[0]+rng.uniform(-10,10),target_start[1]+rng.uniform(-10,10));target_end=a._virtual_trench_copy_target_end(dict(source_length=length),target_start,direction)
         if n%2:target_end=(end[0]+rng.uniform(-10,10),end[1]+rng.uniform(-10,10))

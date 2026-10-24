@@ -17,7 +17,7 @@ use std::{
 };
 #[path="legacy_exchange.rs"]
 mod exchange;
-pub use exchange::{ProjectUiState,legacy_payload,write_legacy_project};
+pub use exchange::{ProjectUiState,legacy_payload,write_legacy_project,write_legacy_project_controlled};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -81,7 +81,7 @@ fn items<'a>(v: &'a Value, field: &str) -> Result<&'a [Value], String> {
         _ => Err(format!("Python-project: {field} is geen lijst")),
     }
 }
-fn asset_path(source: &Path, value: &str) -> PathBuf {
+pub(crate) fn asset_path(source: &Path, value: &str) -> PathBuf {
     let path = Path::new(value);
     // Windows absolute paths must also stay absolute when inspecting on Linux.
     if path.is_absolute() || value.as_bytes().get(1) == Some(&b':') || value.starts_with("\\\\") {
@@ -321,6 +321,7 @@ fn import_value_with_cancel(original:Value,source:&Path,cancel:&std::sync::atomi
         original: Arc::new(original),
         notices,
     });
+    project.view=crate::project_view::ProjectView::from_legacy(&project)?;
     project.validate()?;
     crate::input::check(cancel)?;
     Ok(project)

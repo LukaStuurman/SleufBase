@@ -30,6 +30,19 @@ De gedeelde ATTDEF-/blokondersteuning wordt ook door de actieve route gebruikt.
 
 ## Volgorde en bewijs
 
+Aanvulling 24 oktober 2026: Gemma-profielvoorbereiding, genummerde kaart,
+aanvraag en bewerkbare controle vóór toepassen zijn aangesloten. Het zelfstandige
+kadastrale exportvenster en beide sjabloonplanners gebruiken dezelfde
+overzichtskern voor hartlijnen, vlakken, kleuren, labels en affine TIFFs.
+Projectformaat 5 voegt kaartpositie, laagkeuze en projectgebonden instellingen
+toe en behoudt lezen van 1–4. De desktop-Python-export geeft verplaatste
+bronvectors terug vóór uitgestelde projectacties. Centrale review richt zich
+ook op annulering, geen tweede onbedoelde modelstart, metadatabehoud en
+exportbudgetten. Dit vervangt geen van de volledige acceptatie-/leveringsgates.
+
+De uitgevoerde lokale integratie- en oorspronkelijke uitvoercontroles staan in
+[het verificatierapport van 24 oktober](VERIFICATION_2026-10-24.md).
+
 Aanvulling 23 oktober 2026: drie agents hebben op medium gewerkt aan de zes
 werkpakketten, gevolgd door centrale review en integratie. Puntselectie/snapping,
 asbewerking, richtingskopieën, dekbanddieptes, oorspronkelijke rastermaskers en

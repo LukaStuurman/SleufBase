@@ -146,57 +146,8 @@ pub fn request_with_bgt(
             }
         }
     }
-    if let Some(cad) = inputs.cadastral.as_ref().filter(|c| c.visible) {
-        let mut names = std::collections::HashSet::new();
-        for group in &cad.linework {
-            if names.insert(group.layer_name.clone()) {
-                layers.push(Layer {
-                    name: group.layer_name.clone(),
-                    color: 8,
-                    true_color: None,
-                    lineweight: None,
-                });
-            }
-            for path in &group.paths {
-                points += path.len();
-                if points > 2_000_000 {
-                    return Err("Te veel Kadaster-punten voor de sjabloonexport".into());
-                }
-                geometry.push(line(
-                    &group.layer_name,
-                    path.iter().map(|&(x, y)| [x, y]).collect(),
-                    None,
-                ));
-            }
-        }
-        for label in &cad.labels {
-            if names.insert(label.layer_name.clone()) {
-                layers.push(Layer {
-                    name: label.layer_name.clone(),
-                    color: 8,
-                    true_color: None,
-                    lineweight: None,
-                });
-            }
-            geometry.push(Entity {
-                layer: label.layer_name.clone(),
-                layout: None,
-                paint: Paint {
-                    color: Some(8),
-                    ..Default::default()
-                },
-                shape: Shape::Text {
-                    text: label.text.clone(),
-                    insert: [label.position.0, label.position.1],
-                    height: 1.,
-                    rotation: (-label.rotation).rem_euclid(360.),
-                    style: "KADASTRALE_LABELS".into(),
-                    halign: 1,
-                    valign: 2,
-                },
-            });
-        }
-    }
+    let overview_linework=inputs.cadastral.as_ref().filter(|c|c.visible).map_or_else(Vec::new,|c|c.linework.clone());
+    let overview_labels=inputs.cadastral.as_ref().filter(|c|c.visible).map_or_else(Vec::new,|c|c.labels.clone());
     let overlays = Arc::new(overlays);
     let mut roads = Vec::new();
     let mut terrain_boundaries = Vec::new();
@@ -215,6 +166,7 @@ pub fn request_with_bgt(
         }
     }
     let mut slots = Vec::new();
+    let mut overview_layers = Vec::new();
     let mut metadata_bytes=0usize;
     let mut surface_cache = HashMap::<[u64; 4], Arc<Vec<crate::bgt_surface::Feature>>>::new();
     let mut surface_points = 0usize;
@@ -257,19 +209,6 @@ pub fn request_with_bgt(
         };
         let label = label.unwrap();
         let b = raster.bounds;
-        let mut boundary = Vec::with_capacity(5);
-        // Use the actual affine TIFF corners, rather than its axis-aligned box.
-        for (x, y) in [
-            (0., 0.),
-            (f64::from(raster.width), 0.),
-            (f64::from(raster.width), f64::from(raster.height)),
-            (0., f64::from(raster.height)),
-            (0., 0.),
-        ] {
-            let p = raster.transform.pixel_to_world(x, y);
-            boundary.push([p.0, p.1]);
-        }
-        geometry.push(line("PROEFSLEUVEN_GRENZEN", boundary, None));
         let source = crate::template_raster::Source {
             path: raster.path.clone(),
             transform: raster.transform,
@@ -305,6 +244,10 @@ pub fn request_with_bgt(
             None
         };
         let metadata=crate::raster_points::effective(raster,&row.metadata);
+        let mut overview_metadata=metadata.clone();
+        if !overview_metadata.is_object(){overview_metadata=serde_json::json!({});}
+        overview_metadata["template_proefsleuf_label"]=serde_json::json!(label);
+        overview_layers.push(crate::cadastral_overview::Layer{path:raster.path.clone(),transform:raster.transform,bounds:raster.bounds,metadata:overview_metadata,virtual_trench:None});
         metadata_bytes=metadata_bytes.saturating_add(crate::raster_points::validate_metadata(&metadata)?);
         if metadata_bytes>16*1024*1024{return Err("Te veel profielmetadata voor één export".into());}
         slots.push(Some(Slot {
@@ -355,13 +298,8 @@ pub fn request_with_bgt(
             surfaces,
         }));
     }
-    layers.push(Layer {
-        name: "PROEFSLEUVEN_GRENZEN".into(),
-        color: 7,
-        true_color: None,
-        lineweight: None,
-    });
     Ok(Request {
+        overview:Some(crate::cadastral_overview::Request{layers:overview_layers,linework:overview_linework,labels:overview_labels,settings:state.overview_settings.clone()}),
         template: state.template.clone().unwrap_or_default(),
         slots,
         datasets: Vec::new(),

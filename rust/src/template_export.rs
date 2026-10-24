@@ -24,6 +24,9 @@ use std::{
 #[serde(deny_unknown_fields)]
 pub struct Request {
     pub template: PathBuf,
+    /// Full RD overview, outside the per-slot normal/reverse containers.
+    #[serde(default)]
+    pub overview: Option<crate::cadastral_overview::Request>,
     pub slots: Vec<Option<Slot>>,
     #[serde(default)]
     pub datasets: Vec<Dataset>,
@@ -178,6 +181,9 @@ pub fn read_request(path: &Path, control: &Control) -> Result<Request, String> {
         }
     };
     resolve(&mut request.template);
+    if let Some(overview)=&mut request.overview {
+        crate::cadastral_overview::resolve_paths(overview,parent);
+    }
     for logo in [&mut request.settings.logos.techbase, &mut request.settings.logos.client].into_iter().flatten() {
         resolve(logo);
     }
@@ -481,6 +487,11 @@ fn order_slot_entities(
                 if copy::owner(record) != Some(model) {
                     continue;
                 }
+                // Georeferenced overview TIFFs remain in RD modelspace;
+                // they are not contents of either per-slot profile state.
+                if record.kind()=="IMAGE" && record.first(8)==Some("PROEFSLEUVEN_TIFF") {
+                    continue;
+                }
                 let group = if record.kind() == "IMAGE" {
                     let order = *image_order
                         .get(images)
@@ -563,7 +574,7 @@ pub fn export_with_datasets(
         return Err("Te veel sjabloonvakken voor het afbeeldingsbudget".into());
     }
     let directions = if request.settings.paired { 2 } else { 1 };
-    let mut estimated_images = 0usize;
+    let mut estimated_images = request.overview.as_ref().filter(|o|o.settings.include_tiff_images).map_or(0,|o|o.layers.len());
     for slot in request.slots.iter().flatten() {
         crate::template_photo::validate(&slot.photos)?;
         estimated_images = estimated_images
@@ -623,6 +634,7 @@ pub fn export_with_datasets(
         }
     }
     let tx = Transaction::new(output, control)?;
+    if let Some(overview)=&request.overview {crate::cadastral_overview::protect(output,overview)?;}
     progress("Sjabloon voorbereiden");
     control.check()?;
     let mut doc = Document::load(&request.template, control.flag())?;
@@ -656,6 +668,10 @@ pub fn export_with_datasets(
     control.set_stage(Stage::Planning);
     crate::template_branding::restore_contact(&mut doc, control.flag())?;
     template_geometry::add(&mut doc, &request.layers, &request.geometry, control.flag())?;
+    let mut overview_plan=request.overview.as_ref().map(|overview| {
+        progress("Kadastraal overzicht opbouwen");
+        crate::cadastral_overview::populate(&mut doc,overview,&tx,control,&mut progress)
+    }).transpose()?;
     let templates = if request
         .slots
         .iter()
@@ -674,6 +690,10 @@ pub fn export_with_datasets(
     let mut profiles = 0;
     let mut filled_slots = 0;
     let mut total: u64 = 0;
+    if let Some(plan)=&overview_plan {
+        total=plan.asset_bytes()?;
+        if total>2*1024*1024*1024{return Err("Overzichtsrasters overschrijden het exportbudget".into());}
+    }
     let mut logo_assets: [Option<PathBuf>; 2] = [None, None];
     for (index, source) in [&request.settings.logos.techbase, &request.settings.logos.client].into_iter().enumerate() {
         if let Some(source) = source {
@@ -956,7 +976,9 @@ pub fn export_with_datasets(
     let logo_layouts = prepared.pages.iter().map(|page| page.layout.clone()).collect::<Vec<_>>();
     images.extend(crate::template_branding::images(&doc, &logo_layouts,
         logo_assets[0].as_deref(), logo_assets[1].as_deref(), control.flag())?);
+    if let Some(plan)=&mut overview_plan {images.append(&mut plan.images);}
     template_images::add_images(&mut doc, &images, control.flag())?;
+    if let Some(plan)=&overview_plan {doc=plan.finalize(&doc,control)?;}
     if profiles > 0 || request.settings.paired {
         let (indexed, mut parents) = order_slot_entities(
             &doc,
@@ -1013,6 +1035,7 @@ pub fn export_with_datasets(
     drop(writer);
     progress("Export definitief opslaan");
     control.check()?;
+    if let Some(overview)=&request.overview {crate::cadastral_overview::protect(output,overview)?;}
     let published = tx.publish(control)?;
     // Match the desktop contract: the DXF is already durable. A workbook failure
     // must be reported separately, never turn this into "DXF not saved". The

@@ -39,6 +39,8 @@ impl Default for Row {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct State {
+    #[serde(default="crate::cadastral_overview::template_defaults")]
+    pub overview_settings: crate::cadastral_overview::Settings,
     #[serde(skip_serializing_if="crate::template_branding::Logos::is_empty")]
     pub logos: crate::template_branding::Logos,
     pub rows: Vec<Row>,
@@ -62,6 +64,7 @@ pub struct State {
 impl Default for State {
     fn default() -> Self {
         Self {
+            overview_settings: crate::cadastral_overview::template_defaults(),
             rows: Vec::new(),
             logos: Default::default(),
             project: String::new(),

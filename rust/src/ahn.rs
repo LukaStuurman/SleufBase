@@ -13,6 +13,15 @@ const WCS_ENDPOINT:&str="https://service.pdok.nl/rws/ahn/wcs/v1_0";
 const NO_DATA:f64=3.4028234663852886e38;
 const MAX_TIFF:u64=16*1024*1024;
 
+/// Only absent or explicitly automatic endpoint heights participate. Measured
+/// MarXact layers and manually entered heights never receive automatic updates.
+pub fn eligible_endpoints(trench:&crate::virtual_trench::VirtualTrench)->[bool;2]{
+    if crate::virtual_trench_editor::is_measured(trench){return [false,false];}
+    std::array::from_fn(|i|{let (point,meta)=if i==0{(trench.start,&trench.start_metadata)}else{(trench.end,&trench.end_metadata)};
+        match crate::virtual_map::point_surface_mode(meta).as_str(){"auto"=>true,""=>point.z.is_none(),_=>false}
+    })
+}
+
 pub fn build_url(x:f64,y:f64,size:f64,pixels:u32)->Result<reqwest::Url,String>{
     if !x.is_finite() || !y.is_finite() || x.abs()>1e12 || y.abs()>1e12 || !size.is_finite()
         || size<=0.0 || size>100.0 || pixels==0 || pixels>32 {
@@ -152,6 +161,16 @@ pub fn ground_level(x:f64,y:f64)->Result<Option<f64>,String>{
 #[cfg(test)]
 mod tests{
     use super::*;
+    #[test]
+    fn original_case_whitespace_modes_follow_start_and_measured_manual_points_stay_protected(){
+        use crate::{model::Vertex,virtual_trench::{VirtualTrench,TrenchPoint},virtual_map::{self,MapPoint}};
+        let mut t=VirtualTrench::new("AHN".into(),Vertex{x:0.,y:0.,z:Some(4.)},Vertex{x:10.,y:0.,z:Some(6.)},0.6).unwrap();
+        t.start_metadata=serde_json::json!({"surface_mode":"\u{1c} AuTo \t","surface_z":4.});t.end_metadata=serde_json::json!({"surface_mode":" MANUAL "});
+        t.objects.push(TrenchPoint{metadata:serde_json::json!({"surface_mode":"\u{1c}START ","surface_z":4.}),role:"object".into(),object_name:"LS".into(),source_name:"ls".into(),position:Vertex{x:3.,y:0.,z:Some(3.)},attributes:Default::default()});
+        assert_eq!(eligible_endpoints(&t),[true,false]);virtual_map::apply_surface_height(&mut t,MapPoint::Start,Some(5.)).unwrap();assert_eq!(t.start.z,Some(5.));assert_eq!(t.objects[0].position.z,Some(4.));assert_eq!(t.objects[0].metadata["surface_mode"],"start");assert_eq!(t.end.z,Some(6.));
+        let before=serde_json::to_vec(&t).unwrap();assert!(!virtual_map::apply_surface_height(&mut t,MapPoint::End,Some(100.)).unwrap());assert_eq!(serde_json::to_vec(&t).unwrap(),before);
+        t.boundary_3d=vec![t.start,t.end,Vertex{x:10.,y:1.,z:Some(6.)}];assert_eq!(eligible_endpoints(&t),[false,false]);let before=serde_json::to_vec(&t).unwrap();assert!(!virtual_map::apply_surface_height(&mut t,MapPoint::Start,Some(100.)).unwrap());assert_eq!(serde_json::to_vec(&t).unwrap(),before);
+    }
     #[test]
     fn wcs_query_and_subset_repeat(){
         let url=build_url(168000.,401000.,2.,5).unwrap();

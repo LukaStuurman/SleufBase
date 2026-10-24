@@ -352,17 +352,25 @@ pub fn point_depth(metadata:&serde_json::Value,z:Option<f64>)->f64{
         .or_else(||crate::python_values::number(metadata.get("surface_z")).zip(z).map(|(surface,z)|surface-z))
         .filter(|d|d.is_finite()).unwrap_or(0.)
 }
+/// Python's original str(value or "").strip().lower() surface-mode contract.
+pub fn point_surface_mode(metadata:&serde_json::Value)->String{
+    crate::python_values::string(metadata.get("surface_mode").filter(|v|crate::python_values::truth(v))).unwrap_or_default().to_lowercase()
+}
 /// Apply an asynchronous original endpoint AHN response. Imported measured or
 /// explicit manual points retain their elevations; only original auto endpoints
 /// and objects explicitly attached to start ground level participate.
 pub fn apply_surface_height(t:&mut VirtualTrench,target:MapPoint,height:Option<f64>)->Result<bool,String>{
     crate::virtual_trench_editor::check(t)?;
     if height.is_some_and(|v|!v.is_finite()||v.abs()>1e6){return Err("Ongeldige AHN-hoogte".into());}
+    if crate::virtual_trench_editor::is_measured(t){return Ok(false);}
     let (p,old_meta)=match target{MapPoint::Start=>(t.start,&t.start_metadata),MapPoint::End=>(t.end,&t.end_metadata),MapPoint::Object(_)=>return Err("Meetobjecten volgen het beginmaaiveld; AHN hoort bij de eindpunten".into())};
-    let mode=old_meta.get("surface_mode").and_then(|v|v.as_str()).unwrap_or("");
+    let mode=point_surface_mode(old_meta);
     if mode!="auto" && (!mode.is_empty() || p.z.is_some() || crate::virtual_trench_editor::is_measured(t)){return Ok(false);}
     let mut meta=old_meta.as_object().cloned().unwrap_or_default();
-    meta.insert("surface_mode".into(),json!("auto"));meta.insert("surface_status".into(),json!(if height.is_some(){"resolved"}else{"unavailable"}));
+    // Recognize Python's normalized mode without rewriting its archived text.
+    // Newly created endpoints without a mode still receive the canonical value.
+    if mode.is_empty(){meta.insert("surface_mode".into(),json!("auto"));}
+    meta.insert("surface_status".into(),json!(if height.is_some(){"resolved"}else{"unavailable"}));
     let depth=point_depth(old_meta,p.z);let next_z=height.map(|z|z-depth).or(p.z);
     if let Some(z)=height{meta.insert("surface_z".into(),json!(z));}
     let next_meta=serde_json::Value::Object(meta);
@@ -372,9 +380,10 @@ pub fn apply_surface_height(t:&mut VirtualTrench,target:MapPoint,height:Option<f
     if target==MapPoint::Start {
         if let Some(surface)=height {
             for (i,object) in t.objects.iter().enumerate(){
-                if object.metadata.get("surface_mode").and_then(|v|v.as_str())!=Some("start"){continue;}
+                if point_surface_mode(&object.metadata)!="start"{continue;}
                 let depth=point_depth(&object.metadata,object.position.z);
                 let mut meta=object.metadata.as_object().cloned().unwrap_or_default();
+                meta.insert("surface_mode".into(),json!("start"));
                 meta.insert("surface_z".into(),json!(surface));meta.insert("surface_status".into(),json!("start"));
                 let meta=serde_json::Value::Object(meta);bytes+=size(&meta)?-size(&object.metadata)?;
                 updates.push((i,surface-depth,meta));

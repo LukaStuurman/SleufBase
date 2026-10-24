@@ -2,6 +2,12 @@
 use super::*;
 use sleufbase_rust::virtual_map as map;
 type XY = [f64; 2];
+struct AutoAhn {
+    index:usize,generation:u64,axis:[Vertex;2],metadata:[serde_json::Value;2],
+    cancel:std::sync::Arc<std::sync::atomic::AtomicBool>,
+    rx:Receiver<Result<[Option<Option<f64>>;2],String>>,
+}
+impl Drop for AutoAhn {fn drop(&mut self){self.cancel.store(true,std::sync::atomic::Ordering::Relaxed);}}
 #[derive(Clone)]
 struct Target {
     index: usize,
@@ -298,6 +304,28 @@ mod tests {
         assert!(app.virtual_map.selected.is_none());
         assert!(app.virtual_map.references.is_empty());
     }
+    #[test]
+    fn automatic_endpoint_workers_follow_moved_axis_and_never_overwrite_manual_measured_or_stale_layers(){
+        let ctx=egui::Context::default();
+        let mut app=app();
+        let t=&mut app.virtual_trenches[0];t.boundary_3d.clear();t.alignment=None;t.start.z=None;t.end.z=Some(9.);
+        t.start_metadata=serde_json::json!({"surface_mode":"auto"});t.end_metadata=serde_json::json!({"surface_mode":"manual"});
+        t.objects.clear();t.objects.push(sleufbase_rust::virtual_trench::TrenchPoint{metadata:serde_json::json!({"surface_mode":"start","sleufbase_depth_meters":0.8}),role:"object".into(),object_name:"LS".into(),source_name:"LS".into(),position:Vertex{x:t.start.x+1.,y:t.start.y,z:None},attributes:Default::default()});
+        map::translate(t,2.,3.).unwrap();let axis=[t.start,t.end];
+        let calls=std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));let worker_calls=calls.clone();
+        app.schedule_virtual_ahn_with(0,move|p,_|{worker_calls.lock().unwrap().push(p);Ok(Some(3.4))});
+        let deadline=Instant::now()+Duration::from_secs(2);
+        while !app.virtual_map.auto_ahn.is_empty(){assert!(Instant::now()<deadline);app.poll_virtual_ahn(&ctx);std::thread::yield_now();}
+        assert_eq!(*calls.lock().unwrap(),vec![axis[0]]);assert_eq!(app.virtual_trenches[0].start.z,Some(3.4));assert_eq!(app.virtual_trenches[0].end.z,Some(9.));assert!((app.virtual_trenches[0].objects[0].position.z.unwrap()-2.6).abs()<1e-9);
+        for stale in ["axis","generation","cancel","measured","metadata"]{
+            let t=&app.virtual_trenches[0];let(tx,rx)=mpsc::channel();let cancel=std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+            let job=AutoAhn{index:0,generation:app.project_generation,axis:[t.start,t.end],metadata:[t.start_metadata.clone(),t.end_metadata.clone()],cancel:cancel.clone(),rx};
+            tx.send(Ok([Some(Some(7.)),Some(Some(8.))])).unwrap();app.virtual_map.auto_ahn.push(job);
+            match stale{"axis"=>app.virtual_trenches[0].start.x+=0.5,"generation"=>app.project_generation+=1,"cancel"=>cancel.store(true,std::sync::atomic::Ordering::Relaxed),"measured"=>{let t=&mut app.virtual_trenches[0];t.boundary_3d=vec![t.start,t.end,t.start];},_=>app.virtual_trenches[0].start_metadata=serde_json::json!({"surface_mode":"manual"})}
+            let before=serde_json::to_vec(&app.virtual_trenches).unwrap();app.poll_virtual_ahn(&ctx);assert_eq!(serde_json::to_vec(&app.virtual_trenches).unwrap(),before);assert!(app.virtual_map.auto_ahn.is_empty());
+            app.virtual_trenches[0].boundary_3d.clear();app.virtual_trenches[0].start_metadata=serde_json::json!({"surface_mode":"auto"});
+        }
+    }
 }
 impl Target {
     fn new(index: usize, t: &VirtualTrench) -> Self {
@@ -337,6 +365,7 @@ enum Mode {
 }
 #[derive(Default)]
 pub(super) struct State {
+    auto_ahn:Vec<AutoAhn>,
     pub selected: Option<usize>,
     mode: Option<Mode>,
     generation: u64,
@@ -358,6 +387,47 @@ impl State {
     }
 }
 impl SleufBaseApp {
+    fn schedule_virtual_ahn(&mut self,index:usize){
+        #[cfg(not(test))]
+        {
+            use std::sync::OnceLock;
+            static CLIENT:OnceLock<Result<ahn::AhnClient,String>>=OnceLock::new();
+            let client=match CLIENT.get_or_init(ahn::AhnClient::new).clone(){Ok(client)=>client,Err(error)=>{self.message=error;return}};
+            self.schedule_virtual_ahn_with(index,move|point,cancel|client.ground_level(point.x,point.y,cancel));
+        }
+        #[cfg(test)] let _=index;
+    }
+    fn schedule_virtual_ahn_with(&mut self,index:usize,fetch:impl Fn(Vertex,&std::sync::atomic::AtomicBool)->Result<Option<f64>,String>+Send+'static){
+            use std::sync::{Arc,atomic::{AtomicBool,Ordering}};
+            self.virtual_map.auto_ahn.retain(|job|job.index!=index);
+            let Some(trench)=self.virtual_trenches.get(index)else{return};
+            let wanted=ahn::eligible_endpoints(trench);if !wanted.iter().any(|v|*v){return;}
+            let axis=[trench.start,trench.end];let metadata=[trench.start_metadata.clone(),trench.end_metadata.clone()];
+            let cancel=Arc::new(AtomicBool::new(false));let worker_cancel=cancel.clone();let(tx,rx)=mpsc::channel();
+            let result=std::thread::Builder::new().name("sleufbase-map-ahn".into()).spawn(move||{
+                let result=(||{let mut heights=[None,None];for i in 0..2{if worker_cancel.load(Ordering::Relaxed){return Err("AHN-aanvulling geannuleerd".into());}if wanted[i]{heights[i]=Some(fetch(axis[i],&worker_cancel)?);}}Ok(heights)})();let _=tx.send(result);
+            });
+            match result{Ok(_)=>self.virtual_map.auto_ahn.push(AutoAhn{index,generation:self.project_generation,axis,metadata,cancel,rx}),Err(e)=>self.message=format!("AHN-taak kon niet starten: {e}")}
+    }
+    fn poll_virtual_ahn(&mut self,ctx:&egui::Context){
+        let jobs=std::mem::take(&mut self.virtual_map.auto_ahn);
+        for job in jobs{
+            if job.cancel.load(std::sync::atomic::Ordering::Relaxed){continue;}
+            if job.generation!=self.project_generation{continue;}
+            let Some(trench)=self.virtual_trenches.get(job.index)else{continue};
+            if !ahn::eligible_endpoints(trench).iter().any(|v|*v){continue;}
+            if [trench.start,trench.end]!=job.axis||[&trench.start_metadata,&trench.end_metadata]!=[&job.metadata[0],&job.metadata[1]]{continue;}
+            let heights=match job.rx.try_recv(){Ok(Ok(value))=>value,Ok(Err(error))=>{self.message=error;continue;},Err(TryRecvError::Disconnected)=>{self.message="AHN-aanvulling is afgebroken; de sleuf is behouden".into();continue;},Err(TryRecvError::Empty)=>{self.virtual_map.auto_ahn.push(job);continue;}};
+            if let Some(editor)=self.trench_editor.as_mut().filter(|e|e.index==job.index){
+                if let Err(error)=editor.receive_map_ahn(job.axis,job.metadata.clone(),heights){self.message=error;}
+                continue;
+            }
+            let mut candidate=trench.clone();
+            let result=(||{let mut changed=false;for(target,height)in[map::MapPoint::Start,map::MapPoint::End].into_iter().zip(heights){if let Some(height)=height{changed|=map::apply_surface_height(&mut candidate,target,height)?;}}Ok::<_,String>(changed)})();
+            match result{Ok(true)=>{self.virtual_trenches[job.index]=candidate;self.dirty=true;self.trench_markers.clear();},Ok(false)=>{},Err(error)=>self.message=error}
+        }
+        if !self.virtual_map.auto_ahn.is_empty(){ctx.request_repaint_after(Duration::from_millis(100));}
+    }
     pub(super) fn cancel_virtual_map(&mut self) {
         self.virtual_map.mode = None;
         self.virtual_map.pointer = None;
@@ -538,6 +608,7 @@ impl SleufBaseApp {
     }
     pub(super) fn handle_virtual_map(&mut self, view: &raster_point_ui::View) {
         let ctx = view.painter.ctx();
+        self.poll_virtual_ahn(ctx);
         let released = ctx.input(|i| i.pointer.button_released(egui::PointerButton::Primary));
         let consumed = self.virtual_map.capture;
         if released {
@@ -627,6 +698,7 @@ impl SleufBaseApp {
                             self.dirty = true;
                             self.message="Virtuele proefsleuf geplaatst. Vul de metingen en hoogtes in de editor in.".into();
                             self.open_virtual_editor(i);
+                            if let Some(editor)=&mut self.trench_editor{editor.start_automatic_ahn();}
                         }
                         Err(e) => {
                             self.message = e;
@@ -647,6 +719,7 @@ impl SleufBaseApp {
                                 self.hold_virtual_camera(view);
                                 self.dirty |= changed;
                                 self.trench_markers.clear();
+                                self.schedule_virtual_ahn(target.index);
                                 self.message="Hele proefsleuf verplaatst; hoogtes en bronbestand zijn behouden.".into();
                             }
                             Err(e) => {
@@ -663,7 +736,7 @@ impl SleufBaseApp {
                     }
                     Mode::MovePoint{target,point,original}=>{
                         match map::move_point(&mut self.virtual_trenches[target.index],point,world){
-                            Ok(changed)=>{self.hold_virtual_camera(view);self.dirty|=changed;self.trench_markers.clear();self.message="Meetpunt verplaatst; meetwaarden behouden.".into();}
+                            Ok(changed)=>{self.hold_virtual_camera(view);self.dirty|=changed;self.trench_markers.clear();if !matches!(point,map::MapPoint::Object(_)){self.schedule_virtual_ahn(target.index);}self.message="Meetpunt verplaatst; meetwaarden behouden.".into();}
                             Err(e)=>{self.message=e;self.virtual_map.mode=Some(Mode::MovePoint{target,point,original});}
                         }
                     }
@@ -679,7 +752,7 @@ impl SleufBaseApp {
                     Mode::Copy{target,label,start:None}=>{self.virtual_map.mode=Some(Mode::Copy{target,label,start:Some(world)});self.message="Klik nu de richting van de kopie.".into();}
                     Mode::Copy{target,label,start:Some(start)}=>{
                         match map::copy_in_direction(&self.virtual_trenches[target.index],label.clone(),start,world){
-                            Ok(copy)=>{self.hold_virtual_camera(view);self.virtual_trenches.push(copy);let i=self.virtual_trenches.len()-1;self.virtual_map.selected=Some(i);self.trench_markers.clear();self.dirty=true;self.open_virtual_editor(i);}
+                            Ok(copy)=>{self.hold_virtual_camera(view);self.virtual_trenches.push(copy);let i=self.virtual_trenches.len()-1;self.virtual_map.selected=Some(i);self.trench_markers.clear();self.dirty=true;self.open_virtual_editor(i);if let Some(editor)=&mut self.trench_editor{editor.start_automatic_ahn();}}
                             Err(e)=>{self.message=e;self.virtual_map.mode=Some(Mode::Copy{target,label,start:Some(start)});}
                         }
                     }

@@ -9,6 +9,11 @@ use std::{
 
 pub(crate) fn input_paths<'a>(request: &'a Request, datasets: &'a [Dataset]) -> Vec<&'a Path> {
     let mut sources = vec![request.template.as_path()];
+    if let Some(overview)=&request.overview {
+        sources.extend(overview.layers.iter().map(|l|l.path.as_path()));
+        sources.extend(overview.settings.protected_sources.iter().map(PathBuf::as_path));
+        sources.extend(overview.layers.iter().filter_map(|l|l.virtual_trench.as_ref().and_then(|t|t.source_path.as_deref())));
+    }
     sources.extend(request.settings.logos.techbase.as_deref());
     sources.extend(request.settings.logos.client.as_deref());
     sources.extend(

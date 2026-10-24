@@ -1,0 +1,1130 @@
+[
+  {
+    "name": "polygon-plain",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "polygon",
+        "include_tiff_images": false,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "polygon-tiffs",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "polygon",
+        "include_tiff_images": true,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "centerline-plain",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "centerline",
+        "include_tiff_images": false,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "centerline-tiffs",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "centerline",
+        "include_tiff_images": true,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "none-plain",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "none",
+        "include_tiff_images": false,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "none-tiffs",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [
+        {
+          "layer_name": "KAD_GRENS",
+          "paths": [
+            [
+              [
+                154980.0,
+                463030.0
+              ],
+              [
+                155080.0,
+                463030.0
+              ]
+            ],
+            [
+              [
+                155001.0,
+                462990.0
+              ],
+              [
+                155001.0,
+                463040.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_WEGDEEL",
+          "paths": [
+            [
+              [
+                154990.0,
+                462995.0
+              ],
+              [
+                155040.0,
+                462995.0
+              ]
+            ]
+          ]
+        },
+        {
+          "layer_name": "BGT_VECTOR_OMTREK",
+          "paths": [
+            [
+              [
+                154995.0,
+                463040.0
+              ],
+              [
+                155040.0,
+                463040.0
+              ]
+            ]
+          ]
+        }
+      ],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "none",
+        "include_tiff_images": true,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "centerline-pca-plain",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "centerline",
+        "include_tiff_images": false,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  },
+  {
+    "name": "centerline-pca-tiffs",
+    "request": {
+      "layers": [
+        {
+          "path": "fase_2_ps_00021_66587.tiff",
+          "transform": {
+            "a": 0.7,
+            "b": 0.12,
+            "c": 155000.0,
+            "d": 0.08,
+            "e": -0.6,
+            "f": 463020.0
+          },
+          "bounds": {
+            "min_x": 155000.0,
+            "min_y": 463000.8,
+            "max_x": 155031.84,
+            "max_y": 463023.2
+          },
+          "metadata": {}
+        },
+        {
+          "path": "PS-21_same.tiff",
+          "transform": {
+            "a": 0.8,
+            "b": 0.0,
+            "c": 155014.0,
+            "d": 0.0,
+            "e": -0.7,
+            "f": 463014.0
+          },
+          "bounds": {
+            "min_x": 155014.0,
+            "min_y": 462991.6,
+            "max_x": 155046.0,
+            "max_y": 463014.0
+          },
+          "metadata": {
+            "template_proefsleuf_label": " ps007b "
+          }
+        },
+        {
+          "path": "zondernummer.tiff",
+          "transform": {
+            "a": 0.5,
+            "b": 0.0,
+            "c": 155002.0,
+            "d": 0.0,
+            "e": -0.5,
+            "f": 463024.0
+          },
+          "bounds": {
+            "min_x": 155002.0,
+            "min_y": 463008.0,
+            "max_x": 155022.0,
+            "max_y": 463024.0
+          },
+          "metadata": {}
+        }
+      ],
+      "linework": [],
+      "labels": [
+        {
+          "layer_name": "KAD_STRAATNAAM",
+          "text": "Straat Ø",
+          "position": [
+            155004.0,
+            463028.0
+          ],
+          "rotation": 37.5
+        },
+        {
+          "layer_name": "KAD_HUISNUMMER",
+          "text": "12A",
+          "position": [
+            155008.0,
+            463018.0
+          ],
+          "rotation": -23.0
+        }
+      ],
+      "settings": {
+        "trench_mode": "centerline",
+        "include_tiff_images": true,
+        "label_gap": 1.25,
+        "centerline_color": [
+          17,
+          141,
+          207
+        ],
+        "label_color": [
+          210,
+          31,
+          84
+        ]
+      }
+    }
+  }
+]
