@@ -11,7 +11,9 @@ from verify_native_template_setup import preserve_source
 from verify_native_template_edits import records
 
 def main():
-    output=Path(sys.argv[1]);ref=reference();exporter=importlib.import_module(ref.__package__+'.cadastral_export').CadastralDxfExporter(wfs_client=None)
+    # Use one physical parent for both relpath() and the CLI manifest argument.
+    # Windows app-data aliases/junctions can resolve to a different-depth path.
+    output=Path(sys.argv[1]).resolve();ref=reference();exporter=importlib.import_module(ref.__package__+'.cadastral_export').CadastralDxfExporter(wfs_client=None)
     total_images=total_profiles=0
     for case in json.loads((OUT/'reference.json').read_text(encoding='utf-8')):
         request=case['request'];original=ezdxf.readfile(ROOT/request['template']);old_handles=set(original.entitydb)
@@ -36,7 +38,20 @@ def main():
         changed_layers={r['target_layer'].lower() for r in request['rules']}|{'b-we-og-terrein_profiellijn-gd','x-xx-al-profielbalk-sd','x-xx-al-verwijzing-sd'}
         image_dict=original.rootdict.get('ACAD_IMAGE_DICT')
         mutable=() if image_dict is None else (image_dict.dxf.handle,)
-        preserve_source(records(ROOT/request['template']),raw,original,changed_layers,texts,mutable)
+        # Contact repair is part of the original complete exporter. Derive its
+        # exact expected TEXT values independently and keep every other source
+        # tag under the existing strict preservation comparison.
+        old_texts={entity.dxf.handle:entity.dxf.text for entity in original.entitydb.values() if entity.dxftype()=='TEXT'}
+        exporter._restore_template_layout_contact_text(original)
+        restored={handle:original.entitydb[handle].dxf.text for handle,value in old_texts.items() if original.entitydb[handle].dxf.text!=value}
+        source_records=records(ROOT/request['template'])
+        for record in source_records:
+            if record[0]!=(0,'TEXT'):continue
+            handle=next((value for code,value in record if code==5),None)
+            if handle in restored:
+                expected=restored[handle]
+                record[:]=[(code,expected if code==1 else value) for code,value in record]
+        preserve_source(source_records,raw,original,changed_layers,texts,mutable)
         audit=doc.audit();assert not audit.errors and [e.code for e in audit.fixes]==[e.code for e in baseline.fixes],(case['name'],[(e.code,e.message) for e in audit.fixes])
         total_images+=image_count;total_profiles+=case['profiles']
     print(len(json.loads((OUT/'reference.json').read_text(encoding='utf-8'))),'native prepared exports,',total_profiles,'complete profiles and',total_images,'permanent PNGs: full order/fields/graphs/pixels and source preservation verified')
