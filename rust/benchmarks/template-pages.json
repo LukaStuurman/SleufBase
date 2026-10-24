@@ -1,0 +1,67 @@
+{
+  "rounds": [
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 154.75330000000002,
+        "peak_working_set_bytes": 71942144,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      },
+      "original": {
+        "elapsed_ms": 572.1245999448001,
+        "peak_working_set_bytes": 144707584,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      }
+    },
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 152.5384,
+        "peak_working_set_bytes": 71987200,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      },
+      "original": {
+        "elapsed_ms": 575.2339999889955,
+        "peak_working_set_bytes": 146096128,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      }
+    },
+    {
+      "native": {
+        "build_mode": "release",
+        "elapsed_ms": 151.6631,
+        "peak_working_set_bytes": 71966720,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      },
+      "original": {
+        "elapsed_ms": 584.2238999903202,
+        "peak_working_set_bytes": 145993728,
+        "slots": 64,
+        "added_pages": 4,
+        "layouts": 18,
+        "model_entities": 603
+      }
+    }
+  ],
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.9",
+  "file": "cadastral_template.dxf",
+  "source_bytes": 18855304,
+  "source_sha256": "8096c2fd7ba287507381bacf39c05723e602f2212b577daba969885383736f3b",
+  "scope": "Three fresh processes per implementation. Timed: local real-template read/parse, extension from 32 to 64 slots, final slot/layout/model-entity counts. Excludes interpreter/import/process startup time, output DXF serialization, metadata/viewport fitting, rasters, network, GUI/GPU and the complete export workflow. Windows process peak working set includes startup/import baselines and all temporary expansion documents; it is not isolated allocation or full-app peak memory. File-system cache state is uncontrolled. Geometry and object graphs are checked separately by independent release readback."
+}

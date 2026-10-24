@@ -1,0 +1,205 @@
+{
+  "base_menu": [
+    {
+      "kind": "command",
+      "label": "Locatie",
+      "action": "open_location_dialog"
+    },
+    {
+      "kind": "menu",
+      "label": "Acties",
+      "items": [
+        {
+          "kind": "command",
+          "label": "Project laden...",
+          "action": "load_project"
+        },
+        {
+          "kind": "command",
+          "label": "Project opslaan",
+          "action": "save_project"
+        },
+        {
+          "kind": "command",
+          "label": "Project opslaan als...",
+          "action": "save_project_as"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Laad GeoTIFF(s)",
+          "action": "load_tiffs"
+        },
+        {
+          "kind": "command",
+          "label": "Laad KLIC DXF",
+          "action": "load_dxf"
+        },
+        {
+          "kind": "command",
+          "label": "Zoom naar alles",
+          "action": "zoom_to_all"
+        },
+        {
+          "kind": "command",
+          "label": "Toon TIFF-adressen",
+          "action": "show_tiff_addresses_dialog"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Export kaarten",
+          "action": "export_maps"
+        },
+        {
+          "kind": "command",
+          "label": "Kadastrale export DXF",
+          "action": "export_cadastral_dxf"
+        },
+        {
+          "kind": "command",
+          "label": "Proefsleuven sjabloon DXF",
+          "action": "export_cadastral_template_dxf"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Wis alle referentiepunten",
+          "action": "clear_all_reference_points"
+        },
+        {
+          "kind": "command",
+          "label": "Laad alle beginpunten",
+          "action": "load_all_kickthemap_start_points"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Wis opmerkingen",
+          "action": "clear_comments"
+        },
+        {
+          "kind": "command",
+          "label": "Wis alles",
+          "action": "clear_all"
+        }
+      ]
+    },
+    {
+      "kind": "menu",
+      "label": "KickTheMap",
+      "items": [
+        {
+          "kind": "command",
+          "label": "Inloggen...",
+          "action": "open_kickthemap_login_dialog"
+        },
+        {
+          "kind": "command",
+          "label": "Laad GeoTIFF uit job...",
+          "action": "open_kickthemap_jobs_dialog"
+        },
+        {
+          "kind": "command",
+          "label": "Exporteer objectpunten naar DXF...",
+          "action": "open_kickthemap_dxf_export_dialog"
+        },
+        {
+          "kind": "command",
+          "label": "Browser",
+          "action": "open_kickthemap_browser"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Uitloggen",
+          "action": "kickthemap_logout"
+        }
+      ]
+    },
+    {
+      "kind": "menu",
+      "label": "StreetSmart",
+      "items": [
+        {
+          "kind": "command",
+          "label": "Inloggen...",
+          "action": "open_streetsmart_login_dialog"
+        },
+        {
+          "kind": "command",
+          "label": "Browser",
+          "action": "open_streetsmart_browser"
+        },
+        {
+          "kind": "separator"
+        },
+        {
+          "kind": "command",
+          "label": "Uitloggen",
+          "action": "streetsmart_logout"
+        }
+      ]
+    },
+    {
+      "kind": "menu",
+      "label": "Instellingen",
+      "items": [
+        {
+          "kind": "command",
+          "label": "Open instellingen",
+          "action": "open_settings_dialog"
+        }
+      ]
+    }
+  ],
+  "source_menu_patches": [
+    {
+      "function": "_build_menu_with_kickthemap_jobs_browser",
+      "commands": [
+        {
+          "label": "'Jobs'",
+          "command": "self.open_kickthemap_jobs_browser_window"
+        }
+      ]
+    },
+    {
+      "function": "_build_menu_with_streetsmart_selector",
+      "commands": [
+        {
+          "label": "self._streetview_selector_label()",
+          "command": "self.toggle_streetsmart_selector"
+        }
+      ]
+    },
+    {
+      "function": "_build_menu_with_ai_maaiveld",
+      "commands": [
+        {
+          "label": "'Maaiveld via Gemma'",
+          "command": "self.run_ai_maaiveld_for_selected_layer"
+        }
+      ]
+    }
+  ],
+  "dxf_viewport_primitives": [
+    "LINE",
+    "LWPOLYLINE",
+    "POLYLINE",
+    "ARC",
+    "CIRCLE",
+    "ELLIPSE",
+    "SPLINE",
+    "INSERT"
+  ]
+}

@@ -1,0 +1,6126 @@
+[
+  {
+    "handle": "36",
+    "label": "ACI 1",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      0
+    ],
+    "python_rgb": [
+      255,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "36",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "37",
+    "label": "ACI 2",
+    "difference": null,
+    "native_rgb": [
+      255,
+      255,
+      0
+    ],
+    "python_rgb": [
+      255,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "37",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "38",
+    "label": "ACI 3",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      0
+    ],
+    "python_rgb": [
+      0,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "38",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "39",
+    "label": "ACI 4",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      255
+    ],
+    "python_rgb": [
+      0,
+      255,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "39",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3A",
+    "label": "ACI 5",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      255
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3B",
+    "label": "ACI 6",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      255
+    ],
+    "python_rgb": [
+      255,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3C",
+    "label": "ACI 7",
+    "difference": null,
+    "native_rgb": [
+      220,
+      20,
+      60
+    ],
+    "python_rgb": [
+      220,
+      20,
+      60
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3D",
+    "label": "ACI 8",
+    "difference": null,
+    "native_rgb": [
+      128,
+      128,
+      128
+    ],
+    "python_rgb": [
+      128,
+      128,
+      128
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3E",
+    "label": "ACI 9",
+    "difference": null,
+    "native_rgb": [
+      192,
+      192,
+      192
+    ],
+    "python_rgb": [
+      192,
+      192,
+      192
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "3F",
+    "label": "ACI 10",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      0
+    ],
+    "python_rgb": [
+      255,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "3F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "40",
+    "label": "ACI 11",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      127
+    ],
+    "python_rgb": [
+      255,
+      127,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "40",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "41",
+    "label": "ACI 12",
+    "difference": null,
+    "native_rgb": [
+      165,
+      0,
+      0
+    ],
+    "python_rgb": [
+      165,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "41",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "42",
+    "label": "ACI 13",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      82
+    ],
+    "python_rgb": [
+      165,
+      82,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "42",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "43",
+    "label": "ACI 14",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      0
+    ],
+    "python_rgb": [
+      127,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "43",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "44",
+    "label": "ACI 15",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      63
+    ],
+    "python_rgb": [
+      127,
+      63,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "44",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "45",
+    "label": "ACI 16",
+    "difference": null,
+    "native_rgb": [
+      76,
+      0,
+      0
+    ],
+    "python_rgb": [
+      76,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "45",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "46",
+    "label": "ACI 17",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      38
+    ],
+    "python_rgb": [
+      76,
+      38,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "46",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "47",
+    "label": "ACI 18",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      0
+    ],
+    "python_rgb": [
+      38,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "47",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "48",
+    "label": "ACI 19",
+    "difference": null,
+    "native_rgb": [
+      38,
+      19,
+      19
+    ],
+    "python_rgb": [
+      38,
+      19,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "48",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "49",
+    "label": "ACI 20",
+    "difference": null,
+    "native_rgb": [
+      255,
+      63,
+      0
+    ],
+    "python_rgb": [
+      255,
+      63,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "49",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4A",
+    "label": "ACI 21",
+    "difference": null,
+    "native_rgb": [
+      255,
+      159,
+      127
+    ],
+    "python_rgb": [
+      255,
+      159,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4B",
+    "label": "ACI 22",
+    "difference": null,
+    "native_rgb": [
+      165,
+      41,
+      0
+    ],
+    "python_rgb": [
+      165,
+      41,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4C",
+    "label": "ACI 23",
+    "difference": null,
+    "native_rgb": [
+      165,
+      103,
+      82
+    ],
+    "python_rgb": [
+      165,
+      103,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4D",
+    "label": "ACI 24",
+    "difference": null,
+    "native_rgb": [
+      127,
+      31,
+      0
+    ],
+    "python_rgb": [
+      127,
+      31,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4E",
+    "label": "ACI 25",
+    "difference": null,
+    "native_rgb": [
+      127,
+      79,
+      63
+    ],
+    "python_rgb": [
+      127,
+      79,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "4F",
+    "label": "ACI 26",
+    "difference": null,
+    "native_rgb": [
+      76,
+      19,
+      0
+    ],
+    "python_rgb": [
+      76,
+      19,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "4F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "50",
+    "label": "ACI 27",
+    "difference": null,
+    "native_rgb": [
+      76,
+      47,
+      38
+    ],
+    "python_rgb": [
+      76,
+      47,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "50",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "51",
+    "label": "ACI 28",
+    "difference": null,
+    "native_rgb": [
+      38,
+      9,
+      0
+    ],
+    "python_rgb": [
+      38,
+      9,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "51",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "52",
+    "label": "ACI 29",
+    "difference": null,
+    "native_rgb": [
+      38,
+      23,
+      19
+    ],
+    "python_rgb": [
+      38,
+      23,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "52",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "53",
+    "label": "ACI 30",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      0
+    ],
+    "python_rgb": [
+      255,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "53",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "54",
+    "label": "ACI 31",
+    "difference": null,
+    "native_rgb": [
+      255,
+      191,
+      127
+    ],
+    "python_rgb": [
+      255,
+      191,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "54",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "55",
+    "label": "ACI 32",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      0
+    ],
+    "python_rgb": [
+      165,
+      82,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "55",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "56",
+    "label": "ACI 33",
+    "difference": null,
+    "native_rgb": [
+      165,
+      124,
+      82
+    ],
+    "python_rgb": [
+      165,
+      124,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "56",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "57",
+    "label": "ACI 34",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      0
+    ],
+    "python_rgb": [
+      127,
+      63,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "57",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "58",
+    "label": "ACI 35",
+    "difference": null,
+    "native_rgb": [
+      127,
+      95,
+      63
+    ],
+    "python_rgb": [
+      127,
+      95,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "58",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "59",
+    "label": "ACI 36",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      0
+    ],
+    "python_rgb": [
+      76,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "59",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5A",
+    "label": "ACI 37",
+    "difference": null,
+    "native_rgb": [
+      76,
+      57,
+      38
+    ],
+    "python_rgb": [
+      76,
+      57,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5B",
+    "label": "ACI 38",
+    "difference": null,
+    "native_rgb": [
+      38,
+      19,
+      0
+    ],
+    "python_rgb": [
+      38,
+      19,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5C",
+    "label": "ACI 39",
+    "difference": null,
+    "native_rgb": [
+      38,
+      28,
+      19
+    ],
+    "python_rgb": [
+      38,
+      28,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5D",
+    "label": "ACI 40",
+    "difference": null,
+    "native_rgb": [
+      255,
+      191,
+      0
+    ],
+    "python_rgb": [
+      255,
+      191,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5E",
+    "label": "ACI 41",
+    "difference": null,
+    "native_rgb": [
+      255,
+      223,
+      127
+    ],
+    "python_rgb": [
+      255,
+      223,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "5F",
+    "label": "ACI 42",
+    "difference": null,
+    "native_rgb": [
+      165,
+      124,
+      0
+    ],
+    "python_rgb": [
+      165,
+      124,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "5F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "60",
+    "label": "ACI 43",
+    "difference": null,
+    "native_rgb": [
+      165,
+      145,
+      82
+    ],
+    "python_rgb": [
+      165,
+      145,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "60",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "61",
+    "label": "ACI 44",
+    "difference": null,
+    "native_rgb": [
+      127,
+      95,
+      0
+    ],
+    "python_rgb": [
+      127,
+      95,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "61",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "62",
+    "label": "ACI 45",
+    "difference": null,
+    "native_rgb": [
+      127,
+      111,
+      63
+    ],
+    "python_rgb": [
+      127,
+      111,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "62",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "63",
+    "label": "ACI 46",
+    "difference": null,
+    "native_rgb": [
+      76,
+      57,
+      0
+    ],
+    "python_rgb": [
+      76,
+      57,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "63",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "64",
+    "label": "ACI 47",
+    "difference": null,
+    "native_rgb": [
+      76,
+      66,
+      38
+    ],
+    "python_rgb": [
+      76,
+      66,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "64",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "65",
+    "label": "ACI 48",
+    "difference": null,
+    "native_rgb": [
+      38,
+      28,
+      0
+    ],
+    "python_rgb": [
+      38,
+      28,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "65",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "66",
+    "label": "ACI 49",
+    "difference": null,
+    "native_rgb": [
+      38,
+      33,
+      19
+    ],
+    "python_rgb": [
+      38,
+      33,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "66",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "67",
+    "label": "ACI 50",
+    "difference": null,
+    "native_rgb": [
+      255,
+      255,
+      0
+    ],
+    "python_rgb": [
+      255,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "67",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "68",
+    "label": "ACI 51",
+    "difference": null,
+    "native_rgb": [
+      255,
+      255,
+      127
+    ],
+    "python_rgb": [
+      255,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "68",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "69",
+    "label": "ACI 52",
+    "difference": null,
+    "native_rgb": [
+      165,
+      165,
+      0
+    ],
+    "python_rgb": [
+      165,
+      165,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "69",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6A",
+    "label": "ACI 53",
+    "difference": null,
+    "native_rgb": [
+      165,
+      165,
+      82
+    ],
+    "python_rgb": [
+      165,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6B",
+    "label": "ACI 54",
+    "difference": null,
+    "native_rgb": [
+      127,
+      127,
+      0
+    ],
+    "python_rgb": [
+      127,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6C",
+    "label": "ACI 55",
+    "difference": null,
+    "native_rgb": [
+      127,
+      127,
+      63
+    ],
+    "python_rgb": [
+      127,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6D",
+    "label": "ACI 56",
+    "difference": null,
+    "native_rgb": [
+      76,
+      76,
+      0
+    ],
+    "python_rgb": [
+      76,
+      76,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6E",
+    "label": "ACI 57",
+    "difference": null,
+    "native_rgb": [
+      76,
+      76,
+      38
+    ],
+    "python_rgb": [
+      76,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "6F",
+    "label": "ACI 58",
+    "difference": null,
+    "native_rgb": [
+      38,
+      38,
+      0
+    ],
+    "python_rgb": [
+      38,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "6F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "70",
+    "label": "ACI 59",
+    "difference": null,
+    "native_rgb": [
+      38,
+      38,
+      19
+    ],
+    "python_rgb": [
+      38,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "70",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "71",
+    "label": "ACI 60",
+    "difference": null,
+    "native_rgb": [
+      191,
+      255,
+      0
+    ],
+    "python_rgb": [
+      191,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "71",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "72",
+    "label": "ACI 61",
+    "difference": null,
+    "native_rgb": [
+      223,
+      255,
+      127
+    ],
+    "python_rgb": [
+      223,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "72",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "73",
+    "label": "ACI 62",
+    "difference": null,
+    "native_rgb": [
+      124,
+      165,
+      0
+    ],
+    "python_rgb": [
+      124,
+      165,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "73",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "74",
+    "label": "ACI 63",
+    "difference": null,
+    "native_rgb": [
+      145,
+      165,
+      82
+    ],
+    "python_rgb": [
+      145,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "74",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "75",
+    "label": "ACI 64",
+    "difference": null,
+    "native_rgb": [
+      95,
+      127,
+      0
+    ],
+    "python_rgb": [
+      95,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "75",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "76",
+    "label": "ACI 65",
+    "difference": null,
+    "native_rgb": [
+      111,
+      127,
+      63
+    ],
+    "python_rgb": [
+      111,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "76",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "77",
+    "label": "ACI 66",
+    "difference": null,
+    "native_rgb": [
+      57,
+      76,
+      0
+    ],
+    "python_rgb": [
+      57,
+      76,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "77",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "78",
+    "label": "ACI 67",
+    "difference": null,
+    "native_rgb": [
+      66,
+      76,
+      38
+    ],
+    "python_rgb": [
+      66,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "78",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "79",
+    "label": "ACI 68",
+    "difference": null,
+    "native_rgb": [
+      28,
+      38,
+      0
+    ],
+    "python_rgb": [
+      28,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "79",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7A",
+    "label": "ACI 69",
+    "difference": null,
+    "native_rgb": [
+      33,
+      38,
+      19
+    ],
+    "python_rgb": [
+      33,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7B",
+    "label": "ACI 70",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      0
+    ],
+    "python_rgb": [
+      127,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7C",
+    "label": "ACI 71",
+    "difference": null,
+    "native_rgb": [
+      191,
+      255,
+      127
+    ],
+    "python_rgb": [
+      191,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7D",
+    "label": "ACI 72",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      0
+    ],
+    "python_rgb": [
+      82,
+      165,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7E",
+    "label": "ACI 73",
+    "difference": null,
+    "native_rgb": [
+      124,
+      165,
+      82
+    ],
+    "python_rgb": [
+      124,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "7F",
+    "label": "ACI 74",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      0
+    ],
+    "python_rgb": [
+      63,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "7F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "80",
+    "label": "ACI 75",
+    "difference": null,
+    "native_rgb": [
+      95,
+      127,
+      63
+    ],
+    "python_rgb": [
+      95,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "80",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "81",
+    "label": "ACI 76",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      0
+    ],
+    "python_rgb": [
+      38,
+      76,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "81",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "82",
+    "label": "ACI 77",
+    "difference": null,
+    "native_rgb": [
+      57,
+      76,
+      38
+    ],
+    "python_rgb": [
+      57,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "82",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "83",
+    "label": "ACI 78",
+    "difference": null,
+    "native_rgb": [
+      19,
+      38,
+      0
+    ],
+    "python_rgb": [
+      19,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "83",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "84",
+    "label": "ACI 79",
+    "difference": null,
+    "native_rgb": [
+      28,
+      38,
+      19
+    ],
+    "python_rgb": [
+      28,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "84",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "85",
+    "label": "ACI 80",
+    "difference": null,
+    "native_rgb": [
+      63,
+      255,
+      0
+    ],
+    "python_rgb": [
+      63,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "85",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "86",
+    "label": "ACI 81",
+    "difference": null,
+    "native_rgb": [
+      159,
+      255,
+      127
+    ],
+    "python_rgb": [
+      159,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "86",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "87",
+    "label": "ACI 82",
+    "difference": null,
+    "native_rgb": [
+      41,
+      165,
+      0
+    ],
+    "python_rgb": [
+      41,
+      165,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "87",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "88",
+    "label": "ACI 83",
+    "difference": null,
+    "native_rgb": [
+      103,
+      165,
+      82
+    ],
+    "python_rgb": [
+      103,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "88",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "89",
+    "label": "ACI 84",
+    "difference": null,
+    "native_rgb": [
+      31,
+      127,
+      0
+    ],
+    "python_rgb": [
+      31,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "89",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8A",
+    "label": "ACI 85",
+    "difference": null,
+    "native_rgb": [
+      79,
+      127,
+      63
+    ],
+    "python_rgb": [
+      79,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8B",
+    "label": "ACI 86",
+    "difference": null,
+    "native_rgb": [
+      19,
+      76,
+      0
+    ],
+    "python_rgb": [
+      19,
+      76,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8C",
+    "label": "ACI 87",
+    "difference": null,
+    "native_rgb": [
+      47,
+      76,
+      38
+    ],
+    "python_rgb": [
+      47,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8D",
+    "label": "ACI 88",
+    "difference": null,
+    "native_rgb": [
+      9,
+      38,
+      0
+    ],
+    "python_rgb": [
+      9,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8E",
+    "label": "ACI 89",
+    "difference": null,
+    "native_rgb": [
+      23,
+      38,
+      19
+    ],
+    "python_rgb": [
+      23,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "8F",
+    "label": "ACI 90",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      0
+    ],
+    "python_rgb": [
+      0,
+      255,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "8F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "90",
+    "label": "ACI 91",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      127
+    ],
+    "python_rgb": [
+      127,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "90",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "91",
+    "label": "ACI 92",
+    "difference": null,
+    "native_rgb": [
+      0,
+      165,
+      0
+    ],
+    "python_rgb": [
+      0,
+      165,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "91",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "92",
+    "label": "ACI 93",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      82
+    ],
+    "python_rgb": [
+      82,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "92",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "93",
+    "label": "ACI 94",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      0
+    ],
+    "python_rgb": [
+      0,
+      127,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "93",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "94",
+    "label": "ACI 95",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      63
+    ],
+    "python_rgb": [
+      63,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "94",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "95",
+    "label": "ACI 96",
+    "difference": null,
+    "native_rgb": [
+      0,
+      76,
+      0
+    ],
+    "python_rgb": [
+      0,
+      76,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "95",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "96",
+    "label": "ACI 97",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      38
+    ],
+    "python_rgb": [
+      38,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "96",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "97",
+    "label": "ACI 98",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      0
+    ],
+    "python_rgb": [
+      0,
+      38,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "97",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "98",
+    "label": "ACI 99",
+    "difference": null,
+    "native_rgb": [
+      19,
+      38,
+      19
+    ],
+    "python_rgb": [
+      19,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "98",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "99",
+    "label": "ACI 100",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      63
+    ],
+    "python_rgb": [
+      0,
+      255,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "99",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9A",
+    "label": "ACI 101",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      159
+    ],
+    "python_rgb": [
+      127,
+      255,
+      159
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9B",
+    "label": "ACI 102",
+    "difference": null,
+    "native_rgb": [
+      0,
+      165,
+      41
+    ],
+    "python_rgb": [
+      0,
+      165,
+      41
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9C",
+    "label": "ACI 103",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      103
+    ],
+    "python_rgb": [
+      82,
+      165,
+      103
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9D",
+    "label": "ACI 104",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      31
+    ],
+    "python_rgb": [
+      0,
+      127,
+      31
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9E",
+    "label": "ACI 105",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      79
+    ],
+    "python_rgb": [
+      63,
+      127,
+      79
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "9F",
+    "label": "ACI 106",
+    "difference": null,
+    "native_rgb": [
+      0,
+      76,
+      19
+    ],
+    "python_rgb": [
+      0,
+      76,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "9F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A0",
+    "label": "ACI 107",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      47
+    ],
+    "python_rgb": [
+      38,
+      76,
+      47
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A1",
+    "label": "ACI 108",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      9
+    ],
+    "python_rgb": [
+      0,
+      38,
+      9
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A2",
+    "label": "ACI 109",
+    "difference": null,
+    "native_rgb": [
+      19,
+      88,
+      23
+    ],
+    "python_rgb": [
+      19,
+      88,
+      23
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A3",
+    "label": "ACI 110",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      127
+    ],
+    "python_rgb": [
+      0,
+      255,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A4",
+    "label": "ACI 111",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      191
+    ],
+    "python_rgb": [
+      127,
+      255,
+      191
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A5",
+    "label": "ACI 112",
+    "difference": null,
+    "native_rgb": [
+      0,
+      165,
+      82
+    ],
+    "python_rgb": [
+      0,
+      165,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A6",
+    "label": "ACI 113",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      124
+    ],
+    "python_rgb": [
+      82,
+      165,
+      124
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A7",
+    "label": "ACI 114",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      63
+    ],
+    "python_rgb": [
+      0,
+      127,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A8",
+    "label": "ACI 115",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      95
+    ],
+    "python_rgb": [
+      63,
+      127,
+      95
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "A9",
+    "label": "ACI 116",
+    "difference": null,
+    "native_rgb": [
+      0,
+      76,
+      38
+    ],
+    "python_rgb": [
+      0,
+      76,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "A9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AA",
+    "label": "ACI 117",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      57
+    ],
+    "python_rgb": [
+      38,
+      76,
+      57
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AB",
+    "label": "ACI 118",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      19
+    ],
+    "python_rgb": [
+      0,
+      38,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AC",
+    "label": "ACI 119",
+    "difference": null,
+    "native_rgb": [
+      19,
+      88,
+      28
+    ],
+    "python_rgb": [
+      19,
+      88,
+      28
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AD",
+    "label": "ACI 120",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      191
+    ],
+    "python_rgb": [
+      0,
+      255,
+      191
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AD",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AE",
+    "label": "ACI 121",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      223
+    ],
+    "python_rgb": [
+      127,
+      255,
+      223
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "AF",
+    "label": "ACI 122",
+    "difference": null,
+    "native_rgb": [
+      0,
+      165,
+      124
+    ],
+    "python_rgb": [
+      0,
+      165,
+      124
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "AF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B0",
+    "label": "ACI 123",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      145
+    ],
+    "python_rgb": [
+      82,
+      165,
+      145
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B1",
+    "label": "ACI 124",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      95
+    ],
+    "python_rgb": [
+      0,
+      127,
+      95
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B2",
+    "label": "ACI 125",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      111
+    ],
+    "python_rgb": [
+      63,
+      127,
+      111
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B3",
+    "label": "ACI 126",
+    "difference": null,
+    "native_rgb": [
+      0,
+      76,
+      57
+    ],
+    "python_rgb": [
+      0,
+      76,
+      57
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B4",
+    "label": "ACI 127",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      66
+    ],
+    "python_rgb": [
+      38,
+      76,
+      66
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B5",
+    "label": "ACI 128",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      28
+    ],
+    "python_rgb": [
+      0,
+      38,
+      28
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B6",
+    "label": "ACI 129",
+    "difference": null,
+    "native_rgb": [
+      19,
+      88,
+      88
+    ],
+    "python_rgb": [
+      19,
+      88,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B7",
+    "label": "ACI 130",
+    "difference": null,
+    "native_rgb": [
+      0,
+      255,
+      255
+    ],
+    "python_rgb": [
+      0,
+      255,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B8",
+    "label": "ACI 131",
+    "difference": null,
+    "native_rgb": [
+      127,
+      255,
+      255
+    ],
+    "python_rgb": [
+      127,
+      255,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "B9",
+    "label": "ACI 132",
+    "difference": null,
+    "native_rgb": [
+      0,
+      165,
+      165
+    ],
+    "python_rgb": [
+      0,
+      165,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "B9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BA",
+    "label": "ACI 133",
+    "difference": null,
+    "native_rgb": [
+      82,
+      165,
+      165
+    ],
+    "python_rgb": [
+      82,
+      165,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BB",
+    "label": "ACI 134",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      127
+    ],
+    "python_rgb": [
+      0,
+      127,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BC",
+    "label": "ACI 135",
+    "difference": null,
+    "native_rgb": [
+      63,
+      127,
+      127
+    ],
+    "python_rgb": [
+      63,
+      127,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BD",
+    "label": "ACI 136",
+    "difference": null,
+    "native_rgb": [
+      0,
+      76,
+      76
+    ],
+    "python_rgb": [
+      0,
+      76,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BD",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BE",
+    "label": "ACI 137",
+    "difference": null,
+    "native_rgb": [
+      38,
+      76,
+      76
+    ],
+    "python_rgb": [
+      38,
+      76,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "BF",
+    "label": "ACI 138",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      38
+    ],
+    "python_rgb": [
+      0,
+      38,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "BF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C0",
+    "label": "ACI 139",
+    "difference": null,
+    "native_rgb": [
+      19,
+      88,
+      88
+    ],
+    "python_rgb": [
+      19,
+      88,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C1",
+    "label": "ACI 140",
+    "difference": null,
+    "native_rgb": [
+      0,
+      191,
+      255
+    ],
+    "python_rgb": [
+      0,
+      191,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C2",
+    "label": "ACI 141",
+    "difference": null,
+    "native_rgb": [
+      127,
+      223,
+      255
+    ],
+    "python_rgb": [
+      127,
+      223,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C3",
+    "label": "ACI 142",
+    "difference": null,
+    "native_rgb": [
+      0,
+      124,
+      165
+    ],
+    "python_rgb": [
+      0,
+      124,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C4",
+    "label": "ACI 143",
+    "difference": null,
+    "native_rgb": [
+      82,
+      145,
+      165
+    ],
+    "python_rgb": [
+      82,
+      145,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C5",
+    "label": "ACI 144",
+    "difference": null,
+    "native_rgb": [
+      0,
+      95,
+      127
+    ],
+    "python_rgb": [
+      0,
+      95,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C6",
+    "label": "ACI 145",
+    "difference": null,
+    "native_rgb": [
+      63,
+      111,
+      127
+    ],
+    "python_rgb": [
+      63,
+      111,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C7",
+    "label": "ACI 146",
+    "difference": null,
+    "native_rgb": [
+      0,
+      57,
+      76
+    ],
+    "python_rgb": [
+      0,
+      57,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C8",
+    "label": "ACI 147",
+    "difference": null,
+    "native_rgb": [
+      38,
+      66,
+      126
+    ],
+    "python_rgb": [
+      38,
+      66,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "C9",
+    "label": "ACI 148",
+    "difference": null,
+    "native_rgb": [
+      0,
+      28,
+      38
+    ],
+    "python_rgb": [
+      0,
+      28,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "C9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CA",
+    "label": "ACI 149",
+    "difference": null,
+    "native_rgb": [
+      19,
+      88,
+      88
+    ],
+    "python_rgb": [
+      19,
+      88,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CB",
+    "label": "ACI 150",
+    "difference": null,
+    "native_rgb": [
+      0,
+      127,
+      255
+    ],
+    "python_rgb": [
+      0,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CC",
+    "label": "ACI 151",
+    "difference": null,
+    "native_rgb": [
+      127,
+      191,
+      255
+    ],
+    "python_rgb": [
+      127,
+      191,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CD",
+    "label": "ACI 152",
+    "difference": null,
+    "native_rgb": [
+      0,
+      82,
+      165
+    ],
+    "python_rgb": [
+      0,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CD",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CE",
+    "label": "ACI 153",
+    "difference": null,
+    "native_rgb": [
+      82,
+      124,
+      165
+    ],
+    "python_rgb": [
+      82,
+      124,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "CF",
+    "label": "ACI 154",
+    "difference": null,
+    "native_rgb": [
+      0,
+      63,
+      127
+    ],
+    "python_rgb": [
+      0,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "CF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D0",
+    "label": "ACI 155",
+    "difference": null,
+    "native_rgb": [
+      63,
+      95,
+      127
+    ],
+    "python_rgb": [
+      63,
+      95,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D1",
+    "label": "ACI 156",
+    "difference": null,
+    "native_rgb": [
+      0,
+      38,
+      76
+    ],
+    "python_rgb": [
+      0,
+      38,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D2",
+    "label": "ACI 157",
+    "difference": null,
+    "native_rgb": [
+      38,
+      57,
+      126
+    ],
+    "python_rgb": [
+      38,
+      57,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D3",
+    "label": "ACI 158",
+    "difference": null,
+    "native_rgb": [
+      0,
+      19,
+      38
+    ],
+    "python_rgb": [
+      0,
+      19,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D4",
+    "label": "ACI 159",
+    "difference": null,
+    "native_rgb": [
+      19,
+      28,
+      88
+    ],
+    "python_rgb": [
+      19,
+      28,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D5",
+    "label": "ACI 160",
+    "difference": null,
+    "native_rgb": [
+      0,
+      63,
+      255
+    ],
+    "python_rgb": [
+      0,
+      63,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D6",
+    "label": "ACI 161",
+    "difference": null,
+    "native_rgb": [
+      127,
+      159,
+      255
+    ],
+    "python_rgb": [
+      127,
+      159,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D7",
+    "label": "ACI 162",
+    "difference": null,
+    "native_rgb": [
+      0,
+      41,
+      165
+    ],
+    "python_rgb": [
+      0,
+      41,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D8",
+    "label": "ACI 163",
+    "difference": null,
+    "native_rgb": [
+      82,
+      103,
+      165
+    ],
+    "python_rgb": [
+      82,
+      103,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "D9",
+    "label": "ACI 164",
+    "difference": null,
+    "native_rgb": [
+      0,
+      31,
+      127
+    ],
+    "python_rgb": [
+      0,
+      31,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "D9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DA",
+    "label": "ACI 165",
+    "difference": null,
+    "native_rgb": [
+      63,
+      79,
+      127
+    ],
+    "python_rgb": [
+      63,
+      79,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DB",
+    "label": "ACI 166",
+    "difference": null,
+    "native_rgb": [
+      0,
+      19,
+      76
+    ],
+    "python_rgb": [
+      0,
+      19,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DC",
+    "label": "ACI 167",
+    "difference": null,
+    "native_rgb": [
+      38,
+      47,
+      126
+    ],
+    "python_rgb": [
+      38,
+      47,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DD",
+    "label": "ACI 168",
+    "difference": null,
+    "native_rgb": [
+      0,
+      9,
+      38
+    ],
+    "python_rgb": [
+      0,
+      9,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DD",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DE",
+    "label": "ACI 169",
+    "difference": null,
+    "native_rgb": [
+      19,
+      23,
+      88
+    ],
+    "python_rgb": [
+      19,
+      23,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "DF",
+    "label": "ACI 170",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      255
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "DF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E0",
+    "label": "ACI 171",
+    "difference": null,
+    "native_rgb": [
+      127,
+      127,
+      255
+    ],
+    "python_rgb": [
+      127,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E1",
+    "label": "ACI 172",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      165
+    ],
+    "python_rgb": [
+      0,
+      0,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E2",
+    "label": "ACI 173",
+    "difference": null,
+    "native_rgb": [
+      82,
+      82,
+      165
+    ],
+    "python_rgb": [
+      82,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E3",
+    "label": "ACI 174",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      127
+    ],
+    "python_rgb": [
+      0,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E4",
+    "label": "ACI 175",
+    "difference": null,
+    "native_rgb": [
+      63,
+      63,
+      127
+    ],
+    "python_rgb": [
+      63,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E5",
+    "label": "ACI 176",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      76
+    ],
+    "python_rgb": [
+      0,
+      0,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E6",
+    "label": "ACI 177",
+    "difference": null,
+    "native_rgb": [
+      38,
+      38,
+      126
+    ],
+    "python_rgb": [
+      38,
+      38,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E7",
+    "label": "ACI 178",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      38
+    ],
+    "python_rgb": [
+      0,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E8",
+    "label": "ACI 179",
+    "difference": null,
+    "native_rgb": [
+      19,
+      19,
+      88
+    ],
+    "python_rgb": [
+      19,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "E9",
+    "label": "ACI 180",
+    "difference": null,
+    "native_rgb": [
+      63,
+      0,
+      255
+    ],
+    "python_rgb": [
+      63,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "E9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "EA",
+    "label": "ACI 181",
+    "difference": null,
+    "native_rgb": [
+      159,
+      127,
+      255
+    ],
+    "python_rgb": [
+      159,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "EA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "EB",
+    "label": "ACI 182",
+    "difference": null,
+    "native_rgb": [
+      41,
+      0,
+      165
+    ],
+    "python_rgb": [
+      41,
+      0,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "EB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "EC",
+    "label": "ACI 183",
+    "difference": null,
+    "native_rgb": [
+      103,
+      82,
+      165
+    ],
+    "python_rgb": [
+      103,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "EC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "ED",
+    "label": "ACI 184",
+    "difference": null,
+    "native_rgb": [
+      31,
+      0,
+      127
+    ],
+    "python_rgb": [
+      31,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "ED",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "EE",
+    "label": "ACI 185",
+    "difference": null,
+    "native_rgb": [
+      79,
+      63,
+      127
+    ],
+    "python_rgb": [
+      79,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "EE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "EF",
+    "label": "ACI 186",
+    "difference": null,
+    "native_rgb": [
+      19,
+      0,
+      76
+    ],
+    "python_rgb": [
+      19,
+      0,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "EF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F0",
+    "label": "ACI 187",
+    "difference": null,
+    "native_rgb": [
+      47,
+      38,
+      126
+    ],
+    "python_rgb": [
+      47,
+      38,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F0",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F1",
+    "label": "ACI 188",
+    "difference": null,
+    "native_rgb": [
+      9,
+      0,
+      38
+    ],
+    "python_rgb": [
+      9,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F1",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F2",
+    "label": "ACI 189",
+    "difference": null,
+    "native_rgb": [
+      23,
+      19,
+      88
+    ],
+    "python_rgb": [
+      23,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F2",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F3",
+    "label": "ACI 190",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      255
+    ],
+    "python_rgb": [
+      127,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F3",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F4",
+    "label": "ACI 191",
+    "difference": null,
+    "native_rgb": [
+      191,
+      127,
+      255
+    ],
+    "python_rgb": [
+      191,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F4",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F5",
+    "label": "ACI 192",
+    "difference": null,
+    "native_rgb": [
+      82,
+      0,
+      165
+    ],
+    "python_rgb": [
+      82,
+      0,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F5",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F6",
+    "label": "ACI 193",
+    "difference": null,
+    "native_rgb": [
+      124,
+      82,
+      165
+    ],
+    "python_rgb": [
+      124,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F6",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F7",
+    "label": "ACI 194",
+    "difference": null,
+    "native_rgb": [
+      63,
+      0,
+      127
+    ],
+    "python_rgb": [
+      63,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F7",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F8",
+    "label": "ACI 195",
+    "difference": null,
+    "native_rgb": [
+      95,
+      63,
+      127
+    ],
+    "python_rgb": [
+      95,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F8",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "F9",
+    "label": "ACI 196",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      76
+    ],
+    "python_rgb": [
+      38,
+      0,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "F9",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FA",
+    "label": "ACI 197",
+    "difference": null,
+    "native_rgb": [
+      57,
+      38,
+      126
+    ],
+    "python_rgb": [
+      57,
+      38,
+      126
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FA",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FB",
+    "label": "ACI 198",
+    "difference": null,
+    "native_rgb": [
+      19,
+      0,
+      38
+    ],
+    "python_rgb": [
+      19,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FB",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FC",
+    "label": "ACI 199",
+    "difference": null,
+    "native_rgb": [
+      28,
+      19,
+      88
+    ],
+    "python_rgb": [
+      28,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FC",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FD",
+    "label": "ACI 200",
+    "difference": null,
+    "native_rgb": [
+      191,
+      0,
+      255
+    ],
+    "python_rgb": [
+      191,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FD",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FE",
+    "label": "ACI 201",
+    "difference": null,
+    "native_rgb": [
+      223,
+      127,
+      255
+    ],
+    "python_rgb": [
+      223,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FE",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "FF",
+    "label": "ACI 202",
+    "difference": null,
+    "native_rgb": [
+      124,
+      0,
+      165
+    ],
+    "python_rgb": [
+      124,
+      0,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "FF",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "100",
+    "label": "ACI 203",
+    "difference": null,
+    "native_rgb": [
+      145,
+      82,
+      165
+    ],
+    "python_rgb": [
+      145,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "100",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "101",
+    "label": "ACI 204",
+    "difference": null,
+    "native_rgb": [
+      95,
+      0,
+      127
+    ],
+    "python_rgb": [
+      95,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "101",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "102",
+    "label": "ACI 205",
+    "difference": null,
+    "native_rgb": [
+      111,
+      63,
+      127
+    ],
+    "python_rgb": [
+      111,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "102",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "103",
+    "label": "ACI 206",
+    "difference": null,
+    "native_rgb": [
+      57,
+      0,
+      76
+    ],
+    "python_rgb": [
+      57,
+      0,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "103",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "104",
+    "label": "ACI 207",
+    "difference": null,
+    "native_rgb": [
+      66,
+      38,
+      76
+    ],
+    "python_rgb": [
+      66,
+      38,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "104",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "105",
+    "label": "ACI 208",
+    "difference": null,
+    "native_rgb": [
+      28,
+      0,
+      38
+    ],
+    "python_rgb": [
+      28,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "105",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "106",
+    "label": "ACI 209",
+    "difference": null,
+    "native_rgb": [
+      88,
+      19,
+      88
+    ],
+    "python_rgb": [
+      88,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "106",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "107",
+    "label": "ACI 210",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      255
+    ],
+    "python_rgb": [
+      255,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "107",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "108",
+    "label": "ACI 211",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      255
+    ],
+    "python_rgb": [
+      255,
+      127,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "108",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "109",
+    "label": "ACI 212",
+    "difference": null,
+    "native_rgb": [
+      165,
+      0,
+      165
+    ],
+    "python_rgb": [
+      165,
+      0,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "109",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10A",
+    "label": "ACI 213",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      165
+    ],
+    "python_rgb": [
+      165,
+      82,
+      165
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10B",
+    "label": "ACI 214",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      127
+    ],
+    "python_rgb": [
+      127,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10C",
+    "label": "ACI 215",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      127
+    ],
+    "python_rgb": [
+      127,
+      63,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10D",
+    "label": "ACI 216",
+    "difference": null,
+    "native_rgb": [
+      76,
+      0,
+      76
+    ],
+    "python_rgb": [
+      76,
+      0,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10E",
+    "label": "ACI 217",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      76
+    ],
+    "python_rgb": [
+      76,
+      38,
+      76
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "10F",
+    "label": "ACI 218",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      38
+    ],
+    "python_rgb": [
+      38,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "10F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "110",
+    "label": "ACI 219",
+    "difference": null,
+    "native_rgb": [
+      88,
+      19,
+      88
+    ],
+    "python_rgb": [
+      88,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "110",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "111",
+    "label": "ACI 220",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      191
+    ],
+    "python_rgb": [
+      255,
+      0,
+      191
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "111",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "112",
+    "label": "ACI 221",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      223
+    ],
+    "python_rgb": [
+      255,
+      127,
+      223
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "112",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "113",
+    "label": "ACI 222",
+    "difference": null,
+    "native_rgb": [
+      165,
+      0,
+      124
+    ],
+    "python_rgb": [
+      165,
+      0,
+      124
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "113",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "114",
+    "label": "ACI 223",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      145
+    ],
+    "python_rgb": [
+      165,
+      82,
+      145
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "114",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "115",
+    "label": "ACI 224",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      95
+    ],
+    "python_rgb": [
+      127,
+      0,
+      95
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "115",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "116",
+    "label": "ACI 225",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      111
+    ],
+    "python_rgb": [
+      127,
+      63,
+      111
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "116",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "117",
+    "label": "ACI 226",
+    "difference": null,
+    "native_rgb": [
+      76,
+      0,
+      57
+    ],
+    "python_rgb": [
+      76,
+      0,
+      57
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "117",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "118",
+    "label": "ACI 227",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      66
+    ],
+    "python_rgb": [
+      76,
+      38,
+      66
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "118",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "119",
+    "label": "ACI 228",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      28
+    ],
+    "python_rgb": [
+      38,
+      0,
+      28
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "119",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11A",
+    "label": "ACI 229",
+    "difference": null,
+    "native_rgb": [
+      88,
+      19,
+      88
+    ],
+    "python_rgb": [
+      88,
+      19,
+      88
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11B",
+    "label": "ACI 230",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      127
+    ],
+    "python_rgb": [
+      255,
+      0,
+      127
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11C",
+    "label": "ACI 231",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      191
+    ],
+    "python_rgb": [
+      255,
+      127,
+      191
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11D",
+    "label": "ACI 232",
+    "difference": null,
+    "native_rgb": [
+      165,
+      0,
+      82
+    ],
+    "python_rgb": [
+      165,
+      0,
+      82
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11E",
+    "label": "ACI 233",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      124
+    ],
+    "python_rgb": [
+      165,
+      82,
+      124
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "11F",
+    "label": "ACI 234",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      63
+    ],
+    "python_rgb": [
+      127,
+      0,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "11F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "120",
+    "label": "ACI 235",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      95
+    ],
+    "python_rgb": [
+      127,
+      63,
+      95
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "120",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "121",
+    "label": "ACI 236",
+    "difference": null,
+    "native_rgb": [
+      76,
+      0,
+      38
+    ],
+    "python_rgb": [
+      76,
+      0,
+      38
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "121",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "122",
+    "label": "ACI 237",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      57
+    ],
+    "python_rgb": [
+      76,
+      38,
+      57
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "122",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "123",
+    "label": "ACI 238",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      19
+    ],
+    "python_rgb": [
+      38,
+      0,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "123",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "124",
+    "label": "ACI 239",
+    "difference": null,
+    "native_rgb": [
+      88,
+      19,
+      28
+    ],
+    "python_rgb": [
+      88,
+      19,
+      28
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "124",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "125",
+    "label": "ACI 240",
+    "difference": null,
+    "native_rgb": [
+      255,
+      0,
+      63
+    ],
+    "python_rgb": [
+      255,
+      0,
+      63
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "125",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "126",
+    "label": "ACI 241",
+    "difference": null,
+    "native_rgb": [
+      255,
+      127,
+      159
+    ],
+    "python_rgb": [
+      255,
+      127,
+      159
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "126",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "127",
+    "label": "ACI 242",
+    "difference": null,
+    "native_rgb": [
+      165,
+      0,
+      41
+    ],
+    "python_rgb": [
+      165,
+      0,
+      41
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "127",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "128",
+    "label": "ACI 243",
+    "difference": null,
+    "native_rgb": [
+      165,
+      82,
+      103
+    ],
+    "python_rgb": [
+      165,
+      82,
+      103
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "128",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "129",
+    "label": "ACI 244",
+    "difference": null,
+    "native_rgb": [
+      127,
+      0,
+      31
+    ],
+    "python_rgb": [
+      127,
+      0,
+      31
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "129",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12A",
+    "label": "ACI 245",
+    "difference": null,
+    "native_rgb": [
+      127,
+      63,
+      79
+    ],
+    "python_rgb": [
+      127,
+      63,
+      79
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12A",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12B",
+    "label": "ACI 246",
+    "difference": null,
+    "native_rgb": [
+      76,
+      0,
+      19
+    ],
+    "python_rgb": [
+      76,
+      0,
+      19
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12C",
+    "label": "ACI 247",
+    "difference": null,
+    "native_rgb": [
+      76,
+      38,
+      47
+    ],
+    "python_rgb": [
+      76,
+      38,
+      47
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12D",
+    "label": "ACI 248",
+    "difference": null,
+    "native_rgb": [
+      38,
+      0,
+      9
+    ],
+    "python_rgb": [
+      38,
+      0,
+      9
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12E",
+    "label": "ACI 249",
+    "difference": null,
+    "native_rgb": [
+      88,
+      19,
+      23
+    ],
+    "python_rgb": [
+      88,
+      19,
+      23
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12E",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "12F",
+    "label": "ACI 250",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      0
+    ],
+    "python_rgb": [
+      0,
+      0,
+      0
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "12F",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "130",
+    "label": "ACI 251",
+    "difference": null,
+    "native_rgb": [
+      101,
+      101,
+      101
+    ],
+    "python_rgb": [
+      101,
+      101,
+      101
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "130",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "131",
+    "label": "ACI 252",
+    "difference": null,
+    "native_rgb": [
+      102,
+      102,
+      102
+    ],
+    "python_rgb": [
+      102,
+      102,
+      102
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "131",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "132",
+    "label": "ACI 253",
+    "difference": null,
+    "native_rgb": [
+      153,
+      153,
+      153
+    ],
+    "python_rgb": [
+      153,
+      153,
+      153
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "132",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "133",
+    "label": "ACI 254",
+    "difference": null,
+    "native_rgb": [
+      204,
+      204,
+      204
+    ],
+    "python_rgb": [
+      204,
+      204,
+      204
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "133",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "134",
+    "label": "ACI 255",
+    "difference": null,
+    "native_rgb": [
+      220,
+      20,
+      60
+    ],
+    "python_rgb": [
+      220,
+      20,
+      60
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "134",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "135",
+    "label": "BYLAYER",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      255
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "135",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "136",
+    "label": "BYBLOCK at top level",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      255
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "136",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "137",
+    "label": "layer true-color",
+    "difference": "Honor layer true-color, ignored by original Python reader.",
+    "native_rgb": [
+      18,
+      52,
+      86
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "137",
+      "Laag": "True",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "138",
+    "label": "layer black",
+    "difference": "Honor explicit black layer true-color.",
+    "native_rgb": [
+      0,
+      0,
+      0
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "138",
+      "Laag": "Black",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "139",
+    "label": "off layer",
+    "difference": "Keep off layer hidden by default and retain its actual ACI color.",
+    "native_rgb": [
+      0,
+      255,
+      255
+    ],
+    "python_rgb": [
+      0,
+      255,
+      255
+    ],
+    "visible": false,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "139",
+      "Laag": "Off",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "13A",
+    "label": "frozen layer",
+    "difference": "Keep frozen layer hidden by default.",
+    "native_rgb": [
+      127,
+      0,
+      255
+    ],
+    "python_rgb": [
+      127,
+      0,
+      255
+    ],
+    "visible": false,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "13A",
+      "Laag": "Frozen",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "13B",
+    "label": "entity true-color 1193046",
+    "difference": null,
+    "native_rgb": [
+      18,
+      52,
+      86
+    ],
+    "python_rgb": [
+      18,
+      52,
+      86
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "13B",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "13C",
+    "label": "entity true-color 16777215",
+    "difference": null,
+    "native_rgb": [
+      255,
+      255,
+      255
+    ],
+    "python_rgb": [
+      255,
+      255,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "13C",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "13D",
+    "label": "entity true-color 0",
+    "difference": "Honor explicit RGB black instead of treating zero as missing.",
+    "native_rgb": [
+      0,
+      0,
+      0
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "13D",
+      "Laag": "Water",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "13E",
+    "label": "invisible entity",
+    "difference": "Respect entity invisibility, ignored by original overlay renderer.",
+    "native_rgb": [
+      220,
+      20,
+      60
+    ],
+    "python_rgb": [
+      220,
+      20,
+      60
+    ],
+    "visible": false,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "LINE",
+      "Handle": "13E",
+      "Laag": "0",
+      "Punten": "2"
+    }
+  },
+  {
+    "handle": "143",
+    "label": "INSERT attributes and XDATA",
+    "difference": null,
+    "native_rgb": [
+      0,
+      0,
+      255
+    ],
+    "python_rgb": [
+      0,
+      0,
+      255
+    ],
+    "visible": true,
+    "details": {
+      "Bestand": "properties-ascii.dxf",
+      "Type": "INSERT",
+      "Handle": "143",
+      "Laag": "Water",
+      "Lijntype": "CONTINUOUS",
+      "Lijndikte": "35",
+      "XDATA SLEUFBASE": "original metadata, {, b'\\x00\\x80\\xff\\n\\r\\t\\'\"\\\\', (1.25, 2.5, -3.75), 1e-05, 1e+20, -17, 2000000000, }",
+      "XDATA MEASUREMENTS": "ID-42, 143",
+      "Attribuut Code": "PS 42",
+      "Attribuut Opmerking": "Meting ë",
+      "Punten": "2"
+    }
+  }
+]

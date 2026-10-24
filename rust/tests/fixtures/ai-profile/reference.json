@@ -1,0 +1,952 @@
+{
+  "cases": [
+    {
+      "name": "case-0",
+      "virtual": true,
+      "trench": {
+        "label": "Fixture",
+        "job_id": 81,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155010.0,
+          "y": 463000.0,
+          "z": 5.1
+        },
+        "objects": [
+          {
+            "role": "object",
+            "object_name": "LS",
+            "source_name": "ls",
+            "position": {
+              "x": 155012.0,
+              "y": 463000.4,
+              "z": 1.2
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ],
+            "metadata": {}
+          }
+        ],
+        "metadata": {
+          "rotation_degrees": 0.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.8,
+            "source_name": "Dekband"
+          },
+          {
+            "start_chainage": -2.0,
+            "end_chainage": 20.0,
+            "start_depth": 0.3,
+            "end_depth": 0.3,
+            "source_name": "Beton"
+          }
+        ]
+      },
+      "raster": {
+        "path": "ai-profile.tif",
+        "width": 780,
+        "height": 220,
+        "transform": {
+          "a": 0.01999999999997015,
+          "b": 0,
+          "c": 154998.2,
+          "d": 0,
+          "e": -0.01954545454540163,
+          "f": 463002.2
+        },
+        "bounds": {
+          "min_x": 154998.2,
+          "min_y": 462997.9,
+          "max_x": 155013.8,
+          "max_y": 463002.2
+        },
+        "epsg": 28992,
+        "kickthemap_job_id": 81,
+        "kickthemap_job_title": "Fixture",
+        "kickthemap_job_sidecar": null,
+        "metadata": {
+          "rotation_degrees": 0.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        }
+      },
+      "dataset": {
+        "job_id": 81,
+        "title": "Fixture",
+        "source_path": "jobFeatures.json",
+        "features": [
+          {
+            "object_name": "Beginpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155000.0,
+                "y": 463000.0,
+                "z": 2.3
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "Eindpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155010.0,
+                "y": 463000.0,
+                "z": 5.1
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "LS",
+            "source_name": "ls",
+            "geometry": {
+              "Point": {
+                "x": 155012.0,
+                "y": 463000.4,
+                "z": 1.2
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      },
+      "roads": [
+        [
+          [
+            155015.0,
+            462990.0
+          ],
+          [
+            155015.0,
+            463010.0
+          ]
+        ]
+      ],
+      "terrain": [
+        [
+          [
+            154995.0,
+            462990.0
+          ],
+          [
+            154995.0,
+            463010.0
+          ]
+        ]
+      ],
+      "fail_roads": false,
+      "expected_points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 155000.0,
+          "y": 463000.0
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 155006.025,
+          "y": 463000.0
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 155012.05,
+          "y": 463000.0
+        }
+      ],
+      "expected_axis": [
+        {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        {
+          "x": 155012.05,
+          "y": 463000.0,
+          "z": 5.1
+        }
+      ],
+      "fetch_bounds": {
+        "min_x": 154938.2,
+        "min_y": 462937.9,
+        "max_x": 155073.8,
+        "max_y": 463062.2
+      }
+    },
+    {
+      "name": "case-1",
+      "virtual": true,
+      "trench": {
+        "label": "Fixture",
+        "job_id": 81,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155010.0,
+          "y": 463000.0,
+          "z": 5.1
+        },
+        "objects": [
+          {
+            "role": "object",
+            "object_name": "LS",
+            "source_name": "ls",
+            "position": {
+              "x": 155012.0,
+              "y": 463000.4,
+              "z": 1.2
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ],
+            "metadata": {}
+          }
+        ],
+        "metadata": {
+          "rotation_degrees": 37.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.8,
+            "source_name": "Dekband"
+          },
+          {
+            "start_chainage": -2.0,
+            "end_chainage": 20.0,
+            "start_depth": 0.3,
+            "end_depth": 0.3,
+            "source_name": "Beton"
+          }
+        ]
+      },
+      "raster": {
+        "path": "ai-profile.tif",
+        "width": 780,
+        "height": 220,
+        "transform": {
+          "a": 0.01999999999997015,
+          "b": 0,
+          "c": 154998.2,
+          "d": 0,
+          "e": -0.01954545454540163,
+          "f": 463002.2
+        },
+        "bounds": {
+          "min_x": 154998.2,
+          "min_y": 462997.9,
+          "max_x": 155013.8,
+          "max_y": 463002.2
+        },
+        "epsg": 28992,
+        "kickthemap_job_id": 81,
+        "kickthemap_job_title": "Fixture",
+        "kickthemap_job_sidecar": null,
+        "metadata": {
+          "rotation_degrees": 37.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        }
+      },
+      "dataset": {
+        "job_id": 81,
+        "title": "Fixture",
+        "source_path": "jobFeatures.json",
+        "features": [
+          {
+            "object_name": "Beginpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155000.0,
+                "y": 463000.0,
+                "z": 2.3
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "Eindpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155010.0,
+                "y": 463000.0,
+                "z": 5.1
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "LS",
+            "source_name": "ls",
+            "geometry": {
+              "Point": {
+                "x": 155012.0,
+                "y": 463000.4,
+                "z": 1.2
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      },
+      "roads": [
+        [
+          [
+            155015.0,
+            462990.0
+          ],
+          [
+            155015.0,
+            463010.0
+          ]
+        ]
+      ],
+      "terrain": [
+        [
+          [
+            154995.0,
+            462990.0
+          ],
+          [
+            154995.0,
+            463010.0
+          ]
+        ]
+      ],
+      "fail_roads": true,
+      "expected_points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 155001.2382776909,
+          "y": 462996.3991780856
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 155006.05005663892,
+          "y": 463000.0251136001
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 155010.86183558695,
+          "y": 463003.6510491146
+        }
+      ],
+      "expected_axis": [
+        {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        {
+          "x": 155012.05,
+          "y": 463000.0,
+          "z": 5.1
+        }
+      ],
+      "fetch_bounds": {
+        "min_x": 154938.2,
+        "min_y": 462937.9,
+        "max_x": 155073.8,
+        "max_y": 463062.2
+      }
+    },
+    {
+      "name": "case-2",
+      "virtual": false,
+      "trench": {
+        "label": "Fixture",
+        "job_id": 81,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155010.0,
+          "y": 463000.0,
+          "z": 5.1
+        },
+        "objects": [
+          {
+            "role": "object",
+            "object_name": "LS",
+            "source_name": "ls",
+            "position": {
+              "x": 155012.0,
+              "y": 463000.4,
+              "z": 1.2
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ],
+            "metadata": {}
+          }
+        ],
+        "metadata": {
+          "rotation_degrees": 0.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.8,
+            "source_name": "Dekband"
+          },
+          {
+            "start_chainage": -2.0,
+            "end_chainage": 20.0,
+            "start_depth": 0.3,
+            "end_depth": 0.3,
+            "source_name": "Beton"
+          }
+        ]
+      },
+      "raster": {
+        "path": "ai-profile.tif",
+        "width": 160,
+        "height": 60,
+        "transform": {
+          "a": 0.1,
+          "b": 0,
+          "c": 154998.0,
+          "d": 0,
+          "e": -0.1,
+          "f": 463003.0
+        },
+        "bounds": {
+          "min_x": 154998.0,
+          "min_y": 462997.0,
+          "max_x": 155014.0,
+          "max_y": 463003.0
+        },
+        "epsg": 28992,
+        "kickthemap_job_id": 81,
+        "kickthemap_job_title": "Fixture",
+        "kickthemap_job_sidecar": null,
+        "metadata": {
+          "rotation_degrees": 0.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        }
+      },
+      "dataset": {
+        "job_id": 81,
+        "title": "Fixture",
+        "source_path": "jobFeatures.json",
+        "features": [
+          {
+            "object_name": "Beginpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155000.0,
+                "y": 463000.0,
+                "z": 2.3
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "Eindpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155010.0,
+                "y": 463000.0,
+                "z": 5.1
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "LS",
+            "source_name": "ls",
+            "geometry": {
+              "Point": {
+                "x": 155012.0,
+                "y": 463000.4,
+                "z": 1.2
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      },
+      "roads": [
+        [
+          [
+            155015.0,
+            462990.0
+          ],
+          [
+            155015.0,
+            463010.0
+          ]
+        ]
+      ],
+      "terrain": [
+        [
+          [
+            154995.0,
+            462990.0
+          ],
+          [
+            154995.0,
+            463010.0
+          ]
+        ]
+      ],
+      "fail_roads": false,
+      "expected_points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 154999.95,
+          "y": 463000.0
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 155006.0,
+          "y": 463000.0
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 155012.05,
+          "y": 463000.0
+        }
+      ],
+      "expected_axis": [
+        {
+          "x": 154999.95,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        {
+          "x": 155012.05,
+          "y": 463000.0,
+          "z": 5.1
+        }
+      ],
+      "fetch_bounds": {
+        "min_x": 154938.0,
+        "min_y": 462937.0,
+        "max_x": 155074.0,
+        "max_y": 463063.0
+      }
+    },
+    {
+      "name": "case-3",
+      "virtual": false,
+      "trench": {
+        "label": "Fixture",
+        "job_id": 81,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155010.0,
+          "y": 463000.0,
+          "z": 5.1
+        },
+        "objects": [
+          {
+            "role": "object",
+            "object_name": "LS",
+            "source_name": "ls",
+            "position": {
+              "x": 155012.0,
+              "y": 463000.4,
+              "z": 1.2
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ],
+            "metadata": {}
+          }
+        ],
+        "metadata": {
+          "rotation_degrees": -73.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.8,
+            "source_name": "Dekband"
+          },
+          {
+            "start_chainage": -2.0,
+            "end_chainage": 20.0,
+            "start_depth": 0.3,
+            "end_depth": 0.3,
+            "source_name": "Beton"
+          }
+        ]
+      },
+      "raster": {
+        "path": "ai-profile.tif",
+        "width": 160,
+        "height": 60,
+        "transform": {
+          "a": 0.1,
+          "b": 0,
+          "c": 154998.0,
+          "d": 0,
+          "e": -0.1,
+          "f": 463003.0
+        },
+        "bounds": {
+          "min_x": 154998.0,
+          "min_y": 462997.0,
+          "max_x": 155014.0,
+          "max_y": 463003.0
+        },
+        "epsg": 28992,
+        "kickthemap_job_id": 81,
+        "kickthemap_job_title": "Fixture",
+        "kickthemap_job_sidecar": null,
+        "metadata": {
+          "rotation_degrees": -73.0,
+          "template_dekband_lines": [
+            {
+              "start_chainage": 7.0,
+              "end_chainage": 2.0,
+              "start_depth": 0.8,
+              "end_depth": 0.25,
+              "source_name": "Dekband"
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 20.0,
+              "start_depth": 0.3,
+              "source_name": "Beton"
+            }
+          ]
+        }
+      },
+      "dataset": {
+        "job_id": 81,
+        "title": "Fixture",
+        "source_path": "jobFeatures.json",
+        "features": [
+          {
+            "object_name": "Beginpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155000.0,
+                "y": 463000.0,
+                "z": 2.3
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "Eindpunt",
+            "source_name": "PUNT",
+            "geometry": {
+              "Point": {
+                "x": 155010.0,
+                "y": 463000.0,
+                "z": 5.1
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          },
+          {
+            "object_name": "LS",
+            "source_name": "ls",
+            "geometry": {
+              "Point": {
+                "x": 155012.0,
+                "y": 463000.4,
+                "z": 1.2
+              }
+            },
+            "attributes": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      },
+      "roads": [
+        [
+          [
+            155015.0,
+            462990.0
+          ],
+          [
+            155015.0,
+            463010.0
+          ]
+        ]
+      ],
+      "terrain": [
+        [
+          [
+            154995.0,
+            462990.0
+          ],
+          [
+            154995.0,
+            463010.0
+          ]
+        ]
+      ],
+      "fail_roads": false,
+      "expected_points": [
+        {
+          "key": "start",
+          "label": "Beginpunt",
+          "x": 155004.23115118642,
+          "y": 463005.78564377356
+        },
+        {
+          "key": "middle",
+          "label": "Middenpunt",
+          "x": 155006.0,
+          "y": 463000.0
+        },
+        {
+          "key": "end",
+          "label": "Eindpunt",
+          "x": 155007.76884881358,
+          "y": 462994.21435622644
+        }
+      ],
+      "expected_axis": [
+        {
+          "x": 154999.95,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        {
+          "x": 155012.05,
+          "y": 463000.0,
+          "z": 5.1
+        }
+      ],
+      "fetch_bounds": {
+        "min_x": 154938.0,
+        "min_y": 462937.0,
+        "max_x": 155074.0,
+        "max_y": 463063.0
+      }
+    }
+  ],
+  "providers": [
+    {
+      "setting": "osm",
+      "expected": "OpenStreetMap"
+    },
+    {
+      "setting": "cadastral",
+      "expected": "Cadastral"
+    },
+    {
+      "setting": "pdok",
+      "expected": "PdokAerial"
+    },
+    {
+      "setting": "unknown",
+      "expected": "PdokAerial"
+    }
+  ],
+  "cad": [
+    {
+      "include": false,
+      "count": 0
+    },
+    {
+      "include": true,
+      "count": 1
+    }
+  ]
+}

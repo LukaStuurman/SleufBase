@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "project_name": "PS42",
+  "saved_at": "2026-10-17T12:00:00+00:00",
+  "ui": {
+    "center_x": 168002.0,
+    "center_y": 401001.0,
+    "meters_per_pixel": 0.05,
+    "opacity_percent": 80.0,
+    "use_background": true,
+    "background_source": "PDOK luchtfoto",
+    "selected_tiff_index": 0,
+    "selected_dxf_index": 0
+  },
+  "tiffs": [
+    {
+      "type": "virtual_trench",
+      "name": "PS42",
+      "path": null,
+      "metadata": {
+        "virtual_trench_payload": {
+          "width_meters": 2.0,
+          "source": "marxact",
+          "points": [
+            {
+              "role": "start",
+              "x": 168000,
+              "y": 401001,
+              "z": 11
+            },
+            {
+              "role": "object",
+              "x": 168002,
+              "y": 401001,
+              "z": 3.12,
+              "object_name": "water detail",
+              "source_name": "Waterleiding",
+              "attribute_1": "water detail",
+              "attribute_2": "Water",
+              "attribute_3": "marxact_point",
+              "custom_object_metadata": {
+                "keep": true
+              }
+            },
+            {
+              "role": "end",
+              "x": 168004,
+              "y": 401001,
+              "z": 16
+            }
+          ]
+        },
+        "marxact_boundary_3d": [
+          [
+            168000,
+            401000,
+            10
+          ],
+          [
+            168004,
+            401000,
+            14
+          ],
+          [
+            168004,
+            401002,
+            18
+          ],
+          [
+            168000,
+            401002,
+            12
+          ]
+        ],
+        "marxact_source_path": "assets/PS42.dxf",
+        "marxact_alignment_rotation_degrees": 0,
+        "marxact_alignment_auto_start": [
+          168000,
+          401001,
+          11
+        ],
+        "marxact_alignment_auto_end": [
+          168004,
+          401001,
+          16
+        ],
+        "marxact_alignment_auto_width": 2,
+        "kickthemap_job_id": 123,
+        "custom_metadata": {
+          "unknown": [
+            "preserve",
+            {
+              "also": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "geotiff",
+      "name": "reference",
+      "path": "assets/reference.tiff",
+      "metadata": {
+        "rotation_degrees": 15,
+        "kickthemap_job_id": 456
+      }
+    }
+  ],
+  "template_export_slots": [
+    {
+      "custom_slot": "PS42"
+    }
+  ],
+  "template_export_settings": {
+    "custom_unknown_setting": {
+      "preserve": [
+        1,
+        2,
+        "é"
+      ]
+    }
+  },
+  "dxfs": [
+    {
+      "path": "assets/context.dxf",
+      "visible": false
+    }
+  ],
+  "map_comments": [
+    {
+      "x": 168001.5,
+      "y": 401001.5,
+      "text": "Controleer diepte – café"
+    }
+  ]
+}

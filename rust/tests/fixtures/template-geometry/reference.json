@@ -1,0 +1,7906 @@
+[
+  {
+    "name": "shipped",
+    "path": "assets/cadastral_template.dxf",
+    "layers": [
+      {
+        "name": "Native geometry",
+        "color": 3,
+        "true_color": 1193046
+      },
+      {
+        "name": "0",
+        "color": 2,
+        "true_color": null
+      }
+    ],
+    "requests": [
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              8,
+              9
+            ],
+            "scale": 0.02,
+            "attributes": {}
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 0,
+          "true_color": 9991764,
+          "lineweight": 13
+        },
+        "shape": {
+          "Polyline": {
+            "vertices": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "closed": true
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Circle": {
+            "center": [
+              -3,
+              4
+            ],
+            "radius": 0.1
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 0,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 1,
+            "valign": 2
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 2,
+            "valign": 3
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 4,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              2.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+            "insert": [
+              7.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+            "insert": [
+              13.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+            "insert": [
+              18.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+            "insert": [
+              24.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+            "insert": [
+              29.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Block": {
+            "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+            "insert": [
+              8,
+              9
+            ],
+            "scale": 0.02,
+            "attributes": {}
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {
+          "color": 0,
+          "true_color": 9991764,
+          "lineweight": 13
+        },
+        "shape": {
+          "Polyline": {
+            "vertices": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "closed": true
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Circle": {
+            "center": [
+              -3,
+              4
+            ],
+            "radius": 0.1
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 0,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 1,
+            "valign": 2
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 2,
+            "valign": 3
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "A0 S",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 4,
+            "valign": 0
+          }
+        }
+      }
+    ],
+    "expected": [
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              0.020000000000000018,
+              0.08040671021732121,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              0.08040671021732121,
+              0.0
+            ],
+            "height": 0.1,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              0.020000000000000018,
+              -0.009593289782678843,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.009593289782678843,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              0.020000000000000018,
+              -0.0995932897826788,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.0995932897826788,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              0.020000000000000018,
+              -0.18959328978267878,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.18959328978267878,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              -7.9,
+              0.402033551086606,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              0.402033551086606,
+              0.0
+            ],
+            "height": 0.5,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              -7.9,
+              -0.04796644891339419,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.04796644891339419,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -7.9,
+              -0.4979664489133939,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.4979664489133939,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              -7.9,
+              -0.9479664489133939,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.9479664489133939,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              -146.5,
+              6.030503266299089,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              6.030503266299089,
+              0.0
+            ],
+            "height": 7.5,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              -146.5,
+              -0.7194967337009128,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -0.7194967337009128,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -146.5,
+              -7.469496733700909,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -7.469496733700909,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              -146.5,
+              -14.219496733700907,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -14.219496733700907,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              12.9,
+              -0.146698729810789,
+              0.0
+            ],
+            "align": [
+              12.9,
+              -0.146698729810789,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              12.5,
+              -0.7334936490539449,
+              0.0
+            ],
+            "align": [
+              12.5,
+              -0.7334936490539449,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              5.5,
+              -11.002404735809174,
+              0.0
+            ],
+            "align": [
+              5.5,
+              -11.002404735809174,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              16.52,
+              -0.3800000002240086,
+              0.0
+            ],
+            "align": [
+              16.52,
+              -0.3800000002240086,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              16.52,
+              -0.2700000002262732,
+              0.0
+            ],
+            "align": [
+              16.52,
+              -0.2700000002262732,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              8.6,
+              -1.9000000011200426,
+              0.0
+            ],
+            "align": [
+              8.6,
+              -1.9000000011200426,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              8.6,
+              -1.3500000011313658,
+              0.0
+            ],
+            "align": [
+              8.6,
+              -1.3500000011313658,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              -130.0,
+              -28.50000001680064,
+              0.0
+            ],
+            "align": [
+              -130.0,
+              -28.50000001680064,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -130.0,
+              -20.25000001697049,
+              0.0
+            ],
+            "align": [
+              -130.0,
+              -20.25000001697049,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              25.98,
+              -0.3800000002240086,
+              0.0
+            ],
+            "align": [
+              25.98,
+              -0.3800000002240086,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              25.98,
+              -0.2700000002262732,
+              0.0
+            ],
+            "align": [
+              25.98,
+              -0.2700000002262732,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              33.9,
+              -1.9000000011200426,
+              0.0
+            ],
+            "align": [
+              33.9,
+              -1.9000000011200426,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              33.9,
+              -1.3500000011313658,
+              0.0
+            ],
+            "align": [
+              33.9,
+              -1.3500000011313658,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              172.5,
+              -28.50000001680064,
+              0.0
+            ],
+            "align": [
+              172.5,
+              -28.50000001680064,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              172.5,
+              -20.25000001697049,
+              0.0
+            ],
+            "align": [
+              172.5,
+              -20.25000001697049,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              29.517978170814093,
+              -0.22,
+              0.0
+            ],
+            "align": [
+              29.517978170814093,
+              -0.22,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              29.589890854070468,
+              -1.1,
+              0.0
+            ],
+            "align": [
+              29.589890854070468,
+              -1.1,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              30.848362811057044,
+              -16.5,
+              0.0
+            ],
+            "align": [
+              30.848362811057044,
+              -16.5,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          8.0,
+          9.0,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "LWPOLYLINE",
+        "layer": "Native geometry",
+        "color": 0,
+        "true_color": 9991764,
+        "lineweight": 13,
+        "vertices": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        "closed": true
+      },
+      {
+        "kind": "CIRCLE",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          -3.0,
+          4.0,
+          0.0
+        ],
+        "radius": 0.1
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 0,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 1,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 2
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 2,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 3
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 4,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              0.020000000000000018,
+              0.08040671021732121,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              0.08040671021732121,
+              0.0
+            ],
+            "height": 0.1,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              0.020000000000000018,
+              -0.009593289782678843,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.009593289782678843,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              0.020000000000000018,
+              -0.0995932897826788,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.0995932897826788,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              0.020000000000000018,
+              -0.18959328978267878,
+              0.0
+            ],
+            "align": [
+              0.020000000000000018,
+              -0.18959328978267878,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              -7.9,
+              0.402033551086606,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              0.402033551086606,
+              0.0
+            ],
+            "height": 0.5,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              -7.9,
+              -0.04796644891339419,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.04796644891339419,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -7.9,
+              -0.4979664489133939,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.4979664489133939,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              -7.9,
+              -0.9479664489133939,
+              0.0
+            ],
+            "align": [
+              -7.9,
+              -0.9479664489133939,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          2.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "DP007B",
+            "insert": [
+              -146.5,
+              6.030503266299089,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              6.030503266299089,
+              0.0
+            ],
+            "height": 7.5,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NUMMER",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Proefsleuven",
+            "insert": [
+              -146.5,
+              -0.7194967337009128,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -0.7194967337009128,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "GROEP",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -146.5,
+              -7.469496733700909,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -7.469496733700909,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "Schaal: 1:100",
+            "insert": [
+              -146.5,
+              -14.219496733700907,
+              0.0
+            ],
+            "align": [
+              -146.5,
+              -14.219496733700907,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "SCHAAL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_RECHTS-SOD",
+        "insert": [
+          7.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              12.9,
+              -0.146698729810789,
+              0.0
+            ],
+            "align": [
+              12.9,
+              -0.146698729810789,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              12.5,
+              -0.7334936490539449,
+              0.0
+            ],
+            "align": [
+              12.5,
+              -0.7334936490539449,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_HOOGTEREFERENTIE_ONDER-SOD",
+        "insert": [
+          13.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "8.00 N.A.P.",
+            "insert": [
+              5.5,
+              -11.002404735809174,
+              0.0
+            ],
+            "align": [
+              5.5,
+              -11.002404735809174,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "REFERENTIE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              16.52,
+              -0.3800000002240086,
+              0.0
+            ],
+            "align": [
+              16.52,
+              -0.3800000002240086,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              16.52,
+              -0.2700000002262732,
+              0.0
+            ],
+            "align": [
+              16.52,
+              -0.2700000002262732,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              8.6,
+              -1.9000000011200426,
+              0.0
+            ],
+            "align": [
+              8.6,
+              -1.9000000011200426,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              8.6,
+              -1.3500000011313658,
+              0.0
+            ],
+            "align": [
+              8.6,
+              -1.3500000011313658,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_LINKS-SOD",
+        "insert": [
+          18.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              -130.0,
+              -28.50000001680064,
+              0.0
+            ],
+            "align": [
+              -130.0,
+              -28.50000001680064,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              -130.0,
+              -20.25000001697049,
+              0.0
+            ],
+            "align": [
+              -130.0,
+              -20.25000001697049,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 0,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              25.98,
+              -0.3800000002240086,
+              0.0
+            ],
+            "align": [
+              25.98,
+              -0.3800000002240086,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              25.98,
+              -0.2700000002262732,
+              0.0
+            ],
+            "align": [
+              25.98,
+              -0.2700000002262732,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              33.9,
+              -1.9000000011200426,
+              0.0
+            ],
+            "align": [
+              33.9,
+              -1.9000000011200426,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              33.9,
+              -1.3500000011313658,
+              0.0
+            ],
+            "align": [
+              33.9,
+              -1.3500000011313658,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_TITEL_RECHTS-SOD",
+        "insert": [
+          24.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "N.A.P.",
+            "insert": [
+              172.5,
+              -28.50000001680064,
+              0.0
+            ],
+            "align": [
+              172.5,
+              -28.50000001680064,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "TITEL",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "PS 7B",
+            "insert": [
+              172.5,
+              -20.25000001697049,
+              0.0
+            ],
+            "align": [
+              172.5,
+              -20.25000001697049,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 0.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "OMSCHRIJVING",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              29.517978170814093,
+              -0.22,
+              0.0
+            ],
+            "align": [
+              29.517978170814093,
+              -0.22,
+              0.0
+            ],
+            "height": 0.036000000000000004,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              29.589890854070468,
+              -1.1,
+              0.0
+            ],
+            "align": [
+              29.589890854070468,
+              -1.1,
+              0.0
+            ],
+            "height": 0.18000000000000002,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_BAND_WAARDE-SOD",
+        "insert": [
+          29.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "0",
+            "color": 0,
+            "true_color": null,
+            "lineweight": 0,
+            "text": "3.14",
+            "insert": [
+              30.848362811057044,
+              -16.5,
+              0.0
+            ],
+            "align": [
+              30.848362811057044,
+              -16.5,
+              0.0
+            ],
+            "height": 2.7,
+            "rotation": 90.0,
+            "width": 1.0,
+            "oblique": 0,
+            "generation": 0,
+            "halign": 2,
+            "style": "NLCS-ISO",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "WAARDE",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 0,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "name": "SAL-VERWIJZING_PROFIELRASTER_TITEL_LINKS-SOD",
+        "insert": [
+          8.0,
+          9.0,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "LWPOLYLINE",
+        "layer": "Native geometry",
+        "color": 0,
+        "true_color": 9991764,
+        "lineweight": 13,
+        "vertices": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        "closed": true
+      },
+      {
+        "kind": "CIRCLE",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          -3.0,
+          4.0,
+          0.0
+        ],
+        "radius": 0.1
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 0,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 1,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 2
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 2,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 3
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 4,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      }
+    ]
+  },
+  {
+    "name": "blocks",
+    "path": "rust/tests/fixtures/template-geometry/blocks.dxf",
+    "layers": [
+      {
+        "name": "Native geometry",
+        "color": 3,
+        "true_color": 1193046
+      },
+      {
+        "name": "0",
+        "color": 2,
+        "true_color": null
+      }
+    ],
+    "requests": [
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              8,
+              9
+            ],
+            "scale": 0.02,
+            "attributes": {}
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {
+          "color": 0,
+          "true_color": 9991764,
+          "lineweight": 13
+        },
+        "shape": {
+          "Polyline": {
+            "vertices": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "closed": true
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Circle": {
+            "center": [
+              -3,
+              4
+            ],
+            "radius": 0.1
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 0,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 1,
+            "valign": 2
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 2,
+            "valign": 3
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": null,
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 4,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              8,
+              9
+            ],
+            "scale": 0.02,
+            "attributes": {}
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {
+          "color": 0,
+          "true_color": 9991764,
+          "lineweight": 13
+        },
+        "shape": {
+          "Polyline": {
+            "vertices": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "closed": true
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Circle": {
+            "center": [
+              -3,
+              4
+            ],
+            "radius": 0.1
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 0,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 1,
+            "valign": 2
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 2,
+            "valign": 3
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Layout1",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 4,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              2.0,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -0.2
+            ],
+            "scale": 0.02,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -1.0
+            ],
+            "scale": 0.1,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 2,
+          "lineweight": 25
+        },
+        "shape": {
+          "Block": {
+            "name": "Empty",
+            "insert": [
+              7.5,
+              -15.0
+            ],
+            "scale": 1.5,
+            "attributes": {
+              "NUMMER": "DP007B",
+              "GROEP": "Proefsleuven",
+              "OMSCHRIJVING": "PS 7B",
+              "SCHAAL": "Schaal: 1:100",
+              "REFERENTIE": "8.00 N.A.P.",
+              "WAARDE": "3.14",
+              "TITEL": "N.A.P.",
+              "NAME": "Nieuw Ø 漢😀"
+            }
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Block": {
+            "name": "Titel Ø",
+            "insert": [
+              8,
+              9
+            ],
+            "scale": 0.02,
+            "attributes": {}
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {
+          "color": 0,
+          "true_color": 9991764,
+          "lineweight": 13
+        },
+        "shape": {
+          "Polyline": {
+            "vertices": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                2
+              ]
+            ],
+            "closed": true
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Circle": {
+            "center": [
+              -3,
+              4
+            ],
+            "radius": 0.1
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 0,
+            "valign": 0
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 1,
+            "valign": 2
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 2,
+            "valign": 3
+          }
+        }
+      },
+      {
+        "layer": "Native geometry",
+        "layout": "Papier Ø",
+        "paint": {},
+        "shape": {
+          "Text": {
+            "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+            "insert": [
+              12,
+              34
+            ],
+            "height": 0.035,
+            "rotation": 90,
+            "style": "Standard",
+            "halign": 4,
+            "valign": 0
+          }
+        }
+      }
+    ],
+    "expected": [
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.02,
+              -0.16000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.04,
+              -0.14,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.06,
+              -0.12000000000000002,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.09,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.08,
+              -0.10000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.11,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.1,
+              -0.8000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.2,
+              -0.7000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.3,
+              -0.6000000000000001,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.45,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.4,
+              -0.5,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.55,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              3.5,
+              -12.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              5.0,
+              -10.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              6.5,
+              -9.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 6.75,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              8.0,
+              -7.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 8.25,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "name": "Titel Ø",
+        "insert": [
+          8.0,
+          9.0,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "LWPOLYLINE",
+        "layer": "Native geometry",
+        "color": 0,
+        "true_color": 9991764,
+        "lineweight": 13,
+        "vertices": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        "closed": true
+      },
+      {
+        "kind": "CIRCLE",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          -3.0,
+          4.0,
+          0.0
+        ],
+        "radius": 0.1
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 0,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 1,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 2
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 2,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 3
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 4,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.02,
+              -0.16000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.04,
+              -0.14,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.06,
+              -0.12000000000000002,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.09,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.08,
+              -0.10000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.11,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.1,
+              -0.8000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.2,
+              -0.7000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.3,
+              -0.6000000000000001,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.45,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.4,
+              -0.5,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.55,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              3.5,
+              -12.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              5.0,
+              -10.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              6.5,
+              -9.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 6.75,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              8.0,
+              -7.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 8.25,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "name": "Titel Ø",
+        "insert": [
+          8.0,
+          9.0,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "LWPOLYLINE",
+        "layer": "Native geometry",
+        "color": 0,
+        "true_color": 9991764,
+        "lineweight": 13,
+        "vertices": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        "closed": true
+      },
+      {
+        "kind": "CIRCLE",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          -3.0,
+          4.0,
+          0.0
+        ],
+        "radius": 0.1
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 0,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 1,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 2
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 2,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 3
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 4,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.02,
+              -0.16000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.05,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.04,
+              -0.14,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.07,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.06,
+              -0.12000000000000002,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.09,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.08,
+              -0.10000000000000003,
+              1.0
+            ],
+            "align": [
+              1.98,
+              -0.24000000000000002,
+              0.0
+            ],
+            "height": 0.11,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              2.1,
+              -0.8000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.25,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              2.2,
+              -0.7000000000000002,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.35000000000000003,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              2.3,
+              -0.6000000000000001,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.45,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              2.4,
+              -0.5,
+              1.0
+            ],
+            "align": [
+              1.9,
+              -1.2000000000000002,
+              0.0
+            ],
+            "height": 0.55,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Titel Ø",
+        "insert": [
+          2.0,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": [
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 0,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "Nieuw Ø 漢😀",
+            "insert": [
+              3.5,
+              -12.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 3.75,
+            "rotation": 0.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "NAME",
+            "flags": 0,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 1,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default DEFAULT",
+            "insert": [
+              5.0,
+              -10.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 5.25,
+            "rotation": 45.0,
+            "width": 0.8000000000000003,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "DEFAULT",
+            "flags": 1,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 2,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CONSTANT",
+            "insert": [
+              6.5,
+              -9.0,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 6.75,
+            "rotation": 90.0,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 0,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CONSTANT",
+            "flags": 2,
+            "valign": 0,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          },
+          {
+            "kind": "ATTRIB",
+            "layer": "Attribute layer",
+            "color": 3,
+            "true_color": null,
+            "lineweight": -1,
+            "text": "default CENTERED",
+            "insert": [
+              8.0,
+              -7.5,
+              1.0
+            ],
+            "align": [
+              0.5,
+              -18.0,
+              0.0
+            ],
+            "height": 8.25,
+            "rotation": -90.00000000000001,
+            "width": 0.8,
+            "oblique": 15.0,
+            "generation": 2,
+            "halign": 1,
+            "style": "Standard",
+            "extrusion": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "thickness": 0,
+            "tag": "CENTERED",
+            "flags": 8,
+            "valign": 2,
+            "lock_position": 1,
+            "field_length": 5,
+            "attribute_type": 1,
+            "linetype": "ByBlock"
+          }
+        ]
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -0.2,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -1.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.1,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 2,
+        "true_color": null,
+        "lineweight": 25,
+        "name": "Empty",
+        "insert": [
+          7.5,
+          -15.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "INSERT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "name": "Titel Ø",
+        "insert": [
+          8.0,
+          9.0,
+          0.0
+        ],
+        "scale": [
+          0.02,
+          0.02,
+          1
+        ],
+        "rotation": 0.0,
+        "attributes": []
+      },
+      {
+        "kind": "LWPOLYLINE",
+        "layer": "Native geometry",
+        "color": 0,
+        "true_color": 9991764,
+        "lineweight": 13,
+        "vertices": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        "closed": true
+      },
+      {
+        "kind": "CIRCLE",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          -3.0,
+          4.0,
+          0.0
+        ],
+        "radius": 0.1
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 0,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 1,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 2
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 2,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 3
+      },
+      {
+        "kind": "TEXT",
+        "layer": "Native geometry",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "text": "Maaiveld: 10.25 N.A.P. Ø 漢😀",
+        "insert": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "align": [
+          12.0,
+          34.0,
+          0.0
+        ],
+        "height": 0.035,
+        "rotation": 90.0,
+        "width": 1,
+        "oblique": 0,
+        "generation": 0,
+        "halign": 4,
+        "style": "Standard",
+        "extrusion": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thickness": 0,
+        "valign": 0
+      }
+    ]
+  }
+]

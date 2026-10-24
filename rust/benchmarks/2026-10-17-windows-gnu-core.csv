@@ -1,0 +1,5 @@
+operation,rounds,total_us,allocation_calls,build_mode
+camera_input_retired_clone,20,712771,10000080,release
+camera_input_borrowed,20,0,0,release
+validation_retired_temporary_vectors,20,100030,2000000,release
+validation_current,20,4548,0,release

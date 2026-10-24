@@ -1,0 +1,3567 @@
+{
+  "cases": [
+    {
+      "name": "00-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155008.0,
+            "y": 463000.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155006.0,
+                "y": 463000.3,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.0,
+                "y": 462999.4,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.0,
+                "y": 463000.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 463000.2,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 462999.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155008.7,
+                "y": 463001.8,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.25,
+        "reverse": false
+      },
+      "size": [
+        154,
+        75
+      ],
+      "bounds": {
+        "min_x": 154998.2,
+        "min_y": 462997.60000000003,
+        "max_x": 155010.5,
+        "max_y": 463003.6
+      },
+      "transform": {
+        "a": 0.07987012987005428,
+        "b": 0.0,
+        "c": 154998.2,
+        "d": 0.0,
+        "e": -0.0799999999992239,
+        "f": 463003.6
+      }
+    },
+    {
+      "name": "00-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155008.0,
+            "y": 463000.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155006.0,
+                "y": 463000.3,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.0,
+                "y": 462999.4,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.0,
+                "y": 463000.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 463000.2,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 462999.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155008.7,
+                "y": 463001.8,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 154999.6,
+              "y": 462998.9,
+              "z": 2.0
+            },
+            {
+              "x": 155008.4,
+              "y": 462998.9,
+              "z": 2.0
+            },
+            {
+              "x": 155008.4,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 155004.5,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 155004.5,
+              "y": 463000.2,
+              "z": 2.0
+            },
+            {
+              "x": 155003.5,
+              "y": 463000.2,
+              "z": 2.0
+            },
+            {
+              "x": 155003.5,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 154999.6,
+              "y": 463001.3,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.25,
+        "reverse": false
+      },
+      "size": [
+        159,
+        82
+      ],
+      "bounds": {
+        "min_x": 154997.80000000002,
+        "min_y": 462997.10000000003,
+        "max_x": 155010.5,
+        "max_y": 463003.6
+      },
+      "transform": {
+        "a": 0.07987421383636815,
+        "b": 0.0,
+        "c": 154997.80000000002,
+        "d": 0.0,
+        "e": -0.07926829268221698,
+        "f": 463003.6
+      }
+    },
+    {
+      "name": "01-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155006.34682672232,
+            "y": 463004.87009143207,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.57749161305,
+                "y": 463003.89057457616,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.15861019772,
+                "y": 463000.13274942484,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.74728036087,
+                "y": 463002.99039305426,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.25830773506,
+                "y": 463001.9849549551,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.56268844957,
+                "y": 463001.58827828494,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155005.8064034883,
+                "y": 463006.72426044487,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.375,
+        "reverse": false
+      },
+      "size": [
+        194,
+        199
+      ],
+      "bounds": {
+        "min_x": 154998.0173715713,
+        "min_y": 462997.9619939979,
+        "max_x": 155008.32945515102,
+        "max_y": 463008.52426044486
+      },
+      "transform": {
+        "a": 0.05315506999853749,
+        "b": 0.0,
+        "c": 154998.0173715713,
+        "d": 0.0,
+        "e": -0.053076715813774204,
+        "f": 463008.52426044486
+      }
+    },
+    {
+      "name": "01-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155006.34682672232,
+            "y": 463004.87009143207,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.57749161305,
+                "y": 463003.89057457616,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.15861019772,
+                "y": 463000.13274942484,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.74728036087,
+                "y": 463002.99039305426,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.25830773506,
+                "y": 463001.9849549551,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.56268844957,
+                "y": 463001.58827828494,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155005.8064034883,
+                "y": 463006.72426044487,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 155000.3522962358,
+              "y": 462998.8838067541,
+              "z": 2.0
+            },
+            {
+              "x": 155007.33380563036,
+              "y": 463004.24090732937,
+              "z": 2.0
+            },
+            {
+              "x": 155005.87277820075,
+              "y": 463006.14495534607,
+              "z": 2.0
+            },
+            {
+              "x": 155002.7787001736,
+              "y": 463003.77078577294,
+              "z": 2.0
+            },
+            {
+              "x": 155003.4483377455,
+              "y": 463002.89809709863,
+              "z": 2.0
+            },
+            {
+              "x": 155002.6549844052,
+              "y": 463002.2893356696,
+              "z": 2.0
+            },
+            {
+              "x": 155001.9853468333,
+              "y": 463003.1620243439,
+              "z": 2.0
+            },
+            {
+              "x": 154998.89126880618,
+              "y": 463000.7878547708,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.375,
+        "reverse": false
+      },
+      "size": [
+        226,
+        215
+      ],
+      "bounds": {
+        "min_x": 154997.0912688062,
+        "min_y": 462997.0838067541,
+        "max_x": 155009.13380563035,
+        "max_y": 463008.52426044486
+      },
+      "transform": {
+        "a": 0.05328556116883111,
+        "b": 0.0,
+        "c": 154997.0912688062,
+        "d": 0.0,
+        "e": -0.053211412515198855,
+        "f": 463008.52426044486
+      }
+    },
+    {
+      "name": "02-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155000.0,
+            "y": 463008.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.7,
+                "y": 463006.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.6,
+                "y": 463001.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.3,
+                "y": 463004.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.8,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.3,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 154998.2,
+                "y": 463008.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [
+            {
+              "start_chainage": 3.0,
+              "end_chainage": 7.0,
+              "start_depth": 0.2,
+              "end_depth": 0.8,
+              "source_name": "Band B",
+              "display_rgb": [
+                239,
+                33,
+                44
+              ]
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 9.0,
+              "start_depth": 0.5,
+              "end_depth": 0.1,
+              "source_name": "Band A",
+              "display_rgb": [
+                12,
+                230,
+                64
+              ]
+            },
+            {
+              "start_chainage": 3.0,
+              "end_chainage": 6.0,
+              "start_depth": 0.1,
+              "end_depth": 0.3,
+              "source_name": "Band C",
+              "display_rgb": [
+                99,
+                31,
+                181
+              ]
+            }
+          ],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.75,
+        "reverse": false
+      },
+      "size": [
+        225,
+        462
+      ],
+      "bounds": {
+        "min_x": 154996.40000000002,
+        "min_y": 462998.2,
+        "max_x": 155002.4,
+        "max_y": 463010.5
+      },
+      "transform": {
+        "a": 0.026666666666537317,
+        "b": 0.0,
+        "c": 154996.40000000002,
+        "d": 0.0,
+        "e": -0.026623376623351427,
+        "f": 463010.5
+      }
+    },
+    {
+      "name": "02-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155000.0,
+            "y": 463008.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.7,
+                "y": 463006.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.6,
+                "y": 463001.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.3,
+                "y": 463004.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.8,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.3,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 154998.2,
+                "y": 463008.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 155001.1,
+              "y": 462999.6,
+              "z": 2.0
+            },
+            {
+              "x": 155001.1,
+              "y": 463008.4,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463008.4,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463004.5,
+              "z": 2.0
+            },
+            {
+              "x": 154999.8,
+              "y": 463004.5,
+              "z": 2.0
+            },
+            {
+              "x": 154999.8,
+              "y": 463003.5,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463003.5,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 462999.6,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [
+            {
+              "start_chainage": 3.0,
+              "end_chainage": 7.0,
+              "start_depth": 0.2,
+              "end_depth": 0.8,
+              "source_name": "Band B",
+              "display_rgb": [
+                239,
+                33,
+                44
+              ]
+            },
+            {
+              "start_chainage": -2.0,
+              "end_chainage": 9.0,
+              "start_depth": 0.5,
+              "end_depth": 0.1,
+              "source_name": "Band A",
+              "display_rgb": [
+                12,
+                230,
+                64
+              ]
+            },
+            {
+              "start_chainage": 3.0,
+              "end_chainage": 6.0,
+              "start_depth": 0.1,
+              "end_depth": 0.3,
+              "source_name": "Band C",
+              "display_rgb": [
+                99,
+                31,
+                181
+              ]
+            }
+          ],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 0.75,
+        "reverse": false
+      },
+      "size": [
+        244,
+        477
+      ],
+      "bounds": {
+        "min_x": 154996.40000000002,
+        "min_y": 462997.8,
+        "max_x": 155002.9,
+        "max_y": 463010.5
+      },
+      "transform": {
+        "a": 0.026639344262175804,
+        "b": 0.0,
+        "c": 154996.40000000002,
+        "d": 0.0,
+        "e": -0.02662473794551707,
+        "f": 463010.5
+      }
+    },
+    {
+      "name": "03-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155002.3389736378,
+            "y": 462992.3495619523,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.04112165511,
+                "y": 462994.3498829756,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.71858885113,
+                "y": 462998.86827222124,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.83890014805,
+                "y": 462996.37944116944,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.06837606535,
+                "y": 462997.1895600731,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.59022368738,
+                "y": 462997.0433742207,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.26498239182,
+                "y": 462992.2064176916,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 1.0,
+        "reverse": false
+      },
+      "size": [
+        408,
+        575
+      ],
+      "bounds": {
+        "min_x": 154997.91310857324,
+        "min_y": 462990.4064176916,
+        "max_x": 155006.0649823918,
+        "max_y": 463001.8877115114
+      },
+      "transform": {
+        "a": 0.01998008288865094,
+        "b": 0.0,
+        "c": 154997.91310857324,
+        "d": 0.0,
+        "e": -0.0199674675126722,
+        "f": 463001.8877115114
+      }
+    },
+    {
+      "name": "03-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155002.3389736378,
+            "y": 462992.3495619523,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.04112165511,
+                "y": 462994.3498829756,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.71858885113,
+                "y": 462998.86827222124,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.83890014805,
+                "y": 462996.37944116944,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.06837606535,
+                "y": 462997.1895600731,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.59022368738,
+                "y": 462997.0433742207,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.26498239182,
+                "y": 462992.2064176916,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 154998.83111608657,
+              "y": 463000.0609130272,
+              "z": 2.0
+            },
+            {
+              "x": 155001.40398708812,
+              "y": 462991.6454311747,
+              "z": 2.0
+            },
+            {
+              "x": 155003.6991185024,
+              "y": 462992.347123266,
+              "z": 2.0
+            },
+            {
+              "x": 155002.558868854,
+              "y": 462996.07671181427,
+              "z": 2.0
+            },
+            {
+              "x": 155001.50693362244,
+              "y": 462995.7551029391,
+              "z": 2.0
+            },
+            {
+              "x": 155001.21456191773,
+              "y": 462996.7114076951,
+              "z": 2.0
+            },
+            {
+              "x": 155002.26649714928,
+              "y": 462997.03301657026,
+              "z": 2.0
+            },
+            {
+              "x": 155001.12624750086,
+              "y": 463000.7626051185,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 1.0,
+        "reverse": false
+      },
+      "size": [
+        452,
+        636
+      ],
+      "bounds": {
+        "min_x": 154997.03111608658,
+        "min_y": 462989.84543117473,
+        "max_x": 155006.0649823918,
+        "max_y": 463002.5626051185
+      },
+      "transform": {
+        "a": 0.019986429878814965,
+        "b": 0.0,
+        "c": 154997.03111608658,
+        "d": 0.0,
+        "e": -0.019995556515348643,
+        "f": 463002.5626051185
+      }
+    },
+    {
+      "name": "04-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155008.0,
+            "y": 463000.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155006.0,
+                "y": 463000.3,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.0,
+                "y": 462999.4,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.0,
+                "y": 463000.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 463000.2,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 462999.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155008.7,
+                "y": 463001.8,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 1.5,
+        "reverse": false
+      },
+      "size": [
+        923,
+        450
+      ],
+      "bounds": {
+        "min_x": 154998.2,
+        "min_y": 462997.60000000003,
+        "max_x": 155010.5,
+        "max_y": 463003.6
+      },
+      "transform": {
+        "a": 0.013326110509196487,
+        "b": 0.0,
+        "c": 154998.2,
+        "d": 0.0,
+        "e": -0.013333333333203983,
+        "f": 463003.6
+      }
+    },
+    {
+      "name": "04-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155008.0,
+            "y": 463000.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155006.0,
+                "y": 463000.3,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.0,
+                "y": 462999.4,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.0,
+                "y": 463000.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 463000.2,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155003.0,
+                "y": 462999.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155008.7,
+                "y": 463001.8,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 154999.6,
+              "y": 462998.9,
+              "z": 2.0
+            },
+            {
+              "x": 155008.4,
+              "y": 462998.9,
+              "z": 2.0
+            },
+            {
+              "x": 155008.4,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 155004.5,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 155004.5,
+              "y": 463000.2,
+              "z": 2.0
+            },
+            {
+              "x": 155003.5,
+              "y": 463000.2,
+              "z": 2.0
+            },
+            {
+              "x": 155003.5,
+              "y": 463001.3,
+              "z": 2.0
+            },
+            {
+              "x": 154999.6,
+              "y": 463001.3,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 1.5,
+        "reverse": false
+      },
+      "size": [
+        953,
+        488
+      ],
+      "bounds": {
+        "min_x": 154997.80000000002,
+        "min_y": 462997.10000000003,
+        "max_x": 155010.5,
+        "max_y": 463003.6
+      },
+      "transform": {
+        "a": 0.013326337880359432,
+        "b": 0.0,
+        "c": 154997.80000000002,
+        "d": 0.0,
+        "e": -0.013319672131028262,
+        "f": 463003.6
+      }
+    },
+    {
+      "name": "05-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155006.34682672232,
+            "y": 463004.87009143207,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.57749161305,
+                "y": 463003.89057457616,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.15861019772,
+                "y": 463000.13274942484,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.74728036087,
+                "y": 463002.99039305426,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.25830773506,
+                "y": 463001.9849549551,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.56268844957,
+                "y": 463001.58827828494,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155005.8064034883,
+                "y": 463006.72426044487,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 2.0,
+        "reverse": false
+      },
+      "size": [
+        1032,
+        1057
+      ],
+      "bounds": {
+        "min_x": 154998.0173715713,
+        "min_y": 462997.9619939979,
+        "max_x": 155008.32945515102,
+        "max_y": 463008.52426044486
+      },
+      "transform": {
+        "a": 0.009992329050112667,
+        "b": 0.0,
+        "c": 154998.0173715713,
+        "d": 0.0,
+        "e": -0.009992683488118322,
+        "f": 463008.52426044486
+      }
+    },
+    {
+      "name": "05-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155006.34682672232,
+            "y": 463004.87009143207,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.57749161305,
+                "y": 463003.89057457616,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.15861019772,
+                "y": 463000.13274942484,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.74728036087,
+                "y": 463002.99039305426,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.25830773506,
+                "y": 463001.9849549551,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.56268844957,
+                "y": 463001.58827828494,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155005.8064034883,
+                "y": 463006.72426044487,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 155000.3522962358,
+              "y": 462998.8838067541,
+              "z": 2.0
+            },
+            {
+              "x": 155007.33380563036,
+              "y": 463004.24090732937,
+              "z": 2.0
+            },
+            {
+              "x": 155005.87277820075,
+              "y": 463006.14495534607,
+              "z": 2.0
+            },
+            {
+              "x": 155002.7787001736,
+              "y": 463003.77078577294,
+              "z": 2.0
+            },
+            {
+              "x": 155003.4483377455,
+              "y": 463002.89809709863,
+              "z": 2.0
+            },
+            {
+              "x": 155002.6549844052,
+              "y": 463002.2893356696,
+              "z": 2.0
+            },
+            {
+              "x": 155001.9853468333,
+              "y": 463003.1620243439,
+              "z": 2.0
+            },
+            {
+              "x": 154998.89126880618,
+              "y": 463000.7878547708,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 2.0,
+        "reverse": false
+      },
+      "size": [
+        1205,
+        1145
+      ],
+      "bounds": {
+        "min_x": 154997.0912688062,
+        "min_y": 462997.0838067541,
+        "max_x": 155009.13380563035,
+        "max_y": 463008.52426044486
+      },
+      "transform": {
+        "a": 0.009993806493075378,
+        "b": 0.0,
+        "c": 154997.0912688062,
+        "d": 0.0,
+        "e": -0.009991662612024239,
+        "f": 463008.52426044486
+      }
+    },
+    {
+      "name": "06-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155000.0,
+            "y": 463008.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.7,
+                "y": 463006.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.6,
+                "y": 463001.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.3,
+                "y": 463004.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.8,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.3,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 154998.2,
+                "y": 463008.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 3.0,
+        "reverse": false
+      },
+      "size": [
+        900,
+        1845
+      ],
+      "bounds": {
+        "min_x": 154996.40000000002,
+        "min_y": 462998.2,
+        "max_x": 155002.4,
+        "max_y": 463010.5
+      },
+      "transform": {
+        "a": 0.006666666666634329,
+        "b": 0.0,
+        "c": 154996.40000000002,
+        "d": 0.0,
+        "e": -0.006666666666660357,
+        "f": 463010.5
+      }
+    },
+    {
+      "name": "06-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155000.0,
+            "y": 463008.0,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.7,
+                "y": 463006.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.6,
+                "y": 463001.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.3,
+                "y": 463004.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.8,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.3,
+                "y": 463003.0,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 154998.2,
+                "y": 463008.7,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 155001.1,
+              "y": 462999.6,
+              "z": 2.0
+            },
+            {
+              "x": 155001.1,
+              "y": 463008.4,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463008.4,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463004.5,
+              "z": 2.0
+            },
+            {
+              "x": 154999.8,
+              "y": 463004.5,
+              "z": 2.0
+            },
+            {
+              "x": 154999.8,
+              "y": 463003.5,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 463003.5,
+              "z": 2.0
+            },
+            {
+              "x": 154998.7,
+              "y": 462999.6,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 3.0,
+        "reverse": false
+      },
+      "size": [
+        975,
+        1906
+      ],
+      "bounds": {
+        "min_x": 154996.40000000002,
+        "min_y": 462997.8,
+        "max_x": 155002.9,
+        "max_y": 463010.5
+      },
+      "transform": {
+        "a": 0.006666666666636817,
+        "b": 0.0,
+        "c": 154996.40000000002,
+        "d": 0.0,
+        "e": -0.006663168940194985,
+        "f": 463010.5
+      }
+    },
+    {
+      "name": "07-manual",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155002.3389736378,
+            "y": 462992.3495619523,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.04112165511,
+                "y": 462994.3498829756,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.71858885113,
+                "y": 462998.86827222124,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.83890014805,
+                "y": 462996.37944116944,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.06837606535,
+                "y": 462997.1895600731,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.59022368738,
+                "y": 462997.0433742207,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.26498239182,
+                "y": 462992.2064176916,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 6.0,
+        "reverse": false
+      },
+      "size": [
+        2446,
+        3445
+      ],
+      "bounds": {
+        "min_x": 154997.91310857324,
+        "min_y": 462990.4064176916,
+        "max_x": 155006.0649823918,
+        "max_y": 463001.8877115114
+      },
+      "transform": {
+        "a": 0.0033327366388264854,
+        "b": 0.0,
+        "c": 154997.91310857324,
+        "d": 0.0,
+        "e": -0.0033327413119844745,
+        "f": 463001.8877115114
+      }
+    },
+    {
+      "name": "07-measured",
+      "source": {
+        "trench": {
+          "label": "PS1",
+          "width_meters": 0.6,
+          "start": {
+            "x": 155000.0,
+            "y": 463000.0,
+            "z": 2.0
+          },
+          "end": {
+            "x": 155002.3389736378,
+            "y": 462992.3495619523,
+            "z": 2.1
+          },
+          "objects": [
+            {
+              "role": "object",
+              "object_name": "Kabel 0",
+              "source_name": "LS",
+              "position": {
+                "x": 155002.04112165511,
+                "y": 462994.3498829756,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  200,
+                  10,
+                  20
+                ],
+                "point_id": "object-0",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 1",
+              "source_name": "LS",
+              "position": {
+                "x": 154999.71858885113,
+                "y": 462998.86827222124,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  31,
+                  171
+                ],
+                "point_id": "object-1",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 2",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.83890014805,
+                "y": 462996.37944116944,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  -5,
+                  500,
+                  true
+                ],
+                "point_id": "object-2",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 3",
+              "source_name": "LS",
+              "position": {
+                "x": 155001.06837606535,
+                "y": 462997.1895600731,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "٥",
+                  "2_0",
+                  "3"
+                ],
+                "point_id": "object-3",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 4",
+              "source_name": "LS",
+              "position": {
+                "x": 155000.59022368738,
+                "y": 462997.0433742207,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "point_id": "object-4",
+                "keep": "Ø"
+              }
+            },
+            {
+              "role": "object",
+              "object_name": "Kabel 5",
+              "source_name": "LS",
+              "position": {
+                "x": 155004.26498239182,
+                "y": 462992.2064176916,
+                "z": 1.2
+              },
+              "attributes": [
+                "",
+                "",
+                ""
+              ],
+              "metadata": {
+                "display_rgb": [
+                  "invalid",
+                  2,
+                  3
+                ],
+                "point_id": "object-5",
+                "keep": "Ø"
+              }
+            }
+          ],
+          "boundary_3d": [
+            {
+              "x": 154998.83111608657,
+              "y": 463000.0609130272,
+              "z": 2.0
+            },
+            {
+              "x": 155001.40398708812,
+              "y": 462991.6454311747,
+              "z": 2.0
+            },
+            {
+              "x": 155003.6991185024,
+              "y": 462992.347123266,
+              "z": 2.0
+            },
+            {
+              "x": 155002.558868854,
+              "y": 462996.07671181427,
+              "z": 2.0
+            },
+            {
+              "x": 155001.50693362244,
+              "y": 462995.7551029391,
+              "z": 2.0
+            },
+            {
+              "x": 155001.21456191773,
+              "y": 462996.7114076951,
+              "z": 2.0
+            },
+            {
+              "x": 155002.26649714928,
+              "y": 462997.03301657026,
+              "z": 2.0
+            },
+            {
+              "x": 155001.12624750086,
+              "y": 463000.7626051185,
+              "z": 2.0
+            }
+          ],
+          "dekband_rows": [],
+          "metadata": {},
+          "job_id": 0
+        },
+        "quality": 6.0,
+        "reverse": false
+      },
+      "size": [
+        2711,
+        3816
+      ],
+      "bounds": {
+        "min_x": 154997.03111608658,
+        "min_y": 462989.84543117473,
+        "max_x": 155006.0649823918,
+        "max_y": 463002.5626051185
+      },
+      "transform": {
+        "a": 0.003332300370794675,
+        "b": 0.0,
+        "c": 154997.03111608658,
+        "d": 0.0,
+        "e": -0.003332592752558107,
+        "f": 463002.5626051185
+      }
+    }
+  ],
+  "colors": [
+    {
+      "value": null,
+      "expected": null
+    },
+    {
+      "value": [],
+      "expected": null
+    },
+    {
+      "value": [
+        1,
+        2
+      ],
+      "expected": null
+    },
+    {
+      "value": [
+        1,
+        2,
+        3
+      ],
+      "expected": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "value": [
+        true,
+        false,
+        8
+      ],
+      "expected": [
+        1,
+        0,
+        8
+      ]
+    },
+    {
+      "value": [
+        -7,
+        300,
+        2.9
+      ],
+      "expected": [
+        0,
+        255,
+        2
+      ]
+    },
+    {
+      "value": [
+        "٥",
+        "2_0",
+        "+003"
+      ],
+      "expected": [
+        5,
+        20,
+        3
+      ]
+    },
+    {
+      "value": [
+        "-99999999999999999999999999999999999999999999",
+        "99999999999999999999999999999999999999999999",
+        0
+      ],
+      "expected": [
+        0,
+        255,
+        0
+      ]
+    },
+    {
+      "value": [
+        "x",
+        2,
+        3
+      ],
+      "expected": null
+    },
+    {
+      "value": [
+        "1.5",
+        2,
+        3
+      ],
+      "expected": null
+    },
+    {
+      "value": [
+        null,
+        2,
+        3
+      ],
+      "expected": null
+    },
+    {
+      "value": [
+        "2_",
+        2,
+        3
+      ],
+      "expected": null
+    },
+    {
+      "value": [
+        " 3 ",
+        2,
+        3
+      ],
+      "expected": [
+        3,
+        2,
+        3
+      ]
+    }
+  ]
+}

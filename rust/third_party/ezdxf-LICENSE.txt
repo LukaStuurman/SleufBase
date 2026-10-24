@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2020 Manfred Moitzi
+Copyright (c) 2022-2026 Manfred Moitzi (fonts/shapefile.py)
+Copyright (c) 2023 Manfred Moitzi (fonts/lff.py)
+Copyright (c) 2020-2024 Manfred Moitzi (path/tools.py)
+Copyright (c) 2010-2024 Manfred Moitzi (math/_bezier4p.py)
+Copyright (c) 2021-2023 Manfred Moitzi (addons/text2path.py)
+Copyright (c) 2019-2024 Manfred Moitzi (entities/attrib.py, entities/insert.py)
+Copyright (c) 2011-2022 Manfred Moitzi (sections/entities.py)
+Copyright (c) 2020-2023 Matthew Broadway (addons/drawing/text.py)
+Copyright (c) 2020-2023 Manfred Moitzi (explode.py)
+Copyright (c) 2021-2024 Manfred Moitzi (tools/text.py)
+Copyright (c) 2020-2021 Matthew Broadway (tools/text.py text_wrap)
+Copyright (c) 2021-2023 Manfred Moitzi (tools/text_layout.py)
+Copyright (c) 2023 Manfred Moitzi (fonts/font_manager.py)
+Copyright (c) 2021-2025 Manfred Moitzi (render/abstract_mtext_renderer.py)
+Copyright (c) 2021-2022 Manfred Moitzi (addons/drawing/mtext_complex.py)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

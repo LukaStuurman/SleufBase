@@ -1,0 +1,36 @@
+{
+  "rounds": [
+    {
+      "build_mode": "release",
+      "elapsed_ms": 148.8698,
+      "peak_working_set_bytes": 75132928,
+      "filled_slots": 3,
+      "profiles": 2,
+      "image_files": 6,
+      "drawing_bytes": 18919176
+    },
+    {
+      "build_mode": "release",
+      "elapsed_ms": 145.35799999999998,
+      "peak_working_set_bytes": 75116544,
+      "filled_slots": 3,
+      "profiles": 2,
+      "image_files": 6,
+      "drawing_bytes": 18919176
+    },
+    {
+      "build_mode": "release",
+      "elapsed_ms": 148.30380000000002,
+      "peak_working_set_bytes": 75108352,
+      "filled_slots": 3,
+      "profiles": 2,
+      "image_files": 6,
+      "drawing_bytes": 18919176
+    }
+  ],
+  "platform": "Windows-10-10.0.26200-SP0",
+  "source_bytes": 18855304,
+  "source_sha256": "8096c2fd7ba287507381bacf39c05723e602f2212b577daba969885383736f3b",
+  "fixture_sha256": "30f9b1e0f77fdde6dc8d44c04c8f7e6969a08ea0ea8438896fdca0b397b92f3a",
+  "scope": "Three fresh native release processes. Timed: original real-template load/parse; complete template preparation; three filled slots and one blank; two complete active profiles; six already-prepared small RGBA PNG copies and full pixel-stream validation; one image graph batch; original per-slot drawing-order restoration; final DXF write, asset flush/fsync and atomic publication. Excludes process startup, input-manifest parsing/path resolution, raster/map rendering and fetch, network/BGT preparation, logos/contact restoration, GUI/GPU and output cleanup. Peak process working set includes startup/input parsing baselines and temporary documents. File-system cache is uncontrolled. This is a native prepared-input baseline, not a Python, raster-rendering or full-application comparison. Separate independent readback checks fields/order/geometry/ownership and PNG bytes/pixels."
+}

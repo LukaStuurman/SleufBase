@@ -1,0 +1,555 @@
+# SleufBase Rust (0.1.0-preview)
+
+Dit is een aparte native Rust-desktopapp naast de bestaande SleufBase v0.3.62 (Python).
+De Rust-versie is nog niet productiegelijkwaardig aan SleufBase.
+
+De uiteindelijke zelfstandige Rust-port is bestemd voor
+[LukaStuurman/SleufBase-RUST](https://github.com/LukaStuurman/SleufBase-RUST).
+De volledige acceptatievoorwaarden in [PARITY.md](PARITY.md) blijven vereist.
+
+## Wat er in deze preview zit
+
+Nieuw: logo’s/contactherstel, volledige oorspronkelijke virtuele pixelmaskers/kleuren, dekbandprofielen per richting en niet-geheime profielvoorkeuren. `--export-python nieuw.klicproject native.json` biedt een expliciete beperkte terugconverter; niet verliesvrij ondersteunde gegevens worden geweigerd. [Contracten en beperkingen](tests/fixtures/native-port-contracts.md).
+
+- Rust Windows-desktopvenster met Techbase-oranje accenten (egui/eframe).
+- Virtuele proefsleuven op de echte kaart tekenen, selecteren, als geheel verplaatsen en voorzien van een blijvend referentiepunt. Twee drukken kiezen begin/eind; korte sleuven worden geweigerd. Midden slepen blijft pannen; Escape/rechtsklik annuleert. Gemeten rand en uitlijningsbasis bewegen mee zonder bronbestanden of Z-waarden te wijzigen. Referenties/notities blijven in projecten en sjablonen, ook zonder profieltekening. Puntselectie/snapping, asbewerking, richtingskopieën en dekbanddieptes zijn toegevoegd. Oorspronkelijke maskers en puntkleuren worden op alle pixels vergeleken; AHN aanvullen kan annuleerbaar in het concept. Automatische AHN-aanvulling volgt verplaatsingen en concepten. Het Gemma-venster toont drie bewerkbare teksten vóór expliciet toepassen; echte model-/GPU- en praktijkacceptatie blijven open. Zie ook [de nieuwe contracten](tests/fixtures/native-port-contracts.md). Zie [de oorspronkelijke kaart-/uitvoercontroles](tests/fixtures/virtual-map/README.md).
+- Op kaarten met een referentielegenda schalen tekst, noordpijl en symbolen mee met de uitvoerresolutie, zodat lage-DPI-kaarten leesbaar blijven. Rasterligging en meetcoördinaten blijven behouden.
+- Openen van meerdere lokaal beschikbare KickTheMap jobFeatures.json bestanden.
+- Parser voor handmatig geplaatste objectpunten en objectpolylijnen, inclusief optionele Z-coordinaten.
+- Locatiezoeker met PDOK-adres-/plaats-/wegsuggesties, RD/GPS-invoer, Ctrl+L, toetsenbordkeuze en tijdelijke markering. Springen werkt ook zonder geladen bestanden; de oorspronkelijke schaal en PDOK-luchtfoto volgen de gekozen locatie. Zoeken gebruikt één begrensde achtergrondworker en overschrijft geen projectdata. Zie [de onafhankelijke locatiecontroles](tests/fixtures/location/README.md).
+- Kaartvoorbeeld met RD-objecten, gegeorefereerde GeoTIFFs en asynchrone PDOK-luchtfoto.
+- **Export kaarten** maakt afzonderlijke A4-PNGs van alle geladen TIFFs, met instelbare DPI/schaal, PDOK/OSM/Kadaster/offline achtergrond, optionele zichtbare CAD-lagen en oorspronkelijke 70% TIFF-dekking. Kadaster gebruikt de oorspronkelijke WMTS-zoom/uitsnede/beeldverkleining, vier gelijktijdige downloads en gedeelde pixel-/schijfcache. Een mislukte tegel geeft een fout; eerdere uitvoer blijft behouden. Dubbele bestandsnamen krijgen volgnummers. De bestaande exportworker geeft voortgang/annulering en alle bronnen terug. Volledige provider-/rasterbediening en praktijkacceptatie blijven open. Zie [kaartcontroles](tests/fixtures/map-batch/README.md) en [Kadaster-beeld-/netwerkproeven](tests/fixtures/cadastral-tiles/README.md).
+- TIFF-adressenoverzicht met oorspronkelijke bronvolgorde, adres/afstand, kopiëren met of zonder bestandsnaam, vernieuwen en annuleren. Eén hergebruikte achtergrondworker houdt de kaart bedienbaar; projectwisseling onderdrukt oude resultaten en rasterpixels worden niet gekopieerd. Zie [de oorspronkelijke rij- en clipboardcontroles](tests/fixtures/raster-addresses/README.md).
+- **Begin- en referentiepunten** bij de GeoTIFF-lijst: plaats/verplaats een referentie op de kaart, kies een gemeten beginpunt, wis alle referenties of laad beginpunten voor gekoppelde KickTheMap-TIFFs. Opgeslagen/lokale objecten en de bestaande ingelogde downloadwachtrij worden hergebruikt. Oorspronkelijke BRT/BGT-bronnen bepalen de richting; offline gebruik blijft mogelijk. Punten blijven bij het project en worden door beide sjabloonplanners gebruikt. Oorspronkelijke rotatie-/selectiecontracten en echte kaartklikken controleren de koppeling. Virtuele referentiebewerking en volledige account-/praktijkacceptatie blijven open. Zie [de puntcontroles](tests/fixtures/raster-points/README.md).
+- **TIFF draaien** bij de geselecteerde GeoTIFF: 90° links/rechts, een eigen hoek (ook met decimale komma), reset of slepen aan een rotatiecirkel. Het middelpunt en de oorspronkelijke basis blijven bewaard, zonder rasterpixels te wijzigen; begin-/referentiepunten blijven meetgegevens. De cirkel past bij het openen in de kaart, slepen draait zonder onbedoeld verschuiven en de middelste muisknop blijft beschikbaar voor pannen. Projecten bewaren/herstellen de hoek. De knoppenbalken lopen om bij kleinere vensters. Zie [de oorspronkelijke rotatie-/muiscontroles](tests/fixtures/raster-rotation/README.md).
+- **Kaartacties → Wis opmerkingen / Wis alles**: wis alle vrije kaart-/TIFF-opmerkingen of leeg de geladen kaart met behoud van projectnaam, opslaglocatie, instellingen en aanmelding. De bestaande beveiliging voor onopgeslagen werk en lopende taken blijft van toepassing. Bij de gekozen GeoTIFF kun je een meerregelige TIFF-opmerking bewerken of verwijderen; beide sjabloonroutes nemen die samen met kaartopmerkingen over. Annuleren bewaart de bestaande tekst, ongewijzigde tekst maakt het project niet onnodig gewijzigd. Zie [de oorspronkelijke kaartactiecontroles](tests/fixtures/map-actions/README.md).
+- Instelbare objectregels voor kaartkleuren, disciplineoverzicht, Excel en DXF; standaardvolgorde en kleuren uit Python.
+- Excel (.xlsx) export met oranje opmaak, vaste koprij, filter en totaalregel; gedeelde disciplinenamen tellen samen.
+- Automatisch discipline-Excel naast sjabloon-DXF, volgens de bestaande voorkeur in **Instellingen**. PS-namen/varianten en volgorde volgen de gekozen vakken, ook zonder getekend profiel. Lege vakken worden overgeslagen; ontbrekende meetgegevens krijgen een nulregel en melding. Bij opnieuw exporteren wordt het overzicht atomair vervangen en blijft de vorige versie als `previous-disciplines.xlsx` in de nieuwe exportmap bewaard. Een Excel-fout behoudt de geslaagde DXF. Zie [de onafhankelijke rapportcontroles](tests/fixtures/template-reports/README.md).
+- R2018-object-DXF met gerichte puntlijnen, echte 3D-polylijnen, joblabels, discipline-lagen en oorspronkelijke XDATA.
+- Profielrekenkern met 224 oorspronkelijke Python-referenties voor richting, hoogtes, kettingmaat, markerbreedtes en disciplinebeschrijvingen; de complete tekenkern is gekoppeld, terwijl de volledige sjabloon-/UI-workflow nog openstaat. Zie [de vergelijkingsgevallen](tests/fixtures/profiles/README.md).
+- Native profielkader met automatische/handmatige schaal, titel-/referentieblokken, gekoppelde afstands-/hoogtebanden en verbindingslijnen. 24 oorspronkelijke tekengevallen vergelijken 928 echte DXF-objecten en alle attributen; 100 extra bandverdelingen, Unicode-nummers en afronding zijn vergeleken. Meetvertices blijven geleend en de stabiele plaatsingsvolgorde wordt hergebruikt. Zie [de profieltekencontroles](tests/fixtures/profile-drawing/README.md).
+- Native maaiveldlijnen/kleuren, oppervlakteksten, grondvak, gemeten profielpolylijnen en losse markeringen met cirkelblok of 64-segmentclip. 24 samengestelde tekengevallen vergelijken 2.209 objecten en alle obstakelgegevens voor leaders; nog 150 clips en twaalf tekst-/kleurgevallen volgen de oorspronkelijke helpers. De BGT-tegelclient en geometrievoorbereiding zijn apart aangesloten; de volledige sjabloon-/UI-workflow blijft open.
+- Native referentie-indicatoren voor punten op de sleuf, in de zijruimte en buiten beeld, inclusief afstandspijlen, RD-afronding, kaartrotatie en leaderobstakels. 216 directe oorspronkelijke gevallen en 24 samengestelde tekeningen met 2.249 objecten worden onafhankelijk vergeleken. Referentiecoördinaten worden native opgelost voordat de afstandsbanden worden getekend. De volledige sjabloon-/UI-workflow blijft open.
+- Actieve v0.3.10-profielverwijzingen: botsingszoeker, attribuutblok, echte LEADER met annotatiekoppeling en bandlijn. 65 oorspronkelijke scenario's/382 plaatsingen worden op 1.146 echte DXF-objecten, attributen, bronbehoud en CAD-audit gecontroleerd. Vaste score-indexen vervangen float-hashsleutels; bij uitgeschakelde botsingsvermijding of meer dan 80 entries vervalt ongebruikte scoring. De productie-opstart activeert de optionele dynamische profielpatch niet. Native entrygeneratie is aan de complete tekenkern gekoppeld; sjabloon-/UI-integratie blijft open. Zie [het actieve contract](tests/fixtures/profile-leaders/README.md).
+- Complete profieltekenkern uit meetgegevens: native assen/punten, kader/banden, maaiveld/markeringen/referenties, labelinvoer en annotatiekoppelingen. 48 oorspronkelijke tekeningen vergelijken 5.398 DXF-objecten met botsingsvermijding aan/uit; alle 150 afgeleide entries per stand en 336 beschrijvingsgevallen worden onafhankelijk gecontroleerd. Diameter, bundels, mantelbuizen, materiaal, aangepaste prefixes en diepte komen uit de native meetgegevens. Zie [de volledige tekencontroles](tests/fixtures/profile-drawing/README.md). De BGT-tegelclient levert voorbereide ondergrondgeometrie; pagina-/rastervoorbereiding en de native export-UI blijven open.
+- Native BGT-oppervlakteksten uit voorbereide geometrie: drie profielproeflijnen, polygonen met gaten, multipolygonen, lijnen/collecties en oorspronkelijke lengte-/naamprioriteit. Een voorbereide index leent geometrie en namen, filtert met begrenzingen en veegt snij-intervallen zonder tijdelijke geknipte polygonen. 541 oorspronkelijke GEOS-gevallen en een profiel met 12.000 inkepingen controleren de berekening; de complete tekenkern gebruikt nu dezelfde native bepaling. De eerdere profielreferenties blijven inhoudelijk gelijk. Gerichte releasebenchmark: mediaan 9,184 ms native queries plus 0,445 ms voorbereiding tegenover 1.282,212 ms oorspronkelijke queries, met gelijke checksum. Dit sluit JSON-/geometriedecodering, netwerk, opstart, GUI/DXF en procespiekgeheugen uit. Tegelinvoer/RD is apart overgezet; bronfeature-herstel, samenvoegen en clippen blijven open. Zie [de geometriecontroles](tests/fixtures/bgt-surface/README.md) en [de meting](benchmarks/bgt-surface.json).
+- Native BGT-vector-tegelclient met begrensde HTTP-/gzip-invoer, gedeelde verbindingen, parallelle taken, retries en een LRU-cache voor gedeelde RD-geometrie. 26 oorspronkelijke tegelgevallen vergelijken 819 geometrieën/505 ondergronddelen; 360 matrixvragen volgen dezelfde grenzen/volgorde. Ook live HTTPS en hergebruik zonder extra netwerkverzoek zijn onafhankelijk gecontroleerd. De decoder dekt MVT 1/2, waardetypen, ringgroepen en identifierfallbacks. Ruwe tegeldelen moeten nog per bronfeature worden samengevoegd, hersteld en geclipt vóór profielgebruik. Twintig koude uitlezingen/RD-voorbereidingen van dezelfde echte tegel: mediaan 55,407 ms native tegenover 1.106,525 ms oorspronkelijk; apart 0,491 ms voor 20.000 native cache-opvragen. Deze kernmeting sluit netwerk, opstart, union/herstel/clipping, profielkeuze, GUI/DXF en procespiek uit. Zie [de tegelcontroles](tests/fixtures/bgt-tiles/README.md) en [het rapport](benchmarks/bgt-tiles.json).
+- Native metadatafinalisatie van het goedgekeurde profielverwijsblok: alle 15 AutoCAD-parameter-/actierecords en 523 tags, met behoud van waarden en topologie en nieuwe handleverwijzingen. Vier onafhankelijke Python-/CAD-vergelijkingen omvatten het echte voorbereide sjabloon. Annulering, overloop en onvolledige bestaande dictionaries behouden de vorige tekening; herhalen is byte-identiek. Prototypekopieën, volledige profielplaatsing en interactieve AutoCAD-acceptatie blijven open. Zie [de donorcontroles](tests/fixtures/profile-leader/README.md).
+- Native donor-installatie voegt geometrie en dynamische metadatagraaf samen atomair toe wanneer het blok ontbreekt; bestaande goedgekeurde grafen blijven intact. ATTDEF-cache, gedeelde handles/blokaantallen en APPID-registratie ondersteunen volgende INSERT-batches zonder documentherlezing. De oorspronkelijke authored-block-plaatsing gebruikt minimumschaal, basiscorrectie en beide attributen. Drie onafhankelijke controles vergelijken 120 verwijzingen/240 attributen en bronbehoud. Het echte sjabloon heeft al een compleet donorblok, maar geen gevonden layoutvoorbeeld. Prototypekopieën, volledige profielplaatsing en AutoCAD-/UI-acceptatie blijven open.
+- Sjabloonbouwstenen bewaren het originele moderne ASCII-DXF-document, herkennen dezelfde 32 proefsleufvakken en bewerken alleen bedoelde teksttags. Alle overige tags worden onafhankelijk vergeleken; pagina-/profiel-/assetexport en UI-koppeling ontbreken. Zie [de sjablooncontroles](tests/fixtures/templates/README.md).
+- Native sjabloonrasters met correcte IMAGE-definities/reactors en permanente assetbundles; 91 oorspronkelijke plaatsingen inclusief papierlogo's en alle PNG-pixels onafhankelijk gecontroleerd. Oude bundels blijven bereikbaar na vervanging; fouten/annulering beschermen eerdere uitvoer. Rastervoorbereiding en volledige sjabloon-/UI-export blijven open. Zie [de raster-/bundelcontroles](tests/fixtures/template-images/README.md).
+- Native sjabloontekenlaag voor polylijnen, cirkels, tekst en bestaande profielblokken met automatische attributen. Brondefinities en ingelezen attribuutmetadata worden gedeeld; 89 originele object-/blokplaatsingen worden onafhankelijk gecontroleerd. Meerdere tekenbatches en een rasterbatch delen lagen/handles zonder documentherlezing. Pagina-indeling en de volledige sjabloon-/UI-workflow blijven open. Zie [de tekencontroles](tests/fixtures/template-geometry/README.md).
+- Native sjabloonvoorbereiding maakt ontbrekende tekststijlen en past profielkleuren/lijngewichten toe op bestaande en eerder toegevoegde lagen. Eigen fonts, RGB, lijnstijl, flags en XDATA blijven behouden. Vijftien opeenvolgende toestanden, inclusief het echte sjabloon, worden onafhankelijk vergeleken. Gerichte vervanging van voorbereide records voorkomt een tweede documentkopie/herlezing. Unicode-symboolsleutels volgen ezdxf lower(), inclusief Griekse sigma; Straße en STRASSE blijven afzonderlijk. Een aangetoonde fout in Python bij nieuwe laagkleuren is eveneens hersteld. Zie [de voorbereidingscontroles](tests/fixtures/template-preparation/README.md).
+- Native bladnummering en overzichtsvensters groeperen acht vakken per blad, inclusief lege vakken. De laagste KADER-viewport krijgt het oorspronkelijke kaartmidden en een van zes standaardschalen; BLAD/BLADEN/SCHAAL volgen het eerste bladblok. Twintig opeenvolgende toestanden, inclusief het echte sjabloon, controleren schaalgrenzen, ontbrekende vensters/blokken en bronbehoud. Unicode-bladnamen volgen afzonderlijk ezdxf uppercase(); vijf bladnamen controleren titelvelden en plaatsing van geometrie/rasters. Bladuitbreiding en legenda-/titelherstel zijn afzonderlijk overgezet; de complete export-UI blijft open. Zie [de bladcontroles](tests/fixtures/template-layout/README.md).
+- Native bladuitbreiding kopieert modelonderdelen en maakt ontbrekende papierlayouts met correcte blokrecords, vensters en clipverwijzingen. Het echte sjabloon groeit van 32 naar 64 vakken. Titelattributen, gekoppelde vertices, geneste gegevens en afbeeldingsreactoren krijgen eigen handles; named resources blijven gedeeld. Twaalf toestanden controleren kopieën en opvolgende datum-/project-/viewportbewerkingen, met exacte terugval bij annuleren, fouten of een workerpanic. Een aangetoonde kopieerfout in geneste dictionaries is in de native route hersteld. Legenda-/titelherstel is afzonderlijk overgezet; overige CAD-objecttypen blijven open. Zie [de bladuitbreidingscontroles](tests/fixtures/template-pages/README.md).
+- Native sjabloonvoorbereiding koppelt bladuitbreiding, fonts/lagen, legenda-/titelherstel, eenheden, schaallijst, projectnaam, automatische lokale datum en overzichtsvensters in één atomaire stap. Negen legendavarianten en elf samengestelde toestanden worden onafhankelijk met de oorspronkelijke uitvoer vergeleken, inclusief het echte sjabloon. Attribuuttransformaties worden per bronblok hergebruikt; signed/nonuniform schalen, spiegeling en OCS zijn gecontroleerd. Een vervolgtest voegt tekenwerk en raster toe aan een nieuw blad. Multiline ATTDEF-regeneratie en de complete native exportbediening blijven open. Zie [de voorbereidingscontroles](tests/fixtures/template-setup/README.md) en [legendacontroles](tests/fixtures/template-legends/README.md).
+- Native sjabloonsamenstelling koppelt voorbereide TIFF-/kaart-PNGs aan de vakken, vult teksten en tekent complete profielen met referenties, BGT-/maaiveldwaarden en annotatie-LEADERs. Nieuwe afbeeldingen worden naar één blijvende exportmap gekopieerd, volledig gedecodeerd/gecontroleerd en samen met de DXF atomair gepubliceerd. Eén afbeeldingsbatch plus één eindindexering behoudt de oorspronkelijke tekenvolgorde per vak. Vijf onafhankelijke exportcontroles vergelijken acht profielen en 26 PNGs, inclusief extra blad en dubbele PS-namen. De CLI accepteert voorbereide invoer en directe TIFF-bronnen; beide richtingen zijn nu gekoppeld aan de native vensters, inclusief foto- en virtuele rasteropbouw. Oorspronkelijke fotoannotaties/virtuele maskers, logo-/contactherstel en praktijkacceptatie blijven open. Zie [de exportcontroles](tests/fixtures/template-export/README.md).
+- Native GeoTIFF-voorbereiding leest alle ondersteunde bronpixels en bepaalt richting uit dezelfde profielas of uit wegen/terrein. Bicubische rotatie, crop met twee pixels marge en transparante randachtergrond zijn op 140 beeldgevallen gecontroleerd, met exacte RGBA-pixels; vier aantoonbaar foutieve Pillow-TIFF-oriëntaties hebben een expliciete numerieke referentiecorrectie. Volledig decoderen is ook op 45 kleur- en oriëntatiegevallen en alle pixels van een 4097×4097-TIFF getest. De CLI kan per vak direct een TIFF-bron voorbereiden; vijf volledige exports vergelijken acht profielen en 26 PNGs. Foto-/virtuele opbouw en de volledige native exportworkflow blijven open. Zie [de beeldcontroles](tests/fixtures/template-raster/README.md).
+- Native A4-kaartopbouw voor de sjabloon-CLI: volledige TIFF, CAD-paden, PDOK WMS-tegels/voorbereide achtergrond, coördinaten, schaalbalk, noordpijl en gedeelde profielreferentie. Een rijcache van 8 MiB vervangt de volledige horizontale resamplingbuffer. 54 verkleiningen en acht TIFF-bewerkingen zijn pixel-exact; twaalf bladindelingen volgen iedere oorspronkelijke tekenopdracht. Tien glyph-/positiereferenties volgen onafhankelijke HarfBuzz; fonts en primitieve contourpixels zijn geen FreeType-pixelkopie. Zie [de kaartcontroles](tests/fixtures/map-export/README.md). De complete native workflow blijft open; het keuze-/volgordevenster is gekoppeld.
+- **DXF-sjabloon** bundelt TIFF-bladen/PS-varianten, jobs/virtuele sleuven en opgeslagen exportinvoer. De TIFF-keuze opent het native venster voor volgorde, lege/uitgesloten vakken, PS-nummers/varianten, handmatige schalen, projectnaam/tekenaar, gekoppelde profieljob en richting, referentie, comments en achtergrond/BGT. De export gebruikt de bestaande annuleerbare worker en het ingebouwde sjabloon; grote invoer wordt teruggegeven bij fouten. Native projectformaat 5 bewaart deze keuzes, kaartpositie, dekking, achtergrond en laagidentiteiten en leest versies 1–4. Automatische datum komt uit dezelfde titelblokkern. Gekoppelde normale-omgekeerde exports, foto’s, volledige legacy instellingen en praktijkacceptatie blijven open. Zie [de venster-/workercontroles](tests/fixtures/template-order/README.md).
+- Titelblokkern vult projectnaam en lokale exportdatum op gebruikte bladen, met behoud van latere revisies. Onafhankelijke DXF-controle vergelijkt 78 titelvelden en alle overige tags. De bestaande Python-exportdialoog heeft het projectnaamveld al; het native keuze-/volgordevenster is nu gekoppeld; de volledige workflow blijft onderdeel van de migratie. Zie [de titelblokcontroles](tests/fixtures/template-metadata/README.md).
+- Native BGT-bronfeatures worden per laag/id/ondergrond samengevoegd en op de uitsnede geknipt, met herstel van zelfdoorsnijdingen en behoud van randlijnen/raakpunten. Repareren vóór samenvoegen voorkomt aantoonbaar verlies van geldige tegeldelen; die fout is ook in Python hersteld. 844 geometriegevallen, drie volledige batches, oorspronkelijke padafronding en ondergrondkeuze worden onafhankelijk met GEOS vergeleken. De ondergrondindex leent de geometrie. Zie [de herstelcontroles](tests/fixtures/bgt-geometry/README.md).
+- Beveiliging tegen het overschrijven van bestaande uitvoerbestanden.
+- Eenregelige CAD-tekst (TEXT) verschijnt als echte vectorcontouren op de kaart en op sjabloonkaarten, met lokale TrueType/SHP/SHX/LFF-lettertypen, alle vijftien uitlijningen en tekst in geneste blokken. Projecten bewaren de lettervormen ook zonder de bronfonts. 675 oorspronkelijke tekstgevallen en 25 blokinstanties controleren geometrie; de echte canvas-/kaartpaden zijn getest. Dit is contourweergave: vlakvulling, multiline attribuutopmaak/MTEXT en volledige importinstellingen/praktijkacceptatie blijven open. Zie [de tekstcontroles](tests/fixtures/cad-text/README.md).
+- Gekoppelde eenregelige CAD-attributen (ATTRIB) zijn zichtbaar, met eigen plaatsing/OCS, dubbele namen, lagen, kleur en vlaggen. De bloktransformatie wordt niet dubbel toegepast; herhaalde blokken verplaatsen beide uitlijningspunten. 471 oorspronkelijke attribuutinstanties en 1884 verse runtime-instanties controleren de werkelijke import-/kaartketen. Grote bronmetadata blijft gedeeld. Ingebouwde MTEXT wordt bewaard en als nog niet ondersteund gemeld; multiline ATTDEF, tekstvlakvulling en volledige CAD-acceptatie blijven open. Zie [de attribuutcontroles](tests/fixtures/cad-attrib/README.md).
+- De CAD-kaart gebruikt nu dezelfde modelruimte als de oorspronkelijke inlezer. Actieve en overige papierbladen vervormen de kaartuitsnede niet meer; hun geometrie wordt overgeslagen. Eigenaars, ruimteflags, gekoppelde records, blokinhoud en afwijkende sectievolgorde zijn vergeleken met 24 oorspronkelijke tekeningen. Oude CAD-projectkopieën behouden hun data en tonen een herlaadmelding wanneer de ruimte-informatie ontbreekt. Zie [de ruimtecontroles](tests/fixtures/cad-space/README.md).
+- Eenregelige attribuutdefinities (ATTDEF) tonen hun veldnaam op de kaart, met behoud van standaardwaarde en invoerprompt. Definities binnen ingevoegde blokken worden overgeslagen volgens de oorspronkelijke tekenroute; gekoppelde waarden blijven afzonderlijk zichtbaar. Acht ASCII/binary tekeningen met 442 definities en 602 scèneobjecten toetsen tekst/lagen/transformaties en projectbehoud. Multiline-opmaak, tekstvlakvulling en volledige CAD-acceptatie blijven open. Zie [de definitiecontroles](tests/fixtures/cad-attdef/README.md).
+- Rust-unit-tests en Windows CI die een executable als build-artifact maakt.
+- GeoTIFF-tags, affine RD-coordinaten, EPSG-key en KickTheMap sidecars lezen; TIFF-preview via begrensde strips/tegels als gedraaide/gegeorefereerde kaartlaag tonen.
+- Rust filtert actieve jobs rechtstreeks uit de in de Rust-UI ingeladen objectgegevens en GeoTIFF-sidecars; een compatibiliteitsparser voor de Python-heartbeat blijft apart beschikbaar.
+
+## GeoTIFF-preview zonder volledige bronkopie
+
+- Een aparte decoder verwerkt strips/tegels achtereenvolgens naar een aspectgetrouwe preview (standaard maximaal 2048 × 2048). De bestaande bronlimiet is 150 miljoen pixels; bestanden boven de oude native limiet van 16 miljoen kunnen nu worden weergegeven.
+- RGB(A), grijswaarden, paletten, CMYK en niet-gesubsamplede YCbCr zijn afgedekt met 47 synthetische fixtures, inclusief packed 1/2/4 bits, 16-bit, signed/float, planar, BigTIFF, oriëntaties en LZW/DEFLATE/PackBits/JPEG. JPEG heeft maximaal twee bytewaarden tolerantie; de andere ondersteunde referentiegevallen vergelijken exacte pixels.
+- De referentie gebruikt Pillow 11.3.0, aangevuld met expliciete numerieke verwachtingen voor formaten die Pillow niet opent of verkeerd uitleest. Bij planar RGB16 gebruikt Rust de juiste samples waar Pillow bytes als pixels leest. Niet-eindige/NoData-pixels worden transparant.
+- Het gedecodeerde chunkbudget is standaard 32 MiB. Een te grote afzonderlijke strip/tegel geeft een foutmelding. Dit budget begrenst geen totale proces- of GPU-geheugenpiek.
+- Rasterpixels laden op één achtergrondthread. Projectwissels annuleren oude taken; late resultaten komen niet in een ander project. Fouten blijven per bestand zichtbaar en houden andere bestanden niet tegen.
+- Bij veel rasters verdeelt de app een geschat RGBA-textuurbudget van 256 MiB over de previews. Dit is geen harde totale geheugenlimiet: decoderbuffers, tijdelijke uploads en drivergeheugen komen erbij.
+- De lokale releasebenchmark op een RGB8-bron van 16,8 miljoen pixels levert dezelfde preview met circa 2,3× hogere snelheid en 86% lagere procespiek dan volledige Pillow-conversie. Methode en alle meetrondes staan in [benchmarks/README.md](benchmarks/README.md).
+- Volledige resolutie bij inzoomen, overviews/pyramides, gesubsamplede YCbCr, overige kleurmodi en acceptatie op grote echte GeoTIFFs blijven open.
+
+## OpenStreetMap in de Rust-preview
+
+Via **OpenStreetMap** in de werkbalk kan de gebruiker voor de huidige RD-kaartuitsnede een OSM-raster laden. De rasterlaag wordt naar Nederlandse RD-coördinaten benaderend geherprojecteerd en is als alternatieve kaartachtergrond te kiezen naast PDOK. De bronvermelding **© OpenStreetMap contributors** blijft zichtbaar op de kaart.
+
+De app vraagt uitsluitend na deze expliciete kaartactie de benodigde tegels op (maximaal 24 per verzoek), gebruikt een eigen herkenbare HTTP User-Agent en bewaart PNG-tegels ten minste zeven dagen onder de Rust-appdatamap `osm-tiles`. Bij een tijdelijk netwerkprobleem mag de gebruiker bestaande verouderde cachetegels terugzien; dit is **geen** offline-kaartdownloadfunctie. Er wordt niet vooruit geladen. De RD→WGS84-omrekening is benaderend en niet bedoeld voor landmeetkundige nauwkeurigheid. Extra basemapproviders, cachebeheer/conditionele HTTP-requests en praktijkacceptatie blijven open. Het publieke OSM-tegelplatform heeft eigen [gebruiksregels](https://operations.osmfoundation.org/policies/tiles/).
+
+## Portable Windows-preview (geen installer)
+
+De Windows-preview CI kan na geslaagde tests een **portable ZIP** en bijbehorend **SHA-256**-bestand publiceren als GitHub Actions-artifact `SleufBase-Rust-Windows-portable-preview`. Pak de map uit en start `sleufbase-rust.exe` zonder Python of installer. Dit is een **previewbuild**, geen officiële release; instellingen/back-ups bevinden zich nog in Windows AppData, en EXE-codeondertekening en automatische updates ontbreken. Zie [PORTABLE.md](PORTABLE.md) voor stappen en verificatie.
+
+## Bouwen en starten op Windows
+
+Installeer Rust via https://rustup.rs en voer in PowerShell uit:
+
+    cd rust
+    cargo test
+    cargo build --release
+    .\target\release\sleufbase-rust.exe
+
+Of download bij GitHub Actions in workflow 'Rust preview - Windows' het artifact
+'SleufBase-Rust-Windows-preview' van een geslaagde build. Dit is geen stable release.
+
+### Werkfoto's in native sjabloon-DXF (PNG/JPEG)
+
+In **Project → sjabloon DXF** kun je per proefsleufvak de nieuwe sectie **Werkfoto's** openen. Kies maximaal vier JPEG- of PNG-bestanden, stel per foto de kwartslagrotatie (0°, 90°, 180° of 270°) in en kies of de foto rechts **op TIFF** of **op kaart** wordt geplaatst. De oorspronkelijke volledige TIFF en kaart worden niet vervangen: elke foto krijgt een eigen IMAGE/IMAGEDEF-verwijzing met passende DXF-referenties en wordt verwerkt in dezelfde atomaire exporttransactie.
+
+De afbeelding wordt vóór het publiceren gecontroleerd op bestandstype, afmetingen, bestandsgrootte en geheugenlimieten, waar nodig verkleind tot maximaal 1800 pixels langs de langste zijde en met bewaarde beeldverhouding opgenomen. De uitvoer bevat `slot00001_photo01.png`, enzovoort, in de permanente DXF-afbeeldingsbundel. Ontbrekende of corrupte bestanden verhinderen de export zonder eerdere DXF of assetbundel te overschrijven.
+
+Fotopaden, plaatsing en rotatie worden bij export vastgelegd in de native Rust-projectvoorkeuren. Oudere v3-projectinstellingen zonder fotoveld blijven leesbaar. De fotostrip neemt een deel van de zichtbare kaart of TIFF in beslag; voor aparte bladvakken, fotocaptions, beeldannotatie en alle oorspronkelijke Python-fotobewerking is verdere migratie nodig.
+
+### Native project-naar-sjabloon met CAD-lagen en bewaarde vakinstellingen
+
+De projectgebonden **Project → sjabloon DXF**-route ondersteunt optioneel ook **zichtbare CAD/DXF-lagen**, inclusief geëxpandeerde `INSERT`/`MINSERT`-blokken en bijbehorende RGB/ACI-laagkleuren. Lijnen worden op de grenzen van elk RD-kaartvak afgeknipt; ook een kabel of leiding waarvan beide eindpunten buiten het vak liggen wordt correct weergegeven als die het vak kruist. De exporter begrenst de hoeveelheid kaartgeometrie en respecteert annulering.
+
+Wanneer je een projectgebonden sjabloonexport start, bewaart SleufBase de vakvolgorde, titel, selectie, GeoTIFF-bestandspaden, profielkeuze/richting, opmerkingen, kaartinstellingen en sjabloonpad als **niet-gevoelige projectvoorkeuren**. Deze instellingen gaan mee bij het normale **Rust-project opslaan/automatische back-up**, en worden bij opnieuw openen hersteld. Bronidentiteit wordt gekoppeld via de combinatie van job-ID en bronbestandspad of virtuele-proefsleufidentiteit, in plaats van via vluchtige lijstnummers. Verdwenen of dubbelzinnige TIFF- en jobsbronnen worden niet stilzwijgend vervangen.
+
+Deze functionaliteit heeft regressies voor lijnknippen, zichtbaarheid, DXF/kaart-imagebundels, persistente voorkeuren en het lezen van oudere v3-projectbestanden. Een groene CI controleert de geautomatiseerde gevallen, geen volledige praktijkacceptatie op alle oorspronkelijke Python-projecten.
+
+### Virtuele/MarXact-rasterprofielen rechtstreeks vanuit Rust
+
+Het projectgebonden sjabloonvenster kan nu **virtuele en MarXact-proefsleuven zonder externe KickTheMap-GeoTIFF** exporteren. Kies bij de proefsleuf **GeoTIFF → Eigen virtueel raster (zonder externe TIFF)**. In dat geval tekent Rust de originele sleufgrens, gemeten positie en dwarsmarkeringen van objecten in een eigen transparante rasterplaat op basis van RD-coördinaten en sleufbreedte. De afbeeldingsresolutie/bounds volgen de Python-basismethode (1,5 m of driemaal sleufbreedte marge; normaal 220–1600 pixels per as). Er wordt **geen verzonnen satellietbeeld** gemaakt. De kaart en het dwarsprofiel blijven aparte onderdelen van hetzelfde sjabloonvak; de PNG gaat via de bestaande atomaire DXF-afbeeldingsbundel.
+
+In **Virtuele proefsleuven → Bewerken** zijn nu bovendien de **Z-hoogtes van begin- en eindpunt** instelbaar en kun je **dekbandsegmenten** toevoegen/wijzigen/verwijderen met begin-/eindkettingmaat, omschrijving en RGB-kleur. Dekbanden verschijnen als gekleurde langslijnen in het gegenereerde raster. Een omgekeerde handmatige meetas zet de kettingmaten van dekbanden automatisch om, zonder hun geografische positie te verliezen. Oude Rust-projecten zonder `dekband_rows` blijven leesbaar. De gemeten MarXact-as blijft beschermd; gebruik voor handmatige geometrische wijzigingen een kopie.
+
+Voor het daadwerkelijk tekenen van een **dwarsprofiel** moeten de begin- én eindpunthoogte bekend zijn. Is een Z-hoogte onbekend, vul die handmatig met een bekende meting in of zet **Profiel tekenen** uit. De rasterexport zonder dwarsprofiel blijft beschikbaar. Een gewone KickTheMap-job vereist nog wel een echte GeoTIFF.
+
+**Nog geen volledige Python-pariteit:** originele per-object display_rgb-instellingen, uitgebreid Python-dekbandmodel, raster-previewbewerking op de hoofkaart, complexe fotobewerking en pixel-perfect Pillow-gelijkheid ontbreken nog. De eerste integratietests controleren export zonder externe TIFF, kaart-/PNG-bundel, segmenten en projectcompatibiliteit; echte MarXact-projecten moeten aanvullend worden geaccepteerd.
+
+### Virtuele proefsleuven en MarXact-bronnen bewerken
+
+Open in de linkerkolom **Virtuele proefsleuven → Bewerken** om een bestaande (of uit MarXact ingelezen) proefsleuf te bewerken. De native editor heeft een bovenaanzicht van de sleuf en meetpunten, RD-begin-/eindcoördinaten, breedte, proefsleufnaam, omkeren van een handmatige meetas en een volledige lijst met meetobjecten. Je kunt per object rol, objectnaam, discipline-/broncode, kettingmaat, getekende dwarsafstand (positief links van de as), optionele Z-hoogte en drie attributen aanpassen.
+
+**Excel:** de sectie *Excel: meerdere meetobjecten importeren / kopiëren* ondersteunt tab-gescheiden data, bijvoorbeeld geplakte cellen met `Rol / Object / Bron / Kettingmaat / Dwarsafstand / Z / Attribuut1 / Attribuut2 / Attribuut3`. Komma's als decimaalteken zijn toegestaan. De import is transactioneel: één ongeldige rij betekent dat geen enkele rij wordt toegevoegd. Het exporteren via de klembordknop levert direct een tabel die je in Excel kunt plakken.
+
+Je bewerkt eerst een **concept** en kiest **Opslaan in project** om wijzigingen door te voeren. Verwijderen vraagt extra bevestiging. De oorspronkelijke 3D-grenzen en uitlijning van een gemeten MarXact-sleuf worden niet stilzwijgend gewijzigd. Klik **Handmatige kopie** om een losstaand, bewerkbaar exemplaar te maken; de originele bron wordt behouden. Gewijzigde objecten gaan mee in native projectopslag en bestaande object-/profiel-/sjabloonexports. Een volledig interactieve plaats-/sleepfunctie in de hoofdkaart, alle oorspronkelijke MarXact-visualisaties en volledige Python-pariteit ontbreken nog.
+
+### KickTheMap — browseraanmelding, live/offline jobmanager en batchdownloads
+
+Open de linkerkolom **KickTheMap online → Open KickTheMap browser & jobbeheer**.
+
+1. Klik **Open KickTheMap in Edge**. SleufBase start een **nieuw tijdelijk Edge-profiel** met een alleen-lokaal DevTools-kanaal. Het gebruikt niet de cookies of wachtwoorden uit jouw gewone browserprofiel.
+2. Meld je in het Edge-venster zelf aan op `https://www.my.kickthemap.com/signin` en los eventuele reCAPTCHA handmatig op. Klik in SleufBase op **Sessie overnemen**. De browsercookies van uitsluitend dit nieuw gestarte KickTheMap-profiel worden in een vluchtige native Rust-client overgenomen en op de website gevalideerd. De volledige browsersessie is niet opgeslagen in het Rust-project.
+3. De manager toont **live jobs** en kan sorteren (naam/datum/job-ID), zoeken (adres, gemeente, titel, datum en ID), filters toepassen op downloadbaarheid en alleen daadwerkelijk geladen Rust-jobs, en meerdere jobs tegelijk selecteren. **Vernieuw live jobs** haalt de lijst opnieuw op. Als de normale jobs-API faalt, probeert de manager een **zelfde-origin** jobs-request vanuit het zelf gestarte, reeds ingelogde Edge-tabblad. Als de native Rust-client geen downloadlink ontvangt, probeert hij de **ondertekende downloadlink** uit dezelfde ingelogde Edge-tab via een beperkte, origin-gebonden browseraanroep op te halen; de uiteindelijke bestandsoverdracht wordt nog steeds in Rust op domein, type en grootte gecontroleerd.
+4. Klik **Objecten downloaden + laden**, **GeoTIFF downloaden + laden** of **Beide bestanden per job**. Jobs worden op de achtergrond afgewerkt, met voortgang en annuleerknop; downloads worden beperkt, gevalideerd en samen met een `.job.json`-sidecar permanent opgeslagen. Een bestaand bestand wordt alleen hergebruikt wanneer de sidecar dezelfde job-ID vermeldt en het bestand opnieuw is gevalideerd. Onbekende bestaande bestanden worden nooit overschreven.
+5. Na een batch worden object-JSON en GeoTIFF **achtereenvolgens** in het actieve Rust-project geladen, zodat een lopende import niet door het volgende bestandstype wordt afgebroken. Bij een projectwissel worden downloads niet aan het verkeerde project gekoppeld.
+6. Bij een succesvolle vernieuwing schrijft Rust een **tokenvrije offline jobs-cache** (alleen jobmetadata), die later automatisch in de manager kan worden geopend. Als je uitlogt of het privé Edge-venster sluit, worden de sessiegegevens in SleufBase verwijderd en het tijdelijke browserproces gesloten.
+
+**Windows-vereiste:** Microsoft Edge moet zijn geïnstalleerd en mag door bedrijfsbeleid niet geblokkeerd zijn voor lokaal remote debugging. Dit is een interactieve browserworkflow met menselijke login, **geen** reCAPTCHA-bypass, scraping van normale browserprofielen of opslag van wachtwoorden. Bij beperkte bedrijfsapparaten kan deze functionaliteit niet beschikbaar zijn. De officiële KickTheMap-website in het eigen browservenster kan ook worden gebruikt voor handmatige providerbewerkingen.
+
+**Openstaande pariteit:** volledige Python-specifieke veldvertalingen/injecties in de KickTheMap-website, een generieke Python-achtige handmatige capture van onbekende download-requestvarianten, automatische herstelstappen na alle denkbare providerwijzigingen en praktijkacceptatie met een echt KickTheMap-account zijn nog niet afgetoetst. Bij mislukte live login/download blijft de offline projectworkflow beschikbaar; een succesvolle volledige providerworkflow kan pas met echte accountgegevens worden bevestigd.
+
+### Nieuw: volledige projectgebonden sjabloon-DXF vanuit de desktopapp
+
+Klik op **Project → sjabloon DXF** (naast **Sjabloon via JSON** voor geavanceerde voorbereide export). Je hoeft voor de projectroute geen JSON-exportmanifest meer te maken.
+
+1. Laad één of meerdere KickTheMap `jobFeatures.json`-bestanden, optionele virtuele proefsleuven en de volledige bron-GeoTIFF-bestanden.
+2. Selecteer het oorspronkelijke DWG/DXF-*sjabloon* als DXF, geef een **nieuwe** uitvoer-DXF op, vul de projectnaam/getekend-door in en kies resolutie en schaal.
+3. Voor iedere job of virtuele proefsleuf kies je of die als vak meegaat, welke **GeoTIFF** erbij hoort en of het profiel getekend wordt. Rust probeert eerst een unieke KickTheMap-job-ID; zonder bruikbare ID controleert het de RD-ligging van de job of virtuele sleuf tegen TIFF-grenzen. Alleen een eenduidige sterke match wordt automatisch gekozen. Dubbele/tegenstrijdige bronnen blijven voor handmatige keuze.
+4. Kies lokaal/offline neutraal kaartbeeld of live **PDOK**-luchtfoto. Optioneel kunnen zichtbare BGT-weg-/terreindelen, Kadasterlijnen en geladen CAD/DXF-lagen (ook geneste blokken) op de kaart komen.
+5. Start de export. Rust bouwt automatisch de vakken en kaartbladen op uit volledige TIFF-data en profielbroninformatie, en publiceert de DXF met permanente afbeeldingsbundel via de bestaande transactionele exporter.
+
+De exportworker neemt de geladen brondata tijdelijk **in eigendom** en geeft die terug bij succes, fout en coöperatieve annulering. Voor de uiteindelijke sjabloonaanvraag maakt de huidige planner nog een kopie van de geselecteerde jobdata; nul-kopie-export is dus nog niet voltooid. Tijdens export kun je annuleren met Escape; afsluiten/projectwisselen gebeurt veilig na de taak. Er is een limiet van 128 geselecteerde vakken en 100.000 kaart-overlaypunten per vak. Een bestaand uitvoerbestand wordt in deze UI geweigerd.
+
+**Beperkingen (nog geen 100% Python-pariteit):** de CAD-sjabloon moet vooraf als geldige ondersteunde DXF beschikbaar zijn; er is nog geen visuele vak-/profiel-/fotobewerker met alle legacy-opties. Automatische job-TIFF matching gebruikt unieke job-IDs of conservatieve RD-dekking en vermeldt de herkomst van de match. Bij conflicten moet je de TIFF zelf aanwijzen. In de dialoog zijn bulkselectie, vakvolgorde, TIFF-voorbeelden en RD-extentcontrole beschikbaar. Profiel- en kaartuitvoer blijven onderworpen aan bestaande technische limieten van de Rust-exportkern en vereisen praktijkacceptatie met echte projecten. De planner accepteert alleen TIFF's waarvan een opgegeven EPSG 28992 is; ontbrekende CRS-metadata moeten handmatig worden gecontroleerd. PDF/PNG-foto-overlays en onderliggende volledige Python-templateconfiguraties zijn nog niet allemaal gemigreerd.
+
+### Sjabloonexport in de Rust-desktopapp (voorbereide invoer)
+
+Kies in de werkbalk **Sjabloon via JSON**. Selecteer een voorbereide export-JSON (dezelfde invoer als de CLI-optie `--template-dxf`) en kies een nieuwe `.dxf`-bestandsnaam. De app voert daarna de **native** sjabloon-, kaart-, TIFF- en profielpipeline uit op een achtergrondthread. Het voortgangsscherm ondersteunt annuleren/Escape; bestaande tekeningen en beeldbundels blijven onaangeroerd bij fouten of annulering. Projectwissel en afsluiten tijdens de taak worden veilig uitgesteld.
+
+**Beperking van de JSON-route:** dit venster bouwt niet automatisch de vakken uit het geopende Rust-project op; gebruik daarvoor **Project → sjabloon DXF**. De gebruiker moet de export-JSON, inclusief sjabloonpaden en bronbestanden, vooraf voorbereiden. Het volledige oorspronkelijke interactieve Python-sjabloonvenster is nog niet gemigreerd.
+
+### CLI export
+
+    .\target\release\sleufbase-rust.exe --xlsx disciplines.xlsx C:\jobs\PS1\jobFeatures.json
+    .\target\release\sleufbase-rust.exe --dxf objecten.dxf C:\jobs\PS1\jobFeatures.json
+
+Nieuwe uitvoerbestandsnaam verplicht. De DXF-dialog laat geladen jobs en virtuele proefsleuven afzonderlijk selecteren.
+De jobselectie in de gewone zijbalk wijzigt alleen kaartvoorbeeld en details. Excel gebruikt alle geladen jobs.
+
+Zie [PARITY.md](PARITY.md) voor de volledige functiepariteit-checklist en releasecriteria.
+
+## Nieuw in deze migratiestap
+
+- ASCII- en binaire DXF als aparte kaartlaag openen (LINE, LWPOLYLINE, POLYLINE, ARC, CIRCLE en INSERT-marker); volledige blokken en overige entiteiten nog niet.
+- Kaart verschuiven met slepen en zoomen met muiswiel.
+- Eigen Rust-project opslaan/openen als `*.sleufbase-rust.json`, met brondata, GeoTIFF-metadata en DXF-lagen.
+- Automatische roterende back-ups in een **aparte** Rust-map. Het bestaande Python-projectformaat wordt niet overschreven.
+- Instellingen voor deze back-ups lezen, met dezelfde defaults 10 minuten en maximaal 20 back-ups.
+
+## KickTheMap-objecten naar R2018-DXF
+
+- De bestaande GUI-knop **DXF objecten** en CLI `--dxf` gebruiken dezelfde native R2018-encoder, in meters. Puntlijnen staan loodrecht op de richting van het eerste naar het laatste afwijkende meetpunt; polylijnen behouden één 3D-POLYLINE met oorspronkelijke Z, kleur, laag en `KTM_DXF_EXPORT`-metadata.
+- Joblabels volgen de oorspronkelijke PS-/getalfallback, inclusief Unicode-decimale cijfers en woordgrenzen. Plaatsing ontwijkt andere jobs en eerdere labels volgens dezelfde kandidaatvolgorde. Labelhoogte, witte true-color, uitlijning en `LiberationMono-Regular.ttf`-stijl volgen de Python-export.
+- Laagtabellen declareren de gevraagde disciplinekleur ook bij de eerste aanmaak. Dit herstelt een aangetoonde kleurafwijking in het Python-/ezdxf-aanroeppad; de objectkleuren blijven gelijk. Virtuele jobs sorteren meetobjecten stabiel tussen begin- en eindpunt, zodat de richting correct blijft.
+- De encoder schrijft met een buffer van 64 KiB rechtstreeks naar een tijdelijk bestand. De GUI leent gewone geladen jobs zonder volledige objectkopie. Virtuele jobs en profielmarkeringen worden nog apart voorbereid. Publicatie is atomair en overschrijft geen bestaande uitvoer, ook bij races.
+- Niet-eindige coördinaten, ongeldige laagnamen, besturingstekens/injectie en te lange XDATA geven een fout. XDATA-strings blijven binnen 255 UTF-8-bytes; de uitvoer is maximaal 256 MiB, met punt-/entiteitenbudgetten. Coördinaten worden niet naar acht decimalen afgerond. Dit is geen harde totale RAM-limiet.
+- Veertien volledige Python-exportscenario’s, 87 labelgevallen, f64-rondgangen, fout-/opslagregressies en een onafhankelijke ezdxf-audit testen de uitvoer. CI controleert ook de echte native CLI en aanvullende proefsleuf-/Kadaster-/BGT-lagen zonder DXF-reparaties. Zie de [referenties](tests/fixtures/object-export/README.md).
+- Een releasebenchmark met 100.000 objecten produceert exact gelijke DXF-bytes via buffering en streaming: de extra getraceerde Rust-heap daalt van circa 64 MiB naar 65 KiB. Metingen en precieze grenzen staan in [benchmarks/README.md](benchmarks/README.md). Dit meet de encoder, geen volledige GUI-/schijf- of Python-workflow.
+- De standaard objectexport is verder geport. Overige exportopties in de UI, volledige bron-/groepsfilteracceptatie, sjabloon-/profieltekeningen en raster-/fotobundels blijven open. De genoemde fontstijl verwijst naar de fontnaam; dit voegt geen fontinstallatie toe.
+
+## Objectexport: bronnen kiezen en overlay laden
+
+- **DXF objecten** opent een doorzoekbare bronlijst met afzonderlijke selectie voor geladen jobs en virtuele proefsleuven. Nieuwe bronnen die tijdens de dialoog binnenkomen worden niet automatisch geselecteerd. Een projectwissel sluit de oude exportselectie.
+- Labelafstand en puntlijnlengte zijn voor deze export instelbaar. De opgeslagen labelafstand staat onder **Instellingen** en wordt ook door de CLI gebruikt; standaard 3,5 meter, net als de oorspronkelijke app. De losse bibliotheekencoder houdt zijn eigen oorspronkelijke standaard van 6 meter.
+- Begin- en eindpunten van virtuele proefsleuven zijn een expliciete keuze, standaard aan zoals in de oorspronkelijke Python-aanroep. De oude Python-dialogtekst meldde ten onrechte dat ze altijd werden weggelaten. Zonder eindpunten worden lege virtuele bronnen overgeslagen en gemeld.
+- Aanvullende sleufgrenzen, dwarsmarkeringen en zichtbare Kadaster-/BGT-lagen zijn apart in te schakelen. Deze optie neemt alle aanvullende lagen mee; de bronselectie bepaalt de objectjobs. Alleen aanvullende geometrie exporteren blijft mogelijk.
+- **Exporteren en laden als overlay** publiceert eerst de DXF en leest daarna het werkelijke bestand via de bestaande achtergrondlader. Annuleren van het laden verwijdert de opgeslagen DXF niet. Een mislukte export houdt de dialoog/selectie beschikbaar en vervangt geen bestaand bestand.
+- GUI-exports voor DXF en Excel lopen op één afzonderlijke worker met een voortgangsscherm en **Annuleren** / Escape. Gewone datasets, virtuele proefsleuven en aanvullende kaartlagen worden tijdelijk overgedragen en ongewijzigd teruggegeven. Het overdrachtspad kopieert geen objectvectors; alleen geselecteerde virtuele jobs worden op de worker opgebouwd. Bewerken en het toepassen van netwerkresultaten wachten tot de gegevens terug zijn.
+- Annulering wordt gecontroleerd bij object-/puntbatches en schrijfacties. Het tijdelijke bestand wordt pas na flush en synchronisatie gepubliceerd. Een atomische eindcontrole bepaalt of annuleren of publiceren wint; zodra definitief opslaan is begonnen, rondt Rust die actie af. Een systeemaanroep, sortering, label-/doorsnedefase of XML-/compressiefase kan nog aflopen. Dit is geen onmiddellijke stopgarantie of totale RAM-limiet.
+- Sluiten en projectwissels tijdens export worden uitgesteld. Na terugkeer van de gegevens volgt de bestaande keuze voor onopgeslagen werk. Opslaan/back-ups schrijven geen tijdelijk leeg project terwijl de worker de brongegevens bezit. Fouten, afgevangen exportpanics en een geweigerde tweede taak behouden de brondata en vorige uitvoer; dezelfde worker kan opnieuw worden gebruikt.
+- Online jobs rechtstreeks vanuit deze exportdialog kiezen/downloaden, volledige sjabloon-/profielworkflows en daadwerkelijke acceptatie op grote echte projecten blijven open.
+
+## Objectregels en disciplineoverzicht
+
+- Open **Instellingen → Objectregels en disciplinekleuren** om coderingen, CAD-laag, ACI-kleur en disciplinenaam te bewerken, regels te verplaatsen/verwijderen of standaardregels te herstellen. De eerste passende regel wint. Een lege lijst schakelt regeltoewijzing uit. Lege disciplinenamen gebruiken de eerste codering als label.
+- Wijzigingen blijven een concept tot **Opslaan en toepassen** slaagt. Een ongeldige regel of opslagfout vervangt de actieve regels niet. Dezelfde opgeslagen regels sturen de kaart (ook MarXact-markeringen), het overzicht en de losse Excel-/DXF-export.
+- **Import oude voorkeuren** neemt `kickthemap_object_layer_rules` over. Oudere Rust-instellingen zonder dit veld krijgen de oorspronkelijke app-defaults: dertien regels inclusief warmtenet en hoogspanning, met `ONBEKEND` voor monitoring. Expliciet opgeslagen regels blijven behouden. Instellingen zijn begrensd op 2 MiB; maximaal 256 regels en 32 KiB coderingen/label per regel. Ongeldige laag-/kleurnamen worden gemeld. De CLI meldt ongeldige instellingen als fout; de GUI toont een laadmelding en gebruikt dan tijdelijke standaardwaarden.
+- De CLI gebruikt dezelfde eigen Rust-instellingen. Een afzonderlijk bestand is optioneel: `sleufbase-rust.exe --settings instellingen.json --xlsx overzicht.xlsx jobFeatures.json`. Dit bestand gebruikt het native Rust-instellingenschema; import van oude voorkeuren loopt via de importactie.
+- Excel behoudt de oorspronkelijke disciplinevolgorde, kolombreedtes, rijhoogtes, kleuren, letteropmaak, vaste koprij, filter en totaalregel. Labels die volgens Python `casefold` gelijk zijn krijgen één kolom; alle aantallen worden daarin samengevoegd. Dit herstelt een Python-fout waarbij latere schrijfwijzen uit de totalen verdwenen. Tekst zoals `=1+1` blijft letterlijk.
+- De Excel-export leent geladen jobs en berekent kolomgroepen eenmaal per export. Alleen virtuele jobs worden afzonderlijk opgebouwd. Unicode-hoofdletters en kolomgroepering volgen vaste Python 3.11/Unicode 14-tabellen.
+- Tien onafhankelijke oorspronkelijke rapporten worden via de echte Rust-CLI vergeleken op cellen, opmaak, breedtes, filter en totalen; aangepaste DXF-lagen/-kleuren krijgen tevens een onafhankelijke CAD-audit. Zie de [disciplinereferenties](tests/fixtures/disciplines/README.md). Automatische Excel tijdens template-export, alle overige instellingen en volledige project-/Excel-renderacceptatie blijven open.
+
+## Projectgegevens behouden
+
+- De objectparser volgt de oorspronkelijke groepsfilters en Python-waardeconversie: selectie vóór trimmen, ontbrekend versus `null`, booleans/getallen en samengestelde eigenschappen met oorspronkelijke veldvolgorde. Unicode-decimale coördinaten en geldige numerieke underscores worden gelezen; niet-eindige XY vervalt en niet-eindige Z wordt onbekend.
+- Objectregels ondersteunen Unicode-tekens, `*`, `?`, tekenklassen en de oorspronkelijke verwerking van ongeldige bereiken. De eerste passende regel blijft leidend. Standaard ASCII-regels normaliseren de bron niet meer voor elke regel. 107 parserdocumenten en 149.112 oorspronkelijke regelbeslissingen staan in de [parserreferenties](tests/fixtures/object-parser/README.md).
+- De parser controleert object-/puntbudgetten en annulering tussen batches; één JSON-decodeerfase kan nog aflopen. Eigenschappen zijn maximaal 1 MiB. Dit bewijst nog geen volledige instellingen-/Excel-pariteit of acceptatie met echte projecten.
+
+- Project openen/herstellen, Python-import, DXF toevoegen/herladen/herkoppelen, MarXact, jobFeatures en GeoTIFF-metadata laden via één achtergrondworker. Ook gedownloade bestanden gebruiken dit pad. Een voortgangsscherm houdt de interface beschikbaar voor annuleren; bewerken en het toepassen van netwerkresultaten wachten tot deze laadactie klaar is.
+- Een laadactie bereidt gegevens, CAD-caches en project-/MarXact-dwarsmarkeringen voor voordat zij het project wijzigt. Annuleren verwerpt de hele batch; na een afgeronde batch worden geslaagde bestanden toegevoegd en fouten per bestand gemeld. Een mislukt project of DXF-herladen behoudt de huidige gegevens. Taaknummer én projectgeneratie weren late resultaten.
+- De invoerwachtrij is begrensd en hergebruikt één worker. Annuleren wordt gecontroleerd bij leesblokken en parser-/objectgrenzen; een lopende systeemaanroep, JSON-decodering of afzonderlijke geometrie-/cachefase kan nog aflopen. Annuleren stopt de UI-laadactie direct, maar start geen extra lezer zolang de vorige worker nog bezig is. Projectopslag en back-ups zijn nog synchroon; GUI-DXF/Excel gebruiken een aparte worker; dit is geen totale RAM-limiet of volledige workflowacceptatie.
+- Nieuw/openen/herstellen/sluiten vraagt bij onopgeslagen werk om opslaan, doorgaan zonder opslaan of annuleren. Een mislukte of geannuleerde opslag voert de projectwissel niet uit.
+- Projectwissels koppelen oude PDOK/BGT/Kadaster/AHN-resultaten los. Een eerder gestarte KickTheMap-download blijft op schijf beschikbaar, maar wordt niet aan een inmiddels ander project toegevoegd.
+- Projecten, back-ups, Excel en DXF worden eerst volledig naar een uniek tijdelijk bestand in dezelfde map geschreven. Standalone object-/Excel-export en CLI-conversie publiceren zonder overschrijven, ook als een ander proces tegelijkertijd dezelfde uitvoernaam kiest. Het automatische sjabloonoverzicht bewaart een eerdere versie in de exportmap vóór atomaire vervanging; geladen projectbronnen en de DXF worden nooit door dat overzicht vervangen.
+- Projectopslag controleert alle kaartgeometrie, labels, opmerkingen en rastertransformaties. Ongeldige gegevens vervangen geen bestaand bestand. Lezen én opslaan respecteren de projectlimiet van 128 MiB.
+- jobFeatures-JSON en DXF-bronnen zijn maximaal 256 MiB. De gedeelde lezer controleert ook het werkelijk gelezen aantal bytes, zodat groei na de bestandscontrole de grens niet omzeilt; onderbroken systeemlezingen worden opnieuw geprobeerd.
+- Onbekende velden in de objectstructuren van het native projectformaat worden geweigerd zodat deze preview ze niet stilzwijgend verwijdert bij opnieuw opslaan. De aparte Python-import bewaart het bron-JSON integraal.
+
+## Bestaande Python-projecten importeren
+
+- **Import Python-project** leest `.klicproject` versie 1 rechtstreeks in Rust, zonder Python-runtime. De import opent als onopgeslagen nieuw project; de bron blijft behouden.
+- Virtuele en MarXact-proefsleuven, objectattributen, gemeten 3D-grenzen, automatische uitlijningsbasis, rotatie en job-ID's worden overgenomen. Ook opmerkingen, beschikbare GeoTIFFs met rasterrotatie en DXF-zichtbaarheid worden gelezen. Relatieve bronpaden worden vanaf de projectmap opgelost.
+- Het **volledige oorspronkelijke JSON** blijft bewaard in het native project en de back-ups, inclusief onbekende metadata, sjablooninstellingen en slotvolgorde. Grote bronarchieven worden bij het maken van een snapshot gedeeld in geheugen.
+- De zijbalk toont blijvende importmeldingen voor ontbrekende/niet leesbare assets en nog niet toegepaste UI-/sjablooninstellingen. Dit is **nog geen volledige Python-projectpariteit** en er is nog geen export terug naar het Python-formaat.
+- De synthetische regressie-fixture is gemaakt met de gevalideerde oorspronkelijke Python-serializer, niet handmatig als vervangend schema. Opnieuw genereren: `py -3.11 tools/generate_legacy_project_fixture.py`.
+- Batchconversie: `sleufbase-rust.exe --import-python nieuw-project.json oud-project.klicproject`. Bestaande uitvoer wordt ook bij gelijktijdige conversies niet overschreven.
+
+## Uitbreiding: virtuele proefsleuven
+
+- Rust-datamodel voor virtuele proefsleuven met startpunt, eindpunt, breedte en optionele objecten.
+- Zelfstandig aanmaken in de desktopinterface met RD X/Y-velden; render als contour en sla op met het Rust-project.
+- Chainage, projectie van punten, dwarsprofielfragmenten en basis-DXF/Excel in dezelfde bronset.
+- Uitvoer blijft **niet gelijk** aan Python-sjabloonprofielen, foto's en AutoCAD-blokdefinities.
+
+## PDOK direct in Rust
+
+- WMS 1.1.1 luchtfoto op vaste PDOK service URL, EPSG:28992, inclusief correcte BBOX/afmetingen.
+- Verzoek in een aparte achtergrondthread: de UI blijft reageren tijdens ophalen.
+- Veiligheidslimieten: maximaal 2048x2048 PNG, 24 MiB antwoord, 30 seconden netwerktimeout.
+- De ingebouwde luchtfotolaag wordt op juiste geografische locatie als kaartondergrond getoond.
+- De exportluchtfoto gebruikt nu begrensde WMS-tegels op één pixelrooster. OSM en de zelfstandige Kadaster-export hebben aparte tegel-/cacheroutes; volledige provider-/kwaliteit-/cachepariteit en praktijkacceptatie blijven open.
+
+## Offline KickTheMap jobcache
+
+- Rust leest bestaande lokale Python-SleufBase `jobs_cache/<email>.json` bestanden zonder wachtwoorden/cookies te lezen.
+- Zoek en filter op jobs die in de Rust-app zelf zijn geladen (lokaal ingeladen objectbestanden en TIFF-sidecars).
+- De cachestand is expliciet **niet live**. De eerste native online koppeling staat hieronder beschreven; browserlogin en volledig sessieherstel blijven open.
+
+## Kaartopmerkingen
+
+- Plaats opmerkingen met RD X/Y en tekst, geef ze op de kaart weer en verwijder ze in de zijbalk.
+- Opmerkingen worden opgenomen in het eigen Rust-project en herstellen bij openen van dat project.
+- ASCII DXF POLYLINE-geometrie respecteert gesloten polyline-bit uit de POLYLINE-header.
+
+## Instellingen veilig overzetten
+
+- Via **Import oude voorkeuren** kan een lokaal oud SleufBase instellingen-JSON gekozen worden.
+- Alleen expliciet ondersteunde niet-gevoelige sleutels (BGT-/Excelopties, materiaal- en profielenlijst, MarXact-mappings) worden gelezen en opgeslagen.
+- KickTheMap-wachtwoorden, sessiegegevens en tokens worden bewust NIET gekopieerd.
+- In de Rust-instellingen kun je automatische back-ups instellen (1–1440 minuten, 1–200 bestanden). De opties voor volledige DXF-sjablonen zijn voorbereid maar pas functioneel wanneer die uitvoer ook naar Rust is overgezet.
+
+## Native KickTheMap-login en live jobs (eerste werkende koppeling)
+
+- Rust HTTPS-client met uitsluitend vaste KickTheMap-endpoints, cookiejar **in geheugen**, eigen CSRF-login en maximaal 3 API-pogingen.
+- Live jobs-payload kan rechtstreeks worden gelezen; toont actieve jobtitel, ID, adres, gemeente, datum en status.
+- De login en jobs-opvraag draaien op een achtergrondthread; geen wachtwoorden, cookies of tokens in het projectbestand.
+- Uitloggen verwijdert de sessie uit geheugen. De inlogvelden wissen het wachtwoord zodra verbinding wordt gestart.
+- De bestaande KickTheMap-authenticatie gebruikt soms interactieve reCAPTCHA/WebView2: dit pad geeft nu een expliciete foutmelding; de browserlogin is nog NIET gemigreerd.
+- De live endpointcode heeft unit-tests voor HTML tokens en API JSON, maar is nog NIET getest tegen een echt ingelogd account; er zijn geen gebruikersinloggegevens opgehaald of opgeslagen.
+- Er zijn nu knoppen voor **GeoTIFF** en **Objecten** bij live jobs. De app vraagt een gesigneerde URL aan via `/jobs/get-file-url` in multipart/form/json, laadt zonder doorgeven van de KickTheMap-sessiecookies en controleert de inhoud.
+- Downloads krijgen een tijdelijke bestandsnaam en worden pas na formaatcontrole zonder overschrijven opgeslagen onder `%LOCALAPPDATA%/SleufBase/KickTheMap/Rust`.
+- Alleen HTTPS-hosts van bekende publieke clouddownloadservices worden geaccepteerd. De bronendpoint/inhoud zijn nog niet met een live account gevalideerd. Coord-files, AWS fallback en browserherstel ontbreken nog.
+
+## PDOK BGT wegdelen en terreinranden
+
+- Native OGC API-client voor BGT `wegdeel` en `onbegroeidterreindeel` met RD (EPSG:28992) `bbox` en `crs` parameters.
+- GeoJSON LineString/Polygon/MultiPolygon, gesloten rings, grenzen en vervolgpagina's (maximaal 200); veilige controle op PDOK URL's.
+- Achtergrondladen, aparte zichtbare BGT-lagen en bewaren in het eigen Rust-project.
+- De kaartbediening gebruikt nog OGC Features voor kleine RD-uitsnedes tot 2×2 km. De native vector-tegelclient met gedeelde cache en geometrievoorbereiding is apart gecontroleerd; volledige kaartstijlen en sjabloonbediening blijven open.
+
+## AHN 0,5m maaiveldhoogte (basis)
+
+- Native PDOK AHN WCS 2.0.1 `dtm_05m` in RD EPSG:28992, met 2 m / 5 px, 8 m / 9 px en 24 m / 13 px fallback-vensters.
+- Dichtstbijzijnde geldige rastercel rond het midden van het kaartgebied, teruggegeven in m NAP op millimeterniveau.
+- Asynchrone HTTP-download en TIFF-decoder in Rust; geen Python/numpy.
+- Nog geen AHN op klikpositie of volledige hoogteprofielen.
+
+## MarXact: eerste native 3D DXF-import
+
+- Via **MarXact importeren** kan een ASCII- of binaire DXF met `MULTILEADER` labels, gesloten `POLYLINE` grenzen en `INSERT` meetpunten rechtstreeks worden geladen.
+- Controleert het `Name` op iedere grensvertex, koppelt punten op maximaal 8 cm aan labels en wijst overlappende punten toe aan de kleinste gemeten grens.
+- Bepaalt middenlijn en maaiveld-Z van de gemeten 3D-grens (met voorkeur voor meetpunt-richting), neemt laag-naar-discipline mapping over en bewaart de oorspronkelijke 3D-omtrek.
+- Toont de gemeten contour op de kaart, neemt objecten mee in de basis-DXF/Excel en bewaart alles in een Rust-project.
+- **Nog niet volledig:** overige vendorvarianten en volledige blok-/CAD-pariteit ontbreken nog. Geneste `MULTILEADER`-contexten zijn nu vergeleken met de oorspronkelijke Python-import op een synthetisch ezdxf-bestand; representatieve exportbestanden blijven vereist. Lokale dwarsprofielen, maatvoering, gekleurde en geclipte profielweergave en overige MarXact-workflows zijn nog niet volledig overgezet.
+
+## MarXact-labels uit geneste CAD-contexten
+
+- De DXF-lezer onderscheidt `CONTEXT_DATA`, `LEADER` en `LEADER_LINE`. Het eerste werkelijke pijlpunt wordt gebruikt; tekst-/landingspunten en scope-markeringen worden niet als meetpunten of labeltekst gelezen.
+- Een synthetische R2018-DXF met elf echte geneste labels, meerdere pijllijnen, gemeten 3D-grens en INSERT-objecten wordt vergeleken met de oorspronkelijke Python-parser en ezdxf 1.4.4. De test controleert objecttoewijzing, originele coördinaten, tekst en hoogten.
+- Open POLYLINEs worden overgeslagen als sleufgrens, ook bij labels op alle hoekpunten. Het oorspronkelijke gesloten-vlaggetje blijft in nieuwe Rust-projecten behouden; oudere opgeslagen overlays blijven leesbaar.
+- Labeltekst volgt de oorspronkelijke eerste-matchregel en numerieke hoogteprefix, inclusief decimale komma, `\P`, nieuwe regels en een achtervoegsel zoals `m NAP`. Beschadigde geneste scopes geven een leesfout; een ontbrekende pijl gebruikt geen tekstpositie als vervanging.
+- Fixture opnieuw maken: `python tools/generate_marxact_cad_fixture.py` met ezdxf 1.4.4. Volledige CAD-sjablonen en acceptatie met echte MarXact-bestanden blijven open.
+
+## Ruimtelijke MarXact-labelkoppeling
+
+- Meetpunten en grensvertices gebruiken een gedeelde ruimtelijke index in plaats van per punt alle labels te doorzoeken. De index verwijst naar de oorspronkelijke labels; gelijke XY-posities bewaren alleen de laatste kandidaat, inclusief +0/-0.
+- Bij gelijke afstanden blijft de Python-volgorde per cel en bronpositie bepalend. Dit herstelt een afwijkende label-/hoogtekeuze van de eerdere native lineaire scan.
+- Een extra celrand corrigeert een Python-fout: ties-to-even-afronding kan labels binnen 8 cm twee cellen uiteen plaatsen (bijvoorbeeld 0,04 en 0,12). Rust zoekt ook die cellen en controleert steeds de werkelijke afstand. Dit is een bewuste correctie, geen byte-identieke reproductie van die fout.
+- 10.018 vragen in 207 fixtures vergelijken de oorspronkelijke Python-functie met een onafhankelijke volledige afstandszoekactie in dezelfde tievolgorde. De referentie legt 36 afrondingscorrecties vast. Ook 100.000 gelijke labels, negatieve nul en zeer grote coördinaten hebben regressies. Generator: `python tools/generate_leader_lookup_fixture.py`.
+- Dit versnelt deze zoekbewerking bij verspreide labels; veel verschillende punten in één cel kunnen nog steeds een dure zoekactie geven. Volledige importtijd, grens-/objecttoewijzing en geheugen op echte projecten moeten nog worden gemeten.
+
+## ASCII- en binaire DXF-invoer
+
+- Native binaire tagdecoder voor oude éénbyte-groepcodes met XDATA-escape en moderne tweebyte-groepcodes. Beide formaten gebruiken dezelfde geometrie- en MarXact-parser; er is geen Python-runtime nodig.
+- Vier door ezdxf 1.4.4 geschreven ASCII/binary-paren controleren R12, R2000 en R2018, Windows-1252, Windows-1251, Shift-JIS en UTF-8. Dezelfde punten, lagen, handles en kleuren worden gelezen. Een binaire geneste MarXact-fixture geeft dezelfde objecten en hoogten als ASCII.
+- Codepagina's komen uit HEADER; moderne UTF-8 heeft voorrang ongeacht de volgorde van de headerwaarden. Ongeldige tekst en nog niet ondersteunde codepagina's geven een foutmelding. Letterlijke DXF Unicode-escapes blijven in de bronvelden behouden, zoals bij de oorspronkelijke Python-laagnamen.
+- ASCII-waarden verwijzen tijdens het lezen naar de bronbuffer. Alleen de huidige entiteit houdt haar groepvelden vast; er wordt geen extra vector met alle tags en kopieën daarvan opgebouwd. De bronbytes en uiteindelijke geometrie staan nog wel in geheugen.
+- Invoer is begrensd op 256 MiB, 1 MiB per waarde, 1 miljoen velden per entiteit, 2 miljoen weergegeven entiteiten en 10 miljoen weergegeven vertices. Deze grenzen zijn geen totale procesgeheugenlimiet.
+- Afgebroken scalars/strings, niet-eindige getallen, ontbrekende ENDSEC/EOF en onderbroken POLYLINE-sequenties worden geweigerd, zodat een beschadigd prefix geen ogenschijnlijk complete tekening oplevert.
+- INSERT-attributen, XDATA/binaire chunks, kleur, lijntype en lijndikte zijn beschikbaar als bronmetadata en blijven in native projecten bewaard. Volledige attribuut-/tekstgeometrie, Meshes, HATCH en CAD-sjablonen blijven open.
+- Fixturegenerator: `python tools/generate_dxf_encoding_fixtures.py`. De scalarindeling volgt de [Autodesk-groepcodereferentie](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-2553CF98-44F6-4828-82DD-FE3BC7448113.htm) en [binaire DXF-beschrijving](https://help.autodesk.com/cloudhelp/2019/ENU/AutoCAD-DXF/files/GUID-FC1C3C69-DBC2-49E4-893A-000D6538C0FE.htm).
+
+## CAD-blokken en WCS-geometrie
+
+- Geneste BLOCK/INSERT en MINSERT respecteren blokbasispunten, OCS, spiegeling, niet-uniforme schaal, rotatie en rijen/kolommen. Rasterafstanden worden geroteerd maar niet geschaald. Laag 0 en BYBLOCK erven de plaatsing; verborgen bovenliggende lagen verbergen ook hun inhoud.
+- LWPOLYLINE en 2D POLYLINE ondersteunen bulges en hoogteligging; 3D POLYLINE blijft WCS. CIRCLE/ARC en ELLIPSE bewaren hun curve en worden na de volledige geneste transformatie afgevlakt met maximaal 0,25 tekeneenheid koordafwijking (bij RD-meters: 25 cm). POINT wordt als punt getoond.
+- De cache deelt bronmetadata en blokdefinities tussen instanties en projectsnapshots. Geometrie en zichtbare kaartgrenzen worden opnieuw berekend bij bron-/laagwijziging, niet tijdens gewone frames. MarXact gebruikt de oorspronkelijke modelspace-entiteiten voor zijn meetpunten.
+- **Opnieuw laden** leest een DXF opnieuw; **Bron kiezen...** herstelt een verplaatst bronbestand. Zichtbaarheidskeuzes blijven behouden waar laagnamen overeenkomen. Bij een leesfout blijven de huidige overlay en onopgeslagen wijzigingen intact. Dit helpt oude projecten waarvan eerdere previews blokdefinities niet opsloegen; ontbrekende oorspronkelijke OCS-data kan niet uit oude punten worden terugberekend.
+- Een ezdxf 1.4.4-orakel vergelijkt 72 plaatsingen en 84 WCS-primitieven in ASCII en binary, inclusief geneste shear, schuine vlakken, negatieve schalen en dichte curvesamples. Projectherstel, gedeelde metadata voor 10.000 instanties, laagcache en beschadigde/recursieve/te grote blokken hebben regressietests. Generator: `python tools/generate_cad_scene_fixtures.py`.
+- Recursie, ontbrekende blokken, budgetoverschrijdingen en niet ondersteunde entiteitsoorten krijgen meldingen. TEXT en eenregelige attributen hebben contourweergave; volledige MTEXT-/attribuutopmaak, meshoppervlakken, HATCH, dynamische blokken en volledige lijnstijlen blijven open. De complexe MTEXT-kern verbindt nu opmaak, fontvarianten, echte tekstmaten, kolomplaatsing en lettercontouren; 167 fontkeuzes en 123 samengestelde gevallen controleren deze route. Vet/cursief gebruiken bij meten en tekenen hetzelfde font, met bewaarde oude foutresultaten. De afzonderlijke eenvoudige MTEXT-route en breedteschatting zijn eveneens geport: 616 decodergevallen, 189 teksten/467 regels en 324 schattingen controleren oorspronkelijke afbreking, uitlijning en spatiegedrag. Gewone MTEXT is nu gekoppeld aan echte DXF-invoer, STYLE, geneste blokken en projectopslag zonder fonts: 129 bronnen/1440 segmenten en 138 scène-instanties controleren de geometrie. Inline ACI/RGB-kleuren zijn ook gekoppeld aan projectopslag, canvas en beide sjabloonkaartpaden: 141 oorspronkelijke instanties/1607 gekleurde contouren controleren alle 257 ACI-rollen, zwart/wit en laag-/blokovererving, met gedeelde contourdata. Zie [de kleurcontroles](tests/fixtures/cad-mtext-paint/README.md). Uitgebreide kolom-/embedded-opmaak, achtergronden en vlakvulling blijven vereist. Zie [de MTEXT-invoercontroles](tests/fixtures/cad-mtext/README.md). Zie ook [de eenvoudige MTEXT-controles](tests/fixtures/mtext-simple/README.md). Zie [de MTEXT-fontcontroles](tests/fixtures/mtext-render/README.md). DXF-/projectinvoer loopt via de bestandsworker; dit is geen volledige CAD- of performanceacceptatie.
+- Plaatsing volgt de Autodesk-definities voor [INSERT](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-28FA4CFB-9D5E-4880-9F11-36C97578252F.htm) en het [arbitrary-axis-algoritme](https://help.autodesk.com/cloudhelp/2020/ENU/AutoCAD-DXF/files/GUID-E19E5B42-0CC7-4EBA-B29F-5E1D595149EE.htm).
+
+## CAD-vlakken en mesh-randen
+
+- 3DFACE, SOLID en TRACE tonen hun zichtbare randen, met WCS voor 3DFACE en OCS plus de afwijkende puntvolgorde voor SOLID/TRACE. Alle vier 3DFACE-randbits blijven aan hun bronrand gekoppeld, ook bij driehoeken met een dubbel vierde punt.
+- POLYLINE-polyfaces lezen signed één-gebaseerde vlakindices, ook als vlakrecords vóór coördinaatrecords staan. Declaratieve polyface-aantallen worden als bronmetadata behouden; de werkelijke records bepalen de geometrie. Polygonmeshes respecteren M/N-rasterafmetingen en beide sluitrichtingen. Moderne MESH leest n-gons, expliciete randen en vouwgewichten als aparte lijsten.
+- Geïndexeerde bronvertices/vlakken, normaal/dikte, smoothing-/subdivisieparameters en niet-standaard vertex-/vlakmetadata/XDATA blijven behouden. Meshbronnen worden bij snapshots gedeeld. Een gecachte randset dedupliceert gedeelde topologische randen; losse zichtbare randen vormen aparte paden. Projectherstel bouwt de randen opnieuw uit de bron op en verandert het bronbestand niet. Oudere previews zonder dit mesh-schema weigeren de nieuwe velden.
+- Zesenvijftig ezdxf bron-/wereldgevallen in ASCII/binary vergelijken 278 zichtbare randen, inclusief geneste shear/spiegeling, alle 3DFACE-maskers en OCS. Ook opslag, verouderde randcache, ongeldige indices/aantallen, budgetten, een 100 × 100 raster en werkelijk geschilderde verborgen randen zijn getest. De fixtures regenereren byte voor byte; zie de [referentiebeschrijving en primaire bronnen](tests/fixtures/meshes/README.md).
+- Dit is rand-/controlekooiweergave. Vlakvulling, subdivisie, gladde polygonoppervlakken, dikte-extrusies en het toepassen van afzonderlijke vertex-/vlakstijlen zijn nog open en krijgen meldingen. MESH-subobjectoverrides worden met een expliciete fout geweigerd. Een mesh wordt nooit als MarXact-sleufgrens gebruikt. Bestaande bron-, punt-, pad- en projectbudgetten blijven gelden; geen harde totale RAM-garantie.
+
+## SPLINE/NURBS en CAD-fitcurves
+
+- Controlepunten, knopen, positieve gewichten, fitpunten, eindtangenten, vlaggen, normaal en toleranties blijven als bronparameters bewaard. Open, ongeklemde en periodieke curves, herhaalde knopen en standaardknopen bij ontbrekende waarden worden ondersteund. SPLINE-punten blijven WCS; het normaalveld maakt ze niet OCS.
+- Rationele Bézier-spans worden uit de B-spline afgeleid zonder herhaalde kopieën van de hele curve. Afvlakking gebruikt de omhulling van de controlepunten na de volledige bloktransformatie, met 0,25 tekeneenheid tolerantie. De buffer wordt tussen spans hergebruikt. Volledig herhaalde binnenknopen splitsen de weergave in aparte paden; er wordt geen verbindingslijn over een gat getekend.
+- Fitpunten volgen een kubische C2-interpolatie in koordlengteparameters, met natuurlijke uiteinden of opgegeven eindtangenten volgens ezdxf/CAD. Het tridiagonale stelsel wordt in lineaire tijd opgelost. Zoals ezdxf wordt een afwijkende graad bij alleen fitpunten niet gebruikt voor de curvevorm.
+- Twintig bronvarianten vergelijken 60 wereldcurves en 63 paden met dichte samples van de ezdxf 1.4.4 Python-kernel. Dat omvat graad 1/3/5/11, rationele kwartcirkel, uiteenlopende gewichten, natuurlijke/clamped fitcurves, lussen, spiegeling, schuine vlakken en geneste shear. Ook 20.000 fitpunten, projectherstel, ongeldige gewichten/knopen/aantallen en uitvoerbudgetten hebben regressies. Generator: `python tools/generate_spline_fixtures.py`.
+- De referentie gebruikt de geldige knooprange van ezdxf `params()`, zodat ongeklemde/periodieke curves geen extrapolaties buiten hun domein krijgen. De native parser bewaart geschreven knopen zonder tolerantieronding.
+- Ondersteuning is begrensd op graad 32, 250.000 controle- of fitpunten per curve, een berekenings-/dieptebudget en het bestaande totale vertexbudget. Negatieve/nulgewichten en numeriek onbruikbare bereiken geven een fout. Dit is geen harde totale geheugenlimiet of volledige CAD-sjabloonacceptatie. De bronindeling volgt [Autodesk SPLINE](https://help.autodesk.com/cloudhelp/2023/ENU/AutoCAD-DXF/files/GUID-E1F884F8-AA90-4864-A215-3182D47A9C74.htm); fit-/controlegegevens zijn vergeleken met de [ezdxf-spline-API](https://ezdxf.readthedocs.io/en/stable/tutorials/spline.html).
+
+## Getallen behouden bij projectopslag
+
+- De JSON-parser gebruikt exacte float-rondgangen: opgeslagen eindige `f64`-metingen behouden hun bits, inclusief negatieve nul en subnormale waarden. Dit herstelt een gevonden afwijking van één floatstap bij het heropenen van een curvepunt. Regressies vergelijken ruim 4.000 waarden en complete CAD-projectrondgangen.
+- Het oorspronkelijke Python-JSON bewaart ook grote gehele getallen en lange decimalen zonder omzetting naar `f64`. Onbekende metadata blijven in het bronarchief staan; geometrievelden blijven eindige, gevalideerde meetwaarden. JSON-opmaak en exponentnotatie kunnen bij opnieuw serialiseren verschillen.
+
+## CAD-kleuren, lagen en objectgegevens
+
+- De kaart gebruikt het volledige ACI-palet van de bestaande Python/ezdxf-versie, inclusief de kleurregels voor BYLAYER/BYBLOCK op modelspace-niveau. Expliciete true-color heeft voorrang. Net als Python krijgt wit uit ACI een contrasterende kaartkleur; expliciete RGB-kleuren blijven ongewijzigd.
+- Rust corrigeert twee Python-leesfouten: expliciet RGB-zwart wordt behouden en true-color op een laag wordt toegepast. Uitgeschakelde/bevroren lagen en onzichtbare objecten worden verborgen. Zichtbare objecten bepalen de DXF-kaartgrenzen.
+- Laagverwijzingen volgen hoofdletterongevoelig Unicode `lower()`, zoals de ezdxf-symbooltabel. De oorspronkelijke schrijfwijze blijft in de bronmetadata behouden; kaartkleur, laagkeuze en geneste blokzichtbaarheid gebruiken één laagdefinitie. Afgeleide aliassen worden eenmaal opgebouwd, gedeeld bij snapshots en bij projectherstel hersteld. ASCII/binary-referenties dekken ook Griekse, Cyrillische en geaccentueerde namen. `Straße` en `STRASSE` blijven afzonderlijke lagen, overeenkomstig ezdxf.
+- Oude projecten met conflicterende opgeslagen laagvarianten behouden beide keuzes en tonen een herlaadmelding. Nieuwe DXF-invoer met dubbele laagdefinities wordt geweigerd. Herladen bewaart zichtbaarheid ook als de schrijfwijze van een laagnaam is gewijzigd. Fixturegenerator: `python tools/generate_cad_layer_fixture.py`.
+- Onder **DXF-lagen → CAD-lagen** kun je afzonderlijke lagen tonen/verbergen. De keuze blijft in het project bewaard. Onder **Objecten bekijken** staan handles en lagen; de lijst verwerkt alleen zichtbare rijen.
+- **CAD-objectgegevens** toont bestand, type, handle, laag, aantal punten, lijntype/lijndikte, INSERT-attributen en XDATA. Dubbele attribuutnamen volgen de oorspronkelijke laatste-waarde-regel. Lange waarden worden herkenbaar verkort getoond en kunnen volledig worden gekopieerd. De details worden alleen bij selectie opgebouwd.
+- Een door ezdxf geschreven ASCII/binary-fixture vergelijkt 266 gevallen met de oorspronkelijke Python-functies: alle 255 ACI-kleuren, laagregels, true-color, verborgen objecten, attributen en XDATA. Bewuste correcties hebben een afzonderlijke verwachte uitkomst. Een egui-renderproef controleert werkelijk getekende kleuren en het verbergen van een laag.
+- Native opslag schrijft nu formaat **4**, inclusief bronblokken, plaatsingen, curves, CAD-metadata, laagkeuzes en beide sjabloonkeuzes. Native formaten 1, 2 en 3 worden bij lezen in geheugen omgezet; het bronbestand blijft bij alleen openen ongewijzigd. Oudere Rust-builds weigeren formaat 4, zodat ze nieuwe gegevens niet stilzwijgend verwijderen. Dit betreft het Rust-formaat; Python `.klicproject` v1-import blijft beschikbaar.
+- Onbekende velden in native objectstructuren worden geweigerd. Het volledige oorspronkelijke Python-JSON blijft als open bronarchief behouden, inclusief onbekende Python-metadata.
+- Fixturegenerator: `python tools/generate_cad_properties_fixture.py` met ezdxf 1.4.4. Attribuutgeometrie, volledige lijnstijlen/-gewichten en CAD-sjabloonexport blijven open. True-color en laagstatus volgen de [Autodesk-groepcodes](https://help.autodesk.com/cloudhelp/2024/ENU/AutoCAD-DXF/files/GUID-3F0380A5-1C15-464D-BC66-2C5F094BCFB9.htm) en [LAYER-definitie](https://help.autodesk.com/cloudhelp/2018/ENU/AutoCAD-DXF/files/GUID-D94802B0-8BE8-4AC9-8054-17197688AFDB.htm).
+
+## MarXact-richting en uitlijning
+
+- Import en **Automatisch uitlijnen** gebruiken de Python-regels: unieke objectposities, robuuste PCA met mediaan/MAD, stabilisatie op gemeten grensranden binnen 12,5° en snijpunten rond de objecten bij holle grenzen.
+- De automatische begin-/eindpunten komen op de middens van de geraakte randen, met geïnterpoleerde Z uit de oorspronkelijke 3D-grens.
+- Onder iedere MarXact-proefsleuf staat een **Rotatie °**-regelaar (-90° tot +90°). De correctie is absoluut ten opzichte van de automatische as; herhaald bijdraaien stapelt geen afrondingen op. Handmatige eindpunten liggen op de exacte snijpunten met de grens.
+- **Automatisch uitlijnen** berekent de middenlijn opnieuw en wist de correctie. Een handmatige correctie van 0° behoudt de automatische richting, maar gebruikt zoals Python de objectgemiddelde positie en exacte snijpunten; gebruik de knop om ook de grensmiddens terug te zetten.
+- De kaart toont de actuele as met een pijl en de gemeten objectpunten. De basis-DXF schrijft de 3D-as op `VIRTUAL_TRENCH_AXIS`; de gemeten contour en objectcoördinaten blijven behouden.
+- Projecten en back-ups bewaren de automatische basis en de correctie. Oudere Rust-projecten zonder deze velden blijven leesbaar; de bestaande as wordt bij de eerste handmatige correctie de basis, of kies **Automatisch uitlijnen** om de nieuwe regels toe te passen.
+- Regressietests vergelijken tien synthetische gevallen en zeventig handmatige correcties rechtstreeks met bevroren uitvoer van de Python-geometriefuncties. Fixturegenerator: `python tools/generate_marxact_alignment_fixtures.py` vanuit de repository. Dit bewijst geen volledige MarXact- of DXF-sjabloonpariteit op productiedata.
+
+## Lokale kabel-/leidingmarkeringen
+
+- De kaart en basis-DXF gebruiken dezelfde snijpuntberekening om per object de lokale sleufbreedte te bepalen. Bij holle grenzen kiest de gemeten zijwaartse objectpositie het juiste deel van de sleuf.
+- Markeringen verbinden geen losse delen van een holle grens. Als er geen geldige doorsnede bestaat, wordt geen onbegrensde markering getekend. In DXF blijven de gemeten object-Z's behouden op `VIRTUAL_TRENCH_MARKER`.
+- De kaart herberekent deze geometrie na import of uitlijningswijzigingen; zoomen en verschuiven hergebruiken de uitkomst. Ook de geselecteerde job wordt tijdens kaartverversing als referentie gebruikt in plaats van alle objecten te kopiëren.
+- 240 gevallen worden vergeleken met de oorspronkelijke Python-functie. Volledige profieltekeningen, pixelmaskers, kleureninstellingen en sjabloonpariteit blijven open.
+
+## Kernbenchmarks
+
+`cargo run --release --manifest-path rust/Cargo.toml --example benchmark_core` meet
+de oude en nieuwe camerainvoer/validatie op dezelfde synthetische job met 100.000
+objecten, gedurende twintig herhalingen. CSV bevat tijd, allocatieaanroepen en
+buildmodus. De Windows-CI publiceert het CSV als apart artifact en controleert
+dat de nieuwe gemeten paden geen tijdelijke objectkopieën/puntvectors alloceren.
+Dit is een gerichte microbenchmark, geen bewijs van volledige renderperformance
+of een vergelijking met de complete Python-app op echte projecten.
+
+## MarXact- en virtuele-proefsleufgrenzen in DXF
+
+- De basis-DXF-export schrijft nu ook gesloten **3D POLYLINE**-grenzen (R2018) met de oorspronkelijke gemeten MarXact-Z per vertex, of de rechthoekige grens bij handmatige proefsleuven.
+- De polylines krijgen de laag `VIRTUAL_TRENCH_3D` en een eenvoudig `TEXT`-label; origineel blijft in het Rust-project beschikbaar.
+- Dit is nog **niet** de volledige AutoCAD-sjabloon/DXF-pariteit, maar voorkomt dat de gemeten MarXact-grens volledig uit de basisexport verdwijnt.
+
+## PDOK Kadaster WFS (eerste native versie)
+
+- WFS 2.0.0 `GetFeature` in RD EPSG:28992 met vijf bestaande SleufBase-categorieën: perceel, kadastrale grens, bebouwing, straatnaam en huisnummer.
+- Gecombineerde kleine tegelverzoeken bij grotere gebieden; beperkte paginering, feature-ID-deduplicatie, HTTP-timeouts en grenzen voor geheugen-/downloadgrootte.
+- Perceel- en bebouwingslijnen en de tekstlabels worden als afzonderlijk zichtbare laag op de kaart getoond en in het Rust-project bewaard.
+- De labelhoek wordt bewaard maar **nog niet geroteerd** getoond in de Rust-kaart. Kadastrale lijnen en tekst zijn nu gekoppeld aan de gedeelde overzichtskern voor standalone- en sjabloon-DXF; praktijkacceptatie blijft open.
+
+## Kadastrale en BGT-kaartlagen in basis-DXF
+
+- De **DXF objecten**-export kan nu tevens de zichtbare Kadaster-lijnen, tekstlabels (inclusief rotatiehoek) en BGT-lijnen opnemen op afzonderlijke CAD-lagen.
+- Export gebruikt de native R2018-objectencoder. Volledige SleufBase-sjablonen en dynamische blokken blijven een afzonderlijke workflow.
+- Alleen de zichtbare WFS/BGT-lagen worden meegenomen; grote datasetlimieten en daadwerkelijke CAD-validatie blijven nodig.
+
+## KickTheMap-downloads: bronidentiteit behouden
+
+- Bij een gesigneerde GeoTIFF- of objecten-JSON-download schrijft Rust nu een eigen `*.tiff.job.json` / `*.json.job.json` sidecar met job-ID en titel.
+- De downloader maakt beide bestanden eerst tijdelijk aan en rolt een onvolledig nieuw bestand terug als de sidecar niet kan worden opgeslagen.
+- Lokale objecten-JSON haalt de job-ID eerst uit de sidecar of bestandsnaam (`Naam_123_jobFeatures.json`) en gebruikt de oude mapnaam alleen als fallback.
+- Daardoor werkt de 'alleen geladen jobs'-filter ook voor lokaal in één gedeelde Rust-map gedownloade jobs.
+
+## Native MarXact batch-CLI
+
+- `sleufbase-rust.exe --marxact nieuw-project.json meting1.dxf meting2.dxf` maakt een Rust-project zonder GUI.
+- `sleufbase-rust.exe --marxact-dxf uitvoer.dxf meting1.dxf meting2.dxf` exporteert de gemeten 3D-grenzen en objecten in de native R2018-DXF.
+- De conversie leest de bestaande niet-gevoelige MarXact-mappings uit de Rust-instellingen en weigert bestaande uitvoerbestanden te overschrijven.
+- Omdat de DXF-invoer nog geen volledige MarXact-vendordekking heeft, controleer conversies met echte MarXact-bestanden voordat je er ontwerpbeslissingen op baseert.
+
+## Sjabloonexport met voorbereide invoer
+
+    sleufbase-rust.exe --template-dxf uitvoer.dxf voorbereide-export.json
+
+Deze route gebruikt het native exportpad en weigert bestaande uitvoer te
+overschrijven. Alle invoerpaden zijn relatief aan het JSON-bestand; regels,
+projectnaam en tekenaar komen uit dat bestand. Een ontbrekende exportdatum
+gebruikt de lokale Windows-datum één keer voor alle gebruikte bladen.
+Voorbeeld met één voorbereid vak zonder profiel:
+
+```json
+{
+  "template": "assets/cadastral_template.dxf",
+  "rules": [],
+  "settings": {"project": "Projectnaam", "drawn_by": "Tekenaar"},
+  "slots": [{
+    "bounds": {"min_x": 120000, "min_y": 450000, "max_x": 120030, "max_y": 450020},
+    "label": "PS1", "title": "Proefsleuf 1", "address": null,
+    "comments": "Opmerkingen:",
+    "tiff_png": "voorbereid/PS1_tiff.png", "map_png": "voorbereid/PS1_kaart.png",
+    "profile": null
+  }]
+}
+```
+
+In plaats van `tiff_png` kan een vak een `tiff_source` opgeven. De transformatie
+beschrijft de georiënteerde bronpixels, inclusief eventuele gebruikersrotatie:
+
+```json
+"tiff_source": {
+  "path": "bron/PS1.tiff",
+  "transform": {"a": 0.01, "b": 0, "c": 120000, "d": 0, "e": -0.01, "f": 450020},
+  "reverse_orientation": false,
+  "axis": null
+}
+```
+
+Geef precies één van `tiff_png` en `tiff_source`. Een aanwezig gemeten profiel
+levert zijn al berekende as ook aan de beeldstap; anders kan `axis` expliciet
+begin/eindpunten bevatten of worden de meegegeven wegen/terrein gebruikt.
+De TIFF wordt volledig gedecodeerd en voorbereid. Geef voor de kaart precies één
+van `map_png` en `map_source`. Een kaartbron bouwt zelf het A4-blad met TIFF,
+CAD-paden, coördinaten, schaalbalk, noordpijl, referentielegenda en bronvermelding:
+
+```json
+"map_source": {
+  "background": {"kind": "pdok"},
+  "attribution": "Luchtfoto: PDOK",
+  "overlays": [{"points": [[120000,450010],[120015,450012]], "color": [200,20,20]}]
+}
+```
+
+De kaart gebruikt standaard dezelfde volledige TIFF-bron als het vak.
+`map_source.tiff` kan die bron expliciet opgeven; `include_tiff: false` maakt een
+kaart zonder TIFF. De achtergrond kan ook `{"kind":"solid","color":[245,245,245,255]}`
+of `{"kind":"png","path":"achtergrond.png"}` zijn. Een voorbereide achtergrond
+moet exact bij de berekende uitsnede/afmetingen passen. `settings` bevat standaard
+`dpi: 300` en `scale: 225`; fonts komen uit Windows Segoe UI/Arial, of uit
+expliciete `fonts.regular`/`fonts.bold`-paden. Alle paden zijn manifest-relatief.
+Een gemeten profiel deelt zijn weergegeven referentiepunt met de kaart.
+PDOK wordt op volle kaartresolutie in aansluitende WMS-tegels aangevraagd.
+Zie [de kaartcontroles en grenzen](tests/fixtures/map-export/README.md).
+De PNG-opslag is atomair en vorige exports blijven behouden bij fouten.
+
+Een `null` in `slots` houdt een vak leeg. `datasets`, profielopties per vak,
+BGT-oppervlakken en voorbereide overzichtsgeometrie staan in de
+[referentie-invoer](tests/fixtures/template-export/reference.json). Dit pad kan TIFF-
+en kaartbeelden zelf voorbereiden; overige server-/overzichtsgegevens worden
+aangeleverd. Het native venster stelt deze invoer samen uit geladen TIFFs,
+meetjobs, CAD en opmerkingen; dezelfde worker bereidt beelden en profielen voor.
+De projectroute ondersteunt ook werkfoto’s en eigen virtuele rasters. Begeleidende exports en de overige volledige workflow volgen nog.
+
+De native Normaal/Reverse-blokkern behoudt bronobjecten en maakt de AutoCAD-
+keuze `Versie` met `Normaal` en `Reverse` uit de donor van hetzelfde sjabloon.
+[De onafhankelijke controles](tests/fixtures/template-variants/README.md) dekken
+metadata, beginzichtbaarheid en gekoppelde onderdelen. De kern plaatst de keuzegrip
+nu ook automatisch op basis van profiel-/beeldgrenzen en werkelijke TTF-tekstmaten;
+[de grenscontroles](tests/fixtures/template-extents/README.md) vergelijken de
+oorspronkelijke plaatsing, inclusief complete sjabloonexports. Beide native
+exportvensters bieden standaard **Beide richtingen (Normaal / Reverse)**.
+Per vak maakt Rust beide TIFF-/kaartbeelden en profielen in één DXF; in AutoCAD
+kies je daarna de richting met **Versie**. Projectnaam en lokale datum blijven
+op het gemeenschappelijke blad staan. De keuze wordt in het project bewaard;
+zonder deze optie kun je één richting exporteren.
+
+De CLI schakelt dit in met `settings.paired: true`. Daarvoor zijn een originele
+TIFF- of virtuele bron en `map_source` nodig; alleen een al georiënteerde PNG
+bevat onvoldoende gegevens om de andere richting opnieuw voor te bereiden.
+Windows-fontkeuze gebeurt lokaal op naam/familie/fallback. Beide exportvensters
+bieden **Extra CAD-lettertypen** om eigen SHX-/SHP-/LFF-/TrueType-mappen te kiezen;
+deze mappen worden bij het project bewaard. De CLI gebruikt
+`settings.font_directories: ["CAD Fonts"]` (manifest-relatief). SHP/SHX 1.0/1.1
+en Unicode-programma’s en LibreCAD LFF leveren native tekstmaten voor de keuzegrip; er zijn
+geen commerciële fonts meegeleverd. Nieuwe fouten of
+annuleren behouden de vorige DXF en afbeeldingen; het discipline-overzicht telt
+ieder geselecteerd vak eenmaal. De
+[gepaarde exportcontroles](tests/fixtures/template-paired/README.md) beschrijven
+inhoud, beeldpixels, gekoppelde onderdelen en resterende grenzen.
+
+## Wat nog ontbreekt
+
+1. Praktijkacceptatie van de native Edge-aanmelding/jobmanager, volledige providerfallbacks, accountbeheer en langdurig sessieherstel.
+2. Volledige GeoTIFF-rasterweergave met overviews en resolutie op zoomniveau, PDOK WMTS/offline-cache, volledige BGT/WFS/AHN-workflows en kaartreprojectie.
+3. Volledige kadastrale DXF-sjabloonpariteit: interactieve acceptatie van gepaarde exports, verdere fontvarianten en SHX/LFF-kaartweergave, overige bloktypen en praktijkacceptatie. Logo-/contactherstel en PDF/DGN/DWF-underlays zijn toegevoegd; native werkfoto’s blijven een optionele uitbreiding.
+4. Resterende oorspronkelijke kaartbedieningen, echte acceptatie van de aangesloten AHN/Gemma-workflow voor virtuele sleuven/MarXact, volledige compatibiliteit met Python-projectopslag (expliciete import en beperkte terugconverter zijn aanwezig), migratie van alle instellingen en volledig back-upherstel.
+5. Overige oorspronkelijke instellingen, installatiepakket en volledige migratietests.
+
+## Aanpak voor vervolgmigratie
+
+1. Rust data-/exportkern en Windows CI: deze pull request.
+2. GeoTIFF, RD-projectie, kaartweergave en sidecar-identificatie.
+3. Read-only KickTheMap jobs-lijst en betrouwbare actieve-job filter.
+4. Volledige template-/kadastrale DXF-pariteit met regressietests.
+5. Projectformaat, instellingen, credential handling, installer en gebruikerstests.
+
+De bestaande Python-app, build en releases worden in deze PR niet gewijzigd.

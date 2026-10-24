@@ -1,0 +1,5759 @@
+[
+  {
+    "name": "shipped",
+    "path": "assets/cadastral_template.dxf",
+    "requests": [
+      {
+        "filename": "raster0000.png",
+        "width": 40,
+        "height": 20,
+        "index": 0,
+        "bounds": {
+          "min_x": 194660.4442393875,
+          "min_y": 433676.3632714907,
+          "max_x": 194662.525992819,
+          "max_y": 433677.9245865643
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0001.png",
+        "width": 20,
+        "height": 40,
+        "index": 1,
+        "bounds": {
+          "min_x": 194663.126725054,
+          "min_y": 433676.1916201787,
+          "max_x": 194665.6587099123,
+          "max_y": 433677.9829314751
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0002.png",
+        "width": 80,
+        "height": 30,
+        "index": 2,
+        "bounds": {
+          "min_x": 194660.4442393875,
+          "min_y": 433673.4462714908,
+          "max_x": 194662.525992819,
+          "max_y": 433675.0075865643
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0003.png",
+        "width": 20,
+        "height": 40,
+        "index": 3,
+        "bounds": {
+          "min_x": 194663.126725054,
+          "min_y": 433673.2746201788,
+          "max_x": 194665.6587099123,
+          "max_y": 433675.0659314752
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0004.png",
+        "width": 40,
+        "height": 20,
+        "index": 4,
+        "bounds": {
+          "min_x": 194660.4442393875,
+          "min_y": 433670.5282714908,
+          "max_x": 194662.525992819,
+          "max_y": 433672.0895865644
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0005.png",
+        "width": 20,
+        "height": 40,
+        "index": 5,
+        "bounds": {
+          "min_x": 194663.126725054,
+          "min_y": 433670.3566201788,
+          "max_x": 194665.6587099123,
+          "max_y": 433672.1479314753
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0006.png",
+        "width": 40,
+        "height": 20,
+        "index": 6,
+        "bounds": {
+          "min_x": 194660.4442393876,
+          "min_y": 433667.6100214908,
+          "max_x": 194662.525992819,
+          "max_y": 433669.1713365643
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0007.png",
+        "width": 20,
+        "height": 40,
+        "index": 7,
+        "bounds": {
+          "min_x": 194663.1265737446,
+          "min_y": 433667.4383701813,
+          "max_x": 194665.6585586028,
+          "max_y": 433669.2296814777
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0008.png",
+        "width": 80,
+        "height": 30,
+        "index": 8,
+        "bounds": {
+          "min_x": 194674.9067393875,
+          "min_y": 433676.3632714907,
+          "max_x": 194676.988492819,
+          "max_y": 433677.9245865643
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0009.png",
+        "width": 20,
+        "height": 40,
+        "index": 9,
+        "bounds": {
+          "min_x": 194677.589225054,
+          "min_y": 433676.1916201787,
+          "max_x": 194680.1212099122,
+          "max_y": 433677.9829314751
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0010.png",
+        "width": 40,
+        "height": 20,
+        "index": 10,
+        "bounds": {
+          "min_x": 194674.9067393875,
+          "min_y": 433673.4462714908,
+          "max_x": 194676.988492819,
+          "max_y": 433675.0075865643
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0011.png",
+        "width": 20,
+        "height": 40,
+        "index": 11,
+        "bounds": {
+          "min_x": 194677.589225054,
+          "min_y": 433673.2746201788,
+          "max_x": 194680.1212099122,
+          "max_y": 433675.0659314752
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0012.png",
+        "width": 40,
+        "height": 20,
+        "index": 12,
+        "bounds": {
+          "min_x": 194674.9067393875,
+          "min_y": 433670.5282714908,
+          "max_x": 194676.988492819,
+          "max_y": 433672.0895865644
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0013.png",
+        "width": 20,
+        "height": 40,
+        "index": 13,
+        "bounds": {
+          "min_x": 194677.589225054,
+          "min_y": 433670.3566201788,
+          "max_x": 194680.1212099122,
+          "max_y": 433672.1479314753
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0014.png",
+        "width": 80,
+        "height": 30,
+        "index": 14,
+        "bounds": {
+          "min_x": 194674.9067393876,
+          "min_y": 433667.6097714907,
+          "max_x": 194676.9884928191,
+          "max_y": 433669.1710865642
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0015.png",
+        "width": 20,
+        "height": 40,
+        "index": 15,
+        "bounds": {
+          "min_x": 194677.5892250541,
+          "min_y": 433667.4381201786,
+          "max_x": 194680.1212099123,
+          "max_y": 433669.2294314751
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0016.png",
+        "width": 40,
+        "height": 20,
+        "index": 16,
+        "bounds": {
+          "min_x": 194660.6954931562,
+          "min_y": 433651.2683652214,
+          "max_x": 194662.7772465877,
+          "max_y": 433652.8296802948
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0017.png",
+        "width": 20,
+        "height": 40,
+        "index": 17,
+        "bounds": {
+          "min_x": 194663.3779788227,
+          "min_y": 433651.0967139093,
+          "max_x": 194665.9099636809,
+          "max_y": 433652.8880252058
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0018.png",
+        "width": 40,
+        "height": 20,
+        "index": 18,
+        "bounds": {
+          "min_x": 194660.6954931562,
+          "min_y": 433648.3513652215,
+          "max_x": 194662.7772465877,
+          "max_y": 433649.9126802951
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0019.png",
+        "width": 20,
+        "height": 40,
+        "index": 19,
+        "bounds": {
+          "min_x": 194663.3779788227,
+          "min_y": 433648.1797139096,
+          "max_x": 194665.909963681,
+          "max_y": 433649.9710252058
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0020.png",
+        "width": 80,
+        "height": 30,
+        "index": 20,
+        "bounds": {
+          "min_x": 194660.6954931562,
+          "min_y": 433645.4333652215,
+          "max_x": 194662.7772465877,
+          "max_y": 433646.9946802949
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0021.png",
+        "width": 20,
+        "height": 40,
+        "index": 21,
+        "bounds": {
+          "min_x": 194663.3779788227,
+          "min_y": 433645.2617139094,
+          "max_x": 194665.909963681,
+          "max_y": 433647.0530252059
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0022.png",
+        "width": 40,
+        "height": 20,
+        "index": 22,
+        "bounds": {
+          "min_x": 194660.6954931562,
+          "min_y": 433642.5151152214,
+          "max_x": 194662.7772465877,
+          "max_y": 433644.0764302949
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0023.png",
+        "width": 20,
+        "height": 40,
+        "index": 23,
+        "bounds": {
+          "min_x": 194663.3779788227,
+          "min_y": 433642.3434639093,
+          "max_x": 194665.9099636809,
+          "max_y": 433644.1347752058
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0024.png",
+        "width": 40,
+        "height": 20,
+        "index": 24,
+        "bounds": {
+          "min_x": 194675.1579931562,
+          "min_y": 433651.2683652214,
+          "max_x": 194677.2397465876,
+          "max_y": 433652.8296802948
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0025.png",
+        "width": 20,
+        "height": 40,
+        "index": 25,
+        "bounds": {
+          "min_x": 194677.8404788227,
+          "min_y": 433651.0967139093,
+          "max_x": 194680.3724636809,
+          "max_y": 433652.8880252058
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0026.png",
+        "width": 80,
+        "height": 30,
+        "index": 26,
+        "bounds": {
+          "min_x": 194675.1579931562,
+          "min_y": 433648.3513652215,
+          "max_x": 194677.2397465876,
+          "max_y": 433649.9126802951
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0027.png",
+        "width": 20,
+        "height": 40,
+        "index": 27,
+        "bounds": {
+          "min_x": 194677.8404788227,
+          "min_y": 433648.1797139096,
+          "max_x": 194680.3724636809,
+          "max_y": 433649.9710252058
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0028.png",
+        "width": 40,
+        "height": 20,
+        "index": 28,
+        "bounds": {
+          "min_x": 194675.1579931562,
+          "min_y": 433645.4333652215,
+          "max_x": 194677.2397465876,
+          "max_y": 433646.9946802949
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0029.png",
+        "width": 20,
+        "height": 40,
+        "index": 29,
+        "bounds": {
+          "min_x": 194677.8404788227,
+          "min_y": 433645.2617139094,
+          "max_x": 194680.3724636809,
+          "max_y": 433647.0530252059
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0030.png",
+        "width": 40,
+        "height": 20,
+        "index": 30,
+        "bounds": {
+          "min_x": 194675.1579931562,
+          "min_y": 433642.5148652214,
+          "max_x": 194677.2397465877,
+          "max_y": 433644.076180295
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0031.png",
+        "width": 20,
+        "height": 40,
+        "index": 31,
+        "bounds": {
+          "min_x": 194677.8404788227,
+          "min_y": 433642.3432139094,
+          "max_x": 194680.372463681,
+          "max_y": 433644.1345252057
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0032.png",
+        "width": 80,
+        "height": 30,
+        "index": 32,
+        "bounds": {
+          "min_x": 194660.6220765965,
+          "min_y": 433626.9701315251,
+          "max_x": 194662.703830028,
+          "max_y": 433628.5314465988
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0033.png",
+        "width": 20,
+        "height": 40,
+        "index": 33,
+        "bounds": {
+          "min_x": 194663.304562263,
+          "min_y": 433626.798480213,
+          "max_x": 194665.8365471212,
+          "max_y": 433628.5897915096
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0034.png",
+        "width": 40,
+        "height": 20,
+        "index": 34,
+        "bounds": {
+          "min_x": 194660.6220765965,
+          "min_y": 433624.0531315253,
+          "max_x": 194662.703830028,
+          "max_y": 433625.6144465989
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0035.png",
+        "width": 20,
+        "height": 40,
+        "index": 35,
+        "bounds": {
+          "min_x": 194663.304562263,
+          "min_y": 433623.8814802132,
+          "max_x": 194665.8365471212,
+          "max_y": 433625.6727915095
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0036.png",
+        "width": 40,
+        "height": 20,
+        "index": 36,
+        "bounds": {
+          "min_x": 194660.6220765965,
+          "min_y": 433621.1351315252,
+          "max_x": 194662.703830028,
+          "max_y": 433622.6964465988
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0037.png",
+        "width": 20,
+        "height": 40,
+        "index": 37,
+        "bounds": {
+          "min_x": 194663.304562263,
+          "min_y": 433620.9634802131,
+          "max_x": 194665.8365471212,
+          "max_y": 433622.7547915096
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0038.png",
+        "width": 80,
+        "height": 30,
+        "index": 38,
+        "bounds": {
+          "min_x": 194660.6220765965,
+          "min_y": 433618.2168815251,
+          "max_x": 194662.703830028,
+          "max_y": 433619.7781965988
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0039.png",
+        "width": 20,
+        "height": 40,
+        "index": 39,
+        "bounds": {
+          "min_x": 194663.304562263,
+          "min_y": 433618.0452302132,
+          "max_x": 194665.8365471212,
+          "max_y": 433619.8365415095
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0040.png",
+        "width": 40,
+        "height": 20,
+        "index": 40,
+        "bounds": {
+          "min_x": 194675.0845765965,
+          "min_y": 433626.9701315251,
+          "max_x": 194677.166330028,
+          "max_y": 433628.5314465988
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0041.png",
+        "width": 20,
+        "height": 40,
+        "index": 41,
+        "bounds": {
+          "min_x": 194677.767062263,
+          "min_y": 433626.798480213,
+          "max_x": 194680.2990471212,
+          "max_y": 433628.5897915096
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0042.png",
+        "width": 40,
+        "height": 20,
+        "index": 42,
+        "bounds": {
+          "min_x": 194675.0845765965,
+          "min_y": 433624.0531315253,
+          "max_x": 194677.166330028,
+          "max_y": 433625.6144465989
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0043.png",
+        "width": 20,
+        "height": 40,
+        "index": 43,
+        "bounds": {
+          "min_x": 194677.767062263,
+          "min_y": 433623.8814802132,
+          "max_x": 194680.2990471212,
+          "max_y": 433625.6727915095
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0044.png",
+        "width": 80,
+        "height": 30,
+        "index": 44,
+        "bounds": {
+          "min_x": 194675.0845765965,
+          "min_y": 433621.1351315252,
+          "max_x": 194677.166330028,
+          "max_y": 433622.6964465988
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0045.png",
+        "width": 20,
+        "height": 40,
+        "index": 45,
+        "bounds": {
+          "min_x": 194677.767062263,
+          "min_y": 433620.9634802131,
+          "max_x": 194680.2990471212,
+          "max_y": 433622.7547915096
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0046.png",
+        "width": 40,
+        "height": 20,
+        "index": 46,
+        "bounds": {
+          "min_x": 194675.0845765966,
+          "min_y": 433618.2166315253,
+          "max_x": 194677.166330028,
+          "max_y": 433619.7779465988
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0047.png",
+        "width": 20,
+        "height": 40,
+        "index": 47,
+        "bounds": {
+          "min_x": 194677.7670622631,
+          "min_y": 433618.0449802132,
+          "max_x": 194680.2990471213,
+          "max_y": 433619.8362915095
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0048.png",
+        "width": 40,
+        "height": 20,
+        "index": 48,
+        "bounds": {
+          "min_x": 194660.9766499798,
+          "min_y": 433599.2657673328,
+          "max_x": 194663.0584034113,
+          "max_y": 433600.8270824063
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0049.png",
+        "width": 20,
+        "height": 40,
+        "index": 49,
+        "bounds": {
+          "min_x": 194663.6591356463,
+          "min_y": 433599.0941160207,
+          "max_x": 194666.1911205045,
+          "max_y": 433600.8854273171
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0050.png",
+        "width": 80,
+        "height": 30,
+        "index": 50,
+        "bounds": {
+          "min_x": 194660.9766499798,
+          "min_y": 433596.3487673327,
+          "max_x": 194663.0584034113,
+          "max_y": 433597.9100824064
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0051.png",
+        "width": 20,
+        "height": 40,
+        "index": 51,
+        "bounds": {
+          "min_x": 194663.6591356463,
+          "min_y": 433596.1771160207,
+          "max_x": 194666.1911205045,
+          "max_y": 433597.9684273172
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0052.png",
+        "width": 40,
+        "height": 20,
+        "index": 52,
+        "bounds": {
+          "min_x": 194660.9766499798,
+          "min_y": 433593.4307673329,
+          "max_x": 194663.0584034113,
+          "max_y": 433594.9920824064
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0053.png",
+        "width": 20,
+        "height": 40,
+        "index": 53,
+        "bounds": {
+          "min_x": 194663.6591356463,
+          "min_y": 433593.2591160208,
+          "max_x": 194666.1911205045,
+          "max_y": 433595.0504273172
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0054.png",
+        "width": 40,
+        "height": 20,
+        "index": 54,
+        "bounds": {
+          "min_x": 194660.9766499798,
+          "min_y": 433590.5125173328,
+          "max_x": 194663.0584034113,
+          "max_y": 433592.0738324062
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0055.png",
+        "width": 20,
+        "height": 40,
+        "index": 55,
+        "bounds": {
+          "min_x": 194663.6591356463,
+          "min_y": 433590.3408660207,
+          "max_x": 194666.1911205045,
+          "max_y": 433592.1321773171
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0056.png",
+        "width": 80,
+        "height": 30,
+        "index": 56,
+        "bounds": {
+          "min_x": 194675.4391499798,
+          "min_y": 433599.2657673328,
+          "max_x": 194677.5209034112,
+          "max_y": 433600.8270824063
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0057.png",
+        "width": 20,
+        "height": 40,
+        "index": 57,
+        "bounds": {
+          "min_x": 194678.1216356463,
+          "min_y": 433599.0951160209,
+          "max_x": 194680.6536205046,
+          "max_y": 433600.8864273173
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0058.png",
+        "width": 40,
+        "height": 20,
+        "index": 58,
+        "bounds": {
+          "min_x": 194675.4391499798,
+          "min_y": 433596.3487673327,
+          "max_x": 194677.5209034112,
+          "max_y": 433597.9100824064
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0059.png",
+        "width": 20,
+        "height": 40,
+        "index": 59,
+        "bounds": {
+          "min_x": 194678.1216356463,
+          "min_y": 433596.1771160207,
+          "max_x": 194680.6536205046,
+          "max_y": 433597.9684273172
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0060.png",
+        "width": 40,
+        "height": 20,
+        "index": 60,
+        "bounds": {
+          "min_x": 194675.4391499798,
+          "min_y": 433593.4307673329,
+          "max_x": 194677.5209034112,
+          "max_y": 433594.9920824064
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0061.png",
+        "width": 20,
+        "height": 40,
+        "index": 61,
+        "bounds": {
+          "min_x": 194678.1216356463,
+          "min_y": 433593.2591160208,
+          "max_x": 194680.6536205046,
+          "max_y": 433595.0504273172
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0062.png",
+        "width": 80,
+        "height": 30,
+        "index": 62,
+        "bounds": {
+          "min_x": 194675.4391499798,
+          "min_y": 433590.5122673327,
+          "max_x": 194677.5209034113,
+          "max_y": 433592.0735824063
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0063.png",
+        "width": 20,
+        "height": 40,
+        "index": 63,
+        "bounds": {
+          "min_x": 194678.1216356464,
+          "min_y": 433590.3406160207,
+          "max_x": 194680.6536205046,
+          "max_y": 433592.1319273171
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0064.png",
+        "width": 40,
+        "height": 20,
+        "index": 64,
+        "bounds": {
+          "min_x": 0,
+          "min_y": 0,
+          "max_x": 100,
+          "max_y": 50
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": "A0 S"
+      }
+    ],
+    "expected": [
+      {
+        "name": "kaart",
+        "filename": "raster0000.png",
+        "insert": [
+          194660.4842393875,
+          433676.6434906696,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (2)",
+        "filename": "raster0001.png",
+        "insert": [
+          194663.96488965905,
+          433676.2316201787,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241108637,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6196898769177302e-18,
+          0.04278278241108637,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (3)",
+        "filename": "raster0002.png",
+        "insert": [
+          194660.5442393875,
+          433673.54627149075,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.778550245780948e-18,
+          0.04537716911872849,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (4)",
+        "filename": "raster0003.png",
+        "insert": [
+          194663.126725054,
+          433673.2746201788,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291510832,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545567683103e-18,
+          0.044782782410038635,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (5)",
+        "filename": "raster0004.png",
+        "insert": [
+          194660.4442393875,
+          433670.5282714908,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.780148768280741e-18,
+          0.07806575367867481,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (6)",
+        "filename": "raster0005.png",
+        "insert": [
+          194663.89488965904,
+          433670.2566201788,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241178487,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162566620744e-18,
+          0.04978278241178487,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (7)",
+        "filename": "raster0006.png",
+        "insert": [
+          194660.48423938762,
+          433667.8902406697,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578489069,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011653728985e-18,
+          0.05004383578198031,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (8)",
+        "filename": "raster0007.png",
+        "insert": [
+          194663.96473834958,
+          433667.4783701813,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241108637,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6196898769177302e-18,
+          0.04278278241108637,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (9)",
+        "filename": "raster0008.png",
+        "insert": [
+          194675.0067393875,
+          433676.4632714907,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502458997545e-18,
+          0.04537716912066874,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (10)",
+        "filename": "raster0009.png",
+        "insert": [
+          194677.589225054,
+          433676.1916201787,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291074276,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545567683103e-18,
+          0.044782782410038635,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (11)",
+        "filename": "raster0010.png",
+        "insert": [
+          194674.9067393875,
+          433673.4462714908,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.7801487681025314e-18,
+          0.07806575367576443,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (12)",
+        "filename": "raster0011.png",
+        "insert": [
+          194678.357389659,
+          433673.1746201788,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278240887448,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162564838646e-18,
+          0.04978278240887448,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (13)",
+        "filename": "raster0012.png",
+        "insert": [
+          194674.94673938747,
+          433670.80849066976,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (14)",
+        "filename": "raster0013.png",
+        "insert": [
+          194678.42738965896,
+          433670.39662017877,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241399676,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.61968987709594e-18,
+          0.04278278241399676,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (15)",
+        "filename": "raster0014.png",
+        "insert": [
+          194675.0067393876,
+          433667.70977149066,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.778550245780948e-18,
+          0.04537716911872849,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (16)",
+        "filename": "raster0015.png",
+        "insert": [
+          194677.5892250541,
+          433667.4381201786,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924290928756,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545569465196e-18,
+          0.044782782412949015,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (17)",
+        "filename": "raster0016.png",
+        "insert": [
+          194660.6954931562,
+          433651.2683652214,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.780148767746112e-18,
+          0.07806575366994366,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (18)",
+        "filename": "raster0017.png",
+        "insert": [
+          194664.14614342767,
+          433650.9967139093,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241178487,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162566620744e-18,
+          0.04978278241178487,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (19)",
+        "filename": "raster0018.png",
+        "insert": [
+          194660.7354931562,
+          433648.6315844004,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (20)",
+        "filename": "raster0019.png",
+        "insert": [
+          194664.21614342777,
+          433648.21971390955,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278240817599,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.619689876739521e-18,
+          0.04278278240817599,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (21)",
+        "filename": "raster0020.png",
+        "insert": [
+          194660.7954931562,
+          433645.53336522146,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502455433357e-18,
+          0.04537716911484798,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (22)",
+        "filename": "raster0021.png",
+        "insert": [
+          194663.3779788227,
+          433645.2617139094,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291510832,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545569465196e-18,
+          0.044782782412949015,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (23)",
+        "filename": "raster0022.png",
+        "insert": [
+          194660.6954931562,
+          433642.5151152214,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.7801487681025314e-18,
+          0.07806575367576443,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (24)",
+        "filename": "raster0023.png",
+        "insert": [
+          194664.14614342767,
+          433642.2434639093,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241178487,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162566620744e-18,
+          0.04978278241178487,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (25)",
+        "filename": "raster0024.png",
+        "insert": [
+          194675.1979931562,
+          433651.5485844002,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578489069,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (26)",
+        "filename": "raster0025.png",
+        "insert": [
+          194678.67864342767,
+          433651.1367139093,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241399676,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.61968987709594e-18,
+          0.04278278241399676,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (27)",
+        "filename": "raster0026.png",
+        "insert": [
+          194675.2579931562,
+          433648.45136522147,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917892503554,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502460185612e-18,
+          0.045377169122609,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (28)",
+        "filename": "raster0027.png",
+        "insert": [
+          194677.8404788227,
+          433648.1797139096,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924290928756,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545565009958e-18,
+          0.04478278240567306,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (29)",
+        "filename": "raster0028.png",
+        "insert": [
+          194675.1579931562,
+          433645.4333652215,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578529814,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.780148767746112e-18,
+          0.07806575366994366,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (30)",
+        "filename": "raster0029.png",
+        "insert": [
+          194678.6086434277,
+          433645.1617139094,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241178487,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162566620744e-18,
+          0.04978278241178487,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (31)",
+        "filename": "raster0030.png",
+        "insert": [
+          194675.1979931562,
+          433642.7950844003,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (32)",
+        "filename": "raster0031.png",
+        "insert": [
+          194678.6786434278,
+          433642.3832139094,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278240817599,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.619689876739521e-18,
+          0.04278278240817599,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (33)",
+        "filename": "raster0032.png",
+        "insert": [
+          194660.72207659652,
+          433627.07013152505,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502462561736e-18,
+          0.04537716912648951,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (34)",
+        "filename": "raster0033.png",
+        "insert": [
+          194663.304562263,
+          433626.798480213,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291074276,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545571247294e-18,
+          0.0447827824158594,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (35)",
+        "filename": "raster0034.png",
+        "insert": [
+          194660.6220765965,
+          433624.0531315253,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.78014876845895e-18,
+          0.07806575368158519,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (36)",
+        "filename": "raster0035.png",
+        "insert": [
+          194664.07272686803,
+          433623.7814802132,
+          0.0
+        ],
+        "u_pixel": [
+          0.0497827824059641,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162563056552e-18,
+          0.0497827824059641,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (37)",
+        "filename": "raster0036.png",
+        "insert": [
+          194660.66207659652,
+          433621.41535070416,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (38)",
+        "filename": "raster0037.png",
+        "insert": [
+          194664.14272686795,
+          433621.00348021305,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241399676,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.61968987709594e-18,
+          0.04278278241399676,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (39)",
+        "filename": "raster0038.png",
+        "insert": [
+          194660.72207659652,
+          433618.3168815251,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502461373672e-18,
+          0.045377169124549255,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (40)",
+        "filename": "raster0039.png",
+        "insert": [
+          194663.304562263,
+          433618.0452302132,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291074276,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.742154556590101e-18,
+          0.044782782407128255,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (41)",
+        "filename": "raster0040.png",
+        "insert": [
+          194675.0845765965,
+          433626.9701315251,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.78014876881537e-18,
+          0.07806575368740595,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (42)",
+        "filename": "raster0041.png",
+        "insert": [
+          194678.53522686794,
+          433626.698480213,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241469525,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.048316256840284e-18,
+          0.04978278241469525,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (43)",
+        "filename": "raster0042.png",
+        "insert": [
+          194675.12457659648,
+          433624.3333507042,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (44)",
+        "filename": "raster0043.png",
+        "insert": [
+          194678.605226868,
+          433623.9214802132,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278240817599,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.619689876739521e-18,
+          0.04278278240817599,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (45)",
+        "filename": "raster0044.png",
+        "insert": [
+          194675.1845765965,
+          433621.2351315252,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502458997545e-18,
+          0.04537716912066874,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (46)",
+        "filename": "raster0045.png",
+        "insert": [
+          194677.767062263,
+          433620.9634802131,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924290928756,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545569465196e-18,
+          0.044782782412949015,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (47)",
+        "filename": "raster0046.png",
+        "insert": [
+          194675.0845765966,
+          433618.2166315253,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578529814,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.7801487681025314e-18,
+          0.07806575367576443,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (48)",
+        "filename": "raster0047.png",
+        "insert": [
+          194678.53522686815,
+          433617.94498021324,
+          0.0
+        ],
+        "u_pixel": [
+          0.0497827824059641,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162563056552e-18,
+          0.0497827824059641,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (49)",
+        "filename": "raster0048.png",
+        "insert": [
+          194661.0166499798,
+          433599.5459865117,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (50)",
+        "filename": "raster0049.png",
+        "insert": [
+          194664.4973002513,
+          433599.1341160207,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241108637,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6196898769177302e-18,
+          0.04278278241108637,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (51)",
+        "filename": "raster0050.png",
+        "insert": [
+          194661.0766499798,
+          433596.44876733265,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502462561736e-18,
+          0.04537716912648951,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (52)",
+        "filename": "raster0051.png",
+        "insert": [
+          194663.6591356463,
+          433596.1771160207,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924290928756,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545569465196e-18,
+          0.044782782412949015,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (53)",
+        "filename": "raster0052.png",
+        "insert": [
+          194660.9766499798,
+          433593.4307673329,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578748093,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.7801487681025314e-18,
+          0.07806575367576443,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (54)",
+        "filename": "raster0053.png",
+        "insert": [
+          194664.42730025132,
+          433593.15911602083,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278240887448,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162564838646e-18,
+          0.04978278240887448,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (55)",
+        "filename": "raster0054.png",
+        "insert": [
+          194661.0166499798,
+          433590.7927365116,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578780107,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (56)",
+        "filename": "raster0055.png",
+        "insert": [
+          194664.4973002513,
+          433590.3808660207,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241108637,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6196898769177302e-18,
+          0.04278278241108637,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (57)",
+        "filename": "raster0056.png",
+        "insert": [
+          194675.5391499798,
+          433599.3657673328,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917892503554,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.778550245780948e-18,
+          0.04537716911872849,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (58)",
+        "filename": "raster0057.png",
+        "insert": [
+          194678.1216356463,
+          433599.0951160209,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924291510832,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545567683103e-18,
+          0.044782782410038635,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (59)",
+        "filename": "raster0058.png",
+        "insert": [
+          194675.4391499798,
+          433596.3487673327,
+          0.0
+        ],
+        "u_pixel": [
+          0.05204383578529814,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.78014876881537e-18,
+          0.07806575368740595,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (60)",
+        "filename": "raster0059.png",
+        "insert": [
+          194678.88980025132,
+          433596.0771160207,
+          0.0
+        ],
+        "u_pixel": [
+          0.04978278241178487,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0483162566620744e-18,
+          0.04978278241178487,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (61)",
+        "filename": "raster0060.png",
+        "insert": [
+          194675.4791499798,
+          433593.7109865118,
+          0.0
+        ],
+        "u_pixel": [
+          0.05004383578489069,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0643011657293172e-18,
+          0.05004383578780107,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (62)",
+        "filename": "raster0061.png",
+        "insert": [
+          194678.95980025132,
+          433593.2991160208,
+          0.0
+        ],
+        "u_pixel": [
+          0.04278278241108637,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6196898769177302e-18,
+          0.04278278241108637,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (63)",
+        "filename": "raster0062.png",
+        "insert": [
+          194675.5391499798,
+          433590.6122673327,
+          0.0
+        ],
+        "u_pixel": [
+          0.023521917893594944,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7785502458997545e-18,
+          0.04537716912066874,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (64)",
+        "filename": "raster0063.png",
+        "insert": [
+          194678.1216356464,
+          433590.3406160207,
+          0.0
+        ],
+        "u_pixel": [
+          0.12659924290928756,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7421545567683103e-18,
+          0.044782782410038635,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (65)",
+        "filename": "raster0064.png",
+        "insert": [
+          6.0,
+          3.0,
+          0.0
+        ],
+        "u_pixel": [
+          2.2,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.3471114790620887e-16,
+          2.2,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    ]
+  },
+  {
+    "name": "standard",
+    "path": "rust/tests/fixtures/templates/standard.dxf",
+    "requests": [
+      {
+        "filename": "raster0000.png",
+        "width": 40,
+        "height": 20,
+        "index": 0,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": 0.0,
+          "max_x": 26.1,
+          "max_y": 1.6
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0001.png",
+        "width": 20,
+        "height": 40,
+        "index": 1,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -0.1,
+          "max_x": 29.0,
+          "max_y": 1.7
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0002.png",
+        "width": 80,
+        "height": 30,
+        "index": 2,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": -3.0,
+          "max_x": 26.1,
+          "max_y": -1.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0003.png",
+        "width": 20,
+        "height": 40,
+        "index": 3,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -3.1,
+          "max_x": 29.0,
+          "max_y": -1.3
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0004.png",
+        "width": 40,
+        "height": 20,
+        "index": 4,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": 0.0,
+          "max_x": 56.1,
+          "max_y": 1.6
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0005.png",
+        "width": 20,
+        "height": 40,
+        "index": 5,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -0.1,
+          "max_x": 59.0,
+          "max_y": 1.7
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0006.png",
+        "width": 40,
+        "height": 20,
+        "index": 6,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": -3.0,
+          "max_x": 56.1,
+          "max_y": -1.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0007.png",
+        "width": 20,
+        "height": 40,
+        "index": 7,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -3.1,
+          "max_x": 59.0,
+          "max_y": -1.3
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0008.png",
+        "width": 80,
+        "height": 30,
+        "index": 8,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": -12.0,
+          "max_x": 26.1,
+          "max_y": -10.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0009.png",
+        "width": 20,
+        "height": 40,
+        "index": 9,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -12.1,
+          "max_x": 29.0,
+          "max_y": -10.299999999999999
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0010.png",
+        "width": 40,
+        "height": 20,
+        "index": 10,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": -12.0,
+          "max_x": 56.1,
+          "max_y": -10.4
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0011.png",
+        "width": 20,
+        "height": 40,
+        "index": 11,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -12.1,
+          "max_x": 59.0,
+          "max_y": -10.299999999999999
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0012.png",
+        "width": 40,
+        "height": 20,
+        "index": 12,
+        "bounds": {
+          "min_x": 0,
+          "min_y": 0,
+          "max_x": 100,
+          "max_y": 50
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": "Layout1"
+      }
+    ],
+    "expected": [
+      {
+        "name": "kaart",
+        "filename": "raster0000.png",
+        "insert": [
+          24.04,
+          0.29499999999999926,
+          0.0
+        ],
+        "u_pixel": [
+          0.05050000000000008,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0922331678470716e-18,
+          0.05050000000000008,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (2)",
+        "filename": "raster0001.png",
+        "insert": [
+          27.32,
+          -0.06000000000000005,
+          0.0
+        ],
+        "u_pixel": [
+          0.04299999999999997,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6329906181668093e-18,
+          0.043,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (3)",
+        "filename": "raster0002.png",
+        "insert": [
+          24.1,
+          -2.9,
+          0.0
+        ],
+        "u_pixel": [
+          0.023749999999999983,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.8575091980104904e-18,
+          0.04666666666666666,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (4)",
+        "filename": "raster0003.png",
+        "insert": [
+          26.5,
+          -3.1,
+          0.0
+        ],
+        "u_pixel": [
+          0.125,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7554552980815448e-18,
+          0.045,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (5)",
+        "filename": "raster0004.png",
+        "insert": [
+          54.0,
+          0.0,
+          0.0
+        ],
+        "u_pixel": [
+          0.05250000000000003,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.898587196589413e-18,
+          0.08,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (6)",
+        "filename": "raster0005.png",
+        "insert": [
+          57.25,
+          -0.19999999999999996,
+          0.0
+        ],
+        "u_pixel": [
+          0.05,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.061616997868383e-18,
+          0.05,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (7)",
+        "filename": "raster0006.png",
+        "insert": [
+          54.03999999999999,
+          -2.705000000000001,
+          0.0
+        ],
+        "u_pixel": [
+          0.05050000000000025,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0922331678470716e-18,
+          0.05050000000000008,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (8)",
+        "filename": "raster0007.png",
+        "insert": [
+          57.32,
+          -3.06,
+          0.0
+        ],
+        "u_pixel": [
+          0.04299999999999997,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6329906181668093e-18,
+          0.043,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (9)",
+        "filename": "raster0008.png",
+        "insert": [
+          24.1,
+          -11.9,
+          0.0
+        ],
+        "u_pixel": [
+          0.023749999999999983,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.8575091980104916e-18,
+          0.046666666666666676,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (10)",
+        "filename": "raster0009.png",
+        "insert": [
+          26.5,
+          -12.1,
+          0.0
+        ],
+        "u_pixel": [
+          0.125,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.755455298081546e-18,
+          0.04500000000000002,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (11)",
+        "filename": "raster0010.png",
+        "insert": [
+          54.0,
+          -12.0,
+          0.0
+        ],
+        "u_pixel": [
+          0.05250000000000003,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.898587196589412e-18,
+          0.07999999999999999,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (12)",
+        "filename": "raster0011.png",
+        "insert": [
+          57.25,
+          -12.2,
+          0.0
+        ],
+        "u_pixel": [
+          0.05,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.061616997868383e-18,
+          0.05,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (13)",
+        "filename": "raster0012.png",
+        "insert": [
+          0.0799999999999983,
+          0.03999999999999915,
+          0.0
+        ],
+        "u_pixel": [
+          2.496,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.5283592053358969e-16,
+          2.496,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    ]
+  },
+  {
+    "name": "existing",
+    "path": "rust/tests/fixtures/template-images/existing-images.dxf",
+    "requests": [
+      {
+        "filename": "raster0000.png",
+        "width": 40,
+        "height": 20,
+        "index": 0,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": 0.0,
+          "max_x": 26.1,
+          "max_y": 1.6
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0001.png",
+        "width": 20,
+        "height": 40,
+        "index": 1,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -0.1,
+          "max_x": 29.0,
+          "max_y": 1.7
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0002.png",
+        "width": 80,
+        "height": 30,
+        "index": 2,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": -3.0,
+          "max_x": 26.1,
+          "max_y": -1.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0003.png",
+        "width": 20,
+        "height": 40,
+        "index": 3,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -3.1,
+          "max_x": 29.0,
+          "max_y": -1.3
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0004.png",
+        "width": 40,
+        "height": 20,
+        "index": 4,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": 0.0,
+          "max_x": 56.1,
+          "max_y": 1.6
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0005.png",
+        "width": 20,
+        "height": 40,
+        "index": 5,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -0.1,
+          "max_x": 59.0,
+          "max_y": 1.7
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0006.png",
+        "width": 40,
+        "height": 20,
+        "index": 6,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": -3.0,
+          "max_x": 56.1,
+          "max_y": -1.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0007.png",
+        "width": 20,
+        "height": 40,
+        "index": 7,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -3.1,
+          "max_x": 59.0,
+          "max_y": -1.3
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0008.png",
+        "width": 80,
+        "height": 30,
+        "index": 8,
+        "bounds": {
+          "min_x": 24.0,
+          "min_y": -12.0,
+          "max_x": 26.1,
+          "max_y": -10.4
+        },
+        "definition_name": "kaart",
+        "inset": 0.1,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0009.png",
+        "width": 20,
+        "height": 40,
+        "index": 9,
+        "bounds": {
+          "min_x": 26.5,
+          "min_y": -12.1,
+          "max_x": 29.0,
+          "max_y": -10.299999999999999
+        },
+        "definition_name": "kaart",
+        "inset": 0.0,
+        "preserve_aspect": false,
+        "layout": null
+      },
+      {
+        "filename": "raster0010.png",
+        "width": 40,
+        "height": 20,
+        "index": 10,
+        "bounds": {
+          "min_x": 54.0,
+          "min_y": -12.0,
+          "max_x": 56.1,
+          "max_y": -10.4
+        },
+        "definition_name": "kaart",
+        "inset": 3.0,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0011.png",
+        "width": 20,
+        "height": 40,
+        "index": 11,
+        "bounds": {
+          "min_x": 56.5,
+          "min_y": -12.1,
+          "max_x": 59.0,
+          "max_y": -10.299999999999999
+        },
+        "definition_name": "kaart",
+        "inset": -0.1,
+        "preserve_aspect": true,
+        "layout": null
+      },
+      {
+        "filename": "raster0012.png",
+        "width": 40,
+        "height": 20,
+        "index": 12,
+        "bounds": {
+          "min_x": 0,
+          "min_y": 0,
+          "max_x": 100,
+          "max_y": 50
+        },
+        "definition_name": "kaart",
+        "inset": 0.04,
+        "preserve_aspect": true,
+        "layout": "Layout1"
+      }
+    ],
+    "expected": [
+      {
+        "name": "kaart (2)",
+        "filename": "raster0000.png",
+        "insert": [
+          24.04,
+          0.29499999999999926,
+          0.0
+        ],
+        "u_pixel": [
+          0.05050000000000008,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0922331678470716e-18,
+          0.05050000000000008,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (3)",
+        "filename": "raster0001.png",
+        "insert": [
+          27.32,
+          -0.06000000000000005,
+          0.0
+        ],
+        "u_pixel": [
+          0.04299999999999997,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6329906181668093e-18,
+          0.043,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (4)",
+        "filename": "raster0002.png",
+        "insert": [
+          24.1,
+          -2.9,
+          0.0
+        ],
+        "u_pixel": [
+          0.023749999999999983,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.8575091980104904e-18,
+          0.04666666666666666,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (5)",
+        "filename": "raster0003.png",
+        "insert": [
+          26.5,
+          -3.1,
+          0.0
+        ],
+        "u_pixel": [
+          0.125,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.7554552980815448e-18,
+          0.045,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (6)",
+        "filename": "raster0004.png",
+        "insert": [
+          54.0,
+          0.0,
+          0.0
+        ],
+        "u_pixel": [
+          0.05250000000000003,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.898587196589413e-18,
+          0.08,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (7)",
+        "filename": "raster0005.png",
+        "insert": [
+          57.25,
+          -0.19999999999999996,
+          0.0
+        ],
+        "u_pixel": [
+          0.05,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.061616997868383e-18,
+          0.05,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (8)",
+        "filename": "raster0006.png",
+        "insert": [
+          54.03999999999999,
+          -2.705000000000001,
+          0.0
+        ],
+        "u_pixel": [
+          0.05050000000000025,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.0922331678470716e-18,
+          0.05050000000000008,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (9)",
+        "filename": "raster0007.png",
+        "insert": [
+          57.32,
+          -3.06,
+          0.0
+        ],
+        "u_pixel": [
+          0.04299999999999997,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6329906181668093e-18,
+          0.043,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (10)",
+        "filename": "raster0008.png",
+        "insert": [
+          24.1,
+          -11.9,
+          0.0
+        ],
+        "u_pixel": [
+          0.023749999999999983,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.8575091980104916e-18,
+          0.046666666666666676,
+          0.0
+        ],
+        "image_size": [
+          80.0,
+          30.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            79.5,
+            29.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (11)",
+        "filename": "raster0009.png",
+        "insert": [
+          26.5,
+          -12.1,
+          0.0
+        ],
+        "u_pixel": [
+          0.125,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.755455298081546e-18,
+          0.04500000000000002,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (12)",
+        "filename": "raster0010.png",
+        "insert": [
+          54.0,
+          -12.0,
+          0.0
+        ],
+        "u_pixel": [
+          0.05250000000000003,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          4.898587196589412e-18,
+          0.07999999999999999,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (13)",
+        "filename": "raster0011.png",
+        "insert": [
+          57.25,
+          -12.2,
+          0.0
+        ],
+        "u_pixel": [
+          0.05,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.061616997868383e-18,
+          0.05,
+          0.0
+        ],
+        "image_size": [
+          20.0,
+          40.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 0,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            19.5,
+            39.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      },
+      {
+        "name": "kaart (14)",
+        "filename": "raster0012.png",
+        "insert": [
+          0.0799999999999983,
+          0.03999999999999915,
+          0.0
+        ],
+        "u_pixel": [
+          2.496,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.5283592053358969e-16,
+          2.496,
+          0.0
+        ],
+        "image_size": [
+          40.0,
+          20.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            39.5,
+            19.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    ]
+  }
+]

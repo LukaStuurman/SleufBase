@@ -1,0 +1,4032 @@
+[
+  {
+    "name": "custom",
+    "path": "rust/tests/fixtures/template-preparation/custom.dxf",
+    "steps": [
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Water",
+            "color": 5
+          },
+          {
+            "name": "Data",
+            "color": 3
+          },
+          {
+            "name": "Straße",
+            "color": 4
+          },
+          {
+            "name": "STRASSE",
+            "color": 6
+          },
+          {
+            "name": "ΟΣ",
+            "color": 2
+          },
+          {
+            "name": "οσ",
+            "color": 1
+          },
+          {
+            "name": "X-XX-AL-PROFIELBALK-SD",
+            "color": 4
+          },
+          {
+            "name": "0",
+            "color": 255
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Water": {
+              "color": 5,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Straße": {
+              "color": 4,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "STRASSE": {
+              "color": 6,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "ΟΣ": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "οσ": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 4,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 0.8,
+              "oblique": 5.0,
+              "generation_flags": 2,
+              "last_height": 2.5,
+              "font": "Custom Font.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Water",
+            "color": 3
+          },
+          {
+            "name": "Data",
+            "color": 5
+          },
+          {
+            "name": "Another",
+            "color": 8
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Water": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Straße": {
+              "color": 4,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "STRASSE": {
+              "color": 6,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "ΟΣ": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "οσ": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 5,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Another": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 0.8,
+              "oblique": 5.0,
+              "generation_flags": 2,
+              "last_height": 2.5,
+              "font": "Custom Font.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Data",
+            "color": 3
+          },
+          {
+            "name": "water",
+            "color": 1
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Water": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Straße": {
+              "color": 4,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "STRASSE": {
+              "color": 6,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "ΟΣ": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "οσ": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Another": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 0.8,
+              "oblique": 5.0,
+              "generation_flags": 2,
+              "last_height": 2.5,
+              "font": "Custom Font.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Water": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Straße": {
+              "color": 4,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "STRASSE": {
+              "color": 6,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "ΟΣ": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "οσ": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 5,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": 1193046,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Another": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 0.8,
+              "oblique": 5.0,
+              "generation_flags": 2,
+              "last_height": 2.5,
+              "font": "Custom Font.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "missing",
+    "path": "rust/tests/fixtures/template-preparation/missing.dxf",
+    "steps": [
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Tail",
+            "color": 7
+          },
+          {
+            "name": "Data",
+            "color": 3
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Tail": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Tail",
+            "color": 3
+          },
+          {
+            "name": "Data",
+            "color": 5
+          },
+          {
+            "name": "Later",
+            "color": 2
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Tail": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 5,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Later": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Tail",
+            "color": 7
+          },
+          {
+            "name": "Data",
+            "color": 3
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Tail": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Data": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Later": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "staged",
+    "path": "rust/tests/fixtures/template-preparation/empty.dxf",
+    "steps": [
+      {
+        "kind": "geometry",
+        "layers": [
+          {
+            "name": "Early",
+            "color": 5,
+            "true_color": 4478310,
+            "lineweight": null
+          }
+        ],
+        "entities": [
+          {
+            "layer": "Early",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Circle": {
+                "center": [
+                  0,
+                  1
+                ],
+                "radius": 1
+              }
+            }
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 5,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Early",
+            "color": 3
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "kind": "geometry",
+        "layers": [
+          {
+            "name": "Late",
+            "color": 5,
+            "true_color": 4478310,
+            "lineweight": null
+          }
+        ],
+        "entities": [
+          {
+            "layer": "Late",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Circle": {
+                "center": [
+                  0,
+                  1
+                ],
+                "radius": 1
+              }
+            }
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Late": {
+              "color": 5,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            },
+            {
+              "kind": "CIRCLE",
+              "layer": "Late",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "early",
+            "color": 5
+          },
+          {
+            "name": "Late",
+            "color": 1
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 5,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Late": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            },
+            {
+              "kind": "CIRCLE",
+              "layer": "Late",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Early",
+            "color": 3
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Late": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            },
+            {
+              "kind": "CIRCLE",
+              "layer": "Late",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            }
+          ]
+        }
+      },
+      {
+        "kind": "geometry",
+        "layers": [],
+        "entities": [
+          {
+            "layer": "Early",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Text": {
+                "text": "Voorbereid Ø 漢😀",
+                "insert": [
+                  3,
+                  4
+                ],
+                "height": 0.2,
+                "rotation": 0,
+                "style": "KADASTRALE_LABELS",
+                "halign": 0,
+                "valign": 0
+              }
+            }
+          },
+          {
+            "layer": "0",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Block": {
+                "name": "Straße",
+                "insert": [
+                  10,
+                  20
+                ],
+                "scale": 1,
+                "attributes": {
+                  "A": "Native A"
+                }
+              }
+            }
+          },
+          {
+            "layer": "0",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Block": {
+                "name": "STRASSE",
+                "insert": [
+                  10,
+                  20
+                ],
+                "scale": 1,
+                "attributes": {
+                  "B": "Native B"
+                }
+              }
+            }
+          },
+          {
+            "layer": "0",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Block": {
+                "name": "ΟΣ",
+                "insert": [
+                  10,
+                  20
+                ],
+                "scale": 1,
+                "attributes": {
+                  "C": "Native C"
+                }
+              }
+            }
+          },
+          {
+            "layer": "0",
+            "layout": null,
+            "paint": {},
+            "shape": {
+              "Block": {
+                "name": "οσ",
+                "insert": [
+                  10,
+                  20
+                ],
+                "scale": 1,
+                "attributes": {
+                  "D": "Native D"
+                }
+              }
+            }
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Defpoints": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Early": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "21",
+              "plotstyle": "13"
+            },
+            "Late": {
+              "color": 1,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": 4478310,
+              "material": "21",
+              "plotstyle": "13"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "txt",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          },
+          "entities": [
+            {
+              "kind": "CIRCLE",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            },
+            {
+              "kind": "CIRCLE",
+              "layer": "Late",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "center": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "radius": 1.0
+            },
+            {
+              "kind": "TEXT",
+              "layer": "Early",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "text": "Voorbereid Ø 漢😀",
+              "insert": [
+                3.0,
+                4.0,
+                0.0
+              ],
+              "align": [
+                3.0,
+                4.0,
+                0.0
+              ],
+              "height": 0.2,
+              "rotation": 0,
+              "width": 1,
+              "oblique": 0,
+              "generation": 0,
+              "halign": 0,
+              "style": "KADASTRALE_LABELS",
+              "extrusion": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "thickness": 0,
+              "valign": 0
+            },
+            {
+              "kind": "INSERT",
+              "layer": "0",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "name": "Straße",
+              "insert": [
+                10.0,
+                20.0,
+                0.0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ],
+              "rotation": 0,
+              "attributes": [
+                {
+                  "kind": "ATTRIB",
+                  "layer": "0",
+                  "color": 256,
+                  "true_color": null,
+                  "lineweight": -1,
+                  "text": "Native A",
+                  "insert": [
+                    11.0,
+                    22.0,
+                    0.0
+                  ],
+                  "align": [
+                    11.0,
+                    22.0,
+                    0.0
+                  ],
+                  "height": 0.2,
+                  "rotation": 0,
+                  "width": 1,
+                  "oblique": 0,
+                  "generation": 0,
+                  "halign": 0,
+                  "style": "Standard",
+                  "extrusion": [
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "thickness": 0,
+                  "tag": "A",
+                  "flags": 0,
+                  "valign": 0,
+                  "lock_position": 0,
+                  "field_length": 0,
+                  "attribute_type": 1,
+                  "linetype": "BYLAYER"
+                }
+              ]
+            },
+            {
+              "kind": "INSERT",
+              "layer": "0",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "name": "STRASSE",
+              "insert": [
+                10.0,
+                20.0,
+                0.0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ],
+              "rotation": 0,
+              "attributes": [
+                {
+                  "kind": "ATTRIB",
+                  "layer": "0",
+                  "color": 256,
+                  "true_color": null,
+                  "lineweight": -1,
+                  "text": "Native B",
+                  "insert": [
+                    12.0,
+                    22.0,
+                    0.0
+                  ],
+                  "align": [
+                    12.0,
+                    22.0,
+                    0.0
+                  ],
+                  "height": 0.4,
+                  "rotation": 0,
+                  "width": 1,
+                  "oblique": 0,
+                  "generation": 0,
+                  "halign": 0,
+                  "style": "Standard",
+                  "extrusion": [
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "thickness": 0,
+                  "tag": "B",
+                  "flags": 0,
+                  "valign": 0,
+                  "lock_position": 0,
+                  "field_length": 0,
+                  "attribute_type": 1,
+                  "linetype": "BYLAYER"
+                }
+              ]
+            },
+            {
+              "kind": "INSERT",
+              "layer": "0",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "name": "ΟΣ",
+              "insert": [
+                10.0,
+                20.0,
+                0.0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ],
+              "rotation": 0,
+              "attributes": [
+                {
+                  "kind": "ATTRIB",
+                  "layer": "0",
+                  "color": 256,
+                  "true_color": null,
+                  "lineweight": -1,
+                  "text": "Native C",
+                  "insert": [
+                    13.0,
+                    22.0,
+                    0.0
+                  ],
+                  "align": [
+                    13.0,
+                    22.0,
+                    0.0
+                  ],
+                  "height": 0.6000000000000001,
+                  "rotation": 0,
+                  "width": 1,
+                  "oblique": 0,
+                  "generation": 0,
+                  "halign": 0,
+                  "style": "Standard",
+                  "extrusion": [
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "thickness": 0,
+                  "tag": "C",
+                  "flags": 0,
+                  "valign": 0,
+                  "lock_position": 0,
+                  "field_length": 0,
+                  "attribute_type": 1,
+                  "linetype": "BYLAYER"
+                }
+              ]
+            },
+            {
+              "kind": "INSERT",
+              "layer": "0",
+              "color": 256,
+              "true_color": null,
+              "lineweight": -1,
+              "name": "οσ",
+              "insert": [
+                10.0,
+                20.0,
+                0.0
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ],
+              "rotation": 0,
+              "attributes": [
+                {
+                  "kind": "ATTRIB",
+                  "layer": "0",
+                  "color": 256,
+                  "true_color": null,
+                  "lineweight": -1,
+                  "text": "Native D",
+                  "insert": [
+                    14.0,
+                    22.0,
+                    0.0
+                  ],
+                  "align": [
+                    14.0,
+                    22.0,
+                    0.0
+                  ],
+                  "height": 0.8,
+                  "rotation": 0,
+                  "width": 1,
+                  "oblique": 0,
+                  "generation": 0,
+                  "halign": 0,
+                  "style": "Standard",
+                  "extrusion": [
+                    0.0,
+                    0.0,
+                    1.0
+                  ],
+                  "thickness": 0,
+                  "tag": "D",
+                  "flags": 0,
+                  "valign": 0,
+                  "lock_position": 0,
+                  "field_length": 0,
+                  "attribute_type": 1,
+                  "linetype": "BYLAYER"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "shipped",
+    "path": "assets/cadastral_template.dxf",
+    "compare_entities": false,
+    "steps": [
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Native template layer",
+            "color": 3
+          },
+          {
+            "name": "X-XX-AL-PROFIELBALK-SD",
+            "color": 2
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "DEFPOINTS": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "KADER": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "niet plotten": {
+              "color": 1,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "LS Text": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "STUKHOOFD": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "MVIEW": {
+              "color": 2,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Afbeelding_lijn": {
+              "color": 8,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "DASHEDX2",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Hulplijn kader": {
+              "color": 8,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "DASHEDX2",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Contour": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-GAS_LD-G": {
+              "color": 50,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-GAS_LD-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-GAS_HD-G": {
+              "color": 30,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-GAS_HD-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-DATA-G": {
+              "color": 90,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-DATA-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_AARDING-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-AARDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_LS-G": {
+              "color": 190,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-LS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_MS-G": {
+              "color": 130,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-MS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-OV-KABEL-G": {
+              "color": 190,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "OV-KABEL-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WATER-G": {
+              "color": 170,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-WATER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-RI-GWA-G": {
+              "color": 30,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "RI-GWA-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-RI-VRIJVERVAL-G": {
+              "color": 210,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "RI-OVERIG-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-GW-HOOGTE_GRONDWATERSTAND-G": {
+              "color": 170,
+              "lineweight": 35,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-HULPLIJN-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T50": {
+              "color": 130,
+              "lineweight": 50,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T18": {
+              "color": 10,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T25": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-S": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-WEESLEIDING-G": {
+              "color": 130,
+              "lineweight": 35,
+              "flags": 0,
+              "linetype": "KL-WEESLEIDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WEESLEIDING-G": {
+              "color": 130,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-WEESLEIDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 2,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-GR-MAAIVELD-G": {
+              "color": 90,
+              "lineweight": 13,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G": {
+              "color": 5,
+              "lineweight": 50,
+              "flags": 0,
+              "linetype": "KL-WATER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "V01-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD_DUCT-G": {
+              "color": 20,
+              "lineweight": 100,
+              "flags": 0,
+              "linetype": "V-CONTINUOUS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B1-OI-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1001": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1002": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-DATA_GLASVEZEL-G": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING_DOORSNEDE-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "ZZ-CENTER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING-S": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1006": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1003": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1004": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1007": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1010": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING_DOORSNEDE-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "ZZ-CENTER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-S": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1009": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point10": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point6": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1008": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point5": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point3": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point7": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_HOOGTE-T18": {
+              "color": 150,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_PUNTNUMMER-T18": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_OMSCHRIJVING-T18": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-WATER_HULPSTUK_BESTAAND_INGEMETEN-S": {
+              "color": 91,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "A_tekst": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "W_tekst": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-KADERS": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Logos": {
+              "color": 255,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Native template layer": {
+              "color": 3,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.87496676134972,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Verdana": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "verdana.ttf",
+              "bigfont": ""
+            },
+            "MD": {
+              "flags": 0,
+              "height": 1.25,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Legend": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 0.6,
+              "font": "calibri.ttf",
+              "bigfont": ""
+            },
+            "verdana vet": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "verdanab.ttf",
+              "bigfont": ""
+            },
+            "HDB": {
+              "flags": 0,
+              "height": 1.25,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Arial": {
+              "flags": 0,
+              "height": 0.8,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 0.8,
+              "font": "arial.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM1-T50": {
+              "flags": 0,
+              "height": 5.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 5.0,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM200-T18": {
+              "flags": 0,
+              "height": 360.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 360.0,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM1-T25": {
+              "flags": 0,
+              "height": 2.5,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.8,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "Synfra": {
+              "flags": 0,
+              "height": 1.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.0,
+              "font": "isocpeur.ttf",
+              "bigfont": ""
+            },
+            "MONOTXT": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "iso.shx",
+              "bigfont": ""
+            },
+            "AenD-T20": {
+              "flags": 0,
+              "height": 2.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.0,
+              "font": "nlcs-iso.shx",
+              "bigfont": ""
+            },
+            "HG-TNR-T20": {
+              "flags": 0,
+              "height": 2.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.5,
+              "font": "timesbd.ttf",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          }
+        }
+      },
+      {
+        "kind": "prepare",
+        "points": [
+          {
+            "name": "Native template layer",
+            "color": 5
+          }
+        ],
+        "expected": {
+          "layers": {
+            "0": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "DEFPOINTS": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "KADER": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "niet plotten": {
+              "color": 1,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "LS Text": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "STUKHOOFD": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "MVIEW": {
+              "color": 2,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Afbeelding_lijn": {
+              "color": 8,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "DASHEDX2",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Hulplijn kader": {
+              "color": 8,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "DASHEDX2",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Contour": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-GAS_LD-G": {
+              "color": 50,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-GAS_LD-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-GAS_HD-G": {
+              "color": 30,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-GAS_HD-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-DATA-G": {
+              "color": 90,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-DATA-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_AARDING-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-AARDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_LS-G": {
+              "color": 190,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-LS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-ET_MS-G": {
+              "color": 130,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-MS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-OV-KABEL-G": {
+              "color": 190,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "OV-KABEL-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WATER-G": {
+              "color": 170,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-WATER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-RI-GWA-G": {
+              "color": 30,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "RI-GWA-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-RI-VRIJVERVAL-G": {
+              "color": 210,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "RI-OVERIG-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-GW-HOOGTE_GRONDWATERSTAND-G": {
+              "color": 170,
+              "lineweight": 35,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-HULPLIJN-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 0,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T50": {
+              "color": 130,
+              "lineweight": 50,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T18": {
+              "color": 10,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-T25": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA-S": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-WEESLEIDING-G": {
+              "color": 130,
+              "lineweight": 35,
+              "flags": 0,
+              "linetype": "KL-WEESLEIDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WEESLEIDING-G": {
+              "color": 130,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "KL-WEESLEIDING-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-GR-MAAIVELD-G": {
+              "color": 90,
+              "lineweight": 13,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-OI-KL-WATER_DISTRIBUTIELEIDING_PVCBV_110-G": {
+              "color": 5,
+              "lineweight": 50,
+              "flags": 0,
+              "linetype": "KL-WATER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "V01-OI-KL-BUISLEIDING GEVAARLIJKE INHOUD_DUCT-G": {
+              "color": 20,
+              "lineweight": 100,
+              "flags": 0,
+              "linetype": "V-CONTINUOUS-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-PROFIELBALK-SD": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING-SD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B1-OI-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1001": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1002": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-DATA_GLASVEZEL-G": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING_DOORSNEDE-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "ZZ-CENTER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X1-XX-AL-VERWIJZING-S": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1006": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1003": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1004": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1007": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1010": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING_DOORSNEDE-G": {
+              "color": 7,
+              "lineweight": 18,
+              "flags": 0,
+              "linetype": "ZZ-CENTER-SO",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-VERWIJZING-S": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1009": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point10": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point6": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "1008": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point5": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point3": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Point7": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_HOOGTE-T18": {
+              "color": 150,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_PUNTNUMMER-T18": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-MEETPUNT_COORDINAAT_OMSCHRIJVING-T18": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "N-OI-KL-WATER_HULPSTUK_BESTAAND_INGEMETEN-S": {
+              "color": 91,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "A_tekst": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "W_tekst": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-KADERS": {
+              "color": 7,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "X-XX-AL-LEGENDA": {
+              "color": 7,
+              "lineweight": 25,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Logos": {
+              "color": 255,
+              "lineweight": -3,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "B-WE-OG-TERREIN_PROFIELLIJN-GD": {
+              "color": 8,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            },
+            "Native template layer": {
+              "color": 5,
+              "lineweight": 0,
+              "flags": 0,
+              "linetype": "Continuous",
+              "plot": 1,
+              "true_color": null,
+              "material": "14133",
+              "plotstyle": "F"
+            }
+          },
+          "styles": {
+            "Standard": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.87496676134972,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Verdana": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "verdana.ttf",
+              "bigfont": ""
+            },
+            "MD": {
+              "flags": 0,
+              "height": 1.25,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Legend": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 0.6,
+              "font": "calibri.ttf",
+              "bigfont": ""
+            },
+            "verdana vet": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "verdanab.ttf",
+              "bigfont": ""
+            },
+            "HDB": {
+              "flags": 0,
+              "height": 1.25,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "isocp.shx",
+              "bigfont": ""
+            },
+            "Arial": {
+              "flags": 0,
+              "height": 0.8,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 0.8,
+              "font": "arial.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM1-T50": {
+              "flags": 0,
+              "height": 5.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 5.0,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM200-T18": {
+              "flags": 0,
+              "height": 360.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 360.0,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO-MM1-T25": {
+              "flags": 0,
+              "height": 2.5,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "NLCS-ISO": {
+              "flags": 0,
+              "height": 1.8,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.8,
+              "font": "NLCS-ISO.ttf",
+              "bigfont": ""
+            },
+            "Synfra": {
+              "flags": 0,
+              "height": 1.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.0,
+              "font": "isocpeur.ttf",
+              "bigfont": ""
+            },
+            "MONOTXT": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.25,
+              "font": "iso.shx",
+              "bigfont": ""
+            },
+            "AenD-T20": {
+              "flags": 0,
+              "height": 2.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.0,
+              "font": "nlcs-iso.shx",
+              "bigfont": ""
+            },
+            "HG-TNR-T20": {
+              "flags": 0,
+              "height": 2.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 1.5,
+              "font": "timesbd.ttf",
+              "bigfont": ""
+            },
+            "PROEFSLEUVEN_LIBMONO": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            },
+            "KADASTRALE_LABELS": {
+              "flags": 0,
+              "height": 0.0,
+              "width": 1.0,
+              "oblique": 0.0,
+              "generation_flags": 0,
+              "last_height": 2.5,
+              "font": "LiberationMono-Regular.ttf",
+              "bigfont": ""
+            }
+          }
+        }
+      }
+    ]
+  }
+]

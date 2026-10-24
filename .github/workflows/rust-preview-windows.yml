@@ -1,0 +1,850 @@
+name: Rust preview - Windows
+
+on:
+  push:
+    branches:
+      - 'migration/rust-*'
+  pull_request:
+    paths:
+      - 'rust/**'
+      - '.github/workflows/rust-preview-windows.yml'
+  workflow_dispatch:
+
+# Push and PR events for the same migration branch share a single runner slot.
+# Superseded builds are cancelled; only the newest preview produces an artifact.
+concurrency:
+  group: rust-preview-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-rust:
+    name: Test and build Rust app
+    runs-on: windows-latest
+    # The complete audit set outgrew the former 35-minute cold-build limit.
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Format source for preview build
+        shell: pwsh
+        run: cargo fmt --manifest-path rust/Cargo.toml --all
+      - name: Tests
+        shell: pwsh
+        run: cargo test --locked --manifest-path rust/Cargo.toml --all-targets --jobs 2
+      - name: Clippy report
+        shell: pwsh
+        run: cargo clippy --locked --manifest-path rust/Cargo.toml --all-targets --jobs 2
+      - name: Build release
+        shell: pwsh
+        # Link audit drivers together instead of starting each new LTO link
+        # serially during the downstream audits. Every audit still runs.
+        run: cargo build --locked --release --manifest-path rust/Cargo.toml --bins --examples --jobs 2
+      - name: Bundle third-party notice
+        shell: pwsh
+        run: |
+          Copy-Item -LiteralPath rust/third_party/Pillow-LICENSE.txt -Destination rust/target/release/Pillow-LICENSE.txt
+          Copy-Item -LiteralPath rust/third_party/ezdxf-LICENSE.txt -Destination rust/target/release/ezdxf-LICENSE.txt
+          Copy-Item -LiteralPath rust/third_party/proj4rs-NOTICES.txt -Destination rust/target/release/proj4rs-NOTICES.txt
+          New-Item -ItemType Directory -Path rust/target/release/assets -Force | Out-Null
+          Copy-Item -LiteralPath assets/template_logos -Destination rust/target/release/assets -Recurse -Force -ErrorAction Stop
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Independently audit native object exports
+        shell: pwsh
+        env:
+          OBJECT_EXPORT_AUDIT_DIR: ${{ runner.temp }}/SleufBase-object-export-audit
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'ezdxf==1.4.4'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_object_fixtures -- "$env:OBJECT_EXPORT_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/sleufbase-rust.exe --settings "$env:OBJECT_EXPORT_AUDIT_DIR/cli-settings.json" --dxf "$env:OBJECT_EXPORT_AUDIT_DIR/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_object_exports.py "$env:OBJECT_EXPORT_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify original Python profile references
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'numpy==2.2.6' 'Pillow==11.3.0' 'shapely==2.0.7' 'requests==2.32.4' 'pyproj==3.7.1' 'mapbox-vector-tile==2.2.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_profile_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profiles/reference.json rust/src/profile_unicode.rs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --locked --manifest-path rust/Cargo.toml --test profiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --release --manifest-path rust/Cargo.toml --example benchmark_profiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template preservation and slot edits
+        shell: pwsh
+        env:
+          TEMPLATE_AUDIT_DIR: ${{ runner.temp }}/SleufBase-template-audit
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/templates
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_template_fixtures -- "$env:TEMPLATE_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_edits.py "$env:TEMPLATE_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template fonts and repeated layer preparation
+        shell: pwsh
+        env:
+          TEMPLATE_PREPARATION_DIR: ${{ runner.temp }}/SleufBase-template-preparation
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_dxf_symbol_case.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_preparation_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/src/dxf_symbol_unicode.rs rust/tests/fixtures/template-preparation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_preparation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_preparation.exe "$env:TEMPLATE_PREPARATION_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_preparation.py "$env:TEMPLATE_PREPARATION_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template sheet numbering and overview viewports
+        shell: pwsh
+        env:
+          TEMPLATE_LAYOUT_DIR: ${{ runner.temp }}/SleufBase-template-layout
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_layout_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-layout
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_layout
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_layout.exe "$env:TEMPLATE_LAYOUT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_layout.py "$env:TEMPLATE_LAYOUT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify native BGT vector tile decoding and cache benchmark
+        shell: pwsh
+        env:
+          BGT_TILES_DIR: ${{ runner.temp }}/SleufBase-BGT-tiles
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_bgt_tile_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/bgt-tiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_bgt_tiles --example benchmark_bgt_tiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_tiles.exe "$env:BGT_TILES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_tiles.py "$env:BGT_TILES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_bgt_tiles.py rust/target/release/examples/benchmark_bgt_tiles.exe rust/benchmarks-bgt-tiles.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload BGT vector tile benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-BGT-tiles-benchmark
+          path: rust/benchmarks-bgt-tiles.json
+          if-no-files-found: error
+      - name: Independently verify BGT repair union clipping and complete batches
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_bgt_geometry_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/bgt-geometry
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_bgt_repair
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_repair.exe rust/tests/fixtures/bgt-geometry/reference.json > "$env:RUNNER_TEMP/bgt-geometry-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_geometry.py rust/tests/fixtures/bgt-geometry/reference.json "$env:RUNNER_TEMP/bgt-geometry-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_bgt_repair.exe rust/tests/fixtures/bgt-geometry/groups.json --groups > "$env:RUNNER_TEMP/bgt-groups-native.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_bgt_geometry.py rust/tests/fixtures/bgt-geometry/groups.json "$env:RUNNER_TEMP/bgt-groups-native.json" --groups
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify BGT appearance geometry and benchmark native probes
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_bgt_surface_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/bgt-surface
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example benchmark_bgt_surface
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_bgt_surface.py rust/target/release/examples/benchmark_bgt_surface.exe rust/benchmarks-bgt-surface.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload BGT appearance benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-BGT-surface-benchmark
+          path: rust/benchmarks-bgt-surface.json
+          if-no-files-found: error
+      - name: Independently audit active profile labels and LEADER annotations
+        shell: pwsh
+        env:
+          ACTIVE_LEADERS_DIR: ${{ runner.temp }}/SleufBase-active-leaders
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_profile_leader_layout_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profile-leaders rust/src/data/profile-leader-annotation.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_profile_leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_profile_leaders.exe "$env:ACTIVE_LEADERS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_leaders.py "$env:ACTIVE_LEADERS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native profile leader geometry and metadata
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_profile_leader_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profile-leader rust/src/data
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_profile_leader
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_leader.py rust/target/release/examples/export_profile_leader.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native profile frames and bands
+        shell: pwsh
+        env:
+          PROFILE_DRAWINGS_DIR: ${{ runner.temp }}/SleufBase-profile-drawings
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_profile_drawing_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/profile-drawing
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "$env:PROFILE_DRAWINGS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "$env:PROFILE_DRAWINGS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-body" --body
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-body" --body
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-reference" --reference
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-reference" --reference
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-leaders" --leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-leaders" --leaders
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-leaders-collisions" --leaders-collisions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-leaders-collisions" --leaders-collisions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_profile_drawings -- "${env:PROFILE_DRAWINGS_DIR}-reference-cases" --reference-cases
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_profile_drawings.py "${env:PROFILE_DRAWINGS_DIR}-reference-cases" --reference-cases
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native template drawing primitives
+        shell: pwsh
+        env:
+          TEMPLATE_GEOMETRY_DIR: ${{ runner.temp }}/SleufBase-template-geometry
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_geometry_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-geometry
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_template_geometry -- "$env:TEMPLATE_GEOMETRY_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_geometry.py "$env:TEMPLATE_GEOMETRY_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit sheet expansion and copied layout ownership
+        shell: pwsh
+        env:
+          TEMPLATE_PAGES_DIR: ${{ runner.temp }}/SleufBase-template-pages
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_page_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_pages --example benchmark_template_pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_pages.exe "$env:TEMPLATE_PAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_pages.py "$env:TEMPLATE_PAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_pages.py rust/target/release/examples/benchmark_template_pages.exe rust/benchmarks-template-pages.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload sheet expansion benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-pages-benchmark
+          path: rust/benchmarks-template-pages.json
+          if-no-files-found: error
+      - name: Independently audit legend regeneration and composed template preparation
+        shell: pwsh
+        env:
+          TEMPLATE_LEGENDS_DIR: ${{ runner.temp }}/SleufBase-template-legends
+          TEMPLATE_SETUP_DIR: ${{ runner.temp }}/SleufBase-template-setup
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_legend_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_setup_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-legends rust/tests/fixtures/template-setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_legends --example export_template_setup --example benchmark_template_setup
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_legends.exe "$env:TEMPLATE_LEGENDS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_legends.py "$env:TEMPLATE_LEGENDS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_setup.exe "$env:TEMPLATE_SETUP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_setup.py "$env:TEMPLATE_SETUP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_setup.py rust/target/release/examples/benchmark_template_setup.exe rust/benchmarks-template-setup.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload composed template preparation benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-setup-benchmark
+          path: rust/benchmarks-template-setup.json
+          if-no-files-found: error
+      - name: Independently audit full-resolution TIFF asset preparation
+        shell: pwsh
+        env:
+          TEMPLATE_RASTER_DIR: ${{ runner.temp }}/SleufBase-template-raster
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'tifffile==2025.5.10'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_raster_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-raster
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_rasters --example benchmark_template_raster
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_rasters.exe "$env:TEMPLATE_RASTER_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_rasters.py "$env:TEMPLATE_RASTER_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_raster.py rust/target/release/examples/benchmark_template_raster.exe rust/benchmarks-template-raster.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload TIFF asset preparation benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-raster-benchmark
+          path: rust/benchmarks-template-raster.json
+          if-no-files-found: error
+      - name: Independently audit native map rasters page geometry and template CLI
+        shell: pwsh
+        env:
+          MAP_EXPORT_DIR: ${{ runner.temp }}/SleufBase-map-export
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'uharfbuzz==0.51.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_map_export_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/map-export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_map_pages
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_map_pages.exe "$env:MAP_EXPORT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_map_pages.py "$env:MAP_EXPORT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_map_batch_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/map-batch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_map_batch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_map_batch.py rust/target/release/examples/export_map_batch.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit Kadaster WMTS and complete standalone exports
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cadastral_tile_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cadastral-tiles
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_cadastral_tiles --example export_map_batch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cadastral_tiles.py rust/target/release/examples/resolve_cadastral_tiles.exe rust/target/release/examples/export_map_batch.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native template order dialog and worker outputs
+        shell: pwsh
+        env:
+          TEMPLATE_WORKFLOW_DIR: ${{ runner.temp }}/SleufBase-template-workflows
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_order_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-order
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_workflows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_workflows.exe "$env:TEMPLATE_WORKFLOW_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_workflows.py "$env:TEMPLATE_WORKFLOW_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_report_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-reports
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_reports
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_reports.exe "$env:TEMPLATE_WORKFLOW_DIR/reports"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_reports.py "$env:TEMPLATE_WORKFLOW_DIR/reports"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit prepared template exports and real CLI
+        shell: pwsh
+        env:
+          TEMPLATE_EXPORT_DIR: ${{ runner.temp }}/SleufBase-template-export
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_export_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example export_template_assemblies --example benchmark_template_export
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_assemblies.exe "$env:TEMPLATE_EXPORT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_assemblies.py "$env:TEMPLATE_EXPORT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/benchmark_template_export.py rust/target/release/examples/benchmark_template_export.exe rust/benchmarks-template-export.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload native prepared export benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-template-export-benchmark
+          path: rust/benchmarks-template-export.json
+          if-no-files-found: error
+      - name: Independently audit font dependent profile extents and automatic selectors
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install 'fonttools==4.67.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_dxf_text_metrics_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_stroke_font_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_lff_font_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_font_resolution_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_template_extents_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/dxf-text-metrics rust/tests/fixtures/template-extents rust/tests/fixtures/stroke-font rust/tests/fixtures/lff-font rust/tests/fixtures/font-resolution
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example measure_template_extents --example measure_font_resolution
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_font_resolution.py rust/target/release/examples/measure_font_resolution.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_stroke_fonts.py rust/target/release/examples/measure_template_extents.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_lff_fonts.py rust/target/release/examples/measure_template_extents.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_extents.py rust/target/release/examples/measure_template_extents.exe "${{ runner.temp }}/SleufBase-template-export"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit location input and PDOK parsing
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_workflow_contract.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/workflows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_location_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/location
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_location.py rust/target/release/examples/search_location.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_raster_address_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/raster-addresses
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_raster_addresses.py rust/target/release/examples/search_location.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native raster point modes and profile context
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_raster_point_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_profile_context_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/raster-points rust/tests/fixtures/profile-context
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_raster_points
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_raster_points.py rust/target/release/examples/resolve_raster_points.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native map comments and clear actions
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_map_action_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/map-actions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_map_actions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_map_actions.py rust/target/release/examples/resolve_map_actions.exe rust/target/release/sleufbase-rust.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit TIFF rotation and real original pointer handlers
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_raster_rotation_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/raster-rotation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_geotiff_rotation
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_geotiff_rotation.py rust/target/release/examples/resolve_geotiff_rotation.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit virtual map actions and written reference profiles
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          VIRTUAL_MAP_DIR: ${{ runner.temp }}/SleufBase-virtual-map
+        run: |
+          python tools/generate_virtual_map_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/virtual-map
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example resolve_virtual_map --example export_virtual_map
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_virtual_map.exe "$env:VIRTUAL_MAP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_virtual_map.py rust/target/release/examples/resolve_virtual_map.exe "$env:VIRTUAL_MAP_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit virtual tools AHN preferences and template branding
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          BRANDING_AUDIT_DIR: ${{ runner.temp }}/SleufBase-template-branding
+          UNDERLAY_AUDIT_DIR: ${{ runner.temp }}/SleufBase-template-underlays
+        run: |
+          foreach ($generator in @('generate_ahn_fixtures.py', 'generate_dekband_fixtures.py', 'generate_virtual_tool_fixtures.py', 'generate_virtual_raster_fixtures.py', 'generate_preferences_fixture.py', 'generate_live_jobs_fixture.py', 'generate_template_branding_fixtures.py', 'generate_template_underlay_fixtures.py')) {
+            python "tools/$generator"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          git diff --exit-code -- rust/tests/fixtures/ahn rust/tests/fixtures/dekband rust/tests/fixtures/virtual-tools rust/tests/fixtures/virtual-raster rust/tests/fixtures/preferences.json rust/tests/fixtures/live-jobs.json rust/tests/fixtures/template-branding rust/tests/fixtures/template-underlays
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_branding.exe "$env:BRANDING_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_branding.py "$env:BRANDING_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_template_underlays.exe "$env:UNDERLAY_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_underlays.py "$env:UNDERLAY_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit Gemma contracts and cadastral overview exports
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+          OVERVIEW_AUDIT_DIR: ${{ runner.temp }}/SleufBase-cadastral-overview
+        run: |
+          foreach ($generator in @('generate_ai_maaiveld_fixtures.py', 'generate_ai_profile_fixtures.py', 'generate_cadastral_overview_fixtures.py')) {
+            python "tools/$generator"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          git diff --exit-code -- rust/tests/fixtures/ai-maaiveld rust/tests/fixtures/ai-profile rust/tests/fixtures/cadastral-overview rust/src/cadastral_overview_base.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_cadastral_overview.exe "$env:OVERVIEW_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cadastral_overview.py "$env:OVERVIEW_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native MTEXT parser and immutable format state
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_mtext_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example parse_mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_mtext.py rust/target/release/examples/parse_mtext.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native MTEXT placement and column continuation
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_mtext_layout_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/mtext-layout
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example layout_mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_mtext_layout.py rust/target/release/examples/layout_mtext.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit composed MTEXT fonts, metrics and vector geometry
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_mtext_render_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/mtext-render
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example render_mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_mtext_render.py rust/target/release/examples/render_mtext.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_mtext_simple_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/mtext-simple
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_mtext_simple.py rust/target/release/examples/render_mtext.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_cad_mtext_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-mtext
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_mtext.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_cad_mtext_paint_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-mtext-paint
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_mtext_paint.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit vector CAD text and fresh font geometry
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_text_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-text
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example render_cad_text
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_text.py rust/target/release/examples/render_cad_text.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit attached CAD attributes and repeated block anchors
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_attrib_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-attrib
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example render_cad_scene
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_attrib.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit attribute definition tag display and INSERT exclusion
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_attdef_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-attdef
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example render_cad_scene
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_attdef.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit modelspace selection and excluded paper layouts
+        shell: pwsh
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_cad_space_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/cad-space
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example render_cad_scene
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_cad_space.py rust/target/release/examples/render_cad_scene.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit real paired exports and system font selection
+        shell: pwsh
+        env:
+          PAIRED_TEMPLATE_DIR: ${{ runner.temp }}/SleufBase-paired-template-export
+          PYTHONUTF8: '1'
+        run: |
+          cargo build --locked --release --manifest-path rust/Cargo.toml --example measure_dxf_fonts --example export_paired_templates
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_dxf_fonts.py rust/target/release/examples/measure_dxf_fonts.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/examples/export_paired_templates.exe "$env:PAIRED_TEMPLATE_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_paired_templates.py "$env:PAIRED_TEMPLATE_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit native normal reverse visibility graph
+        shell: pwsh
+        env:
+          TEMPLATE_VARIANTS_DIR: ${{ runner.temp }}/SleufBase-template-variants
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_variant_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-variants
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --release --manifest-path rust/Cargo.toml --example export_template_variants -- "$env:TEMPLATE_VARIANTS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_variants.py "$env:TEMPLATE_VARIANTS_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template project names and dates
+        shell: pwsh
+        env:
+          TEMPLATE_METADATA_DIR: ${{ runner.temp }}/SleufBase-template-metadata
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_metadata_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-metadata
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_template_metadata -- "$env:TEMPLATE_METADATA_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_metadata.py "$env:TEMPLATE_METADATA_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit template raster bundles and replacement
+        shell: pwsh
+        env:
+          TEMPLATE_IMAGES_DIR: ${{ runner.temp }}/SleufBase-template-images
+          PYTHONUTF8: '1'
+        run: |
+          python tools/generate_template_image_fixtures.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- rust/tests/fixtures/template-images
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_template_images -- "$env:TEMPLATE_IMAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_template_images.py "$env:TEMPLATE_IMAGES_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently compare configured CLI reports and DXF colors
+        shell: pwsh
+        env:
+          DISCIPLINE_AUDIT_DIR: ${{ runner.temp }}/SleufBase-discipline-audit
+          PYTHONUTF8: '1'
+        run: |
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_discipline_fixtures -- "$env:DISCIPLINE_AUDIT_DIR" "$PWD/rust/target/release/sleufbase-rust.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_discipline_exports.py "$env:DISCIPLINE_AUDIT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Independently audit background worker exports
+        shell: pwsh
+        env:
+          WORKER_AUDIT_DIR: ${{ runner.temp }}/SleufBase-worker-audit
+          PYTHONUTF8: '1'
+        run: |
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_object_fixtures -- "$env:WORKER_AUDIT_DIR/objects" --worker
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & rust/target/release/sleufbase-rust.exe --settings "$env:WORKER_AUDIT_DIR/objects/cli-settings.json" --dxf "$env:WORKER_AUDIT_DIR/objects/cli-actual.dxf" rust/tests/fixtures/jobFeatures.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_object_exports.py "$env:WORKER_AUDIT_DIR/objects"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo run --locked --manifest-path rust/Cargo.toml --example export_discipline_fixtures -- "$env:WORKER_AUDIT_DIR/reports" "$PWD/rust/target/release/sleufbase-rust.exe" --worker
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/verify_native_discipline_exports.py "$env:WORKER_AUDIT_DIR/reports"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Benchmark core allocations and time
+        shell: pwsh
+        run: |
+          cargo run --locked --release --manifest-path rust/Cargo.toml --example benchmark_core > rust/benchmarks-core.csv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload core benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-core-benchmarks
+          path: rust/benchmarks-core.csv
+      - name: Benchmark bounded raster preview
+        shell: pwsh
+        run: |
+          cargo run --locked --release --manifest-path rust/Cargo.toml --example benchmark_raster -- rust/tests/fixtures/rasters/large-striped.tiff > rust/benchmarks-raster.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload raster benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-raster-benchmark
+          path: rust/benchmarks-raster.json
+          if-no-files-found: error
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-Windows-preview
+          path: |
+            rust/target/release/sleufbase-rust.exe
+            rust/target/release/Pillow-LICENSE.txt
+            rust/target/release/ezdxf-LICENSE.txt
+            rust/target/release/proj4rs-NOTICES.txt
+            rust/target/release/assets/template_logos
+          if-no-files-found: error
+      - name: Package portable Rust Windows preview
+        shell: pwsh
+        run: |
+          $folder = "rust/dist/SleufBase-Rust-portable-preview"
+          $archive = "rust/dist/SleufBase-Rust-portable-preview.zip"
+          New-Item -ItemType Directory -Path $folder -Force | Out-Null
+          Copy-Item -LiteralPath "rust/target/release/sleufbase-rust.exe" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/target/release/Pillow-LICENSE.txt" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/target/release/ezdxf-LICENSE.txt" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/target/release/proj4rs-NOTICES.txt" -Destination $folder -ErrorAction Stop
+          Copy-Item -LiteralPath "rust/PORTABLE.md" -Destination "$folder/README.md" -ErrorAction Stop
+          New-Item -ItemType Directory -Path "$folder/assets" -Force | Out-Null
+          Copy-Item -LiteralPath "rust/target/release/assets/template_logos" -Destination "$folder/assets" -Recurse -Force -ErrorAction Stop
+          Compress-Archive -Path "$folder/*" -DestinationPath $archive -CompressionLevel Optimal -Force
+          $checksum = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "rust/dist/SleufBase-Rust-portable-preview.sha256" -Value "$checksum  SleufBase-Rust-portable-preview.zip" -Encoding ascii
+          if ((Get-Item -LiteralPath $archive).Length -lt 500000) { throw "Portable preview ZIP lijkt onvolledig" }
+      - name: Upload portable Rust Windows preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-Windows-portable-preview
+          path: |
+            rust/dist/SleufBase-Rust-portable-preview.zip
+            rust/dist/SleufBase-Rust-portable-preview.sha256
+          if-no-files-found: error
+      # Exact-byte sink comparison, independent of Python/app performance.
+      - name: Benchmark object export streaming
+        shell: pwsh
+        run: |
+          cargo run --locked --release --manifest-path rust/Cargo.toml --example benchmark_object_export > rust/benchmarks-object-export.csv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload object export benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: SleufBase-Rust-object-export-benchmark
+          path: rust/benchmarks-object-export.csv
+          if-no-files-found: error

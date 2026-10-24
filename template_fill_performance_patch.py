@@ -7,11 +7,11 @@ from . import template_export_performance_patch as template_perf
 from .resource_policy import get_resource_policy
 
 
-PATCH_VERSION = 2
+PATCH_VERSION = 3
 RESOURCE_POLICY = get_resource_policy()
 MAX_PARALLEL_TEMPLATE_MAPS = max(1, RESOURCE_POLICY.light_map_workers)
 MAX_PARALLEL_TEMPLATE_ASSETS = max(1, RESOURCE_POLICY.template_asset_workers)
-_PROFILE_LAYER_CACHE_ATTR = "_sleufbase_profile_layer_cache_v1"
+_PROFILE_LAYER_CACHE_ATTR = "_sleufbase_profile_layer_cache_v2"
 _PROFILE_LEADER_CACHE_ATTR = "_sleufbase_profile_leader_block_v1"
 
 
@@ -24,12 +24,16 @@ def _configure_profile_layers_once(exporter: Any, document: Any, profile_points:
     the legacy final state when duplicate points use the same layer name.
     """
 
-    requested: dict[str, int] = {}
+    requested: dict[str, tuple[str, int]] = {}
     for point in profile_points:
         layer_name = str(getattr(point, "layer_name", "") or "")
         if not layer_name or layer_name == "0":
             continue
-        requested[layer_name] = int(getattr(point, "color", 7))
+        # Match ezdxf's table key (lower, not casefold), retaining the first
+        # spelling and the final color for aliases in this batch.
+        key = layer_name.lower()
+        spelling = requested.get(key, (layer_name, 7))[0]
+        requested[key] = (spelling, int(getattr(point, "color", 7)))
 
     if not requested:
         return
@@ -45,9 +49,9 @@ def _configure_profile_layers_once(exporter: Any, document: Any, profile_points:
             cache = {}
 
     lineweight = int(exporter.TEMPLATE_PROFILE_LINEWEIGHT)
-    for layer_name, color in requested.items():
+    for key, (layer_name, color) in requested.items():
         style = (color, lineweight)
-        if cache.get(layer_name) == style:
+        if cache.get(key) == style:
             continue
         if layer_name in document.layers:
             layer = document.layers.get(layer_name)
@@ -56,9 +60,10 @@ def _configure_profile_layers_once(exporter: Any, document: Any, profile_points:
         else:
             document.layers.add(
                 name=layer_name,
-                dxfattribs={"color": color, "lineweight": lineweight},
+                color=color,
+                lineweight=lineweight,
             )
-        cache[layer_name] = style
+        cache[key] = style
 
 
 def install_template_fill_performance_patch() -> None:

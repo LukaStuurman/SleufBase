@@ -1,0 +1,22 @@
+# Name: Original SleufBase LFF
+# LetterSpacing: 1.25
+# WordSpacing: 8
+[0041] A
+-2,0;11,0;11,21;-2,21;-2,0
+[0078] x
+0,-2;8,-2;8,12;0,12;0,-2
+[0070] p
+1,-7;10,-7;10,11;1,11;1,-7
+[0042] Empty polyline
+one
+[0043] Single point ignored
+99,99
+[0044] Multiple disconnected contours
+0,0;7,8;0,12
+20,12;25,12
+[0045] Invalid coordinates become zero, extra dimensions ignored
+no,0;7,12,0,ignored;0,12;0,0
+[0046] A prefix only before whitespace
+0,0;A4, A7;5,8
+[0047] Underlines and Unicode decimal values
+0,0;1_0,١٢;0,0

@@ -25,6 +25,8 @@ dist-installer/
 logs/
 diagnostics/
 startup-benchmark.txt
+# Non-canonical copies from the original overview fixture writer.
+/rust/tests/fixtures/cadastral-overview/*_tiffs/
 
 # IDE / OS
 .vscode/

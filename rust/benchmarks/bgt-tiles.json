@@ -1,0 +1,61 @@
+{
+  "rounds": [
+    {
+      "native": {
+        "loops": 20,
+        "bytes": 226591,
+        "features": 10360,
+        "surfaces": 6600,
+        "cold_ms": 58.0651,
+        "cache_requests": 20000,
+        "cache_ms": 0.4912,
+        "transport_calls": 1,
+        "cached_memory_estimate": 381813
+      },
+      "original": {
+        "cold_ms": 939.6732000168413,
+        "features": 10360,
+        "surfaces": 6600
+      }
+    },
+    {
+      "native": {
+        "loops": 20,
+        "bytes": 226591,
+        "features": 10360,
+        "surfaces": 6600,
+        "cold_ms": 55.4075,
+        "cache_requests": 20000,
+        "cache_ms": 0.4915,
+        "transport_calls": 1,
+        "cached_memory_estimate": 381813
+      },
+      "original": {
+        "cold_ms": 1106.5254000714049,
+        "features": 10360,
+        "surfaces": 6600
+      }
+    },
+    {
+      "native": {
+        "loops": 20,
+        "bytes": 226591,
+        "features": 10360,
+        "surfaces": 6600,
+        "cold_ms": 54.1062,
+        "cache_requests": 20000,
+        "cache_ms": 0.4911,
+        "transport_calls": 1,
+        "cached_memory_estimate": 381813
+      },
+      "original": {
+        "cold_ms": 1394.0350000048056,
+        "features": 10360,
+        "surfaces": 6600
+      }
+    }
+  ],
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "scope": "Fixed 226591-byte PDOK tile, twenty cold decodes + per-tile RD feature/surface preparation. Excludes process startup, file/network I/O, source-feature union/repair/clipping, profile voting, GUI/DXF and process peak memory. Native cache requests measured separately; cached_memory_estimate is a conservative data-size estimate, not a process-peak measurement."
+}

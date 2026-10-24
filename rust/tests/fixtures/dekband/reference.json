@@ -1,0 +1,242 @@
+{
+  "cases": [
+    {
+      "reverse": false,
+      "source": {
+        "label": "Deck oracle",
+        "job_id": 73,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155006.0,
+          "y": 463008.0,
+          "z": 5.1
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.85,
+            "source_name": "  Dekband  "
+          },
+          {
+            "start_chainage": -3.0,
+            "end_chainage": 15.0,
+            "start_depth": 0.8,
+            "end_depth": 0.1,
+            "source_name": "Betondekband Ø"
+          },
+          {
+            "start_chainage": 12.0,
+            "end_chainage": 14.0,
+            "start_depth": 0.2,
+            "end_depth": 0.9,
+            "source_name": "skip"
+          },
+          {
+            "start_chainage": 1.0,
+            "end_chainage": 3.0,
+            "start_depth": 0.3,
+            "end_depth": 0.4,
+            "source_name": ""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "object_name": "Dekband 1",
+          "source_name": "Dekband",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155001.2,
+                "y": 463001.6,
+                "z": 2.6072139303482587
+              },
+              {
+                "x": 155004.2,
+                "y": 463005.6,
+                "z": 3.400248756218905
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        },
+        {
+          "object_name": "Betondekband Ø",
+          "source_name": "Betondekband Ø",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155000.0,
+                "y": 463000.0,
+                "z": 1.4999999999999998
+              },
+              {
+                "x": 155006.03,
+                "y": 463008.04,
+                "z": 5.0
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        },
+        {
+          "object_name": "Dekband 4",
+          "source_name": "Dekband",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155000.6,
+                "y": 463000.8,
+                "z": 2.2786069651741294
+              },
+              {
+                "x": 155001.8,
+                "y": 463002.39999999997,
+                "z": 2.7358208955223877
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        }
+      ]
+    },
+    {
+      "reverse": true,
+      "source": {
+        "label": "Deck oracle",
+        "job_id": 73,
+        "width_meters": 0.6,
+        "start": {
+          "x": 155000.0,
+          "y": 463000.0,
+          "z": 2.3
+        },
+        "end": {
+          "x": 155006.0,
+          "y": 463008.0,
+          "z": 5.1
+        },
+        "dekband_rows": [
+          {
+            "start_chainage": 2.0,
+            "end_chainage": 7.0,
+            "start_depth": 0.25,
+            "end_depth": 0.85,
+            "source_name": "  Dekband  "
+          },
+          {
+            "start_chainage": -3.0,
+            "end_chainage": 15.0,
+            "start_depth": 0.8,
+            "end_depth": 0.1,
+            "source_name": "Betondekband Ø"
+          },
+          {
+            "start_chainage": 12.0,
+            "end_chainage": 14.0,
+            "start_depth": 0.2,
+            "end_depth": 0.9,
+            "source_name": "skip"
+          },
+          {
+            "start_chainage": 1.0,
+            "end_chainage": 3.0,
+            "start_depth": 0.3,
+            "end_depth": 0.4,
+            "source_name": ""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "object_name": "Dekband 1",
+          "source_name": "Dekband",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155004.8,
+                "y": 463006.4,
+                "z": 4.292786069651741
+              },
+              {
+                "x": 155001.8,
+                "y": 463002.4,
+                "z": 2.299751243781094
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        },
+        {
+          "object_name": "Betondekband Ø",
+          "source_name": "Betondekband Ø",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155006.0,
+                "y": 463008.0,
+                "z": 4.3
+              },
+              {
+                "x": 154999.97,
+                "y": 462999.96,
+                "z": 2.1999999999999997
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        },
+        {
+          "object_name": "Dekband 4",
+          "source_name": "Dekband",
+          "geometry": {
+            "Polyline": [
+              {
+                "x": 155005.4,
+                "y": 463007.2,
+                "z": 4.521393034825871
+              },
+              {
+                "x": 155004.2,
+                "y": 463005.60000000003,
+                "z": 3.864179104477612
+              }
+            ]
+          },
+          "attributes": [
+            "",
+            "",
+            "dekband"
+          ]
+        }
+      ]
+    }
+  ]
+}

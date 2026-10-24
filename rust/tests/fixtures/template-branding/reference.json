@@ -1,0 +1,522 @@
+{
+  "layouts": [
+    "bLaD1",
+    "bLaD2",
+    "bLaD3",
+    "bLaD4",
+    "bLaD5",
+    "BladZonderTitel",
+    "VerdwenenBlad"
+  ],
+  "expected": [
+    {
+      "layout": "bLaD1",
+      "image": {
+        "name": "BLAD1_TECHBASE_LOGO",
+        "filename": "blad1_techbase_logo.png",
+        "insert": [
+          -171.46733539503418,
+          3.0388578015639833,
+          0.0
+        ],
+        "u_pixel": [
+          0.43228474456449895,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6469806437557285e-17,
+          0.43228474456449967,
+          0.0
+        ],
+        "image_size": [
+          37.0,
+          19.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            36.5,
+            18.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD1",
+      "image": {
+        "name": "BLAD1_OPDRACHTGEVER_LOGO",
+        "filename": "blad1_opdrachtgever_logo.png",
+        "insert": [
+          -156.1538424429276,
+          35.48082981247282,
+          0.0
+        ],
+        "u_pixel": [
+          0.31813746864919984,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.9480301633504275e-17,
+          0.31813746864920106,
+          0.0
+        ],
+        "image_size": [
+          21.0,
+          39.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            20.5,
+            38.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD2",
+      "image": {
+        "name": "BLAD2_TECHBASE_LOGO",
+        "filename": "blad2_techbase_logo.png",
+        "insert": [
+          343.73226481088756,
+          -3.6820315782803927,
+          0.0
+        ],
+        "u_pixel": [
+          0.6490740773132057,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          3.974432455955687e-17,
+          0.6490740773132044,
+          0.0
+        ],
+        "image_size": [
+          37.0,
+          19.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            36.5,
+            18.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD2",
+      "image": {
+        "name": "BLAD2_OPDRACHTGEVER_LOGO",
+        "filename": "blad2_opdrachtgever_logo.png",
+        "insert": [
+          331.92146547860955,
+          23.735622359354615,
+          0.0
+        ],
+        "u_pixel": [
+          0.2386031014868985,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.461022622512821e-17,
+          0.2386031014869008,
+          0.0
+        ],
+        "image_size": [
+          21.0,
+          39.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            20.5,
+            38.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD3",
+      "image": {
+        "name": "BLAD3_TECHBASE_LOGO",
+        "filename": "blad3_techbase_logo.png",
+        "insert": [
+          -67.73366769751709,
+          -23.12169684907147,
+          0.0
+        ],
+        "u_pixel": [
+          0.21614237228224947,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.3234903218778643e-17,
+          0.21614237228224983,
+          0.0
+        ],
+        "image_size": [
+          37.0,
+          19.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            36.5,
+            18.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD3",
+      "image": {
+        "name": "BLAD3_OPDRACHTGEVER_LOGO",
+        "filename": "blad3_opdrachtgever_logo.png",
+        "insert": [
+          -63.417364642280425,
+          -82.1822866346875,
+          0.0
+        ],
+        "u_pixel": [
+          0.47720620297380173,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.922045245025642e-17,
+          0.4772062029738016,
+          0.0
+        ],
+        "image_size": [
+          21.0,
+          39.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            20.5,
+            38.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD4",
+      "image": {
+        "name": "BLAD4_TECHBASE_LOGO",
+        "filename": "blad4_techbase_logo.png",
+        "insert": [
+          -149.86733539503416,
+          -3.8611421984360152,
+          0.0
+        ],
+        "u_pixel": [
+          0.43228474456449895,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6469806437557285e-17,
+          0.43228474456449967,
+          0.0
+        ],
+        "image_size": [
+          37.0,
+          19.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            36.5,
+            18.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD4",
+      "image": {
+        "name": "BLAD4_OPDRACHTGEVER_LOGO",
+        "filename": "blad4_opdrachtgever_logo.png",
+        "insert": [
+          -134.55384244292762,
+          28.580829812472828,
+          0.0
+        ],
+        "u_pixel": [
+          0.3181374686492005,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.9480301633504254e-17,
+          0.3181374686492007,
+          0.0
+        ],
+        "image_size": [
+          21.0,
+          39.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            20.5,
+            38.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD5",
+      "image": {
+        "name": "BLAD5_TECHBASE_LOGO",
+        "filename": "blad5_techbase_logo.png",
+        "insert": [
+          -142.66733539503417,
+          -6.161142198436016,
+          0.0
+        ],
+        "u_pixel": [
+          0.43228474456449933,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          2.6469806437557285e-17,
+          0.43228474456449967,
+          0.0
+        ],
+        "image_size": [
+          37.0,
+          19.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            36.5,
+            18.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    {
+      "layout": "bLaD5",
+      "image": {
+        "name": "BLAD5_OPDRACHTGEVER_LOGO",
+        "filename": "blad5_opdrachtgever_logo.png",
+        "insert": [
+          -127.35384244292763,
+          26.28082981247282,
+          0.0
+        ],
+        "u_pixel": [
+          0.31813746864920117,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          1.948030163350427e-17,
+          0.31813746864920095,
+          0.0
+        ],
+        "image_size": [
+          21.0,
+          39.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            20.5,
+            38.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    }
+  ],
+  "texts": [
+    "De Bloemendaal 10",
+    "5221 EC",
+    "'s-Hertogenbosch",
+    "De Bloemendaal 10",
+    "5221 EC",
+    "keep De Diepteweg 16"
+  ],
+  "contact_changes": 4
+}

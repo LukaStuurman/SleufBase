@@ -1,0 +1,388 @@
+{
+  "aliases": [
+    "STRASSE",
+    "οσ",
+    "I",
+    "K",
+    "K"
+  ],
+  "expected": {
+    "Straße": {
+      "circle": {
+        "kind": "CIRCLE",
+        "layer": "0",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          0.0,
+          2.0,
+          0.0
+        ],
+        "radius": 1.0
+      },
+      "image": {
+        "name": "unicode_0",
+        "filename": "unicode.png",
+        "insert": [
+          0.0,
+          2.0,
+          0.0
+        ],
+        "u_pixel": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          6.123233995736766e-17,
+          1.0,
+          0.0
+        ],
+        "image_size": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    "ος": {
+      "circle": {
+        "kind": "CIRCLE",
+        "layer": "0",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          1.0,
+          2.0,
+          0.0
+        ],
+        "radius": 1.0
+      },
+      "image": {
+        "name": "unicode_1",
+        "filename": "unicode.png",
+        "insert": [
+          1.0,
+          2.0,
+          0.0
+        ],
+        "u_pixel": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          6.123233995736766e-17,
+          1.0,
+          0.0
+        ],
+        "image_size": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    "ı": {
+      "circle": {
+        "kind": "CIRCLE",
+        "layer": "0",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "radius": 1.0
+      },
+      "image": {
+        "name": "unicode_2",
+        "filename": "unicode.png",
+        "insert": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "u_pixel": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          6.123233995736766e-17,
+          1.0,
+          0.0
+        ],
+        "image_size": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    "K": {
+      "circle": {
+        "kind": "CIRCLE",
+        "layer": "0",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          3.0,
+          2.0,
+          0.0
+        ],
+        "radius": 1.0
+      },
+      "image": {
+        "name": "unicode_3",
+        "filename": "unicode.png",
+        "insert": [
+          3.0,
+          2.0,
+          0.0
+        ],
+        "u_pixel": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          6.123233995736766e-17,
+          1.0,
+          0.0
+        ],
+        "image_size": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    },
+    "K": {
+      "circle": {
+        "kind": "CIRCLE",
+        "layer": "0",
+        "color": 256,
+        "true_color": null,
+        "lineweight": -1,
+        "center": [
+          4.0,
+          2.0,
+          0.0
+        ],
+        "radius": 1.0
+      },
+      "image": {
+        "name": "unicode_4",
+        "filename": "unicode.png",
+        "insert": [
+          4.0,
+          2.0,
+          0.0
+        ],
+        "u_pixel": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_pixel": [
+          6.123233995736766e-17,
+          1.0,
+          0.0
+        ],
+        "image_size": [
+          2.0,
+          2.0,
+          0.0
+        ],
+        "layer": "PROEFSLEUF_TEMPLATE_IMAGES",
+        "flags": 11,
+        "paperspace": 1,
+        "clipping": 0,
+        "brightness": 50,
+        "contrast": 50,
+        "fade": 0,
+        "clipping_boundary": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        "pixel_size": [
+          0.01,
+          0.01
+        ],
+        "loaded": 1,
+        "resolution_units": 0
+      }
+    }
+  },
+  "attributes": {
+    "3E": "old BLAD",
+    "3F": "old BLADEN",
+    "40": "old SCHAAL",
+    "41": "old DATUM1",
+    "42": "old PROJECTNAAM",
+    "45": "second stays",
+    "46": "definition",
+    "47": "second stays",
+    "48": "definition",
+    "49": "definition",
+    "54": "old BLAD",
+    "55": "old BLADEN",
+    "56": "old SCHAAL",
+    "57": "old DATUM1",
+    "58": "old PROJECTNAAM",
+    "5B": "second stays",
+    "5C": "definition",
+    "5D": "second stays",
+    "5E": "definition",
+    "5F": "definition",
+    "6A": "old BLAD",
+    "6B": "old BLADEN",
+    "6C": "old SCHAAL",
+    "6D": "old DATUM1",
+    "6E": "old PROJECTNAAM",
+    "71": "second stays",
+    "72": "definition",
+    "73": "second stays",
+    "74": "definition",
+    "75": "definition",
+    "88": "old BLAD",
+    "89": "old BLADEN",
+    "8A": "old SCHAAL",
+    "8B": "old DATUM1",
+    "8C": "old PROJECTNAAM",
+    "8F": "second stays",
+    "90": "definition",
+    "91": "second stays",
+    "92": "definition",
+    "93": "definition",
+    "9B": "definition",
+    "9C": "definition",
+    "9D": "definition",
+    "9E": "19-10-2026",
+    "9F": "Unicode layouts",
+    "A6": "definition",
+    "A7": "definition",
+    "A8": "definition",
+    "A9": "19-10-2026",
+    "AA": "Unicode layouts",
+    "B1": "definition",
+    "B2": "definition",
+    "B3": "definition",
+    "B4": "19-10-2026",
+    "B5": "Unicode layouts",
+    "BC": "definition",
+    "BD": "definition",
+    "BE": "definition",
+    "BF": "19-10-2026",
+    "C0": "Unicode layouts",
+    "C7": "definition",
+    "C8": "definition",
+    "C9": "definition",
+    "CA": "19-10-2026",
+    "CB": "Unicode layouts"
+  }
+}

@@ -1,0 +1,9 @@
+operation,rounds,total_us,allocation_calls,build_mode
+camera_input_retired_clone,20,735461,10000080,release
+camera_input_borrowed,20,0,0,release
+validation_retired_temporary_vectors,20,100905,2000000,release
+validation_current,20,4962,0,release
+cad_bounds_retired_scan,20,12447,0,release
+cad_bounds_cached,20,0,0,release
+leader_lookup_retired_linear_20k,3,2448102,0,release
+leader_lookup_build_and_query_20k,3,38655,9,release

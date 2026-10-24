@@ -1,0 +1,129 @@
+{
+  "modes": {
+    "alpha": [
+      {
+        "native": {
+          "mode": "alpha",
+          "build_mode": "release",
+          "elapsed_ms": 5.992,
+          "peak_working_set_bytes": 18780160,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        },
+        "original": {
+          "mode": "alpha",
+          "elapsed_ms": 70.99919999018312,
+          "peak_working_set_bytes": 161837056,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        }
+      },
+      {
+        "native": {
+          "mode": "alpha",
+          "build_mode": "release",
+          "elapsed_ms": 5.8816,
+          "peak_working_set_bytes": 18788352,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        },
+        "original": {
+          "mode": "alpha",
+          "elapsed_ms": 66.07329996768385,
+          "peak_working_set_bytes": 162263040,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        }
+      },
+      {
+        "native": {
+          "mode": "alpha",
+          "build_mode": "release",
+          "elapsed_ms": 5.8234,
+          "peak_working_set_bytes": 18780160,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        },
+        "original": {
+          "mode": "alpha",
+          "elapsed_ms": 65.80730003770441,
+          "peak_working_set_bytes": 161939456,
+          "width": 1400,
+          "height": 1000,
+          "crc32": 2156282672
+        }
+      }
+    ],
+    "rotate": [
+      {
+        "native": {
+          "mode": "rotate",
+          "build_mode": "release",
+          "elapsed_ms": 76.2344,
+          "peak_working_set_bytes": 27725824,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        },
+        "original": {
+          "mode": "rotate",
+          "elapsed_ms": 202.37149996683002,
+          "peak_working_set_bytes": 198254592,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        }
+      },
+      {
+        "native": {
+          "mode": "rotate",
+          "build_mode": "release",
+          "elapsed_ms": 78.5003,
+          "peak_working_set_bytes": 27729920,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        },
+        "original": {
+          "mode": "rotate",
+          "elapsed_ms": 199.36780002899468,
+          "peak_working_set_bytes": 198549504,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        }
+      },
+      {
+        "native": {
+          "mode": "rotate",
+          "build_mode": "release",
+          "elapsed_ms": 82.7667,
+          "peak_working_set_bytes": 27734016,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        },
+        "original": {
+          "mode": "rotate",
+          "elapsed_ms": 194.21990006230772,
+          "peak_working_set_bytes": 198361088,
+          "width": 1630,
+          "height": 1362,
+          "crc32": 922694702
+        }
+      }
+    ]
+  },
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.9",
+  "input": [
+    1400,
+    1000
+  ],
+  "scope": "Three fresh processes per mode/implementation, same resident 1,400 x 1,000 RGBA pattern. Timed: original orientation decision, optional expanded premultiplied bicubic rotation, visible-alpha crop and edge-connected near-white alpha normalization. Rust consumes its owned input; Python follows original convert/crop/NumPy helper copies and any available original acceleration. Source/import/input-construction startup, TIFF decode, PNG encoding, DXF/network/GUI and pixel checksums/raw-output comparisons are excluded from timing. Peak working set is captured immediately after preparation and includes runtime/import/input-construction baselines; it is not isolated allocations. Native/Pillow dimensions, every raw RGBA byte and CRC32 agree in every round; byte comparison occurs after timing and peak capture. File-system cache is not controlled; this is an image-stage comparison, not a full export/app benchmark."
+}

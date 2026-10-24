@@ -32,9 +32,9 @@ class _FakeLayers:
         self.get_calls += 1
         return self.items[name]
 
-    def add(self, name: str, dxfattribs: dict[str, int]) -> _FakeLayer:
+    def add(self, name: str, *, color: int, lineweight: int) -> _FakeLayer:
         self.add_calls += 1
-        layer = _FakeLayer(dxfattribs["color"], dxfattribs["lineweight"])
+        layer = _FakeLayer(color, lineweight)
         self.items[name] = layer
         return layer
 

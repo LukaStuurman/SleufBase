@@ -2082,7 +2082,7 @@ def _install_template_variant_order_patch() -> None:
         variant_codes = self._template_export_variant_codes_for_order(ordered_layers)
 
         dialog = tk.Toplevel(self)
-        dialog.title("Volgorde proefsleuven")
+        dialog.title("DXF-sjabloon exporteren")
         dialog.transient(self)
         dialog.grab_set()
         dialog.resizable(False, False)
@@ -2107,6 +2107,16 @@ def _install_template_variant_order_patch() -> None:
             wraplength=660,
             justify="left",
         ).grid(row=1, column=0, sticky="w", pady=(6, 12))
+
+        project_var = tk.StringVar(value=getattr(self, "_template_project_name", ""))
+        metadata = ttk.Frame(frame, style="Card.TFrame")
+        metadata.grid(row=4, column=0, sticky="ew", pady=(12, 0))
+        metadata.columnconfigure(1, weight=1)
+        ttk.Label(metadata, text="Projectnaam").grid(row=0, column=0, sticky="w", padx=(0, 12))
+        ttk.Entry(metadata, textvariable=project_var).grid(row=0, column=1, sticky="ew")
+        ttk.Label(metadata, text="De exportdatum wordt automatisch op ieder blad ingevuld (dd-mm-jjjj).").grid(
+            row=1, column=0, columnspan=2, sticky="w", pady=(6, 0)
+        )
 
         content = ttk.Frame(frame, style="Card.TFrame")
         content.grid(row=2, column=0, sticky="nsew")
@@ -2349,6 +2359,13 @@ def _install_template_variant_order_patch() -> None:
             refresh_listbox(selection)
 
         def confirm_order() -> None:
+            from .template_metadata import project_name
+
+            try:
+                export_project_name = project_name(project_var.get())
+            except ValueError as exc:
+                messagebox.showerror("Projectnaam ongeldig", str(exc), parent=dialog)
+                return
             labels, invalid_indices = self._template_export_variant_labels(
                 ordered_layers, included_flags, variant_codes, ps_numbers
             )
@@ -2360,6 +2377,8 @@ def _install_template_variant_order_patch() -> None:
                     parent=dialog,
                 )
                 return
+            self._template_project_name = export_project_name
+            self.cadastral_exporter.template_project_name = export_project_name
             self._store_template_export_variant_state(
                 ordered_layers,
                 included_flags,
@@ -2440,7 +2459,7 @@ def _install_template_variant_order_patch() -> None:
         scale_combo.bind("<Return>", lambda _event: set_selected_scale())
 
         footer = ttk.Frame(frame, style="Card.TFrame")
-        footer.grid(row=4, column=0, sticky="e", pady=(14, 0))
+        footer.grid(row=5, column=0, sticky="e", pady=(14, 0))
         ttk.Button(footer, text="Annuleren", command=cancel_order).grid(row=0, column=0, padx=(0, 8))
         ttk.Button(footer, text="Exporteren", command=confirm_order).grid(row=0, column=1)
 

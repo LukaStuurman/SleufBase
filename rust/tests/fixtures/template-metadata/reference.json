@@ -1,0 +1,159 @@
+[
+  {
+    "name": "shipped",
+    "path": "assets/cadastral_template.dxf",
+    "layouts": [
+      "A0 S",
+      "A1 L",
+      "A1 S",
+      "A2 L",
+      "A2 S",
+      "A3 L",
+      "A3 S",
+      "A4 L",
+      "A4 S",
+      "Blad1",
+      "Blad2",
+      "Blad3",
+      "Blad4"
+    ],
+    "project": "  Project Ø – Zuid 漢😀  ",
+    "drawn_by": "  L. Test  ",
+    "date": [
+      2026,
+      10,
+      18
+    ],
+    "expected": {
+      "21042": "Project Ø – Zuid 漢😀",
+      "21050": "18-10-2026",
+      "21051": "Proefsleuven",
+      "21052": "L. Test",
+      "16764": "Project Ø – Zuid 漢😀",
+      "1676E": "18-10-2026",
+      "1676F": "Proefsleuven",
+      "16770": "L. Test",
+      "16533": "Project Ø – Zuid 漢😀",
+      "1653D": "18-10-2026",
+      "1653E": "Proefsleuven",
+      "1653F": "L. Test",
+      "16417": "Project Ø – Zuid 漢😀",
+      "16421": "18-10-2026",
+      "16422": "Proefsleuven",
+      "16423": "L. Test",
+      "166E0": "Project Ø – Zuid 漢😀",
+      "166EA": "18-10-2026",
+      "166EB": "Proefsleuven",
+      "166EC": "L. Test",
+      "167E8": "Project Ø – Zuid 漢😀",
+      "167F2": "18-10-2026",
+      "167F3": "Proefsleuven",
+      "167F4": "L. Test",
+      "165C4": "Project Ø – Zuid 漢😀",
+      "165CE": "18-10-2026",
+      "165CF": "Proefsleuven",
+      "165D0": "L. Test",
+      "16646": "Project Ø – Zuid 漢😀",
+      "16650": "18-10-2026",
+      "16651": "Proefsleuven",
+      "16652": "L. Test",
+      "164AF": "Project Ø – Zuid 漢😀",
+      "164B9": "18-10-2026",
+      "164BA": "Proefsleuven",
+      "164BB": "L. Test",
+      "16394": "Project Ø – Zuid 漢😀",
+      "1639E": "18-10-2026",
+      "1639F": "Proefsleuven",
+      "163A0": "L. Test"
+    }
+  },
+  {
+    "name": "sheets",
+    "path": "rust/tests/fixtures/template-metadata/sheets.dxf",
+    "layouts": [
+      "Layout1",
+      "Blad 2",
+      "Missing"
+    ],
+    "project": "Project Ø – Zuid 漢😀",
+    "drawn_by": "  L. Test  ",
+    "date": [
+      2026,
+      10,
+      18
+    ],
+    "expected": {
+      "39": "Project Ø – Zuid 漢😀",
+      "3A": "18-10-2026",
+      "3B": "Proefsleuven",
+      "3C": "L. Test",
+      "42": "Project Ø – Zuid 漢😀",
+      "43": "18-10-2026",
+      "44": "Proefsleuven",
+      "45": "L. Test",
+      "4F": "Project Ø – Zuid 漢😀",
+      "50": "18-10-2026",
+      "52": "Proefsleuven",
+      "54": "L. Test",
+      "5B": "Project Ø – Zuid 漢😀",
+      "5C": "18-10-2026",
+      "5E": "Proefsleuven",
+      "60": "L. Test"
+    }
+  },
+  {
+    "name": "preserve-project",
+    "path": "rust/tests/fixtures/template-metadata/sheets.dxf",
+    "layouts": [
+      "Blad 2"
+    ],
+    "project": null,
+    "drawn_by": "  L. Test  ",
+    "date": [
+      2026,
+      10,
+      18
+    ],
+    "expected": {
+      "50": "18-10-2026",
+      "52": "Proefsleuven",
+      "54": "L. Test",
+      "5C": "18-10-2026",
+      "5E": "Proefsleuven",
+      "60": "L. Test"
+    }
+  },
+  {
+    "name": "clear-project",
+    "path": "rust/tests/fixtures/template-metadata/sheets.dxf",
+    "layouts": [
+      "Layout1",
+      "Blad 2"
+    ],
+    "project": "",
+    "drawn_by": "  L. Test  ",
+    "date": [
+      2026,
+      10,
+      18
+    ],
+    "expected": {
+      "39": "",
+      "3A": "18-10-2026",
+      "3B": "Proefsleuven",
+      "3C": "L. Test",
+      "42": "",
+      "43": "18-10-2026",
+      "44": "Proefsleuven",
+      "45": "L. Test",
+      "4F": "",
+      "50": "18-10-2026",
+      "52": "Proefsleuven",
+      "54": "L. Test",
+      "5B": "",
+      "5C": "18-10-2026",
+      "5E": "Proefsleuven",
+      "60": "L. Test"
+    }
+  }
+]

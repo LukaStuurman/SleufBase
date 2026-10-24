@@ -1,0 +1,46 @@
+[package]
+name = "sleufbase-rust"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Native Rust migration of SleufBase (early preview)"
+
+[dependencies]
+eframe = "0.31"
+rfd = "0.15"
+serde_json = { version = "1", features = ["float_roundtrip", "arbitrary_precision", "preserve_order"] }
+serde = { version = "1", features = ["derive", "rc"] }
+tempfile = "3"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "json", "cookies", "multipart"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+png = "=0.18.1"
+rust_xlsxwriter = "0.90"
+tiff = "0.11.3"
+regex = "1"
+proj4rs = { version = "=0.2.1", default-features = false }
+tungstenite = "0.30"
+ryu = "1"
+encoding_rs = "0.8"
+getrandom = "0.3"
+robust = "1.2"
+flate2 = "1"
+i_overlay = "9.1"
+ab_glyph = "0.2.32"
+rustybuzz = "0.20.1"
+unicode-bidi = "0.3.18"
+unicode-script = "0.5.8"
+
+[dev-dependencies]
+crc32fast = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_SystemInformation"] }
+
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_ProcessStatus", "Win32_System_Threading"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+
